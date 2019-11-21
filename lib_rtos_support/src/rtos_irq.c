@@ -1,0 +1,216 @@
+/*
+ * rtos_irq.c
+ *
+ *  Created on: Nov 18, 2019
+ *      Author: mbruno
+ */
+
+
+#include "xcore_c.h"
+#include "rtos_support.h"
+
+/************** TEMPORARY *************/
+extern lock_t xKernelISRLock;
+#define portGET_ISR_LOCK() do { if( xKernelISRLock != -1) lock_acquire( xKernelISRLock ); } while( 0 )
+#define portRELEASE_ISR_LOCK() do { if( xKernelISRLock != -1) lock_release( xKernelISRLock ); } while( 0 )
+
+static inline uint32_t portGET_INTERRUPT_STATE( void )
+{
+uint32_t ulState;
+
+    asm volatile(
+        "getsr r11, %1\n"
+        "mov %0, r11"
+        : "=r"(ulState)
+        : "i"(XS1_SR_IEBLE_MASK)
+        : /* clobbers */ "r11"
+    );
+
+    return ulState;
+}
+#define portGET_INTERRUPT_STATE() portGET_INTERRUPT_STATE()
+
+static inline uint32_t portDISABLE_INTERRUPTS( void )
+{
+uint32_t ulState;
+
+    ulState = portGET_INTERRUPT_STATE();
+    asm volatile( "clrsr %0" :: "i"(XS1_SR_IEBLE_MASK) : "memory" );
+
+    return ulState;
+}
+#define portDISABLE_INTERRUPTS() portDISABLE_INTERRUPTS()
+
+#define portENABLE_INTERRUPTS() asm volatile( "setsr %0" :: "i"(XS1_SR_IEBLE_MASK) : "memory" )
+
+/*
+ * Will enable interrupts if ulState is non-zero.
+ */
+#define portRESTORE_INTERRUPTS(ulState)  do {                                           \
+                                             if (ulState != 0) portENABLE_INTERRUPTS(); \
+                                         } while( 0 )
+/************** TEMPORARY *************/
+
+/*
+ * Source IDs 0-7 are reserved for RTOS cores
+ * Source IDs 8-15 are allowed for other use
+ *
+ * (Assuming RTOS_MAX_CORE_COUNT == 8)
+ */
+#define RTOS_CORE_SOURCE_MASK ( ( 1 << RTOS_MAX_CORE_COUNT ) - 1)
+#define MAX_ADDITIONAL_SOURCES 8
+#define MAX_SOURCE_ID ( RTOS_MAX_CORE_COUNT + MAX_ADDITIONAL_SOURCES - 1 )
+
+/*
+ * The channel ends used by RTOS cores to send and receive IRQs.
+ */
+static chanend rtos_irq_chanend[ RTOS_MAX_CORE_COUNT ];
+
+/*
+ * The channel ends used by peripherals to send IRQs.
+ */
+static chanend peripheral_irq_chanend[ MAX_ADDITIONAL_SOURCES ];
+
+/*
+ * Flag set per core indicating which IRQ sources are pending
+ */
+static volatile uint32_t irq_pending[ RTOS_MAX_CORE_COUNT ];
+
+static int peripheral_source_count;
+
+typedef struct {
+    RTOS_IRQ_ISR_ATTR rtos_irq_isr_t isr;
+    void *data;
+} isr_info_t;
+
+static isr_info_t isr_info[MAX_ADDITIONAL_SOURCES];
+
+DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
+{
+    int core_id;
+    uint32_t pending;
+
+    core_id = rtos_core_id_get();
+
+    xassert( irq_pending[ core_id ] );
+
+    _s_chan_check_ct_end( rtos_irq_chanend[ core_id ] );
+
+    /* just ensure the channel read is done before clearing the pending flags. */
+    RTOS_MEMORY_BARRIER();
+
+    /* grab a snapshot of the pending flags before clearing them.
+    After the clear, this core may be interrupted again. We will
+    handle all the interrupts at the time the snapshot is taken now,
+    and any more will be handled when this ISR is called again. */
+
+    portGET_ISR_LOCK();
+    pending = irq_pending[ core_id ];
+    irq_pending[ core_id ] = 0;
+    portRELEASE_ISR_LOCK();
+
+    if (pending & RTOS_CORE_SOURCE_MASK )
+    {
+        /* This core is being yielded by at least one other FreeRTOS core.
+        Clear the pending flags from all of them and enter the scheduler. */
+
+        pending &= ~RTOS_CORE_SOURCE_MASK;
+
+        RTOS_INTERCORE_INTERRUPT_ISR();
+    }
+
+    while ( pending != 0 )
+    {
+        int source_id = 31UL - ( uint32_t ) __builtin_clz( pending );
+
+        xassert( source_id >= RTOS_MAX_CORE_COUNT && source_id <= MAX_SOURCE_ID );
+
+        pending &= ~( 1 << source_id );
+
+        source_id -= RTOS_MAX_CORE_COUNT;
+        isr_info[ source_id ].isr( isr_info[ source_id ].data );
+    }
+}
+
+/*
+ * May be called by a non-FreeRTOS core provided
+ * it has the ISR lock and xSourceID >= RTOS_MAX_CORE_COUNT.
+ */
+void rtos_irq( int core_id, int source_id )
+{
+    chanend source_chanend;
+    int num_cores = rtos_core_count();
+
+    /*
+     * This function must be called from within a critical section.
+     */
+
+    xassert( core_id >= 0 && core_id < num_cores );
+
+    if( irq_pending[ core_id ] == 0 )
+    {
+        if( source_id < num_cores )
+        {
+            source_chanend = rtos_irq_chanend[ source_id ];
+        }
+        else if ( source_id >= RTOS_MAX_CORE_COUNT && source_id < RTOS_MAX_CORE_COUNT + peripheral_source_count )
+        {
+            source_chanend = peripheral_irq_chanend[ source_id - RTOS_MAX_CORE_COUNT ];
+        }
+        else
+        {
+            xassert(0);
+        }
+
+        irq_pending[ core_id ] |= ( 1 << source_id );
+
+        /* just ensure the pending flag is set before the channel send. */
+        RTOS_MEMORY_BARRIER();
+
+        chanend_set_dest( source_chanend, rtos_irq_chanend[ core_id ] );
+        _s_chan_out_ct_end( source_chanend );
+    }
+    else
+    {
+        irq_pending[ core_id ] |= ( 1 << source_id );
+    }
+}
+
+/*
+ * Must be called by a FreeRTOS core to interrupt a
+ * non-FreeRTOS core.
+ */
+void rtos_irq_peripheral( chanend dest_chanend )
+{
+    int core_id;
+
+    uint32_t state = portDISABLE_INTERRUPTS();
+    core_id = rtos_core_id_get();
+    chanend_set_dest( rtos_irq_chanend[ core_id ], dest_chanend );
+    _s_chan_out_ct_end( rtos_irq_chanend[ core_id ] );
+    portRESTORE_INTERRUPTS(state);
+}
+
+int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend source_chanend)
+{
+    int source_id;
+
+    xassert( peripheral_source_count < MAX_ADDITIONAL_SOURCES );
+
+    portGET_ISR_LOCK();
+    source_id = peripheral_source_count++;
+    portRELEASE_ISR_LOCK();
+
+    isr_info[ source_id ].isr = isr;
+    isr_info[ source_id ].data = data;
+    peripheral_irq_chanend[ source_id ] = source_chanend;
+
+    return RTOS_MAX_CORE_COUNT + source_id;
+}
+
+void rtos_irq_enable( int core_id )
+{
+    chanend_alloc( &rtos_irq_chanend[ core_id ] );
+    chanend_setup_interrupt_callback( rtos_irq_chanend[ core_id ], NULL, RTOS_INTERRUPT_CALLBACK( rtos_irq_handler ) );
+    chanend_enable_trigger( rtos_irq_chanend[ core_id ] );
+}

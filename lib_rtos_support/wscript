@@ -1,0 +1,22 @@
+import os.path
+
+def use_module(bld):
+
+    version = '0.1.0'
+
+    depends_on = [
+        'lib_xcore_c'
+    ]
+
+    sources = bld.path.ant_glob(['src/**/*.xc', 'src/**/*.c', 'src/**/*.S'])
+    includes = ['api']
+    optional_headers = 'rtos_support_conf.h'
+
+    bld.env.MODULE_XCC_FLAGS = bld.env.XCC_FLAGS + ['-Os']
+
+    bld.module(
+        source=sources,
+        includes=includes,
+        optional_headers=optional_headers,
+        depends_on=depends_on,
+        version=version)
