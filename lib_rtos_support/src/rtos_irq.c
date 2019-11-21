@@ -6,14 +6,9 @@
  */
 
 
-#include "xcore_c.h"
 #include "rtos_support.h"
 
 /************** TEMPORARY *************/
-extern lock_t xKernelISRLock;
-#define portGET_ISR_LOCK() do { if( xKernelISRLock != -1) lock_acquire( xKernelISRLock ); } while( 0 )
-#define portRELEASE_ISR_LOCK() do { if( xKernelISRLock != -1) lock_release( xKernelISRLock ); } while( 0 )
-
 static inline uint32_t portGET_INTERRUPT_STATE( void )
 {
 uint32_t ulState;
@@ -78,6 +73,17 @@ static volatile uint32_t irq_pending[ RTOS_MAX_CORE_COUNT ];
 
 static int peripheral_source_count;
 
+/*
+ * The IRQ enabled bitfield. Represents which cores have
+ * their IRQ enabled.
+ */
+static uint32_t irq_enable_bf;
+
+/*
+ * Set to 1 when all cores have enabled their IRQ.
+ */
+static int irq_ready;
+
 typedef struct {
     RTOS_IRQ_ISR_ATTR rtos_irq_isr_t isr;
     void *data;
@@ -104,10 +110,12 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
     handle all the interrupts at the time the snapshot is taken now,
     and any more will be handled when this ISR is called again. */
 
-    portGET_ISR_LOCK();
-    pending = irq_pending[ core_id ];
-    irq_pending[ core_id ] = 0;
-    portRELEASE_ISR_LOCK();
+    rtos_lock_acquire(0);
+    {
+        pending = irq_pending[ core_id ];
+        irq_pending[ core_id ] = 0;
+    }
+    rtos_lock_release(0);
 
     if (pending & RTOS_CORE_SOURCE_MASK )
     {
@@ -134,46 +142,53 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
 
 /*
  * May be called by a non-FreeRTOS core provided
- * it has the ISR lock and xSourceID >= RTOS_MAX_CORE_COUNT.
+ * xSourceID >= RTOS_MAX_CORE_COUNT.
  */
 void rtos_irq( int core_id, int source_id )
 {
     chanend source_chanend;
+    uint32_t pending;
     int num_cores = rtos_core_count();
-
-    /*
-     * This function must be called from within a critical section.
-     */
 
     xassert( core_id >= 0 && core_id < num_cores );
 
-    if( irq_pending[ core_id ] == 0 )
+    /*
+     * Atomically set the pending flag and, if the core we are
+     * sending an IRQ does not already have a pending IRQ, interrupt
+     * it with a channel send. This guarantees that if two cores
+     * simultaneously send a core an IRQ that only one will perform
+     * the channel send. Another channel send will not be performed
+     * until the core reads the token from the channel and clears the
+     * pending flags.
+     */
+    rtos_lock_acquire(0);
     {
-        if( source_id < num_cores )
-        {
-            source_chanend = rtos_irq_chanend[ source_id ];
-        }
-        else if ( source_id >= RTOS_MAX_CORE_COUNT && source_id < RTOS_MAX_CORE_COUNT + peripheral_source_count )
-        {
-            source_chanend = peripheral_irq_chanend[ source_id - RTOS_MAX_CORE_COUNT ];
-        }
-        else
-        {
-            xassert(0);
-        }
-
+        pending = irq_pending[ core_id ];
         irq_pending[ core_id ] |= ( 1 << source_id );
 
-        /* just ensure the pending flag is set before the channel send. */
-        RTOS_MEMORY_BARRIER();
+        if( pending == 0 )
+        {
+            if( source_id < num_cores )
+            {
+                source_chanend = rtos_irq_chanend[ source_id ];
+            }
+            else if ( source_id >= RTOS_MAX_CORE_COUNT && source_id < RTOS_MAX_CORE_COUNT + peripheral_source_count )
+            {
+                source_chanend = peripheral_irq_chanend[ source_id - RTOS_MAX_CORE_COUNT ];
+            }
+            else
+            {
+                xassert(0);
+            }
 
-        chanend_set_dest( source_chanend, rtos_irq_chanend[ core_id ] );
-        _s_chan_out_ct_end( source_chanend );
+            /* just ensure the pending flag is set before the channel send. */
+            RTOS_MEMORY_BARRIER();
+
+            chanend_set_dest( source_chanend, rtos_irq_chanend[ core_id ] );
+            _s_chan_out_ct_end( source_chanend );
+        }
     }
-    else
-    {
-        irq_pending[ core_id ] |= ( 1 << source_id );
-    }
+    rtos_lock_release(0);
 }
 
 /*
@@ -197,9 +212,9 @@ int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend source_chanend)
 
     xassert( peripheral_source_count < MAX_ADDITIONAL_SOURCES );
 
-    portGET_ISR_LOCK();
+    rtos_lock_acquire(0);
     source_id = peripheral_source_count++;
-    portRELEASE_ISR_LOCK();
+    rtos_lock_release(0);
 
     isr_info[ source_id ].isr = isr;
     isr_info[ source_id ].data = data;
@@ -208,9 +223,27 @@ int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend source_chanend)
     return RTOS_MAX_CORE_COUNT + source_id;
 }
 
-void rtos_irq_enable( int core_id )
+void rtos_irq_enable( int total_rtos_cores )
 {
+    int core_id;
+
+    core_id = rtos_core_id_get();
     chanend_alloc( &rtos_irq_chanend[ core_id ] );
     chanend_setup_interrupt_callback( rtos_irq_chanend[ core_id ], NULL, RTOS_INTERRUPT_CALLBACK( rtos_irq_handler ) );
     chanend_enable_trigger( rtos_irq_chanend[ core_id ] );
+
+    rtos_lock_acquire(0);
+    {
+        irq_enable_bf |= (1 << core_id);
+
+        if (irq_enable_bf == (1 << total_rtos_cores) - 1) {
+            irq_ready = 1;
+        }
+    }
+    rtos_lock_release(0);
+}
+
+int rtos_irq_ready(void)
+{
+    return irq_ready;
 }

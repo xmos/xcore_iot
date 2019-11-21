@@ -18,6 +18,7 @@
 /* Library header files */
 #include "rtos_utils.h"
 #include "rtos_interrupt.h"
+#include "rtos_locks.h"
 
 #ifndef __XC__
 #include "rtos_irq.h"

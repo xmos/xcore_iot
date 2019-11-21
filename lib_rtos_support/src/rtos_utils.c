@@ -50,10 +50,15 @@ int rtos_core_register(void)
 
     core_id = (int) get_logical_core_id();
 
-    rtos_core_map[core_id] = rtos_core_init_count;
-    rtos_core_map_reverse[rtos_core_init_count] = core_id;
+    rtos_lock_acquire(0);
+    {
+        rtos_core_map[core_id] = rtos_core_init_count;
+        rtos_core_map_reverse[rtos_core_init_count] = core_id;
+        core_id = rtos_core_init_count++;
+    }
+    rtos_lock_release(0);
 
-    return rtos_core_init_count++;
+    return core_id;
 }
 
 /* Note, always returns 0 before the scheduler is started. */

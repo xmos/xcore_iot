@@ -27,7 +27,6 @@ typedef void (*rtos_irq_isr_t)( void *param );
  *                       by rtos_irq_source_register().
  */
 void rtos_irq(int core_id, int source_id);
-//void vPortInterruptCore( int xOtherCoreID, chanend xSourceChanend, int xSourceID );
 
 
 /**
@@ -39,14 +38,12 @@ void rtos_irq(int core_id, int source_id);
  *                      the interrupt.
  */
 void rtos_irq_peripheral(chanend dest_chanend);
-//void vPortInterruptXcore( chanend xDestChanend );
 
 /**
- * This function registers a non-RTOS IRQ source. This must be
- * called by an RTOS core, preferably during initialization prior
- * to starting the scheduler. The source ID returned must be passed
- * to the non-RTOS peripheral that will be generating the IRQs.
- * The peripheral can then subsequently send IRQs with rtos_irq().
+ * This function registers a non-RTOS IRQ source. The source ID
+ * returned must be passed to the non-RTOS peripheral that will be
+ * generating the IRQs. The peripheral can then subsequently send
+ * IRQs with rtos_irq().
  *
  * \param isr            The interrupt service routine to run when the IRQ is received.
  * \param param          A pointer to user data to pass to the ISR.
@@ -57,13 +54,21 @@ void rtos_irq_peripheral(chanend dest_chanend);
  */
 
 int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend source_chanend);
-//int xPortICIISRRegister( rtos_ici_cb_t ici_cb, void *param );
 
 /**
  * This function enables the calling core to receive RTOS IRQs. It
- * should be called once during initialization by each RTOS core.
+ * should be called once during initialization by each RTOS core
+ * after calling rtos_core_register().
+ *
+ * \param The total number of cores used by the RTOS.
  */
-void rtos_irq_enable( int xCoreID );
-//void vPortEnableICI( int xCoreID );
+void rtos_irq_enable(int total_rtos_cores);
+
+/**
+ * This function checks to see if the IRQ system is ready.
+ *
+ * \returns true if all of the cores have enabled IRQs. Otherwise false.
+ */
+int rtos_irq_ready(void);
 
 #endif /* RTOS_IRQ_H_ */

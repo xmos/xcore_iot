@@ -9,6 +9,8 @@
 #ifndef RTOS_UTILS_H_
 #define RTOS_UTILS_H_
 
+#include "xcore_c.h"
+
 #define RTOS_MEMORY_BARRIER() asm volatile( "" ::: "memory" )
 
 #if __XC__
