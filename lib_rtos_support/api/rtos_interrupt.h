@@ -4,6 +4,9 @@
 #ifndef RTOS_INTERRUPT_H_
 #define RTOS_INTERRUPT_H_
 
+#include <stdint.h>
+#include <xs1.h>
+
 #include "rtos_interrupt_impl.h"
 
 /** Define a function that allows RTOS interrupts to occur within its scope
@@ -125,5 +128,98 @@
  */
 #define RTOS_INTERRUPT_CALLBACK(intrpt) _INTERRUPT_CALLBACK(intrpt)
 
+
+/**
+ * This function gets the current interrupt mask.
+ * A non-zero mask value means that interrupts are enabled.
+ *
+ * \returns the current interrupt mask.
+ */
+inline uint32_t rtos_interrupt_mask_get(void)
+{
+    uint32_t mask;
+
+    asm volatile(
+        "getsr r11," _XCORE_C_STR(XS1_SR_IEBLE_MASK) "\n"
+        "mov %0, r11"
+        : "=r"(mask)
+        : /* no inputs */
+        : /* clobbers */ "r11"
+    );
+
+    return mask;
+}
+
+ /**
+  * This function masks (disables) all interrupts on the
+  * calling core.
+  *
+  * \returns the previous value of the interrupt mask.
+  * This value can be passed to rtos_interrupt_mask_set()
+  * to restore the interrupt mask to its previous state.
+  */
+inline uint32_t rtos_interrupt_mask_all(void)
+{
+    uint32_t mask;
+
+    asm volatile(
+        "getsr r11," _XCORE_C_STR(XS1_SR_IEBLE_MASK) "\n"
+        "mov %0, r11\n"
+        "clrsr " _XCORE_C_STR(XS1_SR_IEBLE_MASK)
+        : "=r"(mask)
+        : /* no inputs */
+        : "memory"
+    );
+
+    return mask;
+}
+
+/**
+ * This function unmasks (enables) all interrupts on the
+ * calling core.
+ */
+inline void rtos_interrupt_unmask_all(void)
+{
+    asm volatile(
+        "setsr" _XCORE_C_STR(XS1_SR_IEBLE_MASK)
+        : /* no outputs */
+        : /* no inputs */
+        : "memory"
+    );
+}
+
+/**
+ * This function sets the interrupt mask.
+ * A non-zero mask value unmasks (enables) interrupts.
+ *
+ * \param mask The value to set the interrupt mask to.
+ */
+inline void rtos_interrupt_mask_set(uint32_t mask)
+{
+   if (mask != 0) {
+       rtos_interrupt_unmask_all();
+   }
+}
+
+/*
+ * This function checks to see if it is called from
+ * within an ISR.
+ *
+ * \returns non-zero when called from within an ISR or kcall.
+ */
+inline uint32_t rtos_isr_running(void)
+{
+    uint32_t kernel_mode;
+
+    asm volatile(
+        "getsr r11," _XCORE_C_STR(XS1_SR_INK_MASK) "\n"
+        "mov %0, r11"
+        : "=r"(kernel_mode)
+        : /* no inputs */
+        : /* clobbers */ "r11"
+    );
+
+    return kernel_mode;
+}
 
 #endif /* RTOS_INTERRUPT_H_ */

@@ -1,17 +1,18 @@
 /*
- * rtos_utils.h
+ * rtos_cores.h
  *
  *  Created on: Nov 20, 2019
  *      Author: mbruno
  */
 
 
-#ifndef RTOS_UTILS_H_
-#define RTOS_UTILS_H_
+#ifndef RTOS_CORES_H_
+#define RTOS_CORES_H_
 
 #include "xcore_c.h"
 
-#define RTOS_MEMORY_BARRIER() asm volatile( "" ::: "memory" )
+/* The maximum number of cores an SMP RTOS may use */
+#define RTOS_MAX_CORE_COUNT 8
 
 #if __XC__
 extern "C" {
@@ -57,4 +58,4 @@ int rtos_core_count(void);
 }
 #endif //__XC__
 
-#endif /* RTOS_UTILS_H_ */
+#endif /* RTOS_CORES_H_ */

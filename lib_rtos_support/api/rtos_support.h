@@ -9,16 +9,14 @@
 #ifndef RTOS_SUPPORT_H_
 #define RTOS_SUPPORT_H_
 
-/* The maximum number of cores an SMP RTOS may use */
-#define RTOS_MAX_CORE_COUNT 8
-
 /* Config file to be provided by the RTOS */
 #include "rtos_support_rtos_config.h"
 
 /* Library header files */
-#include "rtos_utils.h"
+#include "rtos_cores.h"
 #include "rtos_interrupt.h"
 #include "rtos_locks.h"
+#include "rtos_macros.h"
 
 #ifndef __XC__
 #include "rtos_irq.h"

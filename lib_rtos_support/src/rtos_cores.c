@@ -1,5 +1,5 @@
 /*
- * rtos_utils.c
+ * rtos_cores.c
  *
  *  Created on: Nov 19, 2019
  *      Author: mbruno

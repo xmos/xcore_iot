@@ -8,44 +8,6 @@
 
 #include "rtos_support.h"
 
-/************** TEMPORARY *************/
-static inline uint32_t portGET_INTERRUPT_STATE( void )
-{
-uint32_t ulState;
-
-    asm volatile(
-        "getsr r11, %1\n"
-        "mov %0, r11"
-        : "=r"(ulState)
-        : "i"(XS1_SR_IEBLE_MASK)
-        : /* clobbers */ "r11"
-    );
-
-    return ulState;
-}
-#define portGET_INTERRUPT_STATE() portGET_INTERRUPT_STATE()
-
-static inline uint32_t portDISABLE_INTERRUPTS( void )
-{
-uint32_t ulState;
-
-    ulState = portGET_INTERRUPT_STATE();
-    asm volatile( "clrsr %0" :: "i"(XS1_SR_IEBLE_MASK) : "memory" );
-
-    return ulState;
-}
-#define portDISABLE_INTERRUPTS() portDISABLE_INTERRUPTS()
-
-#define portENABLE_INTERRUPTS() asm volatile( "setsr %0" :: "i"(XS1_SR_IEBLE_MASK) : "memory" )
-
-/*
- * Will enable interrupts if ulState is non-zero.
- */
-#define portRESTORE_INTERRUPTS(ulState)  do {                                           \
-                                             if (ulState != 0) portENABLE_INTERRUPTS(); \
-                                         } while( 0 )
-/************** TEMPORARY *************/
-
 /*
  * Source IDs 0-7 are reserved for RTOS cores
  * Source IDs 8-15 are allowed for other use
@@ -199,11 +161,11 @@ void rtos_irq_peripheral( chanend dest_chanend )
 {
     int core_id;
 
-    uint32_t state = portDISABLE_INTERRUPTS();
+    uint32_t mask = rtos_interrupt_mask_all();
     core_id = rtos_core_id_get();
     chanend_set_dest( rtos_irq_chanend[ core_id ], dest_chanend );
     _s_chan_out_ct_end( rtos_irq_chanend[ core_id ] );
-    portRESTORE_INTERRUPTS(state);
+    rtos_interrupt_mask_set(mask);
 }
 
 int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend source_chanend)
