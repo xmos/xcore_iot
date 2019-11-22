@@ -168,7 +168,7 @@ inline uint32_t rtos_interrupt_mask_all(void)
         "clrsr " _XCORE_C_STR(XS1_SR_IEBLE_MASK)
         : "=r"(mask)
         : /* no inputs */
-        : "memory"
+        : /* clobbers */ "r11", "memory"
     );
 
     return mask;
@@ -184,7 +184,7 @@ inline void rtos_interrupt_unmask_all(void)
         "setsr" _XCORE_C_STR(XS1_SR_IEBLE_MASK)
         : /* no outputs */
         : /* no inputs */
-        : "memory"
+        : /* clobbers */ "memory"
     );
 }
 
