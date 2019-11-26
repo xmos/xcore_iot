@@ -17,7 +17,7 @@
 #define I2S_CHANS_DAC 2
 
 
-static void initCS43L21(xcore_freertos_device_t i2c_dev)
+static void initCS43L21(soc_peripheral_t i2c_dev)
 {
     i2c_regop_res_t res;
 
@@ -56,7 +56,7 @@ static void initCS43L21(xcore_freertos_device_t i2c_dev)
     }
 }
 
-static void pll_init(xcore_freertos_device_t i2c_dev)
+static void pll_init(soc_peripheral_t i2c_dev)
 {
     // SI5351A Register Addresses
     #define SI5351A_OE_CTRL      (0x03) // Register 3  - Output Enable Control
@@ -127,7 +127,7 @@ static void pll_init(xcore_freertos_device_t i2c_dev)
     res = i2c_driver_write_reg(i2c_dev, clock_gen_i2c_address, SI5351A_OE_CTRL, 0xF8);
 }
 
-void audio_hw_config(xcore_freertos_device_t i2c_dev)
+void audio_hw_config(soc_peripheral_t i2c_dev)
 {
     pll_init(i2c_dev);
     initCS43L21(i2c_dev);

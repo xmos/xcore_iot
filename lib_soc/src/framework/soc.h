@@ -18,7 +18,7 @@
 #include "soc_conf_defaults.h"
 
 #include "soc_channel.h"
-#include "xcore_freertos_dma.h"
+#include "soc_peripheral_hub.h"
 #include "soc_peripheral_control.h"
 
 /*

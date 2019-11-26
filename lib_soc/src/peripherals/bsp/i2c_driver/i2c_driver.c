@@ -3,12 +3,13 @@
 #include <stdlib.h>
 
 #include "soc.h"
+#include "bsp/common/soc_bsp_common.h"
 #include "bitstream_devices.h"
 
 #include "i2c_driver.h"
 
 i2c_res_t i2c_driver_write(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t device_addr,
         uint8_t buf[],
         size_t n,
@@ -16,7 +17,7 @@ i2c_res_t i2c_driver_write(
         int send_stop_bit)
 {
     i2c_res_t res;
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, I2C_DEV_WRITE);
 
@@ -39,14 +40,14 @@ i2c_res_t i2c_driver_write(
 }
 
 i2c_res_t i2c_driver_read(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t device_addr,
         uint8_t buf[],
         size_t n,
         int send_stop_bit)
 {
     i2c_res_t res;
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, I2C_DEV_READ);
 
@@ -65,13 +66,13 @@ i2c_res_t i2c_driver_read(
 }
 
 i2c_regop_res_t i2c_driver_write_reg(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t device_addr,
         uint8_t reg,
         uint8_t data)
 {
     i2c_regop_res_t res;
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, I2C_DEV_WRITE_REG);
 
@@ -89,13 +90,13 @@ i2c_regop_res_t i2c_driver_write_reg(
 }
 
 uint8_t i2c_driver_read_reg(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t device_addr,
         uint8_t reg,
         i2c_regop_res_t *result)
 {
     uint8_t data;
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, I2C_DEV_READ_REG);
 
@@ -112,10 +113,10 @@ uint8_t i2c_driver_read_reg(
     return data;
 }
 
-xcore_freertos_device_t i2c_driver_init(
+soc_peripheral_t i2c_driver_init(
         int device_id)
 {
-    xcore_freertos_device_t device;
+    soc_peripheral_t device;
 
     xassert(device_id >= 0 && device_id < BITSTREAM_I2C_DEVICE_COUNT);
 

@@ -24,7 +24,7 @@
 
 void gpio_ctrl_t0(void *arg)
 {
-    xcore_freertos_device_t dev = arg;
+    soc_peripheral_t dev = arg;
     uint32_t mabs_buttons;
     uint32_t buttonA, buttonB, buttonC, buttonD;
 
@@ -61,7 +61,7 @@ void gpio_ctrl_t0(void *arg)
 
 void gpio_ctrl_create( UBaseType_t priority )
 {
-    xcore_freertos_device_t dev;
+    soc_peripheral_t dev;
 
     dev = gpio_driver_init(BITSTREAM_GPIO_DEVICE_A);
 

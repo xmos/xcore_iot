@@ -11,6 +11,7 @@ chanend soc_channel_establish(
     chanend local_c;
 
     chanend_alloc(&local_c);
+    xassert(local_c != 0);
 
     if (direction & soc_channel_input) {
         s_chan_out_word(remote_tile_chanend, local_c);

@@ -18,7 +18,7 @@ typedef enum {
 } i2c_regop_res_t;
 
 i2c_res_t i2c_driver_write(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t device_addr,
         uint8_t buf[],
         size_t n,
@@ -26,25 +26,25 @@ i2c_res_t i2c_driver_write(
         int send_stop_bit);
 
 i2c_res_t i2c_driver_read(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t device_addr,
         uint8_t buf[],
         size_t n,
         int send_stop_bit);
 
 i2c_regop_res_t i2c_driver_write_reg(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t device_addr,
         uint8_t reg,
         uint8_t data);
 
 uint8_t i2c_driver_read_reg(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t device_addr,
         uint8_t reg,
         i2c_regop_res_t *result);
 
-xcore_freertos_device_t i2c_driver_init(
+soc_peripheral_t i2c_driver_init(
         int device_id);
 
 #endif /* I2C_DRIVER_H_ */

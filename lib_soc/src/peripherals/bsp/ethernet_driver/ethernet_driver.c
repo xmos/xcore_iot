@@ -3,40 +3,41 @@
 #include <stdlib.h>
 
 #include "soc.h"
+#include "bsp/common/soc_bsp_common.h"
 #include "bitstream_devices.h"
 
 #include "ethernet_driver.h"
 
 void ethernet_driver_send_packet(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         void *packet,
         unsigned n)
 {
-    xcore_freertos_dma_ring_buf_t *tx_ring_buf = xcore_freertos_dma_device_tx_ring_buf(dev);
-    xcore_freertos_dma_ring_buf_tx(tx_ring_buf, packet, n);
-    xcore_freertos_dma_request();
+    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
+    soc_dma_ring_tx_buf_set(tx_ring_buf, packet, n);
+    soc_peripheral_hub_dma_request();
 }
 
 void ethernet_driver_send_packet_wait_for_copy(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         void *packet,
         unsigned n)
 {
-    xcore_freertos_dma_ring_buf_t *tx_ring_buf = xcore_freertos_dma_device_tx_ring_buf(dev);
-    xcore_freertos_dma_ring_buf_tx(tx_ring_buf, packet, n);
-    xcore_freertos_dma_request();
+    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
+    soc_dma_ring_tx_buf_set(tx_ring_buf, packet, n);
+    soc_peripheral_hub_dma_request();
 
-    while (( xcore_freertos_dma_ring_buf_tx_complete(tx_ring_buf, NULL, NULL)) != packet ) {
+    while (( soc_dma_ring_tx_buf_get(tx_ring_buf, NULL, NULL)) != packet ) {
         ;   /* Wait until the packet we just sent is recieved */
     }
 }
 
 void ethernet_get_mac_addr(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         size_t ifnum,
         uint8_t mac_address[ETHERNET_MACADDR_NUM_BYTES])
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, ETH_DEV_GET_MAC_ADDR);
 
@@ -50,11 +51,11 @@ void ethernet_get_mac_addr(
 }
 
 void ethernet_set_mac_addr(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         size_t ifnum,
         const uint8_t mac_address[ETHERNET_MACADDR_NUM_BYTES])
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, ETH_DEV_SET_MAC_ADDR);
 
@@ -65,12 +66,12 @@ void ethernet_set_mac_addr(
 }
 
 void ethernet_driver_smi_write_reg(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t phy_addr,
         uint8_t reg_addr,
         uint16_t val)
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, ETH_DEV_SMI_WRITE_REG);
 
@@ -82,11 +83,11 @@ void ethernet_driver_smi_write_reg(
 }
 
 uint16_t ethernet_driver_smi_read_reg(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t phy_addr,
         uint8_t reg_addr)
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
     uint16_t retVal;
 
     soc_peripheral_function_code_tx(c, ETH_DEV_SMI_READ_REG);
@@ -104,10 +105,10 @@ uint16_t ethernet_driver_smi_read_reg(
 }
 
 ethernet_link_state_t ethernet_driver_smi_get_link_state(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t phy_addr)
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
     ethernet_link_state_t retVal;
 
     soc_peripheral_function_code_tx(c, ETH_DEV_SMI_GET_LINK_STATUS);
@@ -119,7 +120,7 @@ ethernet_link_state_t ethernet_driver_smi_get_link_state(
     return retVal;
 }
 
-xcore_freertos_device_t ethernet_driver_init(
+soc_peripheral_t ethernet_driver_init(
         int device_id,
         int rx_desc_count,
         int rx_buf_size,
@@ -128,13 +129,13 @@ xcore_freertos_device_t ethernet_driver_init(
         int isr_core,
         rtos_irq_isr_t isr)
 {
-    xcore_freertos_device_t device;
+    soc_peripheral_t device;
 
     xassert(device_id >= 0 && device_id < BITSTREAM_ETHERNET_DEVICE_COUNT);
 
     device = bitstream_ethernet_devices[device_id];
 
-    xcore_freertos_dma_device_common_init(
+    soc_peripheral_common_dma_init(
             device,
             rx_desc_count,
             rx_buf_size,

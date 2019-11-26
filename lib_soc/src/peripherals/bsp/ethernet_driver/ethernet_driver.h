@@ -15,41 +15,41 @@ typedef enum ethernet_link_state_t {
 #define ETHERNET_MACADDR_NUM_BYTES 6
 
 void ethernet_driver_send_packet(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         void *packet,
         unsigned n);
 
 void ethernet_driver_send_packet_wait_for_copy(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         void *packet,
         unsigned n);
 
 void ethernet_get_mac_addr(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         size_t ifnum,
         uint8_t mac_address[ETHERNET_MACADDR_NUM_BYTES]);
 
 void ethernet_set_mac_addr(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         size_t ifnum,
         const uint8_t mac_address[ETHERNET_MACADDR_NUM_BYTES]);
 
 void ethernet_driver_smi_write_reg(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t phy_addr,
         uint8_t reg_addr,
         uint16_t val);
 
 uint16_t ethernet_driver_smi_read_reg(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t phy_addr,
         uint8_t reg_addr);
 
 ethernet_link_state_t ethernet_driver_smi_get_link_state(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         uint8_t phy_addr);
 
-xcore_freertos_device_t ethernet_driver_init(
+soc_peripheral_t ethernet_driver_init(
         int device_id,
         int rx_desc_count,
         int rx_buf_size,

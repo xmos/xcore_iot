@@ -62,16 +62,16 @@ int frame_power(int32_t *mic_data)
 }
 
 RTOS_IRQ_ISR_ATTR
-int mic_array_isr(xcore_freertos_device_t device)
+int mic_array_isr(soc_peripheral_t device)
 {
-    QueueHandle_t mic_data_queue = xcore_freertos_dma_device_app_data(device);
+    QueueHandle_t mic_data_queue = soc_peripheral_app_data(device);
     BaseType_t xYieldRequired = pdFALSE;
     uint32_t status;
 
-    status = xcore_freertos_dma_interrupt_status(device);
+    status = soc_peripheral_interrupt_status(device);
 
-    if (status & XCORE_FREERTOS_DMA_INTERRUPT_STATUS_RX_DONE) {
-        xcore_freertos_dma_ring_buf_t *rx_ring_buf;
+    if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM) {
+        soc_dma_ring_buf_t *rx_ring_buf;
         int length;
         int32_t *rx_buf;
 
@@ -80,15 +80,15 @@ int mic_array_isr(xcore_freertos_device_t device)
          */
         configASSERT(device == bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A]);
 
-        rx_ring_buf = xcore_freertos_dma_device_rx_ring_buf(device);
-        rx_buf = xcore_freertos_dma_ring_buf_rx(rx_ring_buf, &length);
+        rx_ring_buf = soc_peripheral_rx_dma_ring_buf(device);
+        rx_buf = soc_dma_ring_rx_buf_get(rx_ring_buf, &length);
         configASSERT(rx_buf != NULL);
 //        debug_printf("mic data rx %d bytes\n", length);
 
         if (xQueueSendFromISR(mic_data_queue, &rx_buf, &xYieldRequired) == errQUEUE_FULL) {
 //            debug_printf("mic data lost\n", length);
-            xcore_freertos_dma_ring_buf_rx_desc_set_buf(rx_ring_buf, rx_buf, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
-            xcore_freertos_dma_request();
+            soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
+            soc_peripheral_hub_dma_request();
         }
     }
 
@@ -98,9 +98,9 @@ int mic_array_isr(xcore_freertos_device_t device)
 /* Apply gain to mic data */
 void audio_pipeline_stage1(void *arg)
 {
-    xcore_freertos_device_t mic_dev = arg;
-    QueueHandle_t mic_data_queue = xcore_freertos_dma_device_app_data(mic_dev);
-    xcore_freertos_dma_ring_buf_t *rx_ring_buf = xcore_freertos_dma_device_rx_ring_buf(mic_dev);
+    soc_peripheral_t mic_dev = arg;
+    QueueHandle_t mic_data_queue = soc_peripheral_app_data(mic_dev);
+    soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(mic_dev);
 
     for (;;) {
         int32_t *mic_data;
@@ -109,8 +109,8 @@ void audio_pipeline_stage1(void *arg)
         xQueueReceive(mic_data_queue, &mic_data, portMAX_DELAY);
 
         new_rx_buffer = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
-        xcore_freertos_dma_ring_buf_rx_desc_set_buf(rx_ring_buf, new_rx_buffer, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
-        xcore_freertos_dma_request();
+        soc_dma_ring_rx_buf_set(rx_ring_buf, new_rx_buffer, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
+        soc_peripheral_hub_dma_request();
 
         //debug_printf("Mic power: %d\n", frame_power(mic_data));
 
@@ -128,7 +128,7 @@ void audio_pipeline_stage1(void *arg)
 void audio_pipeline_create(QueueHandle_t output, UBaseType_t priority)
 {
     QueueHandle_t queue;
-    xcore_freertos_device_t dev;
+    soc_peripheral_t dev;
 
     stage1_out_queue = output;
     /*

@@ -11,6 +11,6 @@
 
 #include "i2c_driver.h"
 
-void audio_hw_config(xcore_freertos_device_t i2c_dev);
+void audio_hw_config(soc_peripheral_t i2c_dev);
 
 #endif /* AUDIO_HW_CONFIG_H_ */

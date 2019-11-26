@@ -5,7 +5,7 @@
 
 #include "soc.h"
 
-xcore_freertos_device_t micarray_driver_init(
+soc_peripheral_t micarray_driver_init(
         int device_id,
         int rx_desc_count,
         int rx_buf_size,

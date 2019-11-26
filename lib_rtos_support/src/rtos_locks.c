@@ -25,7 +25,7 @@ void rtos_locks_initialize(void)
     int i;
 
     for (i = 0; i < RTOS_LOCK_COUNT; i++) {
-        xcore_c_error_t ret = lock_alloc(&rtos_locks[i]);
-        xassert(ret == error_none);
+        lock_alloc(&rtos_locks[i]);
+        xassert(rtos_locks[i] != 0);
     }
 }

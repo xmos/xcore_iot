@@ -75,7 +75,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
 
     if (pending & RTOS_CORE_SOURCE_MASK )
     {
-        /* This core is being yielded by at least one other FreeRTOS core.
+        /* This core is being yielded by at least one other RTOS core.
         Clear the pending flags from all of them and enter the scheduler. */
 
         pending &= ~RTOS_CORE_SOURCE_MASK;
@@ -97,7 +97,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
 }
 
 /*
- * May be called by a non-FreeRTOS core provided
+ * May be called by a non-RTOS core provided
  * xSourceID >= RTOS_MAX_CORE_COUNT.
  */
 void rtos_irq( int core_id, int source_id )
@@ -148,8 +148,8 @@ void rtos_irq( int core_id, int source_id )
 }
 
 /*
- * Must be called by a FreeRTOS core to interrupt a
- * non-FreeRTOS core.
+ * Must be called by an RTOS core to interrupt a
+ * non-RTOS core.
  */
 void rtos_irq_peripheral( chanend dest_chanend )
 {

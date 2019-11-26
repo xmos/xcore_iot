@@ -25,20 +25,20 @@ void device_input(const int dev_id, chanend dev_c);
  * Internal to the bitstream.
  */
 void tile0_device_instantiate(
-        chanend eth_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend i2s_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT]);
+        chanend eth_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
 /*
  * Bitstream specific
  *
  * Internal to the bitstream.
  */
 void tile1_device_instantiate(
-        chanend eth_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend i2s_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT]);
+        chanend eth_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
 
 /*
  * Bitstream specific
@@ -47,11 +47,11 @@ void tile1_device_instantiate(
  * implemented on the software side.
  */
 void device_register(
-        chanend mic_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend eth_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend i2s_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend t0_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT],
-        chanend t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT]);
+        chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend eth_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
 
 #endif /* BITSTREAM_H_ */

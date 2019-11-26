@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "soc.h"
+#include "bsp/common/soc_bsp_common.h"
 #include "xcore_c.h"
 #include "bitstream_devices.h"
 
@@ -58,7 +59,7 @@ static int compare_keys(const void *va, const void *vb)
     return a->key - b->key;
 }
 
-static int get_GPIO_dev_id( xcore_freertos_device_t dev )
+static int get_GPIO_dev_id( soc_peripheral_t dev )
 {
     int retVal = -1;
     for( int i=0; i< BITSTREAM_GPIO_DEVICE_COUNT; i++ )
@@ -75,7 +76,7 @@ static int get_GPIO_dev_id( xcore_freertos_device_t dev )
     return retVal;
 }
 
-static unsigned get_port_res( xcore_freertos_device_t dev, port_id_t p )
+static unsigned get_port_res( soc_peripheral_t dev, port_id_t p )
 {
     unsigned retVal;
 
@@ -97,7 +98,7 @@ static unsigned get_port_res( xcore_freertos_device_t dev, port_id_t p )
     return retVal;
 }
 
-static int set_port_res( xcore_freertos_device_t dev, port_id_t p, unsigned port_res )
+static int set_port_res( soc_peripheral_t dev, port_id_t p, unsigned port_res )
 {
     int retVal;
 
@@ -131,11 +132,11 @@ static int set_port_res( xcore_freertos_device_t dev, port_id_t p, unsigned port
 }
 
 static void gpio_driver_alloc(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         unsigned *p,
         int id)
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx( c, GPIO_DEV_PORT_ALLOC );
 
@@ -150,11 +151,11 @@ static void gpio_driver_alloc(
 }
 
 static void gpio_driver_write(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         unsigned p,
         uint32_t data)
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, GPIO_DEV_PORT_OUT);
 
@@ -165,11 +166,11 @@ static void gpio_driver_write(
 }
 
 static void gpio_driver_read(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         unsigned p,
         uint32_t *data)
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, GPIO_DEV_PORT_IN);
 
@@ -183,11 +184,11 @@ static void gpio_driver_read(
 }
 
 static void gpio_driver_peek(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         unsigned p,
         uint32_t *data)
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c, GPIO_DEV_PORT_PEEK);
 
@@ -201,10 +202,10 @@ static void gpio_driver_peek(
 }
 
 static void gpio_driver_free(
-        xcore_freertos_device_t dev,
+        soc_peripheral_t dev,
         unsigned *p)
 {
-    chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
+    chanend c = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx( c, GPIO_DEV_PORT_FREE );
 
@@ -213,7 +214,7 @@ static void gpio_driver_free(
             sizeof(unsigned), p);
 }
 
-int gpio_init( xcore_freertos_device_t dev, port_id_t p )
+int gpio_init( soc_peripheral_t dev, port_id_t p )
 {
     int retVal;
     unsigned new_port_res;
@@ -228,7 +229,7 @@ int gpio_init( xcore_freertos_device_t dev, port_id_t p )
     return retVal;
 }
 
-void gpio_free( xcore_freertos_device_t dev, port_id_t p )
+void gpio_free( soc_peripheral_t dev, port_id_t p )
 {
     unsigned port_res;
     port_res = get_port_res(dev, p);
@@ -236,7 +237,7 @@ void gpio_free( xcore_freertos_device_t dev, port_id_t p )
     gpio_driver_free( dev, &port_res );
 }
 
-void gpio_write( xcore_freertos_device_t dev, port_id_t p, uint32_t value )
+void gpio_write( soc_peripheral_t dev, port_id_t p, uint32_t value )
 {
     unsigned port_res;
     port_res = get_port_res(dev, p);
@@ -244,7 +245,7 @@ void gpio_write( xcore_freertos_device_t dev, port_id_t p, uint32_t value )
     gpio_driver_write(dev, port_res, value);
 }
 
-void gpio_write_pin( xcore_freertos_device_t dev, port_id_t p, int pin, uint32_t value )
+void gpio_write_pin( soc_peripheral_t dev, port_id_t p, int pin, uint32_t value )
 {
     unsigned port_res;
     uint32_t initial_state;
@@ -265,7 +266,7 @@ void gpio_write_pin( xcore_freertos_device_t dev, port_id_t p, int pin, uint32_t
     gpio_driver_write(dev, port_res, initial_state);
 }
 
-uint32_t gpio_read( xcore_freertos_device_t dev, port_id_t p )
+uint32_t gpio_read( soc_peripheral_t dev, port_id_t p )
 {
     uint32_t retVal;
     unsigned port_res;
@@ -275,7 +276,7 @@ uint32_t gpio_read( xcore_freertos_device_t dev, port_id_t p )
     return retVal;
 }
 
-uint32_t gpio_read_pin( xcore_freertos_device_t dev, port_id_t p, int pin )
+uint32_t gpio_read_pin( soc_peripheral_t dev, port_id_t p, int pin )
 {
     uint32_t retVal;
     unsigned port_res;
@@ -286,10 +287,10 @@ uint32_t gpio_read_pin( xcore_freertos_device_t dev, port_id_t p, int pin )
     return retVal;
 }
 
-xcore_freertos_device_t gpio_driver_init(
+soc_peripheral_t gpio_driver_init(
         int device_id)
 {
-    xcore_freertos_device_t device;
+    soc_peripheral_t device;
 
     xassert(device_id >= 0 && device_id < BITSTREAM_GPIO_DEVICE_COUNT);
 

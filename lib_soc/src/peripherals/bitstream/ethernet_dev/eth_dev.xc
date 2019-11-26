@@ -192,9 +192,9 @@ static unsafe void eth_dev_handler(
             }
             break;
 
-        case !no_rx => xcore_freertos_dma_device_rx_ready(data_from_dma_c):
+        case !no_rx => soc_peripheral_rx_dma_ready(data_from_dma_c):
 
-            frame_len = xcore_freertos_dma_device_rx_data(data_from_dma_c, frame_buf, sizeof(frame_buf));
+            frame_len = soc_peripheral_rx_dma_xfer(data_from_dma_c, frame_buf, sizeof(frame_buf));
 
             /* If the stack sends less than 60 bytes, pad with 0x00 for the MAC */
             if( frame_len < 60 )
@@ -212,7 +212,7 @@ static unsafe void eth_dev_handler(
         case !no_tx => i_eth_rx.packet_ready():
 
             i_eth_rx.get_packet(desc, frame_buf, ETHERNET_MAX_PACKET_SIZE);
-            xcore_freertos_dma_device_tx_data(data_to_dma_c, frame_buf, desc.len);
+            soc_peripheral_tx_dma_xfer(data_to_dma_c, frame_buf, desc.len);
 
             no_tx = 1;
             tmr :> time;

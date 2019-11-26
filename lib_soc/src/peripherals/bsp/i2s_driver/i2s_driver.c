@@ -1,9 +1,10 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include "soc.h"
+#include "bsp/common/soc_bsp_common.h"
 #include "bitstream_devices.h"
 
-xcore_freertos_device_t i2s_driver_init(
+soc_peripheral_t i2s_driver_init(
         int device_id,
         int rx_desc_count,
         int rx_buf_size,
@@ -12,13 +13,13 @@ xcore_freertos_device_t i2s_driver_init(
         int isr_core,
         rtos_irq_isr_t isr)
 {
-    xcore_freertos_device_t device;
+    soc_peripheral_t device;
 
     xassert(device_id >= 0 && device_id < BITSTREAM_I2S_DEVICE_COUNT);
 
     device = bitstream_i2s_devices[device_id];
 
-    xcore_freertos_dma_device_common_init(
+    soc_peripheral_common_dma_init(
             device,
             rx_desc_count,
             rx_buf_size,

@@ -21,7 +21,7 @@ typedef enum {
  *
  * \param direction specifies the direction of data flow from the calling tile's
  *                  point of view. See soc_channel_direction_t.
- *                  Normally use xcore_freertos_channel_inout as this is required when
+ *                  Normally use soc_channel_inout as this is required when
  *                  the new channel will be used as a "regular" channel, either from
  *                  xC functions or with the standard non-streaming channel functions
  *                  from lib_xcore_c (e.g. chan_out_word()).

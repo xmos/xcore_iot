@@ -3,6 +3,9 @@
 	<name>lib_soc</name>
 	<comment></comment>
 	<projects>
+		<project>FreeRTOS</project>
+		<project>lib_rtos_support</project>
+		<project>lib_xassert</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

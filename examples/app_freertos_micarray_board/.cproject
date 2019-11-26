@@ -226,6 +226,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array_board_support/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_rtos_support/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/framework}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.1044652766" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -580,6 +582,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array_board_support/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_rtos_support/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/framework}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.1106009663" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -939,6 +943,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array_board_support/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_rtos_support/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/framework}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.464576551" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>

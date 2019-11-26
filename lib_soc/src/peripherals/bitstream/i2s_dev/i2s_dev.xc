@@ -68,8 +68,8 @@ static void i2s_decoupler(
 
     for (;;) {
         uint32_t recv_len;
-        xcore_freertos_dma_device_rx_ready(c);
-        recv_len = xcore_freertos_dma_device_rx_data(
+        soc_peripheral_rx_dma_ready(c);
+        recv_len = soc_peripheral_rx_dma_xfer(
                 c,
                 audio_samples[buf_num],
                 sizeof(audio_samples[0]));
