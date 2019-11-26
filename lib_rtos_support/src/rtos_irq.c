@@ -1,10 +1,4 @@
-/*
- * rtos_irq.c
- *
- *  Created on: Nov 18, 2019
- *      Author: mbruno
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include "rtos_support.h"
 

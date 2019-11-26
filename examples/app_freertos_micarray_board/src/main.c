@@ -1,9 +1,4 @@
-/*
- * main.c
- *
- *  Created on: Oct 1, 2019
- *      Author: jmccarthy
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -36,7 +31,7 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
     return eDHCPContinue;
 }
 
-void xcore_freertos_tile0_main(
+void soc_tile0_main(
         int tile)
 {
     QueueHandle_t ap_output_queue;

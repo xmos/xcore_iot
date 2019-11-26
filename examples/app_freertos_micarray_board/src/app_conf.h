@@ -1,10 +1,4 @@
-/*
- * app_conf.h
- *
- *  Created on: Oct 23, 2019
- *      Author: jmccarthy
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef APP_CONF_H_
 #define APP_CONF_H_
@@ -15,16 +9,17 @@
 
 /* Queue to TCP defines */
 #define appconfQUEUE_TO_TCP_PORT                54321
-#define appconfQUEUE_TO_TCP_ADDR0               10
-#define appconfQUEUE_TO_TCP_ADDR1               129
-#define appconfQUEUE_TO_TCP_ADDR2               28
-#define appconfQUEUE_TO_TCP_ADDR3               119//mike:119 //jerry:238
 
 //#define appconfQUEUE_TO_TCP_ADDR0               10
-//#define appconfQUEUE_TO_TCP_ADDR1               128
+//#define appconfQUEUE_TO_TCP_ADDR1               129
 //#define appconfQUEUE_TO_TCP_ADDR2               28
-//#define appconfQUEUE_TO_TCP_ADDR3               187
+//#define appconfQUEUE_TO_TCP_ADDR3               119//mike:119 //jerry:238
 
+#define appconfQUEUE_TO_TCP_ADDR0               192
+#define appconfQUEUE_TO_TCP_ADDR1               168
+#define appconfQUEUE_TO_TCP_ADDR2               1
+#define appconfQUEUE_TO_TCP_ADDR3               4
+//192.168.1.4
 //#define appconfQUEUE_TO_TCP_ADDR0               10
 //#define appconfQUEUE_TO_TCP_ADDR1               128
 //#define appconfQUEUE_TO_TCP_ADDR2               28

@@ -1,6 +1,5 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
-
 #ifndef RTOS_INTERRUPT_H_
 #define RTOS_INTERRUPT_H_
 

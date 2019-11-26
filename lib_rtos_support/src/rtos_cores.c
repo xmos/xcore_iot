@@ -1,9 +1,4 @@
-/*
- * rtos_cores.c
- *
- *  Created on: Nov 19, 2019
- *      Author: mbruno
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include <xs1.h>
 

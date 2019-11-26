@@ -3,20 +3,20 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include "FreeRTOS.h"
+#include "rtos_support.h"
 
-void xcore_freertos_periph_function_code_tx(
+void soc_peripheral_function_code_tx(
         chanend c,
         uint32_t code)
 {
-    uint32_t state = portDISABLE_INTERRUPTS();
+    uint32_t state = rtos_interrupt_mask_all();
 
     chan_out_word(c, code);
 
-    portRESTORE_INTERRUPTS(state);
+    rtos_interrupt_mask_set(state);
 }
 
-void xcore_freertos_periph_varlist_tx(
+void soc_peripheral_varlist_tx(
         chanend c,
         int num_args,
         ...)
@@ -25,7 +25,7 @@ void xcore_freertos_periph_varlist_tx(
     va_list ap;
     int i;
 
-    uint32_t state = portDISABLE_INTERRUPTS();
+    uint32_t state = rtos_interrupt_mask_all();
 
     chan_init_transaction_master(&c, &tc);
 
@@ -40,21 +40,21 @@ void xcore_freertos_periph_varlist_tx(
 
     chan_complete_transaction(&c, &tc);
 
-    portRESTORE_INTERRUPTS(state);
+    rtos_interrupt_mask_set(state);
 }
 
-void xcore_freertos_periph_function_code_rx(
+void soc_peripheral_function_code_rx(
         chanend c,
         uint32_t *code)
 {
-    uint32_t state = portDISABLE_INTERRUPTS();
+    uint32_t state = rtos_interrupt_mask_all();
 
     chan_in_word(c, code);
 
-    portRESTORE_INTERRUPTS(state);
+    rtos_interrupt_mask_set(state);
 }
 
-void xcore_freertos_periph_varlist_rx(
+void soc_peripheral_varlist_rx(
         chanend c,
         int num_args,
         ...)
@@ -63,7 +63,7 @@ void xcore_freertos_periph_varlist_rx(
     va_list ap;
     int i;
 
-    uint32_t state = portDISABLE_INTERRUPTS();
+    uint32_t state = rtos_interrupt_mask_all();
 
     chan_init_transaction_slave(&c, &tc);
 
@@ -78,5 +78,5 @@ void xcore_freertos_periph_varlist_rx(
 
     chan_complete_transaction(&c, &tc);
 
-    portRESTORE_INTERRUPTS(state);
+    rtos_interrupt_mask_set(state);
 }

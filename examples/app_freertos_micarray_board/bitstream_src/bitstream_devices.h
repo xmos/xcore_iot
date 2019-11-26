@@ -1,10 +1,4 @@
-/*
- * bitstream_devices.h
- *
- *  Created on: Sep 30, 2019
- *      Author: mbruno
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef BITSTREAM_DEVICES_H_
 #define BITSTREAM_DEVICES_H_

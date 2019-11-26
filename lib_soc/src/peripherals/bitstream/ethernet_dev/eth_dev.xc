@@ -103,17 +103,17 @@ static unsafe void eth_dev_handler(
         [[ordered]]
         select
         {
-        case !isnull(ctrl_c) => xcore_freertos_periph_function_code_rx(ctrl_c, &cmd):
+        case !isnull(ctrl_c) => soc_peripheral_function_code_rx(ctrl_c, &cmd):
             switch( cmd )
             {
             case ETH_DEV_GET_MAC_ADDR:
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 1,
                         sizeof(tx_ifnum), &tx_ifnum);
 
                 i_eth_cfg.get_macaddr(tx_ifnum, mac_address);
 
-                xcore_freertos_periph_varlist_tx(
+                soc_peripheral_varlist_tx(
                         ctrl_c, 1,
                         sizeof(mac_address), &mac_address);
 
@@ -122,7 +122,7 @@ static unsafe void eth_dev_handler(
             case ETH_DEV_SET_MAC_ADDR:
                 uint8_t original_mac_address[MACADDR_NUM_BYTES];
 
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 2,
                         sizeof(tx_ifnum), &tx_ifnum,
                         sizeof(mac_address), &mac_address);
@@ -150,13 +150,13 @@ static unsafe void eth_dev_handler(
                 uint8_t phy_addr;
                 uint8_t reg_addr;
 
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 2,
                         sizeof(phy_addr), &phy_addr,
                         sizeof(reg_addr), &reg_addr);
 
                 retVal = i_smi.read_reg(phy_addr, reg_addr);
-                xcore_freertos_periph_varlist_tx(
+                soc_peripheral_varlist_tx(
                         ctrl_c, 1,
                         sizeof(retVal), &retVal);
                 break;
@@ -166,7 +166,7 @@ static unsafe void eth_dev_handler(
                 uint8_t reg_addr;
                 uint16_t val;
 
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 3,
                         sizeof(phy_addr), &phy_addr,
                         sizeof(reg_addr), &reg_addr,
@@ -180,7 +180,7 @@ static unsafe void eth_dev_handler(
 
                 link_status = smi_get_link_state(i_smi, phy_address);
 
-                xcore_freertos_periph_varlist_tx(
+                soc_peripheral_varlist_tx(
                         ctrl_c, 1,
                         sizeof(link_status), &link_status);
                 break;

@@ -1,10 +1,4 @@
-/*
- * rtos_macros.h
- *
- *  Created on: Nov 22, 2019
- *      Author: mbruno
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef RTOS_MACROS_H_
 #define RTOS_MACROS_H_

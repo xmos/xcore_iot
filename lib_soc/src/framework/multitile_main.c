@@ -1,30 +1,25 @@
-/*
- * multitile_main.c
- *
- *  Created on: Sep 30, 2019
- *      Author: mbruno
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 __attribute__((weak))
-int xcore_freertos_tile0_bitstream_initialized(void)
+int soc_tile0_bitstream_initialized(void)
 {
     return 1;
 }
 
 __attribute__((weak))
-int xcore_freertos_tile1_bitstream_initialized(void)
+int soc_tile1_bitstream_initialized(void)
 {
     return 1;
 }
 
 __attribute__((weak))
-int xcore_freertos_tile2_bitstream_initialized(void)
+int soc_tile2_bitstream_initialized(void)
 {
     return 1;
 }
 
 __attribute__((weak))
-int xcore_freertos_tile3_bitstream_initialized(void)
+int soc_tile3_bitstream_initialized(void)
 {
     return 1;
 }

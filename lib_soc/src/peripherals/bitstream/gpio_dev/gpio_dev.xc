@@ -29,24 +29,24 @@ void gpio_handler(
     while (1) {
         select
         {
-        case !isnull(ctrl_c) => xcore_freertos_periph_function_code_rx(ctrl_c, &cmd):
+        case !isnull(ctrl_c) => soc_peripheral_function_code_rx(ctrl_c, &cmd):
             switch( cmd )
             {
             case GPIO_DEV_PORT_ALLOC:
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 2,
                         sizeof(port_ptr), &port_ptr,
                         sizeof(port_id), &port_id);
 
                 gpio_port_alloc(&port_ptr, port_id);
 
-                xcore_freertos_periph_varlist_tx(
+                soc_peripheral_varlist_tx(
                         ctrl_c, 1,
                         sizeof(port_ptr), &port_ptr);
                 break;
 
             case GPIO_DEV_PORT_FREE:
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 1,
                         sizeof(port_ptr), &port_ptr);
 
@@ -54,31 +54,31 @@ void gpio_handler(
                 break;
 
             case GPIO_DEV_PORT_PEEK:
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 1,
                         sizeof(port_arg), &port_arg);
 
                 gpio_port_peek(port_arg, &data);
 
-                xcore_freertos_periph_varlist_tx(
+                soc_peripheral_varlist_tx(
                         ctrl_c, 1,
                         sizeof(data), &data);
                 break;
 
             case GPIO_DEV_PORT_IN:
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 1,
                         sizeof(port_arg), &port_arg);
 
                 gpio_port_in(port_arg, &data);
 
-                xcore_freertos_periph_varlist_tx(
+                soc_peripheral_varlist_tx(
                         ctrl_c, 1,
                         sizeof(data), &data);
                 break;
 
             case GPIO_DEV_PORT_OUT:
-                xcore_freertos_periph_varlist_rx(
+                soc_peripheral_varlist_rx(
                         ctrl_c, 2,
                         sizeof(port_arg), &port_arg,
                         sizeof(data), &data);

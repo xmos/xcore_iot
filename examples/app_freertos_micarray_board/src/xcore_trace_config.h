@@ -1,10 +1,4 @@
-/*
- * xcore_trace_config.h
- *
- *  Created on: Sep 13, 2019
- *      Author: jmccarthy
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef XCORE_TRACE_CONFIG_H_
 #define XCORE_TRACE_CONFIG_H_

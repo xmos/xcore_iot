@@ -1,10 +1,4 @@
-/*
- * rtos_irq.h
- *
- *  Created on: Nov 19, 2019
- *      Author: mbruno
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef RTOS_IRQ_H_
 #define RTOS_IRQ_H_

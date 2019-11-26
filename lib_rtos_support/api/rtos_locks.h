@@ -1,10 +1,4 @@
-/*
- * rtos_locks.h
- *
- *  Created on: Nov 21, 2019
- *      Author: mbruno
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef RTOS_LOCKS_H_
 #define RTOS_LOCKS_H_

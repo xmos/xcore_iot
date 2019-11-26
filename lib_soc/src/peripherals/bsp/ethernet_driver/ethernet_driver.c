@@ -38,13 +38,13 @@ void ethernet_get_mac_addr(
 {
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, ETH_DEV_GET_MAC_ADDR);
+    soc_peripheral_function_code_tx(c, ETH_DEV_GET_MAC_ADDR);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 1,
             sizeof(ifnum), &ifnum);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 1,
             ETHERNET_MACADDR_NUM_BYTES, mac_address);
 }
@@ -56,9 +56,9 @@ void ethernet_set_mac_addr(
 {
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, ETH_DEV_SET_MAC_ADDR);
+    soc_peripheral_function_code_tx(c, ETH_DEV_SET_MAC_ADDR);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 2,
             sizeof(ifnum), &ifnum,
             ETHERNET_MACADDR_NUM_BYTES, mac_address);
@@ -72,9 +72,9 @@ void ethernet_driver_smi_write_reg(
 {
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, ETH_DEV_SMI_WRITE_REG);
+    soc_peripheral_function_code_tx(c, ETH_DEV_SMI_WRITE_REG);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 3,
             sizeof(phy_addr), &phy_addr,
             sizeof(reg_addr), &reg_addr,
@@ -89,14 +89,14 @@ uint16_t ethernet_driver_smi_read_reg(
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
     uint16_t retVal;
 
-    xcore_freertos_periph_function_code_tx(c, ETH_DEV_SMI_READ_REG);
+    soc_peripheral_function_code_tx(c, ETH_DEV_SMI_READ_REG);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 2,
             sizeof(phy_addr), &phy_addr,
             sizeof(reg_addr), &reg_addr);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 1,
             sizeof(retVal), &retVal);
 
@@ -110,9 +110,9 @@ ethernet_link_state_t ethernet_driver_smi_get_link_state(
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
     ethernet_link_state_t retVal;
 
-    xcore_freertos_periph_function_code_tx(c, ETH_DEV_SMI_GET_LINK_STATUS);
+    soc_peripheral_function_code_tx(c, ETH_DEV_SMI_GET_LINK_STATUS);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 1,
             sizeof(retVal), &retVal);
 

@@ -1,9 +1,4 @@
-/*
- * bitstream.c
- *
- *  Created on: Sep 27, 2019
- *      Author: mbruno
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include "soc.h"
 #include "bitstream.h"
@@ -35,12 +30,12 @@ void device_register(
     initialized = 1;
 }
 
-int xcore_freertos_tile0_bitstream_initialized(void)
+int soc_tile0_bitstream_initialized(void)
 {
     return initialized;
 }
 
-void xcore_freertos_tile0_bitstream(
+void soc_tile0_bitstream(
         int tile,
         chanend xTile0Chan,
         chanend xTile1Chan,
@@ -52,26 +47,26 @@ void xcore_freertos_tile0_bitstream(
     chanend i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT];
     chanend t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT];
 
-    eth_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = xcore_freertos_channel_establish(xTile1Chan, xcore_freertos_channel_inout);
-    eth_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = xcore_freertos_channel_establish(xTile1Chan, xcore_freertos_channel_inout);
-    eth_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = xcore_freertos_channel_establish(xTile1Chan, xcore_freertos_channel_inout);
+    eth_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
+    eth_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
+    eth_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
 
-    i2s_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = xcore_freertos_channel_establish(xTile1Chan, xcore_freertos_channel_inout);
+    i2s_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
     i2s_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = 0;
     i2s_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = 0;
 
     i2c_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = 0;
     i2c_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = 0;
-    i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = xcore_freertos_channel_establish(xTile1Chan, xcore_freertos_channel_inout);
+    i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
 
-    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = xcore_freertos_channel_establish(xTile1Chan, xcore_freertos_channel_inout);
-    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = xcore_freertos_channel_establish(xTile1Chan, xcore_freertos_channel_inout);
-    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = xcore_freertos_channel_establish(xTile1Chan, xcore_freertos_channel_inout);
+    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
+    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
+    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
 
     tile0_device_instantiate(eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t1_gpio_dev_ch);
 }
 
-void xcore_freertos_tile1_bitstream(
+void soc_tile1_bitstream(
         int tile,
         chanend xTile0Chan,
         chanend xTile1Chan,
@@ -83,21 +78,21 @@ void xcore_freertos_tile1_bitstream(
     chanend i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT];
     chanend t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CHANNEL_COUNT];
 
-    eth_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = xcore_freertos_channel_establish(xTile0Chan, xcore_freertos_channel_inout);
-    eth_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = xcore_freertos_channel_establish(xTile0Chan, xcore_freertos_channel_inout);
-    eth_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = xcore_freertos_channel_establish(xTile0Chan, xcore_freertos_channel_inout);
+    eth_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
+    eth_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
+    eth_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
 
-    i2s_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = xcore_freertos_channel_establish(xTile0Chan, xcore_freertos_channel_inout);
+    i2s_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
     i2s_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = 0;
     i2s_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = 0;
 
     i2c_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = 0;
     i2c_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = 0;
-    i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = xcore_freertos_channel_establish(xTile0Chan, xcore_freertos_channel_inout);
+    i2c_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
 
-    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = xcore_freertos_channel_establish(xTile0Chan, xcore_freertos_channel_inout);
-    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = xcore_freertos_channel_establish(xTile0Chan, xcore_freertos_channel_inout);
-    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = xcore_freertos_channel_establish(xTile0Chan, xcore_freertos_channel_inout);
+    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DATA_TO_DEVICE_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
+    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DATA_FROM_DEVICE_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
+    t1_gpio_dev_ch[XCORE_FREERTOS_DMA_DEVICE_CONTROL_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
 
     tile1_device_instantiate(eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t1_gpio_dev_ch);
 }

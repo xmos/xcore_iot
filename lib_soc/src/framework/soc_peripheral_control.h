@@ -13,8 +13,8 @@
  * Think XC interfaces.
  */
 
-#ifndef XCORE_FREERTOS_PERIPHERAL_CONTROL_H_
-#define XCORE_FREERTOS_PERIPHERAL_CONTROL_H_
+#ifndef SOC_PERIPHERAL_CONTROL_H_
+#define SOC_PERIPHERAL_CONTROL_H_
 
 #ifdef __XC__
 extern "C" {
@@ -26,13 +26,13 @@ extern "C" {
  * initiate a control function in a bitstream peripheral.
  *
  * Any function parameters can subsequently be sent with
- * xcore_freertos_periph_varlist_tx(). Any return values
- * may be received with xcore_freertos_periph_varlist_rx().
+ * soc_peripheral_varlist_tx(). Any return values
+ * may be received with soc_peripheral_varlist_rx().
  *
  * \param[in] c    The control chanend for the peripheral.
  * \param[in] code The function code to send.
  */
-void xcore_freertos_periph_function_code_tx(
+void soc_peripheral_function_code_tx(
         chanend c,
         uint32_t code);
 
@@ -50,7 +50,7 @@ void xcore_freertos_periph_function_code_tx(
  *                     value is an int with the parameter length. The
  *                     second is a pointer to the parameter to send.
  */
-void xcore_freertos_periph_varlist_tx(
+void soc_peripheral_varlist_tx(
         chanend c,
         int num_args,
         ...);
@@ -67,7 +67,7 @@ void xcore_freertos_periph_varlist_tx(
 #ifdef __XC__
 #pragma select handler
 #endif //__XC__
-void xcore_freertos_periph_function_code_rx(
+void soc_peripheral_function_code_rx(
         chanend c,
         uint32_t *code);
 
@@ -87,7 +87,7 @@ void xcore_freertos_periph_function_code_rx(
  *                         value length. The second is a pointer to where
  *                         the return value should be received.
  */
-void xcore_freertos_periph_varlist_rx(
+void soc_peripheral_varlist_rx(
         chanend c,
         int num_args,
         ...);
@@ -96,4 +96,4 @@ void xcore_freertos_periph_varlist_rx(
 }
 #endif //__XC__
 
-#endif /* XCORE_FREERTOS_PERIPHERAL_CONTROL_H_ */
+#endif /* SOC_PERIPHERAL_CONTROL_H_ */

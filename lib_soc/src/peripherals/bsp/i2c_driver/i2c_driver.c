@@ -18,19 +18,19 @@ i2c_res_t i2c_driver_write(
     i2c_res_t res;
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, I2C_DEV_WRITE);
+    soc_peripheral_function_code_tx(c, I2C_DEV_WRITE);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 3,
             sizeof(device_addr), &device_addr,
             sizeof(n), &n,
             sizeof(send_stop_bit), &send_stop_bit);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 1,
             n, buf);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 2,
             sizeof(size_t), num_bytes_sent,
             sizeof(res), &res);
@@ -48,15 +48,15 @@ i2c_res_t i2c_driver_read(
     i2c_res_t res;
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, I2C_DEV_READ);
+    soc_peripheral_function_code_tx(c, I2C_DEV_READ);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 3,
             sizeof(device_addr), &device_addr,
             sizeof(n), &n,
             sizeof(send_stop_bit), &send_stop_bit);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 2,
             n, buf,
             sizeof(res), &res);
@@ -73,15 +73,15 @@ i2c_regop_res_t i2c_driver_write_reg(
     i2c_regop_res_t res;
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, I2C_DEV_WRITE_REG);
+    soc_peripheral_function_code_tx(c, I2C_DEV_WRITE_REG);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 3,
             sizeof(device_addr), &device_addr,
             sizeof(reg), &reg,
             sizeof(data), &data);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 1,
             sizeof(res), &res);
 
@@ -97,14 +97,14 @@ uint8_t i2c_driver_read_reg(
     uint8_t data;
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, I2C_DEV_READ_REG);
+    soc_peripheral_function_code_tx(c, I2C_DEV_READ_REG);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 2,
             sizeof(device_addr), &device_addr,
             sizeof(reg), &reg);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 2,
             sizeof(i2c_regop_res_t), result,
             sizeof(data), &data);

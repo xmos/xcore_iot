@@ -1,9 +1,4 @@
-/*
- * bitstream.xc
- *
- *  Created on: Sep 24, 2019
- *      Author: mbruno
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include <platform.h>
 #include <stdint.h>

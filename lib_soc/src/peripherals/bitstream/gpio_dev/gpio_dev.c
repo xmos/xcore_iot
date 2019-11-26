@@ -1,11 +1,4 @@
-/*
- * gpio_dev.c
- *
- *  Created on: Nov 22, 2019
- *      Author: jmccarthy
- */
-
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include "xcore_c.h"
 

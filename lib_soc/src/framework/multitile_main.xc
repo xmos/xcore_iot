@@ -1,15 +1,10 @@
-/*
- * multitile_main.xc
- *
- *  Created on: Sep 24, 2019
- *      Author: mbruno
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include <platform.h>
 #include "soc.h"
 
 
-#if XCORE_FREERTOS_TILE_0_INCLUDE
+#if SOC_TILE_0_INCLUDE
 static void tile0(
         int tile,
         chanend ?xTile0Chan,
@@ -18,20 +13,20 @@ static void tile0(
         chanend ?xTile3Chan)
 {
     par {
-#if (XCORE_FREERTOS_TILE_0_INCLUDE & XCORE_FREERTOS_TILE_HAS_BITSTREAM)
-        xcore_freertos_tile0_bitstream(tile, xTile0Chan, xTile1Chan, xTile2Chan, xTile3Chan);
+#if (SOC_TILE_0_INCLUDE & SOC_TILE_HAS_BITSTREAM)
+        soc_tile0_bitstream(tile, xTile0Chan, xTile1Chan, xTile2Chan, xTile3Chan);
 #endif
-#if (XCORE_FREERTOS_TILE_0_INCLUDE & XCORE_FREERTOS_TILE_HAS_SOFTWARE)
+#if (SOC_TILE_0_INCLUDE & SOC_TILE_HAS_SOFTWARE)
         {
-            while (xcore_freertos_tile0_bitstream_initialized() == 0);
-            xcore_freertos_tile0_main(tile);
+            while (soc_tile0_bitstream_initialized() == 0);
+            soc_tile0_main(tile);
         }
 #endif
     }
 }
 #endif
 
-#if XCORE_FREERTOS_TILE_1_INCLUDE
+#if SOC_TILE_1_INCLUDE
 static void tile1(
         int tile,
         chanend ?xTile0Chan,
@@ -40,20 +35,20 @@ static void tile1(
         chanend ?xTile3Chan)
 {
     par {
-#if (XCORE_FREERTOS_TILE_1_INCLUDE & XCORE_FREERTOS_TILE_HAS_BITSTREAM)
-        xcore_freertos_tile1_bitstream(tile, xTile0Chan, xTile1Chan, xTile2Chan, xTile3Chan);
+#if (SOC_TILE_1_INCLUDE & SOC_TILE_HAS_BITSTREAM)
+        soc_tile1_bitstream(tile, xTile0Chan, xTile1Chan, xTile2Chan, xTile3Chan);
 #endif
-#if (XCORE_FREERTOS_TILE_1_INCLUDE & XCORE_FREERTOS_TILE_HAS_SOFTWARE)
+#if (SOC_TILE_1_INCLUDE & SOC_TILE_HAS_SOFTWARE)
         {
-            while (xcore_freertos_tile1_bitstream_initialized() == 0);
-            xcore_freertos_tile1_main(tile);
+            while (soc_tile1_bitstream_initialized() == 0);
+            soc_tile1_main(tile);
         }
 #endif
     }
 }
 #endif
 
-#if XCORE_FREERTOS_TILE_2_INCLUDE
+#if SOC_TILE_2_INCLUDE
 static void tile2(
         int tile,
         chanend ?xTile0Chan,
@@ -62,20 +57,20 @@ static void tile2(
         chanend ?xTile3Chan)
 {
     par {
-#if (XCORE_FREERTOS_TILE_2_INCLUDE & XCORE_FREERTOS_TILE_HAS_BITSTREAM)
-        xcore_freertos_tile2_bitstream(tile, xTile0Chan, xTile1Chan, xTile2Chan, xTile3Chan);
+#if (SOC_TILE_2_INCLUDE & SOC_TILE_HAS_BITSTREAM)
+        soc_tile2_bitstream(tile, xTile0Chan, xTile1Chan, xTile2Chan, xTile3Chan);
 #endif
-#if (XCORE_FREERTOS_TILE_2_INCLUDE & XCORE_FREERTOS_TILE_HAS_SOFTWARE)
+#if (SOC_TILE_2_INCLUDE & SOC_TILE_HAS_SOFTWARE)
         {
-            while (xcore_freertos_tile2_bitstream_initialized() == 0);
-            xcore_freertos_tile2_main(tile);
+            while (soc_tile2_bitstream_initialized() == 0);
+            soc_tile2_main(tile);
         }
 #endif
     }
 }
 #endif
 
-#if XCORE_FREERTOS_TILE_3_INCLUDE
+#if SOC_TILE_3_INCLUDE
 static void tile3(
         int tile,
         chanend ?xTile0Chan,
@@ -84,13 +79,13 @@ static void tile3(
         chanend ?xTile3Chan)
 {
     par {
-#if (XCORE_FREERTOS_TILE_3_INCLUDE & XCORE_FREERTOS_TILE_HAS_BITSTREAM)
-        xcore_freertos_tile3_bitstream(tile, xTile0Chan, xTile1Chan, xTile2Chan, xTile3Chan);
+#if (SOC_TILE_3_INCLUDE & SOC_TILE_HAS_BITSTREAM)
+        soc_tile3_bitstream(tile, xTile0Chan, xTile1Chan, xTile2Chan, xTile3Chan);
 #endif
-#if (XCORE_FREERTOS_TILE_3_INCLUDE & XCORE_FREERTOS_TILE_HAS_SOFTWARE)
+#if (SOC_TILE_3_INCLUDE & SOC_TILE_HAS_SOFTWARE)
         {
-            while (xcore_freertos_tile3_bitstream_initialized() == 0);
-            xcore_freertos_tile3_main(tile);
+            while (soc_tile3_bitstream_initialized() == 0);
+            soc_tile3_main(tile);
         }
 #endif
     }
@@ -99,42 +94,42 @@ static void tile3(
 
 int main(void)
 {
-#if XCORE_FREERTOS_TILE_0_INCLUDE && XCORE_FREERTOS_TILE_1_INCLUDE
+#if SOC_TILE_0_INCLUDE && SOC_TILE_1_INCLUDE
     chan c_t0_t1;
 #endif
-#if XCORE_FREERTOS_TILE_0_INCLUDE && XCORE_FREERTOS_TILE_2_INCLUDE
+#if SOC_TILE_0_INCLUDE && SOC_TILE_2_INCLUDE
     chan c_t0_t2;
 #endif
-#if XCORE_FREERTOS_TILE_0_INCLUDE && XCORE_FREERTOS_TILE_3_INCLUDE
+#if SOC_TILE_0_INCLUDE && SOC_TILE_3_INCLUDE
     chan c_t0_t3;
 #endif
-#if XCORE_FREERTOS_TILE_1_INCLUDE && XCORE_FREERTOS_TILE_2_INCLUDE
+#if SOC_TILE_1_INCLUDE && SOC_TILE_2_INCLUDE
     chan c_t1_t2;
 #endif
-#if XCORE_FREERTOS_TILE_1_INCLUDE && XCORE_FREERTOS_TILE_3_INCLUDE
+#if SOC_TILE_1_INCLUDE && SOC_TILE_3_INCLUDE
     chan c_t1_t3;
 #endif
-#if XCORE_FREERTOS_TILE_2_INCLUDE && XCORE_FREERTOS_TILE_3_INCLUDE
+#if SOC_TILE_2_INCLUDE && SOC_TILE_3_INCLUDE
     chan c_t2_t3;
 #endif
 
     par {
 
-#if XCORE_FREERTOS_TILE_0_INCLUDE
+#if SOC_TILE_0_INCLUDE
         on tile[0]: tile0(
                 0,
                 null,
-#if XCORE_FREERTOS_TILE_1_INCLUDE
+#if SOC_TILE_1_INCLUDE
                 c_t0_t1,
 #else
                 null,
 #endif
-#if XCORE_FREERTOS_TILE_2_INCLUDE
+#if SOC_TILE_2_INCLUDE
                 c_t0_t2,
 #else
                 null,
 #endif
-#if XCORE_FREERTOS_TILE_3_INCLUDE
+#if SOC_TILE_3_INCLUDE
                 c_t0_t3
 #else
                 null
@@ -142,21 +137,21 @@ int main(void)
         );
 #endif
 
-#if XCORE_FREERTOS_TILE_1_INCLUDE
+#if SOC_TILE_1_INCLUDE
         on tile[1]: tile1(
                 1,
-#if XCORE_FREERTOS_TILE_0_INCLUDE
+#if SOC_TILE_0_INCLUDE
                 c_t0_t1,
 #else
                 null,
 #endif
                 null,
-#if XCORE_FREERTOS_TILE_2_INCLUDE
+#if SOC_TILE_2_INCLUDE
                 c_t1_t2,
 #else
                 null,
 #endif
-#if XCORE_FREERTOS_TILE_3_INCLUDE
+#if SOC_TILE_3_INCLUDE
                 c_t1_t3
 #else
                 null
@@ -164,21 +159,21 @@ int main(void)
         );
 #endif
 
-#if XCORE_FREERTOS_TILE_2_INCLUDE
+#if SOC_TILE_2_INCLUDE
         on tile[2]: tile2(
                 2,
-#if XCORE_FREERTOS_TILE_0_INCLUDE
+#if SOC_TILE_0_INCLUDE
                 c_t0_t2,
 #else
                 null,
 #endif
-#if XCORE_FREERTOS_TILE_1_INCLUDE
+#if SOC_TILE_1_INCLUDE
                 c_t1_t2,
 #else
                 null,
 #endif
                 null,
-#if XCORE_FREERTOS_TILE_3_INCLUDE
+#if SOC_TILE_3_INCLUDE
                 c_t2_t3
 #else
                 null
@@ -186,20 +181,20 @@ int main(void)
         );
 #endif
 
-#if XCORE_FREERTOS_TILE_3_INCLUDE
+#if SOC_TILE_3_INCLUDE
         on tile[3]: tile3(
                 3,
-#if XCORE_FREERTOS_TILE_0_INCLUDE
+#if SOC_TILE_0_INCLUDE
                 c_t0_t3,
 #else
                 null,
 #endif
-#if XCORE_FREERTOS_TILE_1_INCLUDE
+#if SOC_TILE_1_INCLUDE
                 c_t1_t3,
 #else
                 null,
 #endif
-#if XCORE_FREERTOS_TILE_2_INCLUDE
+#if SOC_TILE_2_INCLUDE
                 c_t2_t3,
 #else
                 null,

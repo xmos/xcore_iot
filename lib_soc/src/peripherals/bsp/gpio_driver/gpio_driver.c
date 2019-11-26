@@ -137,14 +137,14 @@ static void gpio_driver_alloc(
 {
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx( c, GPIO_DEV_PORT_ALLOC );
+    soc_peripheral_function_code_tx( c, GPIO_DEV_PORT_ALLOC );
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 2,
             sizeof(unsigned), p,
             sizeof(id), &id);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 1,
             sizeof(unsigned), p);
 }
@@ -156,9 +156,9 @@ static void gpio_driver_write(
 {
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, GPIO_DEV_PORT_OUT);
+    soc_peripheral_function_code_tx(c, GPIO_DEV_PORT_OUT);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 2,
             sizeof(p), &p,
             sizeof(data), &data);
@@ -171,13 +171,13 @@ static void gpio_driver_read(
 {
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, GPIO_DEV_PORT_IN);
+    soc_peripheral_function_code_tx(c, GPIO_DEV_PORT_IN);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 1,
             sizeof(p), &p);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 1,
             sizeof(uint32_t), data);
 }
@@ -189,13 +189,13 @@ static void gpio_driver_peek(
 {
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx(c, GPIO_DEV_PORT_PEEK);
+    soc_peripheral_function_code_tx(c, GPIO_DEV_PORT_PEEK);
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 1,
             sizeof(p), &p);
 
-    xcore_freertos_periph_varlist_rx(
+    soc_peripheral_varlist_rx(
             c, 1,
             sizeof(uint32_t), data);
 }
@@ -206,9 +206,9 @@ static void gpio_driver_free(
 {
     chanend c = xcore_freertos_dma_device_ctrl_chanend(dev);
 
-    xcore_freertos_periph_function_code_tx( c, GPIO_DEV_PORT_FREE );
+    soc_peripheral_function_code_tx( c, GPIO_DEV_PORT_FREE );
 
-    xcore_freertos_periph_varlist_tx(
+    soc_peripheral_varlist_tx(
             c, 1,
             sizeof(unsigned), p);
 }

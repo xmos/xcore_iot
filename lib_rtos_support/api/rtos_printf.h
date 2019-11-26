@@ -1,4 +1,5 @@
 // Copyright (c) 2014-2019, XMOS Ltd, All rights reserved
+
 #ifndef _rtos_printf_h_
 #define _rtos_printf_h_
 

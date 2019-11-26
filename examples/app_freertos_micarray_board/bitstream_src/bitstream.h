@@ -1,10 +1,4 @@
-/*
- * bitstream.h
- *
- *  Created on: Sep 27, 2019
- *      Author: mbruno
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef BITSTREAM_H_
 #define BITSTREAM_H_
