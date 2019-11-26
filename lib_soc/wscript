@@ -1,0 +1,22 @@
+import os.path
+
+def use_module(bld):
+
+    version = '0.1.0'
+
+    depends_on = [
+        'lib_rtos_support'
+    ]
+
+    sources = bld.path.ant_glob(['src/**/*.xc', 'src/**/*.c', 'src/**/*.S'])
+    includes = ['framework', 'peripherals/bsp', 'peripherals/bitstream']
+    optional_headers = 'soc_conf.h'
+
+    bld.env.MODULE_XCC_FLAGS = bld.env.XCC_FLAGS + ['-Os']
+
+    bld.module(
+        source=sources,
+        includes=includes,
+        optional_headers=optional_headers,
+        depends_on=depends_on,
+        version=version)

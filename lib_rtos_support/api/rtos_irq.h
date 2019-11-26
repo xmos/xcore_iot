@@ -11,7 +11,22 @@
 
 #include "xcore_c.h"
 
+/**
+ * IRQ ISR callback function pointer type.
+ *
+ * ISRs registered with the RTOS IRQ system must be
+ * compatible with this type.
+ */
 typedef void (*rtos_irq_isr_t)( void *param );
+
+/**
+ * This macro must precede the definition of ISRs that
+ * get registered with the RTOS IRQ system.
+ *
+ * It adds the function to the rtos_irq_isr function pointer
+ * group which allows the compiler to correctly calculate
+ * the stack size for ISRs.
+ */
 #define RTOS_IRQ_ISR_ATTR __attribute__((fptrgroup("rtos_irq_isr")))
 
 /**

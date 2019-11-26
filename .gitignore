@@ -1,2 +1,27 @@
+**/.build*/*
+**/bin/*
+*.o
+*.xe
+*.vcd
+*.s
+*.xi
+*.i
+*.a
+*.xmt
+**/_build/
+**/run_*.log
+**/pdf/*
+**/html/*
 **/.settings/*
+*.pyc
+**/test_results.csv
+**/.venv/**
+
+# waf build files
+.lock-waf_*
+.waf-*/
+build/
+
+# systemview debug files
+*.SVDAT
 
