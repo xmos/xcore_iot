@@ -10,11 +10,6 @@
 /* Queue to TCP defines */
 #define appconfQUEUE_TO_TCP_PORT                54321
 
-#define appconfQUEUE_TO_TCP_ADDR0               10
-#define appconfQUEUE_TO_TCP_ADDR1               129
-#define appconfQUEUE_TO_TCP_ADDR2               28
-#define appconfQUEUE_TO_TCP_ADDR3               119//mike:119 //jerry:238
-
 #define DEBUG_PRINT_ENABLE_QUEUE_TO_TCP         0
 
 #define appconfNETWORK_STATUS_CHECK_INTERVAL_MS     10

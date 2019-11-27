@@ -17,8 +17,6 @@
 /* App headers */
 #include "queue_to_i2s.h"
 
-static QueueHandle_t stage1_out_queue_i2s;
-
 RTOS_IRQ_ISR_ATTR
 int i2s_array_isr(soc_peripheral_t device)
 {
