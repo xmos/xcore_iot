@@ -1,9 +1,4 @@
-/*
- * queue_to_tcp_stream.c
- *
- *  Created on: Oct 23, 2019
- *      Author: jmccarthy
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #define DEBUG_UNIT QUEUE_TO_TCP
 #include "app_conf.h"

@@ -1,10 +1,4 @@
-/*
- * queue_to_tcp_stream.h
- *
- *  Created on: Oct 23, 2019
- *      Author: jmccarthy
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef QUEUE_TO_TCP_STREAM_H_
 #define QUEUE_TO_TCP_STREAM_H_

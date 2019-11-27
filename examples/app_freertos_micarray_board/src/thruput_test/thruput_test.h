@@ -1,10 +1,4 @@
-/*
- * thruput_test.h
- *
- *  Created on: Oct 29, 2019
- *      Author: mbruno
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef THRUPUT_TEST_H_
 #define THRUPUT_TEST_H_

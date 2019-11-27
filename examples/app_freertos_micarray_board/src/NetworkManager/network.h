@@ -1,10 +1,4 @@
-/*
- * network.h
- *
- *  Created on: Oct 23, 2019
- *      Author: jmccarthy
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef NETWORK_H_
 #define NETWORK_H_

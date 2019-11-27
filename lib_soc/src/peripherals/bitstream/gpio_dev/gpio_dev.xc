@@ -106,8 +106,7 @@ void gpio_dev(
         gpio_handler(
               data_to_dma_c,
               data_from_dma_c,
-              ctrl_c
-                );
+              ctrl_c);
     }
 }
 

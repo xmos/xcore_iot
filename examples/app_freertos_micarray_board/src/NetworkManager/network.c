@@ -1,9 +1,4 @@
-/*
- * network.c
- *
- *  Created on: Oct 23, 2019
- *      Author: jmccarthy
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"

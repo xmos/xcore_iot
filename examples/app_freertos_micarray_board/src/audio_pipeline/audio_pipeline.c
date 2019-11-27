@@ -1,9 +1,4 @@
-/*
- * audio_pipeline.c
- *
- *  Created on: Oct 23, 2019
- *      Author: jmccarthy
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -11,6 +6,7 @@
 #include "queue.h"
 
 /* Library headers */
+#include <string.h>
 #include "soc.h"
 #include "dsp_qformat.h"
 
@@ -18,6 +14,7 @@
 #include "bitstream_devices.h"
 #include "micarray_driver.h"
 #include "i2c_driver.h"
+#include "i2s_driver.h"
 
 /* App headers */
 #include "audio_pipeline.h"
@@ -27,7 +24,8 @@
 
 static BaseType_t xStage1_Gain = appconfAUDIO_PIPELINE_STAGE_ONE_GAIN;
 
-static QueueHandle_t stage1_out_queue;
+static QueueHandle_t stage1_out_queue0;
+static QueueHandle_t stage1_out_queue1;
 
 #define MIN(X, Y) ((X) <= (Y) ? (X) : (Y))
 
@@ -35,7 +33,6 @@ BaseType_t audiopipeline_get_stage1_gain( void )
 {
     return xStage1_Gain;
 }
-
 
 BaseType_t audiopipeline_set_stage1_gain( BaseType_t xnewgain )
 {
@@ -105,6 +102,7 @@ void audio_pipeline_stage1(void *arg)
     for (;;) {
         int32_t *mic_data;
         int32_t *new_rx_buffer;
+        int32_t *mic_data_copy;
 
         xQueueReceive(mic_data_queue, &mic_data, portMAX_DELAY);
 
@@ -118,19 +116,28 @@ void audio_pipeline_stage1(void *arg)
             mic_data[i] *= xStage1_Gain;
         }
 
-        if (xQueueSend(stage1_out_queue, &mic_data, pdMS_TO_TICKS(7)) == errQUEUE_FULL) {
+        mic_data_copy = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
+        memcpy(mic_data_copy, mic_data, appconfMIC_FRAME_LENGTH * sizeof(int32_t));
+
+        if (xQueueSend(stage1_out_queue0, &mic_data, pdMS_TO_TICKS(2)) == errQUEUE_FULL) {
 //            debug_printf("stage 1 output lost\n");
             vPortFree(mic_data);
+        }
+
+        if (xQueueSend(stage1_out_queue1, &mic_data_copy, pdMS_TO_TICKS(2)) == errQUEUE_FULL) {
+//            debug_printf("dac output lost\n");
+            vPortFree(mic_data_copy);
         }
     }
 }
 
-void audio_pipeline_create(QueueHandle_t output, UBaseType_t priority)
+void audio_pipeline_create(QueueHandle_t output0, QueueHandle_t output1, UBaseType_t priority)
 {
     QueueHandle_t queue;
     soc_peripheral_t dev;
 
-    stage1_out_queue = output;
+    stage1_out_queue0 = output0;
+    stage1_out_queue1 = output1;
     /*
      * Configure the PLL and DACs. Do this now before
      * starting the scheduler.

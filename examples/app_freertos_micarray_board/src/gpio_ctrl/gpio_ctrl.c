@@ -1,10 +1,4 @@
-/*
- * gpio_ctrl.c
- *
- *  Created on: Nov 22, 2019
- *      Author: jmccarthy
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"

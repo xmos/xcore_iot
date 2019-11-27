@@ -1,10 +1,4 @@
-/*
- * audio_hw_config.h
- *
- *  Created on: Oct 11, 2019
- *      Author: mbruno
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef AUDIO_HW_CONFIG_H_
 #define AUDIO_HW_CONFIG_H_

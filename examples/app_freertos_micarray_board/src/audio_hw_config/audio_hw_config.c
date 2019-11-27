@@ -1,9 +1,4 @@
-/*
- * audio_hw_config.c
- *
- *  Created on: Oct 11, 2019
- *      Author: mbruno
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 /* BSP/bitstream headers */
 #include "i2c_driver.h"

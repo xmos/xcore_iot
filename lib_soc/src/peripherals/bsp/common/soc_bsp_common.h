@@ -1,6 +1,5 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
-
 #ifndef SOC_BSP_COMMON_H_
 #define SOC_BSP_COMMON_H_
 

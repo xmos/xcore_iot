@@ -1,9 +1,4 @@
-/*
- * thruput_test.c
- *
- *  Created on: Oct 29, 2019
- *      Author: mbruno
- */
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #define DEBUG_UNIT THRUPUT_TEST
 #include "app_conf.h"

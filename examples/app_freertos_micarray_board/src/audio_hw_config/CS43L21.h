@@ -1,10 +1,4 @@
-/*
- * CS43L21.h
- *
- *  Created on: Sep 16, 2016
- *      Author: astewart
- */
-
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #ifndef CS43L21_H_
 #define CS43L21_H_

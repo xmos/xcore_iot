@@ -15,16 +15,6 @@
 #define appconfQUEUE_TO_TCP_ADDR2               28
 #define appconfQUEUE_TO_TCP_ADDR3               119//mike:119 //jerry:238
 
-//#define appconfQUEUE_TO_TCP_ADDR0               192
-//#define appconfQUEUE_TO_TCP_ADDR1               168
-//#define appconfQUEUE_TO_TCP_ADDR2               1
-//#define appconfQUEUE_TO_TCP_ADDR3               4
-//192.168.1.4
-//#define appconfQUEUE_TO_TCP_ADDR0               10
-//#define appconfQUEUE_TO_TCP_ADDR1               128
-//#define appconfQUEUE_TO_TCP_ADDR2               28
-//#define appconfQUEUE_TO_TCP_ADDR3               18
-
 #define DEBUG_PRINT_ENABLE_QUEUE_TO_TCP         0
 
 #define appconfNETWORK_STATUS_CHECK_INTERVAL_MS     10
@@ -36,9 +26,6 @@
 #define appconfCLI_UDP_PORT                     5432
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE       128
 
-/* SDRAM test defines */
-#define DEBUG_PRINT_ENABLE_SDRAM_TEST           0
-
 /* Thruput test defines */
 #define appconfTHRUPUT_TEST_PORT            10000
 #define DEBUG_PRINT_ENABLE_THRUPUT_TEST         1
@@ -46,6 +33,7 @@
 /* Task Priorities */
 #define appconfAUDIO_PIPELINE_TASK_PRIORITY    ( configMAX_PRIORITIES - 3 )
 #define appconfQUEUE_TO_TCP_TASK_PRIORITY      ( configMAX_PRIORITIES - 2 )
+#define appconfQUEUE_TO_I2S_TASK_PRIORITY      ( configMAX_PRIORITIES - 2 )
 #define appconfCLI_TASK_PRIORITY               ( configMAX_PRIORITIES - 3 )
 #define appconfSDRAM_TEST_TASK_PRIORITY        ( configMAX_PRIORITIES - 3 )
 #define appconfTHRUPUT_TEST_TASK_PRIORITY      ( configMAX_PRIORITIES - 3 )
