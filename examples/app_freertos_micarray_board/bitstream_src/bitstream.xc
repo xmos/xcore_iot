@@ -131,17 +131,34 @@ void tile0_device_instantiate(
             soc_peripheral_hub();
         }
 
+        /* NOTE:
+         * When micarray_dev and gpio_dev are combined, there is
+         * a risk a deadlock, more likely the fewer FreeRTOS cores.
+         * If the FreeRTOS core that services the micarray ISR
+         * is running the gpio task (or any task that communicates on
+         * this tile), and the XC peripherals are combined, then the
+         * following situation can happen:
+         * FreeRTOS                   XC
+         * Send over ctrl channel     Enter case mic_array_get_next_time_domain_frame_sh
+         * -> mask all interrupts     Call soc_peripheral_tx_dma_xfer
+         * Send command               -> waiting for reponse from ISR
+         * -> waiting for response
+         *    from XC
+         *
+         *    ISR is masked in FreeRTOS, while XC cannot recieve command
+         *    because it is not on a waiteu
+         */
         unsafe {
         micarray_dev(
                 mic_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
                 mic_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
                 mic_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
                 p_pdm_mics);
+        }
 
         gpio_dev(t0_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
                  t0_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
                  t0_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH]);
-        }
     }
 }
 

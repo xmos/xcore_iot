@@ -24,11 +24,20 @@
 
 static QueueHandle_t queue_to_tcp;
 
+static BaseType_t xConnected = 0;
+
+BaseType_t is_queue_to_tcp_connected( void )
+{
+    return xConnected;
+}
+
 static void queue_to_tcp_sender(void *arg)
 {
     Socket_t xConnectedSocket = ( Socket_t ) arg;
     const TickType_t xSendTimeOut = pdMS_TO_TICKS( 5000 );
     BaseType_t xSent;
+
+    xConnected = pdTRUE;
 
     FreeRTOS_setsockopt( xConnectedSocket,
                          0,
@@ -77,6 +86,7 @@ static void queue_to_tcp_sender(void *arg)
             debug_printf("Minimum heap free: %d\n", xPortGetMinimumEverFreeHeapSize());
 
             vPortFree(audio_data);
+            xConnected = pdFALSE;
             vTaskDelete( NULL );
         }
 
@@ -90,7 +100,7 @@ static void vlisten_for_mic_tcp_conn( void *arg )
     Socket_t xListeningSocket, xConnectedSocket;
     socklen_t xSize = sizeof( xClient );
     const TickType_t xReceiveTimeOut = portMAX_DELAY;
-    const BaseType_t xBacklog = 4;
+    const BaseType_t xBacklog = 1;
 
     while( FreeRTOS_IsNetworkUp() == pdFALSE )
     {

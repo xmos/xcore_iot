@@ -13,7 +13,7 @@
 
 unsafe
 {
-[[combinable]]
+//[[combinable]]
 void gpio_handler(
         chanend data_to_dma_c,
         chanend data_from_dma_c,

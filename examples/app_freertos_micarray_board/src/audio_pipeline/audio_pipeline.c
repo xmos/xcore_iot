@@ -4,6 +4,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "FreeRTOS_IP.h"
 
 /* Library headers */
 #include <string.h>
@@ -20,7 +21,7 @@
 #include "audio_pipeline.h"
 #include "app_conf.h"
 #include "audio_hw_config.h"
-
+#include "queue_to_tcp_stream.h"
 
 static BaseType_t xStage1_Gain = appconfAUDIO_PIPELINE_STAGE_ONE_GAIN;
 
@@ -119,12 +120,19 @@ void audio_pipeline_stage1(void *arg)
         mic_data_copy = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
         memcpy(mic_data_copy, mic_data, appconfMIC_FRAME_LENGTH * sizeof(int32_t));
 
-        if (xQueueSend(stage1_out_queue0, &mic_data, pdMS_TO_TICKS(2)) == errQUEUE_FULL) {
-//            debug_printf("stage 1 output lost\n");
+        if ( is_queue_to_tcp_connected() )
+        {
+            if (xQueueSend(stage1_out_queue0, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
+                //            debug_printf("stage 1 output lost\n");
+                vPortFree(mic_data);
+            }
+        }
+        else
+        {
             vPortFree(mic_data);
         }
 
-        if (xQueueSend(stage1_out_queue1, &mic_data_copy, pdMS_TO_TICKS(2)) == errQUEUE_FULL) {
+        if (xQueueSend(stage1_out_queue1, &mic_data_copy, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
 //            debug_printf("dac output lost\n");
             vPortFree(mic_data_copy);
         }

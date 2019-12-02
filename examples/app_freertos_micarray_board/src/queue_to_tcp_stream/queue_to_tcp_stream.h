@@ -13,6 +13,6 @@ typedef enum
 } eTCP_queue_to_tcp_state;
 
 void queue_to_tcp_stream_create(QueueHandle_t input, UBaseType_t priority);
-void vQueuetoTCPChangeHost(int port, int addr0, int addr1, int addr2, int addr3);
+BaseType_t is_queue_to_tcp_connected( void );
 
 #endif /* QUEUE_TO_TCP_STREAM_H_ */

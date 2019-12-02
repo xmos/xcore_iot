@@ -57,7 +57,7 @@ void soc_tile0_main(
     thruput_test_create( appconfTHRUPUT_TEST_TASK_PRIORITY );
 
     /* Create the gpio control task */
-    gpio_ctrl_create(appconfTHRUPUT_TEST_TASK_PRIORITY);
+    gpio_ctrl_create( appconfGPIO_TASK_PRIORITY );
 
     /* Initialize FreeRTOS IP*/
     initalize_FreeRTOS_IP();
