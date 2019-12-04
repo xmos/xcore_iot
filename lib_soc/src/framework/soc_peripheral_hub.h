@@ -5,10 +5,11 @@
 
 #include <stdint.h>
 
-#define SOC_PERIPHERAL_CHANNEL_COUNT 3
+#define SOC_PERIPHERAL_CHANNEL_COUNT 4
 #define SOC_PERIPHERAL_FROM_DMA_CH   0
 #define SOC_PERIPHERAL_TO_DMA_CH     1
 #define SOC_PERIPHERAL_CONTROL_CH    2
+#define SOC_PERIPHERAL_IRQ_CH        3
 
 #define SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM 0x00000001
 #define SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM 0x00000002
@@ -72,6 +73,10 @@ void soc_peripheral_tx_dma_xfer(
         chanend c,
         void *data,
         uint16_t length);
+
+void soc_peripheral_irq_send(
+        chanend c,
+        uint32_t status);
 
 void soc_peripheral_hub();
 
