@@ -140,10 +140,12 @@ void tile0_device_instantiate(
                 null,
                 p_pdm_mics);
 
-        gpio_dev(
-                null,
-                null,
-                t0_gpio_dev_ctrl_ch);
+        unsafe {
+            gpio_dev_c(
+                    null,
+                    null,
+                    t0_gpio_dev_ctrl_ch);
+        }
     }
 }
 
@@ -177,8 +179,8 @@ void tile1_device_instantiate(
                 p_lrclk, p_bclk, p_i2s_dout, 1,
                 bclk);
 
-        gpio_dev(t1_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
-                 t1_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
-                 t1_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH]);
+        gpio_dev_c(t1_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
+                   t1_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
+                   t1_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH]);
     }
 }

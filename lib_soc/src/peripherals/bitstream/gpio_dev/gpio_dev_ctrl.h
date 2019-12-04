@@ -9,5 +9,4 @@
 #define GPIO_DEV_PORT_OUT       0x03
 #define GPIO_DEV_PORT_PEEK      0x04
 
-
 #endif /* GPIO_DEV_CTRL_H_ */
