@@ -57,29 +57,16 @@ static void queue_to_tcp_sender(void *arg)
 
         if( xSent != ( sizeof(int32_t) * appconfMIC_FRAME_LENGTH ) )
         {
-            debug_printf("Send to TCP lost\n");
+            FreeRTOS_shutdown( xConnectedSocket, FREERTOS_SHUT_RDWR );
 
-            if( FreeRTOS_issocketconnected( xConnectedSocket ) == pdFALSE )
+            char dummy;
+            while( FreeRTOS_recv( xConnectedSocket, &dummy, 1, 0 ) >= 0 )
             {
-                debug_printf("Remote disconnected, try to reconnect\n");
+                vTaskDelay(pdMS_TO_TICKS( 100 ));
             }
-            else
-            {
-                debug_printf("Connection broken, shutting down connection\n");
 
-                debug_printf("Heap free: %d\n", xPortGetFreeHeapSize());
-                debug_printf("Minimum heap free: %d\n", xPortGetMinimumEverFreeHeapSize());
-
-                FreeRTOS_shutdown( xConnectedSocket, FREERTOS_SHUT_RDWR );
-                char dummy;
-                while( FreeRTOS_recv( xConnectedSocket, &dummy, 1, 0 ) >= 0 )
-                {
-                    vTaskDelay(pdMS_TO_TICKS( 100 ));
-                }
-
-                configASSERT( FreeRTOS_issocketconnected( xConnectedSocket ) == pdFALSE );
-                FreeRTOS_closesocket( xConnectedSocket );
-            }
+            configASSERT( FreeRTOS_issocketconnected( xConnectedSocket ) == pdFALSE );
+            FreeRTOS_closesocket( xConnectedSocket );
 
             debug_printf("Connection closed\n");
             debug_printf("Heap free: %d\n", xPortGetFreeHeapSize());
