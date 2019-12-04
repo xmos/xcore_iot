@@ -120,28 +120,30 @@ void tile0_device_instantiate(
         chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
-    chan mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT];
-    chan t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT];
+    chan mic_dev_to_dma_ch;
+    chan t0_gpio_dev_ctrl_ch;
 
     micarray_dev_init(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics);
 
     par {
-        {
+        unsafe {
+            unsafe chanend mic_dev_ch[3] = {null, mic_dev_to_dma_ch, null};
+            unsafe chanend t0_gpio_dev_ch[3] = {null, null, t0_gpio_dev_ctrl_ch};
+
             device_register(mic_dev_ch, eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch);
             soc_peripheral_hub();
         }
 
-        unsafe {
         micarray_dev(
-                mic_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
-                mic_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
-                mic_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
+                mic_dev_to_dma_ch,
+                null,
+                null,
                 p_pdm_mics);
 
-        gpio_dev(t0_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
-                 t0_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
-                 t0_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH]);
-        }
+        gpio_dev(
+                null,
+                null,
+                t0_gpio_dev_ctrl_ch);
     }
 }
 

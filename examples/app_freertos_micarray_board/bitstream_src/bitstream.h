@@ -40,6 +40,10 @@ void tile1_device_instantiate(
         chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
 
+#ifdef __XC__
+extern "C" {
+#endif //__XC__
+
 /*
  * Bitstream specific
  *
@@ -53,5 +57,9 @@ void device_register(
         chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
+
+#ifdef __XC__
+}
+#endif //__XC__
 
 #endif /* BITSTREAM_H_ */

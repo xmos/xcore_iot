@@ -15,9 +15,9 @@ unsafe
 {
 [[combinable]]
 void gpio_handler(
-        chanend data_to_dma_c,
-        chanend data_from_dma_c,
-        chanend ctrl_c)
+        chanend ?data_to_dma_c,
+        chanend ?data_from_dma_c,
+        chanend ?ctrl_c)
 {
     uint32_t cmd;
     unsigned port_ptr;
@@ -97,9 +97,9 @@ void gpio_handler(
 }
 
 void gpio_dev(
-        chanend data_to_dma_c,
-        chanend data_from_dma_c,
-        chanend ctrl_c)
+        chanend ?data_to_dma_c,
+        chanend ?data_from_dma_c,
+        chanend ?ctrl_c)
 {
     par
     {

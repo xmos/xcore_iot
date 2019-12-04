@@ -9,7 +9,11 @@ void soc_peripheral_function_code_tx(
         chanend c,
         uint32_t code)
 {
+    uint32_t state = rtos_interrupt_mask_all();
+
     chan_out_word(c, code);
+
+    rtos_interrupt_mask_set(state);
 }
 
 void soc_peripheral_varlist_tx(
@@ -20,6 +24,8 @@ void soc_peripheral_varlist_tx(
     transacting_chanend_t tc;
     va_list ap;
     int i;
+
+    uint32_t state = rtos_interrupt_mask_all();
 
     chan_init_transaction_master(&c, &tc);
 
@@ -33,13 +39,19 @@ void soc_peripheral_varlist_tx(
     va_end(ap);
 
     chan_complete_transaction(&c, &tc);
+
+    rtos_interrupt_mask_set(state);
 }
 
 void soc_peripheral_function_code_rx(
         chanend c,
         uint32_t *code)
 {
+    uint32_t state = rtos_interrupt_mask_all();
+
     chan_in_word(c, code);
+
+    rtos_interrupt_mask_set(state);
 }
 
 void soc_peripheral_varlist_rx(
@@ -50,6 +62,8 @@ void soc_peripheral_varlist_rx(
     transacting_chanend_t tc;
     va_list ap;
     int i;
+
+    uint32_t state = rtos_interrupt_mask_all();
 
     chan_init_transaction_slave(&c, &tc);
 
@@ -63,4 +77,6 @@ void soc_peripheral_varlist_rx(
     va_end(ap);
 
     chan_complete_transaction(&c, &tc);
+
+    rtos_interrupt_mask_set(state);
 }
