@@ -29,6 +29,8 @@ extern "C" {
  * soc_peripheral_varlist_tx(). Any return values
  * may be received with soc_peripheral_varlist_rx().
  *
+ * This function should not be called from within an ISR.
+ *
  * \param[in] c    The control chanend for the peripheral.
  * \param[in] code The function code to send.
  */
@@ -43,6 +45,8 @@ void soc_peripheral_function_code_tx(
  *
  * It is also used by bitstream peripherals to send return values to
  * the software drivers.
+ *
+ * This function should not be called from within an ISR.
  *
  * \param[in] c        The control chanend for the peripheral.
  * \param[in] num_args The number of parameters to send.
@@ -60,6 +64,8 @@ void soc_peripheral_varlist_tx(
  * This function is intended to be used by a bitstream peripheral.
  * It may be used as a select case. It receives the function
  * code sent by the software driver.
+ *
+ * This function should not be called from within an ISR.
  *
  * \param[in]  c    The control chanend for the peripheral.
  * \param[out] code The received function code.
@@ -79,6 +85,8 @@ void soc_peripheral_function_code_rx(
  *
  * It is also used by bitstream peripherals to receive parameters from
  * the software drivers.
+ *
+ * This function should not be called from within an ISR.
  *
  * \param[in] c            The control chanend for the peripheral.
  * \param[in] num_args     The number of return values to receive.
