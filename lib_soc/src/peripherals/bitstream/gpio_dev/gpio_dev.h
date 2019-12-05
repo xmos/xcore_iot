@@ -18,6 +18,7 @@
 #include "gpio.h"
 
 #if (__XC__)
+[[combinable]]
 void gpio_dev(
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,

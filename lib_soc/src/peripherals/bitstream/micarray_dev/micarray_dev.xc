@@ -116,17 +116,17 @@ void micarray_dev_to_dma(
         select {
         case mic_array_get_next_time_domain_frame_sh(c_ds_output[0], c_ds_output):
             unsafe {
-                if (!isnull(data_to_dma_c)) {
+                if (peripheral != NULL && *peripheral != NULL) {
+                    soc_peripheral_tx_dma_direct_xfer(
+                            *peripheral,
+                            mic_array_data.current->data[0],
+                            sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
+                } else if (!isnull(data_to_dma_c)) {
                     soc_peripheral_tx_dma_xfer(
                             data_to_dma_c,
                             mic_array_data.current->data[0],
                             sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
 
-                } else if (peripheral != NULL && *peripheral != NULL) {
-                    soc_peripheral_tx_dma_direct_xfer(
-                            *peripheral,
-                            mic_array_data.current->data[0],
-                            sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
                 }
             }
             break;

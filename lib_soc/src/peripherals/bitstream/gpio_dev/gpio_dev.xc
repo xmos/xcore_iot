@@ -14,7 +14,7 @@
 unsafe
 {
 [[combinable]]
-void gpio_handler(
+void gpio_dev(
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,
@@ -96,32 +96,3 @@ void gpio_handler(
     }
 }
 }
-
-void gpio_dev(
-        chanend ?data_to_dma_c,
-        chanend ?data_from_dma_c,
-        chanend ?ctrl_c,
-        chanend ?irq_c)
-{
-    par
-    {
-        gpio_handler(
-              data_to_dma_c,
-              data_from_dma_c,
-              ctrl_c,
-              irq_c);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
