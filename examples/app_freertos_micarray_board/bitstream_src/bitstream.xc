@@ -9,6 +9,7 @@
 #include "mic_array.h"
 #include "soc.h"
 #include "bitstream.h"
+#include "bitstream_devices.h"
 
 /*-----------------------------------------------------------*/
 /* Ethernet defines */
@@ -120,7 +121,6 @@ void tile0_device_instantiate(
         chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
-    chan mic_dev_to_dma_ch;
     chan t0_gpio_dev_ctrl_ch;
     chan t0_gpio_dev_irq_ch;
 
@@ -128,7 +128,7 @@ void tile0_device_instantiate(
 
     par {
         unsafe {
-            unsafe chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, mic_dev_to_dma_ch, null, null};
+            unsafe chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
             unsafe chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t0_gpio_dev_ctrl_ch, t0_gpio_dev_irq_ch};
 
             device_register(mic_dev_ch, eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch);
@@ -136,7 +136,8 @@ void tile0_device_instantiate(
         }
 
         micarray_dev(
-                mic_dev_to_dma_ch,
+                &bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
+                null,
                 null,
                 null,
                 p_pdm_mics);

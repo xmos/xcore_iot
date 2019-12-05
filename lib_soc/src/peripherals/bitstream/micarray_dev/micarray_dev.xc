@@ -104,7 +104,8 @@ static void mic_array_get_next_time_domain_frame_sh(
 
 [[combinable]]
 void micarray_dev_to_dma(
-        chanend c,
+        soc_peripheral_t *peripheral,
+        chanend ?data_to_dma_c,
         streaming chanend c_ds_output[])
 {
     unsafe {
@@ -115,7 +116,18 @@ void micarray_dev_to_dma(
         select {
         case mic_array_get_next_time_domain_frame_sh(c_ds_output[0], c_ds_output):
             unsafe {
-                soc_peripheral_tx_dma_xfer(c, mic_array_data.current->data[0], sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
+                if (!isnull(data_to_dma_c)) {
+                    soc_peripheral_tx_dma_xfer(
+                            data_to_dma_c,
+                            mic_array_data.current->data[0],
+                            sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
+
+                } else if (peripheral != NULL && *peripheral != NULL) {
+                    soc_peripheral_tx_dma_direct_xfer(
+                            *peripheral,
+                            mic_array_data.current->data[0],
+                            sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
+                }
             }
             break;
         }
@@ -144,6 +156,7 @@ void micarray_dev_task(
 }
 
 void micarray_dev(
+        soc_peripheral_t *peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,
@@ -153,6 +166,6 @@ void micarray_dev(
 
     par {
         micarray_dev_task(p_pdm_mics, c_ds_output);
-        micarray_dev_to_dma(data_to_dma_c, c_ds_output);
+        micarray_dev_to_dma(peripheral, data_to_dma_c, c_ds_output);
     }
 }
