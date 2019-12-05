@@ -50,18 +50,22 @@ void soc_tile0_bitstream(
     eth_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
     eth_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
     eth_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
+    eth_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;
 
     i2s_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
     i2s_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = 0;
     i2s_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = 0;
+    i2s_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;
 
     i2c_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = 0;
     i2c_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = 0;
     i2c_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
+    i2c_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;
 
-    t1_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
-    t1_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
+    t1_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = 0;
+    t1_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = 0;
     t1_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
+    t1_gpio_dev_ch[SOC_PERIPHERAL_IRQ_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
 
     tile0_device_instantiate(eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t1_gpio_dev_ch);
 }
@@ -81,18 +85,22 @@ void soc_tile1_bitstream(
     eth_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
     eth_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
     eth_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
+    eth_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;
 
     i2s_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
     i2s_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = 0;
     i2s_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = 0;
+    i2s_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;
 
     i2c_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = 0;
     i2c_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = 0;
     i2c_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
+    i2c_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;
 
-    t1_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
-    t1_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
+    t1_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = 0;
+    t1_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = 0;
     t1_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
+    t1_gpio_dev_ch[SOC_PERIPHERAL_IRQ_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
 
     tile1_device_instantiate(eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t1_gpio_dev_ch);
 }
