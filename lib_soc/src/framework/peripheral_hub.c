@@ -23,7 +23,7 @@ void soc_dma_ring_buf_release(
  */
 static chanend rtos_irq_c;
 
-typedef struct soc_peripheral {
+struct soc_peripheral {
 
     /* This device's ID */
     int id;
@@ -358,6 +358,8 @@ void soc_peripheral_hub()
                  * the actual device ID.
                  */
                 device_id -= 2 * MAX_PERIPHERALS;
+
+                chanend_disable_trigger(peripherals[device_id].irq_c);
 
                 status = device_to_hub_irq(&peripherals[device_id]);
 
