@@ -19,4 +19,8 @@
 #define I2SCONF_FRAME_BUF_CNT       (4)
 #endif
 
+#ifndef I2SCONF_OFF_TILE
+#define I2SCONF_OFF_TILE            (1)
+#endif
+
 #endif /* I2S_DEV_CONF_DEFAULTS_H_ */

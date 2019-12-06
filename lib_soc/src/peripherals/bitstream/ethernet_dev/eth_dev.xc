@@ -8,6 +8,7 @@
 #include "xassert.h"
 #include "eth_dev.h"
 
+#include "debug_print.h"
 
 void eth_dev_init(
         client ethernet_cfg_if ?i_eth_cfg,
@@ -46,6 +47,21 @@ void eth_dev_init(
     }
 }
 
+static void eth_dev_tx(
+        client ethernet_tx_if ?i_eth_tx,
+        uint8_t *frame_buf,
+        size_t frame_len)
+{
+    /* If the stack sends less than 60 bytes, pad with 0x00 for the MAC */
+    if (frame_len < 60)
+    {
+        memset(&frame_buf[frame_len], 0x00, (60 - frame_len));
+        frame_len = 60;
+    }
+
+    i_eth_tx.send_packet(frame_buf, frame_len, 0);
+}
+
 /*
  *  \param i_eth_cfg    If this component is connected to an MAC component
  *                      in the Ethernet library then this interface should be
@@ -72,8 +88,9 @@ void eth_dev_init(
  *                      reading library user guide for details.
  */
 static unsafe void eth_dev_handler(
-        chanend data_to_dma_c,
-        chanend data_from_dma_c,
+        soc_peripheral_t *peripheral,
+        chanend ?data_to_dma_c,
+        chanend ?data_from_dma_c,
         chanend ?ctrl_c,
         client ethernet_cfg_if ?i_eth_cfg,
         client ethernet_rx_if ?i_eth_rx,
@@ -100,12 +117,35 @@ static unsafe void eth_dev_handler(
 
     while (1)
     {
+        if (peripheral != NULL && *peripheral != NULL) {
+            frame_len = soc_peripheral_rx_dma_direct_xfer(*peripheral, frame_buf, sizeof(frame_buf));
+
+            if (frame_len > 0) {
+                eth_dev_tx(i_eth_tx, frame_buf, frame_len);
+
+                /*
+                 * This ensures that the following select statement will
+                 * not block if nothing is ready and come immediately back
+                 * here in case there is more to send.
+                 */
+                no_rx = 1;
+                tmr :> time;
+            }
+        }
+
         [[ordered]]
         select
         {
         case !isnull(ctrl_c) => soc_peripheral_function_code_rx(ctrl_c, &cmd):
-            switch( cmd )
+            switch (cmd)
             {
+            case SOC_PERIPHERAL_DMA_TX:
+                /*
+                 * The application has added a new DMA TX buffer. This
+                 * ensures that this select statement wakes up and gets
+                 * the TX data in the code above.
+                 */
+                break;
             case ETH_DEV_GET_MAC_ADDR:
                 soc_peripheral_varlist_rx(
                         ctrl_c, 1,
@@ -192,27 +232,27 @@ static unsafe void eth_dev_handler(
             }
             break;
 
-        case !no_rx => soc_peripheral_rx_dma_ready(data_from_dma_c):
+        case !isnull(data_from_dma_c) && !no_rx => soc_peripheral_rx_dma_ready(data_from_dma_c):
 
             frame_len = soc_peripheral_rx_dma_xfer(data_from_dma_c, frame_buf, sizeof(frame_buf));
 
-            /* If the stack sends less than 60 bytes, pad with 0x00 for the MAC */
-            if( frame_len < 60 )
-            {
-                memset( &frame_buf[frame_len], 0x00, (60 - frame_len) );
-                frame_len = 60;
+            if (frame_len > 0) {
+                eth_dev_tx(i_eth_tx, frame_buf, frame_len);
+
+                no_rx = 1;
+                tmr :> time;
             }
-
-            i_eth_tx.send_packet(frame_buf, frame_len, 0);
-
-            no_rx = 1;
-            tmr :> time;
             break;
 
         case !no_tx => i_eth_rx.packet_ready():
 
             i_eth_rx.get_packet(desc, frame_buf, ETHERNET_MAX_PACKET_SIZE);
-            soc_peripheral_tx_dma_xfer(data_to_dma_c, frame_buf, desc.len);
+
+            if (peripheral != NULL && *peripheral != NULL) {
+                soc_peripheral_tx_dma_direct_xfer(*peripheral, frame_buf, desc.len);
+            } else if (!isnull(data_to_dma_c)) {
+                soc_peripheral_tx_dma_xfer(data_to_dma_c, frame_buf, desc.len);
+            }
 
             no_tx = 1;
             tmr :> time;
@@ -235,8 +275,9 @@ static unsafe void eth_dev_handler(
 
 
 void eth_dev(
-        chanend data_to_dma_c,
-        chanend data_from_dma_c,
+        soc_peripheral_t *peripheral,
+        chanend ?data_to_dma_c,
+        chanend ?data_from_dma_c,
         chanend ?ctrl_c,
         port p_eth_rxclk,
         port p_eth_rxerr,
@@ -282,7 +323,7 @@ void eth_dev(
         smi(i_smi, p_smi_mdio, p_smi_mdc);
 
         unsafe {
-            eth_dev_handler(data_to_dma_c, data_from_dma_c, ctrl_c,
+            eth_dev_handler(peripheral, data_to_dma_c, data_from_dma_c, ctrl_c,
                             i_cfg[0],i_rx[0], i_tx[0],
                             i_smi, ETHCONF_SMI_PHY_ADDRESS,
                             null, otp_ports);
@@ -291,8 +332,9 @@ void eth_dev(
 }
 
 void eth_dev_smi_singleport(
-        chanend data_to_dma_c,
-        chanend data_from_dma_c,
+        soc_peripheral_t *peripheral,
+        chanend ?data_to_dma_c,
+        chanend ?data_from_dma_c,
         chanend ?ctrl_c,
         port p_eth_rxclk,
         port p_eth_rxerr,
@@ -337,7 +379,7 @@ void eth_dev_smi_singleport(
         smi_singleport(i_smi, p_smi, ETHCONF_SMI_MDIO_BIT_POS, ETHCONF_SMI_MDC_BIT_POS);
 
         unsafe {
-            eth_dev_handler(data_to_dma_c, data_from_dma_c, ctrl_c,
+            eth_dev_handler(peripheral, data_to_dma_c, data_from_dma_c, ctrl_c,
                             i_cfg[0],i_rx[0], i_tx[0],
                             i_smi, ETHCONF_SMI_PHY_ADDRESS,
                             null, otp_ports);

@@ -160,7 +160,9 @@ void tile1_device_instantiate(
     p_rst_shared <: 0xF;
 
     par {
-        eth_dev_smi_singleport(eth_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
+        eth_dev_smi_singleport(
+                NULL,
+                eth_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
                 eth_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
                 eth_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
                 p_eth_rxclk, p_eth_rxerr, p_eth_rxd, p_eth_rxdv,
@@ -173,7 +175,9 @@ void tile1_device_instantiate(
 
         [[distribute]] i2c_master_single_port(i_i2c, 1, p_i2c, 100, I2C_SCL_BITPOS, I2C_SDA_BITPOS, I2C_OTHER_MASK);
 
-        i2s_dev(i2s_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
+        i2s_dev(
+                NULL,
+                i2s_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
                 i2s_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
                 i2s_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
                 p_mclk_in1,

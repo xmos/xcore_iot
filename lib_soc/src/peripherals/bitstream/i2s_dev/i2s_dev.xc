@@ -9,10 +9,15 @@
 
 #include "fifo.h"
 
+#if I2SCONF_OFF_TILE
 static int32_t audio_samples[I2SCONF_FRAME_BUF_CNT][I2SCONF_AUDIO_FRAME_LEN];
+#else
+static int32_t audio_samples[1][I2SCONF_AUDIO_FRAME_LEN];
+#endif
 
 [[distributable]]
 static void i2s_handler(
+        soc_peripheral_t *peripheral,
         server i2s_frame_callback_if i2s,
         fifo_t sample_buffer)
 {
@@ -26,8 +31,14 @@ static void i2s_handler(
             i2s_config.mode = I2S_MODE_I2S;
             i2s_config.mclk_bclk_ratio = I2SCONF_MASTER_CLK_FREQ / (I2SCONF_SAMPLE_FREQ * 32 * 2);
 
+#if I2SCONF_OFF_TILE
             fifo_get_blocking(sample_buffer, &buf_num);
-
+#else
+            if (peripheral != NULL && *peripheral != NULL) {
+                while (soc_peripheral_rx_dma_direct_xfer(*peripheral, audio_samples[0], sizeof(audio_samples[0])) == 0);
+                buf_num = 0;
+            }
+#endif
             break;
 
         case i2s.send(size_t num_chan_out, int32_t sample[num_chan_out]):
@@ -38,7 +49,14 @@ static void i2s_handler(
             sample_num++;
 
             if (sample_num == I2SCONF_AUDIO_FRAME_LEN) {
+#if I2SCONF_OFF_TILE
                 fifo_get_blocking(sample_buffer, &buf_num);
+#else
+                if (peripheral != NULL && *peripheral != NULL) {
+                    while (soc_peripheral_rx_dma_direct_xfer(*peripheral, audio_samples[0], sizeof(audio_samples[0])) == 0);
+                    buf_num = 0;
+                }
+#endif
                 sample_num = 0;
             }
             break;
@@ -53,6 +71,7 @@ static void i2s_handler(
     }
 }
 
+#if I2SCONF_OFF_TILE
 /**
  * This task receives data from the DMA engine into a FIFO.
  * The i2s handler above pulls frames out of the FIFO as
@@ -80,8 +99,10 @@ static void i2s_decoupler(
         }
     }
 }
+#endif
 
 void i2s_dev(
+        soc_peripheral_t *peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,
@@ -93,8 +114,9 @@ void i2s_dev(
         clock bclk)
 {
     interface i2s_frame_callback_if i_i2s;
-    fifo_t sample_buffer;
+    fifo_t sample_buffer = NULL;
 
+#if I2SCONF_OFF_TILE
     unsafe {
         fifo_init(
                 sample_buffer,
@@ -102,6 +124,7 @@ void i2s_dev(
                 sizeof(int),
                 I2SCONF_FRAME_BUF_CNT-1);
     }
+#endif
 
     par {
         i2s_frame_master(
@@ -112,8 +135,9 @@ void i2s_dev(
                 p_mclk,
                 bclk);
 
-
-        [[distribute]] i2s_handler(i_i2s, sample_buffer);
+        [[distribute]] i2s_handler(peripheral, i_i2s, sample_buffer);
+#if I2SCONF_OFF_TILE
         i2s_decoupler(data_from_dma_c, sample_buffer);
+#endif
     }
 }
