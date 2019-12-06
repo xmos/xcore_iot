@@ -164,17 +164,20 @@ void soc_peripheral_tx_dma_direct_xfer(
     void *rx_buf;
     int max_length;
 
-    rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL);
-    xassert(rx_buf != NULL);
-    xassert(length <= max_length);
-    memcpy(rx_buf, data, length);
-    soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
+    if (device->rx_ring_buf.desc != NULL) {
+        rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL);
+        if (rx_buf != NULL) {
+            xassert(length <= max_length);
+            memcpy(rx_buf, data, length);
+            soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
 
-    rtos_lock_acquire(0);
-    device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
-    rtos_lock_release(0);
+            rtos_lock_acquire(0);
+            device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
+            rtos_lock_release(0);
 
-    rtos_irq(device->core_id, device->irq_source_id);
+            rtos_irq(device->core_id, device->irq_source_id);
+        }
+    }
 }
 
 void soc_peripheral_irq_send(

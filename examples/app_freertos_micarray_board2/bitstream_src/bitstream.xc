@@ -182,14 +182,11 @@ void tile1_device_instantiate(
 
         [[distribute]] i2c_master_single_port(i_i2c, 1, p_i2c, 100, I2C_SCL_BITPOS, I2C_SDA_BITPOS, I2C_OTHER_MASK);
 
-        [[combine]]
-        par {
-            i2c_dev(i2c_dev_ctrl_ch, i_i2c[0]);
+        i2c_dev(i2c_dev_ctrl_ch, i_i2c[0]);
 
-            gpio_dev(null,
-                     null,
-                     t1_gpio_dev_ctrl_ch,
-                     t1_gpio_dev_irq_ch);
-        }
+        gpio_dev(null,
+                 null,
+                 t1_gpio_dev_ctrl_ch,
+                 t1_gpio_dev_irq_ch);
     }
 }
