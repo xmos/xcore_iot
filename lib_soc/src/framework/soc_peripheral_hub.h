@@ -14,14 +14,18 @@
 #define SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM 0x00000001
 #define SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM 0x00000002
 
+struct soc_peripheral;
+
+#ifndef __XC__
+typedef struct soc_peripheral * soc_peripheral_t;
+#else
+typedef struct soc_peripheral * unsafe soc_peripheral_t;
+#endif
+
 #ifndef __XC__
 
 #include "soc_dma_ring_buf.h"
 #include "rtos_support.h"
-
-
-struct soc_peripheral;
-typedef struct soc_peripheral * soc_peripheral_t;
 
 soc_peripheral_t soc_peripheral_register(
         chanend c[SOC_PERIPHERAL_CHANNEL_COUNT]);
@@ -71,6 +75,11 @@ uint16_t soc_peripheral_rx_dma_xfer(
 
 void soc_peripheral_tx_dma_xfer(
         chanend c,
+        void *data,
+        uint16_t length);
+
+void soc_peripheral_tx_dma_direct_xfer(
+        soc_peripheral_t device,
         void *data,
         uint16_t length);
 

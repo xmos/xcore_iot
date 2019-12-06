@@ -1,5 +1,7 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
+#include <string.h>
+
 #include "soc_peripheral_hub.h"
 
 #include "xassert.h"
@@ -23,7 +25,7 @@ void soc_dma_ring_buf_release(
  */
 static chanend rtos_irq_c;
 
-typedef struct soc_peripheral {
+struct soc_peripheral {
 
     /* This device's ID */
     int id;
@@ -124,6 +126,26 @@ void soc_peripheral_tx_dma_xfer(
     chan_complete_transaction(&c, &tc);
 }
 
+void soc_peripheral_tx_dma_direct_xfer(
+        soc_peripheral_t device,
+        void *data,
+        uint16_t length)
+{
+    void *rx_buf;
+    int max_length;
+
+    rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL);
+    xassert(length <= max_length);
+    memcpy(rx_buf, data, length);
+    soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
+
+    rtos_lock_acquire(0);
+    device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
+    rtos_lock_release(0);
+
+    rtos_irq(device->core_id, device->irq_source_id);
+}
+
 void soc_peripheral_irq_send(
         chanend c,
         uint32_t status)
@@ -201,6 +223,12 @@ static void device_to_dma(soc_peripheral_t device)
     chan_complete_transaction(&device->rx_c, &tc);
 
     soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
+
+    rtos_lock_acquire(0);
+    device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
+    rtos_lock_release(0);
+
+    rtos_irq(device->core_id, device->irq_source_id);
 }
 
 static void dma_to_device_ready(soc_peripheral_t device)
@@ -232,18 +260,29 @@ static void dma_to_device(soc_peripheral_t device)
     t_chan_out_buf_byte(&tc, tx_buf, length);
     chan_complete_transaction(&device->tx_c, &tc);
 
+    xassert(device->tx_ready);
     device->tx_ready = 0;
 
     soc_dma_ring_buf_release(&device->tx_ring_buf, 0, length);
+
+    rtos_lock_acquire(0);
+    device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM;
+    rtos_lock_release(0);
+
+    rtos_irq(device->core_id, device->irq_source_id);
 }
 
-static uint32_t device_to_hub_irq(soc_peripheral_t device)
+static void device_to_hub_irq(soc_peripheral_t device)
 {
     uint32_t status;
 
     chan_in_word(device->irq_c, &status);
 
-    return status;
+    rtos_lock_acquire(0);
+    device->interrupt_status |= status;
+    rtos_lock_release(0);
+
+    rtos_irq(device->core_id, device->irq_source_id);
 }
 
 void soc_peripheral_hub()
@@ -317,18 +356,13 @@ void soc_peripheral_hub()
 
         do {
             if (device_id < peripheral_count) {
-                /* Detected that the device is trying to receive */
+                /* The device is trying to receive data */
+
                 chanend_disable_trigger(peripherals[device_id].tx_c);
                 dma_to_device(&peripherals[device_id]);
 
-                rtos_lock_acquire(0);
-                peripherals[device_id].interrupt_status |= SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM;
-                rtos_lock_release(0);
-
-                rtos_irq(peripherals[device_id].core_id, peripherals[device_id].irq_source_id);
-
             } else if ((device_id - 1 * MAX_PERIPHERALS) < peripheral_count) {
-                /* Got data on the device's RX channel */
+                /* The device is trying to send data */
 
                 /*
                  * Select wait returns 1 * MAX_DEVICES + device_id when
@@ -338,19 +372,10 @@ void soc_peripheral_hub()
                 device_id -= 1 * MAX_PERIPHERALS;
 
                 chanend_disable_trigger(peripherals[device_id].rx_c);
-
                 device_to_dma(&peripherals[device_id]);
 
-                rtos_lock_acquire(0);
-                peripherals[device_id].interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
-                rtos_lock_release(0);
-
-                rtos_irq(peripherals[device_id].core_id, peripherals[device_id].irq_source_id);
-
             } else if ((device_id - 2 * MAX_PERIPHERALS) < peripheral_count) {
-                uint32_t status;
-
-                /* Got data on the device's IRQ channel */
+                /* The device is trying to send an IRQ */
 
                 /*
                  * Select wait returns 2 * MAX_DEVICES + device_id when
@@ -359,13 +384,8 @@ void soc_peripheral_hub()
                  */
                 device_id -= 2 * MAX_PERIPHERALS;
 
-                status = device_to_hub_irq(&peripherals[device_id]);
-
-                rtos_lock_acquire(0);
-                peripherals[device_id].interrupt_status |= status;
-                rtos_lock_release(0);
-
-                rtos_irq(peripherals[device_id].core_id, peripherals[device_id].irq_source_id);
+                chanend_disable_trigger(peripherals[device_id].irq_c);
+                device_to_hub_irq(&peripherals[device_id]);
 
             } else if (device_id == 3 * MAX_PERIPHERALS) {
                 /* request from the RTOS */
