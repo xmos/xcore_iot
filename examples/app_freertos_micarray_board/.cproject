@@ -179,14 +179,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/api}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_freertos/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/portable/XCC/XCORE200}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/portable/XCC/Tracing}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/api}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_freertos/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/doc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/api}&quot;"/>
@@ -230,6 +228,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/gpio_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/micarray_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/ethernet_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2c_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2s_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/common}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.1044652766" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -537,14 +541,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/api}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_freertos/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/portable/XCC/XCORE200}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/portable/XCC/Tracing}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/api}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_freertos/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/doc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/api}&quot;"/>
@@ -588,6 +590,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/gpio_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/micarray_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/ethernet_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2c_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2s_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/common}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.1106009663" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -900,14 +908,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/api}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_freertos/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/portable/XCC/XCORE200}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/portable/XCC/Tracing}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/api}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_freertos/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/doc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/api}&quot;"/>
@@ -951,6 +957,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/gpio_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/micarray_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/ethernet_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2c_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2s_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/common}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.464576551" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>

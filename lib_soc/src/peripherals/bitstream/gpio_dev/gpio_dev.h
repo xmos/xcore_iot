@@ -9,8 +9,7 @@
 
 #include "gpio_dev_conf_defaults.h"
 #include "gpio_dev_ctrl.h"
-
-#define MAX_GPIO_EVENTS 32
+#include "gpio_port_map.h"
 
 #ifdef __XC__
 extern "C" {
