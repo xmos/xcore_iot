@@ -28,7 +28,7 @@ def build(bld):
 
     depends_on = [
         'FreeRTOS-Plus-TCP',
-        'lib_soc',
+        'lib_soc'
     ]
     
     bld.env.XTCP_STACK = 'UIP'
@@ -37,11 +37,12 @@ def build(bld):
     bld.env.XSCOPE = bld.path.find_resource('config.xscope')
     
     app_sources = bld.path.ant_glob(['src/**/*.c', 'src/**/*.S'])  
+    bsp_sources = bld.path.ant_glob(['bsp/**/*.c', 'bsp/**/*.S'])
     bitstream_sources = bld.path.ant_glob(['bitstream_src/**/*.xc', 'bitstream_src/**/*.c', 'bitstream_src/**/*.S'])
     
-    sources = app_sources + bitstream_sources
+    sources = app_sources + bsp_sources + bitstream_sources
 
-    includes = [ 'src', 'bitstream_src']
+    includes = [ 'src', 'bitstream_src', 'bsp' ]
         
     optional_headers = ['FreeRTOSIPConfig.h', 'xcore_trace_config.h']
 
@@ -59,7 +60,7 @@ SHARED_FLAGS = [
 ]
 
 XN_FILE_MAP = {
-	'Default': 'bitstream_src/MIC-ARRAY-1V3.xn'
+	'Default': 'bitstream_src/SLICEKIT-X200.xn'
 }
 
 CONFIGS = {

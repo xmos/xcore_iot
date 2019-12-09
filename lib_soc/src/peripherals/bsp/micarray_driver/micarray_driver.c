@@ -4,6 +4,11 @@
 #include "bsp/common/soc_bsp_common.h"
 #include "bitstream_devices.h"
 
+#if ( SOC_MICARRAY_PERIPHERAL_USED == 0 )
+#define BITSTREAM_MICARRAY_DEVICE_COUNT 0
+soc_peripheral_t bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_COUNT];
+#endif /* SOC_MICARRAY_PERIPHERAL_USED */
+
 soc_peripheral_t micarray_driver_init(
         int device_id,
         int rx_desc_count,

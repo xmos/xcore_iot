@@ -4,6 +4,11 @@
 #include "bsp/common/soc_bsp_common.h"
 #include "bitstream_devices.h"
 
+#if( SOC_I2S_PERIPHERAL_USED == 0 )
+#define BITSTREAM_I2S_DEVICE_COUNT 0
+soc_peripheral_t bitstream_i2s_devices[BITSTREAM_I2S_DEVICE_COUNT];
+#endif /* SOC_I2S_PERIPHERAL_USED */
+
 soc_peripheral_t i2s_driver_init(
         int device_id,
         int rx_desc_count,

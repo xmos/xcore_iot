@@ -1,7 +1,26 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
-#ifndef RTOS_PERIPHERALS_CONF_H_
-#define RTOS_PERIPHERALS_CONF_H_
+#ifndef SOC_CONF_H_
+#define SOC_CONF_H_
+
+/* Tile descriptors */
+#define SOC_MULTITILE        1
+#define SOC_TILE_0_INCLUDE   SOC_TILE_HAS_BOTH
+#define SOC_TILE_1_INCLUDE   SOC_TILE_HAS_BITSTREAM
+#define SOC_TILE_2_INCLUDE   SOC_TILE_UNUSED
+#define SOC_TILE_3_INCLUDE   SOC_TILE_UNUSED
+
+/* Peripherals */
+#define SOC_ETHERNET_PERIPHERAL_USED        (1)
+#define SOC_GPIO_PERIPHERAL_USED            (1)
+#define SOC_I2C_PERIPHERAL_USED             (1)
+#define SOC_I2S_PERIPHERAL_USED             (1)
+#define SOC_MICARRAY_PERIPHERAL_USED        (1)
+#define SOC_SDRAM_PERIPHERAL_USED           (0)
+
+/*
+ * Peripheral Configuration
+ */
 
 /* I2S Config */
 #define I2SCONF_SAMPLE_FREQ         (48000)
@@ -9,10 +28,8 @@
 #define I2SCONF_AUDIO_FRAME_LEN     (256)
 #define I2SCONF_FRAME_BUF_CNT       (4)
 
-
 /* I2C Config */
 #define I2CCONF_MAX_BUF_LEN         (128)
-
 
 /* ETH Config */
 #define ETHCONF_MII_BUFSIZE         (4096)
@@ -28,7 +45,6 @@
 #define ETHCONF_RT_MII_TX_BUFSIZE   (ETHCONF_MII_BUFSIZE)
 #define ETHCONF_USE_SHAPER          (0)
 
-
 /* MicArray Config */
 #define MICARRAYCONF_WORD_LENGTH_SHORT              (0)
 #define MICARRAYCONF_MAX_FRAME_SIZE_LOG2            (8)
@@ -40,5 +56,4 @@
 #define MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER    (8)
 #define MICARRAYCONF_MASTER_CLOCK_FREQUENCY         (24576000)
 
-
-#endif /* RTOS_PERIPHERALS_CONF_H_ */
+#endif /* SOC_CONF_H_ */

@@ -55,6 +55,7 @@ int gpio_isr( soc_peripheral_t device )
     configASSERT(device == bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A]);
 
     status = soc_peripheral_interrupt_status(device);
+    status = ( 1 << status );
     xTaskNotifyFromISR( gpio_handler_task, status, eSetBits, &xYieldRequired );
 
     return xYieldRequired;
@@ -107,6 +108,7 @@ void gpio_ctrl_t0(void *arg)
     gpio_irq_setup(dev, gpio_4A);
     gpio_irq_enable(dev, gpio_4A);
 
+    /* Turn on center LED */
     gpio_write_pin(dev, gpio_8D, 2, 0);
 
     for (;;) {
@@ -116,9 +118,9 @@ void gpio_ctrl_t0(void *arg)
                 &status,         /* Pass out notification value into status */
                 portMAX_DELAY ); /* Wait indefinitely until next notification */
 
-        if( ( status & gpio_4A ) != 0 )
+        if( ( status & ( 1 << gpio_4A ) ) != 0 )
         {
-            mabs_buttons = gpio_read(dev, gpio_4A);
+            mabs_buttons = gpio_read( dev, gpio_4A );
             buttonA = ( mabs_buttons >> 0 ) & 0x01;
             buttonB = ( mabs_buttons >> 1 ) & 0x01;
             buttonC = ( mabs_buttons >> 2 ) & 0x01;

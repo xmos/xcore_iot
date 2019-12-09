@@ -3,8 +3,10 @@
 #ifndef I2S_DEV_H_
 #define I2S_DEV_H_
 
-#if __rtos_peripherals_conf_h_exists__
-#include "rtos_peripherals_conf.h"
+#if __soc_conf_h_exists__
+#include "soc_conf.h"
+#else
+#warning soc_conf.h not found
 #endif
 
 #include "i2s_dev_conf_defaults.h"

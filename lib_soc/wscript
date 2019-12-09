@@ -14,6 +14,16 @@ def use_module(bld):
 
     bld.env.MODULE_XCC_FLAGS = bld.env.XCC_FLAGS + ['-Os']
 
+    depends_on = [
+        'lib_otpinfo',
+        'lib_ethernet',
+        'lib_random',
+        'lib_mic_array',
+        'lib_i2c',
+        'lib_i2s',
+        'lib_sdram'
+        ]
+        
     bld.module(
         source=sources,
         includes=includes,

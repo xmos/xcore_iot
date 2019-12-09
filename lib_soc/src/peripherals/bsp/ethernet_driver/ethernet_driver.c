@@ -1,12 +1,15 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
-#include <stdlib.h>
-
 #include "soc.h"
 #include "bsp/common/soc_bsp_common.h"
 #include "bitstream_devices.h"
 
 #include "ethernet_driver.h"
+
+#if ( SOC_ETHERNET_PERIPHERAL_USED == 0 )
+#define BITSTREAM_ETHERNET_DEVICE_COUNT 0
+soc_peripheral_t bitstream_eth_devices[BITSTREAM_ETHERNET_DEVICE_COUNT];
+#endif /* SOC_ETHERNET_PERIPHERAL_USED */
 
 void ethernet_driver_send_packet(
         soc_peripheral_t dev,

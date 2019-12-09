@@ -1,14 +1,15 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "soc.h"
 #include "bsp/common/soc_bsp_common.h"
-#include "xcore_c.h"
 #include "bitstream_devices.h"
 
 #include "gpio_driver.h"
+
+#if ( SOC_GPIO_PERIPHERAL_USED == 0 )
+#define BITSTREAM_GPIO_DEVICE_COUNT 0
+soc_peripheral_t bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_COUNT];
+#endif /* SOC_GPIO_PERIPHERAL_USED */
 
 static int gpio_driver_alloc(
         soc_peripheral_t dev,

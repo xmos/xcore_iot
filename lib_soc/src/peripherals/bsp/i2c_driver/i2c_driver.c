@@ -1,12 +1,15 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
-#include <stdlib.h>
-
 #include "soc.h"
 #include "bsp/common/soc_bsp_common.h"
 #include "bitstream_devices.h"
 
 #include "i2c_driver.h"
+
+#if ( SOC_I2C_PERIPHERAL_USED == 0 )
+#define BITSTREAM_I2C_DEVICE_COUNT 0
+soc_peripheral_t bitstream_i2c_devices[BITSTREAM_I2C_DEVICE_COUNT];
+#endif /* SOC_I2C_PERIPHERAL_USED */
 
 i2c_res_t i2c_driver_write(
         soc_peripheral_t dev,
