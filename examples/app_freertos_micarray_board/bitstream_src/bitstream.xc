@@ -135,18 +135,23 @@ void tile0_device_instantiate(
             soc_peripheral_hub();
         }
 
-        micarray_dev(
-                &bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
-                null,
-                null,
-                null,
-                p_pdm_mics);
+        {
+            while (soc_tile0_bitstream_initialized() == 0);
+            par {
+                micarray_dev(
+                        bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
+                        null,
+                        null,
+                        null,
+                        p_pdm_mics);
 
-        gpio_dev(
-                null,
-                null,
-                t0_gpio_dev_ctrl_ch,
-                t0_gpio_dev_irq_ch);
+                gpio_dev(
+                        null,
+                        null,
+                        t0_gpio_dev_ctrl_ch,
+                        t0_gpio_dev_irq_ch);
+            }
+        }
     }
 }
 

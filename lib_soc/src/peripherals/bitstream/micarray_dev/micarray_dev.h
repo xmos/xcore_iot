@@ -23,7 +23,7 @@ void micarray_dev_init(
 
 [[combinable]]
 void micarray_dev_to_dma(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         streaming chanend c_ds_output[]);
 
@@ -32,7 +32,7 @@ void micarray_dev_task(
         streaming chanend c_ds_output[]);
 
 void micarray_dev(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,

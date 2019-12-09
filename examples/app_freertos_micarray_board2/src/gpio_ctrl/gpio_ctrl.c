@@ -116,7 +116,7 @@ void gpio_ctrl_t0(void *arg)
                 &status,         /* Pass out notification value into status */
                 portMAX_DELAY ); /* Wait indefinitely until next notification */
 
-        if( ( status & gpio_4A ) != 0 )
+        if( ( status & ( 1 << gpio_4A ) ) != 0 )
         {
             mabs_buttons = gpio_read(dev, gpio_4A);
             buttonA = ( mabs_buttons >> 0 ) & 0x01;
