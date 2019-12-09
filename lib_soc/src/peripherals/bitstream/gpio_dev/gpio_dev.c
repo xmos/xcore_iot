@@ -64,7 +64,7 @@ void gpio_dev(
     chanend_setup_select( ctrl_c, GPIO_TOTAL_PORT_CNT );
     chanend_enable_trigger( ctrl_c );
 
-    while( !rtos_irq_ready() );
+    //while( !rtos_irq_ready() );
 
     for( ;; )
     {

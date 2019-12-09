@@ -141,10 +141,7 @@ void tile1_device_instantiate(
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
-    chan eth_dev_from_dma_ch;
-    chan eth_dev_to_dma_ch;
     chan eth_dev_ctrl_ch;
-    chan i2s_dev_from_dma_ch;
     chan i2c_dev_ctrl_ch;
     chan t1_gpio_dev_ctrl_ch;
     chan t1_gpio_dev_irq_ch;
@@ -154,8 +151,8 @@ void tile1_device_instantiate(
 
     par {
         unsafe {
-            unsafe chanend eth_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {eth_dev_from_dma_ch, eth_dev_to_dma_ch, eth_dev_ctrl_ch, null};
-            unsafe chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {i2s_dev_from_dma_ch, null, null, null};
+            unsafe chanend eth_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, eth_dev_ctrl_ch, null};
+            unsafe chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
             unsafe chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, i2c_dev_ctrl_ch, null};
             unsafe chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t1_gpio_dev_ctrl_ch, t1_gpio_dev_irq_ch};
 
@@ -163,8 +160,10 @@ void tile1_device_instantiate(
             soc_peripheral_hub();
         }
 
-        eth_dev_smi_singleport(eth_dev_to_dma_ch,
-                eth_dev_from_dma_ch,
+        eth_dev_smi_singleport(
+                &bitstream_ethernet_devices[BITSTREAM_ETHERNET_DEVICE_A],
+                null,
+                null,
                 eth_dev_ctrl_ch,
                 p_eth_rxclk, p_eth_rxerr, p_eth_rxd, p_eth_rxdv,
                 p_eth_txclk, p_eth_txen, p_eth_txd,
@@ -172,8 +171,10 @@ void tile1_device_instantiate(
                 p_smi,
                 otp_ports);
 
-        i2s_dev(null,
-                i2s_dev_from_dma_ch,
+        i2s_dev(
+                &bitstream_i2s_devices[BITSTREAM_I2S_DEVICE_A],
+                null,
+                null,
                 null,
                 p_mclk_in1,
                 p_lrclk, p_bclk, p_i2s_dout, 1,
@@ -181,14 +182,11 @@ void tile1_device_instantiate(
 
         [[distribute]] i2c_master_single_port(i_i2c, 1, p_i2c, 100, I2C_SCL_BITPOS, I2C_SDA_BITPOS, I2C_OTHER_MASK);
 
-        [[combine]]
-        par {
-            i2c_dev(i2c_dev_ctrl_ch, i_i2c[0]);
+        i2c_dev(i2c_dev_ctrl_ch, i_i2c[0]);
 
-            gpio_dev(null,
-                     null,
-                     t1_gpio_dev_ctrl_ch,
-                     t1_gpio_dev_irq_ch);
-        }
+        gpio_dev(null,
+                 null,
+                 t1_gpio_dev_ctrl_ch,
+                 t1_gpio_dev_irq_ch);
     }
 }

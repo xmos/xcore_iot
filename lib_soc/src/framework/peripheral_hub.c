@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "soc_peripheral_hub.h"
+#include "soc.h"
 
 #include "xassert.h"
 
@@ -110,7 +110,37 @@ uint16_t soc_peripheral_rx_dma_xfer(
     t_chan_in_buf_byte(&tc, data, length);
     chan_complete_transaction(&c, &tc);
 
-    return (int) length;
+    return (uint16_t) length;
+}
+
+uint16_t soc_peripheral_rx_dma_direct_xfer(
+        soc_peripheral_t device,
+        void *data,
+        uint16_t max_length)
+{
+    void *tx_buf;
+    int length = 0;
+    int more;
+
+    if (device->tx_ring_buf.desc != NULL) {
+        tx_buf = soc_dma_ring_buf_get(&device->tx_ring_buf, &length, &more);
+        if (tx_buf != NULL) {
+            /****** Temporary *******/
+            xassert(more == 0);
+            /************************/
+            xassert(length <= max_length);
+            memcpy(data, tx_buf, length);
+            soc_dma_ring_buf_release(&device->tx_ring_buf, 0, length);
+
+            rtos_lock_acquire(0);
+            device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM;
+            rtos_lock_release(0);
+
+            rtos_irq(device->core_id, device->irq_source_id);
+        }
+    }
+
+    return (uint16_t) length;
 }
 
 void soc_peripheral_tx_dma_xfer(
@@ -134,16 +164,20 @@ void soc_peripheral_tx_dma_direct_xfer(
     void *rx_buf;
     int max_length;
 
-    rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL);
-    xassert(length <= max_length);
-    memcpy(rx_buf, data, length);
-    soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
+    if (device->rx_ring_buf.desc != NULL) {
+        rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL);
+        if (rx_buf != NULL) {
+            xassert(length <= max_length);
+            memcpy(rx_buf, data, length);
+            soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
 
-    rtos_lock_acquire(0);
-    device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
-    rtos_lock_release(0);
+            rtos_lock_acquire(0);
+            device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
+            rtos_lock_release(0);
 
-    rtos_irq(device->core_id, device->irq_source_id);
+            rtos_irq(device->core_id, device->irq_source_id);
+        }
+    }
 }
 
 void soc_peripheral_irq_send(
@@ -188,9 +222,48 @@ chanend soc_peripheral_ctrl_chanend(
     return device->control_c;
 }
 
-void soc_peripheral_hub_dma_request(void)
+void soc_peripheral_hub_dma_request(
+        soc_peripheral_t device,
+        soc_dma_request_t request)
 {
-    rtos_irq_peripheral(rtos_irq_c);
+    if (request == SOC_DMA_TX_REQUEST) {
+        if (device->tx_c != 0) {
+            /*
+             * If the tx_c channel is not NULL, then this
+             * peripheral's DMA is performed by the peripheral
+             * hub. The peripheral hub must be sent an IRQ to
+             * let it know that there are TX DMA buffers available
+             * and that it may send them to the device when it is
+             * ready.
+             */
+            rtos_irq_peripheral(rtos_irq_c);
+        } else if (device->control_c != 0) {
+            /*
+             * Otherwise, the peripheral itself must be told
+             * that there are TX DMA buffers available for it
+             * to receive.
+             */
+            soc_peripheral_function_code_tx(device->control_c, SOC_PERIPHERAL_DMA_TX);
+        }
+    } else if (request == SOC_DMA_RX_REQUEST) {
+        if (device->rx_c != 0) {
+            /*
+             * If the rx_c channel is not NULL, then this
+             * peripheral's DMA is performed by the peripheral
+             * hub. The peripheral hub must be sent an IRQ to
+             * let it know that there are RX DMA buffers available
+             * and that it may listen for data from the peripheral.
+             */
+            rtos_irq_peripheral(rtos_irq_c);
+        } else {
+            /*
+             * No need to tell the device directly that the
+             * application is ready to receive. When it has
+             * data to send it will wait until there is an
+             * available buffer.
+             */
+        }
+    }
 }
 
 uint32_t soc_peripheral_interrupt_status(

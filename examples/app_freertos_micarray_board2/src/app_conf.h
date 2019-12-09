@@ -25,12 +25,15 @@
 #define appconfTHRUPUT_TEST_PORT            10000
 #define DEBUG_PRINT_ENABLE_THRUPUT_TEST         1
 
+/* GPIO defines */
+#define appconfGPIO_VOLUME_RAPID_FIRE_MS       100
+
 /* Task Priorities */
 #define appconfAUDIO_PIPELINE_TASK_PRIORITY    ( configMAX_PRIORITIES - 3 )
 #define appconfQUEUE_TO_TCP_TASK_PRIORITY      ( configMAX_PRIORITIES - 2 )
 #define appconfQUEUE_TO_I2S_TASK_PRIORITY      ( configMAX_PRIORITIES - 2 )
 #define appconfCLI_TASK_PRIORITY               ( configMAX_PRIORITIES - 3 )
 #define appconfTHRUPUT_TEST_TASK_PRIORITY      ( configMAX_PRIORITIES - 3 )
-#define appconfGPIO_TASK_PRIORITY              ( configMAX_PRIORITIES - 4 )
+#define appconfGPIO_TASK_PRIORITY              ( configMAX_PRIORITIES - 2 )
 
 #endif /* APP_CONF_H_ */

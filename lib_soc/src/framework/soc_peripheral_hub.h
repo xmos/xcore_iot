@@ -14,6 +14,13 @@
 #define SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM 0x00000001
 #define SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM 0x00000002
 
+typedef enum {
+    SOC_DMA_TX_REQUEST,
+    SOC_DMA_RX_REQUEST
+} soc_dma_request_t;
+
+#define SOC_PERIPHERAL_DMA_TX 0x00
+
 struct soc_peripheral;
 
 #ifndef __XC__
@@ -48,7 +55,9 @@ soc_dma_ring_buf_t *soc_peripheral_tx_dma_ring_buf(
 chanend soc_peripheral_ctrl_chanend(
         soc_peripheral_t device);
 
-void soc_peripheral_hub_dma_request(void);
+void soc_peripheral_hub_dma_request(
+        soc_peripheral_t device,
+        soc_dma_request_t request);
 
 uint32_t soc_peripheral_interrupt_status(
         soc_peripheral_t device);
@@ -70,6 +79,11 @@ void soc_peripheral_rx_dma_ready(
 
 uint16_t soc_peripheral_rx_dma_xfer(
         chanend c,
+        void *data,
+        uint16_t max_length);
+
+uint16_t soc_peripheral_rx_dma_direct_xfer(
+        soc_peripheral_t device,
         void *data,
         uint16_t max_length);
 

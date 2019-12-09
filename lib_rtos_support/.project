@@ -24,7 +24,7 @@
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
-			<triggers>clean,full,incremental,</triggers>
+			<triggers></triggers>
 			<arguments>
 			</arguments>
 		</buildCommand>

@@ -11,6 +11,7 @@ void soc_peripheral_function_code_tx(
 {
     uint32_t state = rtos_interrupt_mask_all();
 
+    /* TODO: Only output 8bit code + end token */
     chan_out_word(c, code);
 
     rtos_interrupt_mask_set(state);
@@ -49,6 +50,7 @@ void soc_peripheral_function_code_rx(
 {
     uint32_t state = rtos_interrupt_mask_all();
 
+    /* TODO: Only input 8bit code + end token */
     chan_in_word(c, code);
 
     rtos_interrupt_mask_set(state);

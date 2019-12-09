@@ -18,7 +18,7 @@ void ethernet_driver_send_packet(
 {
     soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
     soc_dma_ring_tx_buf_set(tx_ring_buf, packet, n);
-    soc_peripheral_hub_dma_request();
+    soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 }
 
 void ethernet_driver_send_packet_wait_for_copy(
@@ -28,7 +28,7 @@ void ethernet_driver_send_packet_wait_for_copy(
 {
     soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
     soc_dma_ring_tx_buf_set(tx_ring_buf, packet, n);
-    soc_peripheral_hub_dma_request();
+    soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 
     while (( soc_dma_ring_tx_buf_get(tx_ring_buf, NULL, NULL)) != packet ) {
         ;   /* Wait until the packet we just sent is recieved */

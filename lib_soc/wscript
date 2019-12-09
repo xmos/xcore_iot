@@ -10,7 +10,7 @@ def use_module(bld):
 
     sources = bld.path.ant_glob(['src/**/*.xc', 'src/**/*.c', 'src/**/*.S'])
     includes = ['src/framework', 'src/peripherals']
-    optional_headers = 'soc_conf.h'
+    optional_headers = ['soc_conf.h', 'rtos_peripherals_conf.h']
 
     bld.env.MODULE_XCC_FLAGS = bld.env.XCC_FLAGS + ['-Os']
 

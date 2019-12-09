@@ -86,7 +86,7 @@ int mic_array_isr(soc_peripheral_t device)
         if (xQueueSendFromISR(mic_data_queue, &rx_buf, &xYieldRequired) == errQUEUE_FULL) {
 //            debug_printf("mic data lost\n", length);
             soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
-            soc_peripheral_hub_dma_request();
+            soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
         }
     }
 
@@ -109,7 +109,7 @@ void audio_pipeline_stage1(void *arg)
 
         new_rx_buffer = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
         soc_dma_ring_rx_buf_set(rx_ring_buf, new_rx_buffer, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
-        soc_peripheral_hub_dma_request();
+        soc_peripheral_hub_dma_request(mic_dev, SOC_DMA_RX_REQUEST);
 
         //debug_printf("Mic power: %d\n", frame_power(mic_data));
 

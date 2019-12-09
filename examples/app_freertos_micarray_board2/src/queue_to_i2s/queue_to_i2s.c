@@ -45,7 +45,7 @@ void vqueue_to_i2s(void *arg)
         }
 
         soc_dma_ring_tx_buf_set(tx_ring_buf, audio_data, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
-        soc_peripheral_hub_dma_request();
+        soc_peripheral_hub_dma_request(i2s_dev, SOC_DMA_TX_REQUEST);
     }
 }
 

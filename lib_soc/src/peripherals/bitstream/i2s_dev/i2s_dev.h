@@ -12,6 +12,7 @@
 #include "i2s_dev_conf_defaults.h"
 
 void i2s_dev(
+        soc_peripheral_t *peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,

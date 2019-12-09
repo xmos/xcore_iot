@@ -27,6 +27,7 @@
 #define I2SCONF_MASTER_CLK_FREQ     (24576000)
 #define I2SCONF_AUDIO_FRAME_LEN     (256)
 #define I2SCONF_FRAME_BUF_CNT       (4)
+#define I2SCONF_OFF_TILE            (1)
 
 /* I2C Config */
 #define I2CCONF_MAX_BUF_LEN         (128)
