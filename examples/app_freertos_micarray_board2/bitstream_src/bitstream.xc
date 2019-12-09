@@ -130,6 +130,7 @@ void tile0_device_instantiate(
                 p_pdm_mics);
 
         gpio_dev(
+                NULL,
                 t0_gpio_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
                 t0_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
                 t0_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
@@ -144,7 +145,6 @@ void tile1_device_instantiate(
     chan eth_dev_ctrl_ch;
     chan i2c_dev_ctrl_ch;
     chan t1_gpio_dev_ctrl_ch;
-    chan t1_gpio_dev_irq_ch;
 
     i2c_master_if i_i2c[1];
     p_rst_shared <: 0xF;
@@ -154,7 +154,7 @@ void tile1_device_instantiate(
             unsafe chanend eth_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, eth_dev_ctrl_ch, null};
             unsafe chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
             unsafe chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, i2c_dev_ctrl_ch, null};
-            unsafe chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t1_gpio_dev_ctrl_ch, t1_gpio_dev_irq_ch};
+            unsafe chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t1_gpio_dev_ctrl_ch, null};
 
             device_register(mic_dev_ch, eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch);
             soc_peripheral_hub();
@@ -187,10 +187,12 @@ void tile1_device_instantiate(
 
                 i2c_dev(i2c_dev_ctrl_ch, i_i2c[0]);
 
-                gpio_dev(null,
-                         null,
-                         t1_gpio_dev_ctrl_ch,
-                         t1_gpio_dev_irq_ch);
+                gpio_dev(
+                        bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_B],
+                        null,
+                        null,
+                        t1_gpio_dev_ctrl_ch,
+                        null);
             }
         }
     }

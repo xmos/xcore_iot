@@ -165,18 +165,18 @@ void soc_peripheral_tx_dma_direct_xfer(
     int max_length;
 
     if (device->rx_ring_buf.desc != NULL) {
-        rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL);
-        if (rx_buf != NULL) {
-            xassert(length <= max_length);
-            memcpy(rx_buf, data, length);
-            soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
+        while ((rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL)) == NULL);
 
-            rtos_lock_acquire(0);
-            device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
-            rtos_lock_release(0);
+        xassert(length <= max_length);
+        memcpy(rx_buf, data, length);
+        soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
 
-            rtos_irq(device->core_id, device->irq_source_id);
-        }
+        rtos_lock_acquire(0);
+        device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
+        rtos_lock_release(0);
+
+        rtos_irq(device->core_id, device->irq_source_id);
+
     }
 }
 
@@ -185,6 +185,17 @@ void soc_peripheral_irq_send(
         uint32_t status)
 {
     chan_out_word(c, status);
+}
+
+void soc_peripheral_irq_direct_send(
+        soc_peripheral_t device,
+        uint32_t status)
+{
+    rtos_lock_acquire(0);
+    device->interrupt_status |= status;
+    rtos_lock_release(0);
+
+    rtos_irq(device->core_id, device->irq_source_id);
 }
 
 void soc_peripheral_handler_register(

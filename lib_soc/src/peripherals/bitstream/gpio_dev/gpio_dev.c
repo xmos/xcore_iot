@@ -4,9 +4,7 @@
 
 #include "rtos_support.h"
 #include "xcore_c.h"
-
-#include "soc_peripheral_control.h"
-#include "soc_peripheral_hub.h"
+#include "soc.h"
 
 #include "gpio_dev.h"
 
@@ -29,6 +27,7 @@ static port get_port( gpio_id_t gpio_id )
 }
 
 void gpio_dev(
+        soc_peripheral_t peripheral,
         chanend data_to_dma_c,
         chanend data_from_dma_c,
         chanend ctrl_c,
@@ -60,7 +59,14 @@ void gpio_dev(
                 mask = ( 0x1 << event_id );
                 port_disable_trigger( get_port(event_id) );
                 port_irq_flags |= mask;
-                soc_peripheral_irq_send( irq_c, mask );
+                if ( irq_c != 0 )
+                {
+                    soc_peripheral_irq_send( irq_c, mask );
+                }
+                else if ( peripheral != NULL )
+                {
+                    soc_peripheral_irq_direct_send( peripheral, mask );
+                }
             }
             else if( event_id == GPIO_TOTAL_PORT_CNT )
             {
