@@ -6,6 +6,8 @@
 
 #include "xassert.h"
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 #define MAX_PERIPHERALS 8
 
 int soc_dma_ring_buf_length_get(
@@ -127,8 +129,7 @@ uint16_t soc_peripheral_rx_dma_direct_xfer(
     int more;
 
     if (device->tx_ring_buf.desc != NULL) {
-        tx_buf = soc_dma_ring_buf_get(&device->tx_ring_buf, &length, &more);
-        if (tx_buf != NULL) {
+        if (soc_dma_ring_buf_get(&device->tx_ring_buf, NULL, NULL) != NULL) {
 
             total_length = soc_dma_ring_buf_length_get(&device->tx_ring_buf);
             xassert(total_length <= max_length);
@@ -172,20 +173,29 @@ void soc_peripheral_tx_dma_direct_xfer(
 {
     void *rx_buf;
     int max_length;
+    int more;
 
     if (device->rx_ring_buf.desc != NULL) {
-        while ((rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL)) == NULL);
+        while (soc_dma_ring_buf_get(&device->rx_ring_buf, NULL, NULL) == NULL);
 
+        max_length = soc_dma_ring_buf_length_get(&device->rx_ring_buf);
         xassert(length <= max_length);
-        memcpy(rx_buf, data, length);
-        soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
+
+        do {
+            rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, &more);
+            xassert(rx_buf != NULL);
+            max_length = MIN(length, max_length);
+            length -= max_length;
+            memcpy(rx_buf, data, max_length);
+            soc_dma_ring_buf_release(&device->rx_ring_buf, 1, max_length);
+            data += max_length;
+        } while (more);
 
         rtos_lock_acquire(0);
         device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
         rtos_lock_release(0);
 
         rtos_irq(device->core_id, device->irq_source_id);
-
     }
 }
 
@@ -303,19 +313,28 @@ static void device_to_dma(soc_peripheral_t device)
 {
     void *rx_buf;
     transacting_chanend_t tc;
-    int max_length;
-    uint32_t length;
+    int length;
+    uint32_t total_length;
+    int more;
 
-    rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, NULL);
-    xassert(rx_buf != NULL);
+    length = soc_dma_ring_buf_length_get(&device->rx_ring_buf);
 
     chan_init_transaction_slave(&device->rx_c, &tc);
-    t_chan_in_word(&tc, &length);
-    xassert(length <= max_length);
-    t_chan_in_buf_byte(&tc, rx_buf, length);
-    chan_complete_transaction(&device->rx_c, &tc);
+    t_chan_in_word(&tc, &total_length);
+    xassert(total_length <= length);
 
-    soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
+    do {
+        rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &length, &more);
+        xassert(rx_buf != NULL);
+
+        length = MIN(total_length, length);
+        total_length -= length;
+
+        t_chan_in_buf_byte(&tc, rx_buf, length);
+        soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
+    } while (more);
+
+    chan_complete_transaction(&device->rx_c, &tc);
 
     rtos_lock_acquire(0);
     device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;

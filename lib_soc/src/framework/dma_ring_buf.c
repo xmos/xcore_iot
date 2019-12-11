@@ -36,9 +36,8 @@
 struct soc_dma_buf_desc {
     void *buf;
     uint16_t length;
-    volatile uint16_t status  : 2;
-    uint16_t tx_last : 1;
-
+    volatile uint8_t status;
+    uint8_t last;
 };
 
 static int add(
@@ -70,7 +69,7 @@ void soc_dma_ring_buf_init(
     for (i = 0; i < ring_buf->desc_count; i++) {
         ring_buf->desc[i].buf = NULL;
         ring_buf->desc[i].length = 0;
-        ring_buf->desc[i].tx_last = 1;
+        ring_buf->desc[i].last = 1;
         ring_buf->desc[i].status = SOC_DMA_BUF_DESC_STATUS_READY;
     }
 }
@@ -84,6 +83,7 @@ void soc_dma_ring_rx_buf_set(
 
     ring_buf->desc[ring_buf->app_next].buf = buf;
     ring_buf->desc[ring_buf->app_next].length = length;
+    ring_buf->desc[ring_buf->app_next].last = 1;
     asm volatile( "" ::: "memory" );
     ring_buf->desc[ring_buf->app_next].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
 
@@ -120,7 +120,7 @@ void soc_dma_ring_tx_buf_set(
 
     ring_buf->desc[ring_buf->app_next].buf = buf;
     ring_buf->desc[ring_buf->app_next].length = length;
-    ring_buf->desc[ring_buf->app_next].tx_last = 1;
+    ring_buf->desc[ring_buf->app_next].last = 1;
     asm volatile( "" ::: "memory" );
     ring_buf->desc[ring_buf->app_next].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
 
@@ -146,7 +146,7 @@ void soc_dma_ring_tx_buf_sg_set(
 
     ring_buf->desc[index].buf = buf;
     ring_buf->desc[index].length = length;
-    ring_buf->desc[index].tx_last = last;
+    ring_buf->desc[index].last = last;
     asm volatile( "" ::: "memory" );
     ring_buf->desc[index].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
 
@@ -168,7 +168,7 @@ void *soc_dma_ring_tx_buf_get(
             *length = ring_buf->desc[ring_buf->done_next].length;
         }
         if (more != NULL) {
-            *more = !ring_buf->desc[ring_buf->done_next].tx_last;
+            *more = !ring_buf->desc[ring_buf->done_next].last;
         }
 
         buf = ring_buf->desc[ring_buf->done_next].buf;
@@ -194,7 +194,7 @@ int soc_dma_ring_buf_length_get(
         for (i = ring_buf->dma_next; !last; i = add(ring_buf, i, 1)) {
             xassert(ring_buf->desc[i].status == SOC_DMA_BUF_DESC_STATUS_WAITING);
             total_length += ring_buf->desc[i].length;
-            last = ring_buf->desc[i].tx_last;
+            last = ring_buf->desc[i].last;
         }
         return total_length;
     } else {
@@ -215,7 +215,7 @@ void *soc_dma_ring_buf_get(
             *length = ring_buf->desc[ring_buf->dma_next].length;
         }
         if (more != NULL) {
-            *more = !ring_buf->desc[ring_buf->dma_next].tx_last;
+            *more = !ring_buf->desc[ring_buf->dma_next].last;
         }
         return ring_buf->desc[ring_buf->dma_next].buf;
     } else {
