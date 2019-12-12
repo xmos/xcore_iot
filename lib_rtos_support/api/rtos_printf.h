@@ -73,7 +73,7 @@ It also provides sprintf and snprintf functions.
 #define DEBUG_PRINT_ENABLE0 DEBUG_PRINT_ENABLE_ALL
 #endif
 
-#if defined(__cplusplus)
+#if defined(__cplusplus) || defined(__XC__)
 extern "C" {
 #endif
 
@@ -97,7 +97,7 @@ size_t rtos_sprintf(char *str, const char *fmt, ...);
  */
 size_t rtos_printf(const char *fmt, ...);
 
-#if defined(__cplusplus)
+#if defined(__cplusplus) || defined(__XC__)
 }
 #endif
 
