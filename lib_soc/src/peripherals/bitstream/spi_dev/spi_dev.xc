@@ -11,6 +11,11 @@
 #include "debug_print.h"
 #define DEVICE_ID 0
 
+#define TEST_DEVICE     0
+#define TEST_ASYNC_SPI  0
+#define TEST_SYNC_SPI   0
+
+#if TEST_DEVICE
 unsafe
 {
 static unsafe void spi_dev_handler(
@@ -160,66 +165,81 @@ static unsafe void spi_dev_handler(
     }
 }
 }
+#endif
 
-//static void spi_test_handler(
-//        client spi_master_async_if spi)
-//{
-//    while(1)
-//    {
-//    uint8_t indata[10];
-//        uint8_t outdata[10];
-//        uint8_t * movable inbuf = indata;
-//        uint8_t * movable outbuf = outdata;
-//
-//        debug_printf("Sending SPI traffic (async)");
-//        delay_microseconds(30);
-//
-//        // Fill the out buffer with data
-//        outbuf[0] = 0xab;
-//        outbuf[1] = 0xcc;
-//        outbuf[2] = 0; outbuf[3] = 0; outbuf[4] = 0;
-//        outbuf[5] = 0xfe;
-//        spi.begin_transaction(0, 100, SPI_MODE_0);
-//
-//        // This call passes the buffers over to the SPI task, after
-//        // this the application cannot access the buffers until
-//        // the retrieve_transfer_buffers_8 function is called.
-//        spi.init_transfer_array_8(move(inbuf),
-//                                  move(outbuf),
-//                                  6);
-//
-//        // Your application can do calculation here whilst the spi task
-//        // transfers the buffer.
-//
-//        // A select will wait for an event. In this case the event we are waiting
-//        // for is the transfer_complete() notification event from the SPI task.
-//        select {
-//            case spi.transfer_complete():
-//               // Once the transfer is complete, we can retrieve the
-//               // buffers back into the inbuf and outbuf pointer variables
-//               spi.retrieve_transfer_buffers_8(inbuf, outbuf);
-//               break;
-//        }
-//
-//        spi.end_transaction(100);
-//
-//
-//        delay_microseconds(40);
-//        spi.begin_transaction(0, 100, SPI_MODE_0);
-//        outbuf[0] = 0x22;
-//        spi.init_transfer_array_8(move(inbuf),
-//                                  move(outbuf),
-//                                  1);
-//        select {
-//            case spi.transfer_complete():
-//               spi.retrieve_transfer_buffers_8(inbuf, outbuf);
-//               break;
-//        }
-//        spi.end_transaction(100);
-//
-//        debug_printf("Done.");
-//    }
-//}
+#if TEST_ASYNC_SPI
+static void spi_test_async_handler(
+        client spi_master_async_if spi)
+{
+    while(1)
+    {
+        uint8_t indata[10];
+        uint8_t outdata[10];
+        uint8_t * movable inbuf = indata;
+        uint8_t * movable outbuf = outdata;
+
+        debug_printf("Sending SPI traffic (async)\n");
+        delay_microseconds(30000);
+
+        // Fill the out buffer with data
+        outbuf[0] = 0xde;
+        outbuf[1] = 0xad;
+        outbuf[2] = 0xbe;
+        outbuf[3] = 0xef;
+        outbuf[4] = 0;
+        outbuf[5] = 0xff;
+        spi.begin_transaction(0, 125, SPI_MODE_1);
+
+        // This call passes the buffers over to the SPI task, after
+        // this the application cannot access the buffers until
+        // the retrieve_transfer_buffers_8 function is called.
+        spi.init_transfer_array_8(move(inbuf),
+                                  move(outbuf),
+                                  6);
+        select {
+            case spi.transfer_complete():
+               spi.retrieve_transfer_buffers_8(inbuf, outbuf);
+               break;
+        }
+
+        spi.end_transaction(100);
+
+        delay_microseconds(30000);
+    }
+}
+#endif
+
+#if TEST_SYNC_SPI
+static void spi_test_handler(
+        client spi_master_if spi)
+{
+    while(1)
+    {
+        uint8_t inbuf[10];
+        uint8_t outbuf[10];
+
+        debug_printf("Sending SPI traffic (sync)\n");
+        delay_microseconds(30000);
+
+        // Fill the out buffer with data
+        outbuf[0] = 0xde;
+        outbuf[1] = 0xad;
+        outbuf[2] = 0xbe;
+        outbuf[3] = 0xef;
+        outbuf[4] = 0;
+        outbuf[5] = 0xff;
+        spi.begin_transaction(0, 125, SPI_MODE_1);
+
+        for(int i=0; i< 6; i++)
+        {
+            inbuf[i] = spi.transfer8(outbuf[i]);
+        }
+
+        spi.end_transaction(100);
+        delay_microseconds(30000);
+    }
+}
+#endif
 
 void spi_dev(
         soc_peripheral_t *peripheral,
@@ -234,19 +254,40 @@ void spi_dev(
         clock ?clk0,
         clock ?clk1)
 {
-    spi_master_async_if i_spi[1];
+#if TEST_SYNC_SPI
+    spi_master_if i_spi[1];
+#endif
+#if ( TEST_ASYNC_SPI || TEST_DEVICE )
+    spi_master_async_if i_spi_a[1];
+#endif
 
     par {
-        spi_master_async(i_spi, 1,
+#if TEST_ASYNC_SPI
+        spi_master_async(i_spi_a, 1,
                          p_sclk, p_mosi, p_miso, p_ss,
                          num_slaves,
                          clk0, clk1);
-//        unsafe
-//        {
-//            spi_dev_handler(peripheral,
-//                            data_to_dma_c, data_from_dma_c, ctrl_c,
-//                            i_spi[0]);
-//        }
-//        spi_test_handler(i_spi[0]);
+
+        spi_test_async_handler(i_spi_a[0]);
+#endif
+#if TEST_DEVICE
+        spi_master_async(i_spi_a, 1,
+                         p_sclk, p_mosi, p_miso, p_ss,
+                         num_slaves,
+                         clk0, clk1);
+        unsafe
+        {
+            spi_dev_handler(peripheral,
+                            data_to_dma_c, data_from_dma_c, ctrl_c,
+                            i_spi[0]);
+        }
+#endif
+
+#if TEST_SYNC_SPI
+        spi_master(i_spi, 1,
+                p_sclk, p_mosi, p_miso, p_ss,
+                num_slaves, clk0);
+        spi_test_handler(i_spi[0]);
+#endif
     }
 }
