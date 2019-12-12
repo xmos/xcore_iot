@@ -17,7 +17,7 @@
 #include "otp_board_info.h"
 
 void eth_dev(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,
@@ -36,7 +36,7 @@ void eth_dev(
         otp_ports_t &?otp_ports);
 
 void eth_dev_smi_singleport(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,

@@ -18,6 +18,7 @@ extern "C" {
 #endif //__XC__
 
 void gpio_dev(
+        soc_peripheral_t peripheral,
         chanend data_to_dma_c,
         chanend data_from_dma_c,
         chanend ctrl_c,

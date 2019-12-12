@@ -36,9 +36,8 @@
 struct soc_dma_buf_desc {
     void *buf;
     uint16_t length;
-    volatile uint16_t status  : 2;
-    uint16_t tx_last : 1;
-
+    volatile uint8_t status;
+    uint8_t last;
 };
 
 static int add(
@@ -70,7 +69,7 @@ void soc_dma_ring_buf_init(
     for (i = 0; i < ring_buf->desc_count; i++) {
         ring_buf->desc[i].buf = NULL;
         ring_buf->desc[i].length = 0;
-        ring_buf->desc[i].tx_last = 1;
+        ring_buf->desc[i].last = 1;
         ring_buf->desc[i].status = SOC_DMA_BUF_DESC_STATUS_READY;
     }
 }
@@ -84,6 +83,7 @@ void soc_dma_ring_rx_buf_set(
 
     ring_buf->desc[ring_buf->app_next].buf = buf;
     ring_buf->desc[ring_buf->app_next].length = length;
+    ring_buf->desc[ring_buf->app_next].last = 1;
     asm volatile( "" ::: "memory" );
     ring_buf->desc[ring_buf->app_next].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
 
@@ -120,59 +120,40 @@ void soc_dma_ring_tx_buf_set(
 
     ring_buf->desc[ring_buf->app_next].buf = buf;
     ring_buf->desc[ring_buf->app_next].length = length;
-    ring_buf->desc[ring_buf->app_next].tx_last = 1;
+    ring_buf->desc[ring_buf->app_next].last = 1;
     asm volatile( "" ::: "memory" );
     ring_buf->desc[ring_buf->app_next].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
 
     ring_buf->app_next = add(ring_buf, ring_buf->app_next, 1);
 }
 
-#if 0
-/* Scatter gather not ready yet */
-
-static void set_tx_desc_buf(
+void soc_dma_ring_tx_buf_sg_set(
         soc_dma_ring_buf_t *ring_buf,
-        int n,
         void *buf,
         uint16_t length,
-        int last)
+        int index,
+        int buf_count)
 {
-    n = add(ring_buf, ring_buf->app_next, n);
-
-    while (ring_buf->desc[n].status != SOC_DMA_BUF_DESC_STATUS_READY);
-
-    ring_buf->desc[n].buf = buf;
-    ring_buf->desc[n].length = length;
-    ring_buf->desc[n].tx_last = last;
-    asm volatile( "" ::: "memory" );
-    ring_buf->desc[n].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
-}
-
-void soc_dma_ring_tx_buf_set_sg(
-        soc_dma_ring_buf_t *ring_buf,
-        int buf_count,
-        void *buf[],
-        uint16_t lengths[])
-{
-    int i;
+    int last;
 
     xassert(buf_count <= ring_buf->desc_count);
+    xassert(index < buf_count);
 
-    for (i = 1; i < buf_count; i++) {
-        set_tx_desc_buf(ring_buf, i, buf[i], lengths[i], i == (buf_count - 1));
-    }
+    last = (index == (buf_count - 1));
+    index = add(ring_buf, ring_buf->app_next, index);
 
-    while (ring_buf->desc[ring_buf->app_next].status != SOC_DMA_BUF_DESC_STATUS_READY);
+    while (ring_buf->desc[index].status != SOC_DMA_BUF_DESC_STATUS_READY);
 
-    ring_buf->desc[ring_buf->app_next].buf = buf[0];
-    ring_buf->desc[ring_buf->app_next].length = lengths[0];
-    ring_buf->desc[ring_buf->app_next].tx_last = (buf_count == 1);
+    ring_buf->desc[index].buf = buf;
+    ring_buf->desc[index].length = length;
+    ring_buf->desc[index].last = last;
     asm volatile( "" ::: "memory" );
-    ring_buf->desc[ring_buf->app_next].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
+    ring_buf->desc[index].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
 
-    ring_buf->app_next = add(ring_buf, ring_buf->app_next, buf_count);
+    if (index == ring_buf->app_next) {
+        ring_buf->app_next = add(ring_buf, ring_buf->app_next, buf_count);
+    }
 }
-#endif
 
 void *soc_dma_ring_tx_buf_get(
         soc_dma_ring_buf_t *ring_buf,
@@ -187,7 +168,7 @@ void *soc_dma_ring_tx_buf_get(
             *length = ring_buf->desc[ring_buf->done_next].length;
         }
         if (more != NULL) {
-            *more = !ring_buf->desc[ring_buf->done_next].tx_last;
+            *more = !ring_buf->desc[ring_buf->done_next].last;
         }
 
         buf = ring_buf->desc[ring_buf->done_next].buf;
@@ -197,6 +178,28 @@ void *soc_dma_ring_tx_buf_get(
     }
 
     return buf;
+}
+
+/*
+ * To be called only by the peripheral hub
+ */
+int soc_dma_ring_buf_length_get(
+        soc_dma_ring_buf_t *ring_buf)
+{
+    int total_length = 0;
+    int last = 0;
+    int i;
+
+    if (ring_buf->desc[ring_buf->dma_next].status == SOC_DMA_BUF_DESC_STATUS_WAITING) {
+        for (i = ring_buf->dma_next; !last; i = add(ring_buf, i, 1)) {
+            xassert(ring_buf->desc[i].status == SOC_DMA_BUF_DESC_STATUS_WAITING);
+            total_length += ring_buf->desc[i].length;
+            last = ring_buf->desc[i].last;
+        }
+        return total_length;
+    } else {
+        return 0;
+    }
 }
 
 /*
@@ -212,7 +215,7 @@ void *soc_dma_ring_buf_get(
             *length = ring_buf->desc[ring_buf->dma_next].length;
         }
         if (more != NULL) {
-            *more = !ring_buf->desc[ring_buf->dma_next].tx_last;
+            *more = !ring_buf->desc[ring_buf->dma_next].last;
         }
         return ring_buf->desc[ring_buf->dma_next].buf;
     } else {

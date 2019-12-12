@@ -88,7 +88,7 @@ static void eth_dev_tx(
  *                      reading library user guide for details.
  */
 static unsafe void eth_dev_handler(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,
@@ -117,8 +117,8 @@ static unsafe void eth_dev_handler(
 
     while (1)
     {
-        if (peripheral != NULL && *peripheral != NULL) {
-            frame_len = soc_peripheral_rx_dma_direct_xfer(*peripheral, frame_buf, sizeof(frame_buf));
+        if (isnull(data_from_dma_c) && peripheral != NULL) {
+            frame_len = soc_peripheral_rx_dma_direct_xfer(peripheral, frame_buf, sizeof(frame_buf));
 
             if (frame_len > 0) {
                 eth_dev_tx(i_eth_tx, frame_buf, frame_len);
@@ -248,10 +248,10 @@ static unsafe void eth_dev_handler(
 
             i_eth_rx.get_packet(desc, frame_buf, ETHERNET_MAX_PACKET_SIZE);
 
-            if (peripheral != NULL && *peripheral != NULL) {
-                soc_peripheral_tx_dma_direct_xfer(*peripheral, frame_buf, desc.len);
-            } else if (!isnull(data_to_dma_c)) {
+            if (!isnull(data_to_dma_c)) {
                 soc_peripheral_tx_dma_xfer(data_to_dma_c, frame_buf, desc.len);
+            } else if (peripheral != NULL) {
+                soc_peripheral_tx_dma_direct_xfer(peripheral, frame_buf, desc.len);
             }
 
             no_tx = 1;
@@ -275,7 +275,7 @@ static unsafe void eth_dev_handler(
 
 
 void eth_dev(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,
@@ -332,7 +332,7 @@ void eth_dev(
 }
 
 void eth_dev_smi_singleport(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,

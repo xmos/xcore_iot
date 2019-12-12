@@ -101,6 +101,10 @@ void soc_peripheral_irq_send(
         chanend c,
         uint32_t status);
 
+void soc_peripheral_irq_direct_send(
+        soc_peripheral_t device,
+        uint32_t status);
+
 void soc_peripheral_hub();
 
 #ifdef __XC__
