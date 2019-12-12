@@ -48,13 +48,27 @@ out port p_leds_oen             = PORT_LED_OEN;
 
 in port p_buttons               = PORT_BUT_A_TO_D;
 
-port p_exp_0                    = PORT_EXPANSION_1;
-port p_exp_1                    = PORT_EXPANSION_3;
-port p_exp_2                    = PORT_EXPANSION_5;
-port p_exp_3                    = PORT_EXPANSION_7;
+//port p_exp_0                    = PORT_EXPANSION_1;
+//port p_exp_1                    = PORT_EXPANSION_3;
+//port p_exp_2                    = PORT_EXPANSION_5;
+//port p_exp_3                    = PORT_EXPANSION_7;
 port p_exp_4                    = PORT_EXPANSION_9;
 //port p_exp_5                    = PORT_EXPANSION_10;
 port p_exp_6                    = PORT_EXPANSION_12;
+
+/*-----------------------------------------------------------*/
+/* SPI defines */
+/*-----------------------------------------------------------*/
+#define SPI_TILE_NO 0
+#define SPI_TILE tile[SPI_TILE_NO]
+
+out buffered port:32 p_sclk     = PORT_EXPANSION_1;
+out port p_ss[1]                = {PORT_EXPANSION_3};
+in buffered port:32 p_miso      = PORT_EXPANSION_5;
+out buffered port:32 p_mosi     = PORT_EXPANSION_7;
+
+clock spi_clk0   = on SPI_TILE: XS1_CLKBLK_4;
+clock spi_clk1   = on SPI_TILE: XS1_CLKBLK_5;
 
 /*-----------------------------------------------------------*/
 /* Mic Array defines */
@@ -123,6 +137,7 @@ void tile0_device_instantiate(
 {
     chan t0_gpio_dev_ctrl_ch;
     chan t0_gpio_dev_irq_ch;
+    chan spi_dev_ctrl_ch;
 
     micarray_dev_init(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics);
 
@@ -130,8 +145,9 @@ void tile0_device_instantiate(
         unsafe {
             unsafe chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
             unsafe chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t0_gpio_dev_ctrl_ch, t0_gpio_dev_irq_ch};
+            unsafe chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, spi_dev_ctrl_ch, null};
 
-            device_register(mic_dev_ch, eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch);
+            device_register(mic_dev_ch, eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch);
             soc_peripheral_hub();
         }
 
@@ -147,6 +163,14 @@ void tile0_device_instantiate(
                 null,
                 t0_gpio_dev_ctrl_ch,
                 t0_gpio_dev_irq_ch);
+
+        spi_dev(&bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
+                null,
+                null,
+                spi_dev_ctrl_ch,
+                p_sclk, p_mosi, p_miso, p_ss,
+                1,
+                spi_clk0, spi_clk1);
     }
 }
 

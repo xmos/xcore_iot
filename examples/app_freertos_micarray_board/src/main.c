@@ -17,6 +17,7 @@
 #include "UDPCommandInterpreter.h"
 #include "thruput_test.h"
 #include "gpio_ctrl.h"
+#include "spi_test.h"
 #include "app_conf.h"
 
 eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
@@ -58,6 +59,8 @@ void soc_tile0_main(
 
     /* Create the gpio control task */
     gpio_ctrl_create( appconfGPIO_TASK_PRIORITY );
+
+    spi_test_create( appconfTHRUPUT_TEST_TASK_PRIORITY );
 
     /* Initialize FreeRTOS IP*/
     initalize_FreeRTOS_IP();

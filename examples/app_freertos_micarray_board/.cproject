@@ -234,6 +234,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2c_driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2s_driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/common}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.1044652766" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -545,15 +548,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/portable/XCC/XCORE200}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/FreeRTOS/Source/portable/XCC/Tracing}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/doc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/doc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/src/xtcp_uip}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/src/xtcp_uip/igmp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/doc/rst}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/doc/rst/images}&quot;"/>
@@ -565,12 +565,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/doc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/doc/rst}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/doc/rst}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/doc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/doc/rst}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/src/xtcp_uip/autoip}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xtcp/src/xtcp_uip/dhcpc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/src}&quot;"/>
@@ -583,7 +580,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/src}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array_board_support/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2c/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_rtos_support/api}&quot;"/>
@@ -596,6 +592,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2c_driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2s_driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/common}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.1106009663" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -963,6 +962,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2c_driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/i2s_driver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/common}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.464576551" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>

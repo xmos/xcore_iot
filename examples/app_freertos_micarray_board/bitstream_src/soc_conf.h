@@ -17,6 +17,7 @@
 #define SOC_I2S_PERIPHERAL_USED             (1)
 #define SOC_MICARRAY_PERIPHERAL_USED        (1)
 #define SOC_SDRAM_PERIPHERAL_USED           (0)
+#define SOC_SPI_PERIPHERAL_USED             (1)
 
 /*
  * Peripheral Configuration
