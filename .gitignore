@@ -13,6 +13,7 @@
 **/pdf/*
 **/html/*
 **/.settings/*
+.metadata
 *.pyc
 **/test_results.csv
 **/.venv/**
