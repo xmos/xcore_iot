@@ -9,9 +9,9 @@ INCLUDE_DIRS = $(SOURCE_DIRS)
 
 XCC_FLAGS = -Os -g -report -fxscope -Wxcore-fptrgroup -DDEBUG_PRINT_ENABLE=1
 
-USED_MODULES = FreeRTOS(>=10.2.1) FreeRTOS-Plus-TCP(>=10.2.1) lib_soc(>=0.5.0)
+USED_MODULES = FreeRTOS(>=10.2.1) FreeRTOS-Plus(>=10.2.1) lib_soc(>=0.5.0)
 
-VERBOSE = 1
+VERBOSE = 0
 
 #=============================================================================
 # The following part of the Makefile includes the common build infrastructure
