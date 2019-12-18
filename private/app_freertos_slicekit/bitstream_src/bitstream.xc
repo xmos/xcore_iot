@@ -107,12 +107,15 @@ void tile0_device_instantiate(
             soc_peripheral_hub();
         }
 
-        micarray_dev(
-                &bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
-                null,
-                null,
-                null,
-                p_pdm_mics);
+        {
+            while (soc_tile0_bitstream_initialized() == 0);
+            micarray_dev(
+                    bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
+                    null,
+                    null,
+                    null,
+                    p_pdm_mics);
+        }
     }
 }
 
@@ -121,7 +124,8 @@ void tile1_device_instantiate(
         chanend sdram_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
     par {
-        eth_dev(eth_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
+        eth_dev(NULL,
+                eth_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
                 eth_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
                 eth_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
                 p_eth_rxclk, p_eth_rxerr, p_eth_rxd, p_eth_rxdv,
