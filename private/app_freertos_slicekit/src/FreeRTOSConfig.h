@@ -96,7 +96,7 @@ your application. */
 #define INCLUDE_xQueueGetMutexHolder            1
 
 /* A header file that defines trace macro can be included here. */
-#include "xcore_trace.h"
+//#include "xcore_trace.h"
 
 #endif /* FREERTOS_CONFIG_H */
 
