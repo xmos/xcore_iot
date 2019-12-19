@@ -1,0 +1,34 @@
+VERSION = 0.5.0
+
+DEPENDENT_MODULES = lib_rtos_support \
+                    lib_otpinfo      \
+                    lib_ethernet     \
+                    lib_random       \
+                    lib_mic_array    \
+                    lib_i2c          \
+                    lib_i2s          \
+                    lib_sdram
+
+MODULE_XCC_FLAGS = $(XCC_FLAGS) -Os
+
+OPTIONAL_HEADERS += soc_conf.h
+OPTIONAL_HEADERS += rtos_peripherals_conf.h
+
+SOURCE_DIRS = src/framework    \
+              src/peripherals/bitstream/ethernet_dev  \
+              src/peripherals/bitstream/gpio_dev      \
+              src/peripherals/bitstream/i2c_dev       \
+              src/peripherals/bitstream/i2s_dev       \
+              src/peripherals/bitstream/micarray_dev  \
+              src/peripherals/bitstream/sdram_dev     \
+              src/peripherals/bsp/common              \
+              src/peripherals/bsp/common/freertos     \
+              src/peripherals/bsp/ethernet_driver     \
+              src/peripherals/bsp/gpio_driver         \
+              src/peripherals/bsp/i2c_driver          \
+              src/peripherals/bsp/i2s_driver          \
+              src/peripherals/bsp/micarray_driver     \
+              src/peripherals/bsp/sdram_driver
+
+EXPORT_INCLUDE_DIRS = $(SOURCE_DIRS)
+INCLUDE_DIRS = $(EXPORT_INCLUDE_DIRS)

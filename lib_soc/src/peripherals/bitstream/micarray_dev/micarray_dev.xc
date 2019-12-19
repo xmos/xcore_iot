@@ -56,7 +56,7 @@ static unsafe void mic_array_init(
     memset(mic_array_data.comp, 0, sizeof(mic_array_data.comp));
 
     //Configure the decimator
-    mic_array_data.dcc.frame_size_log2 = MIC_ARRAY_MAX_FRAME_SIZE_LOG2;
+    mic_array_data.dcc.len = MIC_ARRAY_MAX_FRAME_SIZE_LOG2;
     mic_array_data.dcc.apply_dc_offset_removal = 1;
     mic_array_data.dcc.index_bit_reversal = 0;
     mic_array_data.dcc.windowing_function = NULL;
@@ -139,7 +139,10 @@ void micarray_dev_init(
         out port p_pdm_clk,
         buffered in port:32 p_pdm_mics)
 {
-    mic_array_setup_sdr(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics, MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER);
+    configure_clock_src_divide(pdmclk, p_mclk, MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER/2);
+    configure_port_clock_output(p_pdm_clk, pdmclk);
+    configure_in_port(p_pdm_mics, pdmclk);
+    start_clock(pdmclk);
 }
 
 void micarray_dev_task(

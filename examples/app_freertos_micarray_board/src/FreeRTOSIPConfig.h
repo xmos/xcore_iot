@@ -74,7 +74,6 @@ console before the network is connected then a UDP port after the network has
 connected. */
 extern void vLoggingPrintf( const char *pcFormatString, ... );
 
-//#define vLoggingPrintf(...) tracePRINTF_LOG(__VA_ARGS__)
 #define vLoggingPrintf(...) debug_printf(__VA_ARGS__)
 
 /* Set to 1 to print out debug messages.  If ipconfigHAS_DEBUG_PRINTF is set to

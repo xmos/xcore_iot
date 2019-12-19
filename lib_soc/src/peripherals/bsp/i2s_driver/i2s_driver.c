@@ -1,7 +1,7 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include "soc.h"
-#include "bsp/common/soc_bsp_common.h"
+#include "soc_bsp_common.h"
 #include "bitstream_devices.h"
 
 #if( SOC_I2S_PERIPHERAL_USED == 0 )
