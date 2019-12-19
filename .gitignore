@@ -16,6 +16,7 @@
 *.pyc
 **/test_results.csv
 **/.venv/**
+.metadata
 
 # waf build files
 .lock-waf_*
