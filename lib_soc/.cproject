@@ -234,6 +234,46 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_rtos_support/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/lib_xassert/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/lib_trycatch/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/lib_i2s/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array/lib_mic_array/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2c/lib_i2c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/lib_trycatch/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array/lib_mic_array/src/fir}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_gpio/lib_gpio/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_logging/lib_logging/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/lib_i2s/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.8003410" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -596,6 +636,46 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_rtos_support/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/lib_xassert/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/lib_trycatch/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/lib_i2s/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array/lib_mic_array/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2c/lib_i2c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/lib_trycatch/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array/lib_mic_array/src/fir}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_gpio/lib_gpio/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_logging/lib_logging/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/lib_i2s/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.392287563" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -963,6 +1043,46 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_rtos_support/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xassert/lib_xassert/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/lib_trycatch/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/lib_i2s/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array/lib_mic_array/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2c/lib_i2c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_trycatch/lib_trycatch/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_mic_array/lib_mic_array/src/fir}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_gpio/lib_gpio/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/lib_otpinfo/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/lib_sdram/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_logging/lib_logging/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_locks/lib_locks/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/lib_i2s/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/lib_ethernet/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.1290482666" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>
