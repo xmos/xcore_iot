@@ -2,9 +2,9 @@
 
 function trace_help() {
     echo "Options:"
-    echo "--ncaplay / -n  : Connect to a stream over TCP and pipe into aplay"
-    echo "--udpcli  / -u  : Connect to CLI"
-    echo "--thruput / -t  : Run the throughput test"
+    echo "--ncaplay / -n IP : Connect to a stream over TCP and pipe into aplay"
+    echo "--udpcli  / -u IP : Connect to CLI"
+    echo "--thruput / -t IP : Run the throughput test"
     return
 }
 
