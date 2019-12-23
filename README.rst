@@ -12,12 +12,14 @@ lib_soc provides a system on chip like platform in which an RTOS application may
 
 Example FreeRTOS applications demonstrating how to use the library can be found in the examples folder.
 
-All dependent libraries are included as git submodules. These can be obtained by cloning this repository with the following command:
-git clone --recurse-submodules git@github.com:xmos/lib_rtos_support.git
+All dependent libraries are included as git submodules. These can be obtained by cloning this repository with the following command::
 
-Or by running the following commands inside the repository:
-git submodules init
-git submodules update
+     git clone --recurse-submodules git@github.com:xmos/lib_rtos_support.git
+
+Or by running the following commands inside the repository::
+
+     git submodules init
+     git submodules update
 
 An xTIMEcomposer workspace may be created in the root of this repository. All library projects, the FreeRTOS demo project found in FreeRTOS/FreeRTOS/Demo/XCORE200_XCC/RTOSDemo, and the two example application projects may all be imported into the workspace.
 
