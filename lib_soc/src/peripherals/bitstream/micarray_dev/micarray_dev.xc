@@ -56,7 +56,7 @@ static unsafe void mic_array_init(
     memset(mic_array_data.comp, 0, sizeof(mic_array_data.comp));
 
     //Configure the decimator
-    mic_array_data.dcc.frame_size_log2 = MIC_ARRAY_MAX_FRAME_SIZE_LOG2;
+    mic_array_data.dcc.len = MIC_ARRAY_MAX_FRAME_SIZE_LOG2;
     mic_array_data.dcc.apply_dc_offset_removal = 1;
     mic_array_data.dcc.index_bit_reversal = 0;
     mic_array_data.dcc.windowing_function = NULL;
@@ -104,7 +104,7 @@ static void mic_array_get_next_time_domain_frame_sh(
 
 [[combinable]]
 void micarray_dev_to_dma(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         streaming chanend c_ds_output[])
 {
@@ -116,17 +116,16 @@ void micarray_dev_to_dma(
         select {
         case mic_array_get_next_time_domain_frame_sh(c_ds_output[0], c_ds_output):
             unsafe {
-                if (peripheral != NULL && *peripheral != NULL) {
-                    soc_peripheral_tx_dma_direct_xfer(
-                            *peripheral,
-                            mic_array_data.current->data[0],
-                            sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
-                } else if (!isnull(data_to_dma_c)) {
+                if (!isnull(data_to_dma_c)) {
                     soc_peripheral_tx_dma_xfer(
                             data_to_dma_c,
                             mic_array_data.current->data[0],
                             sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
-
+                } else if (peripheral != NULL) {
+                    soc_peripheral_tx_dma_direct_xfer(
+                            peripheral,
+                            mic_array_data.current->data[0],
+                            sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
                 }
             }
             break;
@@ -140,7 +139,10 @@ void micarray_dev_init(
         out port p_pdm_clk,
         buffered in port:32 p_pdm_mics)
 {
-    mic_array_setup_sdr(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics, MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER);
+    configure_clock_src_divide(pdmclk, p_mclk, MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER/2);
+    configure_port_clock_output(p_pdm_clk, pdmclk);
+    configure_in_port(p_pdm_mics, pdmclk);
+    start_clock(pdmclk);
 }
 
 void micarray_dev_task(
@@ -156,7 +158,7 @@ void micarray_dev_task(
 }
 
 void micarray_dev(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,

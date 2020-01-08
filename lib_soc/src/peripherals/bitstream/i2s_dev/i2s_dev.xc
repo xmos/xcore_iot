@@ -17,11 +17,11 @@ static int32_t audio_samples[1][I2SCONF_AUDIO_FRAME_LEN];
 
 [[distributable]]
 static void i2s_handler(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         server i2s_frame_callback_if i2s,
         fifo_t sample_buffer)
 {
-    int buf_num;
+    int buf_num = 0;
     int sample_num = 0;
 
     while (1) {
@@ -34,9 +34,8 @@ static void i2s_handler(
 #if I2SCONF_OFF_TILE
             fifo_get_blocking(sample_buffer, &buf_num);
 #else
-            if (peripheral != NULL && *peripheral != NULL) {
-                while (soc_peripheral_rx_dma_direct_xfer(*peripheral, audio_samples[0], sizeof(audio_samples[0])) == 0);
-                buf_num = 0;
+            if (peripheral != NULL) {
+                while (soc_peripheral_rx_dma_direct_xfer(peripheral, audio_samples[0], sizeof(audio_samples[0])) == 0);
             }
 #endif
             break;
@@ -52,9 +51,8 @@ static void i2s_handler(
 #if I2SCONF_OFF_TILE
                 fifo_get_blocking(sample_buffer, &buf_num);
 #else
-                if (peripheral != NULL && *peripheral != NULL) {
-                    while (soc_peripheral_rx_dma_direct_xfer(*peripheral, audio_samples[0], sizeof(audio_samples[0])) == 0);
-                    buf_num = 0;
+                if (peripheral != NULL) {
+                    while (soc_peripheral_rx_dma_direct_xfer(peripheral, audio_samples[0], sizeof(audio_samples[0])) == 0);
                 }
 #endif
                 sample_num = 0;
@@ -102,7 +100,7 @@ static void i2s_decoupler(
 #endif
 
 void i2s_dev(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,

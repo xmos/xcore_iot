@@ -55,7 +55,6 @@ int gpio_isr( soc_peripheral_t device )
     configASSERT(device == bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A]);
 
     status = soc_peripheral_interrupt_status(device);
-    status = ( 1 << status );
     xTaskNotifyFromISR( gpio_handler_task, status, eSetBits, &xYieldRequired );
 
     return xYieldRequired;

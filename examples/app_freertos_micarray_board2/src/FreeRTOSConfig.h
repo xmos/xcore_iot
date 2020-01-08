@@ -66,7 +66,7 @@ your application. */
 #define configENABLE_DEBUG_PRINTF 1
 
 /* Define to map sprintf and snprintf to the
- * debug versions in lib_logging */
+ * lite versions in lib_rtos_support */
 #define configUSE_DEBUG_SPRINTF 1
 
 /* Define to enable debug prints from tasks.c */
@@ -96,7 +96,6 @@ your application. */
 #define INCLUDE_xQueueGetMutexHolder            1
 
 /* A header file that defines trace macro can be included here. */
-#include "xcore_trace.h"
 
 #endif /* FREERTOS_CONFIG_H */
 

@@ -2,7 +2,7 @@
 
 function trace_help() {
     echo "Options:"
-    echo "--ncaplay / -n  : Listen for stream over TCP and pipe into aplay"
+    echo "--ncaplay / -n  : Connect to a stream over TCP and pipe into aplay"
     echo "--udpcli  / -u  : Connect to CLI"
     echo "--thruput / -t  : Run the throughput test"
     return
@@ -13,13 +13,13 @@ then
     if [ "$1" == "--help" ] || [ "$1" == "-h" ]
     then
         trace_help
-    elif [ "$1" == "--ncaplay" ] || [ "$1" == "-n" ]
-    then
-        ncat --recv-only -l -p 54321 | aplay --format=S32_LE --rate=48000 --file-type=raw --buffer-size=14000
     fi
 elif [ $# == 2 ]
 then
-    if [ "$1" == "--udpcli" ] || [ "$1" == "-u" ]
+    if [ "$1" == "--ncaplay" ] || [ "$1" == "-n" ]
+    then
+        ncat --recv-only $2 54321 | aplay --format=S32_LE --rate=48000 --file-type=raw --buffer-size=14000
+    elif [ "$1" == "--udpcli" ] || [ "$1" == "-u" ]
     then
         ncat -u $2 5432
     elif [ "$1" == "--thruput" ] || [ "$1" == "-t" ]

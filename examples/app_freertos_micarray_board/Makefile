@@ -1,29 +1,20 @@
-# The TARGET variable determines what target system the application is
-# compiled for. It either refers to an XN file in the source directories
-# or a valid argument for the --target option when compiling
-TARGET = MIC_ARRAY_1V3
 
-# The APP_NAME variable determines the name of the final .xe file. It should
-# not include the .xe postfix. If left blank the name will default to
-# the project name
-APP_NAME = app_freertos_micarray_board
+TARGET = MIC-ARRAY-1V3
 
-# The USED_MODULES variable lists other module used by the application.
-USED_MODULES = 
+APP_NAME = 
 
-# The flags passed to xcc when building the application
-# You can also set the following to override flags for a particular language:
-# XCC_XC_FLAGS, XCC_C_FLAGS, XCC_ASM_FLAGS, XCC_CPP_FLAGS
-# If the variable XCC_MAP_FLAGS is set it overrides the flags passed to
-# xcc for the final link (mapping) stage.
-XCC_FLAGS = -g -O3 -Xmapper --map -Xmapper MAPFILE -report -save-temps
+SOURCE_DIRS = bitstream_src src src/NetworkManager src/audio_hw_config src/audio_pipeline src/gpio_ctrl src/queue_to_i2s src/queue_to_tcp_stream src/thruput_test src/udp_cli src/spi_test
 
-# The XCORE_ARM_PROJECT variable, if set to 1, configures this
-# project to create both xCORE and ARM binaries.
-XCORE_ARM_PROJECT = 0
+INCLUDE_DIRS = $(SOURCE_DIRS)
 
-# The VERBOSE variable, if set to 1, enables verbose output from the make system.
+XCC_FLAGS = -Os -g -report -fxscope -Wxcore-fptrgroup -DDEBUG_PRINT_ENABLE=1
+
+USED_MODULES = FreeRTOS(>=10.2.1) FreeRTOS-Plus(>=10.2.1) lib_soc(>=0.5.0)
+
 VERBOSE = 0
 
+#=============================================================================
+# The following part of the Makefile includes the common build infrastructure
+# for compiling XMOS applications. You should not need to edit below here.
 XMOS_MAKE_PATH ?= ../..
 -include $(XMOS_MAKE_PATH)/xcommon/module_xcommon/build/Makefile.common
