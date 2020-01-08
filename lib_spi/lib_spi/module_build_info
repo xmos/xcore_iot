@@ -1,0 +1,3 @@
+VERSION=3.0.4
+
+XCC_FLAGS_spi_async.xc = $(XCC_FLAGS) -Wno-reinterpret-alignment

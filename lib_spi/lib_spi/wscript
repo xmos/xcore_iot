@@ -1,0 +1,6 @@
+def use_module(bld):
+    bld.env['XCC_FLAGS_spi_async.xc'] = bld.env.XCC_FLAGS + [
+        '-Wno-reinterpret-alignment'
+    ]
+    source = bld.path.ant_glob('src/*.xc')
+    bld.module(source=source, includes=['api'], version='3.0.4')
