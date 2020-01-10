@@ -1,0 +1,2 @@
+xmake clean
+xmake -j

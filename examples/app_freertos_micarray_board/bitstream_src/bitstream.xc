@@ -62,13 +62,14 @@ port p_exp_6                    = PORT_EXPANSION_12;
 #define SPI_TILE_NO 0
 #define SPI_TILE tile[SPI_TILE_NO]
 
-out buffered port:32 p_sclk     = PORT_EXPANSION_1;
-out port p_ss[1]                = {PORT_EXPANSION_3};
-in buffered port:32 p_miso      = PORT_EXPANSION_5;
-out buffered port:32 p_mosi     = PORT_EXPANSION_7;
+//out buffered port:32 p_sclk     = PORT_EXPANSION_1;
+//out port p_ss[1]                = {PORT_EXPANSION_3};
+//in buffered port:32 p_miso      = PORT_EXPANSION_5;
+//out buffered port:32 p_mosi     = PORT_EXPANSION_7;
+//
+//clock spi_clk0   = on SPI_TILE: XS1_CLKBLK_1;
+//clock spi_clk1   = on SPI_TILE: XS1_CLKBLK_2;
 
-clock spi_clk0   = on SPI_TILE: XS1_CLKBLK_4;
-clock spi_clk1   = on SPI_TILE: XS1_CLKBLK_5;
 
 /*-----------------------------------------------------------*/
 /* Mic Array defines */
@@ -153,12 +154,12 @@ void tile0_device_instantiate(
         {
             while (soc_tile0_bitstream_initialized() == 0);
             par {
-                micarray_dev(
+               /* micarray_dev(
                         bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
                         null,
                         null,
                         null,
-                        p_pdm_mics);
+                        p_pdm_mics);*/
 
                 gpio_dev(
                         bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A],
@@ -167,13 +168,10 @@ void tile0_device_instantiate(
                         t0_gpio_dev_ctrl_ch,
                         null);
 
-            spi_dev(&bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
-                    null,
-                    null,
-                    spi_dev_ctrl_ch,
-                    p_sclk, p_mosi, p_miso, p_ss,
-                    1,
-                    spi_clk0, spi_clk1);
+                spi_dev(&bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
+                        null,
+                        null,
+                        spi_dev_ctrl_ch);
             }
         }
     }

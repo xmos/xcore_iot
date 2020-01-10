@@ -12,11 +12,11 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="com.xmos.cdt.toolchain.88660124" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration artifactName="app_freertos_micarray_board" buildProperties="" description="" id="com.xmos.cdt.toolchain.88660124" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.xmos.cdt.toolchain.88660124.1354204302" name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.1276604324" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser;org.eclipse.cdt.core.GNU_ELF" id="com.xmos.cdt.core.platform.1952507627" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-							<builder arguments="CONFIG=Default" id="com.xmos.cdt.builder.base.1851841395" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+							<builder arguments="-j" id="com.xmos.cdt.builder.base.1851841395" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -282,6 +282,21 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev/spi_fast}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.1049421091" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -687,11 +702,19 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_i2s/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_sdram/doc/rst}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev/spi_fast}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.1400070759" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -1107,6 +1130,21 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_dev/spi_fast}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.554769025" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>
@@ -1127,5 +1165,9 @@
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/app_freertos_micarray_board"/>
+		</configuration>
+	</storageModule>
 </cproject>

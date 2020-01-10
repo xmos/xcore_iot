@@ -21,36 +21,33 @@ static SemaphoreHandle_t xSem_spi;
 RTOS_IRQ_ISR_ATTR
 void spi_ISR(soc_peripheral_t device)
 {
+    QueueHandle_t queue = soc_peripheral_app_data(device);
     BaseType_t xYieldRequired = pdFALSE;
     uint32_t status;
 
     status = soc_peripheral_interrupt_status(device);
 
     if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM) {
-//        soc_dma_ring_buf_t *rx_ring_buf;
-//        uint8_t *frame_buffer;
-//        int frame_length;
-//
-//        rx_ring_buf = soc_peripheral_rx_dma_ring_buf(device);
-//
-//        while( ( frame_buffer = soc_dma_ring_rx_buf_get(rx_ring_buf, &frame_length) ) != NULL )
+        soc_dma_ring_buf_t *rx_ring_buf;
+        int length;
+        uint8_t *rx_buf;
+
+        configASSERT(device == bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A]);
+
+        rx_ring_buf = soc_peripheral_rx_dma_ring_buf(device);
+        rx_buf = soc_dma_ring_rx_buf_get(rx_ring_buf, &length);
+        configASSERT(rx_buf != NULL);
+
+        if (xQueueSendFromISR(queue, &rx_buf, &xYieldRequired) == errQUEUE_FULL) {
+            soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, sizeof(uint8_t) * 4096);
+            soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
+        }
+
+//        while( ( rx_buf = soc_dma_ring_rx_buf_get(rx_ring_buf, &length) ) != NULL )
 //        {
-//            BaseType_t xResult;
-//            xResult = xTimerPendFunctionCallFromISR(
-//                    (PendedFunction_t) vDeferredReceive,
-//                    frame_buffer,
-//                    frame_length,
-//                    &xYieldRequired );
-//
-//            if (xResult != pdPASS)
-//            {
-//                iptraceETHERNET_RX_EVENT_LOST();
-//                debug_printf("eth data lost 3\n", frame_length);
-//
-//                /* Give the buffer back to the DMA engine */
-//                soc_dma_ring_rx_buf_set(rx_ring_buf, frame_buffer, ETH_BUF_SIZE);
-//                soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
-//            }
+//            vPortFree(rx_buf);
+//            soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, sizeof(uint8_t) * 4096);
+//            soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
 //        }
         xSemaphoreGiveFromISR( xSem_spi, &xYieldRequired );
     }
@@ -98,7 +95,9 @@ soc_peripheral_t spi_driver_init(
             app_data,
             isr_core,
             isr);
+
     spi_init();
+
     return device;
 }
 
@@ -123,15 +122,18 @@ static void spi_driver_transaction(
     if( rx_buf != NULL )
     {
         soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
-        soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, (uint16_t)len);
-        soc_peripheral_hub_dma_request(dev, SOC_DMA_RX_REQUEST);
-        if( block )
-        {
-            // replace with semaphore
-            while (( soc_dma_ring_rx_buf_get(rx_ring_buf, NULL)) != rx_buf ) {
-                ;   /* Wait until we receive data */
-            }
-        }
+
+//        uint8_t *new_rx_buffer;
+//        new_rx_buffer = pvPortMalloc( sizeof(uint8_t)*4096 );
+//        soc_dma_ring_rx_buf_set(rx_ring_buf, new_rx_buffer, sizeof(uint8_t) * 4096 );
+//        soc_peripheral_hub_dma_request(dev, SOC_DMA_RX_REQUEST);
+//        if( block )
+//        {
+//            // replace with semaphore
+////            while (( soc_dma_ring_rx_buf_get(rx_ring_buf, NULL)) != rx_buf ) {
+//                ;   /* Wait until we receive data */
+////            }
+//        }
     }
 
     if( tx_buf != NULL )
@@ -146,32 +148,40 @@ static void spi_driver_transaction(
             vPortFree(tmpbuf);
         }
 
-        if( block )
-        {
-            // replace with semaphore
-            while (( soc_dma_ring_tx_buf_get(tx_ring_buf, NULL, NULL)) != tx_buf ) {
-                ;   /* Wait until the data we just sent is received */
-            }
-        }
+//        if( block )
+//        {
+//            // replace with semaphore
+//            while (( soc_dma_ring_tx_buf_get(tx_ring_buf, NULL, NULL)) != tx_buf ) {
+//                ;   /* Wait until the data we just sent is received */
+//            }
+//        }
     }
 }
 
-void spi_driver_setup(
+void spi_device_init(
         soc_peripheral_t dev,
-        unsigned speed_in_khz,
-        spi_mode_t mode)
+        unsigned cs_port_bit,
+        unsigned cpol,
+        unsigned cpha,
+        unsigned clock_divide,
+        unsigned cs_to_data_delay_ns,
+        unsigned byte_setup_ns)
 {
-    chanend c = soc_peripheral_ctrl_chanend(dev);
+    chanend c_ctrl = soc_peripheral_ctrl_chanend(dev);
 
-    soc_peripheral_function_code_tx(c, SPI_DEV_SETUP);
+    soc_peripheral_function_code_tx(c_ctrl, SPI_DEV_INIT);
 
     soc_peripheral_varlist_tx(
-            c, 2,
-            sizeof(unsigned), &speed_in_khz,
-            sizeof(spi_mode_t), &mode);
+            c_ctrl, 6,
+            sizeof(unsigned), &cs_port_bit,
+            sizeof(unsigned), &cpol,
+            sizeof(unsigned), &cpha,
+            sizeof(unsigned), &clock_divide,
+            sizeof(unsigned), &cs_to_data_delay_ns,
+            sizeof(unsigned), &byte_setup_ns);
 }
 
-void spi_driver_transmit(
+void spi_transmit(
         soc_peripheral_t dev,
         uint8_t* tx_buf,
         size_t len)

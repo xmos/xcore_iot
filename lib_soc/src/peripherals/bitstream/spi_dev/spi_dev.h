@@ -12,19 +12,12 @@
 #include "spi_dev_conf_defaults.h"
 #include "spi_dev_ctrl.h"
 
-#include "spi.h"
+#include "spi_fast.h"
 
 void spi_dev(
         soc_peripheral_t *peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
-        chanend ?ctrl_c,
-        out buffered port:32 sclk,
-        out buffered port:32 ?mosi,
-        in buffered port:32 ?miso,
-        out port p_ss[num_slaves],
-        static const size_t num_slaves,
-        clock ?clk0,
-        clock ?clk1);
+        chanend ?ctrl_c);
 
 #endif /* SPI_DEV_H_ */

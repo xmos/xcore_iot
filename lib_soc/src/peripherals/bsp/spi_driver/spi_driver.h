@@ -25,14 +25,19 @@ soc_peripheral_t spi_driver_init(
 
 void spi_ISR(soc_peripheral_t device);
 
-/* Setup speed and mode */
-void spi_driver_setup(
+/* Initialize device */
+void spi_device_init(
         soc_peripheral_t dev,
-        unsigned speed_in_khz,
-        spi_mode_t mode);
+        unsigned cs_port_bit,
+        unsigned cpol,
+        unsigned cpha,
+        unsigned clock_divide,
+        unsigned cs_to_data_delay_ns,
+        unsigned byte_setup_ns);
 
-/* Send data to DMA for SPI device */
-void spi_driver_transmit(
+/* Send data to DMA for SPI device
+ * This function only transmits, and ignores response */
+void spi_transmit(
         soc_peripheral_t dev,
         uint8_t* tx_buf,
         size_t len);
