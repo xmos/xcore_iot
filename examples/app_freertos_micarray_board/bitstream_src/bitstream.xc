@@ -154,6 +154,7 @@ void tile0_device_instantiate(
         {
             while (soc_tile0_bitstream_initialized() == 0);
             par {
+#warning Mic array device disabled
                /* micarray_dev(
                         bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
                         null,
@@ -168,10 +169,10 @@ void tile0_device_instantiate(
                         t0_gpio_dev_ctrl_ch,
                         null);
 
-                spi_dev(&bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
-                        null,
-                        null,
-                        spi_dev_ctrl_ch);
+                spi_master_dev(&bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
+                               null,
+                               null,
+                               spi_dev_ctrl_ch);
             }
         }
     }

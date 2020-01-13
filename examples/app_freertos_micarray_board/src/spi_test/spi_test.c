@@ -1,5 +1,6 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
+#include <string.h>
 #include "app_conf.h"
 
 /* FreeRTOS headers */
@@ -12,70 +13,178 @@
 
 /* BSP/bitstream headers */
 #include "bitstream_devices.h"
-#include "spi_driver.h"
+#include "spi_master_driver.h"
 
 /* App headers */
 #include "spi_test.h"
 #include "debug_print.h"
 
-#define appconfSPI_BUFFER       4096
-#define appconfSPI_SPEED_KHZ    125
-#define appconfSPI_MODE         SPI_MODE_3
-
-
-#define appconfSPI_CS_PORT_BIT  0
-#define appconfSPI_CPOL         0
-#define appconfSPI_CPHA         0
-
-/* 100 MHz / (2 * 7) / 2 = 3.57 MHz SCK. aardvark slave max br is 4MHz */
-#define appconfSPI_CLOCKDIV     7
-
-/* tsu_cs on WF200 is 3 ns. aardvark is 10000 (10 us) */
-#define appconfSPI_CS_TO_DATA_DELAY_NS  10000
-
-/* td on WF200 is 0 ns. aardvark is 4000 (4 us) */
-#define appconfSPI_BYTE_SETUP_NS    4000
-
+    /* Test Params */
+#define        test_interval_ms   100
+#define        tx_len             4
+static uint8_t test_msg[tx_len] = { 0xDE, 0xAD, 0xBE, 0xEF };
 
 static void spi_test(void *arg)
 {
     soc_peripheral_t spi_dev = arg;
-    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(spi_dev);
-
     QueueHandle_t queue = soc_peripheral_app_data(spi_dev);
-
-    spi_device_init(spi_dev,
-                    appconfSPI_CS_PORT_BIT,
-                    appconfSPI_CPOL,
-                    appconfSPI_CPHA,
-                    appconfSPI_CLOCKDIV,
-                    appconfSPI_CS_TO_DATA_DELAY_NS,
-                    appconfSPI_BYTE_SETUP_NS);
-
     uint8_t *tx_buf;
     uint8_t *rx_buf;
+    int test = 0;
+
+    spi_master_device_init(spi_dev,
+                           appconfSPI_CS_PORT_BIT,
+                           appconfSPI_CPOL,
+                           appconfSPI_CPHA,
+                           appconfSPI_CLOCKDIV,
+                           appconfSPI_CS_TO_DATA_DELAY_NS,
+                           appconfSPI_BYTE_SETUP_NS);
 
     for(;;)
     {
-        debug_printf("sent\n");
-        tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*4 );
+        vTaskDelay( pdMS_TO_TICKS( test_interval_ms ) );
+        switch(test++)
+        {
+        default:
+        case 0:
+            debug_printf("SPI Test Start\n");
+            break;
+        case 1: /* transmit only */
+//            debug_printf("Transmit Test Start\n");
+//
+//            tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+//            memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
+//            spi_transmit(spi_dev, tx_buf, tx_len );
+//
+//            debug_printf("\tSent:\n");
+//            for(int i=0; i<tx_len; i++)
+//            {
+//                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
+//            }
+//
+//            debug_printf("Transmit Test Complete\n");
+            break;
+        case 2: /* receive only */
+//            debug_printf("Receive Test Start\n");
+//
+//            rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+//
+//            spi_request(spi_dev, rx_buf, tx_len );
+//            xQueueReceive(queue, &rx_buf, portMAX_DELAY);
+//
+//            debug_printf("\tReceived:\n");
+//            for(int i=0; i<tx_len; i++)
+//            {
+//                debug_printf("\trx[%d]:%x\n", i, rx_buf[i]);
+//            }
+//
+//            if(rx_buf != NULL)
+//            {
+//                vPortFree(rx_buf);
+//            }
+//
+//            debug_printf("Receive Test Complete\n");
+            break;
+        case 3: /* transmit only blocking */
+//            debug_printf("Transmit Blocking Test Start\n");
+//
+//            tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+//            memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
+//            spi_transmit(spi_dev, tx_buf, tx_len );
+//
+//            debug_printf("\tSent:\n");
+//            for(int i=0; i<tx_len; i++)
+//            {
+//                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
+//            }
+//
+//            debug_printf("Transmit Blocking Test Complete\n");
+            break;
+        case 4: /* receive only blocking */
+//            debug_printf("Receive Blocking Test Start\n");
+//
+//            rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+//
+//            spi_request_blocking(spi_dev, rx_buf, tx_len );
+//
+//            debug_printf("\tReceived:\n");
+//            for(int i=0; i<tx_len; i++)
+//            {
+//                debug_printf("\trx[%d]:%x\n", i, rx_buf[i]);
+//            }
+//
+//            if(rx_buf != NULL)
+//            {
+//                vPortFree(rx_buf);
+//            }
+//
+//            debug_printf("Receive Blocking Test Complete\n");
+            break;
+        case 5: /* transaction */
+            debug_printf("Transaction Test Start\n");
 
-//        rx_buf = soc_dma_ring_rx_buf_get(rx_ring_buf, &len);
-        tx_buf[0] = 0xDE;
-        tx_buf[1] = 0xAD;
-        tx_buf[2] = 0xBE;
-        tx_buf[3] = 0xEF;
+            tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+            rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
 
-//        spi_transmit(spi_dev, tx_buf, 4 );
-        spi_transaction(spi_dev, tx_buf, tx_buf, 4);
-//        spi_transaction_blocking(spi_dev, tx_buf, rx_buf, 4);
+            memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
 
-        xQueueReceive(queue, &rx_buf, portMAX_DELAY);
-        debug_printf("task rx: %d %d %d %d\n", rx_buf[0],rx_buf[1], rx_buf[2], rx_buf[3]);
+            spi_transaction(spi_dev, rx_buf, tx_buf, tx_len );
 
-//        vPortFree(rx_buf);
+            debug_printf("\tSent:\n");
+            for(int i=0; i<tx_len; i++)
+            {
+                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
+            }
 
-        vTaskDelay( pdMS_TO_TICKS( 100 ) );
+            xQueueReceive(queue, &rx_buf, portMAX_DELAY);
+
+            debug_printf("\tReceived:\n");
+            for(int i=0; i<tx_len; i++)
+            {
+                debug_printf("\trx[%d]:%x\n", i, rx_buf[i]);
+            }
+
+            if(rx_buf != NULL)
+            {
+                vPortFree(rx_buf);
+            }
+
+            debug_printf("Transaction Test Complete\n");
+            break;
+        case 6: /* transaction blocking */
+            debug_printf("Transaction Blocking Test Start\n");
+
+            tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+            rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+
+            memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
+
+            spi_transaction_blocking(spi_dev, rx_buf, tx_buf, tx_len );
+
+            debug_printf("\tSent:\n");
+            for(int i=0; i<tx_len; i++)
+            {
+                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
+            }
+
+            debug_printf("\tReceived:\n");
+            for(int i=0; i<tx_len; i++)
+            {
+                debug_printf("\trx[%d]:%x\n", i, rx_buf[i]);
+            }
+
+            if(rx_buf != NULL)
+            {
+                vPortFree(rx_buf);
+            }
+
+            debug_printf("Transaction Blocking Test Complete\n");
+            break;
+        case 7: /* end */
+            test = 0;
+            debug_printf("SPI Test Finished\n");
+            break;
+        }
     }
 }
 
@@ -89,14 +198,14 @@ void spi_test_create( UBaseType_t priority )
 
     queue = xQueueCreate(1, sizeof(void *));
 
-    dev = spi_driver_init(
+    dev = spi_master_driver_init(
             BITSTREAM_SPI_DEVICE_A,             /* Initializing SPI device A */
             2,                                  /* Give this device 1 RX buffer descriptors */
-            appconfSPI_BUFFER * sizeof(uint8_t), /* Make each DMA RX buffer */
+            0,                                  /* Make each DMA RX buffer */
             2,                                  /* Give this device 1 TX buffer descriptors */
-            queue,                               /* Queue associated with this device */
+            queue,                              /* Queue associated with this device */
             0,                                  /* This device's interrupts should happen on core 0 */
-            (rtos_irq_isr_t) spi_ISR);          /* The ISR to handle this device's interrupts */
+            (rtos_irq_isr_t) spi_master_ISR);   /* The ISR to handle this device's interrupts */
 
     xTaskCreate(spi_test, "spi_test", portTASK_STACK_DEPTH(spi_test), dev, priority, NULL);
 }

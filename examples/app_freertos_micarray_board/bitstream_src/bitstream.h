@@ -11,7 +11,7 @@
 #include "i2c_dev.h"
 #include "i2s_dev.h"
 #include "gpio_dev.h"
-#include "spi_dev.h"
+#include "spi_master_dev.h"
 #endif //__XC__
 
 /*

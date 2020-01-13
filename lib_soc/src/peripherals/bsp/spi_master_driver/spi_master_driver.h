@@ -1,20 +1,13 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
-#ifndef SPI_DRIVER_H_
-#define SPI_DRIVER_H_
+#ifndef SPI_MASTER_DRIVER_H_
+#define SPI_MASTER_DRIVER_H_
 
 #include <stdint.h>
 #include "soc.h"
-#include "spi_dev_ctrl.h"
+#include "spi_master_dev_ctrl.h"
 
-typedef enum spi_mode_t {
-  SPI_MODE_0, /**< SPI Mode 0 - Polarity = 0, Clock Edge = 1 */
-  SPI_MODE_1, /**< SPI Mode 1 - Polarity = 0, Clock Edge = 0 */
-  SPI_MODE_2, /**< SPI Mode 2 - Polarity = 1, Clock Edge = 0 */
-  SPI_MODE_3, /**< SPI Mode 3 - Polarity = 1, Clock Edge = 1 */
-} spi_mode_t;
-
-soc_peripheral_t spi_driver_init(
+soc_peripheral_t spi_master_driver_init(
         int device_id,
         int rx_desc_count,
         int rx_buf_size,
@@ -23,10 +16,10 @@ soc_peripheral_t spi_driver_init(
         int isr_core,
         rtos_irq_isr_t isr);
 
-void spi_ISR(soc_peripheral_t device);
+void spi_master_ISR(soc_peripheral_t device);
 
 /* Initialize device */
-void spi_device_init(
+void spi_master_device_init(
         soc_peripheral_t dev,
         unsigned cs_port_bit,
         unsigned cpol,
@@ -76,4 +69,4 @@ void spi_transaction_blocking(
         uint8_t* tx_buf,
         size_t len);
 
-#endif /* SPI_DRIVER_H_ */
+#endif /* SPI_MASTER_DRIVER_H_ */
