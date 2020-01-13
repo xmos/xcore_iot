@@ -41,7 +41,8 @@ void spi_request(
         uint8_t* rx_buf,
         size_t len);
 
-/* Send data, block until transaction is complete */
+/* Send data, discarding response
+ * Blocks until transaction is complete */
 void spi_transmit_blocking(
         soc_peripheral_t dev,
         uint8_t* tx_buf,

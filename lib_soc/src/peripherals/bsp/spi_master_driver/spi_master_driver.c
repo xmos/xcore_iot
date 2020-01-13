@@ -91,17 +91,12 @@ static void spi_driver_transaction(
     if(tx_buf == NULL)
     {
         tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*len );
+        memset(tx_buf, 0x00, len);
     }
     if( tx_buf != NULL )
     {
         soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
         soc_dma_ring_tx_buf_set(tx_ring_buf, tx_buf, (uint16_t)len );
-
-        uint8_t* tmpbuf;
-        while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != NULL )
-        {
-            vPortFree(tmpbuf);
-        }
     }
 
     soc_peripheral_function_code_tx(c, SPI_MASTER_DEV_TRANSACTION);
@@ -167,6 +162,13 @@ void spi_transmit_blocking(
                            NULL,
                            tx_buf,
                            len);
+    /* Cleanup tx */
+    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
+    uint8_t* tmpbuf;
+    while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) == tx_buf )
+    {
+        vPortFree(tmpbuf);
+    }
 }
 
 void spi_request_blocking(
