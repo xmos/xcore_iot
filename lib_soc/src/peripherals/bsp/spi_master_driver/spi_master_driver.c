@@ -174,10 +174,14 @@ void spi_request_blocking(
         uint8_t* rx_buf,
         size_t len)
 {
+    QueueHandle_t queue = soc_peripheral_app_data(dev);
+
     spi_driver_transaction(dev,
                            rx_buf,
                            NULL,
                            len);
+
+    xQueueReceive(queue, &rx_buf, portMAX_DELAY);
 }
 
 void spi_transaction(
