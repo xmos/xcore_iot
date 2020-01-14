@@ -53,12 +53,6 @@ static void spi_test(void *arg)
     {
         vTaskDelay( pdMS_TO_TICKS( test_interval_ms ) );
 
-        /* Cleanup tx */
-        while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != NULL )
-        {
-            vPortFree(tmpbuf);
-        }
-
         switch(test++)
         {
         default:
@@ -78,6 +72,10 @@ static void spi_test(void *arg)
 //            {
 //                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
 //            }
+
+            /* Cleanup tx */
+            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
+            vPortFree(tmpbuf);
 
             debug_printf("Transmit Test Complete: %d\n", time - start);
             break;
@@ -117,6 +115,10 @@ static void spi_test(void *arg)
 //            {
 //                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
 //            }
+
+            /* Cleanup tx */
+            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
+            vPortFree(tmpbuf);
 
             debug_printf("Transmit Blocking Test Complete: %d\n", time - start);
             break;
@@ -171,6 +173,10 @@ static void spi_test(void *arg)
                 vPortFree(rx_buf);
             }
 
+            /* Cleanup tx */
+            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
+            vPortFree(tmpbuf);
+
             debug_printf("Transaction Test Complete: %d\n", time - start);
             break;
         case 6: /* transaction blocking */
@@ -200,6 +206,10 @@ static void spi_test(void *arg)
             {
                 vPortFree(rx_buf);
             }
+
+            /* Cleanup tx */
+            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
+            vPortFree(tmpbuf);
 
             debug_printf("Transaction Blocking Test Complete: %d\n", time - start);
             break;
