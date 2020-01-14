@@ -169,10 +169,11 @@ void tile0_device_instantiate(
                         t0_gpio_dev_ctrl_ch,
                         null);
 
-                spi_master_dev(&bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
-                               null,
-                               null,
-                               spi_dev_ctrl_ch);
+                spi_master_dev(
+                        bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
+                        null,
+                        null,
+                        spi_dev_ctrl_ch);
             }
         }
     }

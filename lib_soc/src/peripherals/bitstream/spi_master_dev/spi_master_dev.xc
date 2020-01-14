@@ -21,45 +21,37 @@ spi_fast_ports spi_ctx = {
 };
 
 static void spi_test_fast_handler(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c)
 {
-    size_t rx_ptr;
-    size_t tx_ptr;
-
-    uint8_t data_buf[SPICONF_TX_BUFFER];
-    size_t data_len;
+    uint8_t data_buf[SPICONF_BUFFER_LEN];
+    int tx_len;
     uint32_t cmd;
 
     size_t rx_len = 0;
 
-    while(1)
-    {
-        if(peripheral != NULL && *peripheral != NULL)
-        {
+    while (1) {
+        if (peripheral != NULL) {
             /* Check that a valid buffer was set */
-            if( ( data_len = soc_peripheral_rx_dma_direct_xfer(*peripheral, data_buf, SPICONF_TX_BUFFER) ) >= 0 )
-            {
-                if(data_len > 0)    /* TX and RX */
-                {
-                    spi_fast(data_len, data_buf, spi_ctx, SPI_READ_WRITE);
-                }
-                else    /* RX "only" */
-                {
-                    if(rx_len > 0)
-                    {
-                        memset(data_buf, SPICONF_RX_ONLY_CHAR, rx_len);
-                        spi_fast(rx_len, data_buf, spi_ctx, SPI_READ_WRITE);
-                    }
+            if ((tx_len = soc_peripheral_rx_dma_direct_xfer(peripheral, data_buf, SPICONF_BUFFER_LEN)) >= 0) {
+
+                int transfer_len;
+
+                if (rx_len > tx_len) {
+                    transfer_len = rx_len;
+                    memset(data_buf + tx_len, SPICONF_RX_ONLY_CHAR, rx_len - tx_len);
+                } else {
+                    transfer_len = tx_len;
                 }
 
-                if(rx_len > 0)  /* Send response if it had been requested */
-                {
-                    if (peripheral != NULL && *peripheral != NULL) {
+                spi_fast(transfer_len, data_buf, spi_ctx, rx_len > 0 ? SPI_READ_WRITE : SPI_WRITE);
+
+                if (rx_len > 0) { /* Send response if it had been requested */
+                    if (peripheral != NULL) {
                         soc_peripheral_tx_dma_direct_xfer(
-                                *peripheral,
+                                peripheral,
                                 data_buf,
                                 rx_len);
                     } else if (!isnull(data_to_dma_c)) {
@@ -68,16 +60,15 @@ static void spi_test_fast_handler(
                                 data_buf,
                                 rx_len);
                     }
+
                     rx_len = 0;
                 }
             }
         }
 
-        select
-        {
+        select {
         case !isnull(ctrl_c) => soc_peripheral_function_code_rx(ctrl_c, &cmd):
-            switch (cmd)
-            {
+            switch (cmd) {
             case SOC_PERIPHERAL_DMA_TX:
                 /*
                  * The application has added a new DMA TX buffer. This
@@ -129,14 +120,13 @@ static void spi_test_fast_handler(
 }
 
 void spi_master_dev(
-        soc_peripheral_t *peripheral,
+        soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
         chanend ?ctrl_c)
 {
     par {
         spi_test_fast_handler(peripheral,
-                              data_to_dma_c, data_from_dma_c, ctrl_c
-                              );
+                              data_to_dma_c, data_from_dma_c, ctrl_c);
     }
 }

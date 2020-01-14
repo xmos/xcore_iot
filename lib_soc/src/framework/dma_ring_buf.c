@@ -80,6 +80,7 @@ void soc_dma_ring_rx_buf_set(
         uint16_t length)
 {
     xassert(ring_buf->desc[ring_buf->app_next].status == SOC_DMA_BUF_DESC_STATUS_READY);
+    xassert(buf != NULL || length == 0);
 
     ring_buf->desc[ring_buf->app_next].buf = buf;
     ring_buf->desc[ring_buf->app_next].length = length;
@@ -117,6 +118,7 @@ void soc_dma_ring_tx_buf_set(
         uint16_t length)
 {
     while (ring_buf->desc[ring_buf->app_next].status != SOC_DMA_BUF_DESC_STATUS_READY);
+    xassert(buf != NULL || length == 0);
 
     ring_buf->desc[ring_buf->app_next].buf = buf;
     ring_buf->desc[ring_buf->app_next].length = length;

@@ -13,9 +13,6 @@ soc_peripheral_t spi_master_driver_init(
         int device_id,
         int isr_core);
 
-/* SPI master isr */
-void spi_master_isr(soc_peripheral_t device);
-
 /* Initialize device */
 void spi_master_device_init(
         soc_peripheral_t dev,
@@ -44,9 +41,9 @@ void spi_master_device_init(
  */
 void spi_transaction(
         soc_peripheral_t dev,
-        uint8_t* rx_buf,
+        uint8_t *rx_buf,
         size_t rx_len,
-        uint8_t* tx_buf,
+        uint8_t *tx_buf,
         size_t tx_len);
 
 #endif /* SPI_MASTER_DRIVER_H_ */

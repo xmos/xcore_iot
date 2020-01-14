@@ -6,8 +6,6 @@
 
 #include "spi_master_driver.h"
 
-#include "debug_print.h"
-
 #include "FreeRTOS.h"
 #include "semphr.h"
 
@@ -18,31 +16,31 @@ soc_peripheral_t bitstream_spi_devices[BITSTREAM_SPI_DEVICE_COUNT];
 
 
 RTOS_IRQ_ISR_ATTR
-void spi_master_isr(soc_peripheral_t device)
+static void spi_master_isr(soc_peripheral_t dev)
 {
-    QueueHandle_t queue = soc_peripheral_app_data(device);
+    SemaphoreHandle_t sem = (SemaphoreHandle_t) soc_peripheral_app_data(dev);
+    soc_dma_ring_buf_t *ring_buf;
     BaseType_t xYieldRequired = pdFALSE;
+    BaseType_t ret;
     uint32_t status;
 
-    status = soc_peripheral_interrupt_status(device);
+    status = soc_peripheral_interrupt_status(dev);
 
-    if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM) {
-        soc_dma_ring_buf_t *rx_ring_buf;
-        int length;
-        uint8_t *rx_buf;
-
-        configASSERT(device == bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A]);
-
-        rx_ring_buf = soc_peripheral_rx_dma_ring_buf(device);
-        rx_buf = soc_dma_ring_rx_buf_get(rx_ring_buf, &length);
-        configASSERT(rx_buf != NULL);
-
-        if (xQueueSendFromISR(queue, &rx_buf, &xYieldRequired) == errQUEUE_FULL) {
-            ;   // We do not set a new buffer
-        }
+    if (status & SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM) {
+        ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
+        ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
+        configASSERT(ret == pdTRUE);
+        soc_dma_ring_tx_buf_get(ring_buf, NULL, NULL);
     }
 
-    portEND_SWITCHING_ISR( xYieldRequired );
+    if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM) {
+        ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
+        ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
+        configASSERT(ret == pdTRUE);
+        soc_dma_ring_rx_buf_get(ring_buf, NULL);
+    }
+
+    portEND_SWITCHING_ISR(xYieldRequired);
 }
 
 
@@ -52,8 +50,8 @@ soc_peripheral_t spi_master_driver_init(
 {
     soc_peripheral_t device;
 
-    QueueHandle_t queue;
-    queue = xQueueCreate(1, sizeof(void *));
+    SemaphoreHandle_t sem;
+    sem = xSemaphoreCreateCounting(2, 0);
 
     xassert(device_id >= 0 && device_id < BITSTREAM_SPI_DEVICE_COUNT);
 
@@ -64,7 +62,7 @@ soc_peripheral_t spi_master_driver_init(
             1,
             0,
             1,
-            queue,
+            sem,
             isr_core,
             (rtos_irq_isr_t) spi_master_isr);
 
@@ -74,37 +72,30 @@ soc_peripheral_t spi_master_driver_init(
 
 static void spi_driver_transaction(
         soc_peripheral_t dev,
-        uint8_t* rx_buf,
+        uint8_t *rx_buf,
         size_t rx_len,
-        uint8_t* tx_buf,
+        uint8_t *tx_buf,
         size_t tx_len)
 {
     chanend c = soc_peripheral_ctrl_chanend(dev);
+    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
 
-    if( rx_buf != NULL )
-    {
+    if (rx_len > 0) {
         soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
-        soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, (uint16_t)rx_len );
+
+        soc_peripheral_function_code_tx(c, SPI_MASTER_DEV_TRANSACTION);
+
+        soc_peripheral_varlist_tx(
+                c, 1,
+                sizeof(size_t), &rx_len);
+
+        soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, (uint16_t) rx_len);
     }
 
-    if( tx_buf != NULL )
-    {
-        soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
-        soc_dma_ring_tx_buf_set(tx_ring_buf, tx_buf, (uint16_t)tx_len );
-    }
-    else
-    {
-        soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
-        soc_dma_ring_tx_buf_set(tx_ring_buf, &NULL[1], 0 );
-#warning update once framework is updated to accept NULL and length of 0
-        // TODO: replace with NULL, 0 with updates to soc_dma...
-    }
+    soc_dma_ring_tx_buf_set(tx_ring_buf, tx_buf, (uint16_t) tx_len);
 
-    soc_peripheral_function_code_tx(c, SPI_MASTER_DEV_TRANSACTION);
-
-    soc_peripheral_varlist_tx(
-            c, 1,
-            sizeof(size_t), &rx_len);
+    /* this request will take care of both the RX and TX */
+    soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 }
 
 void spi_master_device_init(
@@ -133,28 +124,30 @@ void spi_master_device_init(
 
 void spi_transaction(
         soc_peripheral_t dev,
-        uint8_t* rx_buf,
+        uint8_t *rx_buf,
         size_t rx_len,
-        uint8_t* tx_buf,
+        uint8_t *tx_buf,
         size_t tx_len)
 {
-    uint8_t* tmpbuf;
-    QueueHandle_t queue;
-    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
+    SemaphoreHandle_t sem = (SemaphoreHandle_t) soc_peripheral_app_data(dev);
 
-    if(tx_buf == NULL) { tx_len = 0; }
-    if(rx_buf == NULL) { rx_len = 0; }
+    if (tx_buf == NULL) {
+        tx_len = 0;
+    }
+
+    if (rx_buf == NULL) {
+        rx_len = 0;
+    }
 
     spi_driver_transaction(dev,
                            rx_buf, rx_len,
                            tx_buf, tx_len);
 
-    /* Wait until tx_buf has been transferred */
-    while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
+    /* TODO: check return value */
+    xSemaphoreTake(sem, portMAX_DELAY);
 
-    if(rx_buf > 0)
-    {
-        queue = soc_peripheral_app_data(dev);
-        xQueueReceive(queue, &rx_buf, portMAX_DELAY);
+    if (rx_buf > 0) {
+        /* TODO: check return value */
+        xSemaphoreTake(sem, portMAX_DELAY);
     }
 }

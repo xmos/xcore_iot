@@ -28,7 +28,6 @@ static uint8_t test_msg[tx_len] = { 0xDE, 0xAD, 0xBE, 0xEF,
 static void spi_test(void *arg)
 {
     soc_peripheral_t spi_dev = arg;
-    QueueHandle_t queue = soc_peripheral_app_data(spi_dev);
     uint8_t *tx_buf;
     uint8_t *rx_buf;
     int test = 0;

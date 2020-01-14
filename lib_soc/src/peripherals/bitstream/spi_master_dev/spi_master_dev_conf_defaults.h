@@ -4,12 +4,9 @@
 #define SPI_MASTER_DEV_CONF_DEFAULTS_H_
 
 /* SPI defaults */
-#ifndef SPICONF_RX_BUFFER
-#define SPICONF_RX_BUFFER       4096
-#endif
 
-#ifndef SPICONF_TX_BUFFER
-#define SPICONF_TX_BUFFER       4096
+#ifndef SPICONF_BUFFER_LEN
+#define SPICONF_BUFFER_LEN       4096
 #endif
 
 #ifndef SPICONF_RX_ONLY_CHAR
