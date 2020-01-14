@@ -84,7 +84,7 @@ static void i2s_decoupler(
     int buf_num = 0;
 
     for (;;) {
-        uint32_t recv_len;
+        int recv_len;
         soc_peripheral_rx_dma_ready(c);
         recv_len = soc_peripheral_rx_dma_xfer(
                 c,

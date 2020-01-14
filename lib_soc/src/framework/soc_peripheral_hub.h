@@ -77,25 +77,25 @@ extern "C" {
 void soc_peripheral_rx_dma_ready(
         chanend c);
 
-uint16_t soc_peripheral_rx_dma_xfer(
+int soc_peripheral_rx_dma_xfer(
         chanend c,
         void *data,
-        uint16_t max_length);
+        int max_length);
 
-uint16_t soc_peripheral_rx_dma_direct_xfer(
+int soc_peripheral_rx_dma_direct_xfer(
         soc_peripheral_t device,
         void *data,
-        uint16_t max_length);
+        int max_length);
 
 void soc_peripheral_tx_dma_xfer(
         chanend c,
         void *data,
-        uint16_t length);
+        int length);
 
 void soc_peripheral_tx_dma_direct_xfer(
         soc_peripheral_t device,
         void *data,
-        uint16_t length);
+        int length);
 
 void soc_peripheral_irq_send(
         chanend c,
