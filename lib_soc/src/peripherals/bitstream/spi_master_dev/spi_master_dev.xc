@@ -33,34 +33,42 @@ static void spi_test_fast_handler(
     size_t data_len;
     uint32_t cmd;
 
-    int discard_response = 0;
+    size_t rx_len = 0;
 
-    while (1)
+    while(1)
     {
-        if (peripheral != NULL && *peripheral != NULL)
+        if(peripheral != NULL && *peripheral != NULL)
         {
-            data_len = soc_peripheral_rx_dma_direct_xfer(*peripheral, data_buf, SPICONF_TX_BUFFER);
-
-            if (data_len > 0)
+            /* Check that a valid buffer was set */
+            if( ( data_len = soc_peripheral_rx_dma_direct_xfer(*peripheral, data_buf, SPICONF_TX_BUFFER) ) >= 0 )
             {
-                spi_fast(data_len, data_buf, spi_ctx, SPI_READ_WRITE);
-
-                if( discard_response == 0 )
+                if(data_len > 0)    /* TX and RX */
                 {
-//                    debug_printf("rx to dma\n");
+                    spi_fast(data_len, data_buf, spi_ctx, SPI_READ_WRITE);
+                }
+                else    /* RX "only" */
+                {
+                    if(rx_len > 0)
+                    {
+                        memset(data_buf, SPICONF_RX_ONLY_CHAR, rx_len);
+                        spi_fast(rx_len, data_buf, spi_ctx, SPI_READ_WRITE);
+                    }
+                }
+
+                if(rx_len > 0)  /* Send response if it had been requested */
+                {
                     if (peripheral != NULL && *peripheral != NULL) {
-//                        debug_printf("direct\n");
                         soc_peripheral_tx_dma_direct_xfer(
                                 *peripheral,
                                 data_buf,
-                                data_len);
+                                rx_len);
                     } else if (!isnull(data_to_dma_c)) {
-//                        debug_printf("hub\n");
                         soc_peripheral_tx_dma_xfer(
                                 data_to_dma_c,
                                 data_buf,
-                                data_len);
+                                rx_len);
                     }
+                    rx_len = 0;
                 }
             }
         }
@@ -78,7 +86,6 @@ static void spi_test_fast_handler(
                  */
                 break;
             case SPI_MASTER_DEV_INIT:
-//                debug_printf("init\n");
                 soc_peripheral_varlist_rx(
                         ctrl_c, 6,
                         sizeof(unsigned), &spi_ctx.cs_port_bit,
@@ -92,15 +99,9 @@ static void spi_test_fast_handler(
                 break;
 
             case SPI_MASTER_DEV_TRANSACTION:
-//                debug_printf("transaction\n");
                 soc_peripheral_varlist_rx(
-                        ctrl_c, 3,
-                        sizeof(size_t), &data_len,
-                        4, &rx_ptr,     // sizeof(unsafe uint8_t*) // gives 6 in XC instead of 4
-                        4, &tx_ptr);    // sizeof(unsafe uint8_t*) // gives 6 in XC instead of 4
-
-                discard_response = ( rx_ptr == NULL ) ? 1 : 0;
-
+                        ctrl_c, 1,
+                        sizeof(size_t), &rx_len);
                 break;
 
             default:

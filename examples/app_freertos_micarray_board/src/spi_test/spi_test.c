@@ -60,54 +60,57 @@ static void spi_test(void *arg)
             debug_printf("SPI Test Start\n");
             break;
         case 1: /* transmit only */
-            tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
-            memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
-
-            hwtimer_get_time(timer, &start);
-            spi_transmit(spi_dev, tx_buf, tx_len );
-            hwtimer_get_time(timer, &time);
-
-//            debug_printf("\tSent:\n");
-//            for(int i=0; i<tx_len; i++)
-//            {
-//                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
-//            }
-
-            /* Cleanup tx */
-            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
-            vPortFree(tmpbuf);
-
-            debug_printf("Transmit Test Complete: %d\n", time - start);
+//            tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+//            memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
+//
+//            hwtimer_get_time(timer, &start);
+//            spi_transmit(spi_dev, tx_buf, tx_len );
+//            hwtimer_get_time(timer, &time);
+//
+////            debug_printf("\tSent:\n");
+////            for(int i=0; i<tx_len; i++)
+////            {
+////                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
+////            }
+//
+//            /* Cleanup tx */
+//            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
+//            vPortFree(tmpbuf);
+//
+//            debug_printf("Transmit Test Complete: %d\n", time - start);
             break;
         case 2: /* receive only */
-            rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
-
-            hwtimer_get_time(timer, &start);
-            spi_request(spi_dev, rx_buf, tx_len );
-            hwtimer_get_time(timer, &time);
-
-            xQueueReceive(queue, &rx_buf, portMAX_DELAY);
-
-//            debug_printf("\tReceived:\n");
-//            for(int i=0; i<tx_len; i++)
+//            rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+//
+//            hwtimer_get_time(timer, &start);
+//            spi_request(spi_dev, rx_buf, tx_len );
+//            hwtimer_get_time(timer, &time);
+//
+//            xQueueReceive(queue, &rx_buf, portMAX_DELAY);
+//
+////            debug_printf("\tReceived:\n");
+////            for(int i=0; i<tx_len; i++)
+////            {
+////                debug_printf("\trx[%d]:%x\n", i, rx_buf[i]);
+////            }
+//
+//            /* Cleanup rx */
+//            if(rx_buf != NULL)
 //            {
-//                debug_printf("\trx[%d]:%x\n", i, rx_buf[i]);
+//                vPortFree(rx_buf);
 //            }
-
-            /* Cleanup rx */
-            if(rx_buf != NULL)
-            {
-                vPortFree(rx_buf);
-            }
-
-            debug_printf("Receive Test Complete: %d\n", time - start);
+//
+//            debug_printf("Receive Test Complete: %d\n", time - start);
             break;
         case 3: /* transmit only blocking */
             tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
             memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
 
             hwtimer_get_time(timer, &start);
-            spi_transmit_blocking(spi_dev, tx_buf, tx_len );
+//            spi_transmit_blocking(spi_dev, tx_buf, tx_len );
+            spi_transaction(spi_dev,
+                            NULL, 0,
+                            tx_buf, tx_len);
             hwtimer_get_time(timer, &time);
 
 //            debug_printf("\tSent:\n");
@@ -117,8 +120,10 @@ static void spi_test(void *arg)
 //            }
 
             /* Cleanup tx */
-            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
-            vPortFree(tmpbuf);
+            if(tx_buf != NULL)
+            {
+                vPortFree(tx_buf);
+            }
 
             debug_printf("Transmit Blocking Test Complete: %d\n", time - start);
             break;
@@ -126,7 +131,10 @@ static void spi_test(void *arg)
             rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
 
             hwtimer_get_time(timer, &start);
-            spi_request_blocking(spi_dev, rx_buf, tx_len );
+//            spi_request_blocking(spi_dev, rx_buf, tx_len );
+            spi_transaction(spi_dev,
+                            rx_buf, tx_len,
+                            NULL, 0);
             hwtimer_get_time(timer, &time);
 
 //            debug_printf("\tReceived:\n");
@@ -144,40 +152,43 @@ static void spi_test(void *arg)
             debug_printf("Receive Blocking Test Complete: %d\n", time - start);
             break;
         case 5: /* transaction */
-            tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
-            rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
-
-            memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
-
-            hwtimer_get_time(timer, &start);
-            spi_transaction(spi_dev, rx_buf, tx_buf, tx_len );
-            hwtimer_get_time(timer, &time);
-
-//            debug_printf("\tSent:\n");
-//            for(int i=0; i<tx_len; i++)
+//            tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+//            rx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
+//
+//            memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
+//
+//            hwtimer_get_time(timer, &start);
+////            spi_transaction(spi_dev, rx_buf, tx_buf, tx_len );
+//            spi_transaction(spi_dev,
+//                            rx_buf, tx_len,
+//                            tx_buf, tx_len);
+//            hwtimer_get_time(timer, &time);
+//
+////            debug_printf("\tSent:\n");
+////            for(int i=0; i<tx_len; i++)
+////            {
+////                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
+////            }
+//
+//            xQueueReceive(queue, &rx_buf, portMAX_DELAY);
+//
+////            debug_printf("\tReceived:\n");
+////            for(int i=0; i<tx_len; i++)
+////            {
+////                debug_printf("\trx[%d]:%x\n", i, rx_buf[i]);
+////            }
+//
+//            /* Cleanup rx */
+//            if(rx_buf != NULL)
 //            {
-//                debug_printf("\ttx[%d]:%x\n", i, tx_buf[i]);
+//                vPortFree(rx_buf);
 //            }
-
-            xQueueReceive(queue, &rx_buf, portMAX_DELAY);
-
-//            debug_printf("\tReceived:\n");
-//            for(int i=0; i<tx_len; i++)
-//            {
-//                debug_printf("\trx[%d]:%x\n", i, rx_buf[i]);
-//            }
-
-            /* Cleanup rx */
-            if(rx_buf != NULL)
-            {
-                vPortFree(rx_buf);
-            }
-
-            /* Cleanup tx */
-            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
-            vPortFree(tmpbuf);
-
-            debug_printf("Transaction Test Complete: %d\n", time - start);
+//
+//            /* Cleanup tx */
+//            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
+//            vPortFree(tmpbuf);
+//
+//            debug_printf("Transaction Test Complete: %d\n", time - start);
             break;
         case 6: /* transaction blocking */
             tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*tx_len );
@@ -186,7 +197,10 @@ static void spi_test(void *arg)
             memcpy(tx_buf, test_msg , sizeof(uint8_t)*tx_len);
 
             hwtimer_get_time(timer, &start);
-            spi_transaction_blocking(spi_dev, rx_buf, tx_buf, tx_len );
+//            spi_transaction_blocking(spi_dev, rx_buf, tx_buf, tx_len );
+            spi_transaction(spi_dev,
+                            rx_buf, tx_len,
+                            tx_buf, tx_len);
             hwtimer_get_time(timer, &time);
 
 //            debug_printf("\tSent:\n");
@@ -208,8 +222,10 @@ static void spi_test(void *arg)
             }
 
             /* Cleanup tx */
-            while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
-            vPortFree(tmpbuf);
+            if(tx_buf != NULL)
+            {
+                vPortFree(tx_buf);
+            }
 
             debug_printf("Transaction Blocking Test Complete: %d\n", time - start);
             break;
@@ -225,20 +241,12 @@ static void spi_test(void *arg)
 
 void spi_test_create( UBaseType_t priority )
 {
-    QueueHandle_t queue;
 
     soc_peripheral_t dev;
 
-    queue = xQueueCreate(1, sizeof(void *));
-
     dev = spi_master_driver_init(
-            BITSTREAM_SPI_DEVICE_A,             /* Initializing SPI device A */
-            2,                                  /* Give this device 1 RX buffer descriptors */
-            0,                                  /* Make each DMA RX buffer */
-            2,                                  /* Give this device 1 TX buffer descriptors */
-            queue,                              /* Queue associated with this device */
-            0,                                  /* This device's interrupts should happen on core 0 */
-            (rtos_irq_isr_t) spi_master_ISR);   /* The ISR to handle this device's interrupts */
+            BITSTREAM_SPI_DEVICE_A,  /* Initializing SPI device A */
+            0);                      /* This device's interrupts should happen on core 0 */
 
     xTaskCreate(spi_test, "spi_test", portTASK_STACK_DEPTH(spi_test), dev, priority, NULL);
 }

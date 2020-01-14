@@ -7,16 +7,14 @@
 #include "soc.h"
 #include "spi_master_dev_ctrl.h"
 
+
+/* Initialize driver*/
 soc_peripheral_t spi_master_driver_init(
         int device_id,
-        int rx_desc_count,
-        int rx_buf_size,
-        int tx_desc_count,
-        void *app_data,
-        int isr_core,
-        rtos_irq_isr_t isr);
+        int isr_core);
 
-void spi_master_ISR(soc_peripheral_t device);
+/* SPI master isr */
+void spi_master_isr(soc_peripheral_t device);
 
 /* Initialize device */
 void spi_master_device_init(
@@ -28,46 +26,27 @@ void spi_master_device_init(
         unsigned cs_to_data_delay_ns,
         unsigned byte_setup_ns);
 
-/* Send data to DMA for SPI device
- * This function only transmits, and ignores response */
-void spi_transmit(
-        soc_peripheral_t dev,
-        uint8_t* tx_buf,
-        size_t len);
-
-/* Create request buffer DMA, IRQ is fired when response is received */
-void spi_request(
-        soc_peripheral_t dev,
-        uint8_t* rx_buf,
-        size_t len);
-
-/* Send data, discarding response
- * Blocks until transaction is complete */
-void spi_transmit_blocking(
-        soc_peripheral_t dev,
-        uint8_t* tx_buf,
-        size_t len);
-
-/* Receive buffer, block until transaction is complete
- * no interrupt on receive */
-void spi_request_blocking(
-        soc_peripheral_t dev,
-        uint8_t* rx_buf,
-        size_t len);
-
-/* Send data to DMA for SPI device and fire IRQ when response
- * is received */
+/** Perform a SPI transaction
+ *
+ *  \param dev             the SPI device
+ *  \param rx_buf          the buffer to receive response in.  The
+ *                         buffer must be large enough to hold the
+ *                         specified rx_len.  Parameter should be
+ *                         NULL if no response is requested.
+ *  \param rx_len          the number of bytes to recieve.  Value is
+ *                         ignored if rx_buf is NULL.
+ *  \param tx_buf          the buffer to transmit.  Parameter can
+ *                         be NULL, to only receive
+ *  \param tx_len          the number of bytes to send.  Value is
+ *                         ignored if tx_buf is NULL.
+ *
+ *  \returns               none
+ */
 void spi_transaction(
         soc_peripheral_t dev,
         uint8_t* rx_buf,
+        size_t rx_len,
         uint8_t* tx_buf,
-        size_t len);
-
-/* Send data and receive data, block until transaction is complete */
-void spi_transaction_blocking(
-        soc_peripheral_t dev,
-        uint8_t* rx_buf,
-        uint8_t* tx_buf,
-        size_t len);
+        size_t tx_len);
 
 #endif /* SPI_MASTER_DRIVER_H_ */

@@ -18,7 +18,7 @@ soc_peripheral_t bitstream_spi_devices[BITSTREAM_SPI_DEVICE_COUNT];
 
 
 RTOS_IRQ_ISR_ATTR
-void spi_master_ISR(soc_peripheral_t device)
+void spi_master_isr(soc_peripheral_t device)
 {
     QueueHandle_t queue = soc_peripheral_app_data(device);
     BaseType_t xYieldRequired = pdFALSE;
@@ -48,14 +48,12 @@ void spi_master_ISR(soc_peripheral_t device)
 
 soc_peripheral_t spi_master_driver_init(
         int device_id,
-        int rx_desc_count,
-        int rx_buf_size,
-        int tx_desc_count,
-        void *app_data,
-        int isr_core,
-        rtos_irq_isr_t isr)
+        int isr_core)
 {
     soc_peripheral_t device;
+
+    QueueHandle_t queue;
+    queue = xQueueCreate(1, sizeof(void *));
 
     xassert(device_id >= 0 && device_id < BITSTREAM_SPI_DEVICE_COUNT);
 
@@ -63,12 +61,12 @@ soc_peripheral_t spi_master_driver_init(
 
     soc_peripheral_common_dma_init(
             device,
-            rx_desc_count,
-            rx_buf_size,
-            tx_desc_count,
-            app_data,
+            1,
+            0,
+            1,
+            queue,
             isr_core,
-            isr);
+            (rtos_irq_isr_t) spi_master_isr);
 
     return device;
 }
@@ -77,35 +75,36 @@ soc_peripheral_t spi_master_driver_init(
 static void spi_driver_transaction(
         soc_peripheral_t dev,
         uint8_t* rx_buf,
+        size_t rx_len,
         uint8_t* tx_buf,
-        size_t len)
+        size_t tx_len)
 {
     chanend c = soc_peripheral_ctrl_chanend(dev);
 
     if( rx_buf != NULL )
     {
         soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
-        soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, (uint16_t)len );
+        soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, (uint16_t)rx_len );
     }
 
-    if(tx_buf == NULL)
-    {
-        tx_buf = (uint8_t*)pvPortMalloc( sizeof(uint8_t)*len );
-        memset(tx_buf, 0x00, len);
-    }
     if( tx_buf != NULL )
     {
         soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
-        soc_dma_ring_tx_buf_set(tx_ring_buf, tx_buf, (uint16_t)len );
+        soc_dma_ring_tx_buf_set(tx_ring_buf, tx_buf, (uint16_t)tx_len );
+    }
+    else
+    {
+        soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
+        soc_dma_ring_tx_buf_set(tx_ring_buf, &NULL[1], 0 );
+#warning update once framework is updated to accept NULL and length of 0
+        // TODO: replace with NULL, 0 with updates to soc_dma...
     }
 
     soc_peripheral_function_code_tx(c, SPI_MASTER_DEV_TRANSACTION);
 
     soc_peripheral_varlist_tx(
-            c, 3,
-            sizeof(size_t), &len,
-            sizeof(uint8_t*), (uint8_t*)&rx_buf,
-            sizeof(uint8_t*), (uint8_t*)&tx_buf);
+            c, 1,
+            sizeof(size_t), &rx_len);
 }
 
 void spi_master_device_init(
@@ -131,86 +130,31 @@ void spi_master_device_init(
             sizeof(unsigned), &byte_setup_ns);
 }
 
-void spi_transmit(
-        soc_peripheral_t dev,
-        uint8_t* tx_buf,
-        size_t len)
-{
-    spi_driver_transaction(dev,
-                           NULL,
-                           tx_buf,
-                           len);
-}
-
-void spi_request(
-        soc_peripheral_t dev,
-        uint8_t* rx_buf,
-        size_t len)
-{
-    spi_driver_transaction(dev,
-                           rx_buf,
-                           NULL,
-                           len);
-}
-
-void spi_transmit_blocking(
-        soc_peripheral_t dev,
-        uint8_t* tx_buf,
-        size_t len)
-{
-    spi_driver_transaction(dev,
-                           NULL,
-                           tx_buf,
-                           len);
-    /* Cleanup tx */
-    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
-    uint8_t* tmpbuf;
-    while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) == tx_buf )
-    {
-        vPortFree(tmpbuf);
-    }
-}
-
-void spi_request_blocking(
-        soc_peripheral_t dev,
-        uint8_t* rx_buf,
-        size_t len)
-{
-    QueueHandle_t queue = soc_peripheral_app_data(dev);
-
-    spi_driver_transaction(dev,
-                           rx_buf,
-                           NULL,
-                           len);
-
-    xQueueReceive(queue, &rx_buf, portMAX_DELAY);
-}
 
 void spi_transaction(
         soc_peripheral_t dev,
         uint8_t* rx_buf,
+        size_t rx_len,
         uint8_t* tx_buf,
-        size_t len)
+        size_t tx_len)
 {
-    spi_driver_transaction(dev,
-                           rx_buf,
-                           tx_buf,
-                           len);
-}
+    uint8_t* tmpbuf;
+    QueueHandle_t queue;
+    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
 
-void spi_transaction_blocking(
-        soc_peripheral_t dev,
-        uint8_t* rx_buf,
-        uint8_t* tx_buf,
-        size_t len)
-{
-    QueueHandle_t queue = soc_peripheral_app_data(dev);
+    if(tx_buf == NULL) { tx_len = 0; }
+    if(rx_buf == NULL) { rx_len = 0; }
 
     spi_driver_transaction(dev,
-                           rx_buf,
-                           tx_buf,
-                           len);
+                           rx_buf, rx_len,
+                           tx_buf, tx_len);
 
-    xQueueReceive(queue, &rx_buf, portMAX_DELAY);
+    /* Wait until tx_buf has been transferred */
+    while( ( tmpbuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != tx_buf ) {;}
+
+    if(rx_buf > 0)
+    {
+        queue = soc_peripheral_app_data(dev);
+        xQueueReceive(queue, &rx_buf, portMAX_DELAY);
+    }
 }
-

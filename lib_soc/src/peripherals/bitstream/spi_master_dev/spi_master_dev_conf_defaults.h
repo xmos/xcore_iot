@@ -12,4 +12,8 @@
 #define SPICONF_TX_BUFFER       4096
 #endif
 
+#ifndef SPICONF_RX_ONLY_CHAR
+#define SPICONF_RX_ONLY_CHAR    0x00
+#endif
+
 #endif /* SPI_MASTER_DEV_CONF_DEFAULTS_H_ */
