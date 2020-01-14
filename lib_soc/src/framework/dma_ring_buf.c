@@ -198,28 +198,28 @@ int soc_dma_ring_buf_length_get(
         }
         return total_length;
     } else {
-        return 0;
+        return -1;
     }
 }
 
 /*
  * To be called only by the peripheral hub
  */
-void *soc_dma_ring_buf_get(
+int soc_dma_ring_buf_get(
         soc_dma_ring_buf_t *ring_buf,
-        int *length,
+        void **buf,
         int *more)
 {
     if (ring_buf->desc[ring_buf->dma_next].status == SOC_DMA_BUF_DESC_STATUS_WAITING) {
-        if (length != NULL) {
-            *length = ring_buf->desc[ring_buf->dma_next].length;
+        if (buf != NULL) {
+            *buf = ring_buf->desc[ring_buf->dma_next].buf;
         }
         if (more != NULL) {
             *more = !ring_buf->desc[ring_buf->dma_next].last;
         }
-        return ring_buf->desc[ring_buf->dma_next].buf;
+        return ring_buf->desc[ring_buf->dma_next].length;
     } else {
-        return NULL;
+        return -1;
     }
 }
 
