@@ -3,7 +3,7 @@ TARGET = MIC-ARRAY-1V3
 
 APP_NAME = 
 
-SOURCE_DIRS = bitstream_src src src/NetworkManager src/audio_hw_config src/audio_pipeline src/gpio_ctrl src/queue_to_i2s src/queue_to_tcp_stream src/thruput_test src/udp_cli
+SOURCE_DIRS = bitstream_src src src/NetworkManager src/audio_hw_config src/audio_pipeline src/gpio_ctrl src/queue_to_i2s src/queue_to_tcp_stream src/spi_test src/thruput_test src/udp_cli
 
 INCLUDE_DIRS = $(SOURCE_DIRS)
 

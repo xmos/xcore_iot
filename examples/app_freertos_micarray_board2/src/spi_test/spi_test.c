@@ -24,7 +24,8 @@
 #define        tx_len             8
 static uint8_t test_msg[tx_len] = { 0xDE, 0xAD, 0xBE, 0xEF,
                                     0xFE, 0xED, 0xFA, 0xCE};
-#define SPI_TIMING                1
+
+#define SPI_TIMING                0 /* SPI_TIMING cannot be used on app2, as all hwtimers are consumed */
 #define SPI_DEBUG_PRINT           1
 
 #if SPI_TIMING

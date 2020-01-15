@@ -37,8 +37,8 @@ sl_status_t sl_wfx_host_init_bus(void)
         spi_master_device_init(spi_dev,
                                0,    /* this should be defined in the bitstream */
                                0, 0, /* mode 0 */
-                               7,    /* 100 MHz / (2*1) / 2 = 25 MHz */
-                               10000,  /* really only needs to be 3ns but it is too quick */
+                               2,    /* 100 MHz / (2* 2 ) / 2 = 12.5 MHz */
+                               500,  /* really only needs to be 3ns but it is too quick */
                                0);   /* no inter-byte setup delay required */
 
         initialized = 1;
