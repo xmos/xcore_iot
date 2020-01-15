@@ -9,22 +9,13 @@
 #include "spi_master_dev.h"
 
 #include "debug_print.h"
-#define DEVICE_ID 0
-
-// TODO: move to bitstream.xc
-spi_fast_ports spi_ctx = {
-        PORT_EXPANSION_5,
-        PORT_EXPANSION_3,
-        PORT_EXPANSION_1,
-        PORT_EXPANSION_7,
-        on tile[0]: XS1_CLKBLK_1,
-};
 
 static void spi_test_fast_handler(
         soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
-        chanend ?ctrl_c)
+        chanend ?ctrl_c,
+        spi_fast_ports &spi_ctx)
 {
     uint8_t data_buf[SPICONF_BUFFER_LEN];
     int tx_len;
@@ -138,10 +129,12 @@ void spi_master_dev(
         soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
-        chanend ?ctrl_c)
+        chanend ?ctrl_c,
+        spi_fast_ports &spi_ctx)
 {
     par {
         spi_test_fast_handler(peripheral,
-                              data_to_dma_c, data_from_dma_c, ctrl_c);
+                              data_to_dma_c, data_from_dma_c, ctrl_c,
+                              spi_ctx);
     }
 }

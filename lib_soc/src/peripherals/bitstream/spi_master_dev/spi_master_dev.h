@@ -18,6 +18,7 @@ void spi_master_dev(
         soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,
-        chanend ?ctrl_c);
+        chanend ?ctrl_c,
+        spi_fast_ports &spi_ctx);
 
 #endif /* SPI_MASTER_DEV_H_ */

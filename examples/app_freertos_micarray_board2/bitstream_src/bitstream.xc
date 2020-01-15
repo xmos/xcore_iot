@@ -62,6 +62,13 @@ port p_exp_6                    = PORT_EXPANSION_12;
 #define SPI_TILE_NO 0
 #define SPI_TILE tile[SPI_TILE_NO]
 
+spi_fast_ports spi_ctx = {
+        PORT_EXPANSION_5,
+        PORT_EXPANSION_3,
+        PORT_EXPANSION_1,
+        PORT_EXPANSION_7,
+        on SPI_TILE: XS1_CLKBLK_1,
+};
 /*-----------------------------------------------------------*/
 /* Mic Array defines */
 /*-----------------------------------------------------------*/
@@ -147,7 +154,8 @@ void tile0_device_instantiate(
                 NULL,
                 spi_master_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
                 spi_master_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
-                spi_master_dev_ch[SOC_PERIPHERAL_CONTROL_CH]);
+                spi_master_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
+                spi_ctx);
     }
 }
 
