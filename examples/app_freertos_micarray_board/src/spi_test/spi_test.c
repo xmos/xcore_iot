@@ -245,6 +245,7 @@ void spi_test_create( UBaseType_t priority )
 
     dev = spi_master_driver_init(
             BITSTREAM_SPI_DEVICE_A,  /* Initializing SPI device A */
+            1,                       /* Only need 1 DMA buffer for each direction */
             0);                      /* This device's interrupts should happen on core 0 */
 
     xTaskCreate(spi_test, "spi_test", portTASK_STACK_DEPTH(spi_test), dev, priority, NULL);

@@ -8,7 +8,7 @@
 
 #if ( SOC_ETHERNET_PERIPHERAL_USED == 0 )
 #define BITSTREAM_ETHERNET_DEVICE_COUNT 0
-soc_peripheral_t bitstream_eth_devices[BITSTREAM_ETHERNET_DEVICE_COUNT];
+soc_peripheral_t bitstream_ethernet_devices[BITSTREAM_ETHERNET_DEVICE_COUNT];
 #endif /* SOC_ETHERNET_PERIPHERAL_USED */
 
 void ethernet_driver_send_packet(

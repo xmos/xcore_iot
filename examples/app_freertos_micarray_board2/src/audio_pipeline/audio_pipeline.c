@@ -79,7 +79,7 @@ int mic_array_isr(soc_peripheral_t device)
         configASSERT(device == bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A]);
 
         rx_ring_buf = soc_peripheral_rx_dma_ring_buf(device);
-        rx_buf = soc_dma_ring_rx_buf_get(rx_ring_buf, &length);
+        rx_buf = soc_dma_ring_rx_buf_get(rx_ring_buf, &length, NULL);
         configASSERT(rx_buf != NULL);
 //        debug_printf("mic data rx %d bytes\n", length);
 

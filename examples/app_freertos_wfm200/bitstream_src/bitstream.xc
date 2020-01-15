@@ -1,0 +1,186 @@
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
+
+#include <platform.h>
+#include <stdint.h>
+#include <timer.h>
+
+#include "xassert.h"
+#include "debug_print.h"
+#include "mic_array.h"
+#include "soc.h"
+#include "bitstream.h"
+#include "bitstream_devices.h"
+
+/*-----------------------------------------------------------*/
+/* MABS defines */
+/*-----------------------------------------------------------*/
+#define GPIO_TILE_NO 0
+#define GPIO_TILE tile[GPIO_TILE_NO]
+
+out port p_led0to7              = PORT_LED0_TO_7;
+out port p_led8                 = PORT_LED8;
+out port p_led9                 = PORT_LED9;
+out port p_led10to12            = PORT_LED10_TO_12;
+out port p_leds_oen             = PORT_LED_OEN;
+
+in port p_buttons               = PORT_BUT_A_TO_D;
+
+//port p_exp_0                    = PORT_EXPANSION_1;
+//port p_exp_1                    = PORT_EXPANSION_3;
+//port p_exp_2                    = PORT_EXPANSION_5;
+//port p_exp_3                    = PORT_EXPANSION_7;
+port p_exp_4                    = PORT_EXPANSION_9;
+//port p_exp_5                    = PORT_EXPANSION_10;
+port p_exp_6                    = PORT_EXPANSION_12;
+
+/*-----------------------------------------------------------*/
+/* SPI defines */
+/*-----------------------------------------------------------*/
+#define SPI_TILE_NO 0
+#define SPI_TILE tile[SPI_TILE_NO]
+
+//out buffered port:32 p_sclk     = PORT_EXPANSION_1;
+//out port p_ss[1]                = {PORT_EXPANSION_3};
+//in buffered port:32 p_miso      = PORT_EXPANSION_5;
+//out buffered port:32 p_mosi     = PORT_EXPANSION_7;
+//
+//clock spi_clk0   = on SPI_TILE: XS1_CLKBLK_1;
+//clock spi_clk1   = on SPI_TILE: XS1_CLKBLK_2;
+
+
+/*-----------------------------------------------------------*/
+/* Mic Array defines */
+/*-----------------------------------------------------------*/
+#define MIC_TILE_NO 0
+#define MIC_TILE tile[MIC_TILE_NO]
+
+/* Ports for the PDM microphones */
+out port p_pdm_clk              = PORT_PDM_CLK;
+in buffered port:32 p_pdm_mics  = PORT_PDM_DATA;
+
+/* Clock port for the PDM mics */
+in port p_mclk  = PORT_MCLK_TILE0;
+
+/* Clock blocks for PDM mics */
+clock pdmclk    = on MIC_TILE: XS1_CLKBLK_3;
+
+/*-----------------------------------------------------------*/
+/* I2S defines */
+/*-----------------------------------------------------------*/
+#define I2S_TILE_NO 1
+#define I2S_TILE tile[I2S_TILE_NO]
+
+out buffered port:32 p_i2s_dout[1]  = {PORT_I2S_DAC0};
+in port p_mclk_in1                  = PORT_MCLK_IN;
+out port p_bclk                     = PORT_I2S_BCLK;
+out buffered port:32 p_lrclk        = PORT_I2S_LRCLK;
+
+out port p_pll_sync                 = PORT_PLL_REF;
+clock mclk                          = on I2S_TILE: XS1_CLKBLK_3;
+clock bclk                          = on I2S_TILE: XS1_CLKBLK_4;
+
+/*-----------------------------------------------------------*/
+/* I2C defines */
+/*-----------------------------------------------------------*/
+port p_i2c                          = PORT_I2C;             // Bit 0: SCLK, Bit 1: SDA
+
+#define I2C_SCL_BITPOS  0
+#define I2C_SDA_BITPOS  1
+#define I2C_OTHER_MASK  0
+
+port p_rst_shared                   = PORT_SHARED_RESET;    // Bit 0: DAC_RST_N, Bit 1: ETH_RST_N
+
+/*-----------------------------------------------------------*/
+/* USB defines */
+/*-----------------------------------------------------------*/
+//#define USB_TILE_NO 1
+//#define USB_TILE tile[USB_TILE_NO]
+//
+//port p_usb_tx_readyin   = PORT_USB_TX_READYIN;
+//port p_usb_clk          = PORT_USB_CLK;
+//port p_usb_tx_readyout  = PORT_USB_TX_READYOUT;
+//port p_usb_rx_ready     = PORT_USB_RX_READY;
+//port p_usb_flag0        = PORT_USB_FLAG0;
+//port p_usb_flag1        = PORT_USB_FLAG1;
+//port p_usb_flag2        = PORT_USB_FLAG2;
+//port p_usb_txd          = PORT_USB_TXD;
+//port p_usb_rxd          = PORT_USB_RXD;
+
+
+void tile0_device_instantiate(
+        chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
+{
+    chan t0_gpio_dev_ctrl_ch;
+    chan spi_dev_ctrl_ch;
+
+    micarray_dev_init(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics);
+
+    par {
+        unsafe {
+            unsafe chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
+            unsafe chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t0_gpio_dev_ctrl_ch, null};
+            unsafe chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, spi_dev_ctrl_ch, null};
+
+            device_register(mic_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch);
+            soc_peripheral_hub();
+        }
+
+        {
+            while (soc_tile0_bitstream_initialized() == 0);
+            par {
+                micarray_dev(
+                        bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
+                        null,
+                        null,
+                        null,
+                        p_pdm_mics);
+
+                gpio_dev(
+                        bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A],
+                        null,
+                        null,
+                        t0_gpio_dev_ctrl_ch,
+                        null);
+
+                spi_master_dev(
+                        bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
+                        null,
+                        null,
+                        spi_dev_ctrl_ch);
+            }
+        }
+    }
+}
+
+void tile1_device_instantiate(
+        chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
+{
+    i2c_master_if i_i2c[1];
+    p_rst_shared <: 0xF;
+
+    par {
+        i2c_dev(i2c_dev_ch[SOC_PERIPHERAL_CONTROL_CH], i_i2c[0]);
+
+        [[distribute]] i2c_master_single_port(i_i2c, 1, p_i2c, 100, I2C_SCL_BITPOS, I2C_SDA_BITPOS, I2C_OTHER_MASK);
+
+        i2s_dev(
+                NULL,
+                i2s_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
+                i2s_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
+                i2s_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
+                p_mclk_in1,
+                p_lrclk, p_bclk, p_i2s_dout, 1,
+                bclk);
+
+        gpio_dev(
+                NULL,
+                null,
+                null,
+                t1_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
+                t1_gpio_dev_ch[SOC_PERIPHERAL_IRQ_CH]);
+    }
+}

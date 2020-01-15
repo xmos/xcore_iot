@@ -300,6 +300,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev/spi_fast}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_master_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/firmware/3.3.1}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/freertos}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.1049421091" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -721,6 +724,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev/spi_fast}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_master_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/firmware/3.3.1}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/freertos}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.1400070759" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -1154,6 +1160,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev/spi_fast}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_master_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/firmware/3.3.1}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/freertos}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.554769025" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>

@@ -11,6 +11,7 @@
 /* Initialize driver*/
 soc_peripheral_t spi_master_driver_init(
         int device_id,
+        int dma_buffer_count,
         int isr_core);
 
 /* Initialize device */

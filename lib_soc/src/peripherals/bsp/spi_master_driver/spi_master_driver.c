@@ -20,6 +20,7 @@ static void spi_master_isr(soc_peripheral_t dev)
 {
     SemaphoreHandle_t sem = (SemaphoreHandle_t) soc_peripheral_app_data(dev);
     soc_dma_ring_buf_t *ring_buf;
+    int more;
     BaseType_t xYieldRequired = pdFALSE;
     BaseType_t ret;
     uint32_t status;
@@ -30,22 +31,26 @@ static void spi_master_isr(soc_peripheral_t dev)
         ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
         ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
         configASSERT(ret == pdTRUE);
-        soc_dma_ring_tx_buf_get(ring_buf, NULL, NULL);
+        do {
+            soc_dma_ring_tx_buf_get(ring_buf, NULL, &more);
+        } while (more);
     }
 
     if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM) {
         ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
         ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
         configASSERT(ret == pdTRUE);
-        soc_dma_ring_rx_buf_get(ring_buf, NULL);
+        do {
+            soc_dma_ring_rx_buf_get(ring_buf, NULL, &more);
+        } while (more);
     }
 
     portEND_SWITCHING_ISR(xYieldRequired);
 }
 
-
 soc_peripheral_t spi_master_driver_init(
         int device_id,
+        int dma_buffer_count,
         int isr_core)
 {
     soc_peripheral_t device;
@@ -59,16 +64,15 @@ soc_peripheral_t spi_master_driver_init(
 
     soc_peripheral_common_dma_init(
             device,
-            1,
+            dma_buffer_count,
             0,
-            1,
+            dma_buffer_count,
             sem,
             isr_core,
             (rtos_irq_isr_t) spi_master_isr);
 
     return device;
 }
-
 
 static void spi_driver_transaction(
         soc_peripheral_t dev,
@@ -120,7 +124,6 @@ void spi_master_device_init(
             sizeof(unsigned), &cs_to_data_delay_ns,
             sizeof(unsigned), &byte_setup_ns);
 }
-
 
 void spi_transaction(
         soc_peripheral_t dev,

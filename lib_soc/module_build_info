@@ -31,7 +31,31 @@ SOURCE_DIRS = src/framework                                     \
               src/peripherals/bsp/i2s_driver                    \
               src/peripherals/bsp/micarray_driver               \
               src/peripherals/bsp/sdram_driver                  \
-              src/peripherals/bsp/spi_master_driver
+              src/peripherals/bsp/spi_master_driver             \
+              src/peripherals/bsp/wf200_driver/freertos
 
-EXPORT_INCLUDE_DIRS = $(SOURCE_DIRS)
-INCLUDE_DIRS = $(EXPORT_INCLUDE_DIRS)
+INCLUDE_DIRS := $(SOURCE_DIRS)
+
+##### Include the Silicon Labs WFX200 Full MAC Driver #####
+
+WFX200_LOC = src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver
+WFX200_DRIVER_SRC = $(WFX200_LOC)             \
+                    $(WFX200_LOC)/bus         \
+                    $(WFX200_LOC)/secure_link
+
+WFX200_DRIVER_INC = $(WFX200_LOC)                \
+                    $(WFX200_LOC)/firmware/3.3.1
+
+WFX200_DRIVER_FLAGS = -USL_WFX_USE_SECURE_LINK
+
+# Only support the SPI bus
+EXCLUDE_FILES += $(WFX200_LOC)/bus/sl_wfx_bus_sdio.c
+
+SOURCE_DIRS += $(WFX200_DRIVER_SRC)
+INCLUDE_DIRS += $(WFX200_DRIVER_INC)
+MODULE_XCC_FLAGS += $(WFX200_DRIVER_FLAGS)
+
+###########
+
+
+

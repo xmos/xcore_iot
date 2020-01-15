@@ -91,9 +91,38 @@ void soc_dma_ring_rx_buf_set(
     ring_buf->app_next = add(ring_buf, ring_buf->app_next, 1);
 }
 
+void soc_dma_ring_rx_buf_sg_set(
+        soc_dma_ring_buf_t *ring_buf,
+        void *buf,
+        uint16_t length,
+        int index,
+        int buf_count)
+{
+    int last;
+
+    xassert(buf_count <= ring_buf->desc_count);
+    xassert(index < buf_count);
+
+    last = (index == (buf_count - 1));
+    index = add(ring_buf, ring_buf->app_next, index);
+
+    xassert(ring_buf->desc[index].status == SOC_DMA_BUF_DESC_STATUS_READY);
+
+    ring_buf->desc[index].buf = buf;
+    ring_buf->desc[index].length = length;
+    ring_buf->desc[index].last = last;
+    asm volatile( "" ::: "memory" );
+    ring_buf->desc[index].status = SOC_DMA_BUF_DESC_STATUS_WAITING;
+
+    if (index == ring_buf->app_next) {
+        ring_buf->app_next = add(ring_buf, ring_buf->app_next, buf_count);
+    }
+}
+
 void *soc_dma_ring_rx_buf_get(
         soc_dma_ring_buf_t *ring_buf,
-        int *length)
+        int *length,
+        int *more)
 {
     void *buf = NULL;
 
@@ -101,6 +130,9 @@ void *soc_dma_ring_rx_buf_get(
 
         if (length != NULL) {
             *length = ring_buf->desc[ring_buf->done_next].length;
+        }
+        if (more != NULL) {
+            *more = !ring_buf->desc[ring_buf->done_next].last;
         }
 
         buf = ring_buf->desc[ring_buf->done_next].buf;
