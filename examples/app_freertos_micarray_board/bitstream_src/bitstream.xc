@@ -154,13 +154,12 @@ void tile0_device_instantiate(
         {
             while (soc_tile0_bitstream_initialized() == 0);
             par {
-#warning Mic array device disabled
-               /* micarray_dev(
+                micarray_dev(
                         bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A],
                         null,
                         null,
                         null,
-                        p_pdm_mics);*/
+                        p_pdm_mics);
 
                 gpio_dev(
                         bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A],

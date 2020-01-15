@@ -34,5 +34,11 @@ enum {
 };
 extern soc_peripheral_t bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_COUNT];
 
+enum {
+    BITSTREAM_SPI_DEVICE_A,
+    BITSTREAM_SPI_DEVICE_COUNT
+};
+extern soc_peripheral_t bitstream_spi_devices[BITSTREAM_SPI_DEVICE_COUNT];
+
 
 #endif /* BITSTREAM_DEVICES_H_ */

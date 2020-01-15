@@ -102,18 +102,33 @@ static void spi_test_fast_handler(
             }
             break;
 
-//        case !isnull(data_from_dma_c) => soc_peripheral_rx_dma_ready(data_from_dma_c):
-//            debug_printf("rx from dma\n");
-//            data_len = soc_peripheral_rx_dma_xfer(data_from_dma_c, data_buf, sizeof(data_buf));
-//
-//            memcpy( ptx_buf, data_buf, data_len );
-//
-//            debug_printf("rxdma datalen:%d\n", data_len);
-//
-//            if (data_len > 0) {
-////                spi_fast(data_len, ptx_buf, spi_ctx, SPI_READ_WRITE);
-//            }
-//            break;
+        case !isnull(data_from_dma_c) => soc_peripheral_rx_dma_ready(data_from_dma_c):
+            /* Check that a valid buffer was set */
+            if ((tx_len = soc_peripheral_rx_dma_xfer(data_from_dma_c, data_buf, SPICONF_BUFFER_LEN)) >= 0) {
+
+                int transfer_len;
+
+                if (rx_len > tx_len) {
+                    transfer_len = rx_len;
+                    memset(data_buf + tx_len, SPICONF_RX_ONLY_CHAR, rx_len - tx_len);
+                } else {
+                    transfer_len = tx_len;
+                }
+
+                spi_fast(transfer_len, data_buf, spi_ctx, rx_len > 0 ? SPI_READ_WRITE : SPI_WRITE);
+
+                if (rx_len > 0) { /* Send response if it had been requested */
+                    if (!isnull(data_to_dma_c)) {
+                        soc_peripheral_tx_dma_xfer(
+                                data_to_dma_c,
+                                data_buf,
+                                rx_len);
+                    }
+
+                    rx_len = 0;
+                }
+            }
+            break;
 
         }
     }

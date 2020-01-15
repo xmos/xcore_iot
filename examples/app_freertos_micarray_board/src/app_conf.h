@@ -51,5 +51,6 @@
 #define appconfCLI_TASK_PRIORITY               ( configMAX_PRIORITIES - 3 )
 #define appconfTHRUPUT_TEST_TASK_PRIORITY      ( configMAX_PRIORITIES - 3 )
 #define appconfGPIO_TASK_PRIORITY              ( configMAX_PRIORITIES - 2 )
+#define appconfSPI_TASK_PRIORITY               ( configMAX_PRIORITIES - 3 )
 
 #endif /* APP_CONF_H_ */

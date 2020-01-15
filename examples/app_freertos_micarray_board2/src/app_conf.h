@@ -28,6 +28,22 @@
 /* GPIO defines */
 #define appconfGPIO_VOLUME_RAPID_FIRE_MS       100
 
+/* SPI Test Defines */
+/* Setup for mode 0 */
+#define appconfSPI_CS_PORT_BIT  0
+#define appconfSPI_CPOL         0
+#define appconfSPI_CPHA         0
+
+/* 100 MHz / (2 * 7) / 2 = 3.57 MHz SCK. aardvark slave max br is 4MHz */
+#define appconfSPI_CLOCKDIV     7
+
+/* tsu_cs on WF200 is 3 ns. aardvark is 10000 (10 us) */
+#define appconfSPI_CS_TO_DATA_DELAY_NS  10000
+
+/* td on WF200 is 0 ns. aardvark is 4000 (4 us) */
+#define appconfSPI_BYTE_SETUP_NS    4000
+
+
 /* Task Priorities */
 #define appconfAUDIO_PIPELINE_TASK_PRIORITY    ( configMAX_PRIORITIES - 3 )
 #define appconfQUEUE_TO_TCP_TASK_PRIORITY      ( configMAX_PRIORITIES - 2 )
@@ -35,5 +51,6 @@
 #define appconfCLI_TASK_PRIORITY               ( configMAX_PRIORITIES - 3 )
 #define appconfTHRUPUT_TEST_TASK_PRIORITY      ( configMAX_PRIORITIES - 3 )
 #define appconfGPIO_TASK_PRIORITY              ( configMAX_PRIORITIES - 2 )
+#define appconfSPI_TASK_PRIORITY               ( configMAX_PRIORITIES - 3 )
 
 #endif /* APP_CONF_H_ */
