@@ -63,12 +63,14 @@ port p_exp_6                    = PORT_EXPANSION_12;
 #define SPI_TILE tile[SPI_TILE_NO]
 
 spi_fast_ports spi_ctx = {
-        PORT_EXPANSION_5,
-        PORT_EXPANSION_3,
-        PORT_EXPANSION_1,
-        PORT_EXPANSION_7,
-        on SPI_TILE: XS1_CLKBLK_1,
+        PORT_EXPANSION_5, /* SCK  */
+        PORT_EXPANSION_3, /* MISO */
+        PORT_EXPANSION_1, /* MOSI */
+        PORT_EXPANSION_7, /* CS   */
+        on SPI_TILE: XS1_CLKBLK_1, /* clock block */
+        0, /* CS is at bit 0 on its port */
 };
+
 /*-----------------------------------------------------------*/
 /* Mic Array defines */
 /*-----------------------------------------------------------*/

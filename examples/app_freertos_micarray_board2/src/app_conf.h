@@ -30,7 +30,6 @@
 
 /* SPI Test Defines */
 /* Setup for mode 0 */
-#define appconfSPI_CS_PORT_BIT  0
 #define appconfSPI_CPOL         0
 #define appconfSPI_CPHA         0
 

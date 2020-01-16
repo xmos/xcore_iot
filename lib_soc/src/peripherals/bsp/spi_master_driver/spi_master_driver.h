@@ -17,7 +17,6 @@ soc_peripheral_t spi_master_driver_init(
 /* Initialize device */
 void spi_master_device_init(
         soc_peripheral_t dev,
-        unsigned cs_port_bit,
         unsigned cpol,
         unsigned cpha,
         unsigned clock_divide,

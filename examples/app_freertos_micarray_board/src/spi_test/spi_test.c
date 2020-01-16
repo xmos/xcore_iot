@@ -51,7 +51,6 @@ static void spi_test(void *arg)
     int test = 0;
 
     spi_master_device_init(spi_dev,
-                           appconfSPI_CS_PORT_BIT,
                            appconfSPI_CPOL,
                            appconfSPI_CPHA,
                            appconfSPI_CLOCKDIV,

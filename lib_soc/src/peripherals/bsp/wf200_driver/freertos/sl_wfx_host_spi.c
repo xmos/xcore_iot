@@ -35,7 +35,6 @@ sl_status_t sl_wfx_host_init_bus(void)
 {
     if (!initialized && spi_dev != NULL) {
         spi_master_device_init(spi_dev,
-                               0,    /* this should be defined in the bitstream */
                                0, 0, /* mode 0 */
                                2,    /* 100 MHz / (2* 2 ) / 2 = 12.5 MHz */
                                500,  /* really only needs to be 3ns but it is too quick */
