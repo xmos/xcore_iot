@@ -24,11 +24,11 @@ static TaskHandle_t gpio_handler_task;
 static TimerHandle_t volume_up_timer;
 static TimerHandle_t volume_down_timer;
 
-GPIO_ISR_CALLBACK_FUNCTION( gpio_dev_callback, device, status )
+GPIO_ISR_CALLBACK_FUNCTION( gpio_dev_callback, device, source_id )
 {
     BaseType_t xYieldRequired = pdFALSE;
 
-    xTaskNotifyFromISR( gpio_handler_task, status, eSetBits, &xYieldRequired );
+    xTaskNotifyFromISR( gpio_handler_task, 1 << source_id, eSetBits, &xYieldRequired );
 
     return xYieldRequired;
 }

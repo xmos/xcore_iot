@@ -20,10 +20,10 @@
 #include "queue_to_i2s.h"
 
 RTOS_IRQ_ISR_ATTR
-int i2s_array_isr(soc_peripheral_t device)
+void i2s_array_isr(soc_peripheral_t device)
 {
     BaseType_t xYieldRequired = pdFALSE;
-    return xYieldRequired;
+    portEND_SWITCHING_ISR(xYieldRequired);
 }
 
 void vqueue_to_i2s(void *arg)

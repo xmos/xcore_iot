@@ -14,7 +14,9 @@
 /* BSP/bitstream headers */
 #include "bitstream_devices.h"
 #include "spi_master_driver.h"
+#include "gpio_driver.h"
 #include "sl_wfx.h"
+#include "sl_wfx_host.h"
 
 /* App headers */
 //#include "foo.h"
@@ -36,11 +38,10 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 
 static void wf200_test(void *arg)
 {
-    soc_peripheral_t spi_dev = arg;
+    soc_peripheral_t gpio_dev = arg;
+    soc_peripheral_t spi_dev = soc_peripheral_app_data(gpio_dev);
     sl_wfx_context_t wfx_ctx;
     sl_status_t ret;
-
-    void sl_wfx_host_set_spi_device(soc_peripheral_t dev);
 
     rtos_printf("Hello from wf200 test... ");
 
@@ -48,12 +49,16 @@ static void wf200_test(void *arg)
 
     rtos_printf("GO!\n");
 
-    sl_wfx_host_set_spi_device(spi_dev);
+    sl_wfx_host_set_hif(spi_dev,
+                        gpio_dev,
+                        gpio_1I, 0,  /* header pin 9 */
+                        gpio_1P, 0); /* header pin 10 */
+
     ret = sl_wfx_init(&wfx_ctx);
-    rtos_printf("Returned %d\n", ret);
+    rtos_printf("Returned %x\n", ret);
 
     while (1) {
-        rtos_printf("loop\n");
+        //rtos_printf("loop\n");
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -70,6 +75,11 @@ void soc_tile0_main(
             BITSTREAM_SPI_DEVICE_A,  /* Initializing SPI device A */
             2,                       /* Use 2 DMA buffers for the scatter/gather */
             0);                      /* This device's interrupts should happen on core 0 */
+
+    dev = gpio_driver_init(
+            BITSTREAM_GPIO_DEVICE_A,
+            dev,
+            0);
 
     xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), dev, 15, NULL);
 

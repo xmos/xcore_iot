@@ -195,6 +195,12 @@ void gpio_dev(
 
                     retval_int = port_disable_trigger( port_res );
 
+                    /* In case IRQ disable is called between an interrupt
+                     * firing and the ISR reading the port, this prevents
+                     * the read from re-enabling the interrupt. */
+                    mask = ( 0x1 << gpio_id );
+                    port_irq_flags &= ~mask;
+
                     soc_peripheral_varlist_tx(
                             ctrl_c, 1,
                             sizeof(retval_int), &retval_int);

@@ -60,7 +60,7 @@ int frame_power(int32_t *mic_data)
 }
 
 RTOS_IRQ_ISR_ATTR
-int mic_array_isr(soc_peripheral_t device)
+void mic_array_isr(soc_peripheral_t device)
 {
     QueueHandle_t mic_data_queue = soc_peripheral_app_data(device);
     BaseType_t xYieldRequired = pdFALSE;
@@ -90,7 +90,7 @@ int mic_array_isr(soc_peripheral_t device)
         }
     }
 
-    return xYieldRequired;
+    portEND_SWITCHING_ISR(xYieldRequired);
 }
 
 /* Apply gain to mic data */

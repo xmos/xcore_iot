@@ -9,15 +9,15 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-static const char *pds_data_ptr;
-static uint16_t pds_data_size;
+static const char *pds_data_g;
+static uint16_t pds_size_g;
 
 /**** XCORE Specific Functions Start ****/
 
 void sl_wfx_host_set_pds(const char *pds_data, uint16_t pds_size)
 {
-    pds_data_ptr = pds_data;
-    pds_data_size = pds_size;
+    pds_data_g = pds_data;
+    pds_size_g = pds_size;
 }
 
 /**** XCORE Specific Functions End ****/
@@ -43,21 +43,21 @@ sl_status_t sl_wfx_host_get_firmware_size(uint32_t *firmware_size)
 
 sl_status_t sl_wfx_host_get_pds_data(const char **pds_data, uint16_t index)
 {
-    if (pds_data_ptr == NULL) {
+    if (pds_data_g == NULL) {
         return SL_STATUS_FAIL;
     }
 
-    *pds_data = pds_data_ptr;
+    *pds_data = pds_data_g;
     return SL_STATUS_OK;
 }
 
 sl_status_t sl_wfx_host_get_pds_size(uint16_t *pds_size)
 {
-    if (pds_data_size == 0) {
+    if (pds_size_g == 0) {
         return SL_STATUS_FAIL;
     }
 
-    *pds_size = pds_data_size;
+    *pds_size = pds_size_g;
     return SL_STATUS_OK;
 }
 

@@ -13,14 +13,16 @@ soc_peripheral_t bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_COUNT];
 
 
 typedef struct gpio_isr_callback {
-    GPIO_ISR_CALLBACK_ATTR
-    pGPIO_ISR_CALLBACK cb;
+    GPIO_ISR_CALLBACK_ATTR gpio_isr_cb_t cb;
 } gpio_isr_callback_t;
 
-static gpio_isr_callback_t gpio_isr_callback_map[ GPIO_TOTAL_PORT_CNT ] = {};
+static gpio_isr_callback_t gpio_isr_callback_map[ GPIO_TOTAL_PORT_CNT ];
 
-GPIO_ISR_CALLBACK_FUNCTION( gpio_dev_null, device, status )
+GPIO_ISR_CALLBACK_FUNCTION( gpio_dev_null, device, source_id )
 {
+    (void) device;
+    (void) source_id;
+
     return pdFALSE;
 }
 
@@ -30,13 +32,11 @@ static void gpio_isr( soc_peripheral_t device )
     BaseType_t xYieldRequired = pdFALSE;
     uint32_t status;
 
-    configASSERT(device == bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A]);
-
     status = soc_peripheral_interrupt_status(device);
 
     while( status != 0 )
     {
-        int source_id = 31UL - ( uint32_t ) __builtin_clz( status );
+        gpio_id_t source_id = 31UL - ( uint32_t ) __builtin_clz( status );
 
         xassert( source_id >= 0 );
 
@@ -217,7 +217,7 @@ static int gpio_driver_irq_disable(
     return retval;
 }
 
-int gpio_irq_setup_callback( soc_peripheral_t dev, gpio_id_t gpio_id, pGPIO_ISR_CALLBACK isr_cb)
+int gpio_irq_setup_callback( soc_peripheral_t dev, gpio_id_t gpio_id, gpio_isr_cb_t isr_cb)
 {
     uint32_t retVal;
 
