@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
 #include "soc.h"
 #include "soc_bsp_common.h"
@@ -29,7 +29,6 @@ static void gpio_isr( soc_peripheral_t device )
 {
     BaseType_t xYieldRequired = pdFALSE;
     uint32_t status;
-    uint32_t pending;
 
     configASSERT(device == bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A]);
 
