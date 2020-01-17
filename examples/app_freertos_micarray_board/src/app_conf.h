@@ -36,11 +36,14 @@
 /* 100 MHz / (2 * 7) / 2 = 3.57 MHz SCK. aardvark slave max br is 4MHz */
 #define appconfSPI_CLOCKDIV     7
 
-/* tsu_cs on WF200 is 3 ns. aardvark is 10000 (10 us) */
+/* aardvark is 10000 (10 us) */
 #define appconfSPI_CS_TO_DATA_DELAY_NS  10000
 
-/* td on WF200 is 0 ns. aardvark is 4000 (4 us) */
+/* aardvark is 4000 (4 us) */
 #define appconfSPI_BYTE_SETUP_NS    4000
+
+/* aardvark is 5000 (5 us) */
+#define appconfSPI_DATA_TO_CS_DELAY_NS 5000
 
 
 /* Task Priorities */

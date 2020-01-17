@@ -69,12 +69,13 @@ static void spi_test_fast_handler(
                 break;
             case SPI_MASTER_DEV_INIT:
                 soc_peripheral_varlist_rx(
-                        ctrl_c, 5,
+                        ctrl_c, 6,
                         sizeof(unsigned), &spi_ctx.cpol,
                         sizeof(unsigned), &spi_ctx.cpha,
                         sizeof(unsigned), &spi_ctx.clock_divide,
                         sizeof(unsigned), &spi_ctx.cs_to_data_delay_ns,
-                        sizeof(unsigned), &spi_ctx.byte_setup_ns);
+                        sizeof(unsigned), &spi_ctx.byte_setup_ns,
+                        sizeof(unsigned), &spi_ctx.data_to_cs_delay_ns);
 
                 spi_fast_init(spi_ctx);
                 break;

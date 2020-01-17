@@ -56,7 +56,8 @@ static void spi_test(void *arg)
                            appconfSPI_CPHA,
                            appconfSPI_CLOCKDIV,
                            appconfSPI_CS_TO_DATA_DELAY_NS,
-                           appconfSPI_BYTE_SETUP_NS);
+                           appconfSPI_BYTE_SETUP_NS,
+                           appconfSPI_DATA_TO_CS_DELAY_NS);
 
     SPI_TIMING_INIT();
 

@@ -27,12 +27,14 @@ typedef struct {
     unsigned clock_divide; /* SCK Frequency = 100 MHz / (2 * clock_divide) / 2 */
     unsigned cs_to_data_delay_ns;
     unsigned byte_setup_ns;
+    unsigned data_to_cs_delay_ns;
 
     /****************************************/
     /***      For internal use only       ***/
     /****************************************/
     unsigned cs_to_data_delay_ticks;
     unsigned byte_setup_ticks;
+    unsigned data_to_cs_delay_ticks;
     unsigned clock_bits;
     unsigned clock_delay;
 } spi_fast_ports;
@@ -60,7 +62,7 @@ void drive_cs_port_now(spi_fast_ports &p,
 void drive_cs_port_at_time(spi_fast_ports &p,
                            uint32_t p_ss_bit,
                            uint32_t bit_value,
-                           unsigned *time);
+                           unsigned time);
 
 void drive_cs_port_get_time(spi_fast_ports &p,
                             uint32_t p_ss_bit,

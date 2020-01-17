@@ -108,19 +108,21 @@ void spi_master_device_init(
         unsigned cpha,
         unsigned clock_divide,
         unsigned cs_to_data_delay_ns,
-        unsigned byte_setup_ns)
+        unsigned byte_setup_ns,
+        unsigned data_to_cs_delay_ns)
 {
     chanend c_ctrl = soc_peripheral_ctrl_chanend(dev);
 
     soc_peripheral_function_code_tx(c_ctrl, SPI_MASTER_DEV_INIT);
 
     soc_peripheral_varlist_tx(
-            c_ctrl, 5,
+            c_ctrl, 6,
             sizeof(unsigned), &cpol,
             sizeof(unsigned), &cpha,
             sizeof(unsigned), &clock_divide,
             sizeof(unsigned), &cs_to_data_delay_ns,
-            sizeof(unsigned), &byte_setup_ns);
+            sizeof(unsigned), &byte_setup_ns,
+            sizeof(unsigned), &data_to_cs_delay_ns);
 }
 
 void spi_transaction(

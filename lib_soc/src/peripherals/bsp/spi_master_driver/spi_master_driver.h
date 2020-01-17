@@ -21,7 +21,8 @@ void spi_master_device_init(
         unsigned cpha,
         unsigned clock_divide,
         unsigned cs_to_data_delay_ns,
-        unsigned byte_setup_ns);
+        unsigned byte_setup_ns,
+        unsigned data_to_cs_delay_ns);
 
 /** Perform a SPI transaction
  *

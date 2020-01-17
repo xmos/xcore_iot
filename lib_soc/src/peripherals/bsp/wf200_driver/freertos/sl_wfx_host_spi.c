@@ -38,7 +38,8 @@ sl_status_t sl_wfx_host_init_bus(void)
                                0, 0, /* mode 0 */
                                2,    /* 100 MHz / (2* 2 ) / 2 = 12.5 MHz */
                                500,  /* really only needs to be 3ns but it is too quick */
-                               0);   /* no inter-byte setup delay required */
+                               0,    /* no inter-byte setup delay required */
+                               0);   /* no last clock to cs delay required */
 
         initialized = 1;
 
