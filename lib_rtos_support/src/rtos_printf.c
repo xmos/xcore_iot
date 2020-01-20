@@ -18,6 +18,7 @@
 #include "rtos_support.h"
 
 #undef rtos_printf
+#undef rtos_vprintf
 
 #define LONG64 (LONG_MAX == 9223372036854775807L)
 #define POINTER64 (INTPTR_MAX == 9223372036854775807L)
@@ -460,25 +461,38 @@ size_t rtos_sprintf(char *str, const char *fmt, ...)
     return len;
 }
 
-#ifndef DEBUG_PRINTF_BUFSIZE
+#ifndef RTOS_PRINTF_BUFSIZE
+#ifdef DEBUG_PRINTF_BUFSIZE
+#define RTOS_PRINTF_BUFSIZE DEBUG_PRINTF_BUFSIZE
+#else
 #define RTOS_PRINTF_BUFSIZE 130
 #endif
+#endif
+
+size_t rtos_vprintf(const char *fmt, va_list ap)
+{
+    size_t len;
+    uint32_t mask;
+    char buf[RTOS_PRINTF_BUFSIZE];
+
+    mask = rtos_interrupt_mask_all();
+    len = rtos_vsnwprintf(buf, RTOS_PRINTF_BUFSIZE, 1, fmt, ap);
+
+    _write(FD_STDOUT, buf, len);
+
+    rtos_interrupt_mask_set(mask);
+
+    return len;
+}
 
 size_t rtos_printf(const char *fmt, ...)
 {
     size_t len;
     va_list ap;
-    uint32_t mask;
-    char buf[RTOS_PRINTF_BUFSIZE];
 
     va_start(ap, fmt);
-    mask = rtos_interrupt_mask_all();
-    len = rtos_vsnwprintf(buf, RTOS_PRINTF_BUFSIZE, 1, fmt, ap);
+    len = rtos_vprintf(fmt, ap);
     va_end(ap);
-
-    _write(FD_STDOUT, buf, len);
-
-    rtos_interrupt_mask_set(mask);
 
     return len;
 }

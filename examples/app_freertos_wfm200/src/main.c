@@ -17,6 +17,7 @@
 #include "gpio_driver.h"
 #include "sl_wfx.h"
 #include "sl_wfx_host.h"
+#include "brd8023a_pds.h"
 
 /* App headers */
 //#include "foo.h"
@@ -52,10 +53,28 @@ static void wf200_test(void *arg)
     sl_wfx_host_set_hif(spi_dev,
                         gpio_dev,
                         gpio_1I, 0,  /* header pin 9 */
-                        gpio_1P, 0); /* header pin 10 */
+                        gpio_1P, 0,  /* header pin 10 */
+                        gpio_1J, 0); /* header pin 12 */
+
+    sl_wfx_host_set_pds(pds_table_brd8023a, SL_WFX_ARRAY_COUNT(pds_table_brd8023a));
 
     ret = sl_wfx_init(&wfx_ctx);
     rtos_printf("Returned %x\n", ret);
+
+
+
+    const uint8_t channel_list[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
+
+
+    sl_wfx_send_scan_command(WFM_SCAN_MODE_ACTIVE,
+                             channel_list,
+                             13,
+                             NULL,
+                             0,
+                             NULL,
+                             0,
+                             NULL);
+
 
     while (1) {
         //rtos_printf("loop\n");

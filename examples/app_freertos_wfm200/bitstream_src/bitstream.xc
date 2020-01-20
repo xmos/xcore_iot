@@ -3,6 +3,7 @@
 #include <platform.h>
 #include <stdint.h>
 #include <timer.h>
+#include <quadflashlib.h>
 
 #include "xassert.h"
 #include "debug_print.h"
@@ -106,6 +107,30 @@ port p_rst_shared                   = PORT_SHARED_RESET;    // Bit 0: DAC_RST_N,
 //port p_usb_txd          = PORT_USB_TXD;
 //port p_usb_rxd          = PORT_USB_RXD;
 
+/*-----------------------------------------------------------*/
+/* Quad SPI Flash defines */
+/*-----------------------------------------------------------*/
+/**
+ * Defines the ports and clock block
+ * to use for the quad spi flash.
+ */
+#define FLASH_PORTS {           \
+    PORT_SQI_CS,                \
+    PORT_SQI_SCLK,              \
+    PORT_SQI_SIO,               \
+    on tile[0]: XS1_CLKBLK_2    \
+}
+
+/**
+ * Defines the supported flash chips.
+ */
+#define FLASH_SPECS {             \
+    FL_QUADDEVICE_ISSI_IS25LQ016B \
+}
+
+//Configuration for the quad spi flash
+fl_QSPIPorts      flash_ports   = FLASH_PORTS;
+fl_QuadDeviceSpec flash_specs[] = FLASH_SPECS;
 
 void tile0_device_instantiate(
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
@@ -122,6 +147,12 @@ void tile0_device_instantiate(
             unsafe chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
             unsafe chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t0_gpio_dev_ctrl_ch, null};
             unsafe chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, spi_dev_ctrl_ch, null};
+
+            /*
+             * Must be called before device_register() so that it happens before
+             * before the bitstream is "initialized" and the FreeRTOS software starts.
+             */
+            fl_connectToDevice(flash_ports, flash_specs, sizeof(flash_specs)/sizeof(fl_QuadDeviceSpec));
 
             device_register(mic_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch);
             soc_peripheral_hub();

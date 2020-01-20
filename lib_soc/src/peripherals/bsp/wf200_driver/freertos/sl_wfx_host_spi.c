@@ -28,6 +28,8 @@ typedef struct {
     int wirq_bit;
     gpio_id_t wup_gpio_port;
     int wup_bit;
+    gpio_id_t reset_gpio_port;
+    int reset_bit;
 } sl_wfx_host_hif_t;
 
 static sl_wfx_host_hif_t hif_ctx;
@@ -37,7 +39,8 @@ static sl_wfx_host_hif_t hif_ctx;
 void sl_wfx_host_set_hif(soc_peripheral_t spi_dev,
                          soc_peripheral_t gpio_dev,
                          gpio_id_t wirq_gpio_port, int wirq_bit,
-                         gpio_id_t wup_gpio_port, int wup_bit)
+                         gpio_id_t wup_gpio_port, int wup_bit,
+                         gpio_id_t reset_gpio_port, int reset_bit)
 {
     configASSERT(!hif_ctx.initialized);
 
@@ -47,6 +50,32 @@ void sl_wfx_host_set_hif(soc_peripheral_t spi_dev,
     hif_ctx.wirq_bit = wirq_bit;
     hif_ctx.wup_gpio_port = wup_gpio_port;
     hif_ctx.wup_bit = wup_bit;
+    hif_ctx.reset_gpio_port = reset_gpio_port;
+    hif_ctx.reset_bit = reset_bit;
+}
+
+void sl_wfx_host_gpio(int gpio,
+                      int value)
+{
+    gpio_id_t port;
+    int bit;
+
+    switch (gpio) {
+    case SL_WFX_HIF_GPIO_WUP:
+        port = hif_ctx.wup_gpio_port;
+        bit = hif_ctx.wup_bit;
+        break;
+    case SL_WFX_HIF_GPIO_RESET:
+        port = hif_ctx.reset_gpio_port;
+        bit = hif_ctx.reset_bit;
+        break;
+    default:
+        return;
+    }
+
+    configASSERT(hif_ctx.initialized && port != -1);
+
+    gpio_write_pin(hif_ctx.gpio_dev, port, bit, value);
 }
 
 static GPIO_ISR_CALLBACK_FUNCTION(sl_wfx_host_wirq_isr, device, source_id)
@@ -57,8 +86,7 @@ static GPIO_ISR_CALLBACK_FUNCTION(sl_wfx_host_wirq_isr, device, source_id)
     configASSERT(device == hif_ctx.gpio_dev);
     configASSERT(source_id == hif_ctx.wirq_gpio_port);
 
-    value = gpio_read(device, hif_ctx.wirq_gpio_port);
-    if (value & hif_ctx.wirq_bit) {
+    if (gpio_read_pin(device, hif_ctx.wirq_gpio_port, hif_ctx.wirq_bit)) {
         sl_wfx_host_task_rx_notify(&xYieldRequired);
     }
 
@@ -78,6 +106,12 @@ sl_status_t sl_wfx_host_init_bus(void)
             gpio_init(hif_ctx.gpio_dev, hif_ctx.wirq_gpio_port);
             gpio_irq_setup_callback(hif_ctx.gpio_dev, hif_ctx.wirq_gpio_port, sl_wfx_host_wirq_isr);
             //gpio_irq_enable(hif_ctx.gpio_dev, hif_ctx.wirq_gpio_port);//////////TEMPORARY
+        } else {
+            return SL_STATUS_INITIALIZATION;
+        }
+
+        if (hif_ctx.reset_gpio_port >= 0 && hif_ctx.reset_gpio_port < GPIO_TOTAL_PORT_CNT) {
+            gpio_init(hif_ctx.gpio_dev, hif_ctx.reset_gpio_port);
         } else {
             return SL_STATUS_INITIALIZATION;
         }

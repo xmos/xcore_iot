@@ -14,11 +14,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+#include "event_groups.h"
 
 #define SL_WFX_HOST_BUS_IRQ_BM    0x00000001
 #define SL_WFX_HOST_BUS_DEINIT_BM 0x00000002
 
 static TaskHandle_t receive_task_handle;
+SemaphoreHandle_t s_xDriverSemaphore;
+EventGroupHandle_t sl_wfx_event_group;
 
 static sl_status_t sl_wfx_host_receive_frames(void)
 {
@@ -38,8 +41,6 @@ static void sl_wfx_host_receive_task(void *arg)
 {
     uint32_t bits;
 
-    rtos_printf("host task started\n");
-
     /* create a mutex used for making driver accesses atomic */
     //s_xDriverSemaphore = xSemaphoreCreateMutex();
 
@@ -48,24 +49,20 @@ static void sl_wfx_host_receive_task(void *arg)
 
     for (;;) {
         /* Wait for an interrupt from WF200 */
-        rtos_printf("host task waiting...\n");
         /* TODO: check return value */
         xTaskNotifyWait(0x00000000,
                         0xFFFFFFFF,
                         &bits,
                         portMAX_DELAY);
 
-        rtos_printf("host task woke up\n");
-
         if (bits & SL_WFX_HOST_BUS_DEINIT_BM) {
-            rtos_printf("host task deleting self\n");
+            sl_wfx_host_log("WFX200 host task ending\n");
             vTaskDelete(receive_task_handle);
         }
 
         if (bits & SL_WFX_HOST_BUS_IRQ_BM) {
-            rtos_printf("WiFi IRQ!\n");
             /* Receive the frame(s) pending in WF200 */
-            //sl_wfx_host_receive_frames();
+            sl_wfx_host_receive_frames();
         }
     }
 }
@@ -82,7 +79,12 @@ void sl_wfx_host_task_stop(void)
 
 void sl_wfx_host_task_start(void)
 {
-    rtos_printf("starting host task\n");
+    /* create a mutex used for making driver accesses atomic */
+    s_xDriverSemaphore = xSemaphoreCreateMutex();
+
+    /* create an event group to track Wi-Fi events */
+    sl_wfx_event_group = xEventGroupCreate();
+
     xTaskCreate(sl_wfx_host_receive_task,
                 "sl_wfx_host_receive_task",
                 portTASK_STACK_DEPTH(sl_wfx_host_receive_task),
