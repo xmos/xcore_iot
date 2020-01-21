@@ -73,14 +73,13 @@ void sl_wfx_host_gpio(int gpio,
         return;
     }
 
-    configASSERT(hif_ctx.initialized && port != -1);
+    configASSERT(hif_ctx.initialized && port != gpio_none);
 
     gpio_write_pin(hif_ctx.gpio_dev, port, bit, value);
 }
 
 static GPIO_ISR_CALLBACK_FUNCTION(sl_wfx_host_wirq_isr, device, source_id)
 {
-    uint32_t value;
     BaseType_t xYieldRequired = pdFALSE;
 
     configASSERT(device == hif_ctx.gpio_dev);
@@ -102,24 +101,23 @@ sl_status_t sl_wfx_host_init_bus(void)
 {
     if (!hif_ctx.initialized && hif_ctx.spi_dev != NULL && hif_ctx.gpio_dev != NULL) {
 
-        if (hif_ctx.wirq_gpio_port >= 0 && hif_ctx.wirq_gpio_port < GPIO_TOTAL_PORT_CNT) {
+        if (hif_ctx.wirq_gpio_port > gpio_none && hif_ctx.wirq_gpio_port < GPIO_TOTAL_PORT_CNT) {
             gpio_init(hif_ctx.gpio_dev, hif_ctx.wirq_gpio_port);
             gpio_irq_setup_callback(hif_ctx.gpio_dev, hif_ctx.wirq_gpio_port, sl_wfx_host_wirq_isr);
-            //gpio_irq_enable(hif_ctx.gpio_dev, hif_ctx.wirq_gpio_port);//////////TEMPORARY
         } else {
             return SL_STATUS_INITIALIZATION;
         }
 
-        if (hif_ctx.reset_gpio_port >= 0 && hif_ctx.reset_gpio_port < GPIO_TOTAL_PORT_CNT) {
+        if (hif_ctx.reset_gpio_port > gpio_none && hif_ctx.reset_gpio_port < GPIO_TOTAL_PORT_CNT) {
             gpio_init(hif_ctx.gpio_dev, hif_ctx.reset_gpio_port);
         } else {
             return SL_STATUS_INITIALIZATION;
         }
 
-        if (hif_ctx.wup_gpio_port >= 0 && hif_ctx.wup_gpio_port < GPIO_TOTAL_PORT_CNT) {
+        if (hif_ctx.wup_gpio_port > gpio_none && hif_ctx.wup_gpio_port < GPIO_TOTAL_PORT_CNT) {
             gpio_init(hif_ctx.gpio_dev, hif_ctx.wup_gpio_port);
         } else {
-            hif_ctx.wup_gpio_port = -1;
+            hif_ctx.wup_gpio_port = gpio_none;
         }
 
         spi_master_device_init(hif_ctx.spi_dev,

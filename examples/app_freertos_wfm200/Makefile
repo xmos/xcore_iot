@@ -3,7 +3,7 @@ TARGET = MIC-ARRAY-1V3
 
 APP_NAME = 
 
-SOURCE_DIRS = bitstream_src src
+SOURCE_DIRS = bitstream_src src src/afr_wifi
 
 INCLUDE_DIRS = $(SOURCE_DIRS)
 

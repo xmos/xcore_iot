@@ -41,12 +41,6 @@ static void sl_wfx_host_receive_task(void *arg)
 {
     uint32_t bits;
 
-    /* create a mutex used for making driver accesses atomic */
-    //s_xDriverSemaphore = xSemaphoreCreateMutex();
-
-    /* create an event group to track Wi-Fi events */
-    //sl_wfx_event_group = xEventGroupCreate();
-
     for (;;) {
         /* Wait for an interrupt from WF200 */
         /* TODO: check return value */
@@ -69,6 +63,7 @@ static void sl_wfx_host_receive_task(void *arg)
 
 void sl_wfx_host_task_rx_notify(BaseType_t *xYieldRequired)
 {
+    xEventGroupSetBitsFromISR(sl_wfx_event_group, SL_WFX_INTERRUPT, xYieldRequired);
     xTaskNotifyFromISR(receive_task_handle, SL_WFX_HOST_BUS_IRQ_BM, eSetBits, xYieldRequired);
 }
 

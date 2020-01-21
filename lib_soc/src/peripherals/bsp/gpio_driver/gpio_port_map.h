@@ -5,9 +5,8 @@
 
 #include "xcore_c.h"
 
-#define GPIO_TOTAL_PORT_CNT   (32)
-
 typedef enum {
+    gpio_none = -1,
     gpio_1A = 0,
     gpio_1B,
     gpio_1C,
@@ -39,7 +38,8 @@ typedef enum {
     gpio_16C,
     gpio_16D,
     gpio_32A,
-    gpio_32B
+    gpio_32B,
+    GPIO_TOTAL_PORT_CNT
 } gpio_id_t;
 
 #endif /* GPIO_PORT_MAP_H_ */

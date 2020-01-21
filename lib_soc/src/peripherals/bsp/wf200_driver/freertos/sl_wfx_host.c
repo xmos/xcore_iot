@@ -18,17 +18,12 @@
 
 #define printf rtos_printf
 
-char event_log[50];
-
 extern SemaphoreHandle_t s_xDriverSemaphore;
 
-scan_result_list_t scan_list[SL_WFX_MAX_SCAN_RESULTS];
-uint8_t scan_count = 0;
-uint8_t scan_count_web = 0;
 QueueHandle_t eventQueue;
 
 typedef struct {
-    const char **pds_data;
+    const char * const *pds_data;
     int firmware_index;
     uint16_t pds_size;
     uint8_t firmware_data[DOWNLOAD_BLOCK_SIZE];
@@ -37,187 +32,16 @@ typedef struct {
 
 static sl_wfx_host_ctx_t host_ctx;
 
+void sl_wfx_host_gpio(int gpio,
+                      int value);
 
 /**** XCORE Specific Functions Start ****/
 
-void sl_wfx_host_set_pds(const char *pds_data[],
+void sl_wfx_host_set_pds(const char * const pds_data[],
                          uint16_t pds_size)
 {
     host_ctx.pds_data = pds_data;
     host_ctx.pds_size = pds_size;
-}
-
-
-
-
-/**************************************************************************//**
- * Callback for individual scan result
- *****************************************************************************/
-void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t* scan_result)
-{
-  scan_count++;
-  printf(
-    "# %2d %2d  %03d %02X:%02X:%02X:%02X:%02X:%02X  %s",
-    scan_count,
-    scan_result->channel,
-    ((int16_t)(scan_result->rcpi - 220) / 2),
-    scan_result->mac[0], scan_result->mac[1],
-    scan_result->mac[2], scan_result->mac[3],
-    scan_result->mac[4], scan_result->mac[5],
-    scan_result->ssid_def.ssid);
-  /*Report one AP information*/
-  printf("\r\n");
-  if (scan_count <= SL_WFX_MAX_SCAN_RESULTS) {
-    scan_list[scan_count - 1].ssid_def = scan_result->ssid_def;
-    scan_list[scan_count - 1].channel = scan_result->channel;
-    scan_list[scan_count - 1].security_mode = scan_result->security_mode;
-    scan_list[scan_count - 1].rcpi = scan_result->rcpi;
-    memcpy(scan_list[scan_count - 1].mac, scan_result->mac, 6);
-  }
-}
-
-/**************************************************************************//**
- * Callback for scan complete
- *****************************************************************************/
-void sl_wfx_scan_complete_callback(uint32_t status)
-{
-  scan_count_web = scan_count;
-  scan_count = 0;
-  xEventGroupSetBits(sl_wfx_event_group, SL_WFX_SCAN_COMPLETE);
-}
-
-/**************************************************************************//**
- * Callback when station connects
- *****************************************************************************/
-void sl_wfx_connect_callback(uint8_t* mac, uint32_t status)
-{
-  switch(status){
-  case WFM_STATUS_SUCCESS:
-    {
-      printf("Connected\r\n");
-      sl_wfx_context->state |= SL_WFX_STA_INTERFACE_CONNECTED;
-      xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT);
-      break;
-    }
-  case WFM_STATUS_NO_MATCHING_AP:
-    {
-      strcpy(event_log, "Connection failed, access point not found");
-      printf(event_log);
-      printf("\r\n");
-      break;
-    }
-  case WFM_STATUS_CONNECTION_ABORTED:
-    {
-      strcpy(event_log, "Connection aborted");
-      printf(event_log);
-      printf("\r\n");
-      break;
-    }
-  case WFM_STATUS_CONNECTION_TIMEOUT:
-    {
-      strcpy(event_log, "Connection timeout");
-      printf(event_log);
-      printf("\r\n");
-      break;
-    }
-  case WFM_STATUS_CONNECTION_REJECTED_BY_AP:
-    {
-      strcpy(event_log, "Connection rejected by the access point");
-      printf(event_log);
-      printf("\r\n");
-      break;
-    }
-  case WFM_STATUS_CONNECTION_AUTH_FAILURE:
-    {
-      strcpy(event_log, "Connection authentication failure");
-      printf(event_log);
-      printf("\r\n");
-      break;
-    }
-  default:
-    {
-      strcpy(event_log, "Connection attempt error");
-      printf(event_log);
-      printf("\r\n");
-    }
-  }
-}
-
-/**************************************************************************//**
- * Callback for station disconnect
- *****************************************************************************/
-void sl_wfx_disconnect_callback(uint8_t* mac, uint16_t reason)
-{
-  printf("Disconnected %d\r\n", reason);
-  sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
-  xEventGroupSetBits(sl_wfx_event_group, SL_WFX_DISCONNECT);
-}
-
-/**************************************************************************//**
- * Callback for AP started
- *****************************************************************************/
-void sl_wfx_start_ap_callback(uint32_t status)
-{
-  if (status == 0) {
-    printf("AP started\r\n");
-//    printf("Join the AP with SSID: %s\r\n", softap_ssid);
-    sl_wfx_context->state |= SL_WFX_AP_INTERFACE_UP;
-    xEventGroupSetBits(sl_wfx_event_group, SL_WFX_START_AP);
-  } else {
-    printf("AP start failed\r\n");
-    strcpy(event_log, "AP start failed");
-  }
-}
-
-/**************************************************************************//**
- * Callback for AP stopped
- *****************************************************************************/
-void sl_wfx_stop_ap_callback(void)
-{
-//  dhcpserver_clear_stored_mac ();
-  printf("SoftAP stopped\r\n");
-  sl_wfx_context->state &= ~SL_WFX_AP_INTERFACE_UP;
-  xEventGroupSetBits(sl_wfx_event_group, SL_WFX_STOP_AP);
-}
-
-/**************************************************************************//**
- * Callback for client connect to AP
- *****************************************************************************/
-void sl_wfx_client_connected_callback(uint8_t* mac)
-{
-  printf("Client connected, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
-         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-//  printf("Open a web browser and go to http://%d.%d.%d.%d\r\n",
-//         AP_IP_ADDR0_DEFAULT, AP_IP_ADDR1_DEFAULT, AP_IP_ADDR2_DEFAULT, AP_IP_ADDR3_DEFAULT);
-}
-
-/**************************************************************************//**
- * Callback for client rejected from AP
- *****************************************************************************/
-void sl_wfx_ap_client_rejected_callback(uint32_t status, uint8_t* mac)
-{
-//  struct eth_addr mac_addr;
-//  memcpy(&mac_addr, mac, SL_WFX_BSSID_SIZE);
-//  dhcpserver_remove_mac(&mac_addr);
-  printf("Client rejected, reason: %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
-         (int)status, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-}
-
-/**************************************************************************//**
- * Callback for AP client disconnect
- *****************************************************************************/
-void sl_wfx_ap_client_disconnected_callback(uint32_t status, uint8_t* mac)
-{
-//  struct eth_addr mac_addr;
-//  memcpy(&mac_addr, mac, SL_WFX_BSSID_SIZE);
-//  dhcpserver_remove_mac(&mac_addr);
-  printf("Client disconnected, reason: %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
-         (int)status, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-}
-
-void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t* rx_buffer)
-{
-    rtos_printf("RX Frame!\n");
 }
 
 /**** XCORE Specific Functions End ****/
@@ -290,17 +114,33 @@ sl_status_t sl_wfx_host_reset_chip(void)
 
 sl_status_t sl_wfx_host_set_wake_up_pin(uint8_t state)
 {
+    if (state != 0) {
+        /*
+         * Presumably the WFX is asleep. Ensure the interrupt
+         * event bit is low now before waking it up so that
+         * sl_wfx_host_wait_for_wake_up() may wait for it to
+         * be set by the ISR.
+         */
+        xEventGroupClearBits(sl_wfx_event_group, SL_WFX_INTERRUPT);
+    } else {
+        rtos_printf("going to sleep\n");
+    }
     sl_wfx_host_gpio(SL_WFX_HIF_GPIO_WUP, state);
+
     return SL_STATUS_OK;
 }
 
 sl_status_t sl_wfx_host_wait_for_wake_up(void)
 {
-    /*
-     * TODO: what sets this..??
-     */
-    xEventGroupClearBits(sl_wfx_event_group, SL_WFX_INTERRUPT);
-    xEventGroupWaitBits(sl_wfx_event_group, SL_WFX_INTERRUPT, pdTRUE, pdTRUE, pdMS_TO_TICKS(3));
+    EventBits_t bits;
+
+    bits = xEventGroupWaitBits(sl_wfx_event_group, SL_WFX_INTERRUPT, pdTRUE, pdTRUE, pdMS_TO_TICKS(3));
+
+    if (bits & SL_WFX_INTERRUPT) {
+        rtos_printf("woke up\n");
+    } else {
+        rtos_printf("did not wake\n");
+    }
 
     return SL_STATUS_OK;
 }
@@ -309,7 +149,7 @@ sl_status_t sl_wfx_host_sleep_grant(sl_wfx_host_bus_transfer_type_t type,
                                     sl_wfx_register_address_t address,
                                     uint32_t length)
 {
-    return SL_STATUS_WIFI_SLEEP_NOT_GRANTED;
+    return SL_STATUS_WIFI_SLEEP_GRANTED;
 }
 
 sl_status_t sl_wfx_host_hold_in_reset(void)

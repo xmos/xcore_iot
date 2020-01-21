@@ -1,5 +1,7 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
+#include <string.h>
+
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -15,12 +17,9 @@
 #include "bitstream_devices.h"
 #include "spi_master_driver.h"
 #include "gpio_driver.h"
-#include "sl_wfx.h"
-#include "sl_wfx_host.h"
-#include "brd8023a_pds.h"
 
 /* App headers */
-//#include "foo.h"
+#include "sl_wfx_iot_wifi.h"
 
 #if 0
 eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
@@ -37,12 +36,28 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 }
 #endif
 
+char *security_name(WIFISecurity_t s)
+{
+    switch (s) {
+    case eWiFiSecurityOpen:
+        return "Open";
+    case eWiFiSecurityWEP:
+        return "WEP";
+    case eWiFiSecurityWPA:
+        return "WPA";
+    case eWiFiSecurityWPA2:
+        return "WPA2";
+    case eWiFiSecurityWPA2_ent:
+        return "WPA2 Enterprise";
+    default:
+        return "Unsupported";
+    }
+}
+
 static void wf200_test(void *arg)
 {
-    soc_peripheral_t gpio_dev = arg;
-    soc_peripheral_t spi_dev = soc_peripheral_app_data(gpio_dev);
-    sl_wfx_context_t wfx_ctx;
-    sl_status_t ret;
+    WIFIReturnCode_t ret;
+    WIFIScanResult_t scan_results[20];
 
     rtos_printf("Hello from wf200 test... ");
 
@@ -50,30 +65,23 @@ static void wf200_test(void *arg)
 
     rtos_printf("GO!\n");
 
-    sl_wfx_host_set_hif(spi_dev,
-                        gpio_dev,
-                        gpio_1I, 0,  /* header pin 9 */
-                        gpio_1P, 0,  /* header pin 10 */
-                        gpio_1J, 0); /* header pin 12 */
+    ret = WIFI_On();
 
-    sl_wfx_host_set_pds(pds_table_brd8023a, SL_WFX_ARRAY_COUNT(pds_table_brd8023a));
-
-    ret = sl_wfx_init(&wfx_ctx);
     rtos_printf("Returned %x\n", ret);
 
+    ret = WIFI_Scan(scan_results, 20);
 
-
-    const uint8_t channel_list[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
-
-
-    sl_wfx_send_scan_command(WFM_SCAN_MODE_ACTIVE,
-                             channel_list,
-                             13,
-                             NULL,
-                             0,
-                             NULL,
-                             0,
-                             NULL);
+    if (ret == eWiFiSuccess) {
+        for (int i = 0; i < 20; i++) {
+            uint8_t no_bssid[wificonfigMAX_BSSID_LEN] = {0};
+            if (memcmp(scan_results[i].ucBSSID, no_bssid, wificonfigMAX_BSSID_LEN) == 0) {
+                break;
+            }
+            rtos_printf("%d: %s\n", i, scan_results[i].cSSID);
+            rtos_printf("\tChannel: %d\n", (int) scan_results[i].cChannel);
+            rtos_printf("\t%s\n", security_name(scan_results[i].xSecurity));
+        }
+    }
 
 
     while (1) {
@@ -97,10 +105,10 @@ void soc_tile0_main(
 
     dev = gpio_driver_init(
             BITSTREAM_GPIO_DEVICE_A,
-            dev,
+            NULL,
             0);
 
-    xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), dev, 15, NULL);
+    xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
 
     /* Initialize FreeRTOS IP*/
     //initalize_FreeRTOS_IP();
