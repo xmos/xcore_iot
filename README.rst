@@ -18,8 +18,8 @@ All dependent libraries are included as git submodules. These can be obtained by
 
 Or by running the following commands inside the repository::
 
-     git submodules init
-     git submodules update
+     git submodule init
+     git submodule update
 
 An xTIMEcomposer workspace may be created in the root of this repository. All library projects, the FreeRTOS demo project found in FreeRTOS/FreeRTOS/Demo/XCORE200_XCC/RTOSDemo, and the two example application projects may all be imported into the workspace.
 
