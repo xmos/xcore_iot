@@ -9,8 +9,7 @@ INCLUDE_DIRS = $(SOURCE_DIRS)
 
 XCC_FLAGS = -Os -g -report -fxscope -lquadflash -Wxcore-fptrgroup -DDEBUG_PRINT_ENABLE=1 -DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_INIT
 
-#USED_MODULES = FreeRTOS(>=10.2.1) FreeRTOS-Plus(>=10.2.1) lib_soc(>=0.5.0)
-USED_MODULES = FreeRTOS(>=10.2.1) lib_soc(>=0.5.0)
+USED_MODULES = FreeRTOS(>=10.2.1) FreeRTOS-Plus(>=10.2.1) lib_soc(>=0.5.0)
 
 VERBOSE = 0
 

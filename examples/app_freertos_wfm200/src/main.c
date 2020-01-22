@@ -6,9 +6,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-//#include "FreeRTOS_IP.h"
-//#include "FreeRTOS_Sockets.h"
-//#include "FreeRTOS_DHCP.h"
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_Sockets.h"
+#include "FreeRTOS_DHCP.h"
 
 /* Library headers */
 #include "soc.h"
@@ -20,8 +20,8 @@
 
 /* App headers */
 #include "sl_wfx_iot_wifi.h"
+#include "network.h"
 
-#if 0
 eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
                                             uint32_t ulIPAddress )
 {
@@ -34,7 +34,6 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 
     return eDHCPContinue;
 }
-#endif
 
 char *security_name(WIFISecurity_t s)
 {
@@ -64,6 +63,8 @@ static void wf200_test(void *arg)
     ret = WIFI_On();
 
     rtos_printf("Returned %x\n", ret);
+
+    initalize_FreeRTOS_IP();
 
     ret = WIFI_Scan(scan_results, 20);
 
@@ -117,9 +118,6 @@ void soc_tile0_main(
             0);
 
     xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
-
-    /* Initialize FreeRTOS IP*/
-    //initalize_FreeRTOS_IP();
 
     vTaskStartScheduler();
 }

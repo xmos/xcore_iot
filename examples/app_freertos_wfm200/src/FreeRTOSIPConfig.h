@@ -36,6 +36,13 @@
 #ifndef FREERTOS_IP_CONFIG_H
 #define FREERTOS_IP_CONFIG_H
 
+#define ipconfigUSE_ETHERNET 0
+#define ipconfigUSE_WIFI     1
+
+#if ipconfigUSE_WIFI
+#include "sl_wfx_iot_wifi.h"
+#endif
+
 /* User defined network parameters */
 #define IPconfig_IP_ADDR_OCTET_0    192
 #define IPconfig_IP_ADDR_OCTET_1    168
@@ -102,8 +109,8 @@ then set ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM to 1 to prevent the software
 stack repeating the checksum calculations. */
 #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM   1
 
-#define ipconfigZERO_COPY_RX_DRIVER 1
-#define ipconfigZERO_COPY_TX_DRIVER 1
+#define ipconfigZERO_COPY_RX_DRIVER 0
+#define ipconfigZERO_COPY_TX_DRIVER 0
 
 
 /* Several API's will block until the result is known, or the action has been
