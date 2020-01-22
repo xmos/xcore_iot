@@ -59,11 +59,7 @@ static void wf200_test(void *arg)
     WIFIReturnCode_t ret;
     WIFIScanResult_t scan_results[20];
 
-    rtos_printf("Hello from wf200 test... ");
-
-    vTaskDelay(pdMS_TO_TICKS(5000));
-
-    rtos_printf("GO!\n");
+    rtos_printf("Hello from wf200 test\n ");
 
     ret = WIFI_On();
 
@@ -79,10 +75,22 @@ static void wf200_test(void *arg)
             }
             rtos_printf("%d: %s\n", i, scan_results[i].cSSID);
             rtos_printf("\tChannel: %d\n", (int) scan_results[i].cChannel);
+            rtos_printf("\tStrength: %d dBm\n", (int) scan_results[i].cRSSI);
             rtos_printf("\t%s\n", security_name(scan_results[i].xSecurity));
         }
     }
 
+    WIFINetworkParams_t pxNetworkParams;
+
+    pxNetworkParams.pcSSID = "xxxxxxxx";
+    pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+    pxNetworkParams.pcPassword = "xxxxxxxx";
+    pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+    pxNetworkParams.xSecurity = eWiFiSecurityWPA;
+    pxNetworkParams.cChannel = 0;
+
+    ret = WIFI_ConnectAP(&pxNetworkParams);
+    rtos_printf("Connect returned %x\n", ret);
 
     while (1) {
         //rtos_printf("loop\n");

@@ -55,12 +55,70 @@ WIFIReturnCode_t WIFI_On( void )
 
 WIFIReturnCode_t WIFI_Off( void )
 {
+    sl_wfx_shutdown();
+    /* TODO: Test */
     return eWiFiNotSupported;
 }
 
 WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkParams )
 {
-    return eWiFiNotSupported;
+    sl_status_t ret;
+    sl_wfx_security_mode_t security;
+    EventBits_t bits;
+
+    switch (pxNetworkParams->xSecurity) {
+    case eWiFiSecurityOpen:
+        security = WFM_SECURITY_MODE_OPEN;
+        break;
+    case eWiFiSecurityWEP:
+        security = WFM_SECURITY_MODE_WEP;
+        break;
+    case eWiFiSecurityWPA:
+        security = WFM_SECURITY_MODE_WPA2_WPA1_PSK;
+        break;
+    case eWiFiSecurityWPA2:
+        security = WFM_SECURITY_MODE_WPA2_PSK;
+        break;
+    default:
+        return eWiFiFailure;
+    }
+
+    sl_wfx_host_log(
+            "Connect to: %s(%d):%s(%d) on ch %d with security %d\n",
+            pxNetworkParams->pcSSID,
+            pxNetworkParams->ucSSIDLength,
+            pxNetworkParams->pcPassword,
+            pxNetworkParams->ucPasswordLength,
+            pxNetworkParams->cChannel,
+            security);
+
+    ret = sl_wfx_send_join_command((const uint8_t *) pxNetworkParams->pcSSID,
+                                   pxNetworkParams->ucSSIDLength,
+                                   NULL,
+                                   pxNetworkParams->cChannel,
+                                   security,
+                                   0,
+                                   1,
+                                   (const uint8_t *) pxNetworkParams->pcPassword,
+                                   pxNetworkParams->ucPasswordLength,
+                                   NULL,
+                                   0);
+
+    if (ret != SL_STATUS_OK) {
+        return eWiFiFailure;
+    }
+
+    bits = xEventGroupWaitBits(sl_wfx_event_group,
+                               SL_WFX_CONNECT | SL_WFX_CONNECT_FAIL,
+                               pdTRUE,
+                               pdFALSE,
+                               pdMS_TO_TICKS(10000));
+
+    if (bits & SL_WFX_CONNECT) {
+        return eWiFiSuccess;
+    } else {
+        return eWiFiFailure;
+    }
 }
 
 WIFIReturnCode_t WIFI_Disconnect( void )
@@ -129,18 +187,6 @@ static int scan_count;
 
 void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t* scan_result)
 {
-//  printf(
-//    "# %2d %2d  %03d %02X:%02X:%02X:%02X:%02X:%02X  %s",
-//    scan_count + 1,
-//    scan_result->channel,
-//    ((int16_t)(scan_result->rcpi - 220) / 2),
-//    scan_result->mac[0], scan_result->mac[1],
-//    scan_result->mac[2], scan_result->mac[3],
-//    scan_result->mac[4], scan_result->mac[5],
-//    scan_result->ssid_def.ssid);
-  /*Report one AP information*/
-//  printf("\r\n");
-
     if (scan_count < scan_result_max_count) {
         size_t ssid_len = scan_result->ssid_def.ssid_length;
         if (ssid_len > wificonfigMAX_SSID_LEN) {
@@ -150,7 +196,7 @@ void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t* scan_result)
         memcpy(scan_results[scan_count].ucBSSID, scan_result->mac, wificonfigMAX_BSSID_LEN);
         scan_results[scan_count].cChannel = scan_result->channel;
         scan_results[scan_count].ucHidden = 0;
-        scan_results[scan_count].cRSSI = scan_result->rcpi; //TODO: conversion?
+        scan_results[scan_count].cRSSI = ((int16_t) scan_result->rcpi - 220) / 2;
 
         if (*((uint8_t *) &scan_result->security_mode) == 0) {
             scan_results[scan_count].xSecurity = eWiFiSecurityOpen;
