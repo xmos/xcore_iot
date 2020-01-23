@@ -26,61 +26,6 @@ uint8_t scan_count = 0;
 uint8_t scan_count_web = 0;
 
 
-
-/**************************************************************************//**
- * Callback when station connects
- *****************************************************************************/
-void sl_wfx_connect_callback(uint8_t* mac, uint32_t status)
-{
-    switch (status) {
-    case WFM_STATUS_SUCCESS:
-        sl_wfx_host_log("Connected\r\n");
-        sl_wfx_context->state |= SL_WFX_STA_INTERFACE_CONNECTED;
-        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT);
-        break;
-
-    case WFM_STATUS_NO_MATCHING_AP:
-        sl_wfx_host_log("Connection failed, access point not found\n");
-        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT_FAIL);
-        break;
-
-    case WFM_STATUS_CONNECTION_ABORTED:
-        sl_wfx_host_log("Connection aborted");
-        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT_FAIL);
-        break;
-
-    case WFM_STATUS_CONNECTION_TIMEOUT:
-        sl_wfx_host_log("Connection timeout");
-        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT_FAIL);
-        break;
-
-    case WFM_STATUS_CONNECTION_REJECTED_BY_AP:
-        sl_wfx_host_log("Connection rejected by the access point");
-        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT_FAIL);
-        break;
-
-    case WFM_STATUS_CONNECTION_AUTH_FAILURE:
-        sl_wfx_host_log("Connection authentication failure");
-        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT_FAIL);
-        break;
-
-    default:
-        sl_wfx_host_log("Connection attempt error");
-        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT_FAIL);
-        break;
-    }
-}
-
-/**************************************************************************//**
- * Callback for station disconnect
- *****************************************************************************/
-void sl_wfx_disconnect_callback(uint8_t* mac, uint16_t reason)
-{
-    sl_wfx_host_log("Disconnected %d\r\n", reason);
-    sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
-    xEventGroupSetBits(sl_wfx_event_group, SL_WFX_DISCONNECT);
-}
-
 /**************************************************************************//**
  * Callback for AP started
  *****************************************************************************/

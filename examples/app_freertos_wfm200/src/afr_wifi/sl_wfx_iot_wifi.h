@@ -544,5 +544,8 @@ WIFIReturnCode_t WIFI_GetPMMode( WIFIPMMode_t * pxPMModeType,
 BaseType_t WIFI_IsConnected( void );
 /* @[declare_wifi_wifi_isconnected] */
 
+WIFIReturnCode_t WIFI_GetLock( void );
+void WIFI_ReleaseLock( void );
+
 
 #endif /* _AWS_WIFI_H_ */

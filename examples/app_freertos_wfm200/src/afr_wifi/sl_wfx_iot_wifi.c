@@ -11,6 +11,7 @@
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "semphr.h"
 
 //#include "FreeRTOS_IP.h"
 //#include "FreeRTOS_Sockets.h"
@@ -29,12 +30,53 @@
 
 #include "sl_wfx_iot_wifi.h"
 
+#define SL_WFX_CONNECT_TIMEOUT_MS 10000
+#define SL_WFX_DISCONNECT_TIMEOUT_MS 10000
 
 static sl_wfx_context_t wfx_ctx;
+
+static SemaphoreHandle_t wifi_lock;
+
+WIFIReturnCode_t WIFI_GetLock( void )
+{
+    if( wifi_lock != NULL )
+    {
+        if( xSemaphoreTakeRecursive( wifi_lock, pdMS_TO_TICKS( wificonfigMAX_SEMAPHORE_WAIT_TIME_MS ) ) == pdPASS )
+        {
+            return eWiFiSuccess;
+        }
+        else
+        {
+            return eWiFiTimeout;
+        }
+    }
+    else
+    {
+        return eWiFiFailure;
+    }
+}
+
+void WIFI_ReleaseLock( void )
+{
+    if( wifi_lock != NULL )
+    {
+        xSemaphoreGiveRecursive( wifi_lock );
+    }
+}
 
 WIFIReturnCode_t WIFI_On( void )
 {
     sl_status_t ret;
+
+    if (sl_wfx_context != NULL && sl_wfx_context->state & SL_WFX_STARTED) {
+        return eWiFiSuccess;
+    }
+
+    /*
+     * TODO: Perhaps protect with mutex in case the application and
+     * xNetworkInterfaceInitialise() both call at the same time.
+     * Or don't have xNetworkInterfaceInitialise() call it.
+     */
 
     sl_wfx_host_set_hif(bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
                         bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A],
@@ -47,6 +89,11 @@ WIFIReturnCode_t WIFI_On( void )
     ret = sl_wfx_init(&wfx_ctx);
 
     if (ret == SL_STATUS_OK) {
+        if (wifi_lock == NULL) {
+            wifi_lock = xSemaphoreCreateRecursiveMutex();
+            xassert(wifi_lock != NULL);
+        }
+        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_INITIALIZED);
         return eWiFiSuccess;
     } else {
         return eWiFiFailure;
@@ -55,9 +102,44 @@ WIFIReturnCode_t WIFI_On( void )
 
 WIFIReturnCode_t WIFI_Off( void )
 {
+    WIFI_GetLock();
     sl_wfx_shutdown();
+    WIFI_ReleaseLock();
     /* TODO: Test */
     return eWiFiNotSupported;
+}
+
+WIFIReturnCode_t WIFI_Disconnect( void )
+{
+    EventBits_t bits;
+
+    if( WIFI_GetLock() == eWiFiSuccess )
+    {
+        if (sl_wfx_context->state & SL_WFX_STA_INTERFACE_CONNECTED) {
+            sl_wfx_send_disconnect_command();
+            bits = xEventGroupWaitBits(sl_wfx_event_group,
+                                       SL_WFX_DISCONNECT,
+                                       pdTRUE,
+                                       pdTRUE,
+                                       pdMS_TO_TICKS(SL_WFX_DISCONNECT_TIMEOUT_MS));
+
+            if (bits & SL_WFX_DISCONNECT) {
+                WIFI_ReleaseLock();
+                return eWiFiSuccess;
+            } else {
+                WIFI_ReleaseLock();
+                return eWiFiFailure;
+            }
+        } else {
+            /* Already disconnected */
+            WIFI_ReleaseLock();
+            return eWiFiSuccess;
+        }
+    }
+    else
+    {
+        return eWiFiTimeout;
+    }
 }
 
 WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkParams )
@@ -83,47 +165,64 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
         return eWiFiFailure;
     }
 
-    sl_wfx_host_log(
-            "Connect to: %s(%d):%s(%d) on ch %d with security %d\n",
-            pxNetworkParams->pcSSID,
-            pxNetworkParams->ucSSIDLength,
-            pxNetworkParams->pcPassword,
-            pxNetworkParams->ucPasswordLength,
-            pxNetworkParams->cChannel,
-            security);
+    if( WIFI_GetLock() == eWiFiSuccess )
+    {
+        if (WIFI_Disconnect() == eWiFiFailure) {
+            WIFI_ReleaseLock();
+            return eWiFiFailure;
+        }
 
-    ret = sl_wfx_send_join_command((const uint8_t *) pxNetworkParams->pcSSID,
-                                   pxNetworkParams->ucSSIDLength,
-                                   NULL,
-                                   pxNetworkParams->cChannel,
-                                   security,
-                                   0,
-                                   1,
-                                   (const uint8_t *) pxNetworkParams->pcPassword,
-                                   pxNetworkParams->ucPasswordLength,
-                                   NULL,
-                                   0);
+        sl_wfx_host_log(
+                "Connect to: %s(%d):%s(%d) on ch %d with security %d\n",
+                pxNetworkParams->pcSSID,
+                pxNetworkParams->ucSSIDLength,
+                pxNetworkParams->pcPassword,
+                pxNetworkParams->ucPasswordLength,
+                pxNetworkParams->cChannel,
+                security);
 
-    if (ret != SL_STATUS_OK) {
-        return eWiFiFailure;
+        /*
+         * Ensure the connect fail bit is set as it is not automatically
+         * cleared below. The connect bit should be cleared at this point.
+         */
+        bits = xEventGroupClearBits(sl_wfx_event_group, SL_WFX_CONNECT_FAIL);
+        xassert((bits & SL_WFX_CONNECT) == 0);
+
+        ret = sl_wfx_send_join_command((const uint8_t *) pxNetworkParams->pcSSID,
+                                       pxNetworkParams->ucSSIDLength,
+                                       NULL,
+                                       pxNetworkParams->cChannel,
+                                       security,
+                                       0,
+                                       1,
+                                       (const uint8_t *) pxNetworkParams->pcPassword,
+                                       pxNetworkParams->ucPasswordLength,
+                                       NULL,
+                                       0);
+
+        if (ret != SL_STATUS_OK) {
+            WIFI_ReleaseLock();
+            return eWiFiFailure;
+        }
+
+        bits = xEventGroupWaitBits(sl_wfx_event_group,
+                                   SL_WFX_CONNECT | SL_WFX_CONNECT_FAIL,
+                                   pdFALSE, /* Do not clear these bits */
+                                   pdFALSE,
+                                   pdMS_TO_TICKS(SL_WFX_CONNECT_TIMEOUT_MS));
+
+        if (bits & SL_WFX_CONNECT) {
+            WIFI_ReleaseLock();
+            return eWiFiSuccess;
+        } else {
+            WIFI_ReleaseLock();
+            return eWiFiFailure;
+        }
     }
-
-    bits = xEventGroupWaitBits(sl_wfx_event_group,
-                               SL_WFX_CONNECT | SL_WFX_CONNECT_FAIL,
-                               pdTRUE,
-                               pdFALSE,
-                               pdMS_TO_TICKS(10000));
-
-    if (bits & SL_WFX_CONNECT) {
-        return eWiFiSuccess;
-    } else {
-        return eWiFiFailure;
+    else
+    {
+        return eWiFiTimeout;
     }
-}
-
-WIFIReturnCode_t WIFI_Disconnect( void )
-{
-    return eWiFiNotSupported;
 }
 
 WIFIReturnCode_t WIFI_Reset( void )
@@ -236,28 +335,36 @@ WIFIReturnCode_t WIFI_Scan( WIFIScanResult_t * pxBuffer,
     EventBits_t bits;
     const uint8_t channel_list[] = {1,2,3,4,5,6,7,8,9,10,11,12,13};
 
-    scan_results = pxBuffer;
-    scan_result_max_count = ucNumNetworks;
-    scan_count = 0;
+    if( WIFI_GetLock() == eWiFiSuccess )
+    {
 
-    memset(pxBuffer, 0, sizeof(WIFIScanResult_t) * ucNumNetworks);
+        scan_results = pxBuffer;
+        scan_result_max_count = ucNumNetworks;
+        scan_count = 0;
 
-    sl_wfx_send_scan_command(WFM_SCAN_MODE_ACTIVE,
-                             channel_list,
-                             SL_WFX_ARRAY_COUNT(channel_list),
-                             NULL,
-                             0,
-                             NULL,
-                             0,
-                             NULL);
+        memset(pxBuffer, 0, sizeof(WIFIScanResult_t) * ucNumNetworks);
 
-    bits = xEventGroupWaitBits(sl_wfx_event_group, SL_WFX_SCAN_COMPLETE, pdTRUE, pdTRUE, pdMS_TO_TICKS(1000));
+        sl_wfx_send_scan_command(WFM_SCAN_MODE_ACTIVE,
+                                 channel_list,
+                                 SL_WFX_ARRAY_COUNT(channel_list),
+                                 NULL,
+                                 0,
+                                 NULL,
+                                 0,
+                                 NULL);
 
-    if (bits & SL_WFX_SCAN_COMPLETE) {
-        rtos_printf("scan complete\n");
-        return eWiFiSuccess;
-    } else {
-        rtos_printf("scan did not complete\n");
+        bits = xEventGroupWaitBits(sl_wfx_event_group, SL_WFX_SCAN_COMPLETE, pdTRUE, pdTRUE, pdMS_TO_TICKS(1000));
+
+        if (bits & SL_WFX_SCAN_COMPLETE) {
+            WIFI_ReleaseLock();
+            return eWiFiSuccess;
+        } else {
+            WIFI_ReleaseLock();
+            return eWiFiTimeout;
+        }
+    }
+    else
+    {
         return eWiFiTimeout;
     }
 }

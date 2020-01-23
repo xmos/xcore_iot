@@ -160,7 +160,16 @@ sl_status_t sl_wfx_host_hold_in_reset(void)
 
 sl_status_t sl_wfx_host_setup_waited_event(uint8_t event_id)
 {
-    host_ctx.waited_event_id = event_id;
+    /*
+     * Do not wait for send frame confirmations.
+     *
+     * The driver asks to wait for send frame confirmations
+     * but does not actually wait for them. This causes errors
+     * if we don't filter out the send frame requests here.
+     */
+    if (event_id != SL_WFX_SEND_FRAME_REQ_ID) {
+        host_ctx.waited_event_id = event_id;
+    }
     return SL_STATUS_OK;
 }
 
@@ -169,9 +178,11 @@ sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id,
                                               void **event_payload_out)
 {
     uint8_t posted_event_id;
+    BaseType_t ret;
 
     /* Wait for an event posted by the function sl_wfx_host_post_event() */
-    if (xQueueReceive(eventQueue, &posted_event_id, pdMS_TO_TICKS(timeout_ms)) == pdTRUE) {
+    ret = xQueueReceive(eventQueue, &posted_event_id, pdMS_TO_TICKS(timeout_ms));
+    if (ret == pdTRUE) {
         /* Once a message is received, check if it is the expected ID */
         if (confirmation_id == posted_event_id) {
             /* Pass the confirmation reply and return*/
@@ -179,7 +190,11 @@ sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id,
                 *event_payload_out = sl_wfx_context->event_payload_buffer;
             }
             return SL_STATUS_OK;
+        } else {
+            sl_wfx_host_log("confirmation id is %02x, expected %02x\n", (int) posted_event_id, (int) confirmation_id);
         }
+    } else {
+        sl_wfx_host_log("sl_wfx_host_wait_for_confirmation() queue recv returned %d\n", ret);
     }
 
     /* The wait for the confirmation timed out, return */
@@ -283,16 +298,17 @@ sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
         }
       }
 
-      if(host_ctx.waited_event_id == event_payload->header.id)
+      if(host_ctx.waited_event_id && (host_ctx.waited_event_id == event_payload->header.id))
       {
-        if(event_payload->header.length < SL_WFX_EVENT_MAX_SIZE)
-        {
-          /* Post the event in the queue */
-          memcpy( sl_wfx_context->event_payload_buffer,
-                 (void*) event_payload,
-                 event_payload->header.length );
-          xQueueOverwrite(eventQueue, (void *) &event_payload->header.id);
-        }
+        xassert(event_payload->header.length <= SL_WFX_EVENT_MAX_SIZE);
+
+        host_ctx.waited_event_id = 0;
+
+        /* Post the event in the queue */
+        memcpy( sl_wfx_context->event_payload_buffer,
+               (void*) event_payload,
+               event_payload->header.length );
+        xQueueOverwrite(eventQueue, (void *) &event_payload->header.id);
       }
 
       return SL_STATUS_OK;

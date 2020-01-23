@@ -23,6 +23,7 @@
 #define SL_WFX_STOP_AP       ( 1 << 4 )
 #define SL_WFX_SCAN_COMPLETE ( 1 << 5 )
 #define SL_WFX_CONNECT_FAIL  ( 1 << 6 )
+#define SL_WFX_INITIALIZED   ( 1 << 7 )
 
 extern EventGroupHandle_t sl_wfx_event_group;
 

@@ -17,6 +17,7 @@
 #include "bitstream_devices.h"
 #include "spi_master_driver.h"
 #include "gpio_driver.h"
+#include "sl_wfx.h"
 
 /* App headers */
 #include "sl_wfx_iot_wifi.h"
@@ -90,13 +91,16 @@ static void wf200_test(void *arg)
     pxNetworkParams.xSecurity = eWiFiSecurityWPA;
     pxNetworkParams.cChannel = 0;
 
-    ret = WIFI_ConnectAP(&pxNetworkParams);
-    rtos_printf("Connect returned %x\n", ret);
-
     while (1) {
-        //rtos_printf("loop\n");
+        do {
+            ret = WIFI_ConnectAP(&pxNetworkParams);
+            rtos_printf("Connect returned %x\n", ret);
+        } while (ret != eWiFiSuccess);
+        vTaskDelay(pdMS_TO_TICKS(5000));
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        ret = WIFI_Disconnect();
+        rtos_printf("Disconnect returned %x\n", ret);
+        vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
 
