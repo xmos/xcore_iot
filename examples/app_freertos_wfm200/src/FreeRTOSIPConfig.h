@@ -41,6 +41,7 @@
 
 #if ipconfigUSE_WIFI
 #include "sl_wfx_iot_wifi.h"
+#include "sl_wfx_cmd_api.h"
 #endif
 
 /* User defined network parameters */
@@ -323,11 +324,17 @@ filtering can be removed by using a value other than 1 or 0. */
 block occasionally to allow other tasks to run. */
 #define configWINDOWS_MAC_INTERRUPT_SIMULATOR_DELAY ( 20 / portTICK_PERIOD_MS )
 
-/* Advanced only: in order to access 32-bit fields in the IP packets with
-32-bit memory instructions, all packets will be stored 32-bit-aligned, plus 16-bits.
-This has to do with the contents of the IP-packets: all 32-bit fields are
-32-bit-aligned, plus 16-bit(!) */
-#define ipconfigPACKET_FILLER_SIZE 2
+
+#ifndef SL_WFX_USE_SECURE_LINK
+/* Allocate space before Ethernet frames to hold the WF200 send frame
+ * request header. This allows FreeRTOS+TCP network buffers to be sent
+ * directly to the WF200 driver without allocating a new buffer and copying
+ * the frame from the FreeRTOS+TCP network buffer into it.
+ *
+ * The + 2 is so that the 14 byte Ethernet frame starts 2 bytes after a 32-bit
+ * boundary so that the IP header can begin on one. */
+#define ipconfigPACKET_FILLER_SIZE ( sizeof(sl_wfx_send_frame_req_t) + 2 )
+#endif
 
 /* Define the size of the pool of TCP window descriptors.  On the average, each
 TCP socket will use up to 2 x 6 descriptors, meaning that it can have 2 x 6
