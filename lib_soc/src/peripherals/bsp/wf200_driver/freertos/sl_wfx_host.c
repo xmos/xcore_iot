@@ -16,6 +16,9 @@
 #include "event_groups.h"
 #include "semphr.h"
 
+#include "FreeRTOS_IP.h"
+#include "NetworkBufferManagement.h"
+
 #define printf rtos_printf
 
 extern SemaphoreHandle_t s_xDriverSemaphore;
@@ -318,22 +321,43 @@ sl_status_t sl_wfx_host_allocate_buffer(void **buffer,
                                         sl_wfx_buffer_type_t type,
                                         uint32_t buffer_size)
 {
-    /*
-     * TODO: type could potentially be used
-     * to determine which heap to allocate
-     * from (SRAM or DDR)
-     */
-    (void) type;
+    if (ipconfigZERO_COPY_RX_DRIVER != 0 && type == SL_WFX_RX_FRAME_BUFFER) {
+        NetworkBufferDescriptor_t *network_buffer;
+        network_buffer = pxGetNetworkBufferWithDescriptor( buffer_size, 0 );
+        if (network_buffer != NULL) {
+            /*
+             * The pointer that will be returned to the driver is behind the beginning
+             * of the Ethernet Frame by the size of the received indication message and
+             * SL_WFX_NORMAL_FRAME_PAD_LENGTH padding bytes. This way frames with 2 pad
+             * bytes will begin at where pucEthernetBuffer points to.
+             *
+             * When the padding is other than SL_WFX_NORMAL_FRAME_PAD_LENGTH bytes then
+             * this needs to be dealt with in the receive callback.
+             *
+             * This requires that the FreeRTOS+TCP option ipBUFFER_PADDING be large enough
+             * to hold the sl_wfx_received_ind_t message.
+             */
+            *buffer = network_buffer->pucEthernetBuffer - sizeof(sl_wfx_received_ind_t) - SL_WFX_NORMAL_FRAME_PAD_LENGTH;
+        } else {
+            *buffer = NULL;
+        }
+    } else {
+        *buffer = pvPortMalloc(buffer_size);
+    }
 
-    *buffer = pvPortMalloc(buffer_size);
-    return SL_STATUS_OK;
+    if (buffer != NULL) {
+        return SL_STATUS_OK;
+    } else {
+        return SL_STATUS_NO_MORE_RESOURCE;
+    }
 }
 
 sl_status_t sl_wfx_host_free_buffer(void *buffer, sl_wfx_buffer_type_t type)
 {
-    (void) type;
+    if (ipconfigZERO_COPY_RX_DRIVER == 0 || type != SL_WFX_RX_FRAME_BUFFER) {
+        vPortFree(buffer);
+    }
 
-    vPortFree(buffer);
     return SL_STATUS_OK;
 }
 

@@ -96,7 +96,7 @@ static void wf200_test(void *arg)
             ret = WIFI_ConnectAP(&pxNetworkParams);
             rtos_printf("Connect returned %x\n", ret);
         } while (ret != eWiFiSuccess);
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(15000));
 
         ret = WIFI_Disconnect();
         rtos_printf("Disconnect returned %x\n", ret);

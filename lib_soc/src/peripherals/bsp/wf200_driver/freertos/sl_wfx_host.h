@@ -15,6 +15,14 @@
 #define SL_WFX_HIF_GPIO_WUP   0
 #define SL_WFX_HIF_GPIO_RESET 1
 
+/*
+ * This is the number of padding bytes found before
+ * most Ethernet frames. Extra memory movement needs
+ * to take place for frames that have a different
+ * number of padding bytes.
+ */
+#define SL_WFX_NORMAL_FRAME_PAD_LENGTH 2
+
 /* Wi-Fi events*/
 #define SL_WFX_INTERRUPT     ( 1 << 0 )
 #define SL_WFX_CONNECT       ( 1 << 1 )
