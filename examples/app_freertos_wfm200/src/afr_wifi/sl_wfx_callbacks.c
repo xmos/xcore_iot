@@ -27,33 +27,6 @@ uint8_t scan_count_web = 0;
 
 
 /**************************************************************************//**
- * Callback for AP started
- *****************************************************************************/
-void sl_wfx_start_ap_callback(uint32_t status)
-{
-  if (status == 0) {
-    printf("AP started\r\n");
-//    printf("Join the AP with SSID: %s\r\n", softap_ssid);
-    sl_wfx_context->state |= SL_WFX_AP_INTERFACE_UP;
-    xEventGroupSetBits(sl_wfx_event_group, SL_WFX_START_AP);
-  } else {
-    printf("AP start failed\r\n");
-    strcpy(event_log, "AP start failed");
-  }
-}
-
-/**************************************************************************//**
- * Callback for AP stopped
- *****************************************************************************/
-void sl_wfx_stop_ap_callback(void)
-{
-//  dhcpserver_clear_stored_mac ();
-  printf("SoftAP stopped\r\n");
-  sl_wfx_context->state &= ~SL_WFX_AP_INTERFACE_UP;
-  xEventGroupSetBits(sl_wfx_event_group, SL_WFX_STOP_AP);
-}
-
-/**************************************************************************//**
  * Callback for client connect to AP
  *****************************************************************************/
 void sl_wfx_client_connected_callback(uint8_t* mac)
@@ -67,23 +40,23 @@ void sl_wfx_client_connected_callback(uint8_t* mac)
 /**************************************************************************//**
  * Callback for client rejected from AP
  *****************************************************************************/
-void sl_wfx_ap_client_rejected_callback(uint32_t status, uint8_t* mac)
+void sl_wfx_ap_client_rejected_callback(sl_wfx_reason_t reason, uint8_t* mac)
 {
 //  struct eth_addr mac_addr;
 //  memcpy(&mac_addr, mac, SL_WFX_BSSID_SIZE);
 //  dhcpserver_remove_mac(&mac_addr);
   printf("Client rejected, reason: %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
-         (int)status, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+         reason, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
 /**************************************************************************//**
  * Callback for AP client disconnect
  *****************************************************************************/
-void sl_wfx_ap_client_disconnected_callback(uint32_t status, uint8_t* mac)
+void sl_wfx_ap_client_disconnected_callback(sl_wfx_reason_t reason, uint8_t* mac)
 {
 //  struct eth_addr mac_addr;
 //  memcpy(&mac_addr, mac, SL_WFX_BSSID_SIZE);
 //  dhcpserver_remove_mac(&mac_addr);
   printf("Client disconnected, reason: %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
-         (int)status, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+         reason, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }

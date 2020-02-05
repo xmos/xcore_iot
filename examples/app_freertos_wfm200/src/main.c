@@ -8,7 +8,6 @@
 
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
-#include "FreeRTOS_DHCP.h"
 
 /* Library headers */
 #include "soc.h"
@@ -22,19 +21,6 @@
 /* App headers */
 #include "sl_wfx_iot_wifi.h"
 #include "network.h"
-
-eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
-                                            uint32_t ulIPAddress )
-{
-    debug_printf("DHCP phase %d\n", eDHCPPhase);
-    if (eDHCPPhase == eDHCPPhasePreRequest) {
-        ulIPAddress = FreeRTOS_ntohl(ulIPAddress);
-        debug_printf("%d.%d.%d.%d\n", (ulIPAddress >> 24) & 0xff, (ulIPAddress >> 16) & 0xff, (ulIPAddress >> 8) & 0xff, (ulIPAddress >> 0) & 0xff);
-
-    }
-
-    return eDHCPContinue;
-}
 
 char *security_name(WIFISecurity_t s)
 {
@@ -84,6 +70,7 @@ static void wf200_test(void *arg)
 
     WIFINetworkParams_t pxNetworkParams;
 
+#if 1
     pxNetworkParams.pcSSID = "xxxxxxxx";
     pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
     pxNetworkParams.pcPassword = "xxxxxxxx";
@@ -94,14 +81,36 @@ static void wf200_test(void *arg)
     while (1) {
         do {
             ret = WIFI_ConnectAP(&pxNetworkParams);
-            rtos_printf("Connect returned %x\n", ret);
+            rtos_printf("WIFI_ConnectAP() returned %x\n", ret);
         } while (ret != eWiFiSuccess);
         vTaskDelay(pdMS_TO_TICKS(15000));
 
         ret = WIFI_Disconnect();
-        rtos_printf("Disconnect returned %x\n", ret);
+        rtos_printf("WIFI_Disconnect() returned %x\n", ret);
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
+#else
+    pxNetworkParams.pcSSID = "softap_test";
+    pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+    pxNetworkParams.pcPassword = "test123qwe";
+    pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+    pxNetworkParams.xSecurity = eWiFiSecurityWPA2;
+    pxNetworkParams.cChannel = 5;
+
+    WIFI_ConfigureAP(&pxNetworkParams);
+
+    while (1) {
+        do {
+            ret = WIFI_StartAP();
+            rtos_printf("WIFI_StartAP() returned %x\n", ret);
+        } while (ret != eWiFiSuccess);
+        vTaskDelay(pdMS_TO_TICKS(30000));
+
+        ret = WIFI_StopAP();
+        rtos_printf("WIFI_StopAP() returned %x\n", ret);
+        vTaskDelay(pdMS_TO_TICKS(5000));
+    }
+#endif
 }
 
 void soc_tile0_main(
