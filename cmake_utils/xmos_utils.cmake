@@ -35,6 +35,9 @@ define_property(GLOBAL PROPERTY XMOS_TARGETS_LIST BRIEF_DOCS "brief" FULL_DOCS "
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
+if(DEFINED AFR_ROOT_DIR)
+    include("${AFR_VENDORS_DIR}/xmos/lib_rtos_support/cmake_utils/xmos_afr_support.cmake")
+endif()
 
 function(XMOS_ADD_FILE_COMPILER_FLAGS)
     if(NOT ${ARGC} EQUAL 2)
@@ -133,74 +136,6 @@ function(XMOS_REGISTER_APP)
     target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILE_FLAGS})
 endfunction()
 
-
-## Registers an application and it's dependencies
-function(XMOS_AFR_REGISTER)
-    if(NOT APP_HW_TARGET)
-        message(FATAL_ERROR "APP_HW_TARGET is not defined.")
-    endif()
-
-    ## Populate build flag for hardware target
-    if(EXISTS ${BOARD_DIR}/${APP_HW_TARGET})
-        get_filename_component(HW_ABS_PATH ${BOARD_DIR}/${APP_HW_TARGET} ABSOLUTE)
-        set(APP_TARGET_COMPILER_FLAG ${HW_ABS_PATH})
-    else()
-        set(APP_TARGET_COMPILER_FLAG "-target=${APP_HW_TARGET}")
-    endif()
-
-    set(LIB_NAME ${PROJECT_NAME}_LIB)
-    set(LIB_VERSION ${PROJECT_VERSION})
-    set(LIB_ADD_COMPILER_FLAGS ${APP_COMPILER_FLAGS})
-    set(LIB_XC_SRCS ${APP_XC_SRCS})
-    set(LIB_C_SRCS ${APP_C_SRCS})
-    set(LIB_ASM_SRCS ${APP_ASM_SRCS})
-    set(LIB_INCLUDES ${APP_INCLUDES})
-    set(LIB_DEPENDENT_MODULES ${APP_DEPENDENT_MODULES})
-    set(LIB_OPTIONAL_HEADERS "")
-    set(LIB_FILE_FLAGS "")
-
-    XMOS_REGISTER_MODULE("silent")
-
-    get_target_property(${PROJECT_NAME}_LIB_SRCS ${PROJECT_NAME}_LIB SOURCES)
-    get_target_property(${PROJECT_NAME}_LIB_INCS ${PROJECT_NAME}_LIB INCLUDE_DIRECTORIES)
-    get_target_property(${PROJECT_NAME}_LIB_OPTINCS ${PROJECT_NAME}_LIB OPTIONAL_HEADERS)
-
-    set(APP_SOURCES ${${PROJECT_NAME}_LIB_SRCS})
-    set(APP_INCLUDES ${${PROJECT_NAME}_LIB_INCS})
-
-    list(REMOVE_DUPLICATES APP_SOURCES)
-    list(REMOVE_DUPLICATES APP_INCLUDES)
-
-    foreach(file ${APP_SOURCES})
-        get_filename_component(ext ${file} EXT)
-        if(${ext} STREQUAL ".xc")
-            get_filename_component(abs ${file} ABSOLUTE)
-            set_source_files_properties(${abs} PROPERTIES LANGUAGE C)
-        endif()
-    endforeach()
-
-    # Only define header exists, if header optional
-    foreach(inc ${APP_INCLUDES})
-        file(GLOB headers ${inc}/*.h)
-        foreach(header ${headers})
-            get_filename_component(name ${header} NAME)
-            list(FIND ${PROJECT_NAME}_LIB_OPTINCS ${name} FOUND)
-            if(${FOUND} GREATER -1)
-                get_filename_component(name_we ${header} NAME_WE)
-                message("Header exist added for ${name_we}")
-                string(APPEND HEADER_EXIST_FLAGS " -D__${name_we}_h_exists__ ")
-            endif()
-        endforeach()
-    endforeach()
-
-    set(APP_SOURCES ${APP_SOURCES} PARENT_SCOPE)
-    set(APP_INCLUDES ${APP_INCLUDES} PARENT_SCOPE)
-    set(XMOS_CMAKE_C_FLAGS "${APP_TARGET_COMPILER_FLAG} ${APP_COMPILER_FLAGS} ${HEADER_EXIST_FLAGS}" PARENT_SCOPE)
-    set(XMOS_CMAKE_CXX_FLAGS "${APP_TARGET_COMPILER_FLAG} ${APP_COMPILER_FLAGS} ${HEADER_EXIST_FLAGS}" PARENT_SCOPE)
-    set(XMOS_CMAKE_ASM_FLAGS "${APP_TARGET_COMPILER_FLAG} ${APP_COMPILER_FLAGS} ${HEADER_EXIST_FLAGS}" PARENT_SCOPE)
-endfunction()
-
-
 ## Registers a module and it's dependencies
 function(XMOS_REGISTER_MODULE)
     if(ARGC GREATER 0)
@@ -286,36 +221,19 @@ function(XMOS_REGISTER_MODULE)
             set_source_files_properties(${file} PROPERTIES LANGUAGE C)
         endforeach()
 
-        # if(${LIB_NAME}_DEPS_ONLY_FLAG)
-        #     target_sources(${LIB_NAME} PUBLIC ${DEP_SOURCES})
-        #     target_include_directories(${LIB_NAME} PUBLIC ${DEP_INCLUDES})
-        # else()
-            target_sources(${LIB_NAME} PUBLIC ${LIB_XC_SRCS} ${LIB_C_SRCS} ${LIB_ASM_SRCS})
-            target_include_directories(${LIB_NAME} PUBLIC ${LIB_INCLUDES} ${DEP_INCLUDES})
+        target_sources(${LIB_NAME} PUBLIC ${LIB_XC_SRCS} ${LIB_C_SRCS} ${LIB_ASM_SRCS})
+        target_include_directories(${LIB_NAME} PUBLIC ${LIB_INCLUDES} ${DEP_INCLUDES})
 
-            ## TODO only if AFR
-            # if(XMOS_AFR_FreeRTOS EQUAL True)
-            #     message("TRUE")
-            # list(FIND DEP_MODULE_LIST "FreeRTOS" FOUND_FRTOS)
-            # if(${FOUND_FRTOS} GREATER -1)
-            #     list(REMOVE_ITEM DEP_MODULE_LIST "FreeRTOS")
-            #     list(APPEND DEP_MODULE_LIST "AFR::kernel")
-            # endif()
-            # list(FIND DEP_MODULE_LIST "FreeRTOS-Plus-TCP" FOUND_FRTOS_TCP)
-            # if(${FOUND_FRTOS_TCP} GREATER -1)
-            #     list(REMOVE_ITEM DEP_MODULE_LIST "FreeRTOS-Plus-TCP")
-            #     list(APPEND DEP_MODULE_LIST "AFR::freertos_plus_tcp")
-            # endif()
-            #
-            # message("target link: ${LIB_NAME}")
-        # endif()
-            target_link_libraries(
-                ${LIB_NAME}
-                PRIVATE
-                    ${DEP_MODULE_LIST}
-            )
-            target_compile_options(${LIB_NAME} PRIVATE ${LIB_ADD_COMPILER_FLAGS})
-        # endif()
+        if(DEFINED AFR_ROOT_DIR)
+            include("${AFR_VENDORS_DIR}/xmos/lib_rtos_support/cmake_utils/xmos_afr_support.cmake")
+        endif()
+
+        target_link_libraries(
+            ${LIB_NAME}
+            PRIVATE
+                ${DEP_MODULE_LIST}
+        )
+        target_compile_options(${LIB_NAME} PRIVATE ${LIB_ADD_COMPILER_FLAGS})
 
         if(NOT ${LIB_NAME}_SILENT_FLAG)
             message("Added ${LIB_NAME} (${LIB_VERSION})")
