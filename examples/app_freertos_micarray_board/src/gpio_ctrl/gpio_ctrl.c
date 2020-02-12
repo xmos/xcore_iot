@@ -99,7 +99,7 @@ void gpio_ctrl_t0(void *arg)
     gpio_init(dev, gpio_4A);
 
     /* Enable interrupts on buttons */
-    gpio_irq_setup_callback(dev, gpio_4A, (pGPIO_ISR_CALLBACK)gpio_dev_callback);
+    gpio_irq_setup_callback(dev, gpio_4A, gpio_dev_callback);
     gpio_irq_enable(dev, gpio_4A);
 
     /* Turn on center LED */

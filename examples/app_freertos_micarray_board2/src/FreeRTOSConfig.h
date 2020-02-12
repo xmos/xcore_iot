@@ -67,6 +67,7 @@ your application. */
 
 /* Define to map sprintf and snprintf to the
  * lite versions in lib_rtos_support */
+ #include <stdio.h>
 #define configUSE_DEBUG_SPRINTF 1
 
 /* Define to enable debug prints from tasks.c */
@@ -98,4 +99,3 @@ your application. */
 /* A header file that defines trace macro can be included here. */
 
 #endif /* FREERTOS_CONFIG_H */
-
