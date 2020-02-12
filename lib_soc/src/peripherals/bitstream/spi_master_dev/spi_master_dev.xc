@@ -8,8 +8,6 @@
 #include "xassert.h"
 #include "spi_master_dev.h"
 
-#include "debug_print.h"
-
 static void spi_test_fast_handler(
         soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
