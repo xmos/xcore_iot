@@ -6,7 +6,6 @@
 #include <quadflashlib.h>
 
 #include "xassert.h"
-#include "debug_print.h"
 #include "mic_array.h"
 #include "soc.h"
 #include "bitstream.h"
