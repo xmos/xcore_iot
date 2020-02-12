@@ -1,6 +1,11 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include <string.h>
+#include <sys/time.h>
+
+#define clock libc_clock
+#include <time.h>
+#undef clock
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -21,6 +26,7 @@
 /* App headers */
 #include "sl_wfx_iot_wifi.h"
 #include "network.h"
+#include "dhcpd.h"
 
 char *security_name(WIFISecurity_t s)
 {
@@ -70,15 +76,15 @@ static void wf200_test(void *arg)
 
     WIFINetworkParams_t pxNetworkParams;
 
-#if 1
-    pxNetworkParams.pcSSID = "xxxxxxxx";
-    pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-    pxNetworkParams.pcPassword = "xxxxxxxx";
-    pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
-    pxNetworkParams.xSecurity = eWiFiSecurityWPA;
-    pxNetworkParams.cChannel = 0;
-
     while (1) {
+#if 0
+        pxNetworkParams.pcSSID = "xxxxxxxx";
+        pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+        pxNetworkParams.pcPassword = "xxxxxxxx";
+        pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+        pxNetworkParams.xSecurity = eWiFiSecurityWPA;
+        pxNetworkParams.cChannel = 0;
+
         do {
             ret = WIFI_ConnectAP(&pxNetworkParams);
             rtos_printf("WIFI_ConnectAP() returned %x\n", ret);
@@ -88,29 +94,31 @@ static void wf200_test(void *arg)
         ret = WIFI_Disconnect();
         rtos_printf("WIFI_Disconnect() returned %x\n", ret);
         vTaskDelay(pdMS_TO_TICKS(5000));
-    }
-#else
-    pxNetworkParams.pcSSID = "softap_test";
-    pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-    pxNetworkParams.pcPassword = "test123qwe";
-    pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
-    pxNetworkParams.xSecurity = eWiFiSecurityWPA2;
-    pxNetworkParams.cChannel = 5;
+#endif
+#if 1
+        pxNetworkParams.pcSSID = "softap_test";
+        pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+        pxNetworkParams.pcPassword = "test123qwe";
+        pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+        pxNetworkParams.xSecurity = eWiFiSecurityWPA2;
+        pxNetworkParams.cChannel = 5;
 
-    WIFI_ConfigureAP(&pxNetworkParams);
+        WIFI_ConfigureAP(&pxNetworkParams);
 
-    while (1) {
         do {
             ret = WIFI_StartAP();
             rtos_printf("WIFI_StartAP() returned %x\n", ret);
         } while (ret != eWiFiSuccess);
-        vTaskDelay(pdMS_TO_TICKS(30000));
+//        vTaskDelay(pdMS_TO_TICKS(10000));
+        dhcpd_start(16);
+        vTaskDelay(pdMS_TO_TICKS(10*60000));
 
         ret = WIFI_StopAP();
         rtos_printf("WIFI_StopAP() returned %x\n", ret);
+        dhcpd_stop();
         vTaskDelay(pdMS_TO_TICKS(5000));
-    }
 #endif
+    }
 }
 
 void soc_tile0_main(

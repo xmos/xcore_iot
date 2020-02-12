@@ -45,23 +45,23 @@
 #endif
 
 /* User defined network parameters */
-#define IPconfig_IP_ADDR_OCTET_0    192
-#define IPconfig_IP_ADDR_OCTET_1    168
-#define IPconfig_IP_ADDR_OCTET_2      1
-#define IPconfig_IP_ADDR_OCTET_3     57
+#define IPconfig_IP_ADDR_OCTET_0    10
+#define IPconfig_IP_ADDR_OCTET_1    0
+#define IPconfig_IP_ADDR_OCTET_2    0
+#define IPconfig_IP_ADDR_OCTET_3    1
 //#define IPconfig_IP_ADDR_OCTET_0     10
 //#define IPconfig_IP_ADDR_OCTET_1    129
 //#define IPconfig_IP_ADDR_OCTET_2     20
 //#define IPconfig_IP_ADDR_OCTET_3     29
 
 #define IPconfig_NET_MASK_OCTET_0   255
-#define IPconfig_NET_MASK_OCTET_1   255
-#define IPconfig_NET_MASK_OCTET_2   255
+#define IPconfig_NET_MASK_OCTET_1     0
+#define IPconfig_NET_MASK_OCTET_2     0
 #define IPconfig_NET_MASK_OCTET_3     0
 
-#define IPconfig_GATEWAY_OCTET_0    192
-#define IPconfig_GATEWAY_OCTET_1    168
-#define IPconfig_GATEWAY_OCTET_2      1
+#define IPconfig_GATEWAY_OCTET_0     10
+#define IPconfig_GATEWAY_OCTET_1      0
+#define IPconfig_GATEWAY_OCTET_2      0
 #define IPconfig_GATEWAY_OCTET_3      1
 
 #define IPconfig_DNS_SERVER_OCTET_0   8
@@ -113,13 +113,14 @@ stack repeating the checksum calculations. */
 #define ipconfigZERO_COPY_RX_DRIVER 1
 #define ipconfigZERO_COPY_TX_DRIVER 0
 
+#define ipconfigSUPPORT_SIGNALS 1
 
 /* Several API's will block until the result is known, or the action has been
 performed, for example FreeRTOS_send() and FreeRTOS_recv().  The timeouts can be
 set per socket, using setsockopt().  If not set, the times below will be
 used as defaults. */
-#define ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME	( 5000 )
-#define	ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME	( 5000 )
+#define ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME ( portMAX_DELAY )
+#define ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME    ( portMAX_DELAY )
 
 /* Include support for LLMNR: Link-local Multicast Name Resolution
 (non-Microsoft) */
