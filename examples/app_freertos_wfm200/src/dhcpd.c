@@ -33,27 +33,79 @@
 
 #define DHCP_OPTIONS_LENGTH 308
 
+/**
+ * DHCP message as defined by RFC 2131.
+ *
+ *  0                   1                   2                   3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |     op (1)    |   htype (1)   |   hlen (1)    |   hops (1)    |
+ *  +---------------+---------------+---------------+---------------+
+ *  |                            xid (4)                            |
+ *  +-------------------------------+-------------------------------+
+ *  |           secs (2)            |           flags (2)           |
+ *  +-------------------------------+-------------------------------+
+ *  |                          ciaddr  (4)                          |
+ *  +---------------------------------------------------------------+
+ *  |                          yiaddr  (4)                          |
+ *  +---------------------------------------------------------------+
+ *  |                          siaddr  (4)                          |
+ *  +---------------------------------------------------------------+
+ *  |                          giaddr  (4)                          |
+ *  +---------------------------------------------------------------+
+ *  |                                                               |
+ *  |                          chaddr  (16)                         |
+ *  |                                                               |
+ *  |                                                               |
+ *  +---------------------------------------------------------------+
+ *  |                                                               |
+ *  |                          sname   (64)                         |
+ *  +---------------------------------------------------------------+
+ *  |                                                               |
+ *  |                          file    (128)                        |
+ *  +---------------------------------------------------------------+
+ *  |                                                               |
+ *  |                          options (variable)                   |
+ *  +---------------------------------------------------------------+
+ */
 typedef struct {
-    uint8_t        op;           /* Message op code / Message type */
-    uint8_t        htype;        /* Hardware address type (see ARP section in "Assigned Numbers" RFC; e.g., '1' = 10mb Ethernet.) */
-    uint8_t        hlen;         /* hardware address length (e.g.  '6' for 10mb Ethernet) */
-    uint8_t        hops;         /* Optionally used by relay agents when booting via a relay agent. */
-    uint32_t       xid;          /* Transaction ID */
-    uint16_t       secs;         /* seconds elapsed since client began address acquisition or renewal process */
-    uint16_t       flags;        /* Flags, BROADCAST flag */
-    struct in_addr ciaddr;       /* Client IP address */
-    struct in_addr yiaddr;       /* 'your' (client) IP address */
-    struct in_addr siaddr;       /* IP address of next server to use in bootstrap */
-    struct in_addr giaddr;       /* Relay agent IP address */
-    MACAddress_t   chaddr;       /* Client hardware address */
-    uint8_t        padding[10];  /* Client hardware address padding */
-    uint8_t        sname[64];    /* Optional server host name */
-    uint8_t        file[128];    /* Optional parameters field */
-    uint32_t       magic_cookie; /* Magic Cookie (Vendor), 63,82,53,63*/
-    uint8_t        options[DHCP_OPTIONS_LENGTH]; /* options(variable) content*/
+    uint8_t        op;           /* Message op code / message type.
+                                    1 = BOOTREQUEST, 2 = BOOTREPLY */
+    uint8_t        htype;        /* Hardware address type, see ARP section in "Assigned
+                                    Numbers" RFC; e.g., '1' = 10mb ethernet. */
+    uint8_t        hlen;         /* Hardware address length (e.g.  '6' for 10mb
+                                    ethernet). */
+    uint8_t        hops;         /* Client sets to zero, optionally used by relay agents
+                                    when booting via a relay agent. */
+    uint32_t       xid;          /* Transaction ID, a random number chosen by the
+                                    client, used by the client and server to associate
+                                    messages and responses between a client and a
+                                    server. */
+    uint16_t       secs;         /* Filled in by client, seconds elapsed since client
+                                    began address acquisition or renewal process. */
+    uint16_t       flags;        /* Flags (see figure 2). */
+    struct in_addr ciaddr;       /* Client IP address; only filled in if client is in
+                                    BOUND, RENEW or REBINDING state and can respond
+                                    to ARP requests. */
+    struct in_addr yiaddr;       /* 'your' (client) IP address. */
+    struct in_addr siaddr;       /* IP address of next server to use in bootstrap;
+                                    returned in DHCPOFFER, DHCPACK by server. */
+    struct in_addr giaddr;       /* Relay agent IP address, used in booting via a
+                                    relay agent. */
+    MACAddress_t   chaddr;       /* Client hardware address. */
+    uint8_t        padding[10];  /* Client hardware address padding. Technically part
+                                    of the chaddr field. */
+    uint8_t        sname[64];    /* Optional server host name, null terminated string. */
+    uint8_t        file[128];    /* Boot file name, null terminated string; "generic"
+                                    name or null in DHCPDISCOVER, fully qualified
+                                    directory-path name in DHCPOFFER. */
+    uint32_t       magic_cookie; /* Magic Cookie (99.130.83.99). Technically part of
+                                    options field. */
+    uint8_t        options[DHCP_OPTIONS_LENGTH]; /* Optional parameters field.  See the options
+                                                    documents for a list of defined options. */
 } dhcp_message_t;
 
-/*
+/**
  * The minimum length for a DHCP message is one that contains
  * a single DHCP Message Type option followed by an END option.
  */
@@ -89,10 +141,9 @@ typedef struct {
 #define DHCP_OPTION_END                   255
 
 #define DHCP_IP_STATE_AVAILABLE      0
-#define DHCP_IP_STATE_OFFERED        1
-#define DHCP_IP_STATE_LEASED         2
-#define DHCP_IP_STATE_STATIC         3
-#define DHCP_IP_STATE_UNAVAILABLE    4
+#define DHCP_IP_STATE_LEASED         1
+#define DHCP_IP_STATE_STATIC         2
+#define DHCP_IP_STATE_UNAVAILABLE    3
 
 static xSemaphoreHandle dhcpd_lock;
 static int dhcpd_socket = -1;
@@ -139,19 +190,10 @@ static void dhcpd_lock_release(void)
     }
 }
 
-/*
- * TODO: Perhaps the item value can contain the time the
- * lease expires, rather than the current time. Then we
- * can periodically check all the IPs in the pool and move
- * them to the available state if the lease is expired.
- *
- * OFFERED addresses could just be "leased" with a short
- * lease time then and can get rid of the OFFERED state.
- */
-static void dhcp_client_update(dhcp_ip_info_t *client, int state)
+static void dhcp_client_update(dhcp_ip_info_t *client, int state, uint32_t expiration)
 {
     uxListRemove(&client->list_item);
-    listSET_LIST_ITEM_VALUE(&client->list_item, time(NULL));
+    listSET_LIST_ITEM_VALUE(&client->list_item, time(NULL) + expiration);
     client->state = state;
     vListInsert(&dhcp_ip_pool, &client->list_item);
 }
@@ -213,6 +255,27 @@ static dhcp_ip_info_t *dhcp_client_get_oldest_disconnected(void)
     return NULL;
 }
 
+static void dhcp_client_release_expired_leases(void)
+{
+    int i;
+    dhcp_ip_info_t *client;
+    ListItem_t *item;
+    time_t expiration;
+    time_t now = time(NULL);
+
+    item = listGET_HEAD_ENTRY(&dhcp_ip_pool);
+
+    for (i = 0; i < listCURRENT_LIST_LENGTH(&dhcp_ip_pool); i++) {
+        client = listGET_LIST_ITEM_OWNER(item);
+        expiration = listGET_LIST_ITEM_VALUE(item);
+        if (client->state == DHCP_IP_STATE_LEASED && now >= expiration) {
+            client->state = DHCP_IP_STATE_AVAILABLE;
+            rtos_printf("Lease of %s to " HWADDR_FMT " has expired\n", inet_ntoa(client->ip), HWADDR_ARG(client->mac));
+        }
+        item = listGET_NEXT(item);
+    }
+}
+
 static int netmask_valid(struct in_addr netmask)
 {
     uint32_t mask;
@@ -260,7 +323,8 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
             rtos_printf("\tClient requesting an IP address it has not been offered\n");
             return bad_ip;
         } else if (request_type != DHCP_INFORM) {
-            dhcp_client_update(dhcp_client, request_type == DHCP_DISCOVER ? DHCP_IP_STATE_OFFERED : DHCP_IP_STATE_LEASED);
+            uint32_t expiration = request_type == DHCP_DISCOVER ? 10 : DHCPD_LEASE_TIME;
+            dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, expiration);
             rtos_printf("\tClient found. %s IP %s\n", request_type == DHCP_DISCOVER ? "Offering" : "Leasing", inet_ntoa(dhcp_client->ip));
             return dhcp_client->ip;
         } else {
@@ -268,7 +332,7 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
             if (dhcp_client->ip.s_addr == requested_ip.s_addr) {
                 /* The client is telling us that its IP address matches what we already knew.
                 Ensure its IP is set to static rather than leased. */
-                dhcp_client_update(dhcp_client, DHCP_IP_STATE_STATIC);
+                dhcp_client_update(dhcp_client, DHCP_IP_STATE_STATIC, 0);
                 rtos_printf("\tClient informing us it is using already assigned IP %s.\n", inet_ntoa(dhcp_client->ip));
                 return dhcp_client->ip;
             } else {
@@ -278,7 +342,7 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
                 us with if it is available in the pool. */
                 rtos_printf("\tClient informing us it is using a new IP.\n");
                 memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
-                dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE);
+                dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE, 0);
             }
         }
     }
@@ -291,7 +355,7 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
             /* The Client has requested a specific IP address,
             it is in the pool, and it is available. */
             dhcp_client->mac = *mac;
-            dhcp_client_update(dhcp_client, request_type == DHCP_DISCOVER ? DHCP_IP_STATE_OFFERED : DHCP_IP_STATE_STATIC);
+            dhcp_client_update(dhcp_client, request_type == DHCP_DISCOVER ? DHCP_IP_STATE_LEASED : DHCP_IP_STATE_STATIC, 10);
             if (request_type == DHCP_DISCOVER) {
                 rtos_printf("\tClient not found. Offering requested IP %s\n", inet_ntoa(dhcp_client->ip));
             } else {
@@ -305,7 +369,7 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
             dhcp_client = dhcp_client_get_oldest_disconnected();
             if (dhcp_client != NULL) {
                 dhcp_client->mac = *mac;
-                dhcp_client_update(dhcp_client, DHCP_IP_STATE_OFFERED);
+                dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, 10);
                 rtos_printf("\tClient not found. Offering available IP %s\n", inet_ntoa(dhcp_client->ip));
                 return dhcp_client->ip;
             } else {
@@ -555,7 +619,7 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
                 dhcp_client = dhcp_client_lookup_by_mac(&dhcp_msg->chaddr);
                 if (dhcp_client != NULL) {
                     memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
-                    dhcp_client->state = DHCP_IP_STATE_AVAILABLE;
+                    dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE, 0);
                 }
                 rtos_printf("\tClient has selected a different server.\n");
             }
@@ -745,7 +809,7 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
 
         dhcp_client = dhcp_client_lookup_by_mac(&dhcp_msg->chaddr);
         if (dhcp_client != NULL) {
-            dhcp_client->state = DHCP_IP_STATE_AVAILABLE;
+            dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE, 0);
         }
 
         /* Set these fields according to RFC2131 */
@@ -783,6 +847,13 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
 
 static void dhcpd_listen(void)
 {
+    const TickType_t recv_timeout = pdMS_TO_TICKS(60000);
+    TickType_t last_timeout;
+    TickType_t now;
+
+    last_timeout = xTaskGetTickCount();
+    setsockopt(dhcpd_socket, 0, FREERTOS_SO_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+
     while (dhcpd_socket != -1) {
 
         int ret;
@@ -790,14 +861,6 @@ static void dhcpd_listen(void)
 
         rtos_printf("DHCPD listening\n");
 
-        /*
-         * TODO: Need to periodically return and expire leases.
-         * The dhcpd_socket could just be set a receive timeout
-         * of something like 30 seconds. Whenever it returns, check
-         * to see if it's been at least 30 seconds since the last
-         * time and if so then go through the IP pool and release
-         * expired leases.
-         */
         ret = recvfrom(dhcpd_socket, &dhcp_msg, sizeof(dhcp_message_t), 0, NULL, NULL);
 
         dhcpd_lock_get();
@@ -839,7 +902,7 @@ static void dhcpd_listen(void)
                     dhcp_ip_info_t *dhcp_client;
                     dhcp_client = dhcp_client_lookup_by_ip(dhcp_msg.ciaddr);
                     if (dhcp_client != NULL) {
-                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE);
+                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE, 0);
                     }
                     break;
                 }
@@ -851,7 +914,7 @@ static void dhcpd_listen(void)
                     dhcp_client = dhcp_client_lookup_by_mac(&dhcp_msg.chaddr);
                     if (dhcp_client != NULL) {
                         memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
-                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE);
+                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE, 120);
                         /*
                          * TODO:
                          * Should periodically ping the unavailable IPs. If there is
@@ -866,8 +929,14 @@ static void dhcpd_listen(void)
                     break;
                 }
             }
-        } else {
-            rtos_printf("recvfrom() returned %d\n", ret);
+        }
+
+        now = xTaskGetTickCount();
+
+        if (now >= (last_timeout + recv_timeout)) {
+            last_timeout = now;
+            rtos_printf("Checking for expired leases\n");
+            dhcp_client_release_expired_leases();
         }
 
         dhcpd_lock_release();

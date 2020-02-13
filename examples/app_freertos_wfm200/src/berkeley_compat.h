@@ -67,6 +67,7 @@ inline int socket(int domain, int type, int protocol)
     return (int) s;
 }
 
+#define setsockopt(sockfd, level, optname, optval, optlen) FreeRTOS_setsockopt((Socket_t) (sockfd), level, optname, optval, optlen)
 #define sendto(sockfd, buf, len, flags, dest_addr, addrlen) FreeRTOS_sendto((Socket_t) (sockfd), buf, len, flags, dest_addr, addrlen)
 #define recvfrom(sockfd, buf, len, flags, src_addr, addrlen) FreeRTOS_recvfrom((Socket_t) (sockfd), buf, len, flags, src_addr, addrlen)
 #define bind(sockfd, addr, addrlen) FreeRTOS_bind((Socket_t) (sockfd), addr, addrlen)
