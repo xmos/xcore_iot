@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -24,6 +24,15 @@ static TaskHandle_t gpio_handler_task;
 static TimerHandle_t volume_up_timer;
 static TimerHandle_t volume_down_timer;
 
+GPIO_ISR_CALLBACK_FUNCTION( gpio_dev_callback, device, source_id )
+{
+    BaseType_t xYieldRequired = pdFALSE;
+
+    xTaskNotifyFromISR( gpio_handler_task, 1 << source_id, eSetBits, &xYieldRequired );
+
+    return xYieldRequired;
+}
+
 static void volume_up( void )
 {
     BaseType_t gain = 0;
@@ -44,20 +53,6 @@ static void volume_down( void )
         gain--;
     }
     audiopipeline_set_stage1_gain( gain );
-}
-
-RTOS_IRQ_ISR_ATTR
-int gpio_isr( soc_peripheral_t device )
-{
-    BaseType_t xYieldRequired = pdFALSE;
-    uint32_t status;
-
-    configASSERT(device == bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A]);
-
-    status = soc_peripheral_interrupt_status(device);
-    xTaskNotifyFromISR( gpio_handler_task, status, eSetBits, &xYieldRequired );
-
-    return xYieldRequired;
 }
 
 void vVolumeUpCallback( TimerHandle_t pxTimer )
@@ -104,7 +99,7 @@ void gpio_ctrl_t0(void *arg)
     gpio_init(dev, gpio_4A);
 
     /* Enable interrupts on buttons */
-    gpio_irq_setup(dev, gpio_4A);
+    gpio_irq_setup_callback(dev, gpio_4A, gpio_dev_callback);
     gpio_irq_enable(dev, gpio_4A);
 
     /* Turn on center LED */
@@ -117,14 +112,11 @@ void gpio_ctrl_t0(void *arg)
                 &status,         /* Pass out notification value into status */
                 portMAX_DELAY ); /* Wait indefinitely until next notification */
 
-        if( ( status & ( 1 << gpio_4A ) ) != 0 )
-        {
-            mabs_buttons = gpio_read( dev, gpio_4A );
-            buttonA = ( mabs_buttons >> 0 ) & 0x01;
-            buttonB = ( mabs_buttons >> 1 ) & 0x01;
-            buttonC = ( mabs_buttons >> 2 ) & 0x01;
-            buttonD = ( mabs_buttons >> 3 ) & 0x01;
-        }
+        mabs_buttons = gpio_read( dev, status );
+        buttonA = ( mabs_buttons >> 0 ) & 0x01;
+        buttonB = ( mabs_buttons >> 1 ) & 0x01;
+        buttonC = ( mabs_buttons >> 2 ) & 0x01;
+        buttonD = ( mabs_buttons >> 3 ) & 0x01;
 
         /* Turn on LEDS based on buttons */
         gpio_write_pin(dev, gpio_8C, 0, buttonA);
@@ -189,8 +181,7 @@ void gpio_ctrl_create( UBaseType_t priority )
     dev = gpio_driver_init(
             BITSTREAM_GPIO_DEVICE_A,        /* Initializing GPIO device A */
             NULL,                           /* No app data */
-            0,                              /* This device's interrupts should happen on core 0 */
-            (rtos_irq_isr_t) gpio_isr );    /* The ISR to handle this device's interrupts */
+            0);                             /* This device's interrupts should happen on core 0 */
 
     xTaskCreate(gpio_ctrl_t0, "t0_gpio_ctrl", portTASK_STACK_DEPTH(gpio_ctrl_t0), dev, priority, &gpio_handler_task);
 

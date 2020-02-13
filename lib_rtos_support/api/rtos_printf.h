@@ -78,6 +78,7 @@ extern "C" {
 #endif
 
 #include <stddef.h>
+#include <stdarg.h>
 
 /**
  * Just like snprintf, but not all of the
@@ -92,6 +93,14 @@ size_t rtos_snprintf(char *str, size_t size, const char *fmt, ...);
 size_t rtos_sprintf(char *str, const char *fmt, ...);
 
 /**
+ * Just like vprintf, but not all of the
+ * standard C format control are supported.
+ */
+#ifndef __XC__
+size_t rtos_vprintf(const char *fmt, va_list ap);
+#endif
+
+/**
  * Just like printf, but not all of the
  * standard C format control are supported.
  */
@@ -102,8 +111,10 @@ size_t rtos_printf(const char *fmt, ...);
 #endif
 
 #if DEBUG_PRINT_ENABLE0
+#define rtos_vprintf(...) rtos_vprintf(__VA_ARGS__)
 #define rtos_printf(...) rtos_printf(__VA_ARGS__)
 #else
+#define rtos_vprintf(...)
 #define rtos_printf(...)
 #endif
 

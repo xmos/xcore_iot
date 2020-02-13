@@ -282,6 +282,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev/spi_fast}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_master_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/firmware/3.3.1}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/freertos}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.1297914507" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -692,6 +698,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev/spi_fast}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_master_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/firmware/3.3.1}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/freertos}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.2060491910" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -1107,6 +1119,12 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_otpinfo/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_ethernet/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev/spi_fast}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bitstream/spi_master_dev}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/spi_master_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/firmware/3.3.1}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_soc/src/peripherals/bsp/wf200_driver/freertos}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.1018608743" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>

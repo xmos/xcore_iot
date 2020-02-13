@@ -29,9 +29,17 @@ void soc_dma_ring_rx_buf_set(
         void *buf,
         uint16_t length);
 
+void soc_dma_ring_rx_buf_sg_set(
+        soc_dma_ring_buf_t *ring_buf,
+        void *buf,
+        uint16_t length,
+        int index,
+        int buf_count);
+
 void *soc_dma_ring_rx_buf_get(
         soc_dma_ring_buf_t *ring_buf,
-        int *length);
+        int *length,
+        int *more);
 
 void soc_dma_ring_tx_buf_set(
         soc_dma_ring_buf_t *ring_buf,

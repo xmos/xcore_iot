@@ -48,13 +48,28 @@ out port p_leds_oen             = PORT_LED_OEN;
 
 in port p_buttons               = PORT_BUT_A_TO_D;
 
-port p_exp_0                    = PORT_EXPANSION_1;
-port p_exp_1                    = PORT_EXPANSION_3;
-port p_exp_2                    = PORT_EXPANSION_5;
-port p_exp_3                    = PORT_EXPANSION_7;
+//port p_exp_0                    = PORT_EXPANSION_1;
+//port p_exp_1                    = PORT_EXPANSION_3;
+//port p_exp_2                    = PORT_EXPANSION_5;
+//port p_exp_3                    = PORT_EXPANSION_7;
 port p_exp_4                    = PORT_EXPANSION_9;
 //port p_exp_5                    = PORT_EXPANSION_10;
 port p_exp_6                    = PORT_EXPANSION_12;
+
+/*-----------------------------------------------------------*/
+/* SPI defines */
+/*-----------------------------------------------------------*/
+#define SPI_TILE_NO 0
+#define SPI_TILE tile[SPI_TILE_NO]
+
+spi_fast_ports spi_ctx = {
+        PORT_EXPANSION_5, /* SCK  */
+        PORT_EXPANSION_3, /* MISO */
+        PORT_EXPANSION_1, /* MOSI */
+        PORT_EXPANSION_7, /* CS   */
+        on SPI_TILE: XS1_CLKBLK_1, /* clock block */
+        0, /* CS is at bit 0 on its port */
+};
 
 /*-----------------------------------------------------------*/
 /* Mic Array defines */
@@ -117,7 +132,8 @@ port p_rst_shared                   = PORT_SHARED_RESET;    // Bit 0: DAC_RST_N,
 
 void tile0_device_instantiate(
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
+        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend spi_master_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
     micarray_dev_init(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics);
 
@@ -135,12 +151,20 @@ void tile0_device_instantiate(
                 t0_gpio_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
                 t0_gpio_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
                 t0_gpio_dev_ch[SOC_PERIPHERAL_IRQ_CH]);
+
+        spi_master_dev(
+                NULL,
+                spi_master_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
+                spi_master_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],
+                spi_master_dev_ch[SOC_PERIPHERAL_CONTROL_CH],
+                spi_ctx);
     }
 }
 
 void tile1_device_instantiate(
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
+        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend spi_master_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
     chan eth_dev_ctrl_ch;
     chan i2c_dev_ctrl_ch;
@@ -156,7 +180,7 @@ void tile1_device_instantiate(
             unsafe chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, i2c_dev_ctrl_ch, null};
             unsafe chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t1_gpio_dev_ctrl_ch, null};
 
-            device_register(mic_dev_ch, eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch);
+            device_register(mic_dev_ch, eth_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_master_dev_ch);
             soc_peripheral_hub();
         }
 

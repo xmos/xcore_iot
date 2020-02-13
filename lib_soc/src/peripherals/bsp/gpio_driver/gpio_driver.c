@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
 #include "soc.h"
 #include "soc_bsp_common.h"
@@ -10,6 +10,46 @@
 #define BITSTREAM_GPIO_DEVICE_COUNT 0
 soc_peripheral_t bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_COUNT];
 #endif /* SOC_GPIO_PERIPHERAL_USED */
+
+
+typedef struct gpio_isr_callback {
+    GPIO_ISR_CALLBACK_ATTR gpio_isr_cb_t cb;
+} gpio_isr_callback_t;
+
+static gpio_isr_callback_t gpio_isr_callback_map[ GPIO_TOTAL_PORT_CNT ];
+
+GPIO_ISR_CALLBACK_FUNCTION( gpio_dev_null, device, source_id )
+{
+    (void) device;
+    (void) source_id;
+
+    return pdFALSE;
+}
+
+RTOS_IRQ_ISR_ATTR
+static void gpio_isr( soc_peripheral_t device )
+{
+    BaseType_t xYieldRequired = pdFALSE;
+    uint32_t status;
+
+    status = soc_peripheral_interrupt_status(device);
+
+    while( status != 0 )
+    {
+        gpio_id_t source_id = 31UL - ( uint32_t ) __builtin_clz( status );
+
+        xassert( source_id >= 0 );
+
+        status &= ~( 1 << source_id );
+
+        if( gpio_isr_callback_map[source_id].cb(device, source_id) == pdTRUE )
+        {
+            xYieldRequired = pdTRUE;
+        }
+    }
+
+    portEND_SWITCHING_ISR(xYieldRequired);
+}
 
 static int gpio_driver_alloc(
         soc_peripheral_t dev,
@@ -177,9 +217,11 @@ static int gpio_driver_irq_disable(
     return retval;
 }
 
-int gpio_irq_setup( soc_peripheral_t dev, gpio_id_t gpio_id )
+int gpio_irq_setup_callback( soc_peripheral_t dev, gpio_id_t gpio_id, gpio_isr_cb_t isr_cb)
 {
     uint32_t retVal;
+
+    gpio_isr_callback_map[gpio_id].cb = (isr_cb != NULL) ? isr_cb : gpio_dev_null;
 
     retVal = gpio_driver_irq_setup( dev, gpio_id );
 
@@ -263,8 +305,7 @@ uint32_t gpio_read_pin( soc_peripheral_t dev, gpio_id_t gpio_id, int pin )
 soc_peripheral_t gpio_driver_init(
         int device_id,
         void *app_data,
-        int isr_core,
-        rtos_irq_isr_t isr)
+        int isr_core)
 {
     soc_peripheral_t device;
 
@@ -272,7 +313,7 @@ soc_peripheral_t gpio_driver_init(
 
     device = bitstream_gpio_devices[ device_id ];
 
-    soc_peripheral_handler_register( device, isr_core, app_data, isr );
+    soc_peripheral_handler_register( device, isr_core, app_data, (rtos_irq_isr_t)gpio_isr );
 
     return device;
 }

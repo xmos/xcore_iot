@@ -103,7 +103,7 @@ static unsafe void eth_dev_handler(
     timer tmr;
     uint32_t time;
     int no_rx = 0, no_tx = 0;
-    size_t frame_len;
+    int frame_len;
     unsigned tx_ifnum;
     uint32_t cmd;
     ethernet_packet_info_t desc;

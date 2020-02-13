@@ -11,6 +11,7 @@
 #include "i2c_dev.h"
 #include "i2s_dev.h"
 #include "gpio_dev.h"
+#include "spi_master_dev.h"
 #endif //__XC__
 
 /*
@@ -26,7 +27,8 @@ void device_input(const int dev_id, chanend dev_c);
  */
 void tile0_device_instantiate(
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
+        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend spi_master_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
 /*
  * Bitstream specific
  *
@@ -34,7 +36,8 @@ void tile0_device_instantiate(
  */
 void tile1_device_instantiate(
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
+        chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend spi_master_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
 
 #ifdef __XC__
 extern "C" {
@@ -52,7 +55,8 @@ void device_register(
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
+        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend spi_master_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
 
 #ifdef __XC__
 }

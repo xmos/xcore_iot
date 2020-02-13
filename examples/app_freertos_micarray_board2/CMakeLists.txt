@@ -1,0 +1,76 @@
+cmake_minimum_required(VERSION 3.13)
+
+# Disable in-source build.
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
+endif()
+
+## Import XMOS configurations
+set(XMOS_MODULES_ROOT_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+include("${XMOS_MODULES_ROOT_DIR}/cmake_utils/xmos_utils.cmake")
+
+## Define project
+project(app_freertos_micarray_board2)
+set(PROJECT_VERSION 0.5.0)
+
+## Enable languages for project
+enable_language(C ASM)
+
+## Set XMOS application variables
+set(APP_HW_TARGET bitstream_src/MIC-ARRAY-1V3.xn)
+set(APP_COMPILER_FLAGS
+        "-Os"
+        "-g"
+        "-report"
+        "-fxscope"
+        "-Wxcore-fptrgroup"
+        "-DDEBUG_PRINT_ENABLE=1"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
+set(APP_XC_SRCS
+        "bitstream_src/bitstream.xc"
+    )
+set(APP_C_SRCS
+        "src/main.c"
+        "bitstream_src/bitstream.c"
+        "src/audio_hw_config/audio_hw_config.c"
+        "src/audio_pipeline/audio_pipeline.c"
+        "src/gpio_ctrl/gpio_ctrl.c"
+        "src/NetworkManager/network.c"
+        "src/queue_to_i2s/queue_to_i2s.c"
+        "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
+        "src/spi_test/spi_test.c"
+        "src/thruput_test/thruput_test.c"
+        "src/udp_cli/CLI-commands.c"
+        "src/udp_cli/FreeRTOS_CLI.c"
+        "src/udp_cli/UDPCommandServer.c"
+    )
+set(APP_ASM_SRCS
+        ""
+    )
+set(APP_INCLUDES
+        "src"
+        "src/audio_hw_config"
+        "src/audio_pipeline"
+        "src/gpio_ctrl"
+        "src/NetworkManager"
+        "src/queue_to_i2s"
+        "src/queue_to_tcp_stream"
+        "src/spi_test"
+        "src/thruput_test"
+        "src/udp_cli"
+        "bitstream_src"
+    )
+set(APP_DEPENDENT_MODULES
+        "FreeRTOS-Plus-TCP(>=10.2.1)"
+    )
+
+## Add lib_soc devices
+set(LIB_SOC_ETHERNET ${FULL})
+set(LIB_SOC_GPIO ${FULL})
+set(LIB_SOC_I2C ${FULL})
+set(LIB_SOC_I2S ${FULL})
+set(LIB_SOC_MICARRAY ${FULL})
+set(LIB_SOC_SPIMASTER ${FULL})
+
+## Register the application
+XMOS_REGISTER_APP()

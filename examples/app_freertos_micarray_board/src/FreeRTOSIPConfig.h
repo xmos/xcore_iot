@@ -36,6 +36,13 @@
 #ifndef FREERTOS_IP_CONFIG_H
 #define FREERTOS_IP_CONFIG_H
 
+#define ipconfigUSE_ETHERNET 1
+#define ipconfigUSE_WIFI     0
+
+#if ipconfigUSE_WIFI
+#include "sl_wfx_iot_wifi.h"
+#endif
+
 /* User defined network parameters */
 #define IPconfig_IP_ADDR_OCTET_0    192
 #define IPconfig_IP_ADDR_OCTET_1    168

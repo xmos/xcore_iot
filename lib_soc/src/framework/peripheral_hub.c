@@ -13,9 +13,9 @@
 int soc_dma_ring_buf_length_get(
         soc_dma_ring_buf_t *ring_buf);
 
-void *soc_dma_ring_buf_get(
+int soc_dma_ring_buf_get(
         soc_dma_ring_buf_t *ring_buf,
-        int *length,
+        void **buf,
         int *more);
 
 void soc_dma_ring_buf_release(
@@ -100,13 +100,13 @@ void soc_peripheral_rx_dma_ready(
     s_chan_check_ct_end(c);
 }
 
-uint16_t soc_peripheral_rx_dma_xfer(
+int soc_peripheral_rx_dma_xfer(
         chanend c,
         void *data,
-        uint16_t max_length)
+        int max_length)
 {
     transacting_chanend_t tc;
-    uint32_t length;
+    int length;
 
     chan_init_transaction_master(&c, &tc);
     t_chan_out_word(&tc, max_length);
@@ -115,28 +115,28 @@ uint16_t soc_peripheral_rx_dma_xfer(
     t_chan_in_buf_byte(&tc, data, length);
     chan_complete_transaction(&c, &tc);
 
-    return (uint16_t) length;
+    return length;
 }
 
-uint16_t soc_peripheral_rx_dma_direct_xfer(
+int soc_peripheral_rx_dma_direct_xfer(
         soc_peripheral_t device,
         void *data,
-        uint16_t max_length)
+        int max_length)
 {
     void *tx_buf;
     int length;
-    int total_length = 0;
+    int total_length = -1;
     int more;
 
     if (device->tx_ring_buf.desc != NULL) {
-        if (soc_dma_ring_buf_get(&device->tx_ring_buf, NULL, NULL) != NULL) {
+        if (soc_dma_ring_buf_get(&device->tx_ring_buf, NULL, NULL) >= 0) {
 
             total_length = soc_dma_ring_buf_length_get(&device->tx_ring_buf);
             xassert(total_length <= max_length);
 
             do {
-                tx_buf = soc_dma_ring_buf_get(&device->tx_ring_buf, &length, &more);
-                xassert(tx_buf != NULL);
+                length = soc_dma_ring_buf_get(&device->tx_ring_buf, &tx_buf, &more);
+                xassert(length >= 0);
                 memcpy(data, tx_buf, length);
                 soc_dma_ring_buf_release(&device->tx_ring_buf, 0, length);
                 data += length;
@@ -150,13 +150,13 @@ uint16_t soc_peripheral_rx_dma_direct_xfer(
         }
     }
 
-    return (uint16_t) total_length;
+    return total_length;
 }
 
 void soc_peripheral_tx_dma_xfer(
         chanend c,
         void *data,
-        uint16_t length)
+        int length)
 {
     transacting_chanend_t tc;
 
@@ -169,21 +169,23 @@ void soc_peripheral_tx_dma_xfer(
 void soc_peripheral_tx_dma_direct_xfer(
         soc_peripheral_t device,
         void *data,
-        uint16_t length)
+        int length)
 {
     void *rx_buf;
     int max_length;
     int more;
 
     if (device->rx_ring_buf.desc != NULL) {
-        while (soc_dma_ring_buf_get(&device->rx_ring_buf, NULL, NULL) == NULL);
+        do {
+            max_length = soc_dma_ring_buf_length_get(&device->rx_ring_buf);
+        }
+        while (max_length < 0);
 
-        max_length = soc_dma_ring_buf_length_get(&device->rx_ring_buf);
         xassert(length <= max_length);
 
         do {
-            rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &max_length, &more);
-            xassert(rx_buf != NULL);
+            max_length = soc_dma_ring_buf_get(&device->rx_ring_buf, &rx_buf, &more);
+            xassert(max_length >= 0);
             max_length = MIN(length, max_length);
             length -= max_length;
             memcpy(rx_buf, data, max_length);
@@ -324,8 +326,8 @@ static void device_to_dma(soc_peripheral_t device)
     xassert(total_length <= length);
 
     do {
-        rx_buf = soc_dma_ring_buf_get(&device->rx_ring_buf, &length, &more);
-        xassert(rx_buf != NULL);
+        length = soc_dma_ring_buf_get(&device->rx_ring_buf, &rx_buf, &more);
+        xassert(length >= 0);
 
         length = MIN(total_length, length);
         total_length -= length;
@@ -366,8 +368,8 @@ static void dma_to_device(soc_peripheral_t device)
     t_chan_out_word(&tc, total_length);
 
     do {
-        tx_buf = soc_dma_ring_buf_get(&device->tx_ring_buf, &length, &more);
-        xassert(tx_buf != NULL);
+        length = soc_dma_ring_buf_get(&device->tx_ring_buf, &tx_buf, &more);
+        xassert(length >= 0);
         total_length -= length;
 
         t_chan_out_buf_byte(&tc, tx_buf, length);
@@ -436,7 +438,7 @@ void soc_peripheral_hub()
         for (i = 0; i < peripheral_count; i++) {
 
             if (peripherals[i].tx_c != 0 && peripherals[i].tx_ring_buf.desc != NULL) {
-                if (soc_dma_ring_buf_get(&peripherals[i].tx_ring_buf, NULL, NULL) != NULL) {
+                if (soc_dma_ring_buf_get(&peripherals[i].tx_ring_buf, NULL, NULL) >= 0) {
                     /*
                      * If there is a transmit channel and there is a transmit
                      * buffer available, then we can listen for a data request
@@ -452,7 +454,7 @@ void soc_peripheral_hub()
             }
 
             if (peripherals[i].rx_c != 0 && peripherals[i].rx_ring_buf.desc != NULL) {
-                if (soc_dma_ring_buf_get(&peripherals[i].rx_ring_buf, NULL, NULL) != NULL) {
+                if (soc_dma_ring_buf_get(&peripherals[i].rx_ring_buf, NULL, NULL) >= 0) {
                     /*
                      * If there is a receive channel and there is a receive
                      * buffer available, then we can listen for data from

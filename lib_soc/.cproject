@@ -274,6 +274,31 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/Python}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/bitstream_src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/NetworkManager}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/audio_hw_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/audio_pipeline}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/gpio_ctrl}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/queue_to_i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/queue_to_tcp_stream}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/spi_test}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/thruput_test}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/udp_cli}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.xc.compiler.input.8003410" name="XC" superClass="com.xmos.cdt.xc.compiler.input"/>
 							</tool>
@@ -676,6 +701,31 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/Python}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/bitstream_src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/NetworkManager}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/audio_hw_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/audio_pipeline}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/gpio_ctrl}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/queue_to_i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/queue_to_tcp_stream}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/spi_test}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/thruput_test}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/udp_cli}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.c.compiler.input.c.392287563" name="C" superClass="com.xmos.cdt.c.compiler.input.c"/>
 							</tool>
@@ -1083,6 +1133,31 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_random/lib_random/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_xcore_c/lib_xcore_c/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_dsp/lib_dsp/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst/images}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc/rst}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/doc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/lib_spi/lib_spi/api}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/Python}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/bitstream_src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/NetworkManager}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/audio_hw_config}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/audio_pipeline}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/gpio_ctrl}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/queue_to_i2s}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/queue_to_tcp_stream}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/spi_test}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/thruput_test}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/app_freertos_micarray_board/src/udp_cli}&quot;"/>
 								</option>
 								<inputType id="com.xmos.cdt.cxx.compiler.input.cpp.1290482666" name="C++" superClass="com.xmos.cdt.cxx.compiler.input.cpp"/>
 							</tool>
