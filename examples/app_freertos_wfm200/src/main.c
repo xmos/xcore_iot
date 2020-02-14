@@ -109,9 +109,8 @@ static void wf200_test(void *arg)
             ret = WIFI_StartAP();
             rtos_printf("WIFI_StartAP() returned %x\n", ret);
         } while (ret != eWiFiSuccess);
-//        vTaskDelay(pdMS_TO_TICKS(10000));
         dhcpd_start(16);
-        vTaskDelay(pdMS_TO_TICKS(10*60000));
+        vTaskDelay(pdMS_TO_TICKS(120*60000));
 
         ret = WIFI_StopAP();
         rtos_printf("WIFI_StopAP() returned %x\n", ret);

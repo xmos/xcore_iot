@@ -590,7 +590,7 @@ WIFIReturnCode_t WIFI_StartAP( void )
                                               wifi_ap_settings.ssid,
                                               wifi_ap_settings.ssid_length,
                                               0, /* SSID is not hidden */
-                                              1, /* Isolate clients */
+                                              0, /* Don't isolate clients */
                                               wifi_ap_settings.security,
                                               1, /* enable management frame protection */
                                               wifi_ap_settings.password,

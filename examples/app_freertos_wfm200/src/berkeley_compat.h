@@ -1,10 +1,4 @@
-/*
- * berkeley_compat.h
- *
- *  Created on: Feb 6, 2020
- *      Author: mbruno
- */
-
+// Copyright (c) 2020, XMOS Ltd, All rights reserved
 
 #ifndef BERKELEY_COMPAT_H_
 #define BERKELEY_COMPAT_H_

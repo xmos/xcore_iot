@@ -1,14 +1,10 @@
-/*
- * dhcpd.c
- *
- *  Created on: Feb 6, 2020
- *      Author: mbruno
- */
+// Copyright (c) 2020, XMOS Ltd, All rights reserved
 
 #include "FreeRTOS.h"
 #include "list.h"
 #include "task.h"
 #include "semphr.h"
+#include "queue.h"
 
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
@@ -145,7 +141,8 @@ typedef struct {
 #define DHCP_IP_STATE_STATIC         2
 #define DHCP_IP_STATE_UNAVAILABLE    3
 
-static xSemaphoreHandle dhcpd_lock;
+static QueueHandle_t ping_reply_queue;
+static SemaphoreHandle_t dhcpd_lock;
 static int dhcpd_socket = -1;
 
 static struct in_addr dhcpd_server_ip;
@@ -255,6 +252,90 @@ static dhcp_ip_info_t *dhcp_client_get_oldest_disconnected(void)
     return NULL;
 }
 
+#if DHCPD_PROBE_NEW_IP_ADDRESSES || DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL
+/*
+ * TODO: This should probably be a function that the application calls
+ * from its own vApplicationPingReplyHook() when the DHCP server is up.
+ */
+void vApplicationPingReplyHook( ePingReplyStatus_t eStatus, uint16_t usIdentifier )
+{
+    if (ping_reply_queue != NULL && eStatus == eSuccess) {
+        xQueueOverwrite(ping_reply_queue, &usIdentifier);
+    }
+}
+#endif
+
+#if DHCPD_PROBE_NEW_IP_ADDRESSES || DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL
+static int dhcpd_ip_address_in_use(struct in_addr ip)
+{
+    int in_use = 0;
+    int i;
+    const int tries = 2;
+
+    MACAddress_t mac;
+
+    if (eARPGetCacheEntry(&ip.s_addr, &mac) != eARPCacheHit) {
+        /*
+         * This IP does not have an entry in the ARP table
+         * so probe it using ARP requests. If an entry appears
+         * then the IP is in use.
+         */
+        const int n = DHCPD_IP_PROBE_WAIT_TIME / 10;
+
+        for (i = 0; i < tries; i++) {
+            int j;
+            TickType_t last_wake;
+
+            rtos_printf("\t%s unknown, will probe using ARP\n", inet_ntoa(ip));
+            FreeRTOS_OutputARPRequest(ip.s_addr);
+
+            last_wake = xTaskGetTickCount();
+            for (j = 0; j < n; j++) {
+                vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(10));
+                if (eARPGetCacheEntry(&ip.s_addr, &mac) == eARPCacheHit) {
+                    in_use = 1;
+                    break;
+                }
+            }
+            if (in_use) {
+                break;
+            }
+        }
+    } else {
+        /*
+         * This IP has an entry in the ARP table. This suggests
+         * that the IP is in use. Check to see if it is still
+         * around by sending it ICMP requests.
+         */
+        BaseType_t ret = pdFAIL;
+        uint16_t ping_number_out;
+        uint16_t ping_number_in;
+
+        for (i = 0; i < tries; i++) {
+            rtos_printf("\t%s is at " HWADDR_FMT ", will probe using ICMP\n", inet_ntoa(ip), HWADDR_ARG(mac));
+            ping_number_out = FreeRTOS_SendPingRequest(ip.s_addr, 56, pdMS_TO_TICKS(100));
+            if (ping_number_out != pdFAIL) {
+                /* This loop will skip replies to previous pings */
+                do {
+                    ret = xQueueReceive(ping_reply_queue, &ping_number_in, pdMS_TO_TICKS(DHCPD_IP_PROBE_WAIT_TIME));
+                } while (ret == pdPASS && ping_number_out != ping_number_in);
+            }
+
+            if (ret == pdPASS) {
+                in_use = 1;
+                break;
+            }
+        }
+    }
+
+    if (in_use) {
+        rtos_printf("\tIP %s found on the network\n", inet_ntoa(ip));
+    }
+
+    return in_use;
+}
+#endif
+
 static void dhcp_client_release_expired_leases(void)
 {
     int i;
@@ -268,9 +349,22 @@ static void dhcp_client_release_expired_leases(void)
     for (i = 0; i < listCURRENT_LIST_LENGTH(&dhcp_ip_pool); i++) {
         client = listGET_LIST_ITEM_OWNER(item);
         expiration = listGET_LIST_ITEM_VALUE(item);
-        if (client->state == DHCP_IP_STATE_LEASED && now >= expiration) {
-            client->state = DHCP_IP_STATE_AVAILABLE;
-            rtos_printf("Lease of %s to " HWADDR_FMT " has expired\n", inet_ntoa(client->ip), HWADDR_ARG(client->mac));
+        if (now >= expiration) {
+            if (client->state == DHCP_IP_STATE_LEASED) {
+                client->state = DHCP_IP_STATE_AVAILABLE;
+                rtos_printf("\tLease of %s to " HWADDR_FMT " has expired\n", inet_ntoa(client->ip), HWADDR_ARG(client->mac));
+            }
+#if DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL
+            else if (client->state == DHCP_IP_STATE_UNAVAILABLE) {
+                if (dhcpd_ip_address_in_use(client->ip)) {
+                    rtos_printf("\t%s is still in use.\n", inet_ntoa(client->ip));
+                    dhcp_client_update(client, DHCP_IP_STATE_UNAVAILABLE, DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL);
+                } else {
+                    rtos_printf("\t%s is no longer in use, setting as available.\n", inet_ntoa(client->ip));
+                    client->state = DHCP_IP_STATE_AVAILABLE;
+                }
+            }
+#endif
         }
         item = listGET_NEXT(item);
     }
@@ -323,7 +417,7 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
             rtos_printf("\tClient requesting an IP address it has not been offered\n");
             return bad_ip;
         } else if (request_type != DHCP_INFORM) {
-            uint32_t expiration = request_type == DHCP_DISCOVER ? 10 : DHCPD_LEASE_TIME;
+            uint32_t expiration = request_type == DHCP_DISCOVER ? DHCPD_OFFER_EXPIRATION_TIME : DHCPD_LEASE_TIME;
             dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, expiration);
             rtos_printf("\tClient found. %s IP %s\n", request_type == DHCP_DISCOVER ? "Offering" : "Leasing", inet_ntoa(dhcp_client->ip));
             return dhcp_client->ip;
@@ -354,28 +448,65 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
                 dhcp_client->state == DHCP_IP_STATE_AVAILABLE) {
             /* The Client has requested a specific IP address,
             it is in the pool, and it is available. */
-            dhcp_client->mac = *mac;
-            dhcp_client_update(dhcp_client, request_type == DHCP_DISCOVER ? DHCP_IP_STATE_LEASED : DHCP_IP_STATE_STATIC, 10);
+
             if (request_type == DHCP_DISCOVER) {
-                rtos_printf("\tClient not found. Offering requested IP %s\n", inet_ntoa(dhcp_client->ip));
+                /* Verify that this IP is not already in use on the network */
+
+#if DHCPD_PROBE_NEW_IP_ADDRESSES
+                if (dhcpd_ip_address_in_use(dhcp_client->ip)) {
+                    /* The IP is in use even though it is not leased */
+                    memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
+                    dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE, DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL);
+                } else
+#endif
+                {
+                    dhcp_client->mac = *mac;
+                    dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, DHCPD_OFFER_EXPIRATION_TIME);
+                    rtos_printf("\tClient not found. Offering requested IP %s\n", inet_ntoa(dhcp_client->ip));
+                    return dhcp_client->ip;
+                }
             } else {
-                rtos_printf("\tClient informing us it is using available IP %s.\n", inet_ntoa(dhcp_client->ip));
-            }
-            return dhcp_client->ip;
-        } else if (request_type == DHCP_DISCOVER) {
-            /* Either the client did not request a specific IP address,
-            it wasn't in our pool, or it has already been assigned or
-            offered to another client. */
-            dhcp_client = dhcp_client_get_oldest_disconnected();
-            if (dhcp_client != NULL) {
                 dhcp_client->mac = *mac;
-                dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, 10);
-                rtos_printf("\tClient not found. Offering available IP %s\n", inet_ntoa(dhcp_client->ip));
+                dhcp_client_update(dhcp_client, request_type == DHCP_IP_STATE_STATIC, 0);
+                rtos_printf("\tClient informing us it is using available IP %s.\n", inet_ntoa(dhcp_client->ip));
                 return dhcp_client->ip;
-            } else {
-                /* There are no IP addresses available for this client. Remain silent. */
-                rtos_printf("\tClient not found. There are no available IP addresses\n");
-                return zero_ip;
+            }
+        }
+
+        if (request_type == DHCP_DISCOVER) {
+            /* Either the client did not request a specific IP address,
+            it wasn't in our pool, it has already been assigned or
+            offered to another client, or the IP was found to be in use. */
+
+            /* This forever loop looks dangerous but it is not possible
+            for it to loop forever. Each time the next available IP address
+            is determined to be in use it is marked as unavailable. Eventually
+            either an available IP address will be found that is not in use, or
+            all available IPs will be set as unavailable at which point
+            dhcp_client_get_oldest_disconnected() WILL return NULL and zero_ip
+            will be returned. */
+            for (;;) {
+                dhcp_client = dhcp_client_get_oldest_disconnected();
+                if (dhcp_client != NULL) {
+                    /* Verify that this IP is not already in use on the network */
+#if DHCPD_PROBE_NEW_IP_ADDRESSES
+                    if (dhcpd_ip_address_in_use(dhcp_client->ip)) {
+                        /* The IP is in use even though it is not leased */
+                        memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
+                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE, DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL);
+                    } else
+#endif
+                    {
+                        dhcp_client->mac = *mac;
+                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, DHCPD_OFFER_EXPIRATION_TIME);
+                        rtos_printf("\tClient not found. Offering available IP %s\n", inet_ntoa(dhcp_client->ip));
+                        return dhcp_client->ip;
+                    }
+                } else {
+                    /* There are no IP addresses available for this client. Remain silent. */
+                    rtos_printf("\tClient not found. There are no available IP addresses\n");
+                    return zero_ip;
+                }
             }
         } else {
             /* The IP address the client has informed us it is using is not available,
@@ -847,7 +978,7 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
 
 static void dhcpd_listen(void)
 {
-    const TickType_t recv_timeout = pdMS_TO_TICKS(60000);
+    const TickType_t recv_timeout = pdMS_TO_TICKS(DHCPD_REFRESH_INTERVAL * 1000);
     TickType_t last_timeout;
     TickType_t now;
 
@@ -900,9 +1031,13 @@ static void dhcpd_listen(void)
                  */
                 case DHCP_RELEASE: {
                     dhcp_ip_info_t *dhcp_client;
+
+                    rtos_printf("Release message received for ip %s\n", inet_ntoa(dhcp_msg.ciaddr));
+
                     dhcp_client = dhcp_client_lookup_by_ip(dhcp_msg.ciaddr);
                     if (dhcp_client != NULL) {
                         dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE, 0);
+                        rtos_printf("\tReleased\n");
                     }
                     break;
                 }
@@ -910,16 +1045,14 @@ static void dhcpd_listen(void)
                 case DHCP_DECLINE: {
                     dhcp_ip_info_t *dhcp_client;
 
+                    rtos_printf("Decline message received from " HWADDR_FMT "\n", HWADDR_ARG(dhcp_msg.chaddr));
+
                     /* TODO: Should lookup the requested IP */
                     dhcp_client = dhcp_client_lookup_by_mac(&dhcp_msg.chaddr);
                     if (dhcp_client != NULL) {
                         memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
-                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE, 120);
-                        /*
-                         * TODO:
-                         * Should periodically ping the unavailable IPs. If there is
-                         * no response then can move it back to available.
-                         */
+                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE, DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL);
+                        rtos_printf("\t%s made unavailable\n", inet_ntoa(dhcp_client->ip));
                     }
                     break;
                 }
@@ -1045,6 +1178,11 @@ void dhcpd_start(UBaseType_t priority)
     if (dhcpd_lock == NULL) {
         dhcpd_lock = xSemaphoreCreateRecursiveMutex();
         configASSERT(dhcpd_lock != NULL);
+    }
+
+    if (ping_reply_queue == NULL) {
+        ping_reply_queue = xQueueCreate(1, sizeof(uint16_t));
+        configASSERT(ping_reply_queue != NULL);
     }
 
     dhcpd_lock_get();
