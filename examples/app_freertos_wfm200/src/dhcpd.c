@@ -257,7 +257,7 @@ static dhcp_ip_info_t *dhcp_client_get_oldest_disconnected(void)
  * TODO: This should probably be a function that the application calls
  * from its own vApplicationPingReplyHook() when the DHCP server is up.
  */
-void vApplicationPingReplyHook( ePingReplyStatus_t eStatus, uint16_t usIdentifier )
+void vApplicationPingReplyHook(ePingReplyStatus_t eStatus, uint16_t usIdentifier)
 {
     if (ping_reply_queue != NULL && eStatus == eSuccess) {
         xQueueOverwrite(ping_reply_queue, &usIdentifier);
@@ -670,19 +670,42 @@ static int dhcp_option_get_next(const dhcp_message_t *dhcp_msg,
 #define DHCP_CLIENT_STATE_INIT_REBOOT 3
 #define DHCP_CLIENT_STATE_RENEWING    4
 #define DHCP_CLIENT_STATE_REBINDING   5
-#define DHCP_CLIENT_STATE_INFORM      6
-#define DHCP_CLIENT_STATE_PINGING     7
+#define DHCP_CLIENT_STATE_INFORMING   6
+#define DHCP_CLIENT_STATE_RELEASING   7
+#define DHCP_CLIENT_STATE_DECLINING   8
+#define DHCP_CLIENT_STATE_PINGING     9
 
+/*
+ * This function is used to handle DHCP messages when the op
+ * field is BOOTREQUEST.
+ *
+ * When the DHCP message type is one of:
+ *  - DHCPDISCOVER
+ *  - DHCPREQUEST
+ *  - DHCPINFORM
+ *
+ *  It will respond with a DHCP message of one of the following types:
+ *  - DHCPOFFER
+ *  - DHCPACK
+ *  - DHCPNAK
+ *
+ * When the DHCP message type is one of:
+ *  - DHCPRELEASE
+ *  - DHCPDECLINE
+ *
+ * It will not respond.
+ */
 static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_length)
 {
     const uint8_t *opt_ptr = NULL;
+    dhcp_ip_info_t *dhcp_client;
     int opt;
+    int dhcp_msg_type = 0;
     int ip_requested = 0;
     int server_identified = 0;
     int state = DHCP_CLIENT_STATE_NONE;
     struct in_addr server_identifier = {INADDR_ANY};
     struct in_addr requested_ip = {INADDR_ANY};
-    uint8_t dhcp_msg_type = 0;
     const uint8_t default_params[] = {
             DHCP_OPTION_SUBNET_MASK,
             DHCP_OPTION_ROUTER,
@@ -733,26 +756,24 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
         }
     } while (opt != DHCP_OPTION_END);
 
-    if (dhcp_msg_type == DHCP_DISCOVER) {
+    switch (dhcp_msg_type) {
+    case DHCP_DISCOVER:
         rtos_printf("\tClient is in the discover state.\n");
         state = DHCP_CLIENT_STATE_DISCOVER;
-    } else if (dhcp_msg_type == DHCP_REQUEST) {
+        break;
+
+    case DHCP_REQUEST:
         if (ip_requested && server_identified && dhcp_msg->ciaddr.s_addr == 0) {
             if (server_identifier.s_addr == dhcpd_server_ip.s_addr) {
                 rtos_printf("\tClient is in the selecting state.\n");
                 state = DHCP_CLIENT_STATE_SELECTING;
             } else {
-                dhcp_ip_info_t *dhcp_client;
+                rtos_printf("\tClient has selected a different server.\n");
 
                 /* The client has chosen another server. Lookup its
-                MAC address in the IP pool and ensure the IP is reset
-                to available and that the MAC address is cleared. */
+                MAC address in the IP pool. It will be released. */
                 dhcp_client = dhcp_client_lookup_by_mac(&dhcp_msg->chaddr);
-                if (dhcp_client != NULL) {
-                    memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
-                    dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE, 0);
-                }
-                rtos_printf("\tClient has selected a different server.\n");
+                state = DHCP_CLIENT_STATE_RELEASING;
             }
         } else if (ip_requested && !server_identified && dhcp_msg->ciaddr.s_addr == 0) {
             rtos_printf("\tClient is in the init/reboot state.\n");
@@ -774,32 +795,83 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
             rtos_printf("\tClient is in the ping state.\n");
             state = DHCP_CLIENT_STATE_PINGING;
         } else {
-            rtos_printf("\tClient is in an invalid state.\n");
+            rtos_printf("\tInvalid request message.\n\n");
         }
-    } else if (dhcp_msg_type == DHCP_INFORM) {
+        break;
+
+    case DHCP_INFORM:
         if (!ip_requested && !server_identified && dhcp_msg->ciaddr.s_addr != 0) {
             rtos_printf("\tClient is in the inform state.\n");
             requested_ip = dhcp_msg->ciaddr;
-            state = DHCP_CLIENT_STATE_INFORM;
+            state = DHCP_CLIENT_STATE_INFORMING;
         } else {
-            rtos_printf("\tInvalid inform message.\n");
+            rtos_printf("\tInvalid inform message.\n\n");
         }
+        break;
+
+    case DHCP_DECLINE:
+        if (ip_requested && server_identified && dhcp_msg->ciaddr.s_addr == 0) {
+            rtos_printf("\tClient is in the decline state.\n");
+            dhcp_client = dhcp_client_lookup_by_ip(requested_ip);
+            state = DHCP_CLIENT_STATE_DECLINING;
+        } else {
+            rtos_printf("\tInvalid decline message.\n\n");
+        }
+        break;
+
+    case DHCP_RELEASE:
+        if (!ip_requested && server_identified && dhcp_msg->ciaddr.s_addr != 0) {
+            rtos_printf("\tClient is in the release state.\n");
+            dhcp_client = dhcp_client_lookup_by_ip(dhcp_msg->ciaddr);
+            state = DHCP_CLIENT_STATE_RELEASING;
+        } else {
+            rtos_printf("\tInvalid release message.\n\n");
+        }
+        break;
+
+    default:
+        rtos_printf("\tUnrecognized DHCP message type %d\n\n", dhcp_msg_type);
+        break;
     }
 
-    if (state == DHCP_CLIENT_STATE_NONE) {
-        /* Either the client has selected a different DHCP server
-        or the parameters in the request message indicate an
-        invalid state. Just return now and remain silent. */
-        rtos_printf("\n");
+    switch (state) {
+    case DHCP_CLIENT_STATE_DECLINING:
+    case DHCP_CLIENT_STATE_RELEASING:
+        if (dhcp_client != NULL) {
+            if (dhcp_msg->ciaddr.s_addr == 0) {
+                rtos_printf("\tDisassociating " HWADDR_FMT " from %s\n", HWADDR_ARG(dhcp_client->mac), inet_ntoa(dhcp_client->ip));
+                memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
+            }
+            if (state == DHCP_CLIENT_STATE_DECLINING) {
+                rtos_printf("\tMaking %s unavailable\n\n", inet_ntoa(dhcp_client->ip));
+                dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE, DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL);
+            } else {
+                rtos_printf("\tMaking %s available\n\n", inet_ntoa(dhcp_client->ip));
+                dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE, 0);
+            }
+        } else {
+            rtos_printf("\tIP to release/decline not found in pool\n\n");
+        }
+        /* Do not reply, return now */
         return;
-    }
 
-    if (state != DHCP_CLIENT_STATE_PINGING) {
-        dhcp_msg->yiaddr = dhcpd_client_ip_address_lease(&dhcp_msg->chaddr, requested_ip, dhcp_msg_type);
-    } else {
+    case DHCP_CLIENT_STATE_NONE:
+        /* Either the DHCP message type was invalid or the
+        combination of fields and message type was invalid.
+        Just return now and remain silent. */
+        return;
+
+    case DHCP_CLIENT_STATE_PINGING:
         /* When the client is pinging, just set 'your' address to the
         requested address. Don't actually update the lease. */
         dhcp_msg->yiaddr = requested_ip;
+        break;
+
+    default:
+        /* All other states should attempt to require a lease for the
+        requested IP address. */
+        dhcp_msg->yiaddr = dhcpd_client_ip_address_lease(&dhcp_msg->chaddr, requested_ip, dhcp_msg_type);
+        break;
     }
 
     if (dhcp_msg->yiaddr.s_addr != INADDR_ANY && dhcp_msg->yiaddr.s_addr != INADDR_BROADCAST) {
@@ -831,7 +903,7 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
         if (state == DHCP_CLIENT_STATE_DISCOVER) {
             /* Ensure this is zero when sending an OFFER. */
             dhcp_msg->ciaddr.s_addr = 0;
-        } else if (state == DHCP_CLIENT_STATE_INFORM) {
+        } else if (state == DHCP_CLIENT_STATE_INFORMING) {
             /* Ensure this is zero when replying to an INFORM. */
             dhcp_msg->yiaddr.s_addr = 0;
         }
@@ -874,7 +946,7 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
         dhcp_option_add(dhcp_msg, &option_ptr, DHCP_OPTION_DHCP_MESSAGE_TYPE, 1, sizeof(uint8_t),         &dhcp_msg_type);
         dhcp_option_add(dhcp_msg, &option_ptr, DHCP_OPTION_SERVER_IDENTIFIER, 1,  sizeof(struct in_addr), &dhcpd_server_ip);
 
-        if (state != DHCP_CLIENT_STATE_INFORM) {
+        if (state != DHCP_CLIENT_STATE_INFORMING) {
             /* Except this option MUST NOT be present in the DHCPACK message when
             replying to a DHCPINFORM message */
             dhcp_option_add(dhcp_msg, &option_ptr, DHCP_OPTION_IP_ADDRESS_LEASE_TIME, 1, sizeof(uint32_t), &lease_time);
@@ -927,7 +999,6 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
         dhcpd_send_response(dhcp_msg, options_length);
     } else if (dhcp_msg->yiaddr.s_addr == INADDR_BROADCAST) {
         uint8_t *option_ptr = NULL;
-        dhcp_ip_info_t *dhcp_client;
 
         rtos_printf("\tRequested IP is invalid.\n");
 
@@ -1003,65 +1074,8 @@ static void dhcpd_listen(void)
             vPortFree(dhcp_ip_infos);
             dhcpd_socket = -1;
         } else if (ret >= DHCP_REQUEST_MIN_LENGTH && dhcp_msg.op == BOOTREQUEST) {
-
-            const uint8_t *opt_ptr = NULL;
-            const uint8_t *opt_data;
             size_t options_length = ret - (sizeof(dhcp_msg) - sizeof(dhcp_msg.options));
-            size_t opt_len;
-            int opt;
-
-            do {
-                opt = dhcp_option_get_next(&dhcp_msg, &opt_ptr, options_length, &opt_len, (const void **) &opt_data);
-            } while (opt != DHCP_OPTION_END && opt != DHCP_OPTION_DHCP_MESSAGE_TYPE);
-
-            if (opt == DHCP_OPTION_DHCP_MESSAGE_TYPE && opt_len == 1) {
-
-                switch (*opt_data) {
-                case DHCP_DISCOVER:
-                case DHCP_REQUEST:
-                case DHCP_INFORM:
-                    dhcpd_handle_op_request(&dhcp_msg, options_length);
-                    break;
-
-                /*
-                 * TODO: RELEASE and DECLINE should be handled by a function.
-                 * The server does not respond to them.
-                 * They MUST include server identifier so that
-                 * could be checked, but perhaps does not need to be.
-                 */
-                case DHCP_RELEASE: {
-                    dhcp_ip_info_t *dhcp_client;
-
-                    rtos_printf("Release message received for ip %s\n", inet_ntoa(dhcp_msg.ciaddr));
-
-                    dhcp_client = dhcp_client_lookup_by_ip(dhcp_msg.ciaddr);
-                    if (dhcp_client != NULL) {
-                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_AVAILABLE, 0);
-                        rtos_printf("\tReleased\n");
-                    }
-                    break;
-                }
-
-                case DHCP_DECLINE: {
-                    dhcp_ip_info_t *dhcp_client;
-
-                    rtos_printf("Decline message received from " HWADDR_FMT "\n", HWADDR_ARG(dhcp_msg.chaddr));
-
-                    /* TODO: Should lookup the requested IP */
-                    dhcp_client = dhcp_client_lookup_by_mac(&dhcp_msg.chaddr);
-                    if (dhcp_client != NULL) {
-                        memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
-                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE, DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL);
-                        rtos_printf("\t%s made unavailable\n", inet_ntoa(dhcp_client->ip));
-                    }
-                    break;
-                }
-
-                default:
-                    rtos_printf("DHCP ignoring message %d\n", dhcp_msg.options[2]);
-                    break;
-                }
-            }
+            dhcpd_handle_op_request(&dhcp_msg, options_length);
         }
 
         now = xTaskGetTickCount();

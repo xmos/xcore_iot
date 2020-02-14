@@ -18,7 +18,7 @@
 /**
  * How long in seconds IP leases are for.
  */
-#define DHCPD_LEASE_TIME 120
+#define DHCPD_LEASE_TIME (10 * 60)
 
 /**
  * The amount of time in seconds an IP address is
@@ -34,7 +34,7 @@
  * leases have expired and if unavailable IP addresses
  * should be probed.
  */
-#define DHCPD_REFRESH_INTERVAL      5
+#define DHCPD_REFRESH_INTERVAL 60
 
 /**
  * Set to 1 to probe newly allocated IP addresses
@@ -47,7 +47,7 @@
  *
  * Set to 0 to disable initial probing.
  */
-#define DHCPD_PROBE_NEW_IP_ADDRESSES      1
+#define DHCPD_PROBE_NEW_IP_ADDRESSES 1
 
 /**
  * How often in seconds to probe IP addresses that
@@ -56,7 +56,7 @@
  *
  * Set to 0 to disable periodic probing.
  */
-#define DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL 10
+#define DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL (5 * 60)
 
 /**
  * The number of probes to send when checking to
