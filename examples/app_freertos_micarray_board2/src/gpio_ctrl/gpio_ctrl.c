@@ -28,7 +28,7 @@ GPIO_ISR_CALLBACK_FUNCTION( gpio_dev_callback, device, source_id )
 {
     BaseType_t xYieldRequired = pdFALSE;
 
-    xTaskNotifyFromISR( gpio_handler_task, 1 << source_id, eSetBits, &xYieldRequired );
+    xTaskNotifyFromISR( gpio_handler_task, source_id, eSetBits, &xYieldRequired );
 
     return xYieldRequired;
 }
