@@ -16,7 +16,7 @@
 					<folderInfo id="com.xmos.cdt.toolchain.1294164529.1673360442" name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.1869059476" name="com.xmos.cdt.toolchain" superClass="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser;org.eclipse.cdt.core.GNU_ELF" id="com.xmos.cdt.core.platform.368584010" isAbstract="false" osList="linux,win32,macosx" superClass="com.xmos.cdt.core.platform"/>
-							<builder arguments="CONFIG=Default" id="com.xmos.cdt.builder.base.1460034154" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
+							<builder arguments="-j" buildPath="${workspace_loc:/app_freertos_wfm200/build}" command="make" id="com.xmos.cdt.builder.base.1460034154" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="com.xmos.cdt.builder.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -1688,5 +1688,9 @@
 			</target>
 		</buildTargets>
 	</storageModule>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/app_freertos_wfm200"/>
+		</configuration>
+	</storageModule>
 </cproject>
