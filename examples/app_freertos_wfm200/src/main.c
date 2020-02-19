@@ -112,6 +112,7 @@ static void wf200_test(void *arg)
         dhcpd_start(16);
         vTaskDelay(pdMS_TO_TICKS(120*60000));
 
+        /* FIXME: Why does this cause a firmware exception sometimes? */
         ret = WIFI_StopAP();
         rtos_printf("WIFI_StopAP() returned %x\n", ret);
         dhcpd_stop();

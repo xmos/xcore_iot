@@ -116,12 +116,17 @@ WIFIReturnCode_t WIFI_On( void )
     return ret;
 }
 
+/*
+ * TODO: Verify that the host code that
+ * sl_wfx_shutdown() calls does the right
+ * things.
+ */
 WIFIReturnCode_t WIFI_Off( void )
 {
     WIFI_GetLock();
     sl_wfx_shutdown();
     WIFI_ReleaseLock();
-    /* TODO: Test */
+
     return eWiFiNotSupported;
 }
 
@@ -315,6 +320,9 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
     return ret;
 }
 
+/*
+ * TODO: Implement
+ */
 WIFIReturnCode_t WIFI_Reset( void )
 {
     return eWiFiNotSupported;
@@ -369,23 +377,35 @@ WIFIReturnCode_t WIFI_GetMode( WIFIDeviceMode_t *pxDeviceMode )
     return ret;
 }
 
+/*
+ * TODO: later?
+ */
 WIFIReturnCode_t WIFI_NetworkAdd( const WIFINetworkProfile_t * const pxNetworkProfile,
                                   uint16_t *pusIndex )
 {
     return eWiFiNotSupported;
 }
 
+/*
+ * TODO: later?
+ */
 WIFIReturnCode_t WIFI_NetworkGet( WIFINetworkProfile_t *pxNetworkProfile,
                                   uint16_t usIndex )
 {
     return eWiFiNotSupported;
 }
 
+/*
+ * TODO: later?
+ */
 WIFIReturnCode_t WIFI_NetworkDelete( uint16_t usIndex )
 {
     return eWiFiNotSupported;
 }
 
+/*
+ * TODO: Map to FreeRTOS ping
+ */
 WIFIReturnCode_t WIFI_Ping( uint8_t *pucIPAddr,
                             uint16_t usCount,
                             uint32_t ulIntervalMS )
@@ -393,6 +413,9 @@ WIFIReturnCode_t WIFI_Ping( uint8_t *pucIPAddr,
     return eWiFiNotSupported;
 }
 
+/*
+ * TODO: Map to FreeRTOS get IP
+ */
 WIFIReturnCode_t WIFI_GetIP( uint8_t *pucIPAddr )
 {
     return eWiFiNotSupported;
@@ -424,6 +447,9 @@ WIFIReturnCode_t WIFI_GetMAC( uint8_t *pucMac )
     return ret;
 }
 
+/*
+ * Map to the FreeRTOS equivalent function
+ */
 WIFIReturnCode_t WIFI_GetHostIP( char *pcHost,
                                  uint8_t *pucIPAddr )
 {
@@ -720,12 +746,18 @@ WIFIReturnCode_t WIFI_ConfigureAP( const WIFINetworkParams_t * const pxNetworkPa
     return ret;
 }
 
+/*
+ * TODO: later?
+ */
 WIFIReturnCode_t WIFI_SetPMMode( WIFIPMMode_t xPMModeType,
                                  const void *pvOptionValue )
 {
     return eWiFiNotSupported;
 }
 
+/*
+ * TODO: later?
+ */
 WIFIReturnCode_t WIFI_GetPMMode( WIFIPMMode_t *pxPMModeType,
                                  void * pvOptionValue )
 {
@@ -744,6 +776,10 @@ BaseType_t WIFI_IsConnected( void )
     }
 }
 
+/*
+ * TODO: Make this a function that the application's
+ * xApplicationDHCPHook() calls.
+ */
 eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
                                             uint32_t ulIPAddress )
 {
