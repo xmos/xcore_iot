@@ -138,8 +138,9 @@ typedef struct {
 
 #define DHCP_IP_STATE_AVAILABLE      0
 #define DHCP_IP_STATE_LEASED         1
-#define DHCP_IP_STATE_STATIC         2
-#define DHCP_IP_STATE_UNAVAILABLE    3
+#define DHCP_IP_STATE_OFFERED        2
+#define DHCP_IP_STATE_STATIC         3
+#define DHCP_IP_STATE_UNAVAILABLE    4
 
 static QueueHandle_t ping_reply_queue;
 static SemaphoreHandle_t dhcpd_lock;
@@ -350,7 +351,7 @@ static void dhcp_client_release_expired_leases(void)
         client = listGET_LIST_ITEM_OWNER(item);
         expiration = listGET_LIST_ITEM_VALUE(item);
         if (now >= expiration) {
-            if (client->state == DHCP_IP_STATE_LEASED) {
+            if (client->state == DHCP_IP_STATE_LEASED || client->state == DHCP_IP_STATE_OFFERED) {
                 client->state = DHCP_IP_STATE_AVAILABLE;
                 rtos_printf("\tLease of %s to " HWADDR_FMT " has expired\n", inet_ntoa(client->ip), HWADDR_ARG(client->mac));
             }
@@ -399,6 +400,31 @@ inline int ip_netmask_compare(struct in_addr addr1, struct in_addr addr2, struct
     return (addr1.s_addr & mask.s_addr) == (addr2.s_addr & mask.s_addr);
 }
 
+/**
+ * This function handles selecting an IP address for a client
+ * given its MAC address, the IP address the client has requested,
+ * and the DHCP message type received from the client, which may
+ * be one of DISCOVER, REQUEST, or INFORM.
+ *
+ * The selected IP is returned, and the IP pool is updated
+ * with the client information (MAC address, current state,
+ * lease expiration time). If there are no IP addresses
+ * available then an all zero IP is returned. If the client
+ * has sent a REQUEST message and is requesting an IP address
+ * that was not offered, then the broadcast address is returned
+ * which means a NAK should be sent.
+ *
+ * Whenever an IP is leased out, either for the first time or
+ * for a renewal, the ARP cache is updated.
+ *
+ * If DHCPD_PROBE_NEW_IP_ADDRESSES is true then this function will
+ * verify that the IP address it hands out is not already in use
+ * on the network by sending out either an ICMP echo request or
+ * ARP request (see dhcpd_ip_address_in_use()).
+ *
+ * \note This function has become a bit messy and difficult to
+ * follow. It might be worth restructuring.
+ */
 static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, struct in_addr requested_ip, int request_type)
 {
     dhcp_ip_info_t *dhcp_client;
@@ -418,9 +444,31 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
             return bad_ip;
         } else if (request_type != DHCP_INFORM) {
             uint32_t expiration = request_type == DHCP_DISCOVER ? DHCPD_OFFER_EXPIRATION_TIME : DHCPD_LEASE_TIME;
-            dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, expiration);
-            rtos_printf("\tClient found. %s IP %s\n", request_type == DHCP_DISCOVER ? "Offering" : "Leasing", inet_ntoa(dhcp_client->ip));
-            return dhcp_client->ip;
+            int state = request_type == DHCP_DISCOVER ? DHCP_IP_STATE_OFFERED : DHCP_IP_STATE_LEASED;
+
+#if DHCPD_PROBE_NEW_IP_ADDRESSES
+            if (request_type == DHCP_DISCOVER && dhcp_client->state != DHCP_IP_STATE_LEASED && dhcpd_ip_address_in_use(dhcp_client->ip)) {
+                /* The IP is in use on the network, even though it is not leased,
+                and not in use by the client since it has sent a discover message. */
+                memset(&dhcp_client->mac, 0, sizeof(dhcp_client->mac));
+                dhcp_client_update(dhcp_client, DHCP_IP_STATE_UNAVAILABLE, DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL);
+                if (requested_ip.s_addr == dhcp_client->ip.s_addr) {
+                    /* Since the IP we had associated with this client's MAC address is
+                    in use elsewhere on the network, if the client is also requesting
+                    this IP then do not attempt to honor the request below. */
+                    requested_ip.s_addr = zero_ip.s_addr;
+                }
+            } else
+#endif
+            {
+                dhcp_client_update(dhcp_client, state, expiration);
+                rtos_printf("\tClient found. %s IP %s\n", state == DHCP_IP_STATE_OFFERED ? "Offering" : "Leasing", inet_ntoa(dhcp_client->ip));
+                if (state == DHCP_IP_STATE_LEASED) {
+                    rtos_printf("\tUpdating ARP cache entry (" HWADDR_FMT ")\n", HWADDR_ARG(dhcp_client->mac));
+                    vARPRefreshCacheEntry(&dhcp_client->mac, dhcp_client->ip.s_addr);
+                }
+                return dhcp_client->ip;
+            }
         } else {
             /* This is an inform message */
             if (dhcp_client->ip.s_addr == requested_ip.s_addr) {
@@ -461,7 +509,7 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
 #endif
                 {
                     dhcp_client->mac = *mac;
-                    dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, DHCPD_OFFER_EXPIRATION_TIME);
+                    dhcp_client_update(dhcp_client, DHCP_IP_STATE_OFFERED, DHCPD_OFFER_EXPIRATION_TIME);
                     rtos_printf("\tClient not found. Offering requested IP %s\n", inet_ntoa(dhcp_client->ip));
                     return dhcp_client->ip;
                 }
@@ -498,7 +546,7 @@ static struct in_addr dhcpd_client_ip_address_lease(const MACAddress_t *mac, str
 #endif
                     {
                         dhcp_client->mac = *mac;
-                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_LEASED, DHCPD_OFFER_EXPIRATION_TIME);
+                        dhcp_client_update(dhcp_client, DHCP_IP_STATE_OFFERED, DHCPD_OFFER_EXPIRATION_TIME);
                         rtos_printf("\tClient not found. Offering available IP %s\n", inet_ntoa(dhcp_client->ip));
                         return dhcp_client->ip;
                     }
