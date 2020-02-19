@@ -16,6 +16,9 @@
 #include "event_groups.h"
 #include "semphr.h"
 
+#include "FreeRTOS_IP.h"
+#include "NetworkBufferManagement.h"
+
 #define printf rtos_printf
 
 extern SemaphoreHandle_t s_xDriverSemaphore;
@@ -160,7 +163,16 @@ sl_status_t sl_wfx_host_hold_in_reset(void)
 
 sl_status_t sl_wfx_host_setup_waited_event(uint8_t event_id)
 {
-    host_ctx.waited_event_id = event_id;
+    /*
+     * Do not wait for send frame confirmations.
+     *
+     * The driver asks to wait for send frame confirmations
+     * but does not actually wait for them. This causes errors
+     * if we don't filter out the send frame requests here.
+     */
+    if (event_id != SL_WFX_SEND_FRAME_REQ_ID) {
+        host_ctx.waited_event_id = event_id;
+    }
     return SL_STATUS_OK;
 }
 
@@ -169,9 +181,11 @@ sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id,
                                               void **event_payload_out)
 {
     uint8_t posted_event_id;
+    BaseType_t ret;
 
     /* Wait for an event posted by the function sl_wfx_host_post_event() */
-    if (xQueueReceive(eventQueue, &posted_event_id, pdMS_TO_TICKS(timeout_ms)) == pdTRUE) {
+    ret = xQueueReceive(eventQueue, &posted_event_id, pdMS_TO_TICKS(timeout_ms));
+    if (ret == pdTRUE) {
         /* Once a message is received, check if it is the expected ID */
         if (confirmation_id == posted_event_id) {
             /* Pass the confirmation reply and return*/
@@ -179,7 +193,11 @@ sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id,
                 *event_payload_out = sl_wfx_context->event_payload_buffer;
             }
             return SL_STATUS_OK;
+        } else {
+            sl_wfx_host_log("confirmation id is %02x, expected %02x\n", (int) posted_event_id, (int) confirmation_id);
         }
+    } else {
+        sl_wfx_host_log("sl_wfx_host_wait_for_confirmation() queue recv returned %d\n", ret);
     }
 
     /* The wait for the confirmation timed out, return */
@@ -283,16 +301,17 @@ sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
         }
       }
 
-      if(host_ctx.waited_event_id == event_payload->header.id)
+      if(host_ctx.waited_event_id && (host_ctx.waited_event_id == event_payload->header.id))
       {
-        if(event_payload->header.length < SL_WFX_EVENT_MAX_SIZE)
-        {
-          /* Post the event in the queue */
-          memcpy( sl_wfx_context->event_payload_buffer,
-                 (void*) event_payload,
-                 event_payload->header.length );
-          xQueueOverwrite(eventQueue, (void *) &event_payload->header.id);
-        }
+        xassert(event_payload->header.length <= SL_WFX_EVENT_MAX_SIZE);
+
+        host_ctx.waited_event_id = 0;
+
+        /* Post the event in the queue */
+        memcpy( sl_wfx_context->event_payload_buffer,
+               (void*) event_payload,
+               event_payload->header.length );
+        xQueueOverwrite(eventQueue, (void *) &event_payload->header.id);
       }
 
       return SL_STATUS_OK;
@@ -302,22 +321,43 @@ sl_status_t sl_wfx_host_allocate_buffer(void **buffer,
                                         sl_wfx_buffer_type_t type,
                                         uint32_t buffer_size)
 {
-    /*
-     * TODO: type could potentially be used
-     * to determine which heap to allocate
-     * from (SRAM or DDR)
-     */
-    (void) type;
+    if (ipconfigZERO_COPY_RX_DRIVER != 0 && type == SL_WFX_RX_FRAME_BUFFER) {
+        NetworkBufferDescriptor_t *network_buffer;
+        network_buffer = pxGetNetworkBufferWithDescriptor( buffer_size, 0 );
+        if (network_buffer != NULL) {
+            /*
+             * The pointer that will be returned to the driver is behind the beginning
+             * of the Ethernet Frame by the size of the received indication message and
+             * SL_WFX_NORMAL_FRAME_PAD_LENGTH padding bytes. This way frames with 2 pad
+             * bytes will begin at where pucEthernetBuffer points to.
+             *
+             * When the padding is other than SL_WFX_NORMAL_FRAME_PAD_LENGTH bytes then
+             * this needs to be dealt with in the receive callback.
+             *
+             * This requires that the FreeRTOS+TCP option ipBUFFER_PADDING be large enough
+             * to hold the sl_wfx_received_ind_t message.
+             */
+            *buffer = network_buffer->pucEthernetBuffer - sizeof(sl_wfx_received_ind_t) - SL_WFX_NORMAL_FRAME_PAD_LENGTH;
+        } else {
+            *buffer = NULL;
+        }
+    } else {
+        *buffer = pvPortMalloc(buffer_size);
+    }
 
-    *buffer = pvPortMalloc(buffer_size);
-    return SL_STATUS_OK;
+    if (buffer != NULL) {
+        return SL_STATUS_OK;
+    } else {
+        return SL_STATUS_NO_MORE_RESOURCE;
+    }
 }
 
 sl_status_t sl_wfx_host_free_buffer(void *buffer, sl_wfx_buffer_type_t type)
 {
-    (void) type;
+    if (ipconfigZERO_COPY_RX_DRIVER == 0 || type != SL_WFX_RX_FRAME_BUFFER) {
+        vPortFree(buffer);
+    }
 
-    vPortFree(buffer);
     return SL_STATUS_OK;
 }
 

@@ -7,7 +7,8 @@ DEPENDENT_MODULES = lib_rtos_support \
                     lib_mic_array    \
                     lib_i2c          \
                     lib_i2s          \
-                    lib_sdram
+                    lib_sdram        \
+                    FreeRTOS-Plus
 
 MODULE_XCC_FLAGS = $(XCC_FLAGS) -Os
 

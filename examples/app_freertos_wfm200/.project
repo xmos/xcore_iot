@@ -3,6 +3,7 @@
 	<name>app_freertos_wfm200</name>
 	<comment></comment>
 	<projects>
+		<project>FreeRTOS</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

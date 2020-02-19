@@ -15,6 +15,14 @@
 #define SL_WFX_HIF_GPIO_WUP   0
 #define SL_WFX_HIF_GPIO_RESET 1
 
+/*
+ * This is the number of padding bytes found before
+ * most Ethernet frames. Extra memory movement needs
+ * to take place for frames that have a different
+ * number of padding bytes.
+ */
+#define SL_WFX_NORMAL_FRAME_PAD_LENGTH 2
+
 /* Wi-Fi events*/
 #define SL_WFX_INTERRUPT     ( 1 << 0 )
 #define SL_WFX_CONNECT       ( 1 << 1 )
@@ -23,6 +31,8 @@
 #define SL_WFX_STOP_AP       ( 1 << 4 )
 #define SL_WFX_SCAN_COMPLETE ( 1 << 5 )
 #define SL_WFX_CONNECT_FAIL  ( 1 << 6 )
+#define SL_WFX_START_AP_FAIL ( 1 << 7 )
+#define SL_WFX_INITIALIZED   ( 1 << 8 )
 
 extern EventGroupHandle_t sl_wfx_event_group;
 
@@ -56,14 +66,14 @@ void sl_wfx_host_set_pds(const char * const pds_data[],
  * Callback functions to be implemented by the application
  */
 void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t* scan_result);
-void sl_wfx_scan_complete_callback(uint32_t status);
-void sl_wfx_connect_callback(uint8_t* mac, uint32_t status);
-void sl_wfx_disconnect_callback(uint8_t* mac, uint16_t reason);
-void sl_wfx_start_ap_callback(uint32_t status);
+void sl_wfx_scan_complete_callback(sl_wfx_fmac_status_t status);
+void sl_wfx_connect_callback(uint8_t* mac, sl_wfx_fmac_status_t status);
+void sl_wfx_disconnect_callback(uint8_t* mac, sl_wfx_reason_t reason);
+void sl_wfx_start_ap_callback(sl_wfx_fmac_status_t status);
 void sl_wfx_stop_ap_callback(void);
 void sl_wfx_client_connected_callback(uint8_t* mac);
-void sl_wfx_ap_client_rejected_callback(uint32_t status, uint8_t* mac);
-void sl_wfx_ap_client_disconnected_callback(uint32_t status, uint8_t* mac);
+void sl_wfx_ap_client_rejected_callback(sl_wfx_reason_t reason, uint8_t* mac);
+void sl_wfx_ap_client_disconnected_callback(sl_wfx_reason_t reason, uint8_t* mac);
 void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t* rx_buffer);
 
 #endif /* SL_WFX_HOST_H_ */
