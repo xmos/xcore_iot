@@ -1,6 +1,11 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include <string.h>
+#include <sys/time.h>
+
+#define clock libc_clock
+#include <time.h>
+#undef clock
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -8,7 +13,6 @@
 
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
-#include "FreeRTOS_DHCP.h"
 
 /* Library headers */
 #include "soc.h"
@@ -17,23 +21,12 @@
 #include "bitstream_devices.h"
 #include "spi_master_driver.h"
 #include "gpio_driver.h"
+#include "sl_wfx.h"
 
 /* App headers */
 #include "sl_wfx_iot_wifi.h"
 #include "network.h"
-
-eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
-                                            uint32_t ulIPAddress )
-{
-    debug_printf("DHCP phase %d\n", eDHCPPhase);
-    if (eDHCPPhase == eDHCPPhasePreRequest) {
-        ulIPAddress = FreeRTOS_ntohl(ulIPAddress);
-        debug_printf("%d.%d.%d.%d\n", (ulIPAddress >> 24) & 0xff, (ulIPAddress >> 16) & 0xff, (ulIPAddress >> 8) & 0xff, (ulIPAddress >> 0) & 0xff);
-
-    }
-
-    return eDHCPContinue;
-}
+#include "dhcpd.h"
 
 char *security_name(WIFISecurity_t s)
 {
@@ -83,20 +76,48 @@ static void wf200_test(void *arg)
 
     WIFINetworkParams_t pxNetworkParams;
 
-    pxNetworkParams.pcSSID = "xxxxxxxx";
-    pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-    pxNetworkParams.pcPassword = "xxxxxxxx";
-    pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
-    pxNetworkParams.xSecurity = eWiFiSecurityWPA;
-    pxNetworkParams.cChannel = 0;
-
-    ret = WIFI_ConnectAP(&pxNetworkParams);
-    rtos_printf("Connect returned %x\n", ret);
-
     while (1) {
-        //rtos_printf("loop\n");
+#if 0
+        pxNetworkParams.pcSSID = "xxxxxxxx";
+        pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+        pxNetworkParams.pcPassword = "xxxxxxxx";
+        pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+        pxNetworkParams.xSecurity = eWiFiSecurityWPA;
+        pxNetworkParams.cChannel = 0;
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        do {
+            ret = WIFI_ConnectAP(&pxNetworkParams);
+            rtos_printf("WIFI_ConnectAP() returned %x\n", ret);
+        } while (ret != eWiFiSuccess);
+        vTaskDelay(pdMS_TO_TICKS(15000));
+
+        ret = WIFI_Disconnect();
+        rtos_printf("WIFI_Disconnect() returned %x\n", ret);
+        vTaskDelay(pdMS_TO_TICKS(5000));
+#endif
+#if 1
+        pxNetworkParams.pcSSID = "softap_test";
+        pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+        pxNetworkParams.pcPassword = "test123qwe";
+        pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+        pxNetworkParams.xSecurity = eWiFiSecurityWPA2;
+        pxNetworkParams.cChannel = 5;
+
+        WIFI_ConfigureAP(&pxNetworkParams);
+
+        do {
+            ret = WIFI_StartAP();
+            rtos_printf("WIFI_StartAP() returned %x\n", ret);
+        } while (ret != eWiFiSuccess);
+        dhcpd_start(16);
+        vTaskDelay(pdMS_TO_TICKS(120*60000));
+
+        /* FIXME: Why does this cause a firmware exception sometimes? */
+        ret = WIFI_StopAP();
+        rtos_printf("WIFI_StopAP() returned %x\n", ret);
+        dhcpd_stop();
+        vTaskDelay(pdMS_TO_TICKS(5000));
+#endif
     }
 }
 

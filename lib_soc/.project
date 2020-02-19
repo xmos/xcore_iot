@@ -4,8 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>FreeRTOS</project>
-		<project>lib_rtos_support</project>
-		<project>lib_xassert</project>
+		<project>FreeRTOS-Plus</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
