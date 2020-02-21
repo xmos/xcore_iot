@@ -858,8 +858,13 @@ static void dhcpd_handle_op_request(dhcp_message_t *dhcp_msg, size_t options_len
         break;
 
     case DHCP_DECLINE:
-        if (ip_requested && server_identified && dhcp_msg->ciaddr.s_addr == 0) {
+        if (ip_requested && server_identified) {
             rtos_printf("\tClient is in the decline state.\n");
+            /* Set the client's IP to zero to ensure its MAC and
+            IP are disassociated. The client is supposed to set
+            ciiaddr to zero in a decline message, but they don't
+            always. */
+            dhcp_msg->ciaddr.s_addr = 0;
             dhcp_client = dhcp_client_lookup_by_ip(requested_ip);
             state = DHCP_CLIENT_STATE_DECLINING;
         } else {
