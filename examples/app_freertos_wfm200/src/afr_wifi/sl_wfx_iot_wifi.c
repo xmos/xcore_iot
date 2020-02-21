@@ -766,14 +766,21 @@ WIFIReturnCode_t WIFI_GetPMMode( WIFIPMMode_t *pxPMModeType,
 
 BaseType_t WIFI_IsConnected( void )
 {
-    if( sl_wfx_context != NULL && ( sl_wfx_context->state & ( SL_WFX_STA_INTERFACE_CONNECTED | SL_WFX_AP_INTERFACE_UP ) ) )
+    BaseType_t ret = pdFALSE;
+
+    if( WIFI_GetLock() == eWiFiSuccess )
     {
-        return pdTRUE;
+        EventBits_t bits;
+        bits = xEventGroupGetBits(sl_wfx_event_group);
+        if( ( bits & ( SL_WFX_CONNECT | SL_WFX_START_AP ) ) != 0)
+        {
+            ret = pdTRUE;
+        }
+
+        WIFI_ReleaseLock();
     }
-    else
-    {
-        return pdFALSE;
-    }
+
+    return ret;
 }
 
 /*
