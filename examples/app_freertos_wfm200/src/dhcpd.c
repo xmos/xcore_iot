@@ -253,18 +253,14 @@ static dhcp_ip_info_t *dhcp_client_get_oldest_disconnected(void)
     return NULL;
 }
 
-#if DHCPD_PROBE_NEW_IP_ADDRESSES || DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL
-/*
- * TODO: This should probably be a function that the application calls
- * from its own vApplicationPingReplyHook() when the DHCP server is up.
- */
-void vApplicationPingReplyHook(ePingReplyStatus_t eStatus, uint16_t usIdentifier)
+static volatile uint16_t ping_number_out;
+
+void dhcpcd_ping_reply_received(uint16_t ping_number_in)
 {
-    if (ping_reply_queue != NULL && eStatus == eSuccess) {
-        xQueueOverwrite(ping_reply_queue, &usIdentifier);
+    if (ping_reply_queue != NULL && ping_number_out != pdFAIL && ping_number_in == ping_number_out) {
+        xQueueOverwrite(ping_reply_queue, &ping_number_in);
     }
 }
-#endif
 
 #if DHCPD_PROBE_NEW_IP_ADDRESSES || DHCPD_UNAVAILABLE_IP_PROBE_INTERVAL
 static int dhcpd_ip_address_in_use(struct in_addr ip)
@@ -309,12 +305,11 @@ static int dhcpd_ip_address_in_use(struct in_addr ip)
          * around by sending it ICMP requests.
          */
         BaseType_t ret = pdFAIL;
-        uint16_t ping_number_out;
         uint16_t ping_number_in;
 
         for (i = 0; i < tries; i++) {
             rtos_printf("\t%s is at " HWADDR_FMT ", will probe using ICMP\n", inet_ntoa(ip), HWADDR_ARG(mac));
-            ping_number_out = FreeRTOS_SendPingRequest(ip.s_addr, 56, pdMS_TO_TICKS(100));
+            ping_number_out = FreeRTOS_SendPingRequest(ip.s_addr, 48, pdMS_TO_TICKS(100));
             if (ping_number_out != pdFAIL) {
                 /* This loop will skip replies to previous pings */
                 do {
@@ -327,6 +322,8 @@ static int dhcpd_ip_address_in_use(struct in_addr ip)
                 break;
             }
         }
+
+        ping_number_out = pdFAIL;
     }
 
     if (in_use) {
