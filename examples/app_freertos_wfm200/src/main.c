@@ -77,7 +77,10 @@ static void wf200_test(void *arg)
     WIFINetworkParams_t pxNetworkParams;
 
     while (1) {
-#if 0
+#if 1
+        uint32_t ip;
+        char a[32];
+
         pxNetworkParams.pcSSID = "xxxxxxxx";
         pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
         pxNetworkParams.pcPassword = "xxxxxxxx";
@@ -89,13 +92,27 @@ static void wf200_test(void *arg)
             ret = WIFI_ConnectAP(&pxNetworkParams);
             rtos_printf("WIFI_ConnectAP() returned %x\n", ret);
         } while (ret != eWiFiSuccess);
-        vTaskDelay(pdMS_TO_TICKS(15000));
+
+        vTaskDelay(pdMS_TO_TICKS(5000));
+
+        WIFI_GetIP( (void *) &ip );
+        FreeRTOS_inet_ntoa(ip, a);
+        rtos_printf("My IP is %s\n", a);
+
+        WIFI_GetHostIP("google.com", (void *) &ip );
+        FreeRTOS_inet_ntoa(ip, a);
+        rtos_printf("google.com is %s\n", a);
+
+        rtos_printf("Pinging google.com now!\n");
+        WIFI_Ping( (void *) &ip, 10, 1000 );
+
+        vTaskDelay(pdMS_TO_TICKS(5000));
 
         ret = WIFI_Disconnect();
         rtos_printf("WIFI_Disconnect() returned %x\n", ret);
         vTaskDelay(pdMS_TO_TICKS(5000));
 #endif
-#if 1
+#if 0
         pxNetworkParams.pcSSID = "softap_test";
         pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
         pxNetworkParams.pcPassword = "test123qwe";

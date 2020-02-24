@@ -71,6 +71,8 @@
 #define DHCPD_IP_PROBE_WAIT_TIME 250
 
 
+void dhcpcd_ping_reply_received(uint16_t ping_number_in);
+
 void dhcpd_start(UBaseType_t priority);
 void dhcpd_stop();
 

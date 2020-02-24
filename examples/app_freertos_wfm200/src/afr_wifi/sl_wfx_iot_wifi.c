@@ -25,7 +25,9 @@
 #include "sl_wfx_host.h"
 #include "brd8023a_pds.h"
 
+/* Application headers */
 #include "sl_wfx_iot_wifi.h"
+#include "dhcpd.h"
 
 #define SL_WFX_CONNECT_TIMEOUT_MS 10000
 #define SL_WFX_DISCONNECT_TIMEOUT_MS 10000
@@ -47,6 +49,7 @@ static struct
 
 
 static SemaphoreHandle_t wifi_lock;
+static QueueHandle_t ping_reply_queue;
 
 WIFIReturnCode_t WIFI_GetLock( void )
 {
@@ -106,7 +109,12 @@ WIFIReturnCode_t WIFI_On( void )
             if( wifi_lock == NULL )
             {
                 wifi_lock = xSemaphoreCreateRecursiveMutex();
-                xassert( wifi_lock != NULL );
+                configASSERT( wifi_lock != NULL );
+            }
+            if( ping_reply_queue == NULL )
+            {
+                ping_reply_queue = xQueueCreate(1, sizeof(uint16_t));
+                configASSERT( ping_reply_queue != NULL);
             }
             xEventGroupSetBits( sl_wfx_event_group, SL_WFX_INITIALIZED );
             ret = eWiFiSuccess;
@@ -132,6 +140,7 @@ WIFIReturnCode_t WIFI_Off( void )
 
 void sl_wfx_disconnect_callback(uint8_t *mac, sl_wfx_reason_t reason)
 {
+    ( void ) mac;
     sl_wfx_host_log( "Disconnected %d\n", reason );
     sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
     xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT );
@@ -181,6 +190,8 @@ WIFIReturnCode_t WIFI_Disconnect( void )
 void sl_wfx_connect_callback( uint8_t *mac, sl_wfx_fmac_status_t status )
 {
     int connected = 0;
+
+    ( void ) mac;
 
     switch ( status )
     {
@@ -232,6 +243,8 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
     EventBits_t bits;
     WIFIReturnCode_t ret;
 
+    configASSERT( pxNetworkParams != NULL );
+
     ret = WIFI_GetLock();
     if( ret == eWiFiSuccess )
     {
@@ -281,7 +294,7 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
              * cleared below. The connect bit should be cleared at this point.
              */
             bits = xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT_FAIL );
-            xassert( ( bits & SL_WFX_CONNECT ) == 0 );
+            configASSERT( ( bits & SL_WFX_CONNECT ) == 0 );
 
             sl_ret = sl_wfx_send_join_command( ( const uint8_t * ) pxNetworkParams->pcSSID,
                                                pxNetworkParams->ucSSIDLength,
@@ -367,6 +380,8 @@ WIFIReturnCode_t WIFI_GetMode( WIFIDeviceMode_t *pxDeviceMode )
 {
     WIFIReturnCode_t ret;
 
+    configASSERT( pxDeviceMode != NULL );
+
     ret = WIFI_GetLock();
     if( ret == eWiFiSuccess )
     {
@@ -383,6 +398,8 @@ WIFIReturnCode_t WIFI_GetMode( WIFIDeviceMode_t *pxDeviceMode )
 WIFIReturnCode_t WIFI_NetworkAdd( const WIFINetworkProfile_t * const pxNetworkProfile,
                                   uint16_t *pusIndex )
 {
+    configASSERT( pxNetworkProfile != NULL );
+    configASSERT( pusIndex != NULL );
     return eWiFiNotSupported;
 }
 
@@ -392,6 +409,7 @@ WIFIReturnCode_t WIFI_NetworkAdd( const WIFINetworkProfile_t * const pxNetworkPr
 WIFIReturnCode_t WIFI_NetworkGet( WIFINetworkProfile_t *pxNetworkProfile,
                                   uint16_t usIndex )
 {
+    configASSERT( pxNetworkProfile != NULL );
     return eWiFiNotSupported;
 }
 
@@ -403,27 +421,76 @@ WIFIReturnCode_t WIFI_NetworkDelete( uint16_t usIndex )
     return eWiFiNotSupported;
 }
 
-/*
- * TODO: Map to FreeRTOS ping
- */
+void vApplicationPingReplyHook(ePingReplyStatus_t eStatus, uint16_t usIdentifier)
+{
+    if (eStatus == eSuccess) {
+        dhcpcd_ping_reply_received( usIdentifier );
+        xQueueOverwrite(ping_reply_queue, &usIdentifier);
+    }
+}
+
 WIFIReturnCode_t WIFI_Ping( uint8_t *pucIPAddr,
                             uint16_t usCount,
                             uint32_t ulIntervalMS )
 {
-    return eWiFiNotSupported;
+    uint32_t ip;
+    TickType_t last_wake;
+    int i;
+    int good = 0;
+
+    configASSERT( pucIPAddr != NULL );
+
+    memcpy( &ip, pucIPAddr, sizeof( uint32_t ) );
+
+    last_wake = xTaskGetTickCount();
+    for( i = 0; i < usCount; i++ )
+    {
+        BaseType_t ret = pdFAIL;
+        uint16_t ping_number_out;
+        ping_number_out = FreeRTOS_SendPingRequest( ip, 48, pdMS_TO_TICKS( ulIntervalMS ) );
+        if( ping_number_out != pdFAIL )
+        {
+            uint16_t ping_number_in;
+            do
+            {
+                ret = xQueueReceive( ping_reply_queue, &ping_number_in, pdMS_TO_TICKS( ulIntervalMS ) );
+            }
+            while( ret == pdPASS && ping_number_out != ping_number_in );
+        }
+        if( ret == pdPASS )
+        {
+            rtos_printf( "Received ping reply %d\n", ping_number_out );
+            good++;
+        }
+        else
+        {
+            rtos_printf( "Timed out waitinf for ping reply %d\n", ping_number_out );
+        }
+
+        vTaskDelayUntil( &last_wake, pdMS_TO_TICKS( ulIntervalMS ) );
+    }
+
+    rtos_printf( "Received %d/%d replies\n", good, usCount );
+
+    return usCount == good ? eWiFiSuccess : eWiFiFailure;
 }
 
-/*
- * TODO: Map to FreeRTOS get IP
- */
 WIFIReturnCode_t WIFI_GetIP( uint8_t *pucIPAddr )
 {
-    return eWiFiNotSupported;
+    uint32_t ip;
+    configASSERT( pucIPAddr != NULL );
+
+    ip = FreeRTOS_GetIPAddress();
+
+    memcpy( pucIPAddr, &ip, sizeof( uint32_t ) );
+    return eWiFiSuccess;
 }
 
 WIFIReturnCode_t WIFI_GetMAC( uint8_t *pucMac )
 {
     WIFIReturnCode_t ret;
+
+    configASSERT( pucMac != NULL );
 
     ret = WIFI_GetLock();
     if( ret == eWiFiSuccess )
@@ -447,13 +514,22 @@ WIFIReturnCode_t WIFI_GetMAC( uint8_t *pucMac )
     return ret;
 }
 
-/*
- * Map to the FreeRTOS equivalent function
- */
 WIFIReturnCode_t WIFI_GetHostIP( char *pcHost,
                                  uint8_t *pucIPAddr )
 {
-    return eWiFiNotSupported;
+    WIFIReturnCode_t ret = eWiFiFailure;
+    uint32_t ip;
+
+    configASSERT( pcHost != NULL );
+    configASSERT( pucIPAddr != NULL );
+
+    ip = FreeRTOS_gethostbyname( pcHost );
+    if( ip != 0 ) {
+        memcpy( pucIPAddr, &ip, sizeof( uint32_t ) );
+        ret = eWiFiSuccess;
+    }
+
+    return ret;
 }
 
 static WIFIScanResult_t *scan_results;
@@ -462,6 +538,8 @@ static int scan_count;
 
 void sl_wfx_scan_result_callback( sl_wfx_scan_result_ind_body_t *scan_result )
 {
+    configASSERT( scan_result != NULL );
+
     if( scan_count < scan_result_max_count )
     {
         size_t ssid_len = scan_result->ssid_def.ssid_length;
@@ -516,12 +594,14 @@ void sl_wfx_scan_complete_callback( sl_wfx_fmac_status_t status )
   xEventGroupSetBits( sl_wfx_event_group, SL_WFX_SCAN_COMPLETE );
 }
 
-WIFIReturnCode_t WIFI_Scan( WIFIScanResult_t * pxBuffer,
+WIFIReturnCode_t WIFI_Scan( WIFIScanResult_t *pxBuffer,
                             uint8_t ucNumNetworks )
 {
     EventBits_t bits;
     WIFIReturnCode_t ret;
     const uint8_t channel_list[] = { 1,2,3,4,5,6,7,8,9,10,11,12,13 };
+
+    configASSERT( pxBuffer != NULL );
 
     ret = WIFI_GetLock();
     if( ret == eWiFiSuccess )
@@ -610,7 +690,7 @@ WIFIReturnCode_t WIFI_StartAP( void )
              * cleared below. The start AP bit should be cleared at this point.
              */
             bits = xEventGroupClearBits( sl_wfx_event_group, SL_WFX_START_AP_FAIL );
-            xassert( ( bits & SL_WFX_START_AP ) == 0 );
+            configASSERT( ( bits & SL_WFX_START_AP ) == 0 );
 
             sl_ret = sl_wfx_start_ap_command( wifi_ap_settings.channel,
                                               wifi_ap_settings.ssid,
@@ -703,6 +783,8 @@ WIFIReturnCode_t WIFI_ConfigureAP( const WIFINetworkParams_t * const pxNetworkPa
 {
     WIFIReturnCode_t ret;
 
+    configASSERT( pxNetworkParams != NULL );
+
     ret = WIFI_GetLock();
     if( ret == eWiFiSuccess )
     {
@@ -752,6 +834,7 @@ WIFIReturnCode_t WIFI_ConfigureAP( const WIFINetworkParams_t * const pxNetworkPa
 WIFIReturnCode_t WIFI_SetPMMode( WIFIPMMode_t xPMModeType,
                                  const void *pvOptionValue )
 {
+    configASSERT( pvOptionValue != NULL );
     return eWiFiNotSupported;
 }
 
@@ -761,19 +844,28 @@ WIFIReturnCode_t WIFI_SetPMMode( WIFIPMMode_t xPMModeType,
 WIFIReturnCode_t WIFI_GetPMMode( WIFIPMMode_t *pxPMModeType,
                                  void * pvOptionValue )
 {
+    configASSERT( pxPMModeType != NULL );
+    configASSERT( pvOptionValue != NULL );
     return eWiFiNotSupported;
 }
 
 BaseType_t WIFI_IsConnected( void )
 {
-    if( sl_wfx_context != NULL && ( sl_wfx_context->state & ( SL_WFX_STA_INTERFACE_CONNECTED | SL_WFX_AP_INTERFACE_UP ) ) )
+    BaseType_t ret = pdFALSE;
+
+    if( WIFI_GetLock() == eWiFiSuccess )
     {
-        return pdTRUE;
+        EventBits_t bits;
+        bits = xEventGroupGetBits(sl_wfx_event_group);
+        if( ( bits & ( SL_WFX_CONNECT | SL_WFX_START_AP ) ) != 0)
+        {
+            ret = pdTRUE;
+        }
+
+        WIFI_ReleaseLock();
     }
-    else
-    {
-        return pdFALSE;
-    }
+
+    return ret;
 }
 
 /*
