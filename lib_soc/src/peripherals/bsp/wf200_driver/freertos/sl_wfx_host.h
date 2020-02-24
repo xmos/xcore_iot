@@ -9,9 +9,6 @@
 #include "soc.h"
 #include "gpio_driver.h"
 
-#define SL_WFX_EVENT_MAX_SIZE   512
-#define SL_WFX_EVENT_LIST_SIZE  1
-
 #define SL_WFX_HIF_GPIO_WUP   0
 #define SL_WFX_HIF_GPIO_RESET 1
 

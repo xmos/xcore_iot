@@ -269,9 +269,10 @@ static int dhcpd_ip_address_in_use(struct in_addr ip)
     int i;
     const int tries = 2;
 
+    uint32_t arp_ip = ip.s_addr;
     MACAddress_t mac;
 
-    if (eARPGetCacheEntry(&ip.s_addr, &mac) != eARPCacheHit) {
+    if (eARPGetCacheEntry(&arp_ip, &mac) != eARPCacheHit) {
         /*
          * This IP does not have an entry in the ARP table
          * so probe it using ARP requests. If an entry appears
@@ -284,12 +285,12 @@ static int dhcpd_ip_address_in_use(struct in_addr ip)
             TickType_t last_wake;
 
             rtos_printf("\t%s unknown, will probe using ARP\n", inet_ntoa(ip));
-            FreeRTOS_OutputARPRequest(ip.s_addr);
+            FreeRTOS_OutputARPRequest(arp_ip);
 
             last_wake = xTaskGetTickCount();
             for (j = 0; j < n; j++) {
                 vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(10));
-                if (eARPGetCacheEntry(&ip.s_addr, &mac) == eARPCacheHit) {
+                if (eARPGetCacheEntry(&arp_ip, &mac) == eARPCacheHit) {
                     in_use = 1;
                     break;
                 }

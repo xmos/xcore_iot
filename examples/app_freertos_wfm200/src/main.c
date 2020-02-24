@@ -77,9 +77,9 @@ static void wf200_test(void *arg)
     WIFINetworkParams_t pxNetworkParams;
 
     while (1) {
-#if 1
+#if 0
         uint32_t ip;
-        char a[32];
+        char a[16];
 
         pxNetworkParams.pcSSID = "xxxxxxxx";
         pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
@@ -104,15 +104,15 @@ static void wf200_test(void *arg)
         rtos_printf("google.com is %s\n", a);
 
         rtos_printf("Pinging google.com now!\n");
-        WIFI_Ping( (void *) &ip, 10, 1000 );
+        WIFI_Ping( (void *) &ip, 5, 1000 );
 
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(10*60000));
 
         ret = WIFI_Disconnect();
         rtos_printf("WIFI_Disconnect() returned %x\n", ret);
         vTaskDelay(pdMS_TO_TICKS(5000));
 #endif
-#if 0
+#if 1
         pxNetworkParams.pcSSID = "softap_test";
         pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
         pxNetworkParams.pcPassword = "test123qwe";
@@ -127,13 +127,23 @@ static void wf200_test(void *arg)
             rtos_printf("WIFI_StartAP() returned %x\n", ret);
         } while (ret != eWiFiSuccess);
         dhcpd_start(16);
-        vTaskDelay(pdMS_TO_TICKS(120*60000));
+        vTaskDelay(pdMS_TO_TICKS(10000));
+
+
 
         /* FIXME: Why does this cause a firmware exception sometimes? */
         ret = WIFI_StopAP();
-        rtos_printf("WIFI_StopAP() returned %x\n", ret);
+
         dhcpd_stop();
-        vTaskDelay(pdMS_TO_TICKS(5000));
+
+        rtos_printf("WIFI_StopAP() returned %x\n", ret);
+        if (ret != eWiFiSuccess) {
+            rtos_printf("Resetting WiFi\n");
+            ret = WIFI_Reset();
+            rtos_printf("WIFI_Reset() returned %x\n", ret);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(500));
 #endif
     }
 }

@@ -21,9 +21,12 @@
 
 #define printf rtos_printf
 
+#define SL_WFX_EVENT_MAX_SIZE   512
+#define SL_WFX_EVENT_LIST_SIZE  1
+
 extern SemaphoreHandle_t s_xDriverSemaphore;
 
-QueueHandle_t eventQueue;
+static QueueHandle_t eventQueue;
 
 typedef struct {
     const char * const *pds_data;
@@ -55,7 +58,10 @@ void sl_wfx_host_set_pds(const char * const pds_data[],
 sl_status_t sl_wfx_host_init(void)
 {
     host_ctx.firmware_index = 0;
-    eventQueue = xQueueCreate(SL_WFX_EVENT_LIST_SIZE, sizeof(uint8_t));
+    if (eventQueue == NULL) {
+        eventQueue = xQueueCreate(SL_WFX_EVENT_LIST_SIZE, sizeof(uint8_t));
+        configASSERT(eventQueue != NULL);
+    }
     return SL_STATUS_OK;
 }
 
@@ -107,6 +113,8 @@ sl_status_t sl_wfx_host_deinit(void)
 
 sl_status_t sl_wfx_host_reset_chip(void)
 {
+    host_ctx.waited_event_id = 0;
+
     sl_wfx_host_gpio(SL_WFX_HIF_GPIO_RESET, 0);
     vTaskDelay(pdMS_TO_TICKS(10));
     sl_wfx_host_gpio(SL_WFX_HIF_GPIO_RESET, 1);
@@ -170,7 +178,7 @@ sl_status_t sl_wfx_host_setup_waited_event(uint8_t event_id)
      * but does not actually wait for them. This causes errors
      * if we don't filter out the send frame requests here.
      */
-    if (event_id != SL_WFX_SEND_FRAME_REQ_ID) {
+    if (event_id != SL_WFX_SEND_FRAME_REQ_ID && event_id != SL_WFX_SHUT_DOWN_REQ_ID) {
         host_ctx.waited_event_id = event_id;
     }
     return SL_STATUS_OK;

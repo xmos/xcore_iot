@@ -27,6 +27,7 @@ set(APP_COMPILER_FLAGS
         "-lquadflash"
         "-DDEBUG_PRINT_ENABLE=1"
         "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_INIT"
+        "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
 set(APP_XC_SRCS
         "bitstream_src/bitstream.xc"
