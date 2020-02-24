@@ -1,3 +1,6 @@
+if(NOT TARGET BITSTREAM_CMAKE)
+add_library(BITSTREAM_CMAKE INTERFACE)
+
 file(GLOB_RECURSE bitstream_list "src/peripherals/bitstream/**/*.cmake")
 
 foreach(dev ${bitstream_list})
@@ -12,3 +15,4 @@ foreach(dev ${bitstream_list})
         message("\tAdded ${DEVICE_NAME} bitstream device for lib_soc")
     endif()
 endforeach()
+endif()

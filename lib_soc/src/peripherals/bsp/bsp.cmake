@@ -1,3 +1,6 @@
+if(NOT TARGET BSP_CMAKE)
+add_library(BSP_CMAKE INTERFACE)
+
 file(GLOB_RECURSE bsp_list "src/peripherals/bsp/**/*.cmake")
 
 foreach(dev ${bsp_list})
@@ -12,3 +15,4 @@ foreach(dev ${bsp_list})
         message("\tAdded ${DEVICE_NAME} bsp device for lib_soc")
     endif()
 endforeach()
+endif()

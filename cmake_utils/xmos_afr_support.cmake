@@ -3,6 +3,7 @@ if(XMOS_AFR_FreeRTOS)
     if(${FOUND_FRTOS} GREATER -1)
         list(REMOVE_ITEM DEP_MODULE_LIST "FreeRTOS")
         list(APPEND DEP_MODULE_LIST "AFR::kernel")
+        message("Replaced dependency FreeRTOS with AFR::kernel")
     endif()
 endif()
 
@@ -11,6 +12,7 @@ if(XMOS_AFR_FreeRTOS-Plus-TCP)
     if(${FOUND_FRTOS_TCP} GREATER -1)
         list(REMOVE_ITEM DEP_MODULE_LIST "FreeRTOS-Plus-TCP")
         list(APPEND DEP_MODULE_LIST "AFR::freertos_plus_tcp")
+        message("Replaced dependency FreeRTOS-Plus-TCP with AFR::freertos_plus_tcp")
     endif()
 endif()
 
@@ -18,6 +20,11 @@ endif()
 
 ## Registers an application and it's dependencies
 function(XMOS_AFR_REGISTER)
+    set(XMOS_AFR_FreeRTOS True)
+    set(XMOS_AFR_FreeRTOS-Plus-TCP True)
+    set(FreeRTOS_SILENT_FLAG True)
+    set(FreeRTOS-Plus-TCP_SILENT_FLAG True)
+
     if(NOT APP_HW_TARGET)
         message(FATAL_ERROR "APP_HW_TARGET is not defined.")
     endif()
@@ -50,6 +57,13 @@ function(XMOS_AFR_REGISTER)
     set(APP_SOURCES ${${PROJECT_NAME}_LIB_SRCS})
     set(APP_INCLUDES ${${PROJECT_NAME}_LIB_INCS})
 
+    get_property(XMOS_TARGETS_LIST GLOBAL PROPERTY XMOS_TARGETS_LIST)
+
+    foreach(lib ${XMOS_TARGETS_LIST})
+        get_target_property(inc ${lib} INCLUDE_DIRECTORIES)
+        list(APPEND APP_INCLUDES ${inc})
+    endforeach()
+
     list(REMOVE_DUPLICATES APP_SOURCES)
     list(REMOVE_DUPLICATES APP_INCLUDES)
 
@@ -69,7 +83,6 @@ function(XMOS_AFR_REGISTER)
             list(FIND ${PROJECT_NAME}_LIB_OPTINCS ${name} FOUND)
             if(${FOUND} GREATER -1)
                 get_filename_component(name_we ${header} NAME_WE)
-                message("Header exist added for ${name_we}")
                 list(APPEND HEADER_EXIST_FLAGS -D__${name_we}_h_exists__)
             endif()
         endforeach()
@@ -77,7 +90,6 @@ function(XMOS_AFR_REGISTER)
 
     set(XMOS_APP_COMPILE_FLAGS ${APP_TARGET_COMPILER_FLAG} ${APP_COMPILER_FLAGS} ${HEADER_EXIST_FLAGS})
 
-    get_property(XMOS_TARGETS_LIST GLOBAL PROPERTY XMOS_TARGETS_LIST)
     foreach(target ${XMOS_TARGETS_LIST})
         target_include_directories(${target} PRIVATE ${APP_INCLUDES})
         target_compile_options(${target} BEFORE PRIVATE ${XMOS_APP_COMPILE_FLAGS})

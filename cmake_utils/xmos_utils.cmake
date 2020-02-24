@@ -101,6 +101,13 @@ function(XMOS_REGISTER_APP)
     set(APP_SOURCES ${${PROJECT_NAME}_LIB_SRCS})
     set(APP_INCLUDES ${${PROJECT_NAME}_LIB_INCS})
 
+    get_property(XMOS_TARGETS_LIST GLOBAL PROPERTY XMOS_TARGETS_LIST)
+
+    foreach(lib ${XMOS_TARGETS_LIST})
+        get_target_property(inc ${lib} INCLUDE_DIRECTORIES)
+        list(APPEND APP_INCLUDES ${inc})
+    endforeach()
+
     list(REMOVE_DUPLICATES APP_SOURCES)
     list(REMOVE_DUPLICATES APP_INCLUDES)
 
@@ -127,7 +134,6 @@ function(XMOS_REGISTER_APP)
     set(TARGET_NAME "${PROJECT_NAME}.xe")
     set(APP_COMPILE_FLAGS ${APP_TARGET_COMPILER_FLAG} ${APP_COMPILER_FLAGS} ${APP_COMPILER_C_FLAGS} ${HEADER_EXIST_FLAGS})
 
-    get_property(XMOS_TARGETS_LIST GLOBAL PROPERTY XMOS_TARGETS_LIST)
     foreach(target ${XMOS_TARGETS_LIST})
         target_include_directories(${target} PRIVATE ${APP_INCLUDES})
         target_compile_options(${target} BEFORE PRIVATE ${APP_COMPILE_FLAGS})
@@ -138,6 +144,8 @@ function(XMOS_REGISTER_APP)
         string(REGEX MATCH "^[A-Za-z0-9_ -]+" DEP_NAME ${DEP_MODULE})
         list(APPEND DEPS_TO_LINK ${DEP_NAME})
     endforeach()
+
+    list(REMOVE_DUPLICATES DEPS_TO_LINK)
 
     add_executable(${TARGET_NAME})
     target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES})
@@ -159,8 +167,14 @@ function(XMOS_REGISTER_MODULE)
 
     set(DEP_MODULE_LIST "")
     if(NOT TARGET ${LIB_NAME})
-        set(DEP_INCLUDES "")
-        set(DEP_SOURCES "")
+        if(NOT ${LIB_NAME}_SILENT_FLAG)
+            add_library(${LIB_NAME} STATIC)
+            set_property(TARGET ${LIB_NAME} PROPERTY VERSION ${LIB_VERSION})
+        else()
+            add_library(${LIB_NAME} OBJECT EXCLUDE_FROM_ALL)
+            set_property(TARGET ${LIB_NAME} PROPERTY VERSION ${LIB_VERSION})
+        endif()
+
         set(DEP_OPTIONAL_HEADERS "")
         set(DEP_FILE_FLAGS "")
         foreach(DEP_MODULE ${LIB_DEPENDENT_MODULES})
@@ -176,20 +190,17 @@ function(XMOS_REGISTER_MODULE)
             string(REGEX MATCH "[<>=]+" VERSION_QUAL_REQ ${DEP_FULL_REQ} )
 
             # Add dependencies directories
-            if(EXISTS ${XMOS_MODULES_ROOT_DIR}/${DEP_NAME})
-                add_subdirectory("${XMOS_MODULES_ROOT_DIR}/${DEP_NAME}"  "${CMAKE_CURRENT_BINARY_DIR}/${DEP_NAME}")
-            else()
-                message(FATAL_ERROR "Missing dependency ${DEP_NAME}")
+            if(NOT TARGET ${DEP_NAME})
+                message("Add dep: ${DEP_MODULE} to target ${LIB_NAME}")
+                if(EXISTS ${XMOS_MODULES_ROOT_DIR}/${DEP_NAME})
+                    add_subdirectory("${XMOS_MODULES_ROOT_DIR}/${DEP_NAME}"  "${CMAKE_CURRENT_BINARY_DIR}/${DEP_NAME}")
+                else()
+                    message(FATAL_ERROR "Missing dependency ${DEP_NAME}")
+                endif()
+
+                get_target_property(${DEP_NAME}_optinc ${DEP_NAME} OPTIONAL_HEADERS)
+                list(APPEND DEP_OPTIONAL_HEADERS ${${DEP_NAME}_optinc})
             endif()
-
-            get_target_property(${DEP_NAME}_src ${DEP_NAME} SOURCES)
-            list(APPEND DEP_SOURCES ${${DEP_NAME}_src})
-
-            get_target_property(${DEP_NAME}_inc ${DEP_NAME} INCLUDE_DIRECTORIES)
-            list(APPEND DEP_INCLUDES ${${DEP_NAME}_inc})
-
-            get_target_property(${DEP_NAME}_optinc ${DEP_NAME} OPTIONAL_HEADERS)
-            list(APPEND DEP_OPTIONAL_HEADERS ${${DEP_NAME}_optinc})
 
             # Check dependency version
             get_target_property(DEP_VERSION ${DEP_NAME} VERSION)
@@ -208,14 +219,8 @@ function(XMOS_REGISTER_MODULE)
         endforeach()
 
         if(NOT ${LIB_NAME}_SILENT_FLAG)
-            add_library(${LIB_NAME} STATIC)
-            set_property(TARGET ${LIB_NAME} PROPERTY VERSION ${LIB_VERSION})
-
             get_property(XMOS_TARGETS_LIST GLOBAL PROPERTY XMOS_TARGETS_LIST)
             set_property(GLOBAL PROPERTY XMOS_TARGETS_LIST "${XMOS_TARGETS_LIST};${LIB_NAME}")
-        else()
-            add_library(${LIB_NAME} OBJECT EXCLUDE_FROM_ALL)
-            set_property(TARGET ${LIB_NAME} PROPERTY VERSION ${LIB_VERSION})
         endif()
 
         ## Set optional headers
@@ -233,7 +238,7 @@ function(XMOS_REGISTER_MODULE)
         endforeach()
 
         target_sources(${LIB_NAME} PUBLIC ${LIB_XC_SRCS} ${LIB_C_SRCS} ${LIB_ASM_SRCS})
-        target_include_directories(${LIB_NAME} PUBLIC ${LIB_INCLUDES} ${DEP_INCLUDES})
+        target_include_directories(${LIB_NAME} PUBLIC ${LIB_INCLUDES})
 
         if(DEFINED AFR_ROOT_DIR)
             include("${AFR_VENDORS_DIR}/xmos/lib_rtos_support/cmake_utils/xmos_afr_support.cmake")

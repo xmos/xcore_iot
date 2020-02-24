@@ -34,7 +34,7 @@ set(APP_XC_SRCS
 set(APP_C_SRCS
         "src/main.c"
         "src/network.c"
-	"src/dhcpd.c"
+        "src/dhcpd.c"
         "src/afr_wifi/sl_wfx_callbacks.c"
         "src/afr_wifi/sl_wfx_iot_wifi.c"
         "bitstream_src/bitstream.c"
