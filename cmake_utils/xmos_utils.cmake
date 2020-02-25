@@ -191,7 +191,6 @@ function(XMOS_REGISTER_MODULE)
 
             # Add dependencies directories
             if(NOT TARGET ${DEP_NAME})
-                message("Add dep: ${DEP_MODULE} to target ${LIB_NAME}")
                 if(EXISTS ${XMOS_MODULES_ROOT_DIR}/${DEP_NAME})
                     add_subdirectory("${XMOS_MODULES_ROOT_DIR}/${DEP_NAME}"  "${CMAKE_CURRENT_BINARY_DIR}/${DEP_NAME}")
                 else()
