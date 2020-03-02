@@ -546,13 +546,17 @@ WIFIReturnCode_t WIFI_Ping( uint8_t *pucIPAddr,
 
 WIFIReturnCode_t WIFI_GetIP( uint8_t *pucIPAddr )
 {
+    WIFIReturnCode_t ret = eWiFiFailure;
     uint32_t ip;
     configASSERT( pucIPAddr != NULL );
 
     ip = FreeRTOS_GetIPAddress();
 
-    memcpy( pucIPAddr, &ip, sizeof( uint32_t ) );
-    return eWiFiSuccess;
+    if( ip != 0 ) {
+        memcpy( pucIPAddr, &ip, sizeof( uint32_t ) );
+        ret = eWiFiSuccess;
+    }
+    return ret;
 }
 
 WIFIReturnCode_t WIFI_GetMAC( uint8_t *pucMac )
