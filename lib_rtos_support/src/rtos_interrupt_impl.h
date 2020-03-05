@@ -20,6 +20,7 @@
     .globl _INTERRUPT_PERMITTED(root_function); \
     .align _XCORE_C_CODE_ALIGNMENT; \
     .type  _INTERRUPT_PERMITTED(root_function),@function; \
+    .issue_mode single; \
     .cc_top _INTERRUPT_PERMITTED(root_function).function,_INTERRUPT_PERMITTED(root_function); \
     _INTERRUPT_PERMITTED(root_function):; \
       _XCORE_C_ENTSP(_XCORE_C_STACK_ALIGN(3)); \
@@ -60,6 +61,7 @@
     .globl _INTERRUPT_CALLBACK(intrpt); \
     .align _XCORE_C_CODE_ALIGNMENT; \
     .type  _INTERRUPT_CALLBACK(intrpt),@function; \
+    .issue_mode dual; \
     .cc_top _INTERRUPT_CALLBACK(intrpt).function,_INTERRUPT_CALLBACK(intrpt); \
     _INTERRUPT_CALLBACK(intrpt):; \
       /* Extend the stack by enough words to store the thread context. */ \

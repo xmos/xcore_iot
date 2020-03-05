@@ -1303,7 +1303,7 @@ void dhcpd_stop()
          * and let it close the socket. Unfortunately this
          * isn't standard so will only work with FreeRTOS+TCP.
          */
-        FreeRTOS_SignalSocket((Socket_t *) dhcpd_socket);
+        FreeRTOS_SignalSocket((Socket_t) dhcpd_socket);
 
         dhcpd_lock_get();
         while (dhcpd_socket != -1) {
