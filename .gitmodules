@@ -1,44 +1,44 @@
 [submodule "dependencies/lib_dsp"]
-	path = lib_dsp
+	path = lib_dsp/lib_dsp
 	url = git@github.com:xmos/lib_dsp.git
 [submodule "dependencies/lib_ethernet"]
-	path = lib_ethernet
+	path = lib_ethernet/lib_ethernet
 	url = git@github.com:xmos/lib_ethernet.git
 [submodule "dependencies/lib_gpio"]
-	path = lib_gpio
+	path = lib_gpio/lib_gpio
 	url = git@github.com:xmos/lib_gpio.git
 [submodule "dependencies/lib_i2c"]
-	path = lib_i2c
+	path = lib_i2c/lib_i2c
 	url = git@github.com:xmos/lib_i2c.git
 [submodule "dependencies/lib_i2s"]
-	path = lib_i2s
+	path = lib_i2s/lib_i2s
 	url = git@github.com:xmos/lib_i2s.git
 [submodule "dependencies/lib_locks"]
-	path = lib_locks
+	path = lib_locks/lib_locks
 	url = git@github.com:xmos/lib_locks.git
 [submodule "dependencies/lib_logging"]
-	path = lib_logging
+	path = lib_logging/lib_logging
 	url = git@github.com:xmos/lib_logging.git
 [submodule "dependencies/lib_mic_array"]
-	path = lib_mic_array
+	path = lib_mic_array/lib_mic_array
 	url = git@github.com:xmos/lib_mic_array.git
 [submodule "dependencies/lib_otpinfo"]
-	path = lib_otpinfo
+	path = lib_otpinfo/lib_otpinfo
 	url = git@github.com:xmos/lib_otpinfo.git
 [submodule "dependencies/lib_random"]
-	path = lib_random
+	path = lib_random/lib_random
 	url = git@github.com:xmos/lib_random.git
 [submodule "dependencies/lib_sdram"]
-	path = lib_sdram
+	path = lib_sdram/lib_sdram
 	url = git@github.com:xmos/lib_sdram.git
 [submodule "dependencies/lib_trycatch"]
-	path = lib_trycatch
+	path = lib_trycatch/lib_trycatch
 	url = git@github.com:xmos/lib_trycatch.git
 [submodule "dependencies/lib_xassert"]
-	path = lib_xassert
+	path = lib_xassert/lib_xassert
 	url = git@github.com:xmos/lib_xassert.git
 [submodule "dependencies/lib_xcore_c"]
-	path = lib_xcore_c
+	path = lib_xcore_c/lib_xcore_c
 	url = git@github.com:xmos/lib_xcore_c.git
 [submodule "FreeRTOS"]
 	path = rtos/FreeRTOS
