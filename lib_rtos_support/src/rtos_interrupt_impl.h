@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2020, XMOS Ltd, All rights reserved
 
 /*
  * This file extends the interrupt support in lib_xcore_c to support
@@ -12,7 +12,7 @@
 #include "xcore_c_interrupt_impl.h"
 #include "rtos_support_rtos_config.h"
 
-#define _DEFINE_RTOS_INTERRUPT_PERMITTED_DEF(root_function) \
+#define _DEFINE_RTOS_KERNEL_ENTRY_DEF(root_function) \
     .weak  _fptrgroup.rtos_isr.nstackwords.group; \
     .max_reduce _fptrgroup.rtos_isr.nstackwords, _fptrgroup.rtos_isr.nstackwords.group, 0; \
     .set _kstack_words, _XCORE_C_STACK_ALIGN(_fptrgroup.rtos_isr.nstackwords); \
@@ -35,9 +35,8 @@
     /* The stack size for this function must be big enough for: */ \
     /*  - This wrapper function: _XCORE_C_STACK_ALIGN(3) + _xcore_c_interrupt_permitted_common.nstackwords  */ \
     /*  - The size of the stack required by the root function: root_function.nstackwords */ \
-    /*  - The thread's context which is pushed onto the thread stack upon entering an ISR: RTOS_SUPPORT_INTERRUPT_STACK_GROWTH */ \
     /*  - The size of the stack required by the ISR group: _kstack_words */ \
-    .set   _INTERRUPT_PERMITTED(root_function).nstackwords, _XCORE_C_STACK_ALIGN(3) + RTOS_SUPPORT_INTERRUPT_STACK_GROWTH + _kstack_words + _xcore_c_interrupt_permitted_common.nstackwords + root_function.nstackwords; \
+    .set   _INTERRUPT_PERMITTED(root_function).nstackwords, _XCORE_C_STACK_ALIGN(3) + _xcore_c_interrupt_permitted_common.nstackwords + root_function.nstackwords + _kstack_words; \
     .globl _INTERRUPT_PERMITTED(root_function).nstackwords; \
     .set   _INTERRUPT_PERMITTED(root_function).maxcores, 1 $M _xcore_c_interrupt_permitted_common.maxcores $M root_function.maxcores; \
     .globl _INTERRUPT_PERMITTED(root_function).maxcores; \
@@ -47,8 +46,8 @@
     .globl _INTERRUPT_PERMITTED(root_function).maxchanends; \
     .size  _INTERRUPT_PERMITTED(root_function), . - _INTERRUPT_PERMITTED(root_function); \
 
-#define _DEFINE_RTOS_INTERRUPT_PERMITTED(ret, root_function, ...) \
-    asm(_XCORE_C_STR(_DEFINE_RTOS_INTERRUPT_PERMITTED_DEF(root_function))); \
+#define _DEFINE_RTOS_KERNEL_ENTRY(ret, root_function, ...) \
+    asm(_XCORE_C_STR(_DEFINE_RTOS_KERNEL_ENTRY_DEF(root_function))); \
     _DECLARE_INTERRUPT_PERMITTED(ret, root_function, __VA_ARGS__)
 
 #define _DECLARE_RTOS_INTERRUPT_CALLBACK(intrpt, data) \
@@ -66,13 +65,13 @@
     _INTERRUPT_CALLBACK(intrpt):; \
       /* Extend the stack by enough words to store the thread context. */ \
       extsp RTOS_SUPPORT_INTERRUPT_STACK_GROWTH; \
-      /* We need to use R10 and R11 now so save them where the RTOS wants */ \
+      /* We need to use R1 and R11 now so save them where the RTOS wants */ \
       /* them. The RTOS provided function rtos_interrupt_callback_common */ \
       /* will save the rest of the registers. */ \
-      stw r10, sp[RTOS_SUPPORT_INTERRUPT_R10_STACK_OFFSET]; \
+      stw r1, sp[RTOS_SUPPORT_INTERRUPT_R1_STACK_OFFSET]; \
       stw r11, sp[RTOS_SUPPORT_INTERRUPT_R11_STACK_OFFSET]; \
       ldap r11, intrpt; \
-      mov r10, r11; \
+      mov r1, r11; \
       ldap r11, rtos_interrupt_callback_common; \
       bau r11; \
     .cc_bottom _INTERRUPT_CALLBACK(intrpt).function; \

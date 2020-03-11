@@ -10,6 +10,7 @@
 #include "rtos_cores.h"
 #include "rtos_interrupt.h"
 #include "rtos_locks.h"
+#include "rtos_time.h"
 #include "rtos_macros.h"
 #include "rtos_printf.h"
 

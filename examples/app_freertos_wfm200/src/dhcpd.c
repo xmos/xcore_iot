@@ -17,10 +17,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#define clock time_clock
-#include <time.h>
-#undef clock
-
 #define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define HWADDR_ARG(hwaddr) hwaddr.ucBytes[0], hwaddr.ucBytes[1], hwaddr.ucBytes[2], hwaddr.ucBytes[3], hwaddr.ucBytes[4], hwaddr.ucBytes[5]
 
@@ -190,8 +186,10 @@ static void dhcpd_lock_release(void)
 
 static void dhcp_client_update(dhcp_ip_info_t *client, int state, uint32_t expiration)
 {
+    rtos_time_t now = rtos_time_get();
+
     uxListRemove(&client->list_item);
-    listSET_LIST_ITEM_VALUE(&client->list_item, time(NULL) + expiration);
+    listSET_LIST_ITEM_VALUE(&client->list_item, now.seconds + expiration);
     client->state = state;
     vListInsert(&dhcp_ip_pool, &client->list_item);
 }
@@ -341,14 +339,14 @@ static void dhcp_client_release_expired_leases(void)
     dhcp_ip_info_t *client;
     ListItem_t *item;
     time_t expiration;
-    time_t now = time(NULL);
+    rtos_time_t now = rtos_time_get();
 
     item = listGET_HEAD_ENTRY(&dhcp_ip_pool);
 
     for (i = 0; i < listCURRENT_LIST_LENGTH(&dhcp_ip_pool); i++) {
         client = listGET_LIST_ITEM_OWNER(item);
         expiration = listGET_LIST_ITEM_VALUE(item);
-        if (now >= expiration) {
+        if (now.seconds >= expiration) {
             if (client->state == DHCP_IP_STATE_LEASED || client->state == DHCP_IP_STATE_OFFERED) {
                 client->state = DHCP_IP_STATE_AVAILABLE;
                 rtos_printf("\tLease of %s to " HWADDR_FMT " has expired\n", inet_ntoa(client->ip), HWADDR_ARG(client->mac));
@@ -1200,6 +1198,7 @@ static void dhcpd_ip_pool_init(void)
 
     for (int i = 0; i < ip_pool_count; i++) {
         struct in_addr ip;
+        rtos_time_t now = rtos_time_get();
 
         ip = dhcpd_ip_address_pool_next_valid(&pool);
         if (ip.s_addr == INADDR_ANY) {
@@ -1211,7 +1210,7 @@ static void dhcpd_ip_pool_init(void)
         dhcp_ip_infos[i].ip = ip;
         vListInitialiseItem(&dhcp_ip_infos[i].list_item);
         listSET_LIST_ITEM_OWNER(&dhcp_ip_infos[i].list_item, &dhcp_ip_infos[i]);
-        listSET_LIST_ITEM_VALUE(&dhcp_ip_infos[i].list_item, time(NULL));
+        listSET_LIST_ITEM_VALUE(&dhcp_ip_infos[i].list_item, now.seconds);
 
         vListInsert(&dhcp_ip_pool, &dhcp_ip_infos[i].list_item);
     }

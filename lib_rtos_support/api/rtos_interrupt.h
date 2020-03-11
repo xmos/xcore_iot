@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2020, XMOS Ltd, All rights reserved
 
 #ifndef RTOS_INTERRUPT_H_
 #define RTOS_INTERRUPT_H_
@@ -8,14 +8,15 @@
 
 #include "rtos_interrupt_impl.h"
 
-/** Define a function that allows RTOS interrupts to occur within its scope
+/** Define the function that enters the RTOS kernel and begins the scheduler.
+ *  This should only be used by the RTOS entry function that starts the scheduler.
  *
  *  This macro will define two functions for you:
  *    - An ordinary function that may be called directly
  *      Its signature will be '*ret* *root_function* ( *...* )'
  *    - A function that will also reserve space for and set up a stack
- *      for handling interrupts.
- *      The function name is accessed using the RTOS_INTERRUPT_PERMITTED() macro
+ *      for handling RTOS interrupts.
+ *      The function name is accessed using the RTOS_KERNEL_ENTRY() macro
  *
  *  You would normally use this macro only on the definition of the RTOS entry
  *  function that starts the scheduler.
@@ -31,10 +32,8 @@
  *  **The kernel stack is not re-entrant so kernel mode must not be masked
  *  from within an interrupt_callback_t**
  *
- *  The user may specify a larger kernel stack by defining XCORE_C_KSTACK_WORDS.
- *
  *  Example usage: \code
- *    DEFINE_RTOS_INTERRUPT_PERMITTED(void, vPortStartSchedulerOnCore, void)
+ *    DEFINE_RTOS_KERNEL_ENTRY(void, vPortStartSchedulerOnCore, void)
  *    {
  *      // This is the body of 'void vPortStartSchedulerOnCore(void)'
  *    }
@@ -44,21 +43,21 @@
  *  \param root_function    the name of the ordinary function
  *  \param ...              the arguments of the ordinary function
  */
-#define DEFINE_RTOS_INTERRUPT_PERMITTED(ret, root_function, ...) \
-        _DEFINE_RTOS_INTERRUPT_PERMITTED(ret, root_function, __VA_ARGS__)
+#define DEFINE_RTOS_KERNEL_ENTRY(ret, root_function, ...) \
+        _DEFINE_RTOS_KERNEL_ENTRY(ret, root_function, __VA_ARGS__)
 
 /** Declare an RTOS interrupt permitting function
  *
- *  Use this macro when you require a declaration of your RTOS interrupt permitting function types.
- *  This should only need to be used by the RTOS entry function that starts the scheduler.
+ *  Use this macro when you require a declaration of your RTOS kernel entry function.
+ *  This should only be used by the RTOS entry function that starts the scheduler.
  *
  *  Example usage: \code
  *    // In another file:
- *    //   DEFINE_RTOS_INTERRUPT_PERMITTED(void, vPortStartSchedulerOnCore, void) { ... }
- *    DECLARE_RTOS_INTERRUPT_PERMITTED(void, vPortStartSchedulerOnCore, void);
+ *    //   DEFINE_RTOS_KERNEL_ENTRY(void, vPortStartSchedulerOnCore, void) { ... }
+ *    DECLARE_RTOS_KERNEL_ENTRY(void, vPortStartSchedulerOnCore, void);
  *    ...
  *      par {
- *          RTOS_INTERRUPT_PERMITTED(vPortStartSchedulerOnCore)();
+ *          RTOS_KERNEL_ENTRY(vPortStartSchedulerOnCore)();
  *      }
  *  \endcode
  *
@@ -66,17 +65,17 @@
  *  \param root_function    the name of the ordinary function
  *  \param ...              the arguments of the ordinary function
  */
-#define DECLARE_RTOS_INTERRUPT_PERMITTED(ret, root_function, ...) \
+#define DECLARE_RTOS_KERNEL_ENTRY(ret, root_function, ...) \
         _DECLARE_INTERRUPT_PERMITTED(ret, root_function, __VA_ARGS__)
 
-/** The name of the defined RTOS interrupt permitting function
+/** The name of the defined RTOS kernel entry function
  *
- *  Use this macro for retriving the name of the declared RTOS interrupt function.
+ *  Use this macro for retriving the name of the declared RTOS kernel entry function.
  *  This is the name used to invoke the function.
  *
- *  \return     the name of the defined interrupt permitting function
+ *  \return     the name of the defined kernel entry function
  */
-#define RTOS_INTERRUPT_PERMITTED(root_function) _INTERRUPT_PERMITTED(root_function)
+#define RTOS_KERNEL_ENTRY(root_function) _INTERRUPT_PERMITTED(root_function)
 
 
 /** Define an RTOS interrupt handling function
