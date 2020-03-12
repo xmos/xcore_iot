@@ -55,6 +55,9 @@ soc_dma_ring_buf_t *soc_peripheral_tx_dma_ring_buf(
 chanend soc_peripheral_ctrl_chanend(
         soc_peripheral_t device);
 
+int soc_peripheral_get_id(
+        soc_peripheral_t device);
+
 void soc_peripheral_hub_dma_request(
         soc_peripheral_t device,
         soc_dma_request_t request);
