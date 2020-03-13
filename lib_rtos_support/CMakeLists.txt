@@ -43,6 +43,7 @@ set(LIB_C_SRCS
         "src/rtos_irq.c"
         "src/rtos_locks.c"
         "src/rtos_printf.c"
+        "src/rtos_time.c"
     )
 set(LIB_ASM_SRCS
         ""

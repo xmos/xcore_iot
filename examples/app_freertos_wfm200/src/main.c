@@ -127,14 +127,12 @@ static void wf200_test(void *arg)
             rtos_printf("WIFI_StartAP() returned %x\n", ret);
         } while (ret != eWiFiSuccess);
         dhcpd_start(16);
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(60*60000));
 
-
+        dhcpd_stop();
 
         /* FIXME: Why does this cause a firmware exception sometimes? */
         ret = WIFI_StopAP();
-
-        dhcpd_stop();
 
         rtos_printf("WIFI_StopAP() returned %x\n", ret);
         if (ret != eWiFiSuccess) {
