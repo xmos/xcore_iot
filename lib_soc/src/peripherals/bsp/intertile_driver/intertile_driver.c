@@ -146,14 +146,9 @@ void intertile_driver_send_bytes(
     soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
 
     configASSERT( (len + sizeof(intertile_cb_header_t)) <= INTERTILE_DEV_BUFSIZE );
-    uint8_t* buf = pvPortMalloc( (sizeof(uint8_t) * len) + sizeof(intertile_cb_header_t));
-    memcpy(buf, cb_header, sizeof(intertile_cb_header_t));
-    memcpy(buf+sizeof(intertile_cb_header_t), bytes, len);
 
-//    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, bytes, len, 1, 2);
-//    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, cb_header, cb_header->buf_len, 0, 2);
-
-    soc_dma_ring_tx_buf_set(tx_ring_buf, buf, len + sizeof(intertile_cb_header_t));
+    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, bytes, len, 1, 2);
+    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, cb_header, sizeof(intertile_cb_header_t), 0, 2);
 
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 }
@@ -174,17 +169,11 @@ soc_peripheral_t intertile_driver_init(
     soc_peripheral_common_dma_init(
             device,
             rx_desc_count,
-            0,
+            INTERTILE_DEV_BUFSIZE,
             tx_desc_count,
             app_data,
             isr_core,
             (rtos_irq_isr_t)intertile_isr);
-
-    for (int i = 0; i < rx_desc_count>>1; i++) {
-        uint8_t *bufdesc = pvPortMalloc( sizeof(uint8_t) * INTERTILE_DEV_BUFSIZE );
-        configASSERT(bufdesc != NULL);
-        soc_dma_ring_rx_buf_set(soc_peripheral_rx_dma_ring_buf(device), bufdesc, INTERTILE_DEV_BUFSIZE);
-    }
 
     return device;
 }
