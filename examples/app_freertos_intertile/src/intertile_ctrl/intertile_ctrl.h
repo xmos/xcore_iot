@@ -6,4 +6,20 @@
 void intertile_ctrl_create_t0( UBaseType_t uxPriority );
 void intertile_ctrl_create_t1( UBaseType_t uxPriority );
 
+#include "intertile_driver.h"
+INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( intertile_dev_test0, device, buf, len, xReturnBufferToDMA );
+INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( intertile_dev_test1, device, buf, len, xReturnBufferToDMA );
+
+void t0_test(void *arg);
+void t1_test(void *arg);
+
+
+#include "message_buffer.h"
+#include "soc.h"
+
+typedef struct {
+    MessageBufferHandle_t xMessageBufferSend;
+    MessageBufferHandle_t xMessageBufferRecv;
+} intertile_msg_buffers_t;
+
 #endif /* INTERTILE_CTRL_H_ */

@@ -21,7 +21,7 @@ typedef struct intertile_isr_callback {
 
 static intertile_isr_callback_t intertile_isr_callback_map[ BITSTREAM_INTERTILE_DEVICE_COUNT ][ INTERTILE_DEV_HANDLER_COUNT ];
 
-INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_null, device, buf, len)
+INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_null, device, buf, len, xReturnBufferToDMA)
 {
     (void) device;
     (void) buf;
@@ -58,23 +58,21 @@ static void intertile_isr( soc_peripheral_t device )
 
         while( ( frame_buffer = soc_dma_ring_rx_buf_get(rx_ring_buf, &frame_length, NULL) ) != NULL )
         {
-            BaseType_t xResult = pdFAIL;
+            BaseType_t xReturnBufferToDMA = pdFALSE;
 
             uint32_t cb_id = frame_buffer[0];
             intertile_isr_callback_t mapped_cb;
 
             if( ( mapped_cb.cb = intertile_isr_callback_map[ device_id ][ cb_id ].cb ) != NULL )
             {
-                if( mapped_cb.cb( device, frame_buffer, frame_length ) == pdTRUE )
+                if( mapped_cb.cb( device, frame_buffer, frame_length, &xReturnBufferToDMA ) == pdTRUE )
                 {
                     xYieldRequired = pdTRUE;
                 }
             }
 
-            if (xResult != pdPASS)  // always for now
+            if (xReturnBufferToDMA == pdTRUE)
             {
-                rtos_printf("intertile data lost:%d \n", frame_length);
-
                 /* Give the buffer back to the DMA engine */
                 soc_dma_ring_rx_buf_set(rx_ring_buf, frame_buffer, INTERTILE_DEV_BUFSIZE);
             }
@@ -135,8 +133,6 @@ BaseType_t intertile_driver_unregister_callback(
     return xRetVal;
 }
 
-/* Create a copy of the intertile message, so that the application
- * can do what it wants with the original */
 void intertile_driver_send_bytes(
         soc_peripheral_t dev,
         uint8_t *bytes,

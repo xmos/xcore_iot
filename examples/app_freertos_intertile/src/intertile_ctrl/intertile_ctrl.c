@@ -6,7 +6,7 @@
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
+#include "message_buffer.h"
 
 /* Library headers */
 #include "soc.h"
@@ -18,125 +18,120 @@
 
 /* App headers */
 #include "app_conf.h"
+#include "intertile_ctrl.h"
 
-typedef struct {
-    soc_peripheral_t device;
-    QueueHandle_t xQueueTest0;
-    QueueHandle_t xQueueTest1;
-} rx_test_args_t;
 
-static QueueHandle_t xQueueTest0;
-static QueueHandle_t xQueueTest1;
 
-INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_test0, device, buf, len)
-{
-    (void) device;
-    BaseType_t xYieldRequired = pdFALSE;
-    intertile_cb_header_t* tmp = (intertile_cb_header_t*)buf;
-
-    rtos_printf("test0[%d] rx %d header id:%d bytes:%s\n",
-            get_local_tile_id(),
-            len, tmp->cb_id, buf+1);
-
-    return xYieldRequired;
-}
-
-INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_test1, device, buf, len)
-{
-    (void) device;
-    BaseType_t xYieldRequired = pdFALSE;
-    intertile_cb_header_t* tmp = (intertile_cb_header_t*)buf;
-
-    rtos_printf("test1[%d] rx %d header id:%d bytes:%s\n",
-            get_local_tile_id(),
-            len, tmp->cb_id, buf+1);
-
-    return xYieldRequired;
-}
-
-static void tx_test(void *arg)
+void rx_task(void *arg)
 {
     soc_peripheral_t dev = arg;
 
-    uint8_t buf[] = "Hello World";
-    uint8_t buf1[] = "Hi";
-
-    intertile_cb_header_t test0;
-    intertile_driver_header_init(&test0, INTERTILE_CB_ID_1);
-    intertile_driver_register_callback( dev, intertile_dev_test0, &test0);
-
-    uint8_t abuf[5] = "test";
-    intertile_cb_header_t* test1 = pvPortMalloc(sizeof(intertile_cb_header_t)+(5*(sizeof(uint8_t))));
-    intertile_driver_header_init(test1, INTERTILE_CB_ID_2);
-    intertile_driver_register_callback( dev, intertile_dev_test0, test1);
-
+    intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
+    MessageBufferHandle_t xMessageBufferSend = msgbuffers->xMessageBufferSend;
+    MessageBufferHandle_t xMessageBufferRecv = msgbuffers->xMessageBufferRecv;
     for( ;; )
     {
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        uint8_t *data = pvPortMalloc( sizeof(uint8_t) * INTERTILE_DEV_BUFSIZE );
+        size_t recv_len = 0;
 
-        rtos_printf("tx_task\n");
+        rtos_printf("tile[%d] Wait for message\n", 1&get_local_tile_id());
+        recv_len = xMessageBufferReceive(xMessageBufferRecv, data, INTERTILE_DEV_BUFSIZE, portMAX_DELAY);
+        rtos_printf("tile[%d] Received %d bytes:\n\t%s\n", 1&get_local_tile_id(), recv_len, data);
 
-        intertile_driver_send_bytes(dev, buf, strlen((char *)buf) + 1, &test0);
+        vPortFree(data);
         vTaskDelay(pdMS_TO_TICKS(1000));
-        intertile_driver_send_bytes(dev, buf1, strlen((char *)buf1) + 1, test1);
     }
 }
 
 
-static void rx_test(void *arg)
+INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_test0, device, buf, len, xReturnBufferToDMA)
 {
-    rx_test_args_t* args = arg;
-    soc_peripheral_t dev = args->device;
-    QueueHandle_t xQueueTest0 = args->xQueueTest0;
-    QueueHandle_t xQueueTest1 = args->xQueueTest1;
+    soc_peripheral_t dev = device;
+    BaseType_t xYieldRequired = pdFALSE;
+    intertile_cb_header_t* tmp = (intertile_cb_header_t*)buf;
 
-    uint8_t buf[] = "Goodbye";
+    intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
+    MessageBufferHandle_t xMessageBufferSend = msgbuffers->xMessageBufferSend;
+    MessageBufferHandle_t xMessageBufferRecv = msgbuffers->xMessageBufferRecv;
 
-    intertile_cb_header_t test0;
-    intertile_driver_header_init(&test0, INTERTILE_CB_ID_1);
-    intertile_driver_register_callback( dev, intertile_dev_test1, &test0);
+    uint8_t *payload = buf+1;
 
-    intertile_cb_header_t test1;
-    intertile_driver_header_init(&test1, INTERTILE_CB_ID_2);
-    intertile_driver_register_callback( dev, intertile_dev_test1, &test1);
-
-    for( ;; )
+    if ( xMessageBufferIsFull(xMessageBufferRecv) == pdTRUE )
     {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-
-        rtos_printf("rx_task\n");
-
-        intertile_driver_send_bytes(dev, buf, strlen((char *)buf) + 1, &test0);
+        rtos_printf("tile[%d] Message buffer full, %d bytes lost\n", 1&get_local_tile_id(), len);
+        configASSERT(0);    // Buffer was full
     }
+    else
+    {
+        if (xMessageBufferSendFromISR(xMessageBufferRecv, payload, len, &xYieldRequired) != len)
+        {
+            configASSERT(0);    // Failed to send full buffer
+        }
+    }
+
+    *xReturnBufferToDMA = pdTRUE;
+
+    rtos_printf("tile[%d] rx %d header id:%d bytes:%s\n",
+            1&get_local_tile_id(),
+            len, tmp->cb_id, buf+1);
+
+    return xYieldRequired;
+}
+
+INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_test1, device, buf, len, xReturnBufferToDMA)
+{
+    (void) device;
+    BaseType_t xYieldRequired = pdFALSE;
+    intertile_cb_header_t* tmp = (intertile_cb_header_t*)buf;
+
+    rtos_printf("tile[%d] rx %d header id:%d bytes:%s\n",
+            1&get_local_tile_id(),
+            len, tmp->cb_id, buf+1);
+
+    *xReturnBufferToDMA = pdTRUE;
+
+    return xYieldRequired;
 }
 
 
 void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 {
+    static intertile_msg_buffers_t msgbuffers;
+
+    MessageBufferHandle_t xMessageBufferSend = xMessageBufferCreate(2 * INTERTILE_DEV_BUFSIZE);
+    MessageBufferHandle_t xMessageBufferRecv = xMessageBufferCreate(2 * INTERTILE_DEV_BUFSIZE);
+
+    msgbuffers.xMessageBufferRecv = xMessageBufferRecv;
+    msgbuffers.xMessageBufferSend = xMessageBufferSend;
+
     soc_peripheral_t dev = intertile_driver_init(
             BITSTREAM_INTERTILE_DEVICE_A,
             2,
             2,
-            NULL,
+            &msgbuffers,
             0);
 
-    xTaskCreate(tx_test, "tx_test", portTASK_STACK_DEPTH(tx_test), dev, uxPriority, NULL);
+    xTaskCreate(t0_test, "tile0_intertile", portTASK_STACK_DEPTH(t0_test), dev, uxPriority, NULL);
+    xTaskCreate(rx_task, "tile0_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
 }
-
 
 void intertile_ctrl_create_t1( UBaseType_t uxPriority )
 {
-    xQueueTest0 = xQueueCreate(2, INTERTILE_DEV_BUFSIZE);
-    xQueueTest1 = xQueueCreate(2, INTERTILE_DEV_BUFSIZE);
+    static intertile_msg_buffers_t msgbuffers;
+
+    MessageBufferHandle_t xMessageBufferSend = xMessageBufferCreate(2 * INTERTILE_DEV_BUFSIZE);
+    MessageBufferHandle_t xMessageBufferRecv = xMessageBufferCreate(2 * INTERTILE_DEV_BUFSIZE);
+
+    msgbuffers.xMessageBufferRecv = xMessageBufferRecv;
+    msgbuffers.xMessageBufferSend = xMessageBufferSend;
 
     soc_peripheral_t dev = intertile_driver_init(
             BITSTREAM_INTERTILE_DEVICE_A,
             2,
             2,
-            NULL,
+            &msgbuffers,
             0);
 
-    rx_test_args_t args = {dev, xQueueTest0, xQueueTest1};
-
-    xTaskCreate(rx_test, "rx_test", portTASK_STACK_DEPTH(rx_test), &args, uxPriority, NULL);
+    xTaskCreate(t1_test, "tile1_intertile", portTASK_STACK_DEPTH(t1_test), dev, uxPriority, NULL);
+    xTaskCreate(rx_task, "tile0_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
 }

@@ -3,7 +3,6 @@
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
 
 /* Library headers */
 #include <string.h>
@@ -13,7 +12,6 @@
 
 /* App headers */
 #include "app_conf.h"
-
 
 
 void soc_tile0_main(
@@ -31,7 +29,6 @@ void soc_tile1_main(
 
     vTaskStartScheduler();
 }
-
 
 void vApplicationMallocFailedHook(void)
 {

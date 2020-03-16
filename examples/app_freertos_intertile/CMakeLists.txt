@@ -33,6 +33,8 @@ set(APP_C_SRCS
         "src/main.c"
         "bitstream_src/bitstream.c"
         "src/intertile_ctrl/intertile_ctrl.c"
+        "src/intertile_ctrl/intertile_ctrl_t0.c"
+        "src/intertile_ctrl/intertile_ctrl_t1.c"
     )
 set(APP_ASM_SRCS
         ""
