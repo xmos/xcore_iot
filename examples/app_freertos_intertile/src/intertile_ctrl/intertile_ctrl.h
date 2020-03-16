@@ -18,8 +18,8 @@ void t1_test(void *arg);
 #include "soc.h"
 
 typedef struct {
-    MessageBufferHandle_t xMessageBufferSend;
-    MessageBufferHandle_t xMessageBufferRecv;
+    MessageBufferHandle_t send_msg_buf;
+    MessageBufferHandle_t recv_msg_buf;
 } intertile_msg_buffers_t;
 
 #endif /* INTERTILE_CTRL_H_ */
