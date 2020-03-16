@@ -24,19 +24,29 @@ void t1_test(void *arg)
 {
     soc_peripheral_t dev = arg;
 
-    uint8_t buf[] = "Goodbye";
+    intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
+    MessageBufferHandle_t xMessageBufferSend = msgbuffers->xMessageBufferSend;
 
-    intertile_cb_header_t test0;
-    intertile_driver_header_init(&test0, INTERTILE_CB_ID_1);
-    intertile_driver_register_callback( dev, intertile_dev_test0, &test0);
-
-    intertile_cb_header_t test1;
-    intertile_driver_header_init(&test1, INTERTILE_CB_ID_2);
-    intertile_driver_register_callback( dev, intertile_dev_test0, &test1);
+    uint8_t buf[] = "Hi Tile 0";
+    uint8_t buf1[] = "Bye Tile 0";
+    size_t len;
 
     for( ;; )
     {
+        len = strlen((char *)buf) + 1;
+        rtos_printf("tile[%d] Send %d bytes:\n\t-> %s\n", 1&get_local_tile_id(), len, buf);
+        if( xMessageBufferSend( xMessageBufferSend, (void*)buf, len, portMAX_DELAY) != len )
+        {
+            configASSERT(0);    // Failed to send full buffer
+        }
         vTaskDelay(pdMS_TO_TICKS(1000));
-        intertile_driver_send_bytes(dev, buf, strlen((char *)buf) + 1, &test0);
+
+        len = strlen((char *)buf1) + 1;
+        rtos_printf("tile[%d] Send %d bytes:\n\t-> %s\n", 1&get_local_tile_id(), len, buf);
+        if( xMessageBufferSend( xMessageBufferSend, (void*)buf1, len, portMAX_DELAY) != len )
+        {
+            configASSERT(0);    // Failed to send full buffer
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
