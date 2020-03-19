@@ -409,6 +409,17 @@ static void device_to_hub_irq(soc_peripheral_t device)
     rtos_irq(device->core_id, device->irq_source_id);
 }
 
+void dup_test(int a);
+//{
+//    debug_printf("Hello from dup test on tile 1 (%d)\n", a);
+//}
+
+void call_from_tile1(void)
+{
+    dup_test(5);
+    while(1);
+}
+
 void soc_peripheral_hub()
 {
     int i;

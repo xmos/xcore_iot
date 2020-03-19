@@ -13,11 +13,17 @@
 /* App headers */
 #include "app_conf.h"
 
+void dup_test(int a)
+{
+    debug_printf("Hello from dup test on tile 0 (%d)\n", a);
+}
 
 void soc_tile0_main(
         int tile)
 {
     intertile_ctrl_create_t0( appconfINTERTILE_CTRL_TASK_PRIORITY );
+
+    dup_test(42);
 
     vTaskStartScheduler();
 }

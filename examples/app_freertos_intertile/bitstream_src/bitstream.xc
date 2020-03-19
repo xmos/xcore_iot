@@ -35,6 +35,7 @@ void tile0_device_instantiate(
     }
 }
 
+void call_from_tile1(void);
 void tile1_device_instantiate(
         chanend intertile_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
@@ -43,5 +44,6 @@ void tile1_device_instantiate(
             tile1_device_register(intertile_dev_ch);
             soc_peripheral_hub();
         }
+        call_from_tile1();
     }
 }
