@@ -6,6 +6,11 @@
 
 #include "xassert.h"
 
+#include <xcore/chanend.h>
+#include <xcore/channel.h>
+#include <xcore/channel_transaction.h>
+#include <xcore/triggerable.h>
+
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 #define MAX_PERIPHERALS 8
@@ -28,7 +33,7 @@ void soc_dma_ring_buf_release(
  * interrupt the RTOS and to receive requests
  * from the RTOS.
  */
-static chanend rtos_irq_c;
+static chanend_t rtos_irq_c;
 
 struct soc_peripheral {
 
@@ -36,16 +41,16 @@ struct soc_peripheral {
     int id;
 
     /* Channel used to send data to this device. */
-    chanend tx_c;
+    chanend_t tx_c;
 
     /* Channel used to receive data from this device. */
-    chanend rx_c;
+    chanend_t rx_c;
 
     /* Channel used for control of this device. */
-    chanend control_c;
+    chanend_t control_c;
 
     /* Channel used for receiving interrupt requests from this device. */
-    chanend irq_c;
+    chanend_t irq_c;
 
     /* DMA has begun sending data to this device. */
     uint32_t tx_ready;
@@ -73,7 +78,7 @@ static int peripheral_count;
 
 /* To be called by the bitstream */
 soc_peripheral_t soc_peripheral_register(
-        chanend c[SOC_PERIPHERAL_CHANNEL_COUNT])
+        chanend_t c[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
     int device_id;
 
@@ -95,25 +100,25 @@ soc_peripheral_t soc_peripheral_register(
 }
 
 void soc_peripheral_rx_dma_ready(
-        chanend c)
+        chanend_t c)
 {
-    s_chan_check_ct_end(c);
+    chanend_check_end_token(c);
 }
 
 uint16_t soc_peripheral_rx_dma_xfer(
-        chanend c,
+        chanend_t c,
         void *data,
         uint16_t max_length)
 {
-    transacting_chanend_t tc;
     uint32_t length;
+    transacting_chanend_t tc = chan_init_transaction_master(c);
 
-    chan_init_transaction_master(&c, &tc);
     t_chan_out_word(&tc, max_length);
-    t_chan_in_word(&tc, &length);
+    length = t_chan_in_word(&tc);
     xassert(length <= max_length);
     t_chan_in_buf_byte(&tc, data, length);
-    chan_complete_transaction(&c, &tc);
+    
+    (void)chan_complete_transaction(tc);
 
     return (uint16_t) length;
 }
@@ -154,16 +159,16 @@ uint16_t soc_peripheral_rx_dma_direct_xfer(
 }
 
 void soc_peripheral_tx_dma_xfer(
-        chanend c,
+        chanend_t c,
         void *data,
         uint16_t length)
 {
-    transacting_chanend_t tc;
-
-    chan_init_transaction_master(&c, &tc);
+    transacting_chanend_t tc = chan_init_transaction_master(c);
+    
     t_chan_out_word(&tc, length);
     t_chan_out_buf_byte(&tc, data, length);
-    chan_complete_transaction(&c, &tc);
+
+    (void)chan_complete_transaction(tc);
 }
 
 void soc_peripheral_tx_dma_direct_xfer(
@@ -200,7 +205,7 @@ void soc_peripheral_tx_dma_direct_xfer(
 }
 
 void soc_peripheral_irq_send(
-        chanend c,
+        chanend_t c,
         uint32_t status)
 {
     chan_out_word(c, status);
@@ -312,15 +317,14 @@ uint32_t soc_peripheral_interrupt_status(
 static void device_to_dma(soc_peripheral_t device)
 {
     void *rx_buf;
-    transacting_chanend_t tc;
     int length;
     uint32_t total_length;
     int more;
 
     length = soc_dma_ring_buf_length_get(&device->rx_ring_buf);
+    transacting_chanend_t tc = chan_init_transaction_slave(device->rx_c);
 
-    chan_init_transaction_slave(&device->rx_c, &tc);
-    t_chan_in_word(&tc, &total_length);
+    total_length = t_chan_in_word(&tc);
     xassert(total_length <= length);
 
     do {
@@ -334,7 +338,7 @@ static void device_to_dma(soc_peripheral_t device)
         soc_dma_ring_buf_release(&device->rx_ring_buf, 1, length);
     } while (more);
 
-    chan_complete_transaction(&device->rx_c, &tc);
+    (void)chan_complete_transaction(tc);
 
     rtos_lock_acquire(0);
     device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
@@ -345,23 +349,22 @@ static void device_to_dma(soc_peripheral_t device)
 
 static void dma_to_device_ready(soc_peripheral_t device)
 {
-    s_chan_out_ct_end(device->tx_c);
+    chanend_out_end_token(device->tx_c);
     device->tx_ready = 1;
 }
 
 static void dma_to_device(soc_peripheral_t device)
 {
     void *tx_buf;
-    transacting_chanend_t tc;
     int length;
     int total_length;
     uint32_t max_length;
     int more;
 
     total_length = soc_dma_ring_buf_length_get(&device->tx_ring_buf);
+    transacting_chanend_t tc = chan_init_transaction_slave(device->tx_c);
 
-    chan_init_transaction_slave(&device->tx_c, &tc);
-    t_chan_in_word(&tc, &max_length);
+    max_length = t_chan_in_word(&tc);
     xassert(total_length <= max_length);
     t_chan_out_word(&tc, total_length);
 
@@ -376,7 +379,7 @@ static void dma_to_device(soc_peripheral_t device)
 
     xassert(total_length == 0);
 
-    chan_complete_transaction(&device->tx_c, &tc);
+    (void)chan_complete_transaction(tc);
 
     xassert(device->tx_ready);
     device->tx_ready = 0;
@@ -390,9 +393,7 @@ static void dma_to_device(soc_peripheral_t device)
 
 static void device_to_hub_irq(soc_peripheral_t device)
 {
-    uint32_t status;
-
-    chan_in_word(device->irq_c, &status);
+    uint32_t status = chan_in_word(device->irq_c);
 
     rtos_lock_acquire(0);
     device->interrupt_status |= status;
@@ -405,24 +406,77 @@ void soc_peripheral_hub()
 {
     int i;
 
-    chanend_alloc(&rtos_irq_c);
+    rtos_irq_c = chanend_alloc();
 
-    select_disable_trigger_all();
+    triggerable_disable_all();
 
-    for (i = 0; i < peripheral_count; i++) {
-        if (peripherals[i].tx_c != 0) {
-            chanend_setup_select(peripherals[i].tx_c, 0 * MAX_PERIPHERALS + i);
-        }
-        if (peripherals[i].rx_c != 0) {
-            chanend_setup_select(peripherals[i].rx_c, 1 * MAX_PERIPHERALS + i);
-        }
-        if (peripherals[i].irq_c != 0) {
-            chanend_setup_select(peripherals[i].irq_c, 2 * MAX_PERIPHERALS + i);
-        }
+    switch (peripheral_count)
+    {
+    default: xassert(0); break;
+#if MAX_PERIPHERALS > 8
+    case 9;
+        if (peripherals[8].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[8].tx_c,  event_peri8_tx ); }
+        if (peripherals[8].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[8].rx_c,  event_peri8_rx ); }
+        if (peripherals[8].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[8].irq_c, event_peri8_irq); }
+#endif
+#if MAX_PERIPHERALS > 7
+    case 8:
+        if (peripherals[7].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[7].tx_c,  event_peri7_tx ); }
+        if (peripherals[7].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[7].rx_c,  event_peri7_rx ); }
+        if (peripherals[7].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[7].irq_c, event_peri7_irq); }
+#endif
+#if MAX_PERIPHERALS > 6
+    case 7:
+        if (peripherals[6].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[6].tx_c,  event_peri6_tx ); }
+        if (peripherals[6].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[6].rx_c,  event_peri6_rx ); }
+        if (peripherals[6].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[6].irq_c, event_peri6_irq); }
+#endif
+#if MAX_PERIPHERALS > 5
+    case 6:
+        if (peripherals[5].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[5].tx_c,  event_peri5_tx ); }
+        if (peripherals[5].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[5].rx_c,  event_peri5_rx ); }
+        if (peripherals[5].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[5].irq_c, event_peri5_irq); }
+#endif
+#if MAX_PERIPHERALS > 4
+    case 5:
+        if (peripherals[4].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[4].tx_c,  event_peri4_tx ); }
+        if (peripherals[4].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[4].rx_c,  event_peri4_rx ); }
+        if (peripherals[4].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[4].irq_c, event_peri4_irq); }
+#endif
+#if MAX_PERIPHERALS > 3
+    case 4:
+        if (peripherals[3].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[3].tx_c,  event_peri3_tx ); }
+        if (peripherals[3].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[3].rx_c,  event_peri3_rx ); }
+        if (peripherals[3].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[3].irq_c, event_peri3_irq); }
+#endif
+#if MAX_PERIPHERALS > 2
+    case 3:
+        if (peripherals[2].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[2].tx_c,  event_peri2_tx ); }
+        if (peripherals[2].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[2].rx_c,  event_peri2_rx ); }
+        if (peripherals[2].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[2].irq_c, event_peri2_irq); }
+#endif
+#if MAX_PERIPHERALS > 1
+
+    case 2:
+        if (peripherals[1].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[1].tx_c,  event_peri1_tx ); }
+        if (peripherals[1].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[1].rx_c,  event_peri1_rx ); }
+        if (peripherals[1].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[1].irq_c, event_peri1_irq); }
+#endif
+#if MAX_PERIPHERALS > 0
+    case 1:
+        if (peripherals[0].tx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[0].tx_c,  event_peri0_tx ); }
+        if (peripherals[0].rx_c  != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[0].rx_c,  event_peri0_rx ); }
+        if (peripherals[0].irq_c != 0) { TRIGGERABLE_SETUP_EVENT_VECTOR(peripherals[0].irq_c, event_peri0_irq); }
+#endif
+#if MAX_PERIPHERALS > 9
+#error Can't have more than 9 peripherals
+#endif
+    case 0: break;
     }
 
-    chanend_setup_select(rtos_irq_c, 3 * MAX_PERIPHERALS);
-    chanend_enable_trigger(rtos_irq_c);
+
+    TRIGGERABLE_SETUP_EVENT_VECTOR(rtos_irq_c, event_irq_c);
+    triggerable_enable_trigger(rtos_irq_c);
 
     /*
      * Should wait until all RTOS cores have enabled IRQs,
@@ -431,6 +485,7 @@ void soc_peripheral_hub()
     while (!rtos_irq_ready());
 
     for (;;) {
+
         int device_id;
 
         for (i = 0; i < peripheral_count; i++) {
@@ -443,7 +498,7 @@ void soc_peripheral_hub()
                      * from the device.
                      */
 //                    debug_printf("DMA to listen for data request from device %d\n", i);
-                    chanend_enable_trigger(peripherals[i].tx_c);
+                    triggerable_enable_trigger(peripherals[i].tx_c);
 
                     if (!peripherals[i].tx_ready) {
                         dma_to_device_ready(&peripherals[i]);
@@ -459,22 +514,63 @@ void soc_peripheral_hub()
                      * the device.
                      */
 //                    debug_printf("DMA to listen for data from device %d\n", i);
-                    chanend_enable_trigger(peripherals[i].rx_c);
+                    triggerable_enable_trigger(peripherals[i].rx_c);
                 }
             }
 
             if (peripherals[i].irq_c != 0) {
-                chanend_enable_trigger(peripherals[i].irq_c);
+                triggerable_enable_trigger(peripherals[i].irq_c);
             }
         }
 
-        device_id = select_wait();
+        TRIGGERABLE_WAIT_EVENT(
+            event_peri0_tx, event_peri0_rx, event_peri0_irq,
+            event_peri1_tx, event_peri1_rx, event_peri1_irq,
+            event_peri2_tx, event_peri2_rx, event_peri2_irq,
+            event_peri3_tx, event_peri3_rx, event_peri3_irq,
+            event_peri4_tx, event_peri4_rx, event_peri4_irq,
+            event_peri5_tx, event_peri5_rx, event_peri5_irq,
+            event_peri6_tx, event_peri6_rx, event_peri6_irq,
+            event_peri7_tx, event_peri7_rx, event_peri7_irq,
+            event_peri8_tx, event_peri8_rx, event_peri8_irq,
+            event_irq_c);
+
+        while (0) {
+        event_peri0_tx:  device_id = 0 * MAX_PERIPHERALS + 0; break;
+        event_peri0_rx:  device_id = 1 * MAX_PERIPHERALS + 0; break;
+        event_peri0_irq: device_id = 2 * MAX_PERIPHERALS + 0; break;
+        event_peri1_tx:  device_id = 0 * MAX_PERIPHERALS + 1; break;
+        event_peri1_rx:  device_id = 1 * MAX_PERIPHERALS + 1; break;
+        event_peri1_irq: device_id = 2 * MAX_PERIPHERALS + 1; break;
+        event_peri2_tx:  device_id = 0 * MAX_PERIPHERALS + 2; break;
+        event_peri2_rx:  device_id = 1 * MAX_PERIPHERALS + 2; break;
+        event_peri2_irq: device_id = 2 * MAX_PERIPHERALS + 2; break;
+        event_peri3_tx:  device_id = 0 * MAX_PERIPHERALS + 3; break;
+        event_peri3_rx:  device_id = 1 * MAX_PERIPHERALS + 3; break;
+        event_peri3_irq: device_id = 2 * MAX_PERIPHERALS + 3; break;
+        event_peri4_tx:  device_id = 0 * MAX_PERIPHERALS + 4; break;
+        event_peri4_rx:  device_id = 1 * MAX_PERIPHERALS + 4; break;
+        event_peri4_irq: device_id = 2 * MAX_PERIPHERALS + 4; break;
+        event_peri5_tx:  device_id = 0 * MAX_PERIPHERALS + 5; break;
+        event_peri5_rx:  device_id = 1 * MAX_PERIPHERALS + 5; break;
+        event_peri5_irq: device_id = 2 * MAX_PERIPHERALS + 5; break;
+        event_peri6_tx:  device_id = 0 * MAX_PERIPHERALS + 6; break;
+        event_peri6_rx:  device_id = 1 * MAX_PERIPHERALS + 6; break;
+        event_peri6_irq: device_id = 2 * MAX_PERIPHERALS + 6; break;
+        event_peri7_tx:  device_id = 0 * MAX_PERIPHERALS + 7; break;
+        event_peri7_rx:  device_id = 1 * MAX_PERIPHERALS + 7; break;
+        event_peri7_irq: device_id = 2 * MAX_PERIPHERALS + 7; break;
+        event_peri8_tx:  device_id = 0 * MAX_PERIPHERALS + 8; break;
+        event_peri8_rx:  device_id = 1 * MAX_PERIPHERALS + 8; break;
+        event_peri8_irq: device_id = 2 * MAX_PERIPHERALS + 8; break;
+        event_irq_c:     device_id = 3 * MAX_PERIPHERALS;     break;
+        }
 
         do {
             if (device_id < peripheral_count) {
-                /* The device is trying to receive data */
+                //The device is trying to receive data 
 
-                chanend_disable_trigger(peripherals[device_id].tx_c);
+                triggerable_disable_trigger(peripherals[device_id].tx_c);
                 dma_to_device(&peripherals[device_id]);
 
             } else if ((device_id - 1 * MAX_PERIPHERALS) < peripheral_count) {
@@ -487,7 +583,7 @@ void soc_peripheral_hub()
                  */
                 device_id -= 1 * MAX_PERIPHERALS;
 
-                chanend_disable_trigger(peripherals[device_id].rx_c);
+                triggerable_disable_trigger(peripherals[device_id].rx_c);
                 device_to_dma(&peripherals[device_id]);
 
             } else if ((device_id - 2 * MAX_PERIPHERALS) < peripheral_count) {
@@ -500,7 +596,7 @@ void soc_peripheral_hub()
                  */
                 device_id -= 2 * MAX_PERIPHERALS;
 
-                chanend_disable_trigger(peripherals[device_id].irq_c);
+                triggerable_disable_trigger(peripherals[device_id].irq_c);
                 device_to_hub_irq(&peripherals[device_id]);
 
             } else if (device_id == 3 * MAX_PERIPHERALS) {
@@ -511,10 +607,21 @@ void soc_peripheral_hub()
                  * here so we go back to the start of the loop to make sure
                  * we are waiting on the right channels.
                  */
-                s_chan_check_ct_end(rtos_irq_c);
+
+                chanend_check_end_token(rtos_irq_c);
             }
 
-            device_id = select_no_wait(-1);
-        } while (device_id != -1);
+            TRIGGERABLE_TAKE_EVENT(
+              event_peri0_tx, event_peri0_rx, event_peri0_irq,
+              event_peri1_tx, event_peri1_rx, event_peri1_irq,
+              event_peri2_tx, event_peri2_rx, event_peri2_irq,
+              event_peri3_tx, event_peri3_rx, event_peri3_irq,
+              event_peri4_tx, event_peri4_rx, event_peri4_irq,
+              event_peri5_tx, event_peri5_rx, event_peri5_irq,
+              event_peri6_tx, event_peri6_rx, event_peri6_irq,
+              event_peri7_tx, event_peri7_rx, event_peri7_irq,
+              event_peri8_tx, event_peri8_rx, event_peri8_irq,
+              event_irq_c);
+        } while (0);
     }
 }

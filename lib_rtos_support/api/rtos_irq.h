@@ -3,7 +3,7 @@
 #ifndef RTOS_IRQ_H_
 #define RTOS_IRQ_H_
 
-#include "xcore_c.h"
+#include <xcore/chanend.h>
 
 /**
  * IRQ ISR callback function pointer type.
@@ -46,7 +46,7 @@ void rtos_irq(int core_id, int source_id);
  * \param dest_chanend  The channel end used by the peripheral to receive
  *                      the interrupt.
  */
-void rtos_irq_peripheral(chanend dest_chanend);
+void rtos_irq_peripheral(chanend_t dest_chanend);
 
 /**
  * This function registers a non-RTOS IRQ source. The source ID
@@ -62,7 +62,7 @@ void rtos_irq_peripheral(chanend dest_chanend);
  * peripheral needs to send an IRQ.
  */
 
-int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend source_chanend);
+int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend_t source_chanend);
 
 /**
  * This function enables the calling core to receive RTOS IRQs. It

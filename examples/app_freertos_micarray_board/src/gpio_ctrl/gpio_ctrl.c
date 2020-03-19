@@ -17,7 +17,6 @@
 /* App headers */
 #include "app_conf.h"
 #include "audio_pipeline.h"
-#include "xcore_c.h"
 
 static QueueHandle_t gpio_event_q;
 static TaskHandle_t gpio_handler_task;
