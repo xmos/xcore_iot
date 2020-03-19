@@ -13,6 +13,7 @@
 /* App headers */
 #include "app_conf.h"
 
+#if THIS_XCORE_TILE == 0
 void soc_tile0_main(
         int tile)
 {
@@ -20,7 +21,9 @@ void soc_tile0_main(
 
     vTaskStartScheduler();
 }
+#endif
 
+#if THIS_XCORE_TILE == 1
 void soc_tile1_main(
         int tile)
 {
@@ -28,6 +31,7 @@ void soc_tile1_main(
 
     vTaskStartScheduler();
 }
+#endif
 
 void vApplicationMallocFailedHook(void)
 {

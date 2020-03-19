@@ -9,6 +9,7 @@
 #include "bitstream.h"
 #include "bitstream_devices.h"
 
+#if THIS_XCORE_TILE == 0
 void tile0_device_instantiate(
         chanend intertile_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
@@ -34,7 +35,9 @@ void tile0_device_instantiate(
         }
     }
 }
+#endif
 
+#if THIS_XCORE_TILE == 1
 void tile1_device_instantiate(
         chanend intertile_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
@@ -45,3 +48,4 @@ void tile1_device_instantiate(
         }
     }
 }
+#endif
