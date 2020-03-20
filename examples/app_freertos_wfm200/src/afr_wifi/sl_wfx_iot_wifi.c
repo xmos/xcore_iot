@@ -771,7 +771,9 @@ WIFIReturnCode_t WIFI_StartAP( void )
                                               0, /* SSID is not hidden */
                                               0, /* Don't isolate clients */
                                               wifi_ap_settings.security,
-                                              1, /* enable management frame protection */
+                                              /* enable management frame protection if WPA */
+                                              wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_PSK ||
+                                              wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_WPA1_PSK ? 1 : 0,
                                               wifi_ap_settings.password,
                                               wifi_ap_settings.password_length,
                                               NULL, /* No vendor specific beacon data */
