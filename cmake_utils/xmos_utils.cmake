@@ -137,6 +137,8 @@ function(XMOS_REGISTER_APP)
 
     if(DEFINED THIS_XCORE_TILE)
         set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
+        file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
     else()
         set(TARGET_NAME "${PROJECT_NAME}.xe")
     endif()

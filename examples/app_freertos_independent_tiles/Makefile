@@ -1,6 +1,6 @@
 EXECUTABLE = bin/app_freertos_independent_tiles.xe
-EXECUTABLE_T0 = bin/app_freertos_independent_tiles_0.xe
-EXECUTABLE_T1 = bin/app_freertos_independent_tiles_1.xe
+EXECUTABLE_T0 = bin/tile0/app_freertos_independent_tiles_0.xe
+EXECUTABLE_T1 = bin/tile1/app_freertos_independent_tiles_1.xe
 
 .PHONY: all clean .FORCE
 .FORCE:
@@ -29,4 +29,3 @@ $(EXECUTABLE): $(EXECUTABLE_T0) $(EXECUTABLE_T1)
 	mkdir -p build/tmp
 	cd build/tmp && xobjdump --split ../../$(EXECUTABLE_T1)
 	xobjdump $(EXECUTABLE) -r 0,1,build/tmp/image_n0c1_2.elf
-
