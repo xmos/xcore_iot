@@ -15,11 +15,17 @@ void t1_test(void *arg);
 
 
 #include "message_buffer.h"
+#include "queue.h"
 #include "soc.h"
 
 typedef struct {
     MessageBufferHandle_t send_msg_buf;
     MessageBufferHandle_t recv_msg_buf;
+    QueueHandle_t eventQueue;
+    QueueHandle_t respQueue;
 } intertile_msg_buffers_t;
+
+int add(int a, int b);
+
 
 #endif /* INTERTILE_CTRL_H_ */

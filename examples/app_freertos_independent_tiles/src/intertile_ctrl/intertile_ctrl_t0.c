@@ -6,6 +6,7 @@
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "message_buffer.h"
 
 /* Library headers */
@@ -20,6 +21,13 @@
 #include "app_conf.h"
 #include "intertile_ctrl.h"
 
+typedef struct
+{
+    int id;
+    int a;
+    int b;
+    int ret;
+} add_rpc_arg_t ;
 
 void t0_test(void *arg)
 {
@@ -27,6 +35,9 @@ void t0_test(void *arg)
 
     intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
     MessageBufferHandle_t send_msg_buf = msgbuffers->send_msg_buf;
+    MessageBufferHandle_t recv_msg_buf = msgbuffers->recv_msg_buf;
+    QueueHandle_t eventQueue = msgbuffers->eventQueue;
+    QueueHandle_t respQueue = msgbuffers->respQueue;
 
     uint8_t buf[] = "Hello Tile 1";
     uint8_t buf1[] = "Goodbye Tile 1";
@@ -34,20 +45,22 @@ void t0_test(void *arg)
 
     for( ;; )
     {
-        len = strlen((char *)buf) + 1;
-        rtos_printf("tile[%d] Send %d bytes:\n\t-> %s\n", 1&get_local_tile_id(), len, buf);
-        if( xMessageBufferSend( send_msg_buf, (void*)buf, len, portMAX_DELAY) != len )
-        {
-            configASSERT(0);    // Failed to send full buffer
-        }
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        uint8_t *data = pvPortMalloc( sizeof(uint8_t) * INTERTILE_DEV_BUFSIZE );
+        xQueueReceive( eventQueue, data, portMAX_DELAY );
+        len = sizeof(add_rpc_arg_t);
 
-        len = strlen((char *)buf1) + 1;
-        rtos_printf("tile[%d] Send %d bytes:\n\t-> %s\n", 1&get_local_tile_id(), len, buf);
-        if( xMessageBufferSend( send_msg_buf, (void*)buf1, len, portMAX_DELAY) != len )
+        if( xMessageBufferSend( send_msg_buf, (void*)data, len, portMAX_DELAY) != len )
         {
             configASSERT(0);    // Failed to send full buffer
         }
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        size_t recv_len = 0;
+
+        rtos_printf("tile[%d] Waiting for message\n", 1&get_local_tile_id());
+        recv_len = xMessageBufferReceive(recv_msg_buf, data, INTERTILE_DEV_BUFSIZE, portMAX_DELAY);
+
+        rtos_printf("data is:%d\n", ((add_rpc_arg_t*)data)->ret);
+        xQueueSend(respQueue, data, portMAX_DELAY );
+
+        vPortFree(data);
     }
 }

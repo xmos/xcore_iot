@@ -6,6 +6,7 @@
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "message_buffer.h"
 
 /* Library headers */
@@ -95,6 +96,65 @@ static void intertile_msgbuffer(void *arg)
     }
 }
 
+
+typedef struct
+{
+    int id;
+    int a;
+    int b;
+    int ret;
+} add_rpc_arg_t ;
+
+
+#if THIS_XCORE_TILE == 0
+static QueueHandle_t eventqueue;
+static QueueHandle_t respqueue;
+
+int add(int a, int b)
+{
+    int ret;
+    rtos_printf("tile[%d] Add\n", 1&get_local_tile_id());
+
+    add_rpc_arg_t* msg = pvPortMalloc(sizeof(add_rpc_arg_t));
+    msg->id = 12;
+    msg->a = a;
+    msg->b = b;
+    msg->ret = 0;
+
+    xQueueSend( eventqueue, msg, portMAX_DELAY );
+    xQueueReceive( respqueue, msg, portMAX_DELAY );
+    ret = msg->ret;
+
+    return ret;
+}
+#endif
+
+
+#if THIS_XCORE_TILE == 1
+int add(int a, int b)
+{
+    rtos_printf("tile[%d] Add\n", 1&get_local_tile_id());
+
+    return a+b;
+}
+#endif
+
+#define TEST(a,b) {ret = add(a, b);rtos_printf("%d+%d=%d\n",a, b, ret);}
+
+void add_task(void *arg)
+{
+    int ret, a, b;
+    for( ;; )
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        TEST(1,1);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        TEST(-5,2);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        TEST(0,31);
+    }
+}
+
 void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 {
     static intertile_msg_buffers_t msgbuffers;
@@ -105,6 +165,15 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority )
     msgbuffers.recv_msg_buf = recv_msg_buf;
     msgbuffers.send_msg_buf = send_msg_buf;
 
+
+#if THIS_XCORE_TILE == 0
+    eventqueue = xQueueCreate(2, INTERTILE_DEV_BUFSIZE);
+    respqueue = xQueueCreate(2, INTERTILE_DEV_BUFSIZE);
+
+    msgbuffers.eventQueue = eventqueue;
+    msgbuffers.respQueue = respqueue;
+#endif
+
     soc_peripheral_t dev = intertile_driver_init(
             BITSTREAM_INTERTILE_DEVICE_A,
             2,
@@ -112,8 +181,10 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority )
             &msgbuffers,
             0);
 
+    xTaskCreate(add_task, "add_task", portTASK_STACK_DEPTH(add_task), dev, uxPriority, NULL);
+
     xTaskCreate(t0_test, "tile0_intertile", portTASK_STACK_DEPTH(t0_test), dev, uxPriority, NULL);
-    xTaskCreate(rx_task, "tile0_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
+//    xTaskCreate(rx_task, "tile0_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
     xTaskCreate(intertile_msgbuffer, "tile0_msgbuf", portTASK_STACK_DEPTH(intertile_msgbuffer), dev, uxPriority, NULL);
 
 }
@@ -136,6 +207,6 @@ void intertile_ctrl_create_t1( UBaseType_t uxPriority )
             0);
 
     xTaskCreate(t1_test, "tile1_intertile", portTASK_STACK_DEPTH(t1_test), dev, uxPriority, NULL);
-    xTaskCreate(rx_task, "tile1_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
+//    xTaskCreate(rx_task, "tile1_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
     xTaskCreate(intertile_msgbuffer, "tile1_msgbuf", portTASK_STACK_DEPTH(intertile_msgbuffer), dev, uxPriority, NULL);
 }
