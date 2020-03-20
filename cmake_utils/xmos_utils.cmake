@@ -94,7 +94,7 @@ function(XMOS_REGISTER_APP)
     set(LIB_DEPENDENT_MODULES ${APP_DEPENDENT_MODULES})
     set(LIB_OPTIONAL_HEADERS "")
     set(LIB_FILE_FLAGS "")
-    
+
     XMOS_REGISTER_MODULE("silent")
 
     get_target_property(${PROJECT_NAME}_LIB_SRCS ${PROJECT_NAME}_LIB SOURCES)
@@ -135,7 +135,12 @@ function(XMOS_REGISTER_APP)
         endforeach()
     endforeach()
 
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
+    if(DEFINED THIS_XCORE_TILE)
+        set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
+    else()
+        set(TARGET_NAME "${PROJECT_NAME}.xe")
+    endif()
+
     set(APP_COMPILE_FLAGS ${APP_TARGET_COMPILER_FLAG} ${APP_COMPILER_FLAGS} ${APP_COMPILER_C_FLAGS} ${HEADER_EXIST_FLAGS})
 
     foreach(target ${XMOS_TARGETS_LIST})
