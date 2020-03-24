@@ -21,11 +21,13 @@ typedef struct intertile_isr_callback {
 
 static intertile_isr_callback_t intertile_isr_callback_map[ BITSTREAM_INTERTILE_DEVICE_COUNT ][ INTERTILE_DEV_HANDLER_COUNT ];
 
-INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_null, device, buf, len, xReturnBufferToDMA)
+INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_null, device, buf, len, status, xReturnBufferToDMA)
 {
     (void) device;
     (void) buf;
     (void) len;
+    (void) status;
+    (void) xReturnBufferToDMA;
 
     return pdFALSE;
 }
@@ -39,17 +41,35 @@ static void intertile_isr( soc_peripheral_t device )
 
     status = soc_peripheral_interrupt_status(device);
 
-    if (status & SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM) {
+    if (status & SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM)
+    {
+        rtos_printf("tile[%d] dma tx done\n", 1&get_local_tile_id());
         soc_dma_ring_buf_t *tx_ring_buf;
-        int more;
+        uint8_t *frame_buffer0;
+        int frame_length0;
+        uint8_t *frame_buffer1;
+        int frame_length1;
         tx_ring_buf = soc_peripheral_tx_dma_ring_buf(device);
-        do
         {
-            soc_dma_ring_tx_buf_get(tx_ring_buf, NULL, &more);   // give the buffer back for now
-        } while(more);
+            frame_buffer0 = soc_dma_ring_tx_buf_get(tx_ring_buf, &frame_length0, NULL);
+            frame_buffer1 = soc_dma_ring_tx_buf_get(tx_ring_buf, &frame_length1, NULL);
+
+            uint32_t cb_id = frame_buffer0[0];
+            intertile_isr_callback_t mapped_cb;
+
+            if( ( mapped_cb.cb = intertile_isr_callback_map[ device_id ][ cb_id ].cb ) != NULL )
+            {
+                if( mapped_cb.cb( device, frame_buffer1, frame_length1, status, NULL ) == pdTRUE )
+                {
+                    xYieldRequired = pdTRUE;
+                }
+            }
+        }
     }
 
-    if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM) {
+    if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM)
+    {
+        rtos_printf("tile[%d] dma rx done\n", 1&get_local_tile_id());
         soc_dma_ring_buf_t *rx_ring_buf;
         uint8_t *frame_buffer;
         int frame_length;
@@ -65,7 +85,7 @@ static void intertile_isr( soc_peripheral_t device )
 
             if( ( mapped_cb.cb = intertile_isr_callback_map[ device_id ][ cb_id ].cb ) != NULL )
             {
-                if( mapped_cb.cb( device, frame_buffer, frame_length, &xReturnBufferToDMA ) == pdTRUE )
+                if( mapped_cb.cb( device, frame_buffer, frame_length, status, &xReturnBufferToDMA ) == pdTRUE )
                 {
                     xYieldRequired = pdTRUE;
                 }
@@ -165,7 +185,7 @@ soc_peripheral_t intertile_driver_init(
     soc_peripheral_common_dma_init(
             device,
             rx_desc_count,
-            INTERTILE_DEV_BUFSIZE,
+            0,
             tx_desc_count,
             app_data,
             isr_core,

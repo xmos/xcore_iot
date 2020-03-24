@@ -17,16 +17,10 @@
  * to the intertile isr callback group so that stack usage for certain functions
  * can be calculated.
  */
-#define INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( xFunction, device, buf, len, xReturnBufferToDMA ) BaseType_t xFunction( soc_peripheral_t device, uint8_t *buf, int len, BaseType_t* xReturnBufferToDMA )
-#define INTERTILE_ISR_CALLBACK_FUNCTION( xFunction, device, buf, len, xReturnBufferToDMA ) INTERTILE_ISR_CALLBACK_ATTR BaseType_t xFunction( soc_peripheral_t device, uint8_t *buf, int len, BaseType_t* xReturnBufferToDMA )
+#define INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( xFunction, device, buf, len, status, xReturnBufferToDMA ) BaseType_t xFunction( soc_peripheral_t device, uint8_t *buf, int len, uint32_t status, BaseType_t* xReturnBufferToDMA )
+#define INTERTILE_ISR_CALLBACK_FUNCTION( xFunction, device, buf, len, status, xReturnBufferToDMA ) INTERTILE_ISR_CALLBACK_ATTR BaseType_t xFunction( soc_peripheral_t device, uint8_t *buf, int len, uint32_t status, BaseType_t* xReturnBufferToDMA )
 
-typedef BaseType_t (*intertile_isr_cb_t)(soc_peripheral_t device, uint8_t *buf, int len, BaseType_t* xReturnBufferToDMA);
-
-INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( intertile_rpc, device, buf, len, xReturnBufferToDMA );
-
-typedef struct intertile_cb_header {
-    uint8_t cb_id;
-} intertile_cb_header_t;
+typedef BaseType_t (*intertile_isr_cb_t)(soc_peripheral_t device, uint8_t *buf, int len, uint32_t status, BaseType_t* xReturnBufferToDMA);
 
 typedef enum __attribute__((packed)) {
     INTERTILE_CB_ID_0,
@@ -38,6 +32,10 @@ typedef enum __attribute__((packed)) {
     INTERTILE_CB_ID_6,
     INTERTILE_CB_ID_7,
 } intertile_cb_id_t;
+
+typedef struct intertile_cb_header {
+    intertile_cb_id_t cb_id;
+} intertile_cb_header_t;
 
 /**
  * Initialize the intertile device
