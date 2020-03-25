@@ -35,10 +35,6 @@ static List_t xFreeIntertileBuffersList;
 static IntertileBufferDescriptor_t xIntertileBufferDescriptors[ appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS ];
 static SemaphoreHandle_t xIntertileBufferSemaphore = NULL;
 
-
-static soc_peripheral_t xDevice;
-
-
 #define TILE_PRINTF(fmt, ...) rtos_printf("tile[%d] "#fmt" \n", 1&get_local_tile_id(), ##__VA_ARGS__)
 
 
@@ -57,37 +53,40 @@ static void vDeferredIntertileTransmit( void *buf, uint32_t len )
 portTIMER_CALLBACK_ATTRIBUTE
 static void vDeferredIntertileReceive( uint8_t *buf, int len )
 {
-    IntertileBufferDescriptor_t *pxBuffer;
-    soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(xDevice);
+    IntertileBufferDescriptor_t *pxNewBufDesc;
+    IntertileBufferDescriptor_t *pxBufDesc;
+    soc_peripheral_t dev;
+    soc_dma_ring_buf_t *rx_ring_buf;
+
+    pxBufDesc = pxGetDescriptorFromBuffer( buf );
+    configASSERT( pxBufDesc != NULL );
+    TILE_PRINTF("rx debug descriptor is %p", pxBufDesc);
+    dev = pxBufDesc->dev;
+    rx_ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
 
     /* Allocate a new network buffer for the DMA engine
      * to replace the one it just gave us. */
-    pxBuffer = pxGetIntertileBufferWithDescriptor( INTERTILE_DEV_BUFSIZE, 0 );
+    pxNewBufDesc = pxGetIntertileBufferWithDescriptor( INTERTILE_DEV_BUFSIZE, 0 );
 
-    if( pxBuffer != NULL )
+    if( pxNewBufDesc != NULL )
     {
-        soc_dma_ring_rx_buf_set(rx_ring_buf, pxBuffer->pucBuffer, INTERTILE_DEV_BUFSIZE);
-        soc_peripheral_hub_dma_request(xDevice, SOC_DMA_RX_REQUEST);
-
         IntertileEvent_t xRecvMessage;
 
-        IntertileBufferDescriptor_t* pvData = pxGetDescriptorFromBuffer( buf );
+        pxNewBufDesc->dev = dev;
+        soc_dma_ring_rx_buf_set(rx_ring_buf, pxNewBufDesc->pucBuffer, INTERTILE_DEV_BUFSIZE);
+        soc_peripheral_hub_dma_request(dev, SOC_DMA_RX_REQUEST);
 
-        TILE_PRINTF("rx debug descriptor is %p", pvData);
-
-        configASSERT( pvData != NULL );
-
-        pvData->hdr = buf;
-        pvData->pucBuffer = ( uint8_t* )buf + sizeof( intertile_cb_header_t );
-        pvData->xLen = len;
+        pxBufDesc->hdr = (intertile_cb_header_t *) buf;
+        pxBufDesc->pucBuffer = ( uint8_t* )buf + sizeof( intertile_cb_header_t );
+        pxBufDesc->xLen = len;
 
         xRecvMessage.eEventType = eIntertileRxEvent;
-        xRecvMessage.pvData = ( void* )pvData;
+        xRecvMessage.pvData = ( void* )pxBufDesc;
 
         if( xSendEventStructToIntertileTask( &xRecvMessage, ( TickType_t ) 0 ) == pdFAIL )
         {
             TILE_PRINTF("failed to send rx data to intertile device",0);
-            vReleaseIntertileBufferAndDescriptor( pvData );
+            vReleaseIntertileBufferAndDescriptor( pxBufDesc );
         }
     }
     else
@@ -98,22 +97,6 @@ static void vDeferredIntertileReceive( uint8_t *buf, int len )
         soc_dma_ring_rx_buf_set(rx_ring_buf, buf, INTERTILE_DEV_BUFSIZE);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 static void add_pipe( IntertilePipe_t pxPipe )
 {
@@ -523,6 +506,7 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
         IntertileBufferDescriptor_t *bufdesc = pxGetIntertileBufferWithDescriptor(INTERTILE_DEV_BUFSIZE, 0);
         configASSERT(bufdesc != NULL);
         TILE_PRINTF("rx buffer desc @ %p with buf @ %p", bufdesc, bufdesc->pucBuffer);
+        bufdesc->dev = device;
         soc_dma_ring_rx_buf_set(soc_peripheral_rx_dma_ring_buf(device), bufdesc->pucBuffer, INTERTILE_DEV_BUFSIZE);
     }
 
@@ -575,7 +559,6 @@ BaseType_t xSendEventStructToIntertileTask( const IntertileEvent_t *pxEvent, Tic
 
 INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_recv, device, buf, len, status, xReturnBufferToDMA)
 {
-    soc_peripheral_t dev = device;
     BaseType_t xYieldRequired = pdFALSE;
 
     if (status & SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM)
@@ -673,12 +656,10 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 {
     soc_peripheral_t dev = intertile_driver_init(
             BITSTREAM_INTERTILE_DEVICE_A,
-            2,
-            2,
+            appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS,
+            appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS,
             NULL,
             0);
-
-    xDevice = dev;
 
     xTaskCreate(prvIntertilePipeManagerTask, "IntertilePipeMNGR", portTASK_STACK_DEPTH(prvIntertilePipeManagerTask), dev, uxPriority, &xIntertileTaskHandle);
 
@@ -717,12 +698,10 @@ void intertile_ctrl_create_t1( UBaseType_t uxPriority )
 {
     soc_peripheral_t dev = intertile_driver_init(
             BITSTREAM_INTERTILE_DEVICE_A,
-            2,
-            2,
+            appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS,
+            appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS,
             NULL,
             0);
-
-    xDevice = dev;
 
     xTaskCreate(prvIntertilePipeManagerTask, "IntertilePipeMNGR", portTASK_STACK_DEPTH(prvIntertilePipeManagerTask), dev, uxPriority, &xIntertileTaskHandle);
     xTaskCreate(test_send, "test_send", portTASK_STACK_DEPTH(test_send), dev, uxPriority-1, NULL);
