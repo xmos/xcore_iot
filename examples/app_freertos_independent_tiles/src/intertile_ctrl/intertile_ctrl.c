@@ -36,8 +36,6 @@ static IntertileBufferDescriptor_t xIntertileBufferDescriptors[ appconfigNUM_INT
 static SemaphoreHandle_t xIntertileBufferSemaphore = NULL;
 
 
-
-
 static soc_peripheral_t xDevice;
 
 
@@ -53,22 +51,6 @@ static void vDeferredIntertileTransmit( void *buf, uint32_t len )
         pxBuffer = pxGetDescriptorFromBuffer( buf );
         configASSERT( pxBuffer != NULL );
         vReleaseIntertileBufferAndDescriptor( pxBuffer );
-    }
-    else
-    {
-        uint8_t *pucBuf;
-        soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(xDevice);
-
-        (void) buf;
-        (void) len;
-
-        /* Free any tx buffers that have already been processed */
-        while( ( pucBuf = soc_dma_ring_tx_buf_get( tx_ring_buf, NULL, NULL ) ) != NULL )
-        {
-            pxBuffer = pxGetDescriptorFromBuffer( pucBuf );
-            configASSERT( pxBuffer != NULL );
-            vReleaseIntertileBufferAndDescriptor( pxBuffer );
-        }
     }
 }
 
@@ -115,8 +97,6 @@ static void vDeferredIntertileReceive( uint8_t *buf, int len )
         /* Give the buffer back to the DMA engine */
         soc_dma_ring_rx_buf_set(rx_ring_buf, buf, INTERTILE_DEV_BUFSIZE);
     }
-
-    vDeferredIntertileTransmit(NULL, 0);
 }
 
 

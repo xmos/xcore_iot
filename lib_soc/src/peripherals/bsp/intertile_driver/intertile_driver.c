@@ -45,26 +45,27 @@ static void intertile_isr( soc_peripheral_t device )
     {
         rtos_printf("tile[%d] dma tx done\n", 1&get_local_tile_id());
         soc_dma_ring_buf_t *tx_ring_buf;
-        uint8_t *frame_buffer0;
-        int frame_length0;
-        uint8_t *frame_buffer1;
-        int frame_length1;
-        tx_ring_buf = soc_peripheral_tx_dma_ring_buf(device);
-        {
-            frame_buffer0 = soc_dma_ring_tx_buf_get(tx_ring_buf, &frame_length0, NULL);
-            frame_buffer1 = soc_dma_ring_tx_buf_get(tx_ring_buf, &frame_length1, NULL);
+        uint8_t *hdr_buf, *bytes_buf;
+        int hdr_buf_len, bytes_buf_len;
+        int more;
 
-            uint32_t cb_id = frame_buffer0[0];
+        tx_ring_buf = soc_peripheral_tx_dma_ring_buf(device);
+        do
+        {
+            hdr_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &hdr_buf_len, NULL);
+            bytes_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &bytes_buf_len, &more);
+
+            uint32_t cb_id = hdr_buf[0];
             intertile_isr_callback_t mapped_cb;
 
             if( ( mapped_cb.cb = intertile_isr_callback_map[ device_id ][ cb_id ].cb ) != NULL )
             {
-                if( mapped_cb.cb( device, frame_buffer1, frame_length1, status, NULL ) == pdTRUE )
+                if( mapped_cb.cb( device, bytes_buf, bytes_buf_len, status, NULL ) == pdTRUE )
                 {
                     xYieldRequired = pdTRUE;
                 }
             }
-        }
+        } while( more );
     }
 
     if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM)
