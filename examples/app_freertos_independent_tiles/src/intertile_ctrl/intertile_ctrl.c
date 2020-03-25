@@ -78,7 +78,7 @@ static void vDeferredIntertileReceive( uint8_t *buf, int len )
         configASSERT( pvData != NULL );
 
         pvData->hdr = buf;
-        pvData->pucBuffer = ( uint8_t* )buf+1;
+        pvData->pucBuffer = ( uint8_t* )buf + sizeof( intertile_cb_header_t );
         pvData->xLen = len;
 
         xRecvMessage.eEventType = eIntertileRxEvent;
@@ -255,10 +255,15 @@ BaseType_t intertile_send( IntertilePipe_t pxIntertilePipe, const void* pvBuffer
     // Verify a configured intertile pipe was passed in
     if( xPipe->xRxQueue != NULL )
     {
-        IntertileBufferDescriptor_t* pvData = pxGetIntertileBufferWithDescriptor( xBufferLen, 0 );
+        IntertileBufferDescriptor_t* pvData = pxGetIntertileBufferWithDescriptor( 0, 0 );
 
         if( pvData != NULL )
         {
+            // Populated the descriptor address
+            pvData->pucBuffer -= sizeof( IntertileBufferDescriptor_t* );
+            *( ( IntertileBufferDescriptor_t ** ) ( pvData->pucBuffer ) ) = pvData;
+            pvData->pucBuffer += sizeof( IntertileBufferDescriptor_t* );
+
             pvData->pucBuffer = pvBuffer;
             pvData->xLen = xBufferLen;
             pvData->hdr = &xPipe->cb_id;
@@ -298,7 +303,6 @@ BaseType_t intertile_send_copy( IntertilePipe_t pxIntertilePipe, const void* pvB
         if( pvData != NULL )
         {
             memcpy(pvData->pucBuffer, pvBuffer, xBufferLen);
-            pvData->xLen = xBufferLen;
             pvData->hdr = &xPipe->cb_id;
 
             IntertileEvent_t xSendEvent;
@@ -330,8 +334,6 @@ BaseType_t xIntertilePipeManagerReady( void )
 
 static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffer )
 {
-    uint8_t* buf = (uint8_t*)pxBuffer->pucBuffer;
-    size_t len = (size_t)pxBuffer->xLen;
     intertile_cb_header_t* hdr = (intertile_cb_header_t*)pxBuffer->hdr;
     intertile_cb_id_t cb_id = (intertile_cb_id_t)hdr->cb_id;
     IntertilePipe_t pxPipe = NULL;
@@ -345,10 +347,18 @@ static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffe
         }
     }
 
+    /* We will update the length field to be only the size of the payload */
+    pxBuffer->xLen -= sizeof( intertile_cb_header_t );
+
     xQueueSend( pxPipe->xRxQueue, pxBuffer, portMAX_DELAY );
 
-    // TODO why do you break it
-//    vReleaseIntertileBufferAndDescriptor( pxBuffer );
+    /* The intertile device sends a buffer with header followed by data.
+     * vDeferredIntertileRecieve places the start of data pointer
+     * in pxBuffer->pucBuffer however, the start of the allocated buffer
+     * is at pxBuffer->pucBuffer - sizeof( intertile_cb_header_t ) */
+    pxBuffer->pucBuffer -= sizeof( intertile_cb_header_t );
+
+    vReleaseIntertileBufferAndDescriptor( pxBuffer );
 }
 
 static void prvIntertileSend( soc_peripheral_t device, IntertileBufferDescriptor_t * const pxBuffer )
@@ -366,8 +376,11 @@ void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const p
     BaseType_t xListItemAlreadyInFreeList;
 
     pxBuffer->pucBuffer -= sizeof( IntertileBufferDescriptor_t* );
-    TILE_PRINTF("trying to free buffer at %p", pxBuffer->pucBuffer);
-    vPortFree( pxBuffer->pucBuffer );
+    if( pxBuffer->pucBuffer != NULL )
+    {
+        TILE_PRINTF("trying to free buffer at %p", pxBuffer->pucBuffer);
+        vPortFree( pxBuffer->pucBuffer );
+    }
     pxBuffer->pucBuffer = NULL;
 
     taskENTER_CRITICAL();
@@ -413,6 +426,30 @@ IntertileBufferDescriptor_t *pxResult;
     return pxResult;
 }
 
+uint8_t *pucGetIntertileBuffer( size_t xRequestedSizeBytes )
+{
+    uint8_t *pucBuffer;
+
+    pucBuffer = ( uint8_t * ) pvPortMalloc( xRequestedSizeBytes + ( sizeof( IntertileBufferDescriptor_t* ) ) );
+    configASSERT( pucBuffer );
+
+    if( pucBuffer != NULL )
+    {
+        pucBuffer += sizeof( IntertileBufferDescriptor_t* );
+    }
+
+    return pucBuffer;
+}
+
+void vReleaseIntertileBuffer( uint8_t *pucBuffer )
+{
+    if( pucBuffer != NULL )
+    {
+        pucBuffer -= sizeof( IntertileBufferDescriptor_t* );
+        vPortFree( pucBuffer );
+    }
+}
+
 IntertileBufferDescriptor_t *pxGetIntertileBufferWithDescriptor( size_t xRequestedSizeBytes, TickType_t xBlockTimeTicks )
 {
     IntertileBufferDescriptor_t *pxReturn = NULL;
@@ -450,10 +487,10 @@ IntertileBufferDescriptor_t *pxGetIntertileBufferWithDescriptor( size_t xRequest
     return pxReturn;
 }
 
-static void prvIntertileTask( void *pvArgs )
+static void prvIntertilePipeManagerTask( void *pvArgs )
 {
     soc_peripheral_t device = pvArgs;
-    TILE_PRINTF("prvIntertileTask",0);
+    TILE_PRINTF("prvIntertilePipeManagerTask",0);
 
     xIntertileEventQueue = xQueueCreate( app_confINTERTILE_EVENT_QUEUE_LEN, sizeof( IntertileEvent_t ) );
     configASSERT( xIntertileEventQueue );
@@ -478,11 +515,11 @@ static void prvIntertileTask( void *pvArgs )
         }
     }
 
-    for( int i = 0; i < 2; i++ )
+    for( int i = 0; i < appconfigNUM_INTERTILE_RX_DMA_BUF; i++ )
     {
         IntertileBufferDescriptor_t *bufdesc = pxGetIntertileBufferWithDescriptor(INTERTILE_DEV_BUFSIZE, 0);
         configASSERT(bufdesc != NULL);
-        TILE_PRINTF("rx buffer @ %p", bufdesc);
+        TILE_PRINTF("rx buffer desc @ %p with buf @ %p", bufdesc, bufdesc->pucBuffer);
         soc_dma_ring_rx_buf_set(soc_peripheral_rx_dma_ring_buf(device), bufdesc->pucBuffer, INTERTILE_DEV_BUFSIZE);
     }
 
@@ -562,12 +599,6 @@ INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_recv, device, buf, len, status, x
 }
 
 
-
-
-
-
-
-
 #if THIS_XCORE_TILE == 0
 
 int add(int a, int b)
@@ -625,6 +656,11 @@ static void test_recv( void* args)
     for( ;; )
     {
         len = intertile_recv_copy( pipe, &buf, INTERTILE_DEV_BUFSIZE);
+        for(int i=0; i<len; i++)
+        {
+            TILE_PRINTF("recv task revc[%d]: %c", i, buf[i]);
+        }
+
         TILE_PRINTF("recv task revc %d bytes: %s", len, buf);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -641,7 +677,7 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 
     xDevice = dev;
 
-    xTaskCreate(prvIntertileTask, "prvIntertileTask", portTASK_STACK_DEPTH(prvIntertileTask), dev, uxPriority, &xIntertileTaskHandle);
+    xTaskCreate(prvIntertilePipeManagerTask, "IntertilePipeMNGR", portTASK_STACK_DEPTH(prvIntertilePipeManagerTask), dev, uxPriority, &xIntertileTaskHandle);
 
     xTaskCreate(test_recv, "test_recv", portTASK_STACK_DEPTH(test_recv), dev, uxPriority-1, NULL);
 
@@ -685,7 +721,7 @@ void intertile_ctrl_create_t1( UBaseType_t uxPriority )
 
     xDevice = dev;
 
-    xTaskCreate(prvIntertileTask, "prvIntertileTask", portTASK_STACK_DEPTH(prvIntertileTask), dev, uxPriority, &xIntertileTaskHandle);
+    xTaskCreate(prvIntertilePipeManagerTask, "IntertilePipeMNGR", portTASK_STACK_DEPTH(prvIntertilePipeManagerTask), dev, uxPriority, &xIntertileTaskHandle);
     xTaskCreate(test_send, "test_send", portTASK_STACK_DEPTH(test_send), dev, uxPriority-1, NULL);
 
 //    xTaskCreate(t1_test, "tile1_intertile", portTASK_STACK_DEPTH(t1_test), dev, uxPriority, NULL);

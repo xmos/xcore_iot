@@ -75,5 +75,6 @@ BaseType_t xSendEventStructToIntertileTask( const IntertileEvent_t *pxEvent, Tic
 void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const pxBuffer );
 IntertileBufferDescriptor_t *pxGetIntertileBufferWithDescriptor( size_t xRequestedSizeBytes, TickType_t xBlockTimeTicks );
 IntertileBufferDescriptor_t *pxGetDescriptorFromBuffer( const void *pvBuffer );
+uint8_t *pucGetIntertileBuffer( size_t xRequestedSizeBytes );
 
 #endif /* INTERTILE_CTRL_H_ */

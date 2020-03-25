@@ -22,7 +22,7 @@
 
 typedef BaseType_t (*intertile_isr_cb_t)(soc_peripheral_t device, uint8_t *buf, int len, uint32_t status, BaseType_t* xReturnBufferToDMA);
 
-typedef enum __attribute__((packed)) {
+typedef enum {
     INTERTILE_CB_ID_0,
     INTERTILE_CB_ID_1,
     INTERTILE_CB_ID_2,
