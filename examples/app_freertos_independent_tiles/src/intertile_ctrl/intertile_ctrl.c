@@ -39,7 +39,7 @@ static SemaphoreHandle_t xIntertileBufferSemaphore = NULL;
 static soc_peripheral_t xDevice;
 
 
-#define TILE_PRINTF(fmt, ...) rtos_printf("tile[%d] "#fmt" \n", 1&get_local_tile_id(), __VA_ARGS__)
+#define TILE_PRINTF(fmt, ...) rtos_printf("tile[%d] "#fmt" \n", 1&get_local_tile_id(), ##__VA_ARGS__)
 
 
 portTIMER_CALLBACK_ATTRIBUTE
@@ -380,8 +380,8 @@ void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const p
     {
         TILE_PRINTF("trying to free buffer at %p", pxBuffer->pucBuffer);
         vPortFree( pxBuffer->pucBuffer );
+        pxBuffer->pucBuffer = NULL;
     }
-    pxBuffer->pucBuffer = NULL;
 
     taskENTER_CRITICAL();
     {
@@ -471,15 +471,18 @@ IntertileBufferDescriptor_t *pxGetIntertileBufferWithDescriptor( size_t xRequest
             {
                 pxReturn->pucBuffer = ( uint8_t * ) pvPortMalloc( xRequestedSizeBytes + ( sizeof( IntertileBufferDescriptor_t* ) ) );
 
-                if( pxReturn->pucBuffer == NULL )
+                if( pxReturn->pucBuffer != NULL )
+                {
+                    pxReturn->xLen = xRequestedSizeBytes;
+
+                    *( ( IntertileBufferDescriptor_t ** ) ( pxReturn->pucBuffer ) ) = pxReturn;
+                    pxReturn->pucBuffer += sizeof( IntertileBufferDescriptor_t* );
+                }
+                else
                 {
                     vReleaseIntertileBufferAndDescriptor( pxReturn );
                     pxReturn = NULL;
                 }
-                pxReturn->xLen = xRequestedSizeBytes;
-
-                *( ( IntertileBufferDescriptor_t ** ) ( pxReturn->pucBuffer ) ) = pxReturn;
-                pxReturn->pucBuffer += sizeof( IntertileBufferDescriptor_t* );
             }
         }
     }
