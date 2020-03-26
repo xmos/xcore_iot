@@ -53,9 +53,10 @@ typedef struct IntertilePipe *IntertilePipe_t;
 typedef struct IntertileBufferDescriptor
 {
     ListItem_t xBufferListItem;
+    soc_peripheral_t dev; /**< Intertile device used to transfer this buffer. */
+    intertile_cb_footer_t *ftr;
     uint8_t *pucBuffer;
     size_t xLen;
-    intertile_cb_footer_t *ftr;
 } IntertileBufferDescriptor_t;
 
 /* Function prototypes */
