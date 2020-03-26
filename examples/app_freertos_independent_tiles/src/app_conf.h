@@ -10,6 +10,8 @@
 #define appconfigNUM_INTERTILE_RX_DMA_BUF           (2)
 
 /* Task Priorities */
-#define appconfINTERTILE_CTRL_TASK_PRIORITY    ( configMAX_PRIORITIES - 3 )
+#define appconfINTERTILE_PIPE_MGR_TASK_PRIORITY     ( configMAX_PRIORITIES - 1 )
+#define appconfINTERTILE_CTRL_TASK_PRIORITY         ( configMAX_PRIORITIES - 3 )
+
 
 #endif /* APP_CONF_H_ */
