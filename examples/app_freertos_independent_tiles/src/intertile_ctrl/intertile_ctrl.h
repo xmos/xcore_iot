@@ -55,17 +55,17 @@ typedef struct IntertileBufferDescriptor
     ListItem_t xBufferListItem;
     uint8_t *pucBuffer;
     size_t xLen;
-    intertile_cb_header_t *hdr;
+    intertile_cb_footer_t *ftr;
 } IntertileBufferDescriptor_t;
 
 /* Function prototypes */
 IntertilePipe_t intertile_pipe( intertile_cb_id_t cb_id );
 BaseType_t intertile_pipe_free( IntertilePipe_t pxPipe );
 
-BaseType_t intertile_recv( IntertilePipe_t pxIntertilePipe, void* pvBuffer, size_t xBufferLen );
+BaseType_t intertile_recv( IntertilePipe_t pxIntertilePipe, void* pvBuffer );
 BaseType_t intertile_send( IntertilePipe_t pxIntertilePipe, const void* pvBuffer, size_t xBufferLen );
 
-BaseType_t intertile_recv_copy( IntertilePipe_t pxIntertilePipe, void* pvBuffer, size_t xBufferLen );
+BaseType_t intertile_recv_copy( IntertilePipe_t pxIntertilePipe, void* pvBuffer );
 BaseType_t intertile_send_copy( IntertilePipe_t pxIntertilePipe, const void* pvBuffer, size_t xBufferLen );
 
 BaseType_t xIntertilePipeManagerReady( void );
@@ -76,5 +76,6 @@ void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const p
 IntertileBufferDescriptor_t *pxGetIntertileBufferWithDescriptor( size_t xRequestedSizeBytes, TickType_t xBlockTimeTicks );
 IntertileBufferDescriptor_t *pxGetDescriptorFromBuffer( const void *pvBuffer );
 uint8_t *pucGetIntertileBuffer( size_t xRequestedSizeBytes );
+void vReleaseIntertileBuffer( uint8_t *pucBuffer );
 
 #endif /* INTERTILE_CTRL_H_ */

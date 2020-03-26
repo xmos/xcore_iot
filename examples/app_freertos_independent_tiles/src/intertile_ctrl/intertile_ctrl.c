@@ -23,6 +23,13 @@
 #include "app_conf.h"
 #include "intertile_ctrl.h"
 
+
+#define TEST_ZERO_COPY  1
+
+
+
+
+
 static IntertilePipe_t intertile_pipes[ appconfINTERTILE_MAX_PIPES ] = {NULL};
 
 static QueueHandle_t xIntertileEventQueue = NULL;
@@ -73,12 +80,9 @@ static void vDeferredIntertileReceive( uint8_t *buf, int len )
 
         IntertileBufferDescriptor_t* pvData = pxGetDescriptorFromBuffer( buf );
 
-        TILE_PRINTF("rx debug descriptor is %p", pvData);
-
         configASSERT( pvData != NULL );
 
-        pvData->hdr = buf;
-        pvData->pucBuffer = ( uint8_t* )buf + sizeof( intertile_cb_header_t );
+        pvData->pucBuffer = ( uint8_t* )buf;
         pvData->xLen = len;
 
         xRecvMessage.eEventType = eIntertileRxEvent;
@@ -155,7 +159,7 @@ IntertilePipe_t intertile_pipe( intertile_cb_id_t cb_id )
         pxIntertilePipe->xReceivedBlockTime = portMAX_DELAY;
         pxIntertilePipe->xSendBlockTime = portMAX_DELAY;
         pxIntertilePipe->cb_id = cb_id;
-        pxIntertilePipe->xRxQueue = xQueueCreate(1, INTERTILE_DEV_BUFSIZE);
+        pxIntertilePipe->xRxQueue = xQueueCreate(1, sizeof( IntertileBufferDescriptor_t* ) );
         add_pipe( pxIntertilePipe );
     }
 
@@ -183,7 +187,7 @@ BaseType_t intertile_pipe_free( IntertilePipe_t pxPipe )
     return xRetVal;
 }
 
-BaseType_t intertile_recv( IntertilePipe_t pxIntertilePipe, void* pvBuffer, size_t xBufferLen )
+BaseType_t intertile_recv( IntertilePipe_t pxIntertilePipe, void* pvBuffer )
 {
     prvIntertilePipe_t *xPipe = ( prvIntertilePipe_t* ) pxIntertilePipe;
     BaseType_t xRetVal = 0;
@@ -191,31 +195,32 @@ BaseType_t intertile_recv( IntertilePipe_t pxIntertilePipe, void* pvBuffer, size
     // Verify a configured intertile pipe was passed in
     if( xPipe->xRxQueue != NULL )
     {
-        IntertileBufferDescriptor_t* buf = pvPortMalloc( sizeof(uint8_t) * INTERTILE_DEV_BUFSIZE );
+        IntertileBufferDescriptor_t* buf;
 
-        if( xQueueReceive( xPipe->xRxQueue, buf, xPipe->xReceivedBlockTime ) == pdTRUE )
+        if( xQueueReceive( xPipe->xRxQueue, &buf, xPipe->xReceivedBlockTime ) == pdTRUE )
         {
-            uint8_t* abuf = (uint8_t*)buf->pucBuffer;
+            *( (void**)pvBuffer ) = (void*)( &(buf->pucBuffer[0]) );
             xRetVal = (size_t)buf->xLen;
-            intertile_cb_header_t* hdr = (intertile_cb_header_t*)buf->hdr;
-//            rtos_printf("received buffer len %d %s\n", xRetVal, abuf);
+
+            /* We need to free the descriptor now so null pucBuffer
+             * since the user is now in control of it */
+            buf->pucBuffer = NULL;
+            vReleaseIntertileBufferAndDescriptor( buf );
         }
         else
         {
-            TILE_PRINTF("intertile recv timeout",0);
+            TILE_PRINTF("intertile recv timeout");
         }
-
-        vPortFree(buf);
     }
     else
     {
-        TILE_PRINTF("Invalid pipe passed ro recv",0);
+        TILE_PRINTF("Invalid pipe passed ro recv");
     }
 
     return xRetVal;
 }
 
-BaseType_t intertile_recv_copy( IntertilePipe_t pxIntertilePipe, void* pvBuffer, size_t xBufferLen )
+BaseType_t intertile_recv_copy( IntertilePipe_t pxIntertilePipe, void* pvBuffer )
 {
     prvIntertilePipe_t *xPipe = ( prvIntertilePipe_t* ) pxIntertilePipe;
     BaseType_t xRetVal = 0;
@@ -223,21 +228,19 @@ BaseType_t intertile_recv_copy( IntertilePipe_t pxIntertilePipe, void* pvBuffer,
     // Verify a configured intertile pipe was passed in
     if( xPipe->xRxQueue != NULL )
     {
-        IntertileBufferDescriptor_t* buf = pvPortMalloc( sizeof(uint8_t) * INTERTILE_DEV_BUFSIZE );
+        IntertileBufferDescriptor_t* buf;
 
-        if( xQueueReceive( xPipe->xRxQueue, buf, xPipe->xReceivedBlockTime ) == pdTRUE )
+        if( xQueueReceive( xPipe->xRxQueue, &buf, xPipe->xReceivedBlockTime ) == pdTRUE )
         {
             memcpy( pvBuffer, (uint8_t*)buf->pucBuffer, (size_t)buf->xLen);
             xRetVal = (size_t)buf->xLen;
-            intertile_cb_header_t* hdr = (intertile_cb_header_t*)buf->hdr;
-//            rtos_printf("received buffer len %d %s\n", xRetVal, pvBuffer);
+
+            vReleaseIntertileBufferAndDescriptor( buf );
         }
         else
         {
             TILE_PRINTF("intertile recv timeout",0);
         }
-
-        vPortFree(buf);
     }
     else
     {
@@ -259,14 +262,15 @@ BaseType_t intertile_send( IntertilePipe_t pxIntertilePipe, const void* pvBuffer
 
         if( pvData != NULL )
         {
+            pvData->pucBuffer = pvBuffer;
+
             // Populated the descriptor address
             pvData->pucBuffer -= sizeof( IntertileBufferDescriptor_t* );
             *( ( IntertileBufferDescriptor_t ** ) ( pvData->pucBuffer ) ) = pvData;
             pvData->pucBuffer += sizeof( IntertileBufferDescriptor_t* );
 
-            pvData->pucBuffer = pvBuffer;
             pvData->xLen = xBufferLen;
-            pvData->hdr = &xPipe->cb_id;
+            pvData->ftr = &xPipe->cb_id;
 
             IntertileEvent_t xSendEvent;
 
@@ -303,7 +307,7 @@ BaseType_t intertile_send_copy( IntertilePipe_t pxIntertilePipe, const void* pvB
         if( pvData != NULL )
         {
             memcpy(pvData->pucBuffer, pvBuffer, xBufferLen);
-            pvData->hdr = &xPipe->cb_id;
+            pvData->ftr = &xPipe->cb_id;
 
             IntertileEvent_t xSendEvent;
 
@@ -334,8 +338,11 @@ BaseType_t xIntertilePipeManagerReady( void )
 
 static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffer )
 {
-    intertile_cb_header_t* hdr = (intertile_cb_header_t*)pxBuffer->hdr;
-    intertile_cb_id_t cb_id = (intertile_cb_id_t)hdr->cb_id;
+    intertile_cb_id_t cb_id;
+
+    /* cb_id is the first value of the footer */
+    cb_id = pxBuffer->pucBuffer[ pxBuffer->xLen - sizeof( intertile_cb_footer_t ) ];
+
     IntertilePipe_t pxPipe = NULL;
 
     for( int i=0; i<appconfINTERTILE_MAX_PIPES; i++ )
@@ -348,17 +355,13 @@ static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffe
     }
 
     /* We will update the length field to be only the size of the payload */
-    pxBuffer->xLen -= sizeof( intertile_cb_header_t );
+    pxBuffer->xLen -= sizeof( intertile_cb_footer_t );
 
-    xQueueSend( pxPipe->xRxQueue, pxBuffer, portMAX_DELAY );
-
-    /* The intertile device sends a buffer with header followed by data.
-     * vDeferredIntertileRecieve places the start of data pointer
-     * in pxBuffer->pucBuffer however, the start of the allocated buffer
-     * is at pxBuffer->pucBuffer - sizeof( intertile_cb_header_t ) */
-    pxBuffer->pucBuffer -= sizeof( intertile_cb_header_t );
-
-    vReleaseIntertileBufferAndDescriptor( pxBuffer );
+    if( xQueueSend( pxPipe->xRxQueue, &pxBuffer, portMAX_DELAY ) == pdFAIL )
+    {
+        TILE_PRINTF("Failed to send to pipe[%d] %d bytes lost", pxPipe->cb_id, pxBuffer->xLen);
+        vReleaseIntertileBufferAndDescriptor( pxBuffer );
+    }
 }
 
 static void prvIntertileSend( soc_peripheral_t device, IntertileBufferDescriptor_t * const pxBuffer )
@@ -367,20 +370,22 @@ static void prvIntertileSend( soc_peripheral_t device, IntertileBufferDescriptor
             device,
             (uint8_t*)pxBuffer->pucBuffer,
             (size_t)pxBuffer->xLen,
-            (intertile_cb_header_t*)pxBuffer->hdr );
+            (intertile_cb_footer_t*)pxBuffer->ftr );
 }
-
 
 void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const pxBuffer )
 {
     BaseType_t xListItemAlreadyInFreeList;
 
-    pxBuffer->pucBuffer -= sizeof( IntertileBufferDescriptor_t* );
     if( pxBuffer->pucBuffer != NULL )
     {
-        TILE_PRINTF("trying to free buffer at %p", pxBuffer->pucBuffer);
-        vPortFree( pxBuffer->pucBuffer );
-        pxBuffer->pucBuffer = NULL;
+        pxBuffer->pucBuffer -= sizeof( IntertileBufferDescriptor_t* );
+
+        if( pxBuffer->pucBuffer != NULL )
+        {
+            vPortFree( pxBuffer->pucBuffer );
+            pxBuffer->pucBuffer = NULL;
+        }
     }
 
     taskENTER_CRITICAL();
@@ -398,12 +403,13 @@ void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const p
     {
         if ( xSemaphoreGive( xIntertileBufferSemaphore ) == pdTRUE )
         {
-            TILE_PRINTF("buffer released and semaphore given back",0);
+            ;
+//            TILE_PRINTF("buffer released and semaphore given back");
         }
     }
     else
     {
-        TILE_PRINTF("buffer released and semaphore not given back",0);
+        TILE_PRINTF("buffer released and semaphore not given back");
     }
 }
 
@@ -493,7 +499,6 @@ IntertileBufferDescriptor_t *pxGetIntertileBufferWithDescriptor( size_t xRequest
 static void prvIntertilePipeManagerTask( void *pvArgs )
 {
     soc_peripheral_t device = pvArgs;
-    TILE_PRINTF("prvIntertilePipeManagerTask",0);
 
     xIntertileEventQueue = xQueueCreate( app_confINTERTILE_EVENT_QUEUE_LEN, sizeof( IntertileEvent_t ) );
     configASSERT( xIntertileEventQueue );
@@ -509,7 +514,7 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
         {
             /* Initialise and set the owner of the buffer list items. */
             xIntertileBufferDescriptors[ i ].pucBuffer = NULL;
-            xIntertileBufferDescriptors[ i ].hdr = NULL;
+            xIntertileBufferDescriptors[ i ].ftr = NULL;
             vListInitialiseItem( &( xIntertileBufferDescriptors[ i ].xBufferListItem ) );
             listSET_LIST_ITEM_OWNER( &( xIntertileBufferDescriptors[ i ].xBufferListItem ), &xIntertileBufferDescriptors[ i ] );
 
@@ -522,13 +527,13 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
     {
         IntertileBufferDescriptor_t *bufdesc = pxGetIntertileBufferWithDescriptor(INTERTILE_DEV_BUFSIZE, 0);
         configASSERT(bufdesc != NULL);
-        TILE_PRINTF("rx buffer desc @ %p with buf @ %p", bufdesc, bufdesc->pucBuffer);
+//        TILE_PRINTF("rx buffer desc @ %p with buf @ %p", bufdesc, bufdesc->pucBuffer);
         soc_dma_ring_rx_buf_set(soc_peripheral_rx_dma_ring_buf(device), bufdesc->pucBuffer, INTERTILE_DEV_BUFSIZE);
     }
 
     IntertileEvent_t xReceivedEvent;
     IntertilePipe_t *pxIntertilePipe;
-    TILE_PRINTF("Pipe manager ready",0);
+    TILE_PRINTF("Intertile pipe manager ready");
 
     xPipeManagerReady = pdTRUE;
 
@@ -555,7 +560,8 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
 BaseType_t xSendEventStructToIntertileTask( const IntertileEvent_t *pxEvent, TickType_t xTimeout )
 {
     BaseType_t xRetVal;
-    /* The intertile task cannot block itself while waiting for itself to respond. */
+    /* The intertile task cannot block itself while waiting for it        }
+     * self to respond. */
     if( ( xTaskGetCurrentTaskHandle() == xIntertileTaskHandle ) == pdTRUE )
     {
         xRetVal = xQueueSendToBack( xIntertileEventQueue, pxEvent, 0 );
@@ -646,27 +652,35 @@ static void test_recv( void* args)
 
     IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0 );
 
-    intertile_cb_header_t msg_hdr;
-    intertile_driver_header_init(&msg_hdr, INTERTILE_CB_ID_0);
-    intertile_driver_register_callback( dev, intertile_dev_recv, &msg_hdr);
+    intertile_cb_footer_t msg_ftr;
+    intertile_driver_footer_init(&msg_ftr, INTERTILE_CB_ID_0);
+    intertile_driver_register_callback( dev, intertile_dev_recv, &msg_ftr);
 
     while( xIntertilePipeManagerReady() == pdFALSE )
     {
         vTaskDelay(pdMS_TO_TICKS(100)); // try again in 100ms
     }
-
+#ifndef TEST_ZERO_COPY
     uint8_t buf[INTERTILE_DEV_BUFSIZE];
     for( ;; )
     {
-        len = intertile_recv_copy( pipe, &buf, INTERTILE_DEV_BUFSIZE);
-        for(int i=0; i<len; i++)
-        {
-            TILE_PRINTF("recv task revc[%d]: %c", i, buf[i]);
-        }
+        len = intertile_recv_copy( pipe, &buf );
 
-        TILE_PRINTF("recv task revc %d bytes: %s", len, buf);
+        TILE_PRINTF("<-- recv task %d bytes: %s", len, buf);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
+#else
+    for( ;; )
+    {
+        uint8_t* buf = NULL;
+        len = intertile_recv( pipe, &buf );
+        TILE_PRINTF("<-- recv task %d bytes: %s", len, (char*)buf);
+
+        vTaskDelay(pdMS_TO_TICKS(100));
+        vReleaseIntertileBuffer( buf );
+        vTaskDelay(pdMS_TO_TICKS(900));
+    }
+#endif
 }
 
 void intertile_ctrl_create_t0( UBaseType_t uxPriority )
@@ -686,7 +700,6 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 
 //    xTaskCreate(add_task, "add_task", portTASK_STACK_DEPTH(add_task), dev, uxPriority, NULL);
 //    xTaskCreate(t0_test, "tile0_intertile", portTASK_STACK_DEPTH(t0_test), dev, uxPriority, NULL);
-
 }
 
 static void test_send( void* args)
@@ -695,9 +708,9 @@ static void test_send( void* args)
 
     IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0 );
 
-    intertile_cb_header_t msg_hdr;
-    intertile_driver_header_init(&msg_hdr, INTERTILE_CB_ID_0);
-    intertile_driver_register_callback( dev, intertile_dev_recv, &msg_hdr);
+    intertile_cb_footer_t msg_ftr;
+    intertile_driver_footer_init(&msg_ftr, INTERTILE_CB_ID_0);
+    intertile_driver_register_callback( dev, intertile_dev_recv, &msg_ftr);
 
     uint8_t buf[] = "Hello";
 
@@ -705,12 +718,23 @@ static void test_send( void* args)
     {
         vTaskDelay(pdMS_TO_TICKS(100)); // try again in 100ms
     }
-
+#ifndef TEST_ZERO_COPY
     for( ;; )
     {
+        TILE_PRINTF("--> send task %d bytes: %s", strlen((char *)buf) + 1 , (char*)buf);
         intertile_send_copy( pipe, &buf, strlen((char *)buf) + 1);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
+#else
+    for( ;; )
+    {
+        TILE_PRINTF("--> send task %d bytes: %s", strlen((char *)buf) + 1 , (char*)buf);
+        uint8_t* sndbuf = pucGetIntertileBuffer( strlen((char *)buf) + 1 );
+        memcpy(sndbuf, buf, strlen((char *)buf) + 1);
+        intertile_send( pipe, sndbuf, strlen((char *)buf) + 1);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+#endif
 }
 
 void intertile_ctrl_create_t1( UBaseType_t uxPriority )

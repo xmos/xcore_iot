@@ -33,9 +33,9 @@ typedef enum {
     INTERTILE_CB_ID_7,
 } intertile_cb_id_t;
 
-typedef struct intertile_cb_header {
+typedef struct intertile_cb_footer {
     intertile_cb_id_t cb_id;
-} intertile_cb_header_t;
+} intertile_cb_footer_t;
 
 /**
  * Initialize the intertile device
@@ -62,24 +62,24 @@ soc_peripheral_t intertile_driver_init(
  * on the receiver tile.  This configured header will trigger the
  * callback ISR mapped to cb_id, if one has been registered.
  *
- * \param[in/out] cb_header      Pointer to an intertile header
+ * \param[in/out] cb_footer      Pointer to an intertile header
  * \param[in]     cb_id          Intertile ID to map to this header
  *
  * \returns       pdPASS on success
  *                pdFAIL otherwise
  */
-BaseType_t intertile_driver_header_init(
-        intertile_cb_header_t* cb_header,
+BaseType_t intertile_driver_footer_init(
+        intertile_cb_footer_t* cb_footer,
         intertile_cb_id_t cb_id);
 
 /**
  * Register an intertile ISR callback
  *
- * Register a callback to handle receiving a message with cb_header.
+ * Register a callback to handle receiving a message with cb_footer.
  *
  * \param[in]     dev            Intertile device to use
  * \param[in]     isr_cb         ISR callback
- * \param[in]     cb_header      Pointer to a configured header
+ * \param[in]     cb_footer      Pointer to a configured header
  *
  * \returns       pdPASS on success
  *                pdFAIL otherwise
@@ -87,7 +87,7 @@ BaseType_t intertile_driver_header_init(
 BaseType_t intertile_driver_register_callback(
         soc_peripheral_t dev,
         intertile_isr_cb_t isr_cb,
-        intertile_cb_header_t* cb_header);
+        intertile_cb_footer_t* cb_footer);
 
 /**
  * Unregister an intertile ISR callback
@@ -95,20 +95,20 @@ BaseType_t intertile_driver_register_callback(
  * Unregister
  *
  * \param[in]     dev            Intertile device to use
- * \param[in]     cb_header      Pointer to a configured header
+ * \param[in]     cb_footer      Pointer to a configured header
  *
  * \returns       pdPASS on success
  *                pdFAIL otherwise
  */
 BaseType_t intertile_driver_unregister_callback(
         soc_peripheral_t dev,
-        intertile_cb_header_t* cb_header);
+        intertile_cb_footer_t* cb_footer);
 
 void intertile_driver_send_bytes(
         soc_peripheral_t dev,
         uint8_t *bytes,
         unsigned len,
-        intertile_cb_header_t* cb_header);
+        intertile_cb_footer_t* cb_footer);
 
 
 #endif /* INTERTILE_DRIVER_H_ */
