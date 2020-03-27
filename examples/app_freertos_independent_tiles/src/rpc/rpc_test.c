@@ -86,7 +86,7 @@ static void rpc_host_task(void *arg)
     uint8_t *resp_msg;
     rpc_msg_t rpc_msg;
 
-    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0 );
+    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0, 2 );
 
     while (xIntertilePipeManagerReady() == pdFALSE) {
         vTaskDelay(pdMS_TO_TICKS(1)); /* try again in 1ms */
@@ -153,7 +153,7 @@ int call_1(int a, uint8_t *buffer, int len)
 
 static void rpc_client_test(void *arg)
 {
-    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0 );
+    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0, 2 );
 
     while (xIntertilePipeManagerReady() == pdFALSE) {
         vTaskDelay(pdMS_TO_TICKS(1)); /* try again in 1ms */

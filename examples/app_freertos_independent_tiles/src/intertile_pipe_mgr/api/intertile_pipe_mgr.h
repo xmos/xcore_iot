@@ -3,12 +3,12 @@
 #ifndef INTERTILE_PIPE_MGR_H_
 #define INTERTILE_PIPE_MGR_H_
 
-BaseType_t IntertilePipeManagerInit( int device_id );
+BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id );
 BaseType_t xIntertilePipeManagerReady( void );
 
 typedef struct IntertilePipe *IntertilePipe_t;
 
-IntertilePipe_t intertile_pipe( intertile_cb_id_t cb_id );
+IntertilePipe_t intertile_pipe( intertile_cb_id_t cb_id, int addr );
 BaseType_t intertile_pipe_free( IntertilePipe_t pxPipe );
 
 BaseType_t intertile_recv( IntertilePipe_t pxIntertilePipe, void* pvBuffer );

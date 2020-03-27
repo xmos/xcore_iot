@@ -30,10 +30,10 @@
 
 static void test_recv( void* args)
 {
-    soc_peripheral_t dev = args;
+    int addr = *((int*)args);
     size_t len;
 
-    IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0 );
+    IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0, addr );
 
     while( xIntertilePipeManagerReady() == pdFALSE )
     {
@@ -45,7 +45,7 @@ static void test_recv( void* args)
     {
         len = intertile_recv_copy( pipe, &buf );
 
-        TILE_PRINTF("<-- recv task %d bytes: %s", len, buf);
+        TILE_PRINTF("<-- recv at addr %d %d bytes: %s", addr, len, (char*)buf);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 #else
@@ -53,7 +53,7 @@ static void test_recv( void* args)
     {
         uint8_t* buf = NULL;
         len = intertile_recv( pipe, &buf );
-        TILE_PRINTF("<-- recv task %d bytes: %s", len, (char*)buf);
+        TILE_PRINTF("<-- recv at addr %d %d bytes: %s", addr, len, (char*)buf);
 
         vTaskDelay(pdMS_TO_TICKS(100));
         vReleaseIntertileBuffer( buf );
@@ -64,9 +64,9 @@ static void test_recv( void* args)
 
 static void test_send( void* args)
 {
-    soc_peripheral_t dev = args;
+    int addr = *((int*)args);
 
-    IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0 );
+    IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0, addr );
 
     uint8_t buf[] = "Hello";
 
@@ -77,14 +77,14 @@ static void test_send( void* args)
 #ifndef TEST_ZERO_COPY
     for( ;; )
     {
-        TILE_PRINTF("--> send task %d bytes: %s", strlen((char *)buf) + 1 , (char*)buf);
+        TILE_PRINTF("--> send to addr %d %d bytes: %s", addr, strlen((char *)buf) + 1 , (char*)buf);
         intertile_send_copy( pipe, &buf, strlen((char *)buf) + 1);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 #else
     for( ;; )
     {
-        TILE_PRINTF("--> send task %d bytes: %s", strlen((char *)buf) + 1 , (char*)buf);
+        TILE_PRINTF("--> send to addr %d %d bytes: %s", addr, strlen((char *)buf) + 1 , (char*)buf);
         uint8_t* sndbuf = pucGetIntertileBuffer( strlen((char *)buf) + 1 );
         memcpy(sndbuf, buf, strlen((char *)buf) + 1);
         intertile_send( pipe, sndbuf, strlen((char *)buf) + 1);
@@ -95,14 +95,22 @@ static void test_send( void* args)
 
 void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 {
-    IntertilePipeManagerInit(BITSTREAM_INTERTILE_DEVICE_A);
+    IntertilePipeManagerInit( BITSTREAM_INTERTILE_DEVICE_A, INTERTILE_CB_ID_0 );
 
-    xTaskCreate(test_recv, "test_recv", portTASK_STACK_DEPTH(test_recv), NULL, uxPriority, NULL);
+    static int addr0 = 0;
+    xTaskCreate(test_recv, "test_recv0", portTASK_STACK_DEPTH(test_recv), &addr0, uxPriority, NULL);
+
+    static int addr1 = 1;
+    xTaskCreate(test_recv, "test_recv1", portTASK_STACK_DEPTH(test_recv), &addr1, uxPriority, NULL);
 }
 
 void intertile_ctrl_create_t1( UBaseType_t uxPriority )
 {
-    IntertilePipeManagerInit(BITSTREAM_INTERTILE_DEVICE_A);
+    IntertilePipeManagerInit( BITSTREAM_INTERTILE_DEVICE_A, INTERTILE_CB_ID_0 );
 
-    xTaskCreate(test_send, "test_send", portTASK_STACK_DEPTH(test_send), NULL, uxPriority, NULL);
+    static int addr0 = 0;
+    xTaskCreate(test_send, "test_send0", portTASK_STACK_DEPTH(test_send), &addr0, uxPriority, NULL);
+
+    static int addr1 = 1;
+    xTaskCreate(test_send, "test_send1", portTASK_STACK_DEPTH(test_send), &addr1, uxPriority, NULL);
 }

@@ -45,14 +45,15 @@ static void intertile_isr( soc_peripheral_t device )
     {
 //        rtos_printf("tile[%d] dma tx done\n", 1&get_local_tile_id());
         soc_dma_ring_buf_t *tx_ring_buf;
-        uint8_t *ftr_buf, *bytes_buf;
-        int ftr_buf_len, bytes_buf_len;
+        uint8_t *ftr_buf, *opt_ftr, *bytes_buf;
+        int ftr_buf_len, opt_ftr_len, bytes_buf_len;
         int more;
 
         tx_ring_buf = soc_peripheral_tx_dma_ring_buf(device);
         do
         {
             bytes_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &bytes_buf_len, NULL);
+            opt_ftr = soc_dma_ring_tx_buf_get(tx_ring_buf, &opt_ftr_len, NULL);
             ftr_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &ftr_buf_len, &more);
 
             uint32_t cb_id = ftr_buf[0];
@@ -160,14 +161,17 @@ void intertile_driver_send_bytes(
         soc_peripheral_t dev,
         uint8_t *bytes,
         unsigned len,
+        uint8_t *opt_footer,
+        unsigned opt_len,
         intertile_cb_footer_t* cb_footer)
 {
     soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
 
-    configASSERT( (len + sizeof(intertile_cb_footer_t)) <= INTERTILE_DEV_BUFSIZE );
+    configASSERT( (len + opt_len + sizeof(intertile_cb_footer_t)) <= INTERTILE_DEV_BUFSIZE );
 
-    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, cb_footer, sizeof(intertile_cb_footer_t), 1, 2);
-    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, bytes, len, 0, 2);
+    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, cb_footer, sizeof(intertile_cb_footer_t), 2, 3);
+    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, opt_footer, opt_len, 1, 3);
+    soc_dma_ring_tx_buf_sg_set(tx_ring_buf, bytes, len, 0, 3);
 
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 }

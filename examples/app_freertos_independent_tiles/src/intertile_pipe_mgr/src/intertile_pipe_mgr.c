@@ -217,6 +217,7 @@ BaseType_t intertile_send( IntertilePipe_t pxIntertilePipe, const void* pvBuffer
 
             pvData->xLen = xBufferLen;
             pvData->ftr = &xPipe->cb_id;
+            pvData->addr = xPipe->addr;
 
             IntertileEvent_t xSendEvent;
 
@@ -254,6 +255,7 @@ BaseType_t intertile_send_copy( IntertilePipe_t pxIntertilePipe, const void* pvB
         {
             memcpy(pvData->pucBuffer, pvBuffer, xBufferLen);
             pvData->ftr = &xPipe->cb_id;
+            pvData->addr = xPipe->addr;
 
             IntertileEvent_t xSendEvent;
 
@@ -279,19 +281,25 @@ BaseType_t intertile_send_copy( IntertilePipe_t pxIntertilePipe, const void* pvB
 
 static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffer )
 {
-    intertile_cb_id_t cb_id;
-
     /* cb_id is the first value of the footer */
-    cb_id = pxBuffer->pucBuffer[ pxBuffer->xLen - sizeof( intertile_cb_footer_t ) ];
+    intertile_cb_id_t cb_id = pxBuffer->pucBuffer[ pxBuffer->xLen - sizeof( intertile_cb_footer_t ) ];
+
+    char* ptr = pxBuffer->pucBuffer + pxBuffer->xLen - sizeof( intertile_cb_footer_t ) - sizeof( int );
+
+    int addr;
+    memcpy( &addr, ptr, sizeof(int) );
 
     IntertilePipe_t pxPipe = NULL;
 
     for( int i=0; i<appconfINTERTILE_MAX_PIPES; i++ )
     {
-        pxPipe = get_intertile_pipe(i);
-        if( ( pxPipe->cb_id ) == cb_id )
+        pxPipe = get_intertile_pipe( cb_id, i );
+        if( pxPipe != NULL )
         {
-            break;
+            if( ( pxPipe->addr ) == addr )
+            {
+                break;
+            }
         }
     }
 
@@ -302,13 +310,13 @@ static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffe
     {
         if( xQueueSend( pxPipe->xRxQueue, &pxBuffer, portMAX_DELAY ) == pdFAIL )
         {
-            TILE_PRINTF("Failed to send to pipe[%d] %d bytes lost", pxPipe->cb_id, pxBuffer->xLen);
+            TILE_PRINTF("Failed to send to pipe[%d][%d] %d bytes lost", pxPipe->cb_id, pxPipe->addr, pxBuffer->xLen);
             vReleaseIntertileBufferAndDescriptor( pxBuffer );
         }
     }
     else
     {
-        TILE_PRINTF("Failed to find pipe for id %d. %d bytes lost", cb_id, pxBuffer->xLen);
+        TILE_PRINTF("Failed to find pipe for id %d addr %d. %d bytes lost", cb_id, addr, pxBuffer->xLen);
         vReleaseIntertileBufferAndDescriptor( pxBuffer );
     }
 }
@@ -319,6 +327,8 @@ static void prvIntertileSend( soc_peripheral_t device, IntertileBufferDescriptor
             device,
             (uint8_t*)pxBuffer->pucBuffer,
             (size_t)pxBuffer->xLen,
+            (int*)&pxBuffer->addr,
+            sizeof( int ),
             (intertile_cb_footer_t*)pxBuffer->ftr );
 }
 
@@ -329,7 +339,9 @@ BaseType_t xIntertilePipeManagerReady( void )
 
 static void prvIntertilePipeManagerTask( void *pvArgs )
 {
-    soc_peripheral_t device = pvArgs;
+    IntertilePipeManagerArgs_t args = *( ( IntertilePipeManagerArgs_t* )pvArgs );
+    soc_peripheral_t device = (args.dev);
+    intertile_cb_id_t cb_id = (args.cb_id);
 
     xIntertileEventQueue = xQueueCreate( app_confINTERTILE_EVENT_QUEUE_LEN, sizeof( IntertileEvent_t ) );
     configASSERT( xIntertileEventQueue );
@@ -347,7 +359,7 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
     soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
 
     intertile_cb_footer_t msg_ftr;
-    intertile_driver_footer_init(&msg_ftr, INTERTILE_CB_ID_0);
+    intertile_driver_footer_init(&msg_ftr, cb_id);
     intertile_driver_register_callback( device, intertile_dev_recv, &msg_ftr);
 
     IntertileEvent_t xReceivedEvent;
@@ -376,7 +388,7 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
     }
 }
 
-BaseType_t IntertilePipeManagerInit( int device_id )
+BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id )
 {
     BaseType_t xRetVal;
 
@@ -386,10 +398,14 @@ BaseType_t IntertilePipeManagerInit( int device_id )
                                                   NULL,
                                                   0);
 
+    static IntertilePipeManagerArgs_t args;
+    args.dev = dev;
+    args.cb_id = cb_id;
+
     xRetVal = xTaskCreate( prvIntertilePipeManagerTask,
                            "IntertilePipeMNGR",
                            portTASK_STACK_DEPTH( prvIntertilePipeManagerTask ),
-                           dev,
+                           &args,
                            appconfINTERTILE_PIPE_MGR_TASK_PRIORITY,
                            &xIntertileTaskHandle );
 

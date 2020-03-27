@@ -23,6 +23,7 @@ typedef struct IntertilePipe
     TickType_t xReceivedBlockTime;
     TickType_t xSendBlockTime;
     intertile_cb_id_t cb_id;
+    int addr;
 } prvIntertilePipe_t;
 
 /* Intertile event types */
@@ -48,10 +49,17 @@ typedef struct IntertileBufferDescriptor
     intertile_cb_footer_t *ftr;
     uint8_t *pucBuffer;
     size_t xLen;
+    int addr;
 } IntertileBufferDescriptor_t;
 
+typedef struct IntertilePipeManagerArgs
+{
+    soc_peripheral_t dev;
+    intertile_cb_id_t cb_id;
+} IntertilePipeManagerArgs_t;
+
 /* Function prototypes */
-IntertilePipe_t get_intertile_pipe( int id );
+IntertilePipe_t get_intertile_pipe( intertile_cb_id_t id, int ndx );
 void xIntertileDescriptorBuffersInit( void );
 void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const pxBuffer );
 IntertileBufferDescriptor_t *pxGetIntertileBufferWithDescriptor( size_t xRequestedSizeBytes, TickType_t xBlockTimeTicks );
