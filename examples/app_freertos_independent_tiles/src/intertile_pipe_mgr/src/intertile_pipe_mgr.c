@@ -102,6 +102,7 @@ static void vDeferredIntertileReceive( uint8_t *buf, int len )
 
         /* Give the buffer back to the DMA engine */
         soc_dma_ring_rx_buf_set(rx_ring_buf, buf, INTERTILE_DEV_BUFSIZE);
+        soc_peripheral_hub_dma_request(dev, SOC_DMA_RX_REQUEST);
     }
 }
 
@@ -343,6 +344,7 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
 //        TILE_PRINTF("rx buffer desc @ %p with buf @ %p", bufdesc, bufdesc->pucBuffer);
         soc_dma_ring_rx_buf_set(soc_peripheral_rx_dma_ring_buf(device), bufdesc->pucBuffer, INTERTILE_DEV_BUFSIZE);
     }
+    soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
 
     intertile_cb_footer_t msg_ftr;
     intertile_driver_footer_init(&msg_ftr, INTERTILE_CB_ID_0);

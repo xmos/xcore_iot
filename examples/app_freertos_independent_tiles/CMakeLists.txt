@@ -36,6 +36,8 @@ set(APP_C_SRCS
         "src/intertile_pipe_mgr/src/intertile_pipe_mgr.c"
         "src/intertile_pipe_mgr/src/intertile_pipe.c"
         "src/intertile_pipe_mgr/src/intertile_pipe_buffers.c"
+        "src/rpc/rpc.c"
+        "src/rpc/rpc_test.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -46,6 +48,7 @@ set(APP_INCLUDES
         "src/intertile_ctrl"
         "src/intertile_pipe_mgr/api"
         "src/intertile_pipe_mgr/src"
+        "src/rpc"
     )
 set(APP_DEPENDENT_MODULES
         "lib_soc(>=0.5.0)"

@@ -97,6 +97,7 @@ static void intertile_isr( soc_peripheral_t device )
             {
                 /* Give the buffer back to the DMA engine */
                 soc_dma_ring_rx_buf_set(rx_ring_buf, frame_buffer, INTERTILE_DEV_BUFSIZE);
+                soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
             }
         }
     }

@@ -37,6 +37,7 @@ void soc_peripheral_common_dma_init(
                 configASSERT(buf != NULL);
                 soc_dma_ring_rx_buf_set(ring_buf, buf, rx_buf_size);
             }
+            soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
         }
     }
 
