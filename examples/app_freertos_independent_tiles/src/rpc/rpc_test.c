@@ -88,7 +88,7 @@ static void rpc_host_task(void *arg)
 
     rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0, 2 );
 
-    while (xIntertilePipeManagerReady() == pdFALSE) {
+    while (xIntertilePipeManagerReady( BITSTREAM_INTERTILE_DEVICE_A ) == pdFALSE) {
         vTaskDelay(pdMS_TO_TICKS(1)); /* try again in 1ms */
     }
 
@@ -155,7 +155,7 @@ static void rpc_client_test(void *arg)
 {
     rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0, 2 );
 
-    while (xIntertilePipeManagerReady() == pdFALSE) {
+    while (xIntertilePipeManagerReady( BITSTREAM_INTERTILE_DEVICE_A ) == pdFALSE) {
         vTaskDelay(pdMS_TO_TICKS(1)); /* try again in 1ms */
     }
 

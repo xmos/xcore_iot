@@ -4,6 +4,7 @@
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
+#include "semphr.h"
 
 /* Library headers */
 #include "soc.h"
@@ -16,7 +17,23 @@
 #include "app_conf.h"
 #include "intertile_pipe_mgr_internal.h"
 
-static IntertilePipe_t intertile_pipes[ INTERTILE_CB_ID_COUNT ][ appconfINTERTILE_MAX_PIPES ] = {NULL};
+static IntertilePipe_t intertile_pipes[ INTERTILE_CB_ID_COUNT ][ appconfINTERTILE_MAX_PIPES ] = { { NULL } };
+static SemaphoreHandle_t xIntertilePipeSemaphore[ INTERTILE_CB_ID_COUNT ] = { NULL };
+
+BaseType_t xIntertilePipeInit( intertile_cb_id_t cb_id )
+{
+    BaseType_t xRetVal = pdFAIL;
+
+    xIntertilePipeSemaphore[ cb_id ] = xSemaphoreCreateMutex();
+    configASSERT( xIntertilePipeSemaphore[ cb_id ] );
+
+    if( xIntertilePipeSemaphore[ cb_id ] != NULL )
+    {
+        xRetVal = pdPASS;
+    }
+
+    return xRetVal;
+}
 
 IntertilePipe_t get_intertile_pipe( intertile_cb_id_t id, int ndx )
 {
@@ -56,26 +73,36 @@ static void remove_pipe( IntertilePipe_t pxPipe )
 /* Create intertile pipe */
 IntertilePipe_t intertile_pipe( intertile_cb_id_t cb_id, int addr )
 {
-    IntertilePipe_t pxIntertilePipe;
+    IntertilePipe_t pxIntertilePipe = NULL;
 
-    pxIntertilePipe = pvPortMalloc( sizeof( prvIntertilePipe_t ) );
-
-    if( pxIntertilePipe != NULL )
+    if( cb_id < INTERTILE_CB_ID_COUNT )
     {
-        pxIntertilePipe->xReceivedBlockTime = portMAX_DELAY;
-        pxIntertilePipe->xSendBlockTime = portMAX_DELAY;
-        pxIntertilePipe->cb_id = cb_id;
-        pxIntertilePipe->addr = addr;
-        pxIntertilePipe->xRxQueue = xQueueCreate(1, sizeof( IntertileBufferDescriptor_t* ) );
+        if( xIntertilePipeSemaphore[ cb_id ] != NULL )
+        {
+            pxIntertilePipe = pvPortMalloc( sizeof( prvIntertilePipe_t ) );
 
-        if( pxIntertilePipe->xRxQueue != NULL )
-        {
-            add_pipe( pxIntertilePipe );
-        }
-        else
-        {
-            vPortFree( pxIntertilePipe );
-            pxIntertilePipe = NULL;
+            if( pxIntertilePipe != NULL )
+            {
+                pxIntertilePipe->xReceivedBlockTime = portMAX_DELAY;
+                pxIntertilePipe->xSendBlockTime = portMAX_DELAY;
+                pxIntertilePipe->cb_id = cb_id;
+                pxIntertilePipe->addr = addr;
+                pxIntertilePipe->xRxQueue = xQueueCreate(1, sizeof( IntertileBufferDescriptor_t* ) );
+
+                if( pxIntertilePipe->xRxQueue != NULL )
+                {
+                    if( xSemaphoreTake( xIntertilePipeSemaphore[ cb_id ], portMAX_DELAY ) == pdTRUE )
+                    {
+                        add_pipe( pxIntertilePipe );
+                        xSemaphoreGive( xIntertilePipeSemaphore[ cb_id ] );
+                    }
+                }
+                else
+                {
+                    vPortFree( pxIntertilePipe );
+                    pxIntertilePipe = NULL;
+                }
+            }
         }
     }
 
@@ -84,18 +111,40 @@ IntertilePipe_t intertile_pipe( intertile_cb_id_t cb_id, int addr )
 
 BaseType_t intertile_pipe_free( IntertilePipe_t pxPipe )
 {
-    BaseType_t xRetVal = pdFALSE;
+    BaseType_t xRetVal = pdFAIL;
 
     if( pxPipe != NULL)
     {
-        remove_pipe( pxPipe );
-        vQueueDelete( pxPipe->xRxQueue );
-        if( pxPipe->xRxQueue == NULL )
+        intertile_cb_id_t cb_id = pxPipe->cb_id;
+
+        if( cb_id < INTERTILE_CB_ID_COUNT )
         {
+            if( xSemaphoreTake( xIntertilePipeSemaphore[ cb_id ], portMAX_DELAY ) == pdTRUE )
+            {
+                remove_pipe( pxPipe );
+                xSemaphoreGive( xIntertilePipeSemaphore[ cb_id ] );
+            }
+
+            taskENTER_CRITICAL();
+            {
+                while( uxQueueMessagesWaiting( pxPipe->xRxQueue ) > 0)
+                {
+                    IntertileBufferDescriptor_t* buf;
+
+                    if( ( xQueueReceive( pxPipe->xRxQueue, &buf, portMAX_DELAY ) == pdTRUE ) )
+                    {
+                        vReleaseIntertileBufferAndDescriptor( buf );
+                    }
+                }
+                vQueueDelete( pxPipe->xRxQueue );
+            }
+            taskEXIT_CRITICAL();
+
             vPortFree( pxPipe );
+
             if( pxPipe == NULL )
             {
-                xRetVal = pdTRUE;
+                xRetVal = pdPASS;
             }
         }
     }

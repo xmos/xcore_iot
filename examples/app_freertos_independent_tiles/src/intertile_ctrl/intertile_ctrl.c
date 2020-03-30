@@ -33,12 +33,13 @@ static void test_recv( void* args)
     int addr = *((int*)args);
     size_t len;
 
-    IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0, addr );
-
-    while( xIntertilePipeManagerReady() == pdFALSE )
+    while( xIntertilePipeManagerReady( BITSTREAM_INTERTILE_DEVICE_A ) == pdFALSE )
     {
         vTaskDelay(pdMS_TO_TICKS(100)); // try again in 100ms
     }
+
+    IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0, addr );
+
 #ifndef TEST_ZERO_COPY
     uint8_t buf[INTERTILE_DEV_BUFSIZE];
     for( ;; )
@@ -66,14 +67,17 @@ static void test_send( void* args)
 {
     int addr = *((int*)args);
 
-    IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0, addr );
-
     uint8_t buf[] = "Hello";
 
-    while( xIntertilePipeManagerReady() == pdFALSE )
+    while( xIntertilePipeManagerReady( BITSTREAM_INTERTILE_DEVICE_A ) == pdFALSE )
     {
         vTaskDelay(pdMS_TO_TICKS(100)); // try again in 100ms
     }
+
+    IntertilePipe_t pipe = intertile_pipe( INTERTILE_CB_ID_0, addr );
+
+    vTaskDelay(pdMS_TO_TICKS(100)); // delay so rx side has time to register pipes
+
 #ifndef TEST_ZERO_COPY
     for( ;; )
     {

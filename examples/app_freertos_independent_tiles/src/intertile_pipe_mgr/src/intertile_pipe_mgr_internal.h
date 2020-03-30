@@ -59,8 +59,9 @@ typedef struct IntertilePipeManagerArgs
 } IntertilePipeManagerArgs_t;
 
 /* Function prototypes */
+BaseType_t xIntertilePipeInit( intertile_cb_id_t cb_id );
 IntertilePipe_t get_intertile_pipe( intertile_cb_id_t id, int ndx );
-void xIntertileDescriptorBuffersInit( void );
+BaseType_t xIntertileDescriptorBuffersInit( void );
 void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const pxBuffer );
 IntertileBufferDescriptor_t *pxGetIntertileBufferWithDescriptor( size_t xRequestedSizeBytes, TickType_t xBlockTimeTicks );
 IntertileBufferDescriptor_t *pxGetDescriptorFromBuffer( const void *pvBuffer );

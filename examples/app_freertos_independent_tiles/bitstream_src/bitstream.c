@@ -4,7 +4,11 @@
 #include "bitstream.h"
 #include "bitstream_devices.h"
 
-static int t0_initialized, t1_initialized;
+#if THIS_XCORE_TILE == 0
+static int t0_initialized;
+#elif THIS_XCORE_TILE == 1
+static int t1_initialized;
+#endif
 
 soc_peripheral_t bitstream_intertile_devices[BITSTREAM_INTERTILE_DEVICE_COUNT];
 

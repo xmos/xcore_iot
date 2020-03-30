@@ -21,8 +21,10 @@ static SemaphoreHandle_t xIntertileBufferSemaphore = NULL;
 static List_t xFreeIntertileBuffersList;
 static IntertileBufferDescriptor_t xIntertileBufferDescriptors[ appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS ];
 
-void xIntertileDescriptorBuffersInit( void )
+BaseType_t xIntertileDescriptorBuffersInit( void )
 {
+    BaseType_t xRetVal = pdFAIL;
+
     xIntertileBufferSemaphore = xSemaphoreCreateCounting( appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS, appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS );
     configASSERT( xIntertileBufferSemaphore );
 
@@ -41,7 +43,10 @@ void xIntertileDescriptorBuffersInit( void )
             /* Currently, all buffers are available for use. */
             vListInsert( &xFreeIntertileBuffersList, &( xIntertileBufferDescriptors[ i ].xBufferListItem ) );
         }
+        xRetVal = pdPASS;
     }
+
+    return xRetVal;
 }
 
 void vReleaseIntertileBufferAndDescriptor( IntertileBufferDescriptor_t * const pxBuffer )

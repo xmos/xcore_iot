@@ -22,7 +22,7 @@
 #include "intertile_pipe_mgr_internal.h"
 
 
-static BaseType_t xPipeManagerReady = pdFALSE;
+static BaseType_t xPipeManagerReady[ BITSTREAM_INTERTILE_DEVICE_COUNT ] = { pdFALSE };
 static QueueHandle_t xIntertileEventQueue = NULL;
 static TaskHandle_t xIntertileTaskHandle = NULL;
 
@@ -216,7 +216,7 @@ BaseType_t intertile_send( IntertilePipe_t pxIntertilePipe, const void* pvBuffer
             pvData->pucBuffer += sizeof( IntertileBufferDescriptor_t* );
 
             pvData->xLen = xBufferLen;
-            pvData->ftr = &xPipe->cb_id;
+            pvData->ftr = ( intertile_cb_footer_t* )&xPipe->cb_id;
             pvData->addr = xPipe->addr;
 
             IntertileEvent_t xSendEvent;
@@ -254,7 +254,7 @@ BaseType_t intertile_send_copy( IntertilePipe_t pxIntertilePipe, const void* pvB
         if( pvData != NULL )
         {
             memcpy(pvData->pucBuffer, pvBuffer, xBufferLen);
-            pvData->ftr = &xPipe->cb_id;
+            pvData->ftr = ( intertile_cb_footer_t* )&xPipe->cb_id;
             pvData->addr = xPipe->addr;
 
             IntertileEvent_t xSendEvent;
@@ -284,7 +284,7 @@ static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffe
     /* cb_id is the first value of the footer */
     intertile_cb_id_t cb_id = pxBuffer->pucBuffer[ pxBuffer->xLen - sizeof( intertile_cb_footer_t ) ];
 
-    char* ptr = pxBuffer->pucBuffer + pxBuffer->xLen - sizeof( intertile_cb_footer_t ) - sizeof( int );
+    uint8_t* ptr = pxBuffer->pucBuffer + pxBuffer->xLen - sizeof( intertile_cb_footer_t ) - sizeof( int );
 
     int addr;
     memcpy( &addr, ptr, sizeof(int) );
@@ -327,14 +327,14 @@ static void prvIntertileSend( soc_peripheral_t device, IntertileBufferDescriptor
             device,
             (uint8_t*)pxBuffer->pucBuffer,
             (size_t)pxBuffer->xLen,
-            (int*)&pxBuffer->addr,
-            sizeof( int ),
+            (uint8_t*)&pxBuffer->addr,
+            sizeof( unsigned ),
             (intertile_cb_footer_t*)pxBuffer->ftr );
 }
 
-BaseType_t xIntertilePipeManagerReady( void )
+BaseType_t xIntertilePipeManagerReady( int device_id )
 {
-    return xPipeManagerReady;
+    return xPipeManagerReady[ device_id ];
 }
 
 static void prvIntertilePipeManagerTask( void *pvArgs )
@@ -346,6 +346,7 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
     xIntertileEventQueue = xQueueCreate( app_confINTERTILE_EVENT_QUEUE_LEN, sizeof( IntertileEvent_t ) );
     configASSERT( xIntertileEventQueue );
 
+    xIntertilePipeInit( cb_id );
     xIntertileDescriptorBuffersInit();
 
     for( int i = 0; i < appconfigNUM_INTERTILE_RX_DMA_BUF; i++ )
@@ -363,10 +364,10 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
     intertile_driver_register_callback( device, intertile_dev_recv, &msg_ftr);
 
     IntertileEvent_t xReceivedEvent;
-    IntertilePipe_t *pxIntertilePipe;
+
     TILE_PRINTF("Intertile pipe manager ready");
 
-    xPipeManagerReady = pdTRUE;
+    xPipeManagerReady[ soc_peripheral_get_id( device ) ] = pdTRUE;
 
     for( ;; )
     {
