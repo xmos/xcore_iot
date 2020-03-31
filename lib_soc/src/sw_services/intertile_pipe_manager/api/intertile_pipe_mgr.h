@@ -19,11 +19,12 @@
  *
  * \param[in]     device_id      Intertile device id to use
  * \param[in]     cb_id          Intertile device driver callback to use
+ * \param[in]     uxPriority     Priority manager task should run at
  *
  * \returns       pdPASS if manager task is sucessfully created
  *                pdFAIL otherwise
  */
-BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id );
+BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id, UBaseType_t uxPriority );
 
 /**
  * Check if the pipe manager is ready

@@ -99,7 +99,7 @@ static void test_send( void* args)
 
 void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 {
-    IntertilePipeManagerInit( BITSTREAM_INTERTILE_DEVICE_A, INTERTILE_CB_ID_0 );
+    IntertilePipeManagerInit( BITSTREAM_INTERTILE_DEVICE_A, INTERTILE_CB_ID_0, appconfINTERTILE_PIPE_MGR_TASK_PRIORITY );
 
     static int addr0 = 0;
     xTaskCreate(test_recv, "test_recv0", portTASK_STACK_DEPTH(test_recv), &addr0, uxPriority, NULL);
@@ -110,7 +110,7 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 
 void intertile_ctrl_create_t1( UBaseType_t uxPriority )
 {
-    IntertilePipeManagerInit( BITSTREAM_INTERTILE_DEVICE_A, INTERTILE_CB_ID_0 );
+    IntertilePipeManagerInit( BITSTREAM_INTERTILE_DEVICE_A, INTERTILE_CB_ID_0, appconfINTERTILE_PIPE_MGR_TASK_PRIORITY );
 
     static int addr0 = 0;
     xTaskCreate(test_send, "test_send0", portTASK_STACK_DEPTH(test_send), &addr0, uxPriority, NULL);

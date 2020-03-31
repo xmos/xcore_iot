@@ -13,7 +13,6 @@
 /* BSP/bitstream headers */
 
 /* App headers */
-#include "app_conf.h"
 #include "intertile_pipe_mgr_internal.h"
 
 static SemaphoreHandle_t xIntertileBufferSemaphore = NULL;

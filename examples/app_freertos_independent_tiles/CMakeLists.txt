@@ -33,9 +33,6 @@ set(APP_C_SRCS
         "src/main.c"
         "bitstream_src/bitstream.c"
         "src/intertile_ctrl/intertile_ctrl.c"
-        "src/intertile_pipe_mgr/src/intertile_pipe_mgr.c"
-        "src/intertile_pipe_mgr/src/intertile_pipe.c"
-        "src/intertile_pipe_mgr/src/intertile_pipe_buffers.c"
         "src/rpc/rpc.c"
         "src/rpc/rpc_test.c"
     )
@@ -46,8 +43,6 @@ set(APP_INCLUDES
         "src"
         "bitstream_src"
         "src/intertile_ctrl"
-        "src/intertile_pipe_mgr/api"
-        "src/intertile_pipe_mgr/src"
         "src/rpc"
     )
 set(APP_DEPENDENT_MODULES
@@ -58,6 +53,7 @@ set(USE_FREERTOS_SMP True)
 
 ## Add lib_soc devices
 set(LIB_SOC_INTERTILE ${FULL})
+set(LIB_SOC_SW_PIPE_MGR True)
 
 ## Register the application
 XMOS_REGISTER_APP()

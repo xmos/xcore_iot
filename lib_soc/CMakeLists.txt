@@ -33,7 +33,7 @@
 #                           ex: set(LIB_OPTIONAL_HEADERS "foo.h" "bar.h")
 
 set(LIB_NAME lib_soc)
-set(LIB_VERSION 0.5.0)
+set(LIB_VERSION 0.6.0)
 set(LIB_ADD_COMPILER_FLAGS "-Os")
 set(LIB_XC_SRCS
         "src/framework/multitile_main.xc"
@@ -65,6 +65,7 @@ set(LIB_OPTIONAL_HEADERS "soc_conf.h" "rtos_peripherals_conf.h")
 # for compiling XMOS applications. You should not need to edit below here.
 set(LIB_SOC_FRAMEWORK ${FULL})
 
+include("src/sw_services/sw_services.cmake")
 include("src/peripherals/bitstream/bitstream.cmake")
 include("src/peripherals/bsp/bsp.cmake")
 

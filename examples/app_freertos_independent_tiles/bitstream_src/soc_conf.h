@@ -23,9 +23,10 @@
 /*
  * Software Configuration
  */
-#define impconfINTERTILE_MAX_PIPES                (4)
-#define impconfINTERTILE_EVENT_QUEUE_LEN          (4)
-#define impconfNUM_INTERTILE_BUFFER_DESCRIPTORS   (10)
+#define impconfINTERTILE_MAX_PIPES                 (4)
+#define impconfINTERTILE_EVENT_QUEUE_LEN           (4)
+#define impconfNUM_INTERTILE_BUFFER_DESCRIPTORS    (10)
+#define impconfNUM_RX_INTERTILE_BUFFER_DESCRIPTORS (5)
 
 /*
  * Peripheral Configuration

@@ -14,7 +14,6 @@
 #include "intertile_driver.h"
 
 /* App headers */
-#include "app_conf.h"
 #include "intertile_pipe_mgr_internal.h"
 
 static IntertilePipe_t intertile_pipes[ INTERTILE_CB_ID_COUNT ][ impconfINTERTILE_MAX_PIPES ] = { { NULL } };

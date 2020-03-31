@@ -18,7 +18,6 @@
 #include "intertile_driver.h"
 
 /* App headers */
-#include "app_conf.h"
 #include "intertile_pipe_mgr_internal.h"
 
 
@@ -349,7 +348,7 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
     xIntertilePipeInit( cb_id );
     xIntertileDescriptorBuffersInit();
 
-    for( int i = 0; i < impconfNUM_INTERTILE_BUFFER_DESCRIPTORS; i++ )
+    for( int i = 0; i < impconfNUM_RX_INTERTILE_BUFFER_DESCRIPTORS; i++ )
     {
         IntertileBufferDescriptor_t *bufdesc = pxGetIntertileBufferWithDescriptor(INTERTILE_DEV_BUFSIZE, 0);
         configASSERT(bufdesc != NULL);
@@ -389,7 +388,7 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
     }
 }
 
-BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id )
+BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id, UBaseType_t uxPriority )
 {
     BaseType_t xRetVal;
 
@@ -407,7 +406,7 @@ BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id )
                            "IntertilePipeMNGR",
                            portTASK_STACK_DEPTH( prvIntertilePipeManagerTask ),
                            &args,
-                           appconfINTERTILE_PIPE_MGR_TASK_PRIORITY,
+                           uxPriority,
                            &xIntertileTaskHandle );
 
     return xRetVal;
