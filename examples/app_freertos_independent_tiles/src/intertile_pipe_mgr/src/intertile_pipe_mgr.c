@@ -291,7 +291,7 @@ static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffe
 
     IntertilePipe_t pxPipe = NULL;
 
-    for( int i=0; i<appconfINTERTILE_MAX_PIPES; i++ )
+    for( int i=0; i<impconfINTERTILE_MAX_PIPES; i++ )
     {
         pxPipe = get_intertile_pipe( cb_id, i );
         if( pxPipe != NULL )
@@ -343,13 +343,13 @@ static void prvIntertilePipeManagerTask( void *pvArgs )
     soc_peripheral_t device = (args.dev);
     intertile_cb_id_t cb_id = (args.cb_id);
 
-    xIntertileEventQueue = xQueueCreate( app_confINTERTILE_EVENT_QUEUE_LEN, sizeof( IntertileEvent_t ) );
+    xIntertileEventQueue = xQueueCreate( impconfINTERTILE_EVENT_QUEUE_LEN, sizeof( IntertileEvent_t ) );
     configASSERT( xIntertileEventQueue );
 
     xIntertilePipeInit( cb_id );
     xIntertileDescriptorBuffersInit();
 
-    for( int i = 0; i < appconfigNUM_INTERTILE_RX_DMA_BUF; i++ )
+    for( int i = 0; i < impconfNUM_INTERTILE_BUFFER_DESCRIPTORS; i++ )
     {
         IntertileBufferDescriptor_t *bufdesc = pxGetIntertileBufferWithDescriptor(INTERTILE_DEV_BUFSIZE, 0);
         configASSERT(bufdesc != NULL);
@@ -394,8 +394,8 @@ BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id )
     BaseType_t xRetVal;
 
     soc_peripheral_t dev = intertile_driver_init( device_id,
-                                                  appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS,
-                                                  appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS,
+                                                  impconfNUM_INTERTILE_BUFFER_DESCRIPTORS,
+                                                  impconfNUM_INTERTILE_BUFFER_DESCRIPTORS,
                                                   NULL,
                                                   0);
 

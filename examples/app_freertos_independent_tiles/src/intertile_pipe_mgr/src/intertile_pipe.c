@@ -17,7 +17,7 @@
 #include "app_conf.h"
 #include "intertile_pipe_mgr_internal.h"
 
-static IntertilePipe_t intertile_pipes[ INTERTILE_CB_ID_COUNT ][ appconfINTERTILE_MAX_PIPES ] = { { NULL } };
+static IntertilePipe_t intertile_pipes[ INTERTILE_CB_ID_COUNT ][ impconfINTERTILE_MAX_PIPES ] = { { NULL } };
 static SemaphoreHandle_t xIntertilePipeSemaphore[ INTERTILE_CB_ID_COUNT ] = { NULL };
 
 BaseType_t xIntertilePipeInit( intertile_cb_id_t cb_id )
@@ -53,14 +53,14 @@ static void add_pipe( IntertilePipe_t pxPipe )
             intertile_pipes[ id ][ cnt ] = pxPipe;
             break;
         }
-        cnt = ( cnt >= appconfINTERTILE_MAX_PIPES - 1) ? 0 : cnt+1;
+        cnt = ( cnt >= impconfINTERTILE_MAX_PIPES - 1) ? 0 : cnt+1;
     } while( start != cnt );
 }
 
 static void remove_pipe( IntertilePipe_t pxPipe )
 {
     intertile_cb_id_t id = pxPipe->cb_id;
-    for( int i=0; i<appconfINTERTILE_MAX_PIPES; i++ )
+    for( int i=0; i<impconfINTERTILE_MAX_PIPES; i++ )
     {
         if( intertile_pipes[ id ][ i ] == pxPipe )
         {

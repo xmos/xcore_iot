@@ -3,6 +3,14 @@
 #ifndef INTERTILE_PIPE_MGR_H_
 #define INTERTILE_PIPE_MGR_H_
 
+#if __soc_conf_h_exists__
+#include "soc_conf.h"
+#else
+#warning soc_conf.h not found
+#endif
+
+#include "intertile_pipe_mgr_conf_defaults.h"
+
 /**
  * Initialize the intertile pipe manager
  *

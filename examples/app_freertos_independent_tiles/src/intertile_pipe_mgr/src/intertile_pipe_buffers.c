@@ -19,20 +19,20 @@
 static SemaphoreHandle_t xIntertileBufferSemaphore = NULL;
 
 static List_t xFreeIntertileBuffersList;
-static IntertileBufferDescriptor_t xIntertileBufferDescriptors[ appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS ];
+static IntertileBufferDescriptor_t xIntertileBufferDescriptors[ impconfNUM_INTERTILE_BUFFER_DESCRIPTORS ];
 
 BaseType_t xIntertileDescriptorBuffersInit( void )
 {
     BaseType_t xRetVal = pdFAIL;
 
-    xIntertileBufferSemaphore = xSemaphoreCreateCounting( appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS, appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS );
+    xIntertileBufferSemaphore = xSemaphoreCreateCounting( impconfNUM_INTERTILE_BUFFER_DESCRIPTORS, impconfNUM_INTERTILE_BUFFER_DESCRIPTORS );
     configASSERT( xIntertileBufferSemaphore );
 
     if( xIntertileBufferSemaphore != NULL )
     {
         vListInitialise( &xFreeIntertileBuffersList );
 
-        for( int i=0; i<appconfigNUM_INTERTILE_BUFFER_DESCRIPTORS; i++ )
+        for( int i=0; i<impconfNUM_INTERTILE_BUFFER_DESCRIPTORS; i++ )
         {
             /* Initialise and set the owner of the buffer list items. */
             xIntertileBufferDescriptors[ i ].pucBuffer = NULL;
