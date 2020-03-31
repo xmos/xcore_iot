@@ -121,11 +121,7 @@ BaseType_t intertile_pipe_free( IntertilePipe_t pxPipe )
             if( xSemaphoreTake( xIntertilePipeSemaphore[ cb_id ], portMAX_DELAY ) == pdTRUE )
             {
                 remove_pipe( pxPipe );
-                xSemaphoreGive( xIntertilePipeSemaphore[ cb_id ] );
-            }
 
-            taskENTER_CRITICAL();
-            {
                 while( uxQueueMessagesWaiting( pxPipe->xRxQueue ) > 0)
                 {
                     IntertileBufferDescriptor_t* buf;
@@ -136,13 +132,11 @@ BaseType_t intertile_pipe_free( IntertilePipe_t pxPipe )
                     }
                 }
                 vQueueDelete( pxPipe->xRxQueue );
-            }
-            taskEXIT_CRITICAL();
+                pxPipe->xRxQueue = NULL;
 
-            vPortFree( pxPipe );
+                xSemaphoreGive( xIntertilePipeSemaphore[ cb_id ] );
 
-            if( pxPipe == NULL )
-            {
+                vPortFree( pxPipe );
                 xRetVal = pdPASS;
             }
         }

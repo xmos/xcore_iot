@@ -5,9 +5,6 @@
 #include <stdarg.h>
 #include <string.h>
 
-/* FreeRTOS headers */
-#include "FreeRTOS.h"
-
 /* Library headers */
 #include "soc.h"
 
@@ -16,19 +13,14 @@
 
 /* App headers */
 #include "rpc.h"
-#include "intertile_pipe_mgr.h"
 
-
-int rpc_request_marshall(uint8_t **msg, int fcode, const rpc_param_desc_t param_desc[], ...)
+int rpc_request_marshall_va(uint8_t **msg, int fcode, const rpc_param_desc_t param_desc[], va_list ap)
 {
     int param_count;
     int param_total_length = 0;
     int i;
     int msg_length;
     uint8_t *msg_ptr;
-    va_list ap;
-
-    va_start(ap, param_desc);
 
     for (i = 0; param_desc[i].length != 0; i++) {
         if (param_desc[i].input) {
@@ -53,44 +45,25 @@ int rpc_request_marshall(uint8_t **msg, int fcode, const rpc_param_desc_t param_
     memcpy(msg_ptr, param_desc, sizeof(rpc_param_desc_t) * param_count);
     msg_ptr += sizeof(rpc_param_desc_t) * param_count;
 
-
     for (i = 0; i < param_count; i++) {
-        int64_t arg64;
-        void *arg_ptr;
-        int32_t arg32;
-        int16_t arg16;
-        int8_t arg8;
+        void *arg_ptr = va_arg(ap, void *);
 
-        if (param_desc[i].ptr) {
-            arg_ptr = va_arg(ap, void *);
-        } else {
-            switch (param_desc[i].length) {
-            case sizeof(int8_t):
-                arg8 = va_arg(ap, int32_t);
-                arg_ptr = &arg8;
-                break;
-            case sizeof(int16_t):
-                arg16 = va_arg(ap, int32_t);
-                arg_ptr = &arg16;
-                break;
-            case sizeof(int32_t):
-                arg32 = va_arg(ap, int32_t);
-                arg_ptr = &arg32;
-                break;
-            case sizeof(int64_t):
-                arg64 = va_arg(ap, int64_t);
-                arg_ptr = &arg64;
-                break;
-            default:
-                xassert(0);
-            }
-        }
         if (param_desc[i].input) {
             memcpy(msg_ptr, arg_ptr, param_desc[i].length);
             msg_ptr += param_desc[i].length;
         }
     }
 
+    return msg_length;
+}
+
+int rpc_request_marshall(uint8_t **msg, int fcode, const rpc_param_desc_t param_desc[], ...)
+{
+    int msg_length;
+    va_list ap;
+
+    va_start(ap, param_desc);
+    msg_length = rpc_request_marshall_va(msg, fcode, param_desc, ap);
     va_end(ap);
 
     return msg_length;
@@ -109,13 +82,10 @@ void rpc_request_parse(rpc_msg_t *rpc_msg, uint8_t *msg_buf)
     rpc_msg->params = msg_buf;
 }
 
-void rpc_request_unmarshall(rpc_msg_t *rpc_msg, ...)
+void rpc_request_unmarshall_va(rpc_msg_t *rpc_msg, va_list ap)
 {
     int i;
-    va_list ap;
     uint8_t *params_ptr = rpc_msg->params;
-
-    va_start(ap, rpc_msg);
 
     for (i = 0; i < rpc_msg->param_count; i++) {
         if (rpc_msg->param_desc[i].ptr) {
@@ -134,19 +104,23 @@ void rpc_request_unmarshall(rpc_msg_t *rpc_msg, ...)
             }
         }
     }
+}
 
+void rpc_request_unmarshall(rpc_msg_t *rpc_msg, ...)
+{
+    va_list ap;
+
+    va_start(ap, rpc_msg);
+    rpc_request_unmarshall_va(rpc_msg, ap);
     va_end(ap);
 }
 
-int rpc_response_marshall(uint8_t **msg, const rpc_msg_t *rpc_msg, ...)
+int rpc_response_marshall_va(uint8_t **msg, const rpc_msg_t *rpc_msg, va_list ap)
 {
     int param_total_length = 0;
     int i;
     int msg_length;
     uint8_t *msg_ptr;
-    va_list ap;
-
-    va_start(ap, rpc_msg);
 
     for (i = 0; i < rpc_msg->param_count; i++) {
         if (rpc_msg->param_desc[i].output) {
@@ -200,6 +174,16 @@ int rpc_response_marshall(uint8_t **msg, const rpc_msg_t *rpc_msg, ...)
         }
     }
 
+    return msg_length;
+}
+
+int rpc_response_marshall(uint8_t **msg, const rpc_msg_t *rpc_msg, ...)
+{
+    int msg_length;
+    va_list ap;
+
+    va_start(ap, rpc_msg);
+    msg_length = rpc_response_marshall_va(msg, rpc_msg, ap);
     va_end(ap);
 
     return msg_length;
@@ -214,13 +198,10 @@ void rpc_response_parse(rpc_msg_t *rpc_msg, uint8_t *msg_buf)
     rpc_msg->params = msg_buf;
 }
 
-void rpc_response_unmarshall(const rpc_msg_t *rpc_msg, const rpc_param_desc_t param_desc[], ...)
+void rpc_response_unmarshall_va(const rpc_msg_t *rpc_msg, const rpc_param_desc_t param_desc[], va_list ap)
 {
     int i;
-    va_list ap;
     uint8_t *params_ptr = rpc_msg->params;
-
-    va_start(ap, param_desc);
 
     for (i = 0; param_desc[i].length != 0; i++) {
         void *arg_ptr = va_arg(ap, void *);
@@ -230,44 +211,54 @@ void rpc_response_unmarshall(const rpc_msg_t *rpc_msg, const rpc_param_desc_t pa
             params_ptr += param_desc[i].length;
         }
     }
+}
 
+void rpc_response_unmarshall(const rpc_msg_t *rpc_msg, const rpc_param_desc_t param_desc[], ...)
+{
+    va_list ap;
+
+    va_start(ap, param_desc);
+    rpc_response_unmarshall_va(rpc_msg, param_desc, ap);
     va_end(ap);
 }
 
-
-#if 0
-int test_call_2(int a, uint64_t b, uint8_t c)
+void rpc_client_call_generic(IntertilePipe_t rpc_pipe, int fcode, const rpc_param_desc_t param_desc[], ...)
 {
-    uint8_t *msg;
+    uint8_t *req_msg;
+    uint8_t *resp_msg;
+    rpc_msg_t rpc_msg;
     int msg_length;
+    va_list ap_init, ap;
 
-    rpc_param_desc_t param_desc[] = {
-            RPC_PARAM_TYPE(a),
-            RPC_PARAM_TYPE(b),
-            RPC_PARAM_TYPE(c),
-            RPC_PARAM_RETURN(int),
-            RPC_PARAM_LIST_END
-    };
-    msg_length = rpc_request_marshall(
-            &msg, rpc_fcode_test_call_2, param_desc,
-            a, b, c);
+    va_start(ap_init, param_desc);
 
-    vPortFree(msg);
+    va_copy(ap, ap_init);
+    msg_length = rpc_request_marshall_va(
+            &req_msg, fcode, param_desc,
+            ap);
+    va_end(ap);
 
-    return 0;
+    /* send RPC request message to host */
+    intertile_send(rpc_pipe, req_msg, msg_length);
+
+    /* receive RPC response message from host */
+    msg_length = intertile_recv(rpc_pipe, &resp_msg);
+    if (msg_length == 0) {
+        /* TODO: What to do here? */
+        xassert(0);
+    }
+
+    rpc_response_parse(&rpc_msg, resp_msg);
+
+    xassert(rpc_msg.fcode == fcode);
+
+    va_copy(ap, ap_init);
+    rpc_response_unmarshall_va(
+            &rpc_msg, param_desc,
+            ap);
+    va_end(ap);
+
+    vReleaseIntertileBuffer(resp_msg);
+
+    va_end(ap_init);
 }
-
-void test_call_3(void)
-{
-    uint8_t *msg;
-    int msg_length;
-
-    rpc_param_desc_t param_desc[] = {
-            RPC_PARAM_LIST_END
-    };
-    msg_length = rpc_request_marshall(
-            &msg, rpc_fcode_test_call_3, param_desc);
-
-    vPortFree(msg);
-}
-#endif

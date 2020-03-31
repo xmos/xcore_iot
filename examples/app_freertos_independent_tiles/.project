@@ -3,6 +3,7 @@
 	<name>app_freertos_independent_tiles</name>
 	<comment></comment>
 	<projects>
+		<project>lib_soc</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

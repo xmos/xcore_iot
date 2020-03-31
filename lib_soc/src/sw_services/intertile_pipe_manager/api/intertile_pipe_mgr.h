@@ -79,7 +79,8 @@ BaseType_t intertile_pipe_free( IntertilePipe_t pxPipe );
  *       longer needed
  *
  * \param[in]     pxIntertilePipe  Pipe to listen on
- * \param[in/out] pvBuffer         Buffer to read into
+ * \param[out]    pvBuffer         Pointer to a pointer. Will be set
+ *                                 to point at the received data buffer.
  *
  * \returns       number of bytes recieved
  */
@@ -95,7 +96,7 @@ BaseType_t intertile_recv( IntertilePipe_t pxIntertilePipe, void* pvBuffer );
  *       then the buffer must be freed by the user.
  *
  * \param[in]     pxIntertilePipe  Pipe to send to
- * \param[in/out] pvBuffer         Buffer to send
+ * \param[in]     pvBuffer         Buffer to send
  * \param[in]     xBufferLen       Length of buffer in bytes
  *
  * \returns       number of bytes sent
@@ -108,7 +109,7 @@ BaseType_t intertile_send( IntertilePipe_t pxIntertilePipe, const void* pvBuffer
  * Note: Data is copied so user can handle pvBuffer without restriction
  *
  * \param[in]     pxIntertilePipe  Pipe to listen on
- * \param[in/out] pvBuffer         Buffer to copy into
+ * \param[out]    pvBuffer         Buffer to copy into
  *
  * \returns       number of bytes recieved
  */
@@ -120,7 +121,7 @@ BaseType_t intertile_recv_copy( IntertilePipe_t pxIntertilePipe, void* pvBuffer 
  * Note: Data is copied so user can handle pvBuffer without restriction
  *
  * \param[in]     pxIntertilePipe  Pipe to send to
- * \param[in/out] pvBuffer         Buffer to send
+ * \param[in]     pvBuffer         Buffer to send
  * \param[in]     xBufferLen       Length of buffer in bytes
  *
  * \returns       number of bytes sent

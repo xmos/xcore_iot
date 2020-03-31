@@ -20,13 +20,17 @@
 enum {
     rpc_fcode_test_call_1,
     rpc_fcode_test_call_2,
-    rpc_fcode_test_call_3,
 };
 
 static IntertilePipe_t rpc_pipe;
 
 #if THIS_XCORE_TILE == 1
-/* actual call_1() on the host */
+/*
+ * actual call_1() on the host.
+ * Demonstrates an in/out buffer.
+ * Can also be used to demonstrate
+ * and input only buffer.
+ */
 int call_1(int a, uint8_t *buffer, int len)
 {
     int ret;
@@ -57,7 +61,67 @@ int call_1(int a, uint8_t *buffer, int len)
     return ret;
 }
 
-int call_1_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+/*
+ * actual call_2() on the host.
+ * Demonstrates an output only buffer.
+ */
+int call_2(uint8_t *buffer, int len)
+{
+    static int retlen = 5;
+
+    if (retlen > len) {
+        retlen = len;
+    }
+
+    for (int i = 0; i < retlen; i++) {
+        buffer[i] = retlen+i;
+    }
+
+    return retlen++;
+}
+#elif THIS_XCORE_TILE == 0
+/* The client version of call_1() */
+int call_1(int a, uint8_t *buffer, int len)
+{
+    int ret;
+
+    const rpc_param_desc_t rpc_param_desc_test_call_1[] = {
+            RPC_PARAM_TYPE(a),
+            RPC_PARAM_INOUT_BUFFER(buffer, len),
+            RPC_PARAM_TYPE(len),
+            RPC_PARAM_RETURN(int),
+            RPC_PARAM_LIST_END
+    };
+
+    rpc_client_call_generic(
+            rpc_pipe, rpc_fcode_test_call_1, rpc_param_desc_test_call_1,
+            &a, buffer, &len, &ret);
+
+    return ret;
+}
+
+/* The client version of call_2() */
+int call_2(uint8_t *buffer, int len)
+{
+    int ret;
+
+    const rpc_param_desc_t rpc_param_desc_test_call_2[] = {
+            RPC_PARAM_OUT_BUFFER(buffer, len),
+            RPC_PARAM_TYPE(len),
+            RPC_PARAM_RETURN(int),
+            RPC_PARAM_LIST_END
+    };
+
+    rpc_client_call_generic(
+            rpc_pipe, rpc_fcode_test_call_2, rpc_param_desc_test_call_2,
+            buffer, &len, &ret);
+
+    return ret;
+}
+#endif
+
+#if THIS_XCORE_TILE == 1
+static int call_1_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 {
     int msg_length;
 
@@ -66,6 +130,9 @@ int call_1_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
     int len;
     int ret;
 
+    /* Here, because the buffer is an input, the buffer
+    pointer gets set to point at the data in the request
+    message. */
     rpc_request_unmarshall(
             rpc_msg,
             &a, &buffer, &len, &ret);
@@ -79,6 +146,41 @@ int call_1_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
     return msg_length;
 }
 
+static int call_2_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+{
+    int msg_length;
+
+    uint8_t *buffer;
+    int len;
+    int ret;
+
+    /* Here, because the buffer is output only, the buffer
+    pointer will not get set. */
+    rpc_request_unmarshall(
+            rpc_msg,
+            &buffer, &len, &ret);
+
+    /* Instead allocate a buffer with the length parameter
+    before calling, as this is what would be done by
+    the client. Alternatively this could be allocated
+    statically or on the stack if the length is known
+    at compile time. */
+    buffer = pvPortMalloc(len);
+
+    ret = call_2(buffer, len);
+
+    msg_length = rpc_response_marshall(
+            resp_msg, rpc_msg,
+            buffer, len, ret);
+
+    /* The data from buffer has been copied into the response
+    message. Since buffer was allocated on the heap, free
+    it now. */
+    vPortFree(buffer);
+
+    return msg_length;
+}
+
 static void rpc_host_task(void *arg)
 {
     int msg_length;
@@ -86,11 +188,11 @@ static void rpc_host_task(void *arg)
     uint8_t *resp_msg;
     rpc_msg_t rpc_msg;
 
-    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0, 2 );
-
     while (xIntertilePipeManagerReady( BITSTREAM_INTERTILE_DEVICE_A ) == pdFALSE) {
         vTaskDelay(pdMS_TO_TICKS(1)); /* try again in 1ms */
     }
+
+    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0, 2 );
 
     for (;;) {
         /* receive RPC request message from client */
@@ -101,6 +203,9 @@ static void rpc_host_task(void *arg)
         switch(rpc_msg.fcode) {
         case rpc_fcode_test_call_1:
             msg_length = call_1_rpc_host(&rpc_msg, &resp_msg);
+            break;
+        case rpc_fcode_test_call_2:
+            msg_length = call_2_rpc_host(&rpc_msg, &resp_msg);
             break;
         default:
             configASSERT(0);
@@ -115,49 +220,13 @@ static void rpc_host_task(void *arg)
 #endif
 
 #if THIS_XCORE_TILE == 0
-int call_1(int a, uint8_t *buffer, int len)
-{
-    uint8_t *req_msg;
-    uint8_t *resp_msg;
-    rpc_msg_t rpc_msg;
-    int msg_length;
-    int ret;
-
-    const rpc_param_desc_t rpc_param_desc_test_call_1[] = {
-            RPC_PARAM_TYPE(a),
-            RPC_PARAM_IN_BUFFER(buffer, len),
-            RPC_PARAM_TYPE(len),
-            RPC_PARAM_RETURN(int),
-            RPC_PARAM_LIST_END
-    };
-
-    msg_length = rpc_request_marshall(
-            &req_msg, rpc_fcode_test_call_1, rpc_param_desc_test_call_1,
-            a, buffer, len, &ret);
-
-    /* send RPC request message to host */
-    intertile_send(rpc_pipe, req_msg, msg_length);
-
-    /* receive RPC response message from host */
-    msg_length = intertile_recv(rpc_pipe, &resp_msg);
-
-    rpc_response_parse(&rpc_msg, resp_msg);
-    rpc_response_unmarshall(
-            &rpc_msg, rpc_param_desc_test_call_1,
-            &a, buffer, &len, &ret);
-
-    vReleaseIntertileBuffer(resp_msg);
-
-    return ret;
-}
-
 static void rpc_client_test(void *arg)
 {
-    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0, 2 );
-
     while (xIntertilePipeManagerReady( BITSTREAM_INTERTILE_DEVICE_A ) == pdFALSE) {
         vTaskDelay(pdMS_TO_TICKS(1)); /* try again in 1ms */
     }
+
+    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0, 2 );
 
     int ret;
     uint8_t buffer[32] = {0};
@@ -182,15 +251,20 @@ static void rpc_client_test(void *arg)
             rtos_printf("%02x ", buffer[i]);
         }
         rtos_printf("\n\n");
+
+        ret = call_2(buffer, 32);
+        rtos_printf("call_2() on client returned: %d\n", ret);
+        rtos_printf("\tbuffer: ");
+        for (int i = 0; i < ret; i++) {
+            rtos_printf("%02x ", buffer[i]);
+        }
+        rtos_printf("\n\n");
     }
 }
 #endif
 
 void rpc_test_init()
 {
-    //rpc_pipe = intertile_pipe( 42, 0 );
-//    rpc_pipe = intertile_pipe( INTERTILE_CB_ID_0 );
-
 #if THIS_XCORE_TILE == 0
     xTaskCreate(rpc_client_test, "rpc_client_test", portTASK_STACK_DEPTH(rpc_client_test), NULL, 15, NULL);
 #endif

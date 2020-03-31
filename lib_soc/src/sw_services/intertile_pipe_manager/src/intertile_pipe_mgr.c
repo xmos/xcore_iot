@@ -290,6 +290,12 @@ static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffe
 
     IntertilePipe_t pxPipe = NULL;
 
+    /*
+     * TODO: should get the xIntertilePipeSemaphore here.
+     * This will ensure that the pipe is not deleted
+     * between getting the pipe and sending to its queue.
+     */
+
     for( int i=0; i<impconfINTERTILE_MAX_PIPES; i++ )
     {
         pxPipe = get_intertile_pipe( cb_id, i );
@@ -307,6 +313,7 @@ static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffe
 
     if( pxPipe != NULL )
     {
+        configASSERT( pxPipe->xRxQueue != NULL );
         if( xQueueSend( pxPipe->xRxQueue, &pxBuffer, portMAX_DELAY ) == pdFAIL )
         {
             TILE_PRINTF("Failed to send to pipe[%d][%d] %d bytes lost", pxPipe->cb_id, pxPipe->addr, pxBuffer->xLen);
@@ -318,6 +325,8 @@ static void prvHandleIntertilePacket( IntertileBufferDescriptor_t* const pxBuffe
         TILE_PRINTF("Failed to find pipe for id %d addr %d. %d bytes lost", cb_id, addr, pxBuffer->xLen);
         vReleaseIntertileBufferAndDescriptor( pxBuffer );
     }
+
+    /* TODO: should release the xIntertilePipeSemaphore here */
 }
 
 static void prvIntertileSend( soc_peripheral_t device, IntertileBufferDescriptor_t * const pxBuffer )
