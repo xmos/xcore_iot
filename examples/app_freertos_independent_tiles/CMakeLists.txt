@@ -33,7 +33,6 @@ set(APP_C_SRCS
         "src/main.c"
         "bitstream_src/bitstream.c"
         "src/intertile_ctrl/intertile_ctrl.c"
-        "src/rpc/rpc.c"
         "src/rpc/rpc_test.c"
     )
 set(APP_ASM_SRCS
@@ -54,6 +53,7 @@ set(USE_FREERTOS_SMP True)
 ## Add lib_soc devices
 set(LIB_SOC_INTERTILE ${FULL})
 set(LIB_SOC_SW_PIPE_MGR True)
+set(LIB_SOC_SW_RPC True)
 
 ## Register the application
 XMOS_REGISTER_APP()
