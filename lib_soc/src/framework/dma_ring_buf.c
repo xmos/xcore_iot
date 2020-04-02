@@ -3,6 +3,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "rtos_support_rtos_config.h"
+
+#if RTOS_FREERTOS
+#include "FreeRTOS.h"
+#include "semphr.h"
+#endif
+
 #include "soc_dma_ring_buf.h"
 
 #include "xassert.h"
@@ -65,6 +72,7 @@ void soc_dma_ring_buf_init(
     ring_buf->done_next = 0;
     ring_buf->desc_count = buf_desc_count;
     ring_buf->desc = (soc_dma_buf_desc_t *) desc_buf;
+    ring_buf->tx_semaphore = NULL;
 
     for (i = 0; i < ring_buf->desc_count; i++) {
         ring_buf->desc[i].buf = NULL;
@@ -149,7 +157,17 @@ void soc_dma_ring_tx_buf_set(
         void *buf,
         uint16_t length)
 {
-    while (ring_buf->desc[ring_buf->app_next].status != SOC_DMA_BUF_DESC_STATUS_READY);
+    if (ring_buf->tx_semaphore != NULL) {
+        #if RTOS_FREERTOS
+        {
+            while (xSemaphoreTake(ring_buf->tx_semaphore, portMAX_DELAY) != pdTRUE);
+            xassert(ring_buf->desc[ring_buf->app_next].status == SOC_DMA_BUF_DESC_STATUS_READY);
+        }
+        #endif
+    } else {
+        while (ring_buf->desc[ring_buf->app_next].status != SOC_DMA_BUF_DESC_STATUS_READY);
+    }
+
     xassert(buf != NULL || length == 0);
 
     ring_buf->desc[ring_buf->app_next].buf = buf;
@@ -176,7 +194,16 @@ void soc_dma_ring_tx_buf_sg_set(
     last = (index == (buf_count - 1));
     index = add(ring_buf, ring_buf->app_next, index);
 
-    while (ring_buf->desc[index].status != SOC_DMA_BUF_DESC_STATUS_READY);
+    if (ring_buf->tx_semaphore != NULL) {
+        #if RTOS_FREERTOS
+        {
+            while (xSemaphoreTake(ring_buf->tx_semaphore, portMAX_DELAY) != pdTRUE);
+            xassert(ring_buf->desc[index].status == SOC_DMA_BUF_DESC_STATUS_READY);
+        }
+        #endif
+    } else {
+        while (ring_buf->desc[index].status != SOC_DMA_BUF_DESC_STATUS_READY);
+    }
 
     ring_buf->desc[index].buf = buf;
     ring_buf->desc[index].length = length;
@@ -209,6 +236,19 @@ void *soc_dma_ring_tx_buf_get(
         asm volatile( "" ::: "memory" );
         ring_buf->desc[ring_buf->done_next].status = SOC_DMA_BUF_DESC_STATUS_READY;
         ring_buf->done_next = add(ring_buf, ring_buf->done_next, 1);
+        if (ring_buf->tx_semaphore != NULL) {
+            #if RTOS_FREERTOS
+            {
+                if (rtos_isr_running()) {
+                    BaseType_t pxHigherPriorityTaskWoken;
+                    xSemaphoreGiveFromISR(ring_buf->tx_semaphore, &pxHigherPriorityTaskWoken);
+                    portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
+                } else {
+                    xSemaphoreGive(ring_buf->tx_semaphore);
+                }
+            }
+            #endif
+        }
     }
 
     return buf;

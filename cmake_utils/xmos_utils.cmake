@@ -80,6 +80,10 @@ function(XMOS_REGISTER_APP)
         set(APP_TARGET_COMPILER_FLAG "-target=${APP_HW_TARGET}")
     endif()
 
+    if(DEFINED THIS_XCORE_TILE)
+        list(APPEND APP_COMPILER_FLAGS "-DTHIS_XCORE_TILE=${THIS_XCORE_TILE}")
+    endif()
+
     set(LIB_NAME ${PROJECT_NAME}_LIB)
     set(LIB_VERSION ${PROJECT_VERSION})
     set(LIB_ADD_COMPILER_FLAGS ${APP_COMPILER_FLAGS})
@@ -131,7 +135,14 @@ function(XMOS_REGISTER_APP)
         endforeach()
     endforeach()
 
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
+    if(DEFINED THIS_XCORE_TILE)
+        set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
+        file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
+    else()
+        set(TARGET_NAME "${PROJECT_NAME}.xe")
+    endif()
+
     set(APP_COMPILE_FLAGS ${APP_TARGET_COMPILER_FLAG} ${APP_COMPILER_FLAGS} ${APP_COMPILER_C_FLAGS} ${HEADER_EXIST_FLAGS})
 
     foreach(target ${XMOS_TARGETS_LIST})

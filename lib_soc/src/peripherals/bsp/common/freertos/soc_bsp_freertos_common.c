@@ -5,6 +5,7 @@
 #if RTOS_FREERTOS
 
 #include "FreeRTOS.h"
+#include "semphr.h"
 
 void soc_peripheral_common_dma_init(
         soc_peripheral_t device,
@@ -36,6 +37,7 @@ void soc_peripheral_common_dma_init(
                 configASSERT(buf != NULL);
                 soc_dma_ring_rx_buf_set(ring_buf, buf, rx_buf_size);
             }
+            soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
         }
     }
 
@@ -44,6 +46,7 @@ void soc_peripheral_common_dma_init(
         configASSERT(buf_desc != NULL);
         ring_buf = soc_peripheral_tx_dma_ring_buf(device);
         soc_dma_ring_buf_init(ring_buf, buf_desc, tx_desc_count);
+        ring_buf->tx_semaphore = xSemaphoreCreateCounting(tx_desc_count, tx_desc_count);
     }
 
     soc_peripheral_handler_register(device, isr_core, app_data, isr);

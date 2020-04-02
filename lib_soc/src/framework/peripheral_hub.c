@@ -254,6 +254,12 @@ chanend soc_peripheral_ctrl_chanend(
     return device->control_c;
 }
 
+int soc_peripheral_get_id(
+        soc_peripheral_t device)
+{
+    return device->id;
+}
+
 void soc_peripheral_hub_dma_request(
         soc_peripheral_t device,
         soc_dma_request_t request)
