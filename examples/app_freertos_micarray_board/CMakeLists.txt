@@ -25,6 +25,17 @@ set(APP_COMPILER_FLAGS
         "-fxscope"
         "-Wxcore-fptrgroup"
         "-DDEBUG_PRINT_ENABLE=1"
+        "-lquadflash"
+        "-nodefaultlibs"
+        "-lc"
+        "-lsyscall"
+        "-lxs1"
+        "-lxc"
+        "-lclang_rt.builtins-xcore"
+        "-llocks"
+        "-lotp"
+        "-lsafec"
+        "-lxcc"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
 set(APP_XC_SRCS
         "bitstream_src/bitstream.xc"
