@@ -32,6 +32,9 @@ set(APP_XC_SRCS
 set(APP_C_SRCS
         "src/main.c"
         "bitstream_src/bitstream.c"
+        "src/intertile_ctrl/intertile_ctrl.c"
+        "src/intertile_ctrl/intertile_ctrl_t0.c"
+        "src/intertile_ctrl/intertile_ctrl_t1.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -39,6 +42,7 @@ set(APP_ASM_SRCS
 set(APP_INCLUDES
         "src"
         "bitstream_src"
+        "src/intertile_ctrl"
     )
 set(APP_DEPENDENT_MODULES
         "lib_soc(>=0.5.0)"

@@ -17,19 +17,13 @@
  * to the intertile isr callback group so that stack usage for certain functions
  * can be calculated.
  */
-#define INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( xFunction, device, buf, len ) BaseType_t xFunction( soc_peripheral_t device, uint8_t *buf, int len )
-#define INTERTILE_ISR_CALLBACK_FUNCTION( xFunction, device, buf, len ) INTERTILE_ISR_CALLBACK_ATTR BaseType_t xFunction( soc_peripheral_t device, uint8_t *buf, int len )
+#define INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( xFunction, device, buf, len, status, xReturnBufferToDMA ) BaseType_t xFunction( soc_peripheral_t device, uint8_t *buf, int len, uint32_t status, BaseType_t* xReturnBufferToDMA )
+#define INTERTILE_ISR_CALLBACK_FUNCTION( xFunction, device, buf, len, status, xReturnBufferToDMA ) INTERTILE_ISR_CALLBACK_ATTR BaseType_t xFunction( soc_peripheral_t device, uint8_t *buf, int len, uint32_t status, BaseType_t* xReturnBufferToDMA )
 
-typedef BaseType_t (*intertile_isr_cb_t)(soc_peripheral_t device, uint8_t *buf, int len);
+typedef BaseType_t (*intertile_isr_cb_t)(soc_peripheral_t device, uint8_t *buf, int len, uint32_t status, BaseType_t* xReturnBufferToDMA);
 
-INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( intertile_rpc, device, buf, len );
-
-typedef struct intertile_cb_header {
-    uint8_t cb_id;
-} intertile_cb_header_t;
-
-typedef enum __attribute__((packed)) {
-    INTERTILE_CB_ID_0,
+typedef enum {
+    INTERTILE_CB_ID_0 = 0,
     INTERTILE_CB_ID_1,
     INTERTILE_CB_ID_2,
     INTERTILE_CB_ID_3,
@@ -37,7 +31,12 @@ typedef enum __attribute__((packed)) {
     INTERTILE_CB_ID_5,
     INTERTILE_CB_ID_6,
     INTERTILE_CB_ID_7,
+    INTERTILE_CB_ID_COUNT,
 } intertile_cb_id_t;
+
+typedef struct intertile_cb_footer {
+    intertile_cb_id_t cb_id;
+} intertile_cb_footer_t;
 
 /**
  * Initialize the intertile device
@@ -58,30 +57,30 @@ soc_peripheral_t intertile_driver_init(
         int isr_core);
 
 /**
- * Initialize an intertile message header
+ * Initialize an intertile message footer
  *
  * Messages sent with the intertile device will trigger an ISR
- * on the receiver tile.  This configured header will trigger the
+ * on the receiver tile.  This configured footer will trigger the
  * callback ISR mapped to cb_id, if one has been registered.
  *
- * \param[in/out] cb_header      Pointer to an intertile header
- * \param[in]     cb_id          Intertile ID to map to this header
+ * \param[in/out] cb_footer      Pointer to an intertile footer
+ * \param[in]     cb_id          Intertile ID to map to this footer
  *
  * \returns       pdPASS on success
  *                pdFAIL otherwise
  */
-BaseType_t intertile_driver_header_init(
-        intertile_cb_header_t* cb_header,
+BaseType_t intertile_driver_footer_init(
+        intertile_cb_footer_t* cb_footer,
         intertile_cb_id_t cb_id);
 
 /**
  * Register an intertile ISR callback
  *
- * Register a callback to handle receiving a message with cb_header.
+ * Register a callback to handle receiving a message with cb_footer.
  *
  * \param[in]     dev            Intertile device to use
  * \param[in]     isr_cb         ISR callback
- * \param[in]     cb_header      Pointer to a configured header
+ * \param[in]     cb_footer      Pointer to a configured footer
  *
  * \returns       pdPASS on success
  *                pdFAIL otherwise
@@ -89,28 +88,46 @@ BaseType_t intertile_driver_header_init(
 BaseType_t intertile_driver_register_callback(
         soc_peripheral_t dev,
         intertile_isr_cb_t isr_cb,
-        intertile_cb_header_t* cb_header);
+        intertile_cb_footer_t* cb_footer);
 
 /**
  * Unregister an intertile ISR callback
  *
- * Unregister
+ * Unregister a callback for cb_footer.
  *
  * \param[in]     dev            Intertile device to use
- * \param[in]     cb_header      Pointer to a configured header
+ * \param[in]     cb_footer      Pointer to a configured footer
  *
  * \returns       pdPASS on success
  *                pdFAIL otherwise
  */
 BaseType_t intertile_driver_unregister_callback(
         soc_peripheral_t dev,
-        intertile_cb_header_t* cb_header);
+        intertile_cb_footer_t* cb_footer);
 
+/**
+ * Send message to intertile driver
+ *
+ * Note: The buffer being sent must be smaller than
+ * INTERTILE_DEV_BUFSIZE - sizeof( intertile_cb_footer_t ) - opt_len
+ * as the device internal buffer can only handle messages of
+ * size INTERTILE_DEV_BUFSIZE
+ *
+ * \param[in]     dev            Intertile device to use
+ * \param[in]     bytes          Pointer to the buffer to send
+ * \param[in]     len            Length in bytes of buffer to send
+ * \param[in]     opt_footer     Pointer to an optional footer to send
+ * \param[in]     opt_len        Length in bytes of optional footer
+ * \param[in]     cb_footer      Pointer to a configured footer
+ *
+ * \returns       None
+ */
 void intertile_driver_send_bytes(
         soc_peripheral_t dev,
         uint8_t *bytes,
         unsigned len,
-        intertile_cb_header_t* cb_header);
-
+        uint8_t *opt_footer,
+        unsigned opt_len,
+        intertile_cb_footer_t* cb_footer);
 
 #endif /* INTERTILE_DRIVER_H_ */

@@ -10,7 +10,7 @@
 #endif
 
 #ifndef INTERTILE_DEV_BUFSIZE
-#define INTERTILE_DEV_BUFSIZE               (4096 + 1)
+#define INTERTILE_DEV_BUFSIZE               (4096)
 #endif
 
 #if( INTERTILE_DEV_HANDLER_COUNT > INTERTILE_DEV_MAX_HANDLER_COUNT )

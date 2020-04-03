@@ -19,8 +19,8 @@ extern "C" {
 void intertile_dev(
         soc_peripheral_t peripheral,
         chanend m_ctrl_c,
-        chanend s_data_to_dma_c,
-        chanend s_data_from_dma_c);
+        chanend s_data_from_dma_c,
+        chanend s_data_to_dma_c);
 
 #ifdef __XC__
 }

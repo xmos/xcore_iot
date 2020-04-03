@@ -17,6 +17,7 @@ typedef struct {
     int dma_next;
     int app_next;
     int done_next;
+    void *tx_semaphore;
 } soc_dma_ring_buf_t;
 
 void soc_dma_ring_buf_init(
