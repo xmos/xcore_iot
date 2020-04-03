@@ -55,7 +55,6 @@ set(LIB_INCLUDES
     )
 set(LIB_DEPENDENT_MODULES
         "lib_rtos_support(>=0.5.0)"
-        "lib_xcore_c(>=2.0.0)"
         "FreeRTOS(>=10.3.0)"
     )
 set(LIB_OPTIONAL_HEADERS "soc_conf.h" "rtos_peripherals_conf.h")

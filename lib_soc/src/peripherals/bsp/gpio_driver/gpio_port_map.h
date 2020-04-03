@@ -3,8 +3,6 @@
 #ifndef GPIO_PORT_MAP_H_
 #define GPIO_PORT_MAP_H_
 
-#include "xcore_c.h"
-
 typedef enum {
     gpio_none = -1,
     gpio_1A = 0,
@@ -26,9 +24,9 @@ typedef enum {
     gpio_4A,
     gpio_4B,
     gpio_4C,
-    gpio_4D,
-    gpio_4E,
-    gpio_4F,
+    // gpio_4D,
+    // gpio_4E,
+    // gpio_4F,
     gpio_8A,
     gpio_8B,
     gpio_8C,

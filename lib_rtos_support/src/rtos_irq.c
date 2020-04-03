@@ -1,5 +1,6 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
+#include <xcore/triggerable.h>
 #include "rtos_support.h"
 
 /*
@@ -15,12 +16,12 @@
 /*
  * The channel ends used by RTOS cores to send and receive IRQs.
  */
-static chanend rtos_irq_chanend[ RTOS_MAX_CORE_COUNT ];
+static chanend_t rtos_irq_chanend[ RTOS_MAX_CORE_COUNT ];
 
 /*
  * The channel ends used by peripherals to send IRQs.
  */
-static chanend peripheral_irq_chanend[ MAX_ADDITIONAL_SOURCES ];
+static chanend_t peripheral_irq_chanend[ MAX_ADDITIONAL_SOURCES ];
 
 /*
  * Flag set per core indicating which IRQ sources are pending
@@ -47,6 +48,8 @@ typedef struct {
 
 static isr_info_t isr_info[MAX_ADDITIONAL_SOURCES];
 
+static volatile int peri_irq_count = 0;
+
 DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
 {
     int core_id;
@@ -56,7 +59,9 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
 
     xassert( irq_pending[ core_id ] );
 
-    _s_chan_check_ct_end( rtos_irq_chanend[ core_id ] );
+    chanend_check_end_token( rtos_irq_chanend[ core_id ] );
+
+    peri_irq_count -= 1;
 
     /* just ensure the channel read is done before clearing the pending flags. */
     RTOS_MEMORY_BARRIER();
@@ -102,7 +107,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
  */
 void rtos_irq( int core_id, int source_id )
 {
-    chanend source_chanend;
+    chanend_t source_chanend;
     uint32_t pending;
     int num_cores = rtos_core_count();
 
@@ -141,28 +146,30 @@ void rtos_irq( int core_id, int source_id )
             RTOS_MEMORY_BARRIER();
 
             chanend_set_dest( source_chanend, rtos_irq_chanend[ core_id ] );
-            _s_chan_out_ct_end( source_chanend );
+            chanend_out_end_token( source_chanend );
         }
     }
     rtos_lock_release(0);
 }
 
+
 /*
  * Must be called by an RTOS core to interrupt a
  * non-RTOS core.
  */
-void rtos_irq_peripheral( chanend dest_chanend )
+void rtos_irq_peripheral( chanend_t dest_chanend )
 {
     int core_id;
 
     uint32_t mask = rtos_interrupt_mask_all();
     core_id = rtos_core_id_get();
     chanend_set_dest( rtos_irq_chanend[ core_id ], dest_chanend );
-    _s_chan_out_ct_end( rtos_irq_chanend[ core_id ] );
+    peri_irq_count += 1;
+    chanend_out_end_token( rtos_irq_chanend[ core_id ] );
     rtos_interrupt_mask_set(mask);
 }
 
-int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend source_chanend)
+int rtos_irq_register(rtos_irq_isr_t isr, void *data, chanend_t source_chanend)
 {
     int source_id;
 
@@ -184,9 +191,9 @@ void rtos_irq_enable( int total_rtos_cores )
     int core_id;
 
     core_id = rtos_core_id_get();
-    chanend_alloc( &rtos_irq_chanend[ core_id ] );
-    chanend_setup_interrupt_callback( rtos_irq_chanend[ core_id ], NULL, RTOS_INTERRUPT_CALLBACK( rtos_irq_handler ) );
-    chanend_enable_trigger( rtos_irq_chanend[ core_id ] );
+    rtos_irq_chanend[ core_id ] = chanend_alloc();
+    triggerable_setup_interrupt_callback( rtos_irq_chanend[ core_id ], NULL, RTOS_INTERRUPT_CALLBACK( rtos_irq_handler ) );
+    triggerable_enable_trigger( rtos_irq_chanend[ core_id ] );
 
     rtos_lock_acquire(0);
     {

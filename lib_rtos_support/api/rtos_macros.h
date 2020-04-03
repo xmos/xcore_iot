@@ -4,7 +4,9 @@
 #define RTOS_MACROS_H_
 
 #include "rtos_support_rtos_config.h"
-#include "xcore_c.h"
+
+#define RTOS_STRINGIFY_I(...) #__VA_ARGS__
+#define RTOS_STRINGIFY(...) RTOS_STRINGIFY_I(__VA_ARGS__)
 
 /*
  * Inserts a compile time memory barrier
@@ -25,7 +27,7 @@
     ({ \
         uint32_t stack_size; \
         asm volatile ( \
-                "ldc %0, " _XCORE_C_STR(thread_entry) ".nstackwords + " _XCORE_C_STR(RTOS_SUPPORT_INTERRUPT_STACK_GROWTH) "\n\t" \
+                "ldc %0, " RTOS_STRINGIFY(thread_entry) ".nstackwords + " RTOS_STRINGIFY(RTOS_SUPPORT_INTERRUPT_STACK_GROWTH) "\n\t" \
                 : "=r"(stack_size) /* output 0 is stack_size */ \
                 : /* there are no inputs */ \
                 : /* nothing gets clobbered */ \

@@ -23,16 +23,6 @@ set(APP_COMPILER_FLAGS
         "-g"
         "-report"
         "-fxscope"
-	"-nodefaultlibs"
-	"-lc"
-	"-lsyscall"
-	"-lxs1"
-	"-lxc"
-	"-lclang_rt.builtins-xcore"
-	"-llocks"
-	"-lotp"
-	"-lsafec"
-	"-lxcc"
         "-Wxcore-fptrgroup"
         "-DDEBUG_PRINT_ENABLE=1"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
@@ -58,7 +48,7 @@ set(APP_DEPENDENT_MODULES
         "lib_soc(>=0.5.0)"
     )
 
-set(USE_FREERTOS_SMP True)
+set(USE_FREERTOS_SMP False)
 
 ## Add lib_soc devices
 set(LIB_SOC_INTERTILE ${FULL})

@@ -6,7 +6,7 @@
 #if !defined(__XC__)
 
 #include "rtos_support_rtos_config.h"
-#include "xcore_c.h"
+#include <xcore/lock.h>
 #include "xassert.h"
 
 #ifndef RTOS_LOCK_COUNT
