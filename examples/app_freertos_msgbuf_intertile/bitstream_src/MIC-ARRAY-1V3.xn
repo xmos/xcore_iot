@@ -110,10 +110,12 @@
     </Link>
   </Links>
   <ExternalDevices>
-    <Device NodeId="0" Tile="0" Class="SQIFlash" Name="bootFlash" Type="IS25LQ016B">
+    <Device NodeId="0" Tile="0" Class="SQIFlash" Name="bootFlash" Type="IS25LQ016B" PageSize="256" SectorSize="4096" NumPages="8192">
       <Attribute Name="PORT_SQI_CS" Value="PORT_SQI_CS"/>
       <Attribute Name="PORT_SQI_SCLK"   Value="PORT_SQI_SCLK"/>
       <Attribute Name="PORT_SQI_SIO"  Value="PORT_SQI_SIO"/>
+      <Attribute Name="QE_REGISTER" Value="flash_qe_location_status_reg_0"/>
+      <Attribute Name="QE_BIT" Value="flash_qe_bit_6"/>
     </Device>
   </ExternalDevices>
   <JTAGChain>
