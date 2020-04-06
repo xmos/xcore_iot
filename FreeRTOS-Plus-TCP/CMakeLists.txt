@@ -1,8 +1,81 @@
-cmake_minimum_required(VERSION 3.13)
+#=============================================================================
+# Library creator shall specify the following variables:
+#   LIB_NAME                Name of the library
+#                           May only contain alphanumeric and space, dash, and
+#                           underscore characters.
+#                           ex: set(LIB_NAME lib_foo)
+#   LIB_VERSION             Version of the library
+#                           Must follow semantic version format.
+#                           ex: set(LIB_VERSION 1.0.0)
+#   LIB_ADD_COMPILER_FLAGS  Additional compiler flags
+#                           ex: set(LIB_ADD_COMPILER_FLAGS "-oS")
+#   LIB_XC_SRCS             List of all library XC sources
+#                           Shall be set to "" if no XC sources exist
+#                           ex: set(LIB_XC_SRCS "foo.xc" "bar.xc")
+#   LIB_C_SRCS              List of all library C sources
+#                           Shall be set to "" if no C sources exist
+#                           ex: set(LIB_C_SRCS "foo.c" "bar.c")
+#   LIB_ASM_SRCS            List of all library ASM sources
+#                           Shall be set to "" if no ASM sources exist
+#                           ex: set(LIB_ASM_SRCS "foo.S" "bar.S")
+#   LIB_INCLUDES            List of all library include directories
+#                           Shall be set to all directories include .h files
+#                           ex: set(LIB_INCLUDES "foo/bar")
+#   LIB_DEPENDENT_MODULES   List of all dependency libraries with version
+#                           Every list item shall include a dependency name,
+#                           which must also be the folder in which the library
+#                           CMakeLists.txt exists, and a version requirement.
+#                           Version requirements shall be in the format:
+#                           ([bool req][major].[minor].[patch])
+#                           ex: set(LIB_DEPENDENT_MODULES "lib_foo(>=1.0.0)")
+#   LIB_OPTIONAL_HEADERS    List of optional header files
+#                           Must contain full header file names
+#                           ex: set(LIB_OPTIONAL_HEADERS "foo.h" "bar.h")
 
-if(${USE_FREERTOS_SMP})
-    add_subdirectory("${XMOS_MODULES_ROOT_DIR}/rtos/FreeRTOS-SMP/FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP" "${CMAKE_CURRENT_BINARY_DIR}/FreeRTOS-Plus-TCP")
-else()
-    add_subdirectory("${XMOS_MODULES_ROOT_DIR}/rtos/FreeRTOS/FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP" "${CMAKE_CURRENT_BINARY_DIR}/FreeRTOS-Plus-TCP")
+set(LIB_NAME FreeRTOS-Plus-TCP)
+set(LIB_VERSION 10.3.0)
+set(LIB_ADD_COMPILER_FLAGS "-Os")
+set(LIB_XC_SRCS
+        ""
+    )
+set(LIB_C_SRCS
+        "FreeRTOS_ARP.c"
+        "FreeRTOS_DHCP.c"
+        "FreeRTOS_DNS.c"
+        "FreeRTOS_IP.c"
+        "FreeRTOS_Sockets.c"
+        "FreeRTOS_Stream_Buffer.c"
+        "FreeRTOS_TCP_IP.c"
+        "FreeRTOS_TCP_WIN.c"
+        "FreeRTOS_UDP_IP.c"
+        "portable/BufferManagement/BufferAllocation_2.c"
+        "portable/NetworkInterface/XCC/XCORE200/FreeRTOS_TCP_port.c"
+        "portable/NetworkInterface/XCC/XCORE200/NetworkInterface.c"
+        "portable/NetworkInterface/XCC/XCORE200/NetworkInterfaceWiFi.c"
+    )
+set(LIB_ASM_SRCS
+        ""
+    )
+set(LIB_INCLUDES
+        "include"
+        "portable/Compiler/XCC"
+        "portable/NetworkInterface/XCC/XCORE200"
+    )
+set(LIB_DEPENDENT_MODULES
+        "FreeRTOS(>=10.3.0)"
+        "lib_soc(>=0.5.0)"
+        "lib_random(>=1.0.0)"
+        "lib_otpinfo(>=2.0.1)"
+    )
+set(LIB_OPTIONAL_HEADERS "")
 
-endif()
+set(${LIB_NAME}_FILEPATH_PREFIX "${XMOS_MODULES_ROOT_DIR}/rtos/FreeRTOS/FreeRTOS-Plus/FreeRTOS/FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP/")
+
+list(TRANSFORM LIB_XC_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
+list(TRANSFORM LIB_C_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
+list(TRANSFORM LIB_ASM_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
+list(TRANSFORM LIB_INCLUDES PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
+#=============================================================================
+# The following part of the CMakeLists includes the common build infrastructure
+# for compiling XMOS applications. You should not need to edit below here.
+XMOS_REGISTER_MODULE()

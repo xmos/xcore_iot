@@ -38,12 +38,15 @@
 	path = lib_xassert/lib_xassert
 	url = git@github.com:xmos/lib_xassert.git
 [submodule "FreeRTOS"]
-	path = rtos/FreeRTOS
+	path = rtos/FreeRTOS/FreeRTOS-Plus/FreeRTOS
 	url = git@github0.xmos.com:mbruno-xmos/FreeRTOS-fork.git
 [submodule "lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver"]
 	path = lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver
 	url = git@github.com:SiliconLabs/wfx-fullMAC-driver.git
 [submodule "rtos/FreeRTOS-SMP"]
-	path = rtos/FreeRTOS-SMP
+	path = rtos/FreeRTOS/FreeRTOS-Plus/FreeRTOS-SMP
 	url = git@github0.xmos.com:mikeb/FreeRTOS-fork.git
 	branch = feature/xcore-smp
+[submodule "rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT"]
+	path = rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT
+	url = git@github.com:FreeRTOS/Lab-Project-FreeRTOS-FAT.git
