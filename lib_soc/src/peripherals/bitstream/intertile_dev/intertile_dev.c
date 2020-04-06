@@ -1,7 +1,9 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
+#include <xcore/triggerable.h>
+#include <xcore/chanend.h>
+
 #include "rtos_support.h"
-#include "xcore_c.h"
 #include "soc.h"
 
 #include "intertile_dev.h"
@@ -21,73 +23,53 @@ void intertile_dev(
     uint8_t buf[INTERTILE_DEV_BUFSIZE];
     int len;
 
-    select_disable_trigger_all();
+    TRIGGERABLE_SETUP_EVENT_VECTOR(m_ctrl_c, event_ctrl);
+    TRIGGERABLE_SETUP_EVENT_VECTOR(s_data_from_dma_c, event_data_from_remote_tile);
 
-    chanend_setup_select( s_data_from_dma_c, EVENT_SLAVE_TO_MASTER );
-    chanend_enable_trigger( s_data_from_dma_c );
+    triggerable_disable_all();
+    triggerable_enable_trigger(s_data_from_dma_c);
+    triggerable_enable_trigger(m_ctrl_c);
 
-    chanend_setup_select( m_ctrl_c, EVENT_CONTROL_CHANNEL );
-    chanend_enable_trigger( m_ctrl_c );
+    for (;;) {
 
-    for( ;; )
-    {
-        int event_id;
+		if (peripheral != NULL) {
+			len = soc_peripheral_rx_dma_direct_xfer(peripheral, buf, sizeof(buf));
 
-        event_id = select_wait();
+			if (len > 0) {
+				if (s_data_to_dma_c != 0) {
+					soc_peripheral_tx_dma_xfer(s_data_to_dma_c, buf, len);
+				}
+			}
+		}
 
-        do {
-            if( peripheral != NULL )
-            {
-                len = soc_peripheral_rx_dma_direct_xfer(peripheral, buf, sizeof(buf));
+		TRIGGERABLE_WAIT_EVENT(event_ctrl, event_data_from_remote_tile);
 
-                if (len > 0)
-                {
-                    if (s_data_to_dma_c != 0)
-                    {
-                        soc_peripheral_tx_dma_xfer(s_data_to_dma_c, buf, len);
-                    }
-                }
-            }
+		event_ctrl: {
+			soc_peripheral_function_code_rx(m_ctrl_c, &cmd);
+			switch( cmd ) {
+			case SOC_PERIPHERAL_DMA_TX:
+				/*
+				 * The application has added a new DMA TX buffer. This
+				 * ensures that this select statement wakes up and gets
+				 * the TX data in the code above.
+				 */
+				break;
 
-            switch( event_id )
-            {
-                case EVENT_CONTROL_CHANNEL:
-                {
-                    soc_peripheral_function_code_rx(m_ctrl_c, &cmd);
-                    switch( cmd )
-                    {
-                    case SOC_PERIPHERAL_DMA_TX:
-                        /*
-                         * The application has added a new DMA TX buffer. This
-                         * ensures that this select statement wakes up and gets
-                         * the TX data in the code above.
-                         */
-                        break;
-                    default:
-                        rtos_printf( "Invalid CMD\n" );
-                        break;
-                    }
-                    break;
-                }
-                case EVENT_SLAVE_TO_MASTER:
-                {
-                    soc_peripheral_rx_dma_ready(s_data_from_dma_c);
-                    len = soc_peripheral_rx_dma_xfer(s_data_from_dma_c, buf, sizeof(buf));
+			default:
+				rtos_printf( "Invalid CMD\n" );
+				break;
+			}
+			continue;
+		}
 
-                    if (peripheral != 0) {
-                        soc_peripheral_tx_dma_direct_xfer(peripheral, buf, len);
-                    }
-                    break;
-                }
-                default:
-                {
-                    rtos_printf( "Invalid event\n" );
-                    xassert(0);
-                    break;
-                }
-            }
+		event_data_from_remote_tile: {
+			soc_peripheral_rx_dma_ready(s_data_from_dma_c);
+			len = soc_peripheral_rx_dma_xfer(s_data_from_dma_c, buf, sizeof(buf));
 
-            event_id = select_no_wait( -1 );
-        } while( event_id != -1 );
+			if (peripheral != 0) {
+				soc_peripheral_tx_dma_direct_xfer(peripheral, buf, len);
+			}
+			continue;
+		}
     }
 }

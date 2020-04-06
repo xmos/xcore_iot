@@ -37,9 +37,6 @@
 [submodule "dependencies/lib_xassert"]
 	path = lib_xassert/lib_xassert
 	url = git@github.com:xmos/lib_xassert.git
-[submodule "dependencies/lib_xcore_c"]
-	path = lib_xcore_c/lib_xcore_c
-	url = git@github.com:xmos/lib_xcore_c.git
 [submodule "FreeRTOS"]
 	path = rtos/FreeRTOS
 	url = git@github0.xmos.com:mbruno-xmos/FreeRTOS-fork.git

@@ -7,6 +7,7 @@
 #include <xs1.h>
 
 #include "rtos_interrupt_impl.h"
+#include "rtos_macros.h"
 
 /** Define the function that enters the RTOS kernel and begins the scheduler.
  *  This should only be used by the RTOS entry function that starts the scheduler.
@@ -66,7 +67,7 @@
  *  \param ...              the arguments of the ordinary function
  */
 #define DECLARE_RTOS_KERNEL_ENTRY(ret, root_function, ...) \
-        _DECLARE_INTERRUPT_PERMITTED(ret, root_function, __VA_ARGS__)
+        _XCORE_DECLARE_INTERRUPT_PERMITTED(ret, root_function, __VA_ARGS__)
 
 /** The name of the defined RTOS kernel entry function
  *
@@ -75,7 +76,7 @@
  *
  *  \return     the name of the defined kernel entry function
  */
-#define RTOS_KERNEL_ENTRY(root_function) _INTERRUPT_PERMITTED(root_function)
+#define RTOS_KERNEL_ENTRY(root_function) _XCORE_INTERRUPT_PERMITTED(root_function)
 
 
 /** Define an RTOS interrupt handling function
@@ -124,7 +125,7 @@
  *
  *  \return     the name of the defined interrupt_callback_t function
  */
-#define RTOS_INTERRUPT_CALLBACK(intrpt) _INTERRUPT_CALLBACK(intrpt)
+#define RTOS_INTERRUPT_CALLBACK(intrpt) _XCORE_INTERRUPT_CALLBACK(intrpt)
 
 
 /**
@@ -138,7 +139,7 @@ inline uint32_t rtos_interrupt_mask_get(void)
     uint32_t mask;
 
     asm volatile(
-        "getsr r11," _XCORE_C_STR(XS1_SR_IEBLE_MASK) "\n"
+        "getsr r11," RTOS_STRINGIFY(XS1_SR_IEBLE_MASK) "\n"
         "mov %0, r11"
         : "=r"(mask)
         : /* no inputs */
@@ -161,9 +162,9 @@ inline uint32_t rtos_interrupt_mask_all(void)
     uint32_t mask;
 
     asm volatile(
-        "getsr r11," _XCORE_C_STR(XS1_SR_IEBLE_MASK) "\n"
+        "getsr r11," RTOS_STRINGIFY(XS1_SR_IEBLE_MASK) "\n"
         "mov %0, r11\n"
-        "clrsr " _XCORE_C_STR(XS1_SR_IEBLE_MASK)
+        "clrsr " RTOS_STRINGIFY(XS1_SR_IEBLE_MASK)
         : "=r"(mask)
         : /* no inputs */
         : /* clobbers */ "r11", "memory"
@@ -179,7 +180,7 @@ inline uint32_t rtos_interrupt_mask_all(void)
 inline void rtos_interrupt_unmask_all(void)
 {
     asm volatile(
-        "setsr" _XCORE_C_STR(XS1_SR_IEBLE_MASK)
+        "setsr" RTOS_STRINGIFY(XS1_SR_IEBLE_MASK)
         : /* no outputs */
         : /* no inputs */
         : /* clobbers */ "memory"
@@ -210,7 +211,7 @@ inline uint32_t rtos_isr_running(void)
     uint32_t kernel_mode;
 
     asm volatile(
-        "getsr r11," _XCORE_C_STR(XS1_SR_INK_MASK) "\n"
+        "getsr r11," RTOS_STRINGIFY(XS1_SR_INK_MASK) "\n"
         "mov %0, r11"
         : "=r"(kernel_mode)
         : /* no inputs */
