@@ -38,7 +38,7 @@
 
 
 #define mainFLASH_DISK_SECTOR_SIZE    512UL /* Currently fixed! */
-#define mainFLASH_DISK_SECTORS        ( ( 10UL * 1024UL * 1024UL ) / mainFLASH_DISK_SECTOR_SIZE ) /* 1M bytes. */
+#define mainFLASH_DISK_SECTORS        ( ( 10UL * 1024UL * 1024UL ) / mainFLASH_DISK_SECTOR_SIZE ) /* 10M bytes. */
 #define mainIO_MANAGER_CACHE_SIZE   ( 2UL * mainFLASH_DISK_SECTOR_SIZE )
 #define mainFLASH_DISK_NAME           "/flash"
 
