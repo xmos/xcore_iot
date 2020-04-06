@@ -76,7 +76,6 @@ list(TRANSFORM LIB_C_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
 list(TRANSFORM LIB_ASM_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
 list(TRANSFORM LIB_INCLUDES PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
 
-message("${LIB_C_SRCS}")
 # #=============================================================================
 # # The following part of the CMakeLists includes the common build infrastructure
 # # for compiling XMOS applications. You should not need to edit below here.
