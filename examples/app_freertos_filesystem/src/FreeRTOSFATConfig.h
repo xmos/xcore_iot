@@ -79,7 +79,7 @@ accesses the file system, allowing relative paths to be used.
 
 Set to 0 not to use a CWD, in which case full paths must be used for each
 file access. */
-#define ffconfigHAS_CWD 0
+#define ffconfigHAS_CWD 1
 
 /* Set to an index within FreeRTOS's thread local storage array that is free for
 use by FreeRTOS+FAT.  FreeRTOS+FAT will use two consecutive indexes from this
@@ -162,7 +162,7 @@ allowing the second copy to be used in the case of a read error.  If
 Set to 1 to use both FATs - this is less efficient but more	secure.
 
 Set to 0 to use only one FAT - the second FAT will never be written to. */
-#define	ffconfigWRITE_BOTH_FATS	0
+#define	ffconfigWRITE_BOTH_FATS	1
 
 /* Set to 1 to have the number of free clusters and the first free cluster
 to be written to the FS info sector each time one of those values changes.
@@ -332,6 +332,7 @@ conform with the coding standard, so use this function with care! */
 #define portINLINE __inline
 
 #define ffconfigDEBUG 1
+#define ffconfigFAT_USES_STAT 1
 
 #endif /* _FF_CONFIG_H_ */
 
