@@ -42,24 +42,157 @@
 #define mainFLASH_DISK_IO_MANAGER_CACHE_SIZE   ( 2UL * mainFLASH_DISK_SECTOR_SIZE )
 #define mainFLASH_DISK_NAME           "/flash"
 
+static int make_disk = 0;
 
 static void prvCreateDiskAndExampleFiles( void* arg )
 {
 FF_Disk_t *pxDisk;
 
+
 	rtos_printf("Flash can hold %d bytes\n", fl_getFlashSize() );
+	while( make_disk == 0 )
+	{
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
+
+	rtos_printf("Flash can proceed\n");
 
     /* Create the Flash disk. */
-    pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, 0, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
+    pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, 291920, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
     configASSERT( pxDisk );
 
-//    /* Print out information on the disk. */
+    /* Print out information on the disk. */
     FF_FlashDiskShowPartition( pxDisk );
 
+    for(;;)
+    {
+		vTaskDelay(pdMS_TO_TICKS(100));
+    }
     /* Create a few example files on the disk.  These are not deleted again. */
 //    vCreateAndVerifyExampleFiles( mainFLASH_DISK_NAME );
 
 //        vStdioWithCWDTest( mainRAM_DISK_NAME );
+}
+
+char *security_name(WIFISecurity_t s)
+{
+    switch (s) {
+    case eWiFiSecurityOpen:
+        return "Open";
+    case eWiFiSecurityWEP:
+        return "WEP";
+    case eWiFiSecurityWPA:
+        return "WPA";
+    case eWiFiSecurityWPA2:
+        return "WPA2";
+    case eWiFiSecurityWPA2_ent:
+        return "WPA2 Enterprise";
+    default:
+        return "Unsupported";
+    }
+}
+
+static void wf200_test(void *arg)
+{
+    WIFIReturnCode_t ret;
+    WIFIScanResult_t scan_results[20];
+
+    rtos_printf("Hello from wf200 test\n ");
+
+    ret = WIFI_On();
+
+    rtos_printf("Returned %x\n", ret);
+
+    initalize_FreeRTOS_IP();
+
+    ret = WIFI_Scan(scan_results, 20);
+
+    if (ret == eWiFiSuccess) {
+        for (int i = 0; i < 20; i++) {
+            uint8_t no_bssid[wificonfigMAX_BSSID_LEN] = {0};
+            if (memcmp(scan_results[i].ucBSSID, no_bssid, wificonfigMAX_BSSID_LEN) == 0) {
+                break;
+            }
+            rtos_printf("%d: %s\n", i, scan_results[i].cSSID);
+            rtos_printf("\tChannel: %d\n", (int) scan_results[i].cChannel);
+            rtos_printf("\tStrength: %d dBm\n", (int) scan_results[i].cRSSI);
+            rtos_printf("\t%s\n", security_name(scan_results[i].xSecurity));
+        }
+    }
+
+    WIFINetworkParams_t pxNetworkParams;
+
+    while (1) {
+#if 1
+        static uint32_t ip;
+        char a[16];
+
+        pxNetworkParams.pcSSID = "xxxxxxxxx";
+        pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+        pxNetworkParams.pcPassword = "xxxxxxxxx";
+        pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+        pxNetworkParams.xSecurity = eWiFiSecurityWPA;
+        pxNetworkParams.cChannel = 0;
+
+        do {
+            ret = WIFI_ConnectAP(&pxNetworkParams);
+            rtos_printf("WIFI_ConnectAP() returned %x\n", ret);
+        } while (ret != eWiFiSuccess);
+
+        vTaskDelay(pdMS_TO_TICKS(5000));
+
+        WIFI_GetIP( (void *) &ip );
+        FreeRTOS_inet_ntoa(ip, a);
+        rtos_printf("My IP is %s\n", a);
+
+        WIFI_GetHostIP("google.com", (void *) &ip );
+        FreeRTOS_inet_ntoa(ip, a);
+        rtos_printf("google.com is %s\n", a);
+
+        rtos_printf("Pinging google.com now!\n");
+        WIFI_Ping( (void *) &ip, 5, 1000 );
+
+        make_disk = 1;
+
+        vTaskDelay(pdMS_TO_TICKS(10*60000));
+
+        ret = WIFI_Disconnect();
+        rtos_printf("WIFI_Disconnect() returned %x\n", ret);
+        vTaskDelay(pdMS_TO_TICKS(5000));
+#endif
+#if 0
+        pxNetworkParams.pcSSID = "softap_test";
+        pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+        pxNetworkParams.pcPassword = "test123qwe";
+        pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+        pxNetworkParams.xSecurity = eWiFiSecurityWPA2;
+        pxNetworkParams.cChannel = 5;
+
+        WIFI_ConfigureAP(&pxNetworkParams);
+
+        do {
+            ret = WIFI_StartAP();
+            rtos_printf("WIFI_StartAP() returned %x\n", ret);
+        } while (ret != eWiFiSuccess);
+
+        dhcpd_start(16);
+        vTaskDelay(pdMS_TO_TICKS(60*60000));
+
+        dhcpd_stop();
+
+        /* FIXME: Why does this cause a firmware exception sometimes? */
+        ret = WIFI_StopAP();
+
+        rtos_printf("WIFI_StopAP() returned %x\n", ret);
+        if (ret != eWiFiSuccess) {
+            rtos_printf("Resetting WiFi\n");
+            ret = WIFI_Reset();
+            rtos_printf("WIFI_Reset() returned %x\n", ret);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(500));
+#endif
+    }
 }
 
 void soc_tile0_main(
@@ -67,7 +200,21 @@ void soc_tile0_main(
 {
     rtos_printf("Hello from tile %d\n", tile);
 
-    xTaskCreate(prvCreateDiskAndExampleFiles, "fs_test", 2000/*portTASK_STACK_DEPTH(prvCreateDiskAndExampleFiles)*/, NULL, 15, NULL);
+    soc_peripheral_t dev;
+
+    dev = spi_master_driver_init(
+            BITSTREAM_SPI_DEVICE_A,  /* Initializing SPI device A */
+            2,                       /* Use 2 DMA buffers for the scatter/gather */
+            0);                      /* This device's interrupts should happen on core 0 */
+
+    dev = gpio_driver_init(
+            BITSTREAM_GPIO_DEVICE_A,
+            NULL,
+            0);
+
+    xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
+
+	xTaskCreate(prvCreateDiskAndExampleFiles, "fs_test", 2000/*portTASK_STACK_DEPTH(prvCreateDiskAndExampleFiles)*/, NULL, 15, NULL);
 
     vTaskStartScheduler();
 }
