@@ -19,6 +19,7 @@
 
 /* Library headers */
 #include "soc.h"
+#include <quadflashlib.h>
 
 /* BSP/bitstream headers */
 #include "bitstream_devices.h"
@@ -34,43 +35,26 @@
 /* FreeRTOS+FAT includes. */
 #include "ff_headers.h"
 #include "ff_stdio.h"
-
-
-#define TEST_FLASH_DISK 1
-
-
-#if TEST_FLASH_DISK
 #include "ff_flashdisk.h"
+
 #define mainFLASH_DISK_SECTOR_SIZE    512UL /* Currently fixed! */
 #define mainFLASH_DISK_SECTORS        ( ( 10UL * 1024UL * 1024UL ) / mainFLASH_DISK_SECTOR_SIZE )
 #define mainFLASH_DISK_IO_MANAGER_CACHE_SIZE   ( 2UL * mainFLASH_DISK_SECTOR_SIZE )
 #define mainFLASH_DISK_NAME           "/flash"
-#else
-#include "ff_ramdisk.h"
-#define mainRAM_DISK_SECTOR_SIZE    512UL /* Currently fixed! */
-#define mainRAM_DISK_SECTORS        ( ( 160UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE )
-#define mainRAM_DISK_IO_MANAGER_CACHE_SIZE   ( 2UL * mainRAM_DISK_SECTOR_SIZE )
-#define mainRAM_DISK_NAME           "/ram"
-#endif
 
-static void prvCreateDiskAndExampleFiles( void )
+
+static void prvCreateDiskAndExampleFiles( void* arg )
 {
 FF_Disk_t *pxDisk;
 
-#if TEST_FLASH_DISK
+	rtos_printf("Flash can hold %d bytes\n", fl_getFlashSize() );
+
     /* Create the Flash disk. */
     pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
     configASSERT( pxDisk );
-//
+
 //    /* Print out information on the disk. */
     FF_FlashDiskShowPartition( pxDisk );
-#else
-	uint8_t* buf = pvPortMalloc( sizeof(uint8_t) * 512 * mainRAM_DISK_SECTORS );
-    pxDisk = FF_RAMDiskInit( mainRAM_DISK_NAME, buf, mainRAM_DISK_SECTORS, mainRAM_DISK_IO_MANAGER_CACHE_SIZE );
-	configASSERT( pxDisk );
-
-    FF_RAMDiskShowPartition( pxDisk );
-#endif
 
     /* Create a few example files on the disk.  These are not deleted again. */
 //    vCreateAndVerifyExampleFiles( mainFLASH_DISK_NAME );
@@ -83,7 +67,7 @@ void soc_tile0_main(
 {
     rtos_printf("Hello from tile %d\n", tile);
 
-    xTaskCreate((TaskFunction_t)prvCreateDiskAndExampleFiles, "fs_test", 2000/*portTASK_STACK_DEPTH(prvCreateDiskAndExampleFiles)*/, NULL, 15, NULL);
+    xTaskCreate(prvCreateDiskAndExampleFiles, "fs_test", 2000/*portTASK_STACK_DEPTH(prvCreateDiskAndExampleFiles)*/, NULL, 15, NULL);
 
     vTaskStartScheduler();
 }
