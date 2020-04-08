@@ -214,18 +214,17 @@ int32_t lReturn = FF_ERR_NONE;
 		}
 		else
 		{
-		    taskENTER_CRITICAL();
-		    {
+			taskENTER_CRITICAL();
+			{
 				if( ( fl_readStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) ),
-								    ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
-								    ( unsigned char * ) pucDestination ) )
-						!= 0 )
+				                    ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
+				                    ( unsigned char * ) pucDestination ) ) != 0 )
 				{
 					lReturn = FF_ERR_DEVICE_DRIVER_FAILED;
 					rtos_printf("read failed\n");
 				}
-		    }
-		    taskEXIT_CRITICAL();
+			}
+			taskEXIT_CRITICAL();
 
 //			rtos_printf("Read sector:%d offset:%d size:%d data:%8s\n",
 //						( uint32_t ) ulSectorNumber,
@@ -271,30 +270,49 @@ int32_t lReturn = FF_ERR_NONE;
 		}
 		else
 		{
-		    unsigned char* scratch;
+			unsigned char* scratch = NULL;
 
-		    taskENTER_CRITICAL();
-		    {
+			unsigned scratch_bytes = fl_getWriteScratchSize( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) ),
+			                                                 ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ) );
 
-		    	unsigned scratch_bytes = fl_getWriteScratchSize( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) ),
-						 	 	 	 							 ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ) );
-
-		    	scratch = pvPortMalloc( scratch_bytes );
-
-		    	if( ( fl_writeStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) ),
-									 ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
-									 ( unsigned char* ) pucSource,
-									 ( unsigned char* ) scratch ) )
-						!= 0 )
+			configASSERT( scratch_bytes != -1 );
+			if( scratch_bytes == -1 )
+			{
+				lReturn = FF_ERR_DEVICE_DRIVER_FAILED;
+			}
+			else
+			{
+				if( scratch_bytes > 0 )
 				{
-					lReturn = FF_ERR_DEVICE_DRIVER_FAILED;
-					rtos_printf("write failed\n");
+					scratch = pvPortMalloc( scratch_bytes );
+					configASSERT( scratch != NULL );
+					if( scratch == NULL )
+					{
+						lReturn = FF_ERR_DEVICE_DRIVER_FAILED;
+					}
 				}
 
-		    }
-		    taskEXIT_CRITICAL();
+				if( lReturn == FF_ERR_NONE )
+				{
+					taskENTER_CRITICAL();
+					{
+						if( ( fl_writeStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) ),
+						                     ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
+						                     ( unsigned char* ) pucSource,
+						                     ( unsigned char* ) scratch ) ) != 0 )
+						{
+							lReturn = FF_ERR_DEVICE_DRIVER_FAILED;
+							rtos_printf("write failed\n");
+						}
+					}
+					taskEXIT_CRITICAL();
 
-	    	vPortFree( scratch );
+					if( scratch != NULL )
+					{
+						vPortFree( scratch );
+					}
+				}
+			}
 
 //			rtos_printf("Write sector:%d offset:%d size:%d data:%8s\n",
 //						( uint32_t ) ulSectorNumber,
