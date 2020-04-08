@@ -49,4 +49,4 @@
 	branch = feature/xcore-smp
 [submodule "rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT"]
 	path = rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT
-	url = git@github0.xmos.com:JeremiahMcCarthy/Lab-Project-FreeRTOS-FAT.git
+	url = git@github.com:FreeRTOS/Lab-Project-FreeRTOS-FAT.git

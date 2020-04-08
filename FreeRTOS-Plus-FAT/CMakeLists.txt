@@ -54,7 +54,7 @@ set(LIB_C_SRCS
         "ff_sys.c"
         "ff_time.c"
         "portable/common/ff_ramdisk.c"
-        "portable/XCC/XCORE200/ff_flashdisk.c"
+        "../portable/XCC/XCORE200/ff_flashdisk.c"
     )
 set(LIB_ASM_SRCS
         ""
@@ -62,7 +62,7 @@ set(LIB_ASM_SRCS
 set(LIB_INCLUDES
         "include"
         "portable/common"
-        "portable/XCC/XCORE200"
+        "../portable/XCC/XCORE200"
     )
 set(LIB_DEPENDENT_MODULES
         "FreeRTOS(>=10.3.0)"
