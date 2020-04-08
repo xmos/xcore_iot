@@ -62,7 +62,7 @@ static int32_t prvReadFlash( uint8_t *pucBuffer, uint32_t ulSectorNumber, uint32
 static FF_Error_t prvPartitionAndFormatDisk( FF_Disk_t *pxDisk );
 
 
-FF_Disk_t *FF_FlashDiskInit( char *pcName, uint32_t ulSectorCount, size_t xIOManagerCacheSize )
+FF_Disk_t *FF_FlashDiskInit( char *pcName, uint32_t ulFlashStartingIndex, uint32_t ulSectorCount, size_t xIOManagerCacheSize )
 {
 FF_Error_t xError;
 FF_Disk_t *pxDisk = NULL;
@@ -88,7 +88,7 @@ FF_CreationParameters_t xParameters;
 		specific data that needs to be stored in the FF_Disk_t structure for a
 		Flash disk is the location of the Flash buffer itself - so this is stored
 		directly in the FF_Disk_t's pvTag member. */
-//		pxDisk->pvTag = ( void * ) NULL;
+		pxDisk->pvTag = ( void * ) ulFlashStartingIndex;
 
 		/* The signature is used by the disk read and disk write functions to
 		ensure the disk being accessed is a Flash disk. */
@@ -214,9 +214,10 @@ int32_t lReturn = FF_ERR_NONE;
 		}
 		else
 		{
+            unsigned flash_disk_start = ( unsigned ) pxDisk->pvTag;
 			taskENTER_CRITICAL();
 			{
-				if( ( fl_readStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) ),
+				if( ( fl_readStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) + flash_disk_start ),
 				                    ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
 				                    ( unsigned char * ) pucDestination ) ) != 0 )
 				{
@@ -294,9 +295,10 @@ int32_t lReturn = FF_ERR_NONE;
 
 				if( lReturn == FF_ERR_NONE )
 				{
+                    unsigned flash_disk_start = ( unsigned ) pxDisk->pvTag;
 					taskENTER_CRITICAL();
 					{
-						if( ( fl_writeStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) ),
+						if( ( fl_writeStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) + flash_disk_start ),
 						                     ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
 						                     ( unsigned char* ) pucSource,
 						                     ( unsigned char* ) scratch ) ) != 0 )

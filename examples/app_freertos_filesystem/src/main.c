@@ -50,7 +50,7 @@ FF_Disk_t *pxDisk;
 	rtos_printf("Flash can hold %d bytes\n", fl_getFlashSize() );
 
     /* Create the Flash disk. */
-    pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
+    pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, 0, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
     configASSERT( pxDisk );
 
 //    /* Print out information on the disk. */

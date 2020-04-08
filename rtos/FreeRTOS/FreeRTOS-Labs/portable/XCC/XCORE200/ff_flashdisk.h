@@ -33,7 +33,7 @@ extern "C" {
 
 #include "ff_headers.h"
 
-FF_Disk_t *FF_FlashDiskInit( char *pcName, uint32_t ulSectorCount, size_t xIOManagerCacheSize );
+FF_Disk_t *FF_FlashDiskInit( char *pcName, uint32_t ulFlashStartingIndex, uint32_t ulSectorCount, size_t xIOManagerCacheSize );
 BaseType_t FF_FlashDiskDelete( FF_Disk_t *pxDisk );
 BaseType_t FF_FlashDiskShowPartition( FF_Disk_t *pxDisk );
 
