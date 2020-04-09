@@ -55,6 +55,8 @@ set(LIB_C_SRCS
         "ff_time.c"
         "portable/common/ff_ramdisk.c"
         "../portable/XCC/XCORE200/ff_flashdisk.c"
+        "../../FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_FAT_Demos/CreateAndVerifyExampleFiles.c"
+        "../../FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_FAT_Demos/test/ff_stdio_tests_with_cwd.c"
     )
 set(LIB_ASM_SRCS
         ""
@@ -63,6 +65,7 @@ set(LIB_INCLUDES
         "include"
         "portable/common"
         "../portable/XCC/XCORE200"
+        "../../FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_TCP_Demos/include"
     )
 set(LIB_DEPENDENT_MODULES
         "FreeRTOS(>=10.3.0)"

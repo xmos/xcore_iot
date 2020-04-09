@@ -97,7 +97,7 @@ Long file names will be recognised but ignored.
 Users should familiarise themselves with any patent issues that may
 potentially exist around the use of long file names in FAT file systems
 before enabling long file name support. */
-#define ffconfigLFN_SUPPORT 0
+#define ffconfigLFN_SUPPORT 1
 
 /* Only used when ffconfigLFN_SUPPORT is set to 1.
 

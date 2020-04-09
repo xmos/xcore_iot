@@ -1,6 +1,7 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include <string.h>
+#include <stdio.h>
 #include <sys/time.h>
 
 #define clock libc_clock
@@ -37,25 +38,19 @@
 #include "ff_stdio.h"
 #include "ff_flashdisk.h"
 
+extern void vCreateAndVerifyExampleFiles( const char *pcMountPath );
+extern void vStdioWithCWDTest( const char *pcMountPath );
+
 #define mainFLASH_DISK_SECTOR_SIZE    512UL /* Currently fixed! */
-#define mainFLASH_DISK_SECTORS        ( ( 10UL * 1024UL * 1024UL ) / mainFLASH_DISK_SECTOR_SIZE )
+#define mainFLASH_DISK_SECTORS        ( ( 3UL * 1024UL * 1024UL ) / mainFLASH_DISK_SECTOR_SIZE )
 #define mainFLASH_DISK_IO_MANAGER_CACHE_SIZE   ( 2UL * mainFLASH_DISK_SECTOR_SIZE )
 #define mainFLASH_DISK_NAME           "/flash"
-
-static int make_disk = 0;
 
 static void prvCreateDiskAndExampleFiles( void* arg )
 {
 FF_Disk_t *pxDisk;
 
-
 	rtos_printf("Flash can hold %d bytes\n", fl_getFlashSize() );
-	while( make_disk == 0 )
-	{
-		vTaskDelay(pdMS_TO_TICKS(10));
-	}
-
-	rtos_printf("Flash can proceed\n");
 
     /* Create the Flash disk. */
     pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, 291920, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
@@ -64,14 +59,20 @@ FF_Disk_t *pxDisk;
     /* Print out information on the disk. */
     FF_FlashDiskShowPartition( pxDisk );
 
+    /* Create a few example files on the disk.  These are not deleted again. */
+    vCreateAndVerifyExampleFiles( mainFLASH_DISK_NAME );
+
+    FF_FlashDiskShowPartition( pxDisk );
+
+	vStdioWithCWDTest( mainFLASH_DISK_NAME );
+
+	rtos_printf("\n\nSTDIO with CWD tests complete!\n\n");
+
     for(;;)
     {
-		vTaskDelay(pdMS_TO_TICKS(100));
+        FF_FlashDiskShowPartition( pxDisk );
+		vTaskDelay(pdMS_TO_TICKS(5000));
     }
-    /* Create a few example files on the disk.  These are not deleted again. */
-//    vCreateAndVerifyExampleFiles( mainFLASH_DISK_NAME );
-
-//        vStdioWithCWDTest( mainRAM_DISK_NAME );
 }
 
 char *security_name(WIFISecurity_t s)
@@ -127,9 +128,9 @@ static void wf200_test(void *arg)
         static uint32_t ip;
         char a[16];
 
-        pxNetworkParams.pcSSID = "xxxxxxxxx";
+        pxNetworkParams.pcSSID = "Masha2.4";
         pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-        pxNetworkParams.pcPassword = "xxxxxxxxx";
+        pxNetworkParams.pcPassword = "Bread2300";
         pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
         pxNetworkParams.xSecurity = eWiFiSecurityWPA;
         pxNetworkParams.cChannel = 0;
@@ -151,8 +152,6 @@ static void wf200_test(void *arg)
 
         rtos_printf("Pinging google.com now!\n");
         WIFI_Ping( (void *) &ip, 5, 1000 );
-
-        make_disk = 1;
 
         vTaskDelay(pdMS_TO_TICKS(10*60000));
 
@@ -212,7 +211,7 @@ void soc_tile0_main(
             NULL,
             0);
 
-    xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
+//    xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
 
 	xTaskCreate(prvCreateDiskAndExampleFiles, "fs_test", 2000/*portTASK_STACK_DEPTH(prvCreateDiskAndExampleFiles)*/, NULL, 15, NULL);
 
