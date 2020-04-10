@@ -52,6 +52,7 @@ set(APP_INCLUDES
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.3.0)"
         "FreeRTOS-Plus-FAT(>=10.3.0)"
+        "FreeRTOS-Plus-Demos(>=10.3.0)"
     )
 
 set(USE_FREERTOS_SMP False)

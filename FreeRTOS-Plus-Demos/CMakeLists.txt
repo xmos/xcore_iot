@@ -32,45 +32,28 @@
 #                           Must contain full header file names
 #                           ex: set(LIB_OPTIONAL_HEADERS "foo.h" "bar.h")
 
-set(LIB_NAME FreeRTOS-Plus-FAT)
+set(LIB_NAME FreeRTOS-Plus-Demos)
 set(LIB_VERSION 10.3.0)
 set(LIB_ADD_COMPILER_FLAGS "-Os")
 set(LIB_XC_SRCS
         ""
     )
 set(LIB_C_SRCS
-        "ff_crc.c"
-        #"ff_dev_support.c"
-        "ff_dir.c"
-        "ff_error.c"
-        "ff_fat.c"
-        "ff_file.c"
-        "ff_format.c"
-        "ff_ioman.c"
-        "ff_locking.c"
-        "ff_memory.c"
-        "ff_stdio.c"
-        "ff_string.c"
-        "ff_sys.c"
-        "ff_time.c"
-        "portable/common/ff_ramdisk.c"
-        "../portable/XCC/XCORE200/ff_flashdisk.c"
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_FAT_Demos/CreateAndVerifyExampleFiles.c"
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_FAT_Demos/test/ff_stdio_tests_with_cwd.c"
     )
 set(LIB_ASM_SRCS
         ""
     )
 set(LIB_INCLUDES
-        "include"
-        "portable/common"
-        "../portable/XCC/XCORE200"
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_TCP_Demos/include"
     )
 set(LIB_DEPENDENT_MODULES
-        "FreeRTOS(>=10.3.0)"
-        "lib_soc(>=0.5.0)"
+        "FreeRTOS-Plus-FAT(>=10.3.0)"
     )
 set(LIB_OPTIONAL_HEADERS "")
 
-set(${LIB_NAME}_FILEPATH_PREFIX "${XMOS_MODULES_ROOT_DIR}/rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT/")
+set(${LIB_NAME}_FILEPATH_PREFIX "${XMOS_MODULES_ROOT_DIR}/rtos/FreeRTOS/")
 
 list(TRANSFORM LIB_XC_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
 list(TRANSFORM LIB_C_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
