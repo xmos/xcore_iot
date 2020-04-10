@@ -199,7 +199,7 @@ static void ftp_test(void *arg)
 	pxTCPServer = FreeRTOS_CreateTCPServer( xServerConfiguration, sizeof( xServerConfiguration ) / sizeof( xServerConfiguration[ 0 ] ) );
 	configASSERT( pxTCPServer );
 
-	vStartTFTPServerTask( 2000, 15 );
+	vStartTFTPServerTask( 100, 15 );
 
 	for( ;; )
 	{
@@ -252,9 +252,9 @@ static void wf200_test(void *arg)
         }
     }
 
-	pxNetworkParams.pcSSID = "xxxxxxxxx";
+	pxNetworkParams.pcSSID = "24g.apodize.com";
 	pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-	pxNetworkParams.pcPassword = "xxxxxxxxx";
+	pxNetworkParams.pcPassword = "katie123";
 	pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
 	pxNetworkParams.xSecurity = eWiFiSecurityWPA;
 	pxNetworkParams.cChannel = 0;
@@ -271,7 +271,7 @@ static void wf200_test(void *arg)
 	rtos_printf("My IP is %s\n", a);
 
 #if FTP_DEMO
-    xTaskCreate(ftp_test, "ftp_test", 4000, NULL, 15, NULL);
+    xTaskCreate(ftp_test, "ftp_test", 500, NULL, 15, NULL);
 #endif
 
 	WIFI_GetHostIP("google.com", (void *) &ip );
@@ -285,9 +285,19 @@ static void wf200_test(void *arg)
 	{
 		int free_stack_words;
 		vTaskDelay(pdMS_TO_TICKS(5000));
+
+		rtos_printf("Minimum heap free: %d\n", xPortGetMinimumEverFreeHeapSize());
+		rtos_printf("Current heap free: %d\n", xPortGetFreeHeapSize());
+
 		free_stack_words = uxTaskGetStackHighWaterMark(NULL);
 		rtos_printf("wf200_test free stack words: %d\n", free_stack_words);
-		rtos_printf("Minimum heap free: %d\n", xPortGetMinimumEverFreeHeapSize());
+
+		free_stack_words = uxTaskGetStackHighWaterMark(xTaskGetHandle("ftp_test"));
+		rtos_printf("ftp_test free stack words: %d\n", free_stack_words);
+
+		free_stack_words = uxTaskGetStackHighWaterMark(xTaskGetHandle("TFTPd"));
+		rtos_printf("TFTPd free stack words: %d\n", free_stack_words);
+
 	}
 }
 
@@ -308,6 +318,7 @@ FF_Disk_t *pxDisk;
     /* Print out information on the disk. */
     FF_FlashDiskShowPartition( pxDisk );
 
+#if !(FTP_DEMO)
     rtos_printf("Removing test directory\n");
     ff_deltree( mainFLASH_DISK_NAME "/test" );
     rtos_printf("Creating test directory\n");
@@ -318,10 +329,10 @@ FF_Disk_t *pxDisk;
 
     FF_FlashDiskShowPartition( pxDisk );
 
-#if !(FTP_DEMO)
 	vStdioWithCWDTest( mainFLASH_DISK_NAME "/test" );
-#endif
+
 	rtos_printf("\n\nSTDIO with CWD tests complete!\n\n");
+#endif
 
     rtos_printf("\n");
     ls_recursive("/flash", 0);
