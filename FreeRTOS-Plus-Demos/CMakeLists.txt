@@ -41,12 +41,22 @@ set(LIB_XC_SRCS
 set(LIB_C_SRCS
         "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_FAT_Demos/CreateAndVerifyExampleFiles.c"
         "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_FAT_Demos/test/ff_stdio_tests_with_cwd.c"
+
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/Demo_IP_Protocols/Common/FreeRTOS_TCP_server.c"
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c"
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c"
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_TCP_Demos/TFTPServer.c"
+
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/Utilities/date_and_time.c"
     )
 set(LIB_ASM_SRCS
         ""
     )
 set(LIB_INCLUDES
         "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_TCP_Demos/include"
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/Demo_IP_Protocols/include"
+
+        "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/Utilities/include"
     )
 set(LIB_DEPENDENT_MODULES
         "FreeRTOS-Plus-FAT(>=10.3.0)"

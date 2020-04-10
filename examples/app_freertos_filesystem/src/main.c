@@ -38,8 +38,15 @@
 #include "ff_stdio.h"
 #include "ff_flashdisk.h"
 
+#include "FreeRTOS_TCP_server.h"
+
+
+#define FTP_DEMO 1
+
 extern void vCreateAndVerifyExampleFiles( const char *pcMountPath );
 extern void vStdioWithCWDTest( const char *pcMountPath );
+extern void vStartTFTPServerTask(unsigned short, unsigned long);
+extern TCPServer_t *FreeRTOS_CreateTCPServer( const struct xSERVER_CONFIG *pxConfigs, BaseType_t xCount );
 
 #define mainFLASH_DISK_SECTOR_SIZE    512UL /* Currently fixed! */
 #define mainFLASH_DISK_SECTORS        ( ( 1UL * 1024UL * 1024UL ) / mainFLASH_DISK_SECTOR_SIZE )
@@ -181,6 +188,25 @@ static char *security_name(WIFISecurity_t s)
     }
 }
 
+static void ftp_test(void *arg)
+{
+	TCPServer_t *pxTCPServer = NULL;
+	static const struct xSERVER_CONFIG xServerConfiguration[] =
+	{
+				/* Server type,		port number,	backlog, 	root dir. */
+				{ eSERVER_FTP,  	21, 			12, 		"" }
+	};
+	pxTCPServer = FreeRTOS_CreateTCPServer( xServerConfiguration, sizeof( xServerConfiguration ) / sizeof( xServerConfiguration[ 0 ] ) );
+	configASSERT( pxTCPServer );
+
+	vStartTFTPServerTask( 2000, 15 );
+
+	for( ;; )
+	{
+		FreeRTOS_TCPServerWork( pxTCPServer, pdMS_TO_TICKS(100) );
+	}
+}
+
 static void wf200_test(void *arg)
 {
     WIFIReturnCode_t ret;
@@ -226,9 +252,9 @@ static void wf200_test(void *arg)
         }
     }
 
-	pxNetworkParams.pcSSID = "xxxxx";
+	pxNetworkParams.pcSSID = "xxxxxxxxx";
 	pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-	pxNetworkParams.pcPassword = "xxxxx";
+	pxNetworkParams.pcPassword = "xxxxxxxxx";
 	pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
 	pxNetworkParams.xSecurity = eWiFiSecurityWPA;
 	pxNetworkParams.cChannel = 0;
@@ -243,6 +269,10 @@ static void wf200_test(void *arg)
 	WIFI_GetIP( (void *) &ip );
 	FreeRTOS_inet_ntoa(ip, a);
 	rtos_printf("My IP is %s\n", a);
+
+#if FTP_DEMO
+    xTaskCreate(ftp_test, "ftp_test", 4000, NULL, 15, NULL);
+#endif
 
 	WIFI_GetHostIP("google.com", (void *) &ip );
 	FreeRTOS_inet_ntoa(ip, a);
@@ -288,8 +318,9 @@ FF_Disk_t *pxDisk;
 
     FF_FlashDiskShowPartition( pxDisk );
 
+#if !(FTP_DEMO)
 	vStdioWithCWDTest( mainFLASH_DISK_NAME "/test" );
-
+#endif
 	rtos_printf("\n\nSTDIO with CWD tests complete!\n\n");
 
     rtos_printf("\n");

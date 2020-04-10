@@ -371,4 +371,6 @@ disconnecting stage will timeout after a period of non-activity. */
 
 #define portINLINE __inline
 
+#define ipconfigUSE_FTP 1
+
 #endif /* FREERTOS_IP_CONFIG_H */
