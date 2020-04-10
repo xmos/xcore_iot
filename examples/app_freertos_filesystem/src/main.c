@@ -252,9 +252,9 @@ static void wf200_test(void *arg)
         }
     }
 
-	pxNetworkParams.pcSSID = "24g.apodize.com";
+	pxNetworkParams.pcSSID = "xxxxxxxxx";
 	pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-	pxNetworkParams.pcPassword = "katie123";
+	pxNetworkParams.pcPassword = "xxxxxxxxx";
 	pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
 	pxNetworkParams.xSecurity = eWiFiSecurityWPA;
 	pxNetworkParams.cChannel = 0;
@@ -266,7 +266,9 @@ static void wf200_test(void *arg)
 
 	vTaskDelay(pdMS_TO_TICKS(5000));
 
-	WIFI_GetIP( (void *) &ip );
+	while (WIFI_GetIP( (void *) &ip ) != eWiFiSuccess) {
+		vTaskDelay(pdMS_TO_TICKS(1000));
+	}
 	FreeRTOS_inet_ntoa(ip, a);
 	rtos_printf("My IP is %s\n", a);
 
@@ -313,12 +315,12 @@ FF_Disk_t *pxDisk;
 
     /* Start the wifi test task now that the filesystem has been mounted
      * since it will load the WF200 firmware from the filesystem */
-    xTaskCreate(wf200_test, "wf200_test", 800, NULL, 15, NULL);
+    xTaskCreate(wf200_test, "wf200_test", 800, NULL, 16, NULL);
 
     /* Print out information on the disk. */
     FF_FlashDiskShowPartition( pxDisk );
 
-#if !(FTP_DEMO)
+
     rtos_printf("Removing test directory\n");
     ff_deltree( mainFLASH_DISK_NAME "/test" );
     rtos_printf("Creating test directory\n");
@@ -326,7 +328,7 @@ FF_Disk_t *pxDisk;
 
     /* Create a few example files on the disk */
     vCreateAndVerifyExampleFiles( mainFLASH_DISK_NAME "/test" );
-
+#if !(FTP_DEMO)
     FF_FlashDiskShowPartition( pxDisk );
 
 	vStdioWithCWDTest( mainFLASH_DISK_NAME "/test" );

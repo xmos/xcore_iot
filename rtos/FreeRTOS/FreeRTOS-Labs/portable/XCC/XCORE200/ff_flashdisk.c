@@ -215,7 +215,7 @@ int32_t lReturn = FF_ERR_NONE;
 		else
 		{
             unsigned flash_disk_start = ( unsigned ) pxDisk->pvTag;
-			taskENTER_CRITICAL();
+            portDISABLE_INTERRUPTS();
 			{
 				if( ( fl_readStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) + flash_disk_start ),
 				                    ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
@@ -225,7 +225,7 @@ int32_t lReturn = FF_ERR_NONE;
 					rtos_printf("read failed\n");
 				}
 			}
-			taskEXIT_CRITICAL();
+			portENABLE_INTERRUPTS();
 
 //			rtos_printf("Read sector:%d offset:%d size:%d data:%8s\n",
 //						( uint32_t ) ulSectorNumber,
@@ -296,7 +296,7 @@ int32_t lReturn = FF_ERR_NONE;
 				if( lReturn == FF_ERR_NONE )
 				{
                     unsigned flash_disk_start = ( unsigned ) pxDisk->pvTag;
-					taskENTER_CRITICAL();
+                    portDISABLE_INTERRUPTS();
 					{
 						if( ( fl_writeStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) + flash_disk_start ),
 						                     ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
@@ -307,7 +307,7 @@ int32_t lReturn = FF_ERR_NONE;
 							rtos_printf("write failed\n");
 						}
 					}
-					taskEXIT_CRITICAL();
+					portENABLE_INTERRUPTS();
 
 					if( scratch != NULL )
 					{
