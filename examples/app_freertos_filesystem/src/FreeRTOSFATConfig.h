@@ -137,7 +137,7 @@ names (see the ffconfig_UTF_16_SUPPORT setting). */
 Set to 0 to exclude FAT12 support.
 
 FAT16 and FAT32 are always enabled. */
-#define	ffconfigFAT12_SUPPORT 0
+#define	ffconfigFAT12_SUPPORT 1
 
 /* When writing and reading data, i/o becomes less efficient if sizes other
 than 512 bytes are being used.  When set to 1 each file handle will

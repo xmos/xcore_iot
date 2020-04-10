@@ -4,6 +4,8 @@
 	<comment></comment>
 	<projects>
 		<project>FreeRTOS</project>
+		<project>FreeRTOS-Labs</project>
+		<project>FreeRTOS-Plus</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

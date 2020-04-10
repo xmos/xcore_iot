@@ -125,7 +125,7 @@ FF_CreationParameters_t xParameters;
 			known that the disk has not been used before, and cannot already
 			contain any partitions.  Most media drivers will not perform
 			this step because the media will have already been partitioned. */
-			xError = prvPartitionAndFormatDisk( pxDisk );
+//			xError = prvPartitionAndFormatDisk( pxDisk );
 
 			if( FF_isERR( xError ) == pdFALSE )
 			{
