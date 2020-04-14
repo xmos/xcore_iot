@@ -164,6 +164,32 @@ FF_CreationParameters_t xParameters;
 	return pxDisk;
 }
 
+static uint32_t xInterruptDisableTime = 0;
+
+static void vDisableInterrupts( void )
+{
+	taskDISABLE_INTERRUPTS();
+
+	if( rtos_core_id_get() == 0 )
+	{
+		xInterruptDisableTime = xscope_gettime();
+	}
+}
+
+static void vEnableInterrupts( void )
+{
+	if( rtos_core_id_get() == 0 )
+	{
+		TickType_t xCatchUp = ( xscope_gettime() - xInterruptDisableTime ) / ( configCPU_CLOCK_HZ / configTICK_RATE_HZ );
+		if( xCatchUp > 0 )
+		{
+			xTaskCatchUpTicks( xCatchUp );
+		}
+	}
+
+	taskENABLE_INTERRUPTS();
+}
+
 BaseType_t FF_FlashDiskDelete( FF_Disk_t *pxDisk )
 {
 	BaseType_t xRetVal = pdFAIL;
@@ -215,7 +241,7 @@ int32_t lReturn = FF_ERR_NONE;
 		else
 		{
             unsigned flash_disk_start = ( unsigned ) pxDisk->pvTag;
-            portDISABLE_INTERRUPTS();
+            vDisableInterrupts();
 			{
 				if( ( fl_readStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) + flash_disk_start ),
 				                    ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
@@ -225,7 +251,7 @@ int32_t lReturn = FF_ERR_NONE;
 					rtos_printf("read failed\n");
 				}
 			}
-			portENABLE_INTERRUPTS();
+			vEnableInterrupts();
 
 //			rtos_printf("Read sector:%d offset:%d size:%d data:%8s\n",
 //						( uint32_t ) ulSectorNumber,
@@ -296,7 +322,7 @@ int32_t lReturn = FF_ERR_NONE;
 				if( lReturn == FF_ERR_NONE )
 				{
                     unsigned flash_disk_start = ( unsigned ) pxDisk->pvTag;
-                    portDISABLE_INTERRUPTS();
+                    vDisableInterrupts();
 					{
 						if( ( fl_writeStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) + flash_disk_start ),
 						                     ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ),
@@ -307,7 +333,7 @@ int32_t lReturn = FF_ERR_NONE;
 							rtos_printf("write failed\n");
 						}
 					}
-					portENABLE_INTERRUPTS();
+					vEnableInterrupts();
 
 					if( scratch != NULL )
 					{

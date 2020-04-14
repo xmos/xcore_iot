@@ -55,7 +55,7 @@ set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-Demos(>=10.3.0)"
     )
 
-set(USE_FREERTOS_SMP False)
+set(USE_FREERTOS_SMP True)
 
 ## Add lib_soc devices
 set(LIB_SOC_GPIO ${FULL})
