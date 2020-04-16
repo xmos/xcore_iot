@@ -250,6 +250,8 @@ static void wf200_test(void *arg)
             rtos_printf("\tStrength: %d dBm\n", (int) scan_results[i].cRSSI);
             rtos_printf("\t%s\n", security_name(scan_results[i].xSecurity));
         }
+    } else {
+    	rtos_printf("WIFI_Scan() failed %d\n", ret);
     }
 
 	pxNetworkParams.pcSSID = "xxxxxxxxx";

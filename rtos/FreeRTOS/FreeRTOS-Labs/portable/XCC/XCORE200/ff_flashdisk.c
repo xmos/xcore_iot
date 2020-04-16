@@ -168,7 +168,7 @@ static uint32_t xInterruptDisableTime = 0;
 
 static void vDisableInterrupts( void )
 {
-	taskDISABLE_INTERRUPTS();
+	taskENTER_CRITICAL();
 
 	if( rtos_core_id_get() == 0 )
 	{
@@ -187,7 +187,7 @@ static void vEnableInterrupts( void )
 		}
 	}
 
-	taskENABLE_INTERRUPTS();
+	taskEXIT_CRITICAL();
 }
 
 BaseType_t FF_FlashDiskDelete( FF_Disk_t *pxDisk )
