@@ -410,7 +410,7 @@ sl_status_t sl_wfx_host_lock(void)
 {
     sl_status_t status;
 
-    if (xSemaphoreTake(s_xDriverSemaphore, 500) == pdTRUE) {
+    if (xSemaphoreTake(s_xDriverSemaphore, pdMS_TO_TICKS(SL_WFX_DEFAULT_REQUEST_TIMEOUT_MS)) == pdTRUE) {
         status = SL_STATUS_OK;
     } else {
         printf("Wi-Fi driver mutex timeout\r\n");
@@ -422,7 +422,9 @@ sl_status_t sl_wfx_host_lock(void)
 
 sl_status_t sl_wfx_host_unlock(void)
 {
-    xSemaphoreGive(s_xDriverSemaphore);
+	if (xSemaphoreGetMutexHolder(s_xDriverSemaphore) == xTaskGetCurrentTaskHandle()) {
+		xSemaphoreGive(s_xDriverSemaphore);
+	}
 
     return SL_STATUS_OK;
 }
