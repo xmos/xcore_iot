@@ -3,10 +3,13 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <xcore/channel.h>
+#include <xcore/channel_transaction.h>
+
 #include "rtos_support.h"
 
 void soc_peripheral_function_code_tx(
-        chanend c,
+        chanend_t c,
         uint32_t code)
 {
     uint32_t state = rtos_interrupt_mask_all();
@@ -18,17 +21,16 @@ void soc_peripheral_function_code_tx(
 }
 
 void soc_peripheral_varlist_tx(
-        chanend c,
+        chanend_t c,
         int num_args,
         ...)
 {
-    transacting_chanend_t tc;
     va_list ap;
     int i;
 
     uint32_t state = rtos_interrupt_mask_all();
 
-    chan_init_transaction_master(&c, &tc);
+    transacting_chanend_t tc = chan_init_transaction_master(c);
 
     va_start(ap, num_args);
     for (i = 0; i < num_args; i++) {
@@ -39,35 +41,34 @@ void soc_peripheral_varlist_tx(
     }
     va_end(ap);
 
-    chan_complete_transaction(&c, &tc);
+    (void)chan_complete_transaction(tc);
 
     rtos_interrupt_mask_set(state);
 }
 
 void soc_peripheral_function_code_rx(
-        chanend c,
+        chanend_t c,
         uint32_t *code)
 {
     uint32_t state = rtos_interrupt_mask_all();
 
     /* TODO: Only input 8bit code + end token */
-    chan_in_word(c, code);
+    *code = chan_in_word(c);
 
     rtos_interrupt_mask_set(state);
 }
 
 void soc_peripheral_varlist_rx(
-        chanend c,
+        chanend_t c,
         int num_args,
         ...)
 {
-    transacting_chanend_t tc;
     va_list ap;
     int i;
 
     uint32_t state = rtos_interrupt_mask_all();
 
-    chan_init_transaction_slave(&c, &tc);
+    transacting_chanend_t tc = chan_init_transaction_slave(c);
 
     va_start(ap, num_args);
     for (i = 0; i < num_args; i++) {
@@ -78,7 +79,7 @@ void soc_peripheral_varlist_rx(
     }
     va_end(ap);
 
-    chan_complete_transaction(&c, &tc);
+    (void)chan_complete_transaction(tc);
 
     rtos_interrupt_mask_set(state);
 }

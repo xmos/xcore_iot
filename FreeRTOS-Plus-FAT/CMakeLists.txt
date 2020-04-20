@@ -32,32 +32,50 @@
 #                           Must contain full header file names
 #                           ex: set(LIB_OPTIONAL_HEADERS "foo.h" "bar.h")
 
-set(LIB_NAME lib_xcore_c)
-set(LIB_VERSION 2.0.0)
-set(LIB_ADD_COMPILER_FLAGS "")
+set(LIB_NAME FreeRTOS-Plus-FAT)
+set(LIB_VERSION 10.3.0)
+set(LIB_ADD_COMPILER_FLAGS "-Os")
 set(LIB_XC_SRCS
         ""
     )
 set(LIB_C_SRCS
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_chan.c"
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_clock.c"
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_hwtimer.c"
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_interrupt.c"
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_port.c"
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_resource.c"
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_select.c"
+        "ff_crc.c"
+        #"ff_dev_support.c"
+        "ff_dir.c"
+        "ff_error.c"
+        "ff_fat.c"
+        "ff_file.c"
+        "ff_format.c"
+        "ff_ioman.c"
+        "ff_locking.c"
+        "ff_memory.c"
+        "ff_stdio.c"
+        "ff_string.c"
+        "ff_sys.c"
+        "ff_time.c"
+        "portable/common/ff_ramdisk.c"
+        "../portable/XCC/XCORE200/ff_flashdisk.c"
     )
 set(LIB_ASM_SRCS
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_interrupt.S"
-        "lib_xcore_c/lib_xcore_c/src/xcore_c_select.S"
+        ""
     )
 set(LIB_INCLUDES
-        "lib_xcore_c/lib_xcore_c/api"
-        "lib_xcore_c/lib_xcore_c/src"
+        "include"
+        "portable/common"
+        "../portable/XCC/XCORE200"
     )
-set(LIB_DEPENDENT_MODULES "lib_trycatch(>=1.0.0)" "lib_xassert(>=2.0.1)")
-set(LIB_OPTIONAL_HEADERS "debug_conf.h" "xassert_conf.h")
+set(LIB_DEPENDENT_MODULES
+        "FreeRTOS(>=10.3.0)"
+        "lib_soc(>=0.5.0)"
+    )
+set(LIB_OPTIONAL_HEADERS "")
 
+set(${LIB_NAME}_FILEPATH_PREFIX "${XMOS_MODULES_ROOT_DIR}/rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT/")
+
+list(TRANSFORM LIB_XC_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
+list(TRANSFORM LIB_C_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
+list(TRANSFORM LIB_ASM_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
+list(TRANSFORM LIB_INCLUDES PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
 #=============================================================================
 # The following part of the CMakeLists includes the common build infrastructure
 # for compiling XMOS applications. You should not need to edit below here.

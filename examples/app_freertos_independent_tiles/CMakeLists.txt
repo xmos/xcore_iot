@@ -48,7 +48,7 @@ set(APP_DEPENDENT_MODULES
         "lib_soc(>=0.5.0)"
     )
 
-set(USE_FREERTOS_SMP True)
+set(USE_FREERTOS_SMP False)
 
 ## Add lib_soc devices
 set(LIB_SOC_INTERTILE ${FULL})

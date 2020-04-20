@@ -111,7 +111,7 @@ void sl_wfx_host_task_start(void)
                     "sl_wfx_host_receive_task",
                     portTASK_STACK_DEPTH(sl_wfx_host_receive_task),
                     NULL,
-                    15,
+					configMAX_PRIORITIES - 1,
                     &receive_task_handle);
         configASSERT(sl_wfx_host_receive_task != NULL);
     }

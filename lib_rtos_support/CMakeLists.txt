@@ -52,7 +52,7 @@ set(LIB_INCLUDES
         "api"
         "src"
     )
-set(LIB_DEPENDENT_MODULES "lib_xcore_c(>=2.0.0)")
+set(LIB_DEPENDENT_MODULES "lib_xassert(>=4.0.0)")
 set(LIB_OPTIONAL_HEADERS "rtos_support_rtos_config.h")
 
 #=============================================================================

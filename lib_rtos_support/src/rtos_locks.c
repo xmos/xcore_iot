@@ -25,7 +25,7 @@ void rtos_locks_initialize(void)
     int i;
 
     for (i = 0; i < RTOS_LOCK_COUNT; i++) {
-        lock_alloc(&rtos_locks[i]);
+        rtos_locks[i] = lock_alloc();
         xassert(rtos_locks[i] != 0);
     }
 }

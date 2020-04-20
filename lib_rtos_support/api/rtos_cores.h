@@ -3,8 +3,6 @@
 #ifndef RTOS_CORES_H_
 #define RTOS_CORES_H_
 
-#include "xcore_c.h"
-
 /* The maximum number of cores an SMP RTOS may use */
 #define RTOS_MAX_CORE_COUNT 8
 

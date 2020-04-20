@@ -50,8 +50,36 @@ void sl_wfx_host_set_pds(const char * const pds_data[],
     host_ctx.pds_size = pds_size;
 }
 
+
 /**** XCORE Specific Functions End ****/
 
+/**** Application Provided Functions ****
+ *
+ * These are
+ * default implementations in case the application
+ * does not provide them.
+ */
+
+__attribute__((weak))
+uint32_t sl_wfx_app_fw_size(void)
+{
+	return sl_wfx_firmware_size;
+}
+
+__attribute__((weak))
+sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
+{
+	int ret;
+    taskENTER_CRITICAL();
+    ret = fl_readData(index, size, data);
+    taskEXIT_CRITICAL();
+
+    if (ret == 0) {
+    	return SL_STATUS_OK;
+    } else {
+    	return SL_STATUS_FAIL;
+    }
+}
 
 /**** WF200 Driver Required Host Functions Start ****/
 
@@ -67,22 +95,26 @@ sl_status_t sl_wfx_host_init(void)
 
 sl_status_t sl_wfx_host_get_firmware_data(const uint8_t **data, uint32_t data_size)
 {
-    taskENTER_CRITICAL();
-    fl_readData(host_ctx.firmware_index,
-                data_size,
-                host_ctx.firmware_data);
-    taskEXIT_CRITICAL();
+	sl_status_t ret;
 
-    host_ctx.firmware_index += data_size;
-    *data = host_ctx.firmware_data;
+	ret = sl_wfx_app_fw_read(host_ctx.firmware_data, host_ctx.firmware_index, data_size);
 
-    return SL_STATUS_OK;
+	if (ret == SL_STATUS_OK) {
+		host_ctx.firmware_index += data_size;
+		*data = host_ctx.firmware_data;
+	}
+
+    return ret;
 }
 
 
 sl_status_t sl_wfx_host_get_firmware_size(uint32_t *firmware_size)
 {
-    *firmware_size = sl_wfx_firmware_size;
+    *firmware_size = sl_wfx_app_fw_size();
+    if (*firmware_size == 0) {
+    	return SL_STATUS_NOT_AVAILABLE;
+    }
+
     return SL_STATUS_OK;
 }
 
@@ -378,7 +410,7 @@ sl_status_t sl_wfx_host_lock(void)
 {
     sl_status_t status;
 
-    if (xSemaphoreTake(s_xDriverSemaphore, 500) == pdTRUE) {
+    if (xSemaphoreTake(s_xDriverSemaphore, pdMS_TO_TICKS(SL_WFX_DEFAULT_REQUEST_TIMEOUT_MS)) == pdTRUE) {
         status = SL_STATUS_OK;
     } else {
         printf("Wi-Fi driver mutex timeout\r\n");
@@ -390,7 +422,9 @@ sl_status_t sl_wfx_host_lock(void)
 
 sl_status_t sl_wfx_host_unlock(void)
 {
-    xSemaphoreGive(s_xDriverSemaphore);
+	if (xSemaphoreGetMutexHolder(s_xDriverSemaphore) == xTaskGetCurrentTaskHandle()) {
+		xSemaphoreGive(s_xDriverSemaphore);
+	}
 
     return SL_STATUS_OK;
 }

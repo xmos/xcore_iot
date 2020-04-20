@@ -7,8 +7,8 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority );
 void intertile_ctrl_create_t1( UBaseType_t uxPriority );
 
 #include "intertile_driver.h"
-INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( intertile_dev_test0, device, buf, len, xReturnBufferToDMA );
-INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( intertile_dev_test1, device, buf, len, xReturnBufferToDMA );
+INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( intertile_dev_test0, device, buf, len, status, xReturnBufferToDMA );
+INTERTILE_ISR_CALLBACK_FUNCTION_PROTO( intertile_dev_test1, device, buf, len, status, xReturnBufferToDMA );
 
 void t0_test(void *arg);
 void t1_test(void *arg);
