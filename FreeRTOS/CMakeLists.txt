@@ -33,10 +33,22 @@
 #                           ex: set(LIB_OPTIONAL_HEADERS "foo.h" "bar.h")
 set(LIB_NAME FreeRTOS)
 set(LIB_VERSION 10.3.0)
-set(LIB_ADD_COMPILER_FLAGS "-Os")
+
+if(NOT DEFINED FREERTOS_PORT)
+    set(FREERTOS_PORT "XCORE200")
+endif()
+
+if(FREERTOS_PORT STREQUAL "XCOREAI")
+    set(LIB_ADD_COMPILER_FLAGS "-Os" "-march=xs3a")
+elseif(FREERTOS_PORT STREQUAL "XCORE200")
+    set(LIB_ADD_COMPILER_FLAGS "-Os" "-march=xs2a")
+else()
+    message( SEND_ERROR "Invalid FreeRTOS port ${FREEROTS_PORT}")
+endif()
+
 if(${USE_FREERTOS_SMP})
 set(LIB_XC_SRCS
-        "portable/XCC/XCORE200/port.xc"
+	"portable/XCC/${FREERTOS_PORT}/port.xc"
     )
 else()
 set(LIB_XC_SRCS
@@ -51,15 +63,15 @@ set(LIB_C_SRCS
         "stream_buffer.c"
         "tasks.c"
         "timers.c"
-        "portable/XCC/XCORE200/port.c"
+	"portable/XCC/${FREERTOS_PORT}/port.c"
         "portable/MemMang/heap_4.c"
     )
 set(LIB_ASM_SRCS
-        "portable/XCC/XCORE200/portasm.S"
+	"portable/XCC/${FREERTOS_PORT}/portasm.S"
     )
 set(LIB_INCLUDES
         "include"
-        "portable/XCC/XCORE200"
+	"portable/XCC/${FREERTOS_PORT}"
     )
 set(LIB_DEPENDENT_MODULES "lib_rtos_support(>=0.5.0)")
 set(LIB_OPTIONAL_HEADERS "")
