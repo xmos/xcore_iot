@@ -21,12 +21,13 @@ static void freertos_task1( void* arg )
 	rtos_printf("Task 1 got input %d\n", in);
 
     asm volatile (
-    		"mov r11, %0\r\n"
-    		"vldr r11[0]\r\n"
+    		"mov r11, %0\n"
+    		"vldr r11[0]\n"
             "vldd %1[0]\n"
             "vldc %2[0]\n"
             :
             : "r"(vr_in), "r"(vd_in), "r"(vc_in)
+			: "r11" /* r11 is clobbered */
     );
 
     rtos_printf("Task 1 VPU regs set\n");
@@ -34,12 +35,13 @@ static void freertos_task1( void* arg )
     taskYIELD();
 
     asm volatile (
-    		"mov r11, %2\r\n"
-    		"vstr %0[0]\r\n"
+    		"mov r11, %2\n"
+    		"vstr %0[0]\n"
             "vstd %1[0]\n"
             "vstc r11[0]\n"
             :
             : "r"(vr_out), "r"(vd_out), "r"(vc_out)
+			: "r11" /* r11 is clobbered */
     );
 
     rtos_printf("Task 1 VPU regs:\n");
