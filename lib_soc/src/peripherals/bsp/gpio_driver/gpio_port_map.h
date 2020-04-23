@@ -24,9 +24,9 @@ typedef enum {
     gpio_4A,
     gpio_4B,
     gpio_4C,
-    // gpio_4D,
-    // gpio_4E,
-    // gpio_4F,
+    gpio_4D,
+    gpio_4E,
+    gpio_4F,
     gpio_8A,
     gpio_8B,
     gpio_8C,
@@ -34,9 +34,9 @@ typedef enum {
     gpio_16A,
     gpio_16B,
     gpio_16C,
-    gpio_16D,
-    gpio_32A,
-    gpio_32B,
+    ///gpio_16D,
+    ///gpio_32A,
+    ///gpio_32B,
     GPIO_TOTAL_PORT_CNT
 } gpio_id_t;
 
