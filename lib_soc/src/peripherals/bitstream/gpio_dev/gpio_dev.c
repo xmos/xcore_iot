@@ -15,10 +15,10 @@ static const port gpio_lookup[ GPIO_TOTAL_PORT_CNT ] =
     XS1_PORT_1A, XS1_PORT_1B, XS1_PORT_1C, XS1_PORT_1D, XS1_PORT_1E, XS1_PORT_1F, XS1_PORT_1G,
     XS1_PORT_1H, XS1_PORT_1I, XS1_PORT_1J, XS1_PORT_1K, XS1_PORT_1L, XS1_PORT_1M, XS1_PORT_1N,
     XS1_PORT_1O, XS1_PORT_1P,
-    XS1_PORT_4A, XS1_PORT_4B, XS1_PORT_4C, //XS1_PORT_4D, XS1_PORT_4E, XS1_PORT_4F,
+    XS1_PORT_4A, XS1_PORT_4B, XS1_PORT_4C, XS1_PORT_4D, XS1_PORT_4E, XS1_PORT_4F,
     XS1_PORT_8A, XS1_PORT_8B, XS1_PORT_8C, XS1_PORT_8D,
-    XS1_PORT_16A, XS1_PORT_16B, XS1_PORT_16C, XS1_PORT_16D,
-    XS1_PORT_32A, XS1_PORT_32B
+    XS1_PORT_16A, XS1_PORT_16B, XS1_PORT_16C, //XS1_PORT_16D,
+    //XS1_PORT_32A, XS1_PORT_32B
 };
 
 static uint32_t port_irq_flags;
@@ -51,54 +51,52 @@ void gpio_dev(
     for( ;; )
     {
         TRIGGERABLE_WAIT_EVENT(
-            event_with_id_0,  event_with_id_1,  event_with_id_2,  event_with_id_3,  event_with_id_4,
-            event_with_id_5,  event_with_id_6,  event_with_id_7,  event_with_id_8,  event_with_id_9,
-            event_with_id_10, event_with_id_11, event_with_id_12, event_with_id_13, event_with_id_14,
-            event_with_id_15, event_with_id_16, event_with_id_17, event_with_id_18, event_with_id_19, 
-            event_with_id_20, event_with_id_21, event_with_id_22, event_with_id_23, event_with_id_24,
-            event_with_id_25, event_with_id_26, event_with_id_27, event_with_id_28,
-            \\ event_with_id_, event_with_id_, event_with_id_, 
+        	event_gpio_1A,  event_gpio_1B,  event_gpio_1C,  event_gpio_1D,  event_gpio_1E,
+			event_gpio_1F,  event_gpio_1G,  event_gpio_1H,  event_gpio_1I,  event_gpio_1J,
+			event_gpio_1K,  event_gpio_1L,  event_gpio_1M,  event_gpio_1N,  event_gpio_1O,
+			event_gpio_1P,  event_gpio_4A,  event_gpio_4B,  event_gpio_4C,  event_gpio_4D,
+			event_gpio_4E,  event_gpio_4F,  event_gpio_8A,  event_gpio_8B,  event_gpio_8C,
+			event_gpio_8D,  event_gpio_16A, event_gpio_16B, event_gpio_16C,
+         // event_gpio_16D, event_gpio_32A, event_gpio_32B,
             event_ctrl);
-        
         {
-            int event_id;
-            while (0) { // This loop is just a hacky way to let us use break to go to the generic bit...
-            event_with_id_0:  event_id = 0;  break; // XS1_PORT_1A
-            event_with_id_1:  event_id = 1;  break; // XS1_PORT_1B
-            event_with_id_2:  event_id = 2;  break; // XS1_PORT_1C
-            event_with_id_3:  event_id = 3;  break; // XS1_PORT_1D
-            event_with_id_4:  event_id = 4;  break; // XS1_PORT_1E
-            event_with_id_5:  event_id = 5;  break; // XS1_PORT_1F
-            event_with_id_6:  event_id = 6;  break; // XS1_PORT_1G
-            event_with_id_7:  event_id = 7;  break; // XS1_PORT_1H
-            event_with_id_8:  event_id = 8;  break; // XS1_PORT_1I
-            event_with_id_9:  event_id = 9;  break; // XS1_PORT_1J
-            event_with_id_10: event_id = 10; break; // XS1_PORT_1K
-            event_with_id_11: event_id = 11; break; // XS1_PORT_1L
-            event_with_id_12: event_id = 12; break; // XS1_PORT_1M
-            event_with_id_13: event_id = 13; break; // XS1_PORT_1N
-            event_with_id_14: event_id = 14; break; // XS1_PORT_1O
-            event_with_id_15: event_id = 15; break; // XS1_PORT_1P
-            event_with_id_16: event_id = 16; break; // XS1_PORT_4A
-            event_with_id_17: event_id = 17; break; // XS1_PORT_4B
-            event_with_id_18: event_id = 18; break; // XS1_PORT_4C
-          //event_with_id_: event_id = ; break; // XS1_PORT_4D
-          //event_with_id_: event_id = ; break; // XS1_PORT_4E
-          //event_with_id_: event_id = ; break; // XS1_PORT_4F
-            event_with_id_19: event_id = 19; break; // XS1_PORT_8A
-            event_with_id_20: event_id = 20; break; // XS1_PORT_8B
-            event_with_id_21: event_id = 21; break; // XS1_PORT_8C
-            event_with_id_22: event_id = 22; break; // XS1_PORT_8D
-            event_with_id_23: event_id = 23; break; // XS1_PORT_16A
-            event_with_id_24: event_id = 24; break; // XS1_PORT_16B
-            event_with_id_25: event_id = 25; break; // XS1_PORT_16C
-            event_with_id_26: event_id = 26; break; // XS1_PORT_16D
-            event_with_id_27: event_id = 27; break; // XS1_PORT_32A
-            event_with_id_28: event_id = 28; break; // XS1_PORT_32B
-            } 
-            xassert(( event_id >= 0 ) && ( event_id < GPIO_TOTAL_PORT_CNT ));
-            mask = ( 0x1 << event_id );
-            triggerable_disable_trigger( get_port(event_id) );
+            while (0) { /* This loop is just a hacky way to let us use break to go to the generic bit... */
+            event_gpio_1A:  gpio_id = gpio_1A;  break;
+            event_gpio_1B:  gpio_id = gpio_1B;  break;
+            event_gpio_1C:  gpio_id = gpio_1C;  break;
+            event_gpio_1D:  gpio_id = gpio_1D;  break;
+            event_gpio_1E:  gpio_id = gpio_1E;  break;
+            event_gpio_1F:  gpio_id = gpio_1F;  break;
+            event_gpio_1G:  gpio_id = gpio_1G;  break;
+            event_gpio_1H:  gpio_id = gpio_1H;  break;
+            event_gpio_1I:  gpio_id = gpio_1I;  break;
+            event_gpio_1J:  gpio_id = gpio_1J;  break;
+            event_gpio_1K:  gpio_id = gpio_1K;  break;
+            event_gpio_1L:  gpio_id = gpio_1L;  break;
+            event_gpio_1M:  gpio_id = gpio_1M;  break;
+            event_gpio_1N:  gpio_id = gpio_1N;  break;
+            event_gpio_1O:  gpio_id = gpio_1O;  break;
+            event_gpio_1P:  gpio_id = gpio_1P;  break;
+            event_gpio_4A:  gpio_id = gpio_4A;  break;
+            event_gpio_4B:  gpio_id = gpio_4B;  break;
+            event_gpio_4C:  gpio_id = gpio_4C;  break;
+            event_gpio_4D:  gpio_id = gpio_4D;  break;
+            event_gpio_4E:  gpio_id = gpio_4E;  break;
+            event_gpio_4F:  gpio_id = gpio_4F;  break;
+            event_gpio_8A:  gpio_id = gpio_8A;  break;
+            event_gpio_8B:  gpio_id = gpio_8B;  break;
+            event_gpio_8C:  gpio_id = gpio_8C;  break;
+            event_gpio_8D:  gpio_id = gpio_8D;  break;
+            event_gpio_16A: gpio_id = gpio_16A; break;
+            event_gpio_16B: gpio_id = gpio_16B; break;
+            event_gpio_16C: gpio_id = gpio_16C; break;
+          //event_gpio_16D: gpio_id = gpio_16D; break;
+          //event_gpio_32A: gpio_id = gpio_32A; break;
+          //event_gpio_32B: gpio_id = gpio_32B; break;
+            }
+            xassert(( gpio_id >= 0 ) && ( gpio_id < GPIO_TOTAL_PORT_CNT ));
+            mask = ( 0x1 << gpio_id );
+            triggerable_disable_trigger( get_port(gpio_id) );
             port_irq_flags |= mask;
             if ( irq_c != 0 )
             {
@@ -213,41 +211,40 @@ void gpio_dev(
 
                 switch (gpio_id)
                 {
-                case 0:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(0),  event_with_id_0 ); break;
-                case 1:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(1),  event_with_id_1 ); break;
-                case 2:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(2),  event_with_id_2 ); break;
-                case 3:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(3),  event_with_id_3 ); break;
-                case 4:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(4),  event_with_id_4 ); break;
-                case 5:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(5),  event_with_id_5 ); break;
-                case 6:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(6),  event_with_id_6 ); break;
-                case 7:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(7),  event_with_id_7 ); break;
-                case 8:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(8),  event_with_id_8 ); break;
-                case 9:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(9),  event_with_id_9 ); break;
-                case 10: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(10), event_with_id_10); break;
-                case 11: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(11), event_with_id_11); break;
-                case 12: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(12), event_with_id_12); break;
-                case 13: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(13), event_with_id_13); break;
-                case 14: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(14), event_with_id_14); break;
-                case 15: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(15), event_with_id_15); break;
-                case 16: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(16), event_with_id_16); break;
-                case 17: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(17), event_with_id_17); break;
-                case 18: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(18), event_with_id_18); break;
-                case 19: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(19), event_with_id_19); break;
-                case 20: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(20), event_with_id_20); break;
-                case 21: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(21), event_with_id_21); break;
-                case 22: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(22), event_with_id_22); break;
-                case 23: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(23), event_with_id_23); break;
-                case 24: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(24), event_with_id_24); break;
-                case 25: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(25), event_with_id_25); break;
-                case 26: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(26), event_with_id_26); break;
-                case 27: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(27), event_with_id_27); break;
-                case 28: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(28), event_with_id_28); break;
-                // case 29: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(29), event_with_id_29); break;
-                // case 30: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(30), event_with_id_30); break;
-                // case 31: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(31), event_with_id_31); break;
+                case gpio_1A:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1A ); break;
+                case gpio_1B:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1B ); break;
+                case gpio_1C:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1C ); break;
+                case gpio_1D:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1D ); break;
+                case gpio_1E:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1E ); break;
+                case gpio_1F:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1F ); break;
+                case gpio_1G:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1G ); break;
+                case gpio_1H:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1H ); break;
+                case gpio_1I:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1I ); break;
+                case gpio_1J:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1J ); break;
+                case gpio_1K:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1K ); break;
+                case gpio_1L:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1L ); break;
+                case gpio_1M:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1M ); break;
+                case gpio_1N:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1N ); break;
+                case gpio_1O:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1O ); break;
+                case gpio_1P:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_1P ); break;
+                case gpio_4A:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_4A ); break;
+                case gpio_4B:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_4B ); break;
+                case gpio_4C:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_4C ); break;
+                case gpio_4D:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_4D ); break;
+                case gpio_4E:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_4E ); break;
+                case gpio_4F:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_4F ); break;
+                case gpio_8A:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_8A ); break;
+                case gpio_8B:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_8B ); break;
+                case gpio_8C:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_8C ); break;
+                case gpio_8D:  TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_8D ); break;
+                case gpio_16A: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_16A); break;
+                case gpio_16B: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_16B); break;
+                case gpio_16C: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_16C); break;
+              //case gpio_16D: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_16D); break;
+              //case gpio_32A: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_32A); break;
+              //case gpio_32B: TRIGGERABLE_SETUP_EVENT_VECTOR(get_port(gpio_id), event_gpio_32B); break;
                 default: xassert(0); break;
                 }
-                // retval_int = port_setup_select( port_res, gpio_id );
 
                 retval_int = 0;
 
