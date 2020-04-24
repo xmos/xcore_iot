@@ -39,30 +39,30 @@ set(LIB_XC_SRCS
         ""
     )
 set(LIB_C_SRCS
-        "ff_crc.c"
+        "Lab-Project-FreeRTOS-FAT/ff_crc.c"
         #"ff_dev_support.c"
-        "ff_dir.c"
-        "ff_error.c"
-        "ff_fat.c"
-        "ff_file.c"
-        "ff_format.c"
-        "ff_ioman.c"
-        "ff_locking.c"
-        "ff_memory.c"
-        "ff_stdio.c"
-        "ff_string.c"
-        "ff_sys.c"
-        "ff_time.c"
-        "portable/common/ff_ramdisk.c"
-        "../portable/XCC/XCORE200/ff_flashdisk.c"
+        "Lab-Project-FreeRTOS-FAT/ff_dir.c"
+        "Lab-Project-FreeRTOS-FAT/ff_error.c"
+        "Lab-Project-FreeRTOS-FAT/ff_fat.c"
+        "Lab-Project-FreeRTOS-FAT/ff_file.c"
+        "Lab-Project-FreeRTOS-FAT/ff_format.c"
+        "Lab-Project-FreeRTOS-FAT/ff_ioman.c"
+        "Lab-Project-FreeRTOS-FAT/ff_locking.c"
+        "Lab-Project-FreeRTOS-FAT/ff_memory.c"
+        "Lab-Project-FreeRTOS-FAT/ff_stdio.c"
+        "Lab-Project-FreeRTOS-FAT/ff_string.c"
+        "Lab-Project-FreeRTOS-FAT/ff_sys.c"
+        "Lab-Project-FreeRTOS-FAT/ff_time.c"
+        "Lab-Project-FreeRTOS-FAT/portable/common/ff_ramdisk.c"
+        "portable/XCC/XCORE200/FreeRTOS-Plus-FAT/ff_flashdisk.c"
     )
 set(LIB_ASM_SRCS
         ""
     )
 set(LIB_INCLUDES
-        "include"
-        "portable/common"
-        "../portable/XCC/XCORE200"
+        "Lab-Project-FreeRTOS-FAT/include"
+        "Lab-Project-FreeRTOS-FAT/portable/common"
+        "portable/XCC/XCORE200/FreeRTOS-Plus-FAT"
     )
 set(LIB_DEPENDENT_MODULES
         "FreeRTOS(>=10.3.0)"
@@ -70,7 +70,7 @@ set(LIB_DEPENDENT_MODULES
     )
 set(LIB_OPTIONAL_HEADERS "")
 
-set(${LIB_NAME}_FILEPATH_PREFIX "${XMOS_MODULES_ROOT_DIR}/rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT/")
+set(${LIB_NAME}_FILEPATH_PREFIX "${XMOS_MODULES_ROOT_DIR}/rtos/FreeRTOS/FreeRTOS-Labs/")
 
 list(TRANSFORM LIB_XC_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
 list(TRANSFORM LIB_C_SRCS PREPEND ${${LIB_NAME}_FILEPATH_PREFIX})
