@@ -30,14 +30,14 @@ set(APP_COMPILER_FLAGS
         "-Wxcore-fptrgroup"
         "-lquadflash"
         "-DDEBUG_PRINT_ENABLE=1"
-        "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT|SL_WFX_DEBUG_SLEEP|SL_WFX_DEBUG_SLK|SL_WFX_DEBUG_RX|SL_WFX_DEBUG_RX_REG|SL_WFX_DEBUG_TX|SL_WFX_DEBUG_TX_REG|SL_WFX_DEBUG_FW_LOAD"
+        "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_INIT"
         "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
 
 if(FREERTOS_PORT STREQUAL "XCOREAI")
     set(bitstream_dir "xcoreai_explorer_bitstream_src")
     set(APP_HW_TARGET "${bitstream_dir}/XCORE-AI-EXPLORER.xn")
-    list(APPEND APP_COMPILER_FLAGS "-DXCOREAI_EXPLORER=1")
+    list(APPEND APP_COMPILER_FLAGS "-DXCOREAI_EXPLORER=1" "-mcmodel=large")
 elseif(FREERTOS_PORT STREQUAL "XCORE200")
     set(bitstream_dir "bitstream_src")
     set(APP_HW_TARGET "${bitstream_dir}/MIC-ARRAY-1V3.xn")
