@@ -36,6 +36,7 @@ set(LIB_VERSION 10.3.0)
 
 if(NOT DEFINED FREERTOS_PORT)
     set(FREERTOS_PORT "XCORE200")
+    message("FreeRTOS port set to XCORE200 by default")
 endif()
 
 if(FREERTOS_PORT STREQUAL "XCOREAI")
@@ -43,7 +44,7 @@ if(FREERTOS_PORT STREQUAL "XCOREAI")
 elseif(FREERTOS_PORT STREQUAL "XCORE200")
     set(LIB_ADD_COMPILER_FLAGS "-Os" "-march=xs2a")
 else()
-    message( SEND_ERROR "Invalid FreeRTOS port ${FREEROTS_PORT}")
+    message( SEND_ERROR "Invalid FreeRTOS port ${FREERTOS_PORT}")
 endif()
 
 if(${USE_FREERTOS_SMP})
