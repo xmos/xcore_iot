@@ -16,21 +16,38 @@ set(PROJECT_VERSION 0.5.0)
 ## Enable languages for project
 enable_language(C ASM)
 
+#set(FREERTOS_PORT "XCORE200")
+set(FREERTOS_PORT "XCOREAI")
+
 ## Set XMOS application variables
-set(APP_HW_TARGET bitstream_src/MIC-ARRAY-1V3.xn)
+
 set(APP_COMPILER_FLAGS
         "-Os"
+        "-D__XS2A__=1" # Hack to get some libs to work with XS3
         "-g"
         "-report"
         "-fxscope"
         "-Wxcore-fptrgroup"
         "-lquadflash"
         "-DDEBUG_PRINT_ENABLE=1"
-        "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_INIT"
+        "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT|SL_WFX_DEBUG_SLEEP|SL_WFX_DEBUG_SLK|SL_WFX_DEBUG_RX|SL_WFX_DEBUG_RX_REG|SL_WFX_DEBUG_TX|SL_WFX_DEBUG_TX_REG|SL_WFX_DEBUG_FW_LOAD"
         "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
+
+if(FREERTOS_PORT STREQUAL "XCOREAI")
+    set(bitstream_dir "xcoreai_explorer_bitstream_src")
+    set(APP_HW_TARGET "${bitstream_dir}/XCORE-AI-EXPLORER.xn")
+    list(APPEND APP_COMPILER_FLAGS "-DXCOREAI_EXPLORER=1")
+elseif(FREERTOS_PORT STREQUAL "XCORE200")
+    set(bitstream_dir "bitstream_src")
+    set(APP_HW_TARGET "${bitstream_dir}/MIC-ARRAY-1V3.xn")
+    list(APPEND APP_COMPILER_FLAGS "-DXCORE200_MAB=1")
+else()
+    message(SEND_ERROR "Invalid FreeRTOS port ${FREEROTS_PORT}")
+endif()
+
 set(APP_XC_SRCS
-        "bitstream_src/bitstream.xc"
+        "${bitstream_dir}/bitstream.xc"
     )
 set(APP_C_SRCS
         "src/main.c"
@@ -38,7 +55,7 @@ set(APP_C_SRCS
         "src/dhcpd.c"
         "src/afr_wifi/sl_wfx_callbacks.c"
         "src/afr_wifi/sl_wfx_iot_wifi.c"
-        "bitstream_src/bitstream.c"
+        "${bitstream_dir}/bitstream.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -47,7 +64,7 @@ set(APP_INCLUDES
         "src"
         "src/afr_wifi"
         "src/afr_wifi/types"
-        "bitstream_src"
+        "${bitstream_dir}"
     )
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.3.0)"

@@ -17,13 +17,13 @@ set(PROJECT_VERSION 0.5.0)
 enable_language(C ASM)
 
 ## Set XMOS application variables
-set(APP_HW_TARGET XU316-1024-FB265-C32)
+set(APP_HW_TARGET src/XCORE-AI-EXPLORER.xn)
 set(APP_COMPILER_FLAGS
         "-D__XS2A__"
         "-O2"
         "-g"
         "-report"
-#        "-fxscope"
+        "-fxscope"
         "-Wxcore-fptrgroup"
         "-lquadflash"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
