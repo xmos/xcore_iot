@@ -8,6 +8,26 @@ if(PROJECT_SOURCE_DIR AND NOT DEFINED AFR_VENDORS_DIR)
     message(FATAL_ERROR "xmos_utils.cmake must be included before a project definition")
 endif()
 
+# Check that supported bitstream has been specified
+include("bitstream_src/supported_hw.cmake")
+if(DEFINED BOARD)
+    if(${BOARD} IN_LIST SUPPORTED_HW)
+        include("bitstream_src/${BOARD}/board.cmake")
+    else()
+        message("\nConfiguration for ${BOARD} not found.\nPreconfigured bitstreams are:")
+        foreach(HW ${SUPPORTED_HW})    
+            message("\t${HW}")
+        endforeach()
+        message(FATAL_ERROR "")
+    endif()
+else()
+    message("\n-DBOARD must be specified.\nPreconfigured bitstreams are:")
+    foreach(HW ${SUPPORTED_HW})    
+        message("\t${HW}")
+    endforeach()
+    message(FATAL_ERROR "")
+endif()
+
 ## Setup at caller scope
 
 # Set up compiler
@@ -69,7 +89,7 @@ endfunction()
 ## Registers an application and it's dependencies
 function(XMOS_REGISTER_APP)
     if(NOT APP_HW_TARGET)
-        message(FATAL_ERROR "APP_HW_TARGET is not defined.")
+        set(APP_HW_TARGET ${BOARD_HW_TARGET})
     endif()
 
     ## Populate build flag for hardware target
@@ -86,11 +106,11 @@ function(XMOS_REGISTER_APP)
 
     set(LIB_NAME ${PROJECT_NAME}_LIB)
     set(LIB_VERSION ${PROJECT_VERSION})
-    set(LIB_ADD_COMPILER_FLAGS ${APP_COMPILER_FLAGS})
-    set(LIB_XC_SRCS ${APP_XC_SRCS})
-    set(LIB_C_SRCS ${APP_C_SRCS})
-    set(LIB_ASM_SRCS ${APP_ASM_SRCS})
-    set(LIB_INCLUDES ${APP_INCLUDES})
+    set(LIB_ADD_COMPILER_FLAGS ${APP_COMPILER_FLAGS} ${BOARD_COMPILE_FLAGS})
+    set(LIB_XC_SRCS ${APP_XC_SRCS} ${BOARD_XC_SRCS})
+    set(LIB_C_SRCS ${APP_C_SRCS} ${BOARD_C_SRCS})
+    set(LIB_ASM_SRCS ${APP_ASM_SRCS} ${BOARD_ASM_SRCS})
+    set(LIB_INCLUDES ${APP_INCLUDES} ${BOARD_INCLUDES})
     set(LIB_DEPENDENT_MODULES ${APP_DEPENDENT_MODULES})
     set(LIB_OPTIONAL_HEADERS "")
     set(LIB_FILE_FLAGS "")
@@ -143,7 +163,7 @@ function(XMOS_REGISTER_APP)
         set(TARGET_NAME "${PROJECT_NAME}.xe")
     endif()
 
-    set(APP_COMPILE_FLAGS ${APP_TARGET_COMPILER_FLAG} ${APP_COMPILER_FLAGS} ${APP_COMPILER_C_FLAGS} ${HEADER_EXIST_FLAGS})
+    set(APP_COMPILE_FLAGS ${APP_TARGET_COMPILER_FLAG} ${LIB_ADD_COMPILER_FLAGS} ${APP_COMPILER_C_FLAGS} ${HEADER_EXIST_FLAGS})
 
     foreach(target ${XMOS_TARGETS_LIST})
         target_include_directories(${target} PRIVATE ${APP_INCLUDES})
@@ -164,6 +184,8 @@ function(XMOS_REGISTER_APP)
     target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILE_FLAGS})
     target_link_libraries(${TARGET_NAME} PRIVATE ${DEPS_TO_LINK})
     target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILE_FLAGS})
+
+    unset(BOARD CACHE)
 endfunction()
 
 ## Registers a module and it's dependencies
