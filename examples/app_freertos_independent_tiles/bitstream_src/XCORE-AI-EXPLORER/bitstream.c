@@ -37,8 +37,8 @@ void soc_tile0_bitstream(
 
     intertile_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
     intertile_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = soc_channel_establish(xTile1Chan, soc_channel_inout);
-    intertile_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = 0;//soc_channel_establish(xTile1Chan, soc_channel_inout);
-    intertile_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;//soc_channel_establish(xTile1Chan, soc_channel_inout);
+    intertile_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = 0;
+    intertile_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;
 
     tile0_device_instantiate( intertile_dev_ch);
 }
@@ -69,8 +69,8 @@ void soc_tile1_bitstream(
 
     intertile_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
     intertile_dev_ch[SOC_PERIPHERAL_TO_DMA_CH] = soc_channel_establish(xTile0Chan, soc_channel_inout);
-    intertile_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = 0;//soc_channel_establish(xTile0Chan, soc_channel_inout);
-    intertile_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;//soc_channel_establish(xTile0Chan, soc_channel_inout);
+    intertile_dev_ch[SOC_PERIPHERAL_CONTROL_CH] = 0;
+    intertile_dev_ch[SOC_PERIPHERAL_IRQ_CH] = 0;
 
     tile1_device_instantiate( intertile_dev_ch );
 }

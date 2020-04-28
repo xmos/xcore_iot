@@ -17,7 +17,6 @@ set(PROJECT_VERSION 0.5.0)
 enable_language(C ASM)
 
 ## Set XMOS application variables
-set(APP_HW_TARGET bitstream_src/MIC-ARRAY-1V3.xn)
 set(APP_COMPILER_FLAGS
         "-Os"
         "-g"
@@ -27,11 +26,10 @@ set(APP_COMPILER_FLAGS
         "-DDEBUG_PRINT_ENABLE=1"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
 set(APP_XC_SRCS
-        "bitstream_src/bitstream.xc"
+        ""
     )
 set(APP_C_SRCS
         "src/main.c"
-        "bitstream_src/bitstream.c"
         "src/intertile_ctrl/intertile_ctrl.c"
         "src/rpc/rpc_test.c"
     )
@@ -40,7 +38,6 @@ set(APP_ASM_SRCS
     )
 set(APP_INCLUDES
         "src"
-        "bitstream_src"
         "src/intertile_ctrl"
         "src/rpc"
     )
