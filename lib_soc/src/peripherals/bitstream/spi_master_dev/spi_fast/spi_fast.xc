@@ -90,7 +90,7 @@ void spi_fast(unsigned num_bytes, char *buffer, spi_fast_ports &p, spi_direction
 
     partout_timed(p.clk, 16, p.clock_bits, port_time + p.clock_delay);
     partout_timed(p.mosi, 16, zip(buffer[0], buffer[0], 0), port_time);
-    asm volatile ("setpt res[%0], %1":: "r"(p.miso), "r"(port_time+15));
+    asm volatile ("setpt res[%0], %1":: "r"(p.miso), "r"(port_time+14));
     asm volatile ("setpsc res[%0], %1":: "r"(p.miso), "r"(16));
 
     unsigned i;
