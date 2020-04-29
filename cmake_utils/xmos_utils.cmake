@@ -184,8 +184,6 @@ function(XMOS_REGISTER_APP)
     target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILE_FLAGS})
     target_link_libraries(${TARGET_NAME} PRIVATE ${DEPS_TO_LINK})
     target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILE_FLAGS})
-
-    unset(BOARD CACHE)
 endfunction()
 
 ## Registers a module and it's dependencies
