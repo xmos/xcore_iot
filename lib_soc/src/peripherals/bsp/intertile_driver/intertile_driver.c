@@ -61,7 +61,7 @@ static void intertile_isr( soc_peripheral_t device )
 
             if( ( mapped_cb.cb = intertile_isr_callback_map[ device_id ][ cb_id ].cb ) != NULL )
             {
-                if( mapped_cb.cb( device, bytes_buf, bytes_buf_len, status, NULL ) == pdTRUE )
+                if( mapped_cb.cb( device, bytes_buf, bytes_buf_len, SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM, NULL ) == pdTRUE )
                 {
                     xYieldRequired = pdTRUE;
                 }
@@ -88,7 +88,7 @@ static void intertile_isr( soc_peripheral_t device )
 
             if( ( mapped_cb.cb = intertile_isr_callback_map[ device_id ][ cb_id ].cb ) != NULL )
             {
-                if( mapped_cb.cb( device, frame_buffer, frame_length, status, &xReturnBufferToDMA ) == pdTRUE )
+                if( mapped_cb.cb( device, frame_buffer, frame_length, SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM, &xReturnBufferToDMA ) == pdTRUE )
                 {
                     xYieldRequired = pdTRUE;
                 }

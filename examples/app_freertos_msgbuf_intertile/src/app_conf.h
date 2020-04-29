@@ -4,6 +4,7 @@
 #define APP_CONF_H_
 
 /* Intertile device defines */
+#define appconfINTERTILE_DMA_BUF_CNT   		   ( 3 )
 
 /* Task Priorities */
 #define appconfINTERTILE_CTRL_TASK_PRIORITY    ( configMAX_PRIORITIES - 3 )
