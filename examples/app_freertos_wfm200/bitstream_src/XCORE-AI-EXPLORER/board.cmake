@@ -1,7 +1,6 @@
 # Hardware configurations
 set(BOARD_COMPILE_FLAGS
         "-DXCOREAI_EXPLORER=1"
-        "-mcmodel=large"
     )
 set(BOARD_HW_TARGET
         "bitstream_src/${BOARD}/XCORE-AI-EXPLORER.xn"
