@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-
-#include "quadflashlib.h"
+#include <xmos_flash.h>
+//#include "quadflashlib.h"
 
 #include "sl_wfx.h"
 #include "sl_wfx_wf200_C0.h"
@@ -31,8 +31,8 @@ static QueueHandle_t eventQueue;
 typedef struct {
     const char * const *pds_data;
     int firmware_index;
-    uint16_t pds_size;
     uint8_t firmware_data[DOWNLOAD_BLOCK_SIZE];
+    uint16_t pds_size;
     uint8_t waited_event_id;
 } sl_wfx_host_ctx_t;
 
@@ -69,16 +69,22 @@ uint32_t sl_wfx_app_fw_size(void)
 __attribute__((weak))
 sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
 {
-	int ret;
+	extern flash_handle_t flash_handle;
+
+	//int ret;
     taskENTER_CRITICAL();
-    ret = fl_readData(index, size, data);
+    //ret = fl_readData(index, size, data);
+	/* TODO:  - Fix hardcoded data partition address.
+	 *        - Move flash access to a flash device.
+	 */
+    flash_read_quad(&flash_handle, 0x100000/4 + index/4, (unsigned *) data, size/4);
     taskEXIT_CRITICAL();
 
-    if (ret == 0) {
+    //if (ret == 0) {
     	return SL_STATUS_OK;
-    } else {
-    	return SL_STATUS_FAIL;
-    }
+    //} else {
+    //	return SL_STATUS_FAIL;
+    //}
 }
 
 /**** WF200 Driver Required Host Functions Start ****/

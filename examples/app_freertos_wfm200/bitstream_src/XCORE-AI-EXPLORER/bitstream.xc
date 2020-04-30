@@ -3,8 +3,10 @@
 #include <platform.h>
 #include <stdint.h>
 #include <timer.h>
-#include <quadflashlib.h>
+//#include <quadflashlib.h>
+#include <xmos_flash.h>
 
+#include "debug_print.h"
 #include "xassert.h"
 #include "mic_array.h"
 #include "soc.h"
@@ -105,10 +107,80 @@ port p_rst_shared                   = PORT_SHARED_RESET;    // Bit 0: DAC_RST_N,
     FL_QUADDEVICE_SPANSION_S25FL116K \
 }
 
+#if 0
 //Configuration for the quad spi flash
 fl_QSPIPorts      flash_ports   = FLASH_PORTS;
 fl_QuadDeviceSpec flash_specs[] = FLASH_SPECS;
+#else
+/**
+ * Defines the clock/timing configuration
+ * for the quad spi flash. This configuration
+ * is for 50 MHz.
+ */
+#define FLASH_CLOCK_CONFIG {        \
+    flash_clock_reference,          \
+    0,                              \
+    1,                              \
+    flash_clock_input_edge_plusone, \
+    flash_port_pad_delay_1          \
+}
 
+//Configuration for the quad spi flash
+flash_handle_t       flash_handle;
+flash_ports_t        flash_ports        = FLASH_PORTS;
+flash_clock_config_t flash_clock_config = FLASH_CLOCK_CONFIG;
+flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_0, flash_qe_bit_6}; 
+
+static unsigned is_busy(flash_handle_t * flash_handle)
+{
+  unsigned char status;
+  status = flash_read_status_register(flash_handle, flash_status_register_0);
+  return (status & 0x1) == 1;
+}
+
+static void wait_while_busy(flash_handle_t * flash_handle)
+{
+  timer tmr;
+  unsigned int t;
+  while(is_busy(flash_handle))
+  {
+    debug_printf("b.");
+    tmr :> t;
+    tmr when timerafter(t+100) :> t;
+  }
+  debug_printf("done\n");
+}
+
+static void enable_quad_mode(void)
+{
+  unsigned char quad_enable[2] = {0x00, 0x00};
+  flash_num_status_bytes_t num_status_bytes;
+  if(flash_qe_config.flash_qe_location == flash_qe_location_status_reg_0)
+  {
+    quad_enable[0] = (1 << flash_qe_config.flash_qe_shift);
+    num_status_bytes = flash_num_status_bytes_1;
+  }
+  else
+  {
+    quad_enable[1] = (1 << flash_qe_config.flash_qe_shift);
+    num_status_bytes = flash_num_status_bytes_2;
+  }
+
+  flash_write_enable(&flash_handle);
+  flash_write_status_register(&flash_handle, quad_enable, num_status_bytes);
+  wait_while_busy(&flash_handle);
+}
+
+static int is_quad_mode_enabled(void)
+{
+    uint8_t status;
+
+    status = flash_read_status_register(&flash_handle, flash_qe_config.flash_qe_location);
+
+    return (status & (1 << flash_qe_config.flash_qe_shift)) != 0;
+}
+
+#endif
 void tile0_device_instantiate(
 #if 0
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
@@ -131,7 +203,20 @@ void tile0_device_instantiate(
              * Must be called before device_register() so that it happens before
              * before the bitstream is "initialized" and the FreeRTOS software starts.
              */
-            fl_connectToDevice(flash_ports, flash_specs, sizeof(flash_specs)/sizeof(fl_QuadDeviceSpec));
+            //fl_connectToDevice(flash_ports, flash_specs, sizeof(flash_specs)/sizeof(fl_QuadDeviceSpec));
+            flash_connect(&flash_handle, &flash_ports, flash_clock_config, flash_qe_config);
+
+            /*
+             * Ensure that the quad spi flash is in quad mode
+             */
+            if (!is_quad_mode_enabled()) {
+                debug_printf("quad mode not enabled!\n");
+                enable_quad_mode();
+                xassert(is_quad_mode_enabled());
+                debug_printf("quad mode enabled!\n");
+            } else {
+                debug_printf("quad mode already enabled!\n");
+            }
 
             //device_register(mic_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch);
             device_register(t0_gpio_dev_ch, spi_dev_ch);
