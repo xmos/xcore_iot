@@ -20,7 +20,7 @@
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.1367283409" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
 							<option id="cdt.managedbuild.option.gnu.cross.path.232208423" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.35383708" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder buildPath="${workspace_loc:/app_freertos_micarray_board/build}" id="cdt.managedbuild.builder.gnu.cross.578030883" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<builder buildPath="${workspace_loc:/app_freertos_micarray_board2/build}" id="cdt.managedbuild.builder.gnu.cross.578030883" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.479064771" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2038817493" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -64,11 +64,11 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="app_freertos_micarray_board" buildProperties="" description="" id="com.xmos.cdt.toolchain.88660124" name="Default" optionalBuildProperties="" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration artifactName="app_freertos_micarray_board2" buildProperties="" description="" id="com.xmos.cdt.toolchain.88660124" name="Default" optionalBuildProperties="" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.xmos.cdt.toolchain.88660124.1354204302" name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.1276604324" name="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser;org.eclipse.cdt.core.GNU_ELF" id="com.xmos.cdt.core.platform.1952507627" isAbstract="false" osList="linux,win32,macosx"/>
-							<builder arguments="-j" autoBuildTarget="" buildPath="${workspace_loc:/app_freertos_micarray_board/build}" cleanBuildTarget="" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="com.xmos.cdt.builder.base.1851841395" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false">
+							<builder arguments="-j" autoBuildTarget="" buildPath="${workspace_loc:/app_freertos_micarray_board2/build}" cleanBuildTarget="" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="com.xmos.cdt.builder.base.1851841395" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -104,7 +104,7 @@
 					<folderInfo id="com.xmos.cdt.toolchain.1078037384.84608992" name="/" resourcePath="">
 						<toolChain id="com.xmos.cdt.toolchain.875270616" name="com.xmos.cdt.toolchain">
 							<targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser;org.eclipse.cdt.core.GNU_ELF" id="com.xmos.cdt.core.platform.1831200506" isAbstract="false" osList="linux,win32,macosx"/>
-							<builder arguments="-j" buildPath="${workspace_loc:/app_freertos_micarray_board2/build}" command="make" id="com.xmos.cdt.builder.base.1200296953" keepEnvironmentInBuildfile="false" managedBuildOn="false">
+							<builder arguments="-j" buildPath="${workspace_loc:/app_freertos_micarray_board22/build}" command="make" id="com.xmos.cdt.builder.base.1200296953" keepEnvironmentInBuildfile="false" managedBuildOn="false">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
 								</outputEntries>
@@ -119,12 +119,12 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="app_freertos_micarray_board2.null.2011150632" name="app_freertos_micarray_board2"/>
+		<project id="app_freertos_micarray_board22.null.2011150632" name="app_freertos_micarray_board22"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Default">
-			<resource resourceType="PROJECT" workspacePath="/app_freertos_micarray_board"/>
+			<resource resourceType="PROJECT" workspacePath="/app_freertos_micarray_board2"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
