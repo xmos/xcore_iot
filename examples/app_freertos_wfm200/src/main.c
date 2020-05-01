@@ -21,6 +21,7 @@
 #include "bitstream_devices.h"
 #include "spi_master_driver.h"
 #include "gpio_driver.h"
+#include "qspi_flash_driver.h"
 #include "sl_wfx.h"
 
 /* App headers */
@@ -53,6 +54,31 @@ static void wf200_test(void *arg)
     WIFINetworkParams_t pxNetworkParams;
 
     rtos_printf("Hello from wf200 test\n ");
+
+    qspi_flash_erase(
+    		bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+    		5000,
+			109693);
+
+    uint8_t flash_buf[16];
+    qspi_flash_write(
+    		bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+            "hello, world!\n",
+    		0x100003,
+            15);
+
+    qspi_flash_read(
+    		bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+			flash_buf,
+    		0x100004,
+            4);
+
+    for (int i = 0; i < 4; i++) {
+    	rtos_printf("%02x ", flash_buf[i]);
+    }
+    rtos_printf("\n");
+
+    vTaskDelete(NULL);
 
     ret = WIFI_On();
 
@@ -173,6 +199,10 @@ void soc_tile0_main(
     dev = gpio_driver_init(
             BITSTREAM_GPIO_DEVICE_A,
             NULL,
+            0);
+
+    dev = qspi_flash_driver_init(
+            BITSTREAM_QSPI_FLASH_DEVICE_A,
             0);
 
     xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);

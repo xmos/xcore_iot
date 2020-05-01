@@ -131,54 +131,7 @@ flash_ports_t        flash_ports        = FLASH_PORTS;
 flash_clock_config_t flash_clock_config = FLASH_CLOCK_CONFIG;
 flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_0, flash_qe_bit_6}; 
 
-static unsigned is_busy(flash_handle_t * flash_handle)
-{
-  unsigned char status;
-  status = flash_read_status_register(flash_handle, flash_status_register_0);
-  return (status & 0x1) == 1;
-}
 
-static void wait_while_busy(flash_handle_t * flash_handle)
-{
-  timer tmr;
-  unsigned int t;
-  while(is_busy(flash_handle))
-  {
-    debug_printf("b.");
-    tmr :> t;
-    tmr when timerafter(t+100) :> t;
-  }
-  debug_printf("done\n");
-}
-
-static void enable_quad_mode(void)
-{
-  unsigned char quad_enable[2] = {0x00, 0x00};
-  flash_num_status_bytes_t num_status_bytes;
-  if(flash_qe_config.flash_qe_location == flash_qe_location_status_reg_0)
-  {
-    quad_enable[0] = (1 << flash_qe_config.flash_qe_shift);
-    num_status_bytes = flash_num_status_bytes_1;
-  }
-  else
-  {
-    quad_enable[1] = (1 << flash_qe_config.flash_qe_shift);
-    num_status_bytes = flash_num_status_bytes_2;
-  }
-
-  flash_write_enable(&flash_handle);
-  flash_write_status_register(&flash_handle, quad_enable, num_status_bytes);
-  wait_while_busy(&flash_handle);
-}
-
-static int is_quad_mode_enabled(void)
-{
-    uint8_t status;
-
-    status = flash_read_status_register(&flash_handle, flash_qe_config.flash_qe_location);
-
-    return (status & (1 << flash_qe_config.flash_qe_shift)) != 0;
-}
 
 #endif
 void tile0_device_instantiate(
@@ -192,34 +145,24 @@ void tile0_device_instantiate(
 {
     chan t0_gpio_dev_ctrl_ch;
     chan spi_dev_ctrl_ch;
+    chan qspi_flash_dev_ctrl_ch;
 
     par {
         unsafe {
             unsafe chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
             unsafe chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t0_gpio_dev_ctrl_ch, null};
             unsafe chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, spi_dev_ctrl_ch, null};
+            unsafe chanend qspi_flash_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, qspi_flash_dev_ctrl_ch, null};
 
             /*
              * Must be called before device_register() so that it happens before
              * before the bitstream is "initialized" and the FreeRTOS software starts.
              */
             //fl_connectToDevice(flash_ports, flash_specs, sizeof(flash_specs)/sizeof(fl_QuadDeviceSpec));
-            flash_connect(&flash_handle, &flash_ports, flash_clock_config, flash_qe_config);
+            //flash_connect(&flash_handle, &flash_ports, flash_clock_config, flash_qe_config);
 
-            /*
-             * Ensure that the quad spi flash is in quad mode
-             */
-            if (!is_quad_mode_enabled()) {
-                debug_printf("quad mode not enabled!\n");
-                enable_quad_mode();
-                xassert(is_quad_mode_enabled());
-                debug_printf("quad mode enabled!\n");
-            } else {
-                debug_printf("quad mode already enabled!\n");
-            }
-
-            //device_register(mic_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch);
-            device_register(t0_gpio_dev_ch, spi_dev_ch);
+            //device_register(mic_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch, qspi_flash_dev_ch);
+            device_register(t0_gpio_dev_ch, spi_dev_ch, qspi_flash_dev_ch);
             soc_peripheral_hub();
         }
 
@@ -239,6 +182,13 @@ void tile0_device_instantiate(
                         null,
                         spi_dev_ctrl_ch,
                         spi_ctx);
+                        
+                qspi_flash_dev(
+                        bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+                        null,
+                        null,
+                        qspi_flash_dev_ctrl_ch,
+                        &flash_ports, &flash_clock_config, &flash_qe_config);
             }
         }
     }

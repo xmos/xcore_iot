@@ -11,6 +11,7 @@
 #include "i2s_dev.h"
 #include "gpio_dev.h"
 #include "spi_master_dev.h"
+#include "qspi_flash_dev.h"
 #endif //__XC__
 
 /*
@@ -56,7 +57,8 @@ void device_register(
 #endif
         chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         //chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
+        chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+		chanend qspi_flash_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]);
 
 #ifdef __XC__
 }
