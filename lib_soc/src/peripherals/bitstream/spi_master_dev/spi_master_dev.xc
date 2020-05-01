@@ -38,17 +38,10 @@ static void spi_test_fast_handler(
                 spi_fast(transfer_len, data_buf, spi_ctx, rx_len > 0 ? SPI_READ_WRITE : SPI_WRITE);
 
                 if (rx_len > 0) { /* Send response if it had been requested */
-                    if (peripheral != NULL) {
-                        soc_peripheral_tx_dma_direct_xfer(
-                                peripheral,
-                                data_buf,
-                                rx_len);
-                    } else if (!isnull(data_to_dma_c)) {
-                        soc_peripheral_tx_dma_xfer(
-                                data_to_dma_c,
-                                data_buf,
-                                rx_len);
-                    }
+                    soc_peripheral_tx_dma_direct_xfer(
+                            peripheral,
+                            data_buf,
+                            rx_len);
 
                     rx_len = 0;
                 }
