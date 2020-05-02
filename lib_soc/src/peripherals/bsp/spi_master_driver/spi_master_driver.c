@@ -29,20 +29,24 @@ static void spi_master_isr(soc_peripheral_t dev)
 
     if (status & SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM) {
         ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
-        ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
-        configASSERT(ret == pdTRUE);
-        do {
-            soc_dma_ring_tx_buf_get(ring_buf, NULL, &more);
-        } while (more);
+
+        while (soc_dma_ring_tx_buf_get(ring_buf, NULL, &more) != NULL) {
+        	if (!more) {
+                ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
+                configASSERT(ret == pdTRUE);
+        	}
+        }
     }
 
     if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM) {
         ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
-        ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
-        configASSERT(ret == pdTRUE);
-        do {
-            soc_dma_ring_rx_buf_get(ring_buf, NULL, &more);
-        } while (more);
+
+        while (soc_dma_ring_rx_buf_get(ring_buf, NULL, &more) != NULL) {
+        	if (!more) {
+                ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
+                configASSERT(ret == pdTRUE);
+        	}
+        }
     }
 
     portEND_SWITCHING_ISR(xYieldRequired);
