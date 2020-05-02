@@ -14,10 +14,16 @@
 soc_peripheral_t bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_COUNT];
 #endif /* SOC_QSPI_FLASH_PERIPHERAL_USED */
 
+typedef struct {
+	soc_peripheral_t dev;
+	SemaphoreHandle_t dma_sem;
+	SemaphoreHandle_t lock;
+} qspi_flash_driver_t;
+
 RTOS_IRQ_ISR_ATTR
 static void qspi_flash_isr(soc_peripheral_t dev)
 {
-    SemaphoreHandle_t sem = (SemaphoreHandle_t) soc_peripheral_app_data(dev);
+	qspi_flash_driver_t *driver_struct = (qspi_flash_driver_t *) soc_peripheral_app_data(dev);
     soc_dma_ring_buf_t *ring_buf;
     int more;
     BaseType_t xYieldRequired = pdFALSE;
@@ -31,8 +37,10 @@ static void qspi_flash_isr(soc_peripheral_t dev)
 
         while (soc_dma_ring_tx_buf_get(ring_buf, NULL, &more) != NULL) {
         	if (!more) {
-        		rtos_printf("qspi tx isr\n");
-                ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
+        		/*
+        		 * TODO: Consider how not to give this semaphore for read operations.
+        		 */
+                ret = xSemaphoreGiveFromISR(driver_struct->dma_sem, &xYieldRequired);
                 configASSERT(ret == pdTRUE);
         	}
         }
@@ -43,39 +51,13 @@ static void qspi_flash_isr(soc_peripheral_t dev)
 
         while (soc_dma_ring_rx_buf_get(ring_buf, NULL, &more) != NULL) {
         	if (!more) {
-        		rtos_printf("qspi rx isr\n");
-                ret = xSemaphoreGiveFromISR(sem, &xYieldRequired);
+                ret = xSemaphoreGiveFromISR(driver_struct->dma_sem, &xYieldRequired);
                 configASSERT(ret == pdTRUE);
         	}
         }
     }
 
     portEND_SWITCHING_ISR(xYieldRequired);
-}
-
-soc_peripheral_t qspi_flash_driver_init(
-        int device_id,
-        int isr_core)
-{
-    soc_peripheral_t device;
-
-    SemaphoreHandle_t sem;
-    sem = xSemaphoreCreateCounting(2, 0);
-
-    xassert(device_id >= 0 && device_id < BITSTREAM_QSPI_FLASH_DEVICE_COUNT);
-
-    device = bitstream_qspi_flash_devices[device_id];
-
-    soc_peripheral_common_dma_init(
-            device,
-            1,
-            0,
-            3, /* Up to 3 TX buffers may be sent for a single transaction */
-            sem,
-            isr_core,
-            (rtos_irq_isr_t) qspi_flash_isr);
-
-    return device;
 }
 
 void qspi_flash_read(
@@ -87,11 +69,13 @@ void qspi_flash_read(
 	qspi_flash_dev_cmd_t flash_cmd;
 	soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
 	soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
-	SemaphoreHandle_t sem = (SemaphoreHandle_t) soc_peripheral_app_data(dev);
+	qspi_flash_driver_t *driver_struct = (qspi_flash_driver_t *) soc_peripheral_app_data(dev);
 
 	flash_cmd.operation = qspi_flash_dev_op_read;
 	flash_cmd.byte_address = address;
 	flash_cmd.byte_count = len;
+
+	xSemaphoreTake(driver_struct->lock, portMAX_DELAY);
 
 	soc_dma_ring_rx_buf_set(rx_ring_buf, data, (uint16_t) len);
 	soc_dma_ring_tx_buf_set(tx_ring_buf, &flash_cmd, (uint16_t) sizeof(flash_cmd));
@@ -99,9 +83,10 @@ void qspi_flash_read(
     /* this request will take care of both the RX and TX */
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 
-    xSemaphoreTake(sem, portMAX_DELAY); /* wait for the DMA TX to complete */
-    xSemaphoreTake(sem, portMAX_DELAY); /* wait for the DMA RX to complete */
-    rtos_printf("read complete\n");
+    xSemaphoreGive(driver_struct->lock);
+
+    xSemaphoreTake(driver_struct->dma_sem, portMAX_DELAY); /* wait for the DMA TX to complete */
+    xSemaphoreTake(driver_struct->dma_sem, portMAX_DELAY); /* wait for the DMA RX to complete */
 }
 
 #define WORD_TO_BYTE_ADDRESS(w) ((w) * sizeof(uint32_t))
@@ -115,7 +100,7 @@ void qspi_flash_write(
 {
 	qspi_flash_dev_cmd_t flash_cmd;
 	soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
-	SemaphoreHandle_t sem = (SemaphoreHandle_t) soc_peripheral_app_data(dev);
+	qspi_flash_driver_t *driver_struct = (qspi_flash_driver_t *) soc_peripheral_app_data(dev);
 #if QSPI_FLASH_QUAD_PAGE_PROGRAM
 	/*
 	 * If the address is not word aligned, then the start
@@ -138,6 +123,8 @@ void qspi_flash_write(
 	flash_cmd.byte_address = address;
 	flash_cmd.byte_count = len;
 
+	xSemaphoreTake(driver_struct->lock, portMAX_DELAY);
+
 #if QUAD_PAGE_PROGRAM
 	if (pad_len > 0) {
 		tx_buffers++;
@@ -150,8 +137,9 @@ void qspi_flash_write(
 
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 
-    xSemaphoreTake(sem, portMAX_DELAY); /* wait for the DMA TX to complete */
-    rtos_printf("write complete\n");
+    xSemaphoreGive(driver_struct->lock);
+
+    xSemaphoreTake(driver_struct->dma_sem, portMAX_DELAY); /* wait for the DMA TX to complete */
 }
 
 void qspi_flash_erase(
@@ -161,100 +149,51 @@ void qspi_flash_erase(
 {
 	qspi_flash_dev_cmd_t flash_cmd;
 	soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
-	SemaphoreHandle_t sem = (SemaphoreHandle_t) soc_peripheral_app_data(dev);
+	qspi_flash_driver_t *driver_struct = (qspi_flash_driver_t *) soc_peripheral_app_data(dev);
 
 	flash_cmd.operation = qspi_flash_dev_op_erase;
 	flash_cmd.byte_address = address;
 	flash_cmd.byte_count = len;
 
+	xSemaphoreTake(driver_struct->lock, portMAX_DELAY);
+
 	soc_dma_ring_tx_buf_set(tx_ring_buf, &flash_cmd, (uint16_t) sizeof(flash_cmd));
 
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 
-    xSemaphoreTake(sem, portMAX_DELAY); /* wait for the DMA TX to complete */
-    rtos_printf("erase complete\n");
+    xSemaphoreGive(driver_struct->lock);
+
+    /* wait for the DMA TX to complete before returning,
+     * otherwise flash_cmd will go out of scope before
+     * the device receives it. */
+    xSemaphoreTake(driver_struct->dma_sem, portMAX_DELAY);
 }
 
-
-#if 0
-static void spi_driver_transaction(
-        soc_peripheral_t dev,
-        uint8_t *rx_buf,
-        size_t rx_len,
-        uint8_t *tx_buf,
-        size_t tx_len)
+soc_peripheral_t qspi_flash_driver_init(
+        int device_id,
+        int isr_core)
 {
-    chanend c = soc_peripheral_ctrl_chanend(dev);
-    soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
+    soc_peripheral_t device;
+    qspi_flash_driver_t *driver_struct;
 
-    if (rx_len > 0) {
-        soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(dev);
+    xassert(device_id >= 0 && device_id < BITSTREAM_QSPI_FLASH_DEVICE_COUNT);
 
-        soc_peripheral_function_code_tx(c, SPI_MASTER_DEV_TRANSACTION);
+    device = bitstream_qspi_flash_devices[device_id];
 
-        soc_peripheral_varlist_tx(
-                c, 1,
-                sizeof(size_t), &rx_len);
+    driver_struct = pvPortMalloc(sizeof(qspi_flash_driver_t));
 
-        soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, (uint16_t) rx_len);
-    }
+    driver_struct->dma_sem = xSemaphoreCreateCounting(2, 0);
+    driver_struct->lock = xSemaphoreCreateMutex();
+    driver_struct->dev = device;
 
-    soc_dma_ring_tx_buf_set(tx_ring_buf, tx_buf, (uint16_t) tx_len);
+    soc_peripheral_common_dma_init(
+            device,
+            1,
+            0,
+            3, /* Up to 3 TX buffers may be sent for a single transaction */
+			driver_struct,
+            isr_core,
+            (rtos_irq_isr_t) qspi_flash_isr);
 
-    /* this request will take care of both the RX and TX */
-    soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
+    return device;
 }
-
-void spi_master_device_init(
-        soc_peripheral_t dev,
-        unsigned cpol,
-        unsigned cpha,
-        unsigned clock_divide,
-        unsigned cs_to_data_delay_ns,
-        unsigned byte_setup_ns,
-        unsigned data_to_cs_delay_ns)
-{
-    chanend c_ctrl = soc_peripheral_ctrl_chanend(dev);
-
-    soc_peripheral_function_code_tx(c_ctrl, SPI_MASTER_DEV_INIT);
-
-    soc_peripheral_varlist_tx(
-            c_ctrl, 6,
-            sizeof(unsigned), &cpol,
-            sizeof(unsigned), &cpha,
-            sizeof(unsigned), &clock_divide,
-            sizeof(unsigned), &cs_to_data_delay_ns,
-            sizeof(unsigned), &byte_setup_ns,
-            sizeof(unsigned), &data_to_cs_delay_ns);
-}
-
-void spi_transaction(
-        soc_peripheral_t dev,
-        uint8_t *rx_buf,
-        size_t rx_len,
-        uint8_t *tx_buf,
-        size_t tx_len)
-{
-    SemaphoreHandle_t sem = (SemaphoreHandle_t) soc_peripheral_app_data(dev);
-
-    if (tx_buf == NULL) {
-        tx_len = 0;
-    }
-
-    if (rx_buf == NULL) {
-        rx_len = 0;
-    }
-
-    spi_driver_transaction(dev,
-                           rx_buf, rx_len,
-                           tx_buf, tx_len);
-
-    /* TODO: check return value */
-    xSemaphoreTake(sem, portMAX_DELAY);
-
-    if (rx_buf > 0) {
-        /* TODO: check return value */
-        xSemaphoreTake(sem, portMAX_DELAY);
-    }
-}
-#endif

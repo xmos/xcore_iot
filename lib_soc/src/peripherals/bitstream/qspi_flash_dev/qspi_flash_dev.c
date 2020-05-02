@@ -1,5 +1,7 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
+#define DEBUG_UNIT QSPI_FLASH_DEV
+
 #include <xcore/triggerable.h>
 #include <xcore/chanend.h>
 #include <xmos_flash.h>
@@ -24,9 +26,6 @@
 #define SECTOR_TO_BYTE_ADDRESS(s, ss) SECTORS_TO_BYTES(s, ss)
 #define BYTE_TO_SECTOR_ADDRESS(b, ss) ((b) / (ss))
 
-
-#define DEFAULT_PAGE_COUNT 16384
-
 #define ERASE_SIZE_4K  4096
 #define ERASE_SIZE_16K 16384
 #define ERASE_SIZE_32K 32768
@@ -34,13 +33,8 @@ static const int erase_sizes[] = {ERASE_SIZE_4K, ERASE_SIZE_16K, ERASE_SIZE_32K}
 
 static const int page_size = 256;
 
-/*
- * TODO: need to be able to set page count via the driver.
- * which should update flash_size_bytes and flash_size_words
- */
-static int page_count = DEFAULT_PAGE_COUNT;
-static int flash_size_bytes = 256 * DEFAULT_PAGE_COUNT;
-static int flash_size_words = BYTES_TO_WORDS(256 * DEFAULT_PAGE_COUNT);
+static int flash_size_bytes;
+static int flash_size_words;
 
 
 static int is_busy(const flash_handle_t *flash_handle)
@@ -105,6 +99,8 @@ static uint8_t *op_read(
 	int word_count;
 	int front_pad_len;
 
+	rtos_printf("Asked to read %d bytes at address 0x%08x\n", buf->cmd.byte_count, buf->cmd.byte_address);
+
 	word_address = BYTE_TO_WORD_ADDRESS(buf->cmd.byte_address);
 	front_pad_len = buf->cmd.byte_address - WORD_TO_BYTE_ADDRESS(word_address);
 	word_count = BYTES_TO_WORDS(front_pad_len + buf->cmd.byte_count);
@@ -119,7 +115,7 @@ static uint8_t *op_read(
 		memset(&buf->word_buf[word_count], 0xFF, original_word_count - word_count);
 	}
 
-	rtos_printf("Read %u words from flash at address 0x%x\n", word_count, word_address);
+	rtos_printf("Read %d words from flash at address 0x%x\n", word_count, word_address);
 	flash_read_quad(flash_handle, word_address, buf->word_buf, word_count);
 
 	return &buf->byte_buf[front_pad_len];
@@ -170,6 +166,8 @@ static void op_write(
 	int address_to_write = buf->cmd.byte_address;
 	uint8_t *write_buf = buf->byte_buf;
 
+	rtos_printf("Asked to write %d bytes at address 0x%08x\n", bytes_left_to_write, address_to_write);
+
 	while (bytes_left_to_write > 0) {
 		/* compute the maximum number of bytes that can be written to the current page. */
 		int max_bytes_to_write = page_size - address_to_write % page_size;
@@ -179,6 +177,7 @@ static void op_write(
 			break; /* do not write past the end of the flash */
 		}
 
+		rtos_printf("Write %d bytes from flash at address 0x%x\n", bytes_to_write, address_to_write);
 		flash_write_enable(flash_handle);
 		flash_write_page(flash_handle, address_to_write, write_buf, bytes_to_write);
 		wait_while_busy(flash_handle);
@@ -196,7 +195,7 @@ static void op_erase(
 	int bytes_left_to_erase = buf->cmd.byte_count;
 	int address_to_erase = buf->cmd.byte_address;
 
-	rtos_printf("Asked to erase %u bytes at address 0x%08x\n", bytes_left_to_erase, address_to_erase);
+	rtos_printf("Asked to erase %d bytes at address 0x%08x\n", bytes_left_to_erase, address_to_erase);
 
 	if (address_to_erase == 0 && bytes_left_to_erase >= flash_size_bytes) {
 		/* Use chip erase when being asked to erase the entire address range */
@@ -223,6 +222,10 @@ static void op_erase(
 			int erase_length = erase_sizes[0];
 			int sector_address;
 
+			if (address_to_erase >= flash_size_bytes) {
+				break; /* do not erase past the end of the flash */
+			}
+
 			for (int i = 2; i > 0; i--) {
 				int sector_size = erase_sizes[i];
 				if (SECTOR_TO_BYTE_ADDRESS(BYTE_TO_SECTOR_ADDRESS(address_to_erase, sector_size), sector_size) == address_to_erase) {
@@ -238,20 +241,20 @@ static void op_erase(
 			sector_address = BYTE_TO_SECTOR_ADDRESS(address_to_erase, erase_length);
 			xassert(address_to_erase == SECTOR_TO_BYTE_ADDRESS(sector_address, erase_length));
 
-			rtos_printf("Erasing %d bytes (%d) at byte address %u (sector address %u)\n", erase_length, bytes_left_to_erase, address_to_erase, sector_address);
+			rtos_printf("Erasing %d bytes (%d) at byte address %d (sector address %d)\n", erase_length, bytes_left_to_erase, address_to_erase, sector_address);
 
 			flash_write_enable(flash_handle);
 			switch (erase_length) {
 			case ERASE_SIZE_4K:
-				flash_erase_sector(flash_handle, sector_address);
+				flash_erase_sector(flash_handle, address_to_erase);
 				break;
 
 			case ERASE_SIZE_16K:
-				flash_erase_block_32KB(flash_handle, sector_address);
+				flash_erase_block_32KB(flash_handle, address_to_erase);
 				break;
 
 			case ERASE_SIZE_32K:
-				flash_erase_block_64KB(flash_handle, sector_address);
+				flash_erase_block_64KB(flash_handle, address_to_erase);
 				break;
 
 			default:
@@ -313,6 +316,7 @@ void qspi_flash_dev(
 		chanend data_to_dma_c,
         chanend data_from_dma_c,
 		chanend ctrl_c,
+		int page_count,
 		const flash_ports_t        *flash_ports,
 		const flash_clock_config_t *flash_clock_config,
 		const flash_qe_config_t    *flash_qe_config)
@@ -323,18 +327,21 @@ void qspi_flash_dev(
     recv_buf_t buf;
     int len;
 
+    flash_size_bytes = page_size * page_count;
+    flash_size_words = BYTES_TO_WORDS(flash_size_bytes);
+
     flash_connect(&flash_handle, flash_ports, *flash_clock_config, *flash_qe_config);
 
     /*
      * Ensure that the quad spi flash is in quad mode
      */
     if (!is_quad_mode_enabled(&flash_handle, flash_qe_config)) {
-        debug_printf("quad mode not enabled!\n");
+        rtos_printf("quad mode not enabled!\n");
         enable_quad_mode(&flash_handle, flash_qe_config);
         xassert(is_quad_mode_enabled(&flash_handle, flash_qe_config));
-        debug_printf("quad mode enabled!\n");
+        rtos_printf("quad mode enabled!\n");
     } else {
-        debug_printf("quad mode already enabled!\n");
+        rtos_printf("quad mode already enabled!\n");
     }
 
     triggerable_disable_all();

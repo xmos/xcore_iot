@@ -21,6 +21,7 @@ void qspi_flash_dev(
 		chanend data_to_dma_c,
         chanend data_from_dma_c,
 		chanend ctrl_c,
+		int page_count,
 		const flash_ports_t        *flash_ports,
 		const flash_clock_config_t *flash_clock_config,
 		const flash_qe_config_t    *flash_qe_config);
