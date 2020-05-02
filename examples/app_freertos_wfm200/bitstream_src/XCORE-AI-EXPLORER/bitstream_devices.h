@@ -40,7 +40,5 @@ enum {
 };
 extern soc_peripheral_t bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_COUNT];
 
-#include <xmos_flash.h>
-extern flash_handle_t flash_handle;
 
 #endif /* BITSTREAM_DEVICES_H_ */

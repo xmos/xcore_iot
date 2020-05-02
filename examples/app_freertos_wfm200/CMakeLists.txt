@@ -24,8 +24,6 @@ set(APP_COMPILER_FLAGS
         "-report"
         "-fxscope"
         "-Wxcore-fptrgroup"
-       #"-lquadflash"
-        "-lquadspi"
         "-DDEBUG_PRINT_ENABLE=1"
         "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_ERROR"
         "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"

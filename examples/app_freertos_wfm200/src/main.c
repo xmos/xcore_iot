@@ -47,6 +47,19 @@ static char *security_name(WIFISecurity_t s)
     }
 }
 
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
+{
+	qspi_flash_read(
+			bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+	        data,
+			0x100000 + index,
+	        size);
+
+	return SL_STATUS_OK;
+}
+#endif
+
 static void wf200_test(void *arg)
 {
     WIFIReturnCode_t ret;
@@ -54,31 +67,6 @@ static void wf200_test(void *arg)
     WIFINetworkParams_t pxNetworkParams;
 
     rtos_printf("Hello from wf200 test\n ");
-
-    qspi_flash_erase(
-    		bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
-    		5000,
-			109693);
-
-    uint8_t flash_buf[16];
-    qspi_flash_write(
-    		bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
-            "hello, world!\n",
-    		0x100003,
-            15);
-
-    qspi_flash_read(
-    		bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
-			flash_buf,
-    		0x100004,
-            4);
-
-    for (int i = 0; i < 4; i++) {
-    	rtos_printf("%02x ", flash_buf[i]);
-    }
-    rtos_printf("\n");
-
-    vTaskDelete(NULL);
 
     ret = WIFI_On();
 
@@ -201,9 +189,11 @@ void soc_tile0_main(
             NULL,
             0);
 
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
     dev = qspi_flash_driver_init(
             BITSTREAM_QSPI_FLASH_DEVICE_A,
             0);
+#endif
 
     xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
 
