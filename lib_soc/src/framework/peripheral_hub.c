@@ -272,7 +272,7 @@ void soc_peripheral_hub_dma_request(
         soc_dma_request_t request)
 {
     if (request == SOC_DMA_TX_REQUEST) {
-        if (device->tx_c != 0) {
+        if (rtos_irq_ready() && device->tx_c != 0) {
             /*
              * If the tx_c channel is not NULL, then this
              * peripheral's DMA is performed by the peripheral
@@ -291,7 +291,7 @@ void soc_peripheral_hub_dma_request(
             soc_peripheral_function_code_tx(device->control_c, SOC_PERIPHERAL_DMA_TX);
         }
     } else if (request == SOC_DMA_RX_REQUEST) {
-        if (device->rx_c != 0) {
+        if (rtos_irq_ready() && device->rx_c != 0) {
             /*
              * If the rx_c channel is not NULL, then this
              * peripheral's DMA is performed by the peripheral
