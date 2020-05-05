@@ -139,7 +139,7 @@ void tile0_device_instantiate(
     chan t0_gpio_dev_ctrl_ch;
     chan spi_dev_ctrl_ch;
 
-    micarray_dev_init(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics);
+    micarray_dev_init(pdmclk, NULL, p_mclk, p_pdm_clk, p_pdm_mics);
 
     par {
         unsafe {

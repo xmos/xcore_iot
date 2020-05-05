@@ -135,7 +135,7 @@ void tile0_device_instantiate(
         chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend spi_master_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
-    micarray_dev_init(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics);
+    micarray_dev_init(pdmclk, NULL, p_mclk, p_pdm_clk, p_pdm_mics);
 
     par {
         micarray_dev(

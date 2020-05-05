@@ -131,6 +131,17 @@ flash_ports_t        flash_ports        = FLASH_PORTS;
 flash_clock_config_t flash_clock_config = FLASH_CLOCK_CONFIG;
 flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_0, flash_qe_bit_6}; 
 
+static void test()
+{
+  timer tmr;
+  unsigned int t;
+while(1)
+{
+    tmr :> t;
+    tmr when timerafter(t+100) :> t;
+}
+}
+
 static unsigned is_busy(flash_handle_t * flash_handle)
 {
   unsigned char status;
@@ -194,6 +205,7 @@ void tile0_device_instantiate(
     chan spi_dev_ctrl_ch;
 
     par {
+test();
         unsafe {
             unsafe chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
             unsafe chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t0_gpio_dev_ctrl_ch, null};
@@ -222,16 +234,16 @@ void tile0_device_instantiate(
             device_register(t0_gpio_dev_ch, spi_dev_ch);
             soc_peripheral_hub();
         }
-
         {
             while (soc_tile0_bitstream_initialized() == 0);
             par {
+/*
                 gpio_dev(
                         bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A],
                         null,
                         null,
                         t0_gpio_dev_ctrl_ch,
-                        null);
+                        null);*/
 
                 spi_master_dev(
                         bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A],
@@ -257,7 +269,7 @@ void tile1_device_instantiate(
     i2c_master_if i_i2c[1];
     p_rst_shared <: 0xF;
 
-    micarray_dev_init(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics);
+    micarray_dev_init(pdmclk, NULL, p_mclk, p_pdm_clk, p_pdm_mics);
 
     par {
         micarray_dev(
