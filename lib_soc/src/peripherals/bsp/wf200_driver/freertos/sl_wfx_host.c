@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <xmos_flash.h>
-//#include "quadflashlib.h"
+
+#include "quadflashlib.h"
 
 #include "sl_wfx.h"
 #include "sl_wfx_wf200_C0.h"
@@ -69,22 +69,16 @@ uint32_t sl_wfx_app_fw_size(void)
 __attribute__((weak))
 sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
 {
-	extern flash_handle_t flash_handle;
-
-	//int ret;
+	int ret;
     taskENTER_CRITICAL();
-    //ret = fl_readData(index, size, data);
-	/* TODO:  - Fix hardcoded data partition address.
-	 *        - Move flash access to a flash device.
-	 */
-    flash_read_quad(&flash_handle, 0x100000/4 + index/4, (unsigned *) data, size/4);
+    ret = fl_readData(index, size, data);
     taskEXIT_CRITICAL();
 
-    //if (ret == 0) {
+    if (ret == 0) {
     	return SL_STATUS_OK;
-    //} else {
-    //	return SL_STATUS_FAIL;
-    //}
+    } else {
+    	return SL_STATUS_FAIL;
+    }
 }
 
 /**** WF200 Driver Required Host Functions Start ****/

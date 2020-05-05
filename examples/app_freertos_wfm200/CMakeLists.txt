@@ -24,8 +24,6 @@ set(APP_COMPILER_FLAGS
         "-report"
         "-fxscope"
         "-Wxcore-fptrgroup"
-       #"-lquadflash"
-        "-lquadspi"
         "-DDEBUG_PRINT_ENABLE=1"
         "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_ERROR"
         "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
@@ -61,6 +59,7 @@ set(LIB_SOC_WFM200 ${BSP_ONLY})
 set(LIB_SOC_MICARRAY ${FULL})
 set(LIB_SOC_I2S ${FULL})
 set(LIB_SOC_I2C ${FULL})
+set(LIB_SOC_QSPI_FLASH ${FULL})
 
 ## Register the application
 XMOS_REGISTER_APP()

@@ -21,6 +21,7 @@
 #include "bitstream_devices.h"
 #include "spi_master_driver.h"
 #include "gpio_driver.h"
+#include "qspi_flash_driver.h"
 #include "sl_wfx.h"
 
 /* App headers */
@@ -45,6 +46,19 @@ static char *security_name(WIFISecurity_t s)
         return "Unsupported";
     }
 }
+
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
+{
+	qspi_flash_read(
+			bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+	        data,
+			0x100000 + index,
+	        size);
+
+	return SL_STATUS_OK;
+}
+#endif
 
 static void wf200_test(void *arg)
 {
@@ -174,6 +188,12 @@ void soc_tile0_main(
             BITSTREAM_GPIO_DEVICE_A,
             NULL,
             0);
+
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+    dev = qspi_flash_driver_init(
+            BITSTREAM_QSPI_FLASH_DEVICE_A,
+            0);
+#endif
 
     xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
 

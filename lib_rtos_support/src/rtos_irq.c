@@ -48,8 +48,6 @@ typedef struct {
 
 static isr_info_t isr_info[MAX_ADDITIONAL_SOURCES];
 
-static volatile int peri_irq_count = 0;
-
 DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
 {
     int core_id;
@@ -60,8 +58,6 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
     xassert( irq_pending[ core_id ] );
 
     chanend_check_end_token( rtos_irq_chanend[ core_id ] );
-
-    peri_irq_count -= 1;
 
     /* just ensure the channel read is done before clearing the pending flags. */
     RTOS_MEMORY_BARRIER();
@@ -164,7 +160,6 @@ void rtos_irq_peripheral( chanend_t dest_chanend )
     uint32_t mask = rtos_interrupt_mask_all();
     core_id = rtos_core_id_get();
     chanend_set_dest( rtos_irq_chanend[ core_id ], dest_chanend );
-    peri_irq_count += 1;
     chanend_out_end_token( rtos_irq_chanend[ core_id ] );
     rtos_interrupt_mask_set(mask);
 }

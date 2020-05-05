@@ -50,11 +50,11 @@ static void intertile_isr( soc_peripheral_t device )
         int more;
 
         tx_ring_buf = soc_peripheral_tx_dma_ring_buf(device);
-        do
+        while( ( bytes_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &bytes_buf_len, &more) ) != NULL )
         {
-            bytes_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &bytes_buf_len, NULL);
-            opt_ftr = soc_dma_ring_tx_buf_get(tx_ring_buf, &opt_ftr_len, NULL);
-            ftr_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &ftr_buf_len, &more);
+            xassert(more);
+            opt_ftr = soc_dma_ring_tx_buf_get(tx_ring_buf, &opt_ftr_len, &more); xassert(more);
+            ftr_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &ftr_buf_len, &more); xassert(!more);
 
             uint32_t cb_id = ftr_buf[0];
             intertile_isr_callback_t mapped_cb;
@@ -66,7 +66,7 @@ static void intertile_isr( soc_peripheral_t device )
                     xYieldRequired = pdTRUE;
                 }
             }
-        } while( more );
+        }
     }
 
     if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM)
