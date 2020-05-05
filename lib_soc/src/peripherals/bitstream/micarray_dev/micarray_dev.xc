@@ -133,16 +133,54 @@ void micarray_dev_to_dma(
     }
 }
 
+
+void mic_array_setup_sdr(clock pdmclk,
+		in port p_mclk,
+		out port p_pdm_clk,
+		buffered in port:32 p_pdm_mics,
+		int divide)
+{
+	configure_clock_src_divide(pdmclk, p_mclk, divide/2);
+	configure_port_clock_output(p_pdm_clk, pdmclk);
+	configure_in_port(p_pdm_mics, pdmclk);
+	start_clock(pdmclk);
+}
+
+void mic_array_setup_ddr(clock pdmclk,
+		clock pdmclk6,
+		in port p_mclk,
+		out port p_pdm_clk,
+		buffered in port:32 p_pdm_mics,
+		int divide)
+{
+	configure_clock_src_divide(pdmclk, p_mclk, divide/2);
+	configure_clock_src_divide(pdmclk6, p_mclk, divide/4);
+	configure_port_clock_output(p_pdm_clk, pdmclk);
+	configure_in_port(p_pdm_mics, pdmclk6);
+
+	/* start the faster capture clock */
+	start_clock(pdmclk6);
+	/* wait for a rising edge on the capture clock */
+	partin(p_pdm_mics, 4);
+	/* start the slower output clock */
+	start_clock(pdmclk);
+}
+
 void micarray_dev_init(
         clock pdmclk,
+        clock ?pdmclk2,
         in port p_mclk,
         out port p_pdm_clk,
         buffered in port:32 p_pdm_mics)
 {
-    configure_clock_src_divide(pdmclk, p_mclk, MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER/2);
-    configure_port_clock_output(p_pdm_clk, pdmclk);
-    configure_in_port(p_pdm_mics, pdmclk);
-    start_clock(pdmclk);
+	if(isnull(pdmclk2))
+	{
+		mic_array_setup_sdr(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics, MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER);
+	}
+	else
+	{
+		mic_array_setup_ddr(pdmclk, pdmclk2, p_mclk, p_pdm_clk, p_pdm_mics, MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER);
+	}
 }
 
 void micarray_dev_task(

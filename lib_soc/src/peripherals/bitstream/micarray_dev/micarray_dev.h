@@ -17,6 +17,7 @@
 
 void micarray_dev_init(
         clock pdmclk,
+        clock ?pdmclk2,
         in port p_mclk,
         out port p_pdm_clk,
         buffered in port:32 p_pdm_mics);
