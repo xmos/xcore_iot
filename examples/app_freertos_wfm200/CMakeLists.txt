@@ -19,7 +19,6 @@ enable_language(C ASM)
 ## Set XMOS application variables
 set(APP_COMPILER_FLAGS
         "-Os"
-        "-D__XS2A__=1" # Hack to get some libs to work with XS3
         "-g"
         "-report"
         "-fxscope"

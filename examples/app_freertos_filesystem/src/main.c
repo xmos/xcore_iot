@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+#define USE_FREERTOS_PLUS_FAT 0
+#define USE_FATFS 1
+
 #define clock libc_clock
 #include <time.h>
 #undef clock
@@ -15,17 +18,15 @@
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 
-#include "ff_headers.h"
-#include "ff_stdio.h"
-
 /* Library headers */
 #include "soc.h"
-#include <quadflashlib.h>
+//#include <quadflashlib.h>
 
 /* BSP/bitstream headers */
 #include "bitstream_devices.h"
 #include "spi_master_driver.h"
 #include "gpio_driver.h"
+#include "qspi_flash_driver.h"
 #include "sl_wfx.h"
 
 /* App headers */
@@ -34,21 +35,29 @@
 #include "dhcpd.h"
 
 /* FreeRTOS+FAT includes. */
+#if USE_FREERTOS_PLUS_FAT
 #include "ff_headers.h"
 #include "ff_stdio.h"
 #include "ff_flashdisk.h"
+#elif USE_FATFS
+#include "ff.h"
+#endif
 
-#include "FreeRTOS_TCP_server.h"
+//#include "FreeRTOS_TCP_server.h"
 
+#define WF200_TASK_STACK_SIZE  1000//800
+#define FTP_TASK_STACK_SIZE    500
+#define TFTPD_TASK_STACK_SIZE  1000//100
+#define FAT_TEST_STACK_SIZE    700
 
-#define FTP_DEMO 1
+#define FTP_DEMO 0
 
-extern void vCreateAndVerifyExampleFiles( const char *pcMountPath );
-extern void vStdioWithCWDTest( const char *pcMountPath );
-extern void vStartTFTPServerTask(unsigned short, unsigned long);
-extern TCPServer_t *FreeRTOS_CreateTCPServer( const struct xSERVER_CONFIG *pxConfigs, BaseType_t xCount );
+//extern void vCreateAndVerifyExampleFiles( const char *pcMountPath );
+//extern void vStdioWithCWDTest( const char *pcMountPath );
+//extern void vStartTFTPServerTask(unsigned short, unsigned long);
+//extern TCPServer_t *FreeRTOS_CreateTCPServer( const struct xSERVER_CONFIG *pxConfigs, BaseType_t xCount );
 
-#define mainFLASH_DISK_SECTOR_SIZE    512UL /* Currently fixed! */
+#define mainFLASH_DISK_SECTOR_SIZE    4096UL /* Currently fixed! */
 #define mainFLASH_DISK_SECTORS        ( ( 1UL * 1024UL * 1024UL ) / mainFLASH_DISK_SECTOR_SIZE )
 #define mainFLASH_DISK_IO_MANAGER_CACHE_SIZE   ( 2UL * mainFLASH_DISK_SECTOR_SIZE )
 #define mainFLASH_DISK_NAME           "/flash"
@@ -61,6 +70,7 @@ static void indent(int level)
 	}
 }
 
+#if USE_FREERTOS_PLUS_FAT && 0
 static void ls_recursive( const char *pcDirectoryToScan, int level)
 {
 	FF_FindData_t *pxFindStruct;
@@ -125,8 +135,9 @@ static void ls_recursive( const char *pcDirectoryToScan, int level)
     /* Free the allocated FF_FindData_t structure. */
     vPortFree( pxFindStruct );
 }
+#endif
 
-
+#if USE_FREERTOS_PLUS_FAT
 static FF_FILE *wf200_fw_file;
 static uint32_t wf200_fw_size;
 
@@ -143,6 +154,7 @@ uint32_t sl_wfx_app_fw_size(void)
 		wf200_fw_size = 0;
 	}
 
+	rtos_printf("wf200 fw size is %d\n", wf200_fw_size);
 	return wf200_fw_size;
 }
 
@@ -166,9 +178,58 @@ sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
 	if (items_read == 1) {
 		return SL_STATUS_OK;
 	} else {
+		rtos_printf("items_read: %d\n", items_read);
 		return SL_STATUS_FAIL;
 	}
 }
+#elif USE_FATFS
+static FIL wf200_fw_file;
+static uint32_t wf200_fw_size;
+
+uint32_t sl_wfx_app_fw_size(void)
+{
+	FRESULT result;
+
+	if (wf200_fw_file.obj.fs == NULL) {
+		rtos_printf("Opening WF200 firmware file\n");
+		result = f_open(&wf200_fw_file, "/flash/firmware/wf200.sec", FA_READ);
+	}
+
+	if (result == FR_OK) {
+		wf200_fw_size = f_size(&wf200_fw_file);
+	} else {
+		wf200_fw_size = 0;
+	}
+
+	rtos_printf("wf200 fw size is %d\n", wf200_fw_size);
+	return wf200_fw_size;
+}
+
+sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
+{
+	FRESULT result;
+	uint32_t bytes_read = 0;
+
+	if (wf200_fw_file.obj.fs != NULL) {
+		result = f_read(&wf200_fw_file, data, size, &bytes_read);
+	}
+
+	if (bytes_read == 0 || index + size >= wf200_fw_size) {
+		if (wf200_fw_file.obj.fs != NULL) {
+			f_close(&wf200_fw_file);
+			wf200_fw_size = 0;
+			rtos_printf("Closed WF200 firmware file\n");
+		}
+	}
+
+	if (bytes_read == size) {
+		return SL_STATUS_OK;
+	} else {
+		rtos_printf("items_read: %d\n", bytes_read);
+		return SL_STATUS_FAIL;
+	}
+}
+#endif
 
 static char *security_name(WIFISecurity_t s)
 {
@@ -187,7 +248,7 @@ static char *security_name(WIFISecurity_t s)
         return "Unsupported";
     }
 }
-
+#if 0
 static void ftp_test(void *arg)
 {
 	TCPServer_t *pxTCPServer = NULL;
@@ -199,13 +260,14 @@ static void ftp_test(void *arg)
 	pxTCPServer = FreeRTOS_CreateTCPServer( xServerConfiguration, sizeof( xServerConfiguration ) / sizeof( xServerConfiguration[ 0 ] ) );
 	configASSERT( pxTCPServer );
 
-	vStartTFTPServerTask( 100, 15 );
+	vStartTFTPServerTask( TFTPD_TASK_STACK_SIZE, 15 );
 
 	for( ;; )
 	{
 		FreeRTOS_TCPServerWork( pxTCPServer, pdMS_TO_TICKS(100) );
 	}
 }
+#endif
 
 static void wf200_test(void *arg)
 {
@@ -254,9 +316,9 @@ static void wf200_test(void *arg)
     	rtos_printf("WIFI_Scan() failed %d\n", ret);
     }
 
-	pxNetworkParams.pcSSID = "xxxxxxxxx";
+	pxNetworkParams.pcSSID = "24g.apodize.com";
 	pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-	pxNetworkParams.pcPassword = "xxxxxxxxx";
+	pxNetworkParams.pcPassword = "katie123";
 	pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
 	pxNetworkParams.xSecurity = eWiFiSecurityWPA;
 	pxNetworkParams.cChannel = 0;
@@ -275,7 +337,7 @@ static void wf200_test(void *arg)
 	rtos_printf("My IP is %s\n", a);
 
 #if FTP_DEMO
-    xTaskCreate(ftp_test, "ftp_test", 500, NULL, 15, NULL);
+    xTaskCreate(ftp_test, "ftp_test", FTP_TASK_STACK_SIZE, NULL, 15, NULL);
 #endif
 
 	WIFI_GetHostIP("google.com", (void *) &ip );
@@ -307,18 +369,23 @@ static void wf200_test(void *arg)
 
 static void prvCreateDiskAndExampleFiles( void* arg )
 {
+#if USE_FREERTOS_PLUS_FAT
 FF_Disk_t *pxDisk;
 
-	rtos_printf("Flash can hold %d bytes\n", fl_getFlashSize() );
+//	rtos_printf("Flash can hold %d bytes\n", fl_getFlashSize() );
 
     /* Create the Flash disk. */
-    pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, 0, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+	pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, 0x100000, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
+#else
+    pxDisk = FF_FlashDiskInit( mainFLASH_DISK_NAME, 0x000000, mainFLASH_DISK_SECTORS, mainFLASH_DISK_IO_MANAGER_CACHE_SIZE );
+#endif
     configASSERT( pxDisk );
 
     /* Start the wifi test task now that the filesystem has been mounted
      * since it will load the WF200 firmware from the filesystem */
-    xTaskCreate(wf200_test, "wf200_test", 800, NULL, 16, NULL);
-
+    xTaskCreate(wf200_test, "wf200_test", WF200_TASK_STACK_SIZE, NULL, 16, NULL);
+#if 0
     /* Print out information on the disk. */
     FF_FlashDiskShowPartition( pxDisk );
 
@@ -340,7 +407,18 @@ FF_Disk_t *pxDisk;
 
     rtos_printf("\n");
     ls_recursive("/flash", 0);
+#endif
+#elif USE_FATFS
 
+    FATFS *fs;
+    fs = pvPortMalloc(sizeof(FATFS));
+    f_mount(fs, "", 0);
+
+    /* Start the wifi test task now that the filesystem has been mounted
+     * since it will load the WF200 firmware from the filesystem */
+    xTaskCreate(wf200_test, "wf200_test", WF200_TASK_STACK_SIZE, NULL, 16, NULL);
+
+#endif
 
     for(;;)
     {
@@ -348,7 +426,9 @@ FF_Disk_t *pxDisk;
 		vTaskDelay(pdMS_TO_TICKS(5000));
 		free_stack_words = uxTaskGetStackHighWaterMark(NULL);
 		rtos_printf("prvCreateDiskAndExampleFiles free stack words: %d\n", free_stack_words);
-        FF_FlashDiskShowPartition( pxDisk );
+#if USE_FREERTOS_PLUS_FAT
+//        FF_FlashDiskShowPartition( pxDisk );
+#endif
     }
 }
 
@@ -357,7 +437,13 @@ void soc_tile0_main(
 {
     rtos_printf("Hello from tile %d\n", tile);
 
-	xTaskCreate(prvCreateDiskAndExampleFiles, "fs_test", 700, NULL, 15, NULL);
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+    qspi_flash_driver_init(
+            BITSTREAM_QSPI_FLASH_DEVICE_A,
+            0);
+#endif
+
+	xTaskCreate(prvCreateDiskAndExampleFiles, "fs_test", FAT_TEST_STACK_SIZE, NULL, 15, NULL);
 
     vTaskStartScheduler();
 }
