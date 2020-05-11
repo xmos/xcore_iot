@@ -2,7 +2,7 @@
 dd if=/dev/zero of=fat.fs bs=1024 count=1024
 
 # Create an empty FAT filesystem in it
-/sbin/mkfs.vfat -v -s8 -n xcore_filesystem fat.fs
+/sbin/mkfs.vfat -v -F12 -s1 -S4096 -n xcore_filesystem fat.fs
 
 mkdir -p fat_mnt
 

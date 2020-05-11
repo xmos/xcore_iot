@@ -705,7 +705,7 @@ WIFIReturnCode_t WIFI_Scan( WIFIScanResult_t *pxBuffer,
                                            NULL);
         if( sl_ret == SL_STATUS_OK )
         {
-            bits = xEventGroupWaitBits( sl_wfx_event_group, SL_WFX_SCAN_COMPLETE, pdTRUE, pdTRUE, pdMS_TO_TICKS( 1000 ) );
+            bits = xEventGroupWaitBits( sl_wfx_event_group, SL_WFX_SCAN_COMPLETE, pdTRUE, pdTRUE, pdMS_TO_TICKS( 10000 ) );
 
             if( ( bits & SL_WFX_SCAN_COMPLETE ) == 0 )
             {

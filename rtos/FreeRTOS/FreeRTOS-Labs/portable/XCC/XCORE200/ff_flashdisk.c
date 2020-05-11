@@ -24,6 +24,7 @@
  *
  */
 
+
 /* Standard includes. */
 #include <stdlib.h>
 #include <string.h>
@@ -42,25 +43,41 @@
 #include "ff_sys.h"
 
 /* XMOS includes */
+#include "soc.h"
+
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+/* BSP/bitstream headers */
+#include "bitstream_devices.h"
+#include "qspi_flash_driver.h"
+#else
 #include <quadflashlib.h>
+#endif
 
 #define flashHIDDEN_SECTOR_COUNT	8
 #define flashPRIMARY_PARTITIONS		1
 #define flashHUNDRED_64_BIT			100ULL
-#define flashDISKSECTOR_SIZE			512UL
+#define flashDISKSECTOR_SIZE			4096UL
 #define flashPARTITION_NUMBER		0 /* Only a single partition is used. */
 #define flashBYTES_PER_KB			( 1024ull )
-#define flashSECTORS_PER_KB			( flashBYTES_PER_KB / flashDISKSECTOR_SIZE )
+#define flashKB_PER_SECTOR			flashDISKSECTOR_SIZE / flashBYTES_PER_KB
 
 /* Used as a magic number to indicate that an FF_Disk_t structure is a Flash
 disk. */
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+#define flashSIGNATURE 0x89F0FA86
+#else
 extern fl_QuadDeviceSpec flash_specs[];
 #define flashSIGNATURE				flash_specs->idValue
+#endif
 
 static int32_t prvWriteFlash( uint8_t *pucBuffer, uint32_t ulSectorNumber, uint32_t ulSectorCount, FF_Disk_t *pxDisk );
 static int32_t prvReadFlash( uint8_t *pucBuffer, uint32_t ulSectorNumber, uint32_t ulSectorCount, FF_Disk_t *pxDisk );
 static FF_Error_t prvPartitionAndFormatDisk( FF_Disk_t *pxDisk );
 
+typedef struct {
+	soc_peripheral_t flash_dev;
+	int starting_index;
+} flash_tag_t;
 
 FF_Disk_t *FF_FlashDiskInit( char *pcName, uint32_t ulFlashStartingIndex, uint32_t ulSectorCount, size_t xIOManagerCacheSize )
 {
@@ -241,6 +258,14 @@ int32_t lReturn = FF_ERR_NONE;
 		else
 		{
             unsigned flash_disk_start = ( unsigned ) pxDisk->pvTag;
+
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+			qspi_flash_read(
+					bitstream_qspi_flash_devices[ BITSTREAM_QSPI_FLASH_DEVICE_A ],
+					pucDestination,
+					flash_disk_start + ( ulSectorNumber * flashDISKSECTOR_SIZE ),
+					ulSectorCount * flashDISKSECTOR_SIZE );
+#else
             vDisableInterrupts();
 			{
 				if( ( fl_readStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) + flash_disk_start ),
@@ -252,6 +277,7 @@ int32_t lReturn = FF_ERR_NONE;
 				}
 			}
 			vEnableInterrupts();
+#endif
 
 //			rtos_printf("Read sector:%d offset:%d size:%d data:%8s\n",
 //						( uint32_t ) ulSectorNumber,
@@ -299,9 +325,12 @@ int32_t lReturn = FF_ERR_NONE;
 		{
 			unsigned char* scratch = NULL;
 
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+			unsigned scratch_bytes = 0;
+#else
 			unsigned scratch_bytes = fl_getWriteScratchSize( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) ),
 			                                                 ( unsigned ) ( ulSectorCount * ( unsigned ) flashDISKSECTOR_SIZE ) );
-
+#endif
 			configASSERT( scratch_bytes != -1 );
 			if( scratch_bytes == -1 )
 			{
@@ -322,6 +351,18 @@ int32_t lReturn = FF_ERR_NONE;
 				if( lReturn == FF_ERR_NONE )
 				{
                     unsigned flash_disk_start = ( unsigned ) pxDisk->pvTag;
+
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+        			qspi_flash_erase(
+        					bitstream_qspi_flash_devices[ BITSTREAM_QSPI_FLASH_DEVICE_A ],
+							flash_disk_start + ( ulSectorNumber * flashDISKSECTOR_SIZE ),
+        					ulSectorCount * flashDISKSECTOR_SIZE );
+        			qspi_flash_write(
+        					bitstream_qspi_flash_devices[ BITSTREAM_QSPI_FLASH_DEVICE_A ],
+							pucSource,
+        					flash_disk_start + ( ulSectorNumber * flashDISKSECTOR_SIZE ),
+        					ulSectorCount * flashDISKSECTOR_SIZE );
+#else
                     vDisableInterrupts();
 					{
 						if( ( fl_writeStore( ( unsigned ) ( ( ulSectorNumber * flashDISKSECTOR_SIZE ) + flash_disk_start ),
@@ -334,6 +375,7 @@ int32_t lReturn = FF_ERR_NONE;
 						}
 					}
 					vEnableInterrupts();
+#endif
 
 					if( scratch != NULL )
 					{
@@ -436,8 +478,8 @@ BaseType_t xReturn = pdPASS;
 				( ( uint64_t )pxIOManager->xPartition.ulDataSectors ) );
 		}
 
-		ulTotalSizeKB = pxIOManager->xPartition.ulDataSectors / flashSECTORS_PER_KB;
-		ulFreeSizeKB = ( uint32_t ) ( ullFreeSectors / flashSECTORS_PER_KB );
+		ulTotalSizeKB = pxIOManager->xPartition.ulDataSectors * flashKB_PER_SECTOR;
+		ulFreeSizeKB = ( uint32_t ) ( ullFreeSectors * flashKB_PER_SECTOR );
 
 		/* It is better not to use the 64-bit format such as %Lu because it
 		might not be implemented. */

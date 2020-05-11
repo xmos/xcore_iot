@@ -13,11 +13,12 @@
 /* Peripherals */
 #define SOC_ETHERNET_PERIPHERAL_USED        (0)
 #define SOC_GPIO_PERIPHERAL_USED            (1)
-#define SOC_I2C_PERIPHERAL_USED             (1)
-#define SOC_I2S_PERIPHERAL_USED             (1)
-#define SOC_MICARRAY_PERIPHERAL_USED        (1)
+#define SOC_I2C_PERIPHERAL_USED             (0)
+#define SOC_I2S_PERIPHERAL_USED             (0)
+#define SOC_MICARRAY_PERIPHERAL_USED        (0)
 #define SOC_SDRAM_PERIPHERAL_USED           (0)
 #define SOC_SPI_PERIPHERAL_USED             (1)
+#define SOC_QSPI_FLASH_PERIPHERAL_USED      (1)
 
 /*
  * Peripheral Configuration
@@ -43,5 +44,8 @@
 #define MICARRAYCONF_SAMPLE_RATE                    (48000)
 #define MICARRAYCONF_MASTER_TO_PDM_CLOCK_DIVIDER    (8)
 #define MICARRAYCONF_MASTER_CLOCK_FREQUENCY         (24576000)
+
+/* QSPI Flash Config */
+#define QSPI_FLASH_DEV_WRITE_BUFSIZE  4096
 
 #endif /* SOC_CONF_H_ */
