@@ -88,21 +88,14 @@ void gpio_ctrl_t0(void *arg)
                             vVolumeDownCallback);
 
     /* Initialize LED outputs */
-    gpio_init(dev, gpio_8C);
-    gpio_init(dev, gpio_1K);
-    gpio_init(dev, gpio_1L);
-    gpio_init(dev, gpio_8D);
-    gpio_init(dev, gpio_1P);
+    gpio_init(dev, gpio_4C);
 
     /* Initialize button inputs */
-    gpio_init(dev, gpio_4A);
+    gpio_init(dev, gpio_4D);	// Buttons on 0 and 1
 
     /* Enable interrupts on buttons */
-    gpio_irq_setup_callback(dev, gpio_4A, gpio_dev_callback);
-    gpio_irq_enable(dev, gpio_4A);
-
-    /* Turn on center LED */
-    gpio_write_pin(dev, gpio_8D, 2, 0);
+    gpio_irq_setup_callback(dev, gpio_4D, gpio_dev_callback);
+    gpio_irq_enable(dev, gpio_4D);
 
     for (;;) {
         xTaskNotifyWait(
@@ -114,18 +107,12 @@ void gpio_ctrl_t0(void *arg)
         mabs_buttons = gpio_read( dev, status );
         buttonA = ( mabs_buttons >> 0 ) & 0x01;
         buttonB = ( mabs_buttons >> 1 ) & 0x01;
-        buttonC = ( mabs_buttons >> 2 ) & 0x01;
-        buttonD = ( mabs_buttons >> 3 ) & 0x01;
 
         /* Turn on LEDS based on buttons */
-        gpio_write_pin(dev, gpio_8C, 0, buttonA);
-        gpio_write_pin(dev, gpio_8C, 1, buttonA);
-        gpio_write_pin(dev, gpio_8C, 2, buttonB);
-        gpio_write_pin(dev, gpio_8C, 3, buttonB);
-        gpio_write_pin(dev, gpio_8C, 4, buttonC);
-        gpio_write_pin(dev, gpio_8C, 5, buttonC);
-        gpio_write_pin(dev, gpio_8C, 6, buttonD);
-        gpio_write_pin(dev, gpio_8C, 7, buttonD);
+        gpio_write_pin(dev, gpio_4C, 0, buttonA);
+        gpio_write_pin(dev, gpio_4C, 1, buttonA);
+        gpio_write_pin(dev, gpio_4C, 2, buttonB);
+        gpio_write_pin(dev, gpio_4C, 3, buttonB);
 
         /* Adjust volume based on LEDs */
         if( buttonA == 0 )   /* Up */
@@ -147,27 +134,6 @@ void gpio_ctrl_t0(void *arg)
         {
             xTimerStop( volume_down_timer, 0 );
         }
-
-        if( buttonC == 0 )   /* Mute */
-        {
-            gain = audiopipeline_get_stage1_gain();
-
-            if( gain == 0 )
-            {
-                audiopipeline_set_stage1_gain( saved_gain );
-                saved_gain = 0;
-            }
-            else
-            {
-                saved_gain = audiopipeline_get_stage1_gain();
-                audiopipeline_set_stage1_gain( 0 );
-            }
-        }
-
-        if( buttonD == 0 )   /* Default */
-        {
-            audiopipeline_set_stage1_gain( appconfAUDIO_PIPELINE_STAGE_ONE_GAIN );
-        }
     }
 }
 
@@ -183,8 +149,4 @@ void gpio_ctrl_create( UBaseType_t priority )
             0);                             /* This device's interrupts should happen on core 0 */
 
     xTaskCreate(gpio_ctrl_t0, "t0_gpio_ctrl", portTASK_STACK_DEPTH(gpio_ctrl_t0), dev, priority, &gpio_handler_task);
-
-//    dev = gpio_driver_init(BITSTREAM_GPIO_DEVICE_B);
-
-//    xTaskCreate(gpio_ctrl_t1, "t1_gpio_ctrl", portTASK_STACK_DEPTH(gpio_ctrl_t1), dev, priority, NULL);
 }

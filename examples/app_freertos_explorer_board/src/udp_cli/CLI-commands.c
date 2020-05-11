@@ -103,7 +103,7 @@ portCLI_CALLBACK_FUNCTION_PROTO(prvDisplayIPConfig, pcWriteBuffer, xWriteBufferL
 /*
  * Defines a command that sends an ICMP ping request to an IP address.
  */
-//static BaseType_t prvPingCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvPingCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the "trace start" and "trace stop" commands;

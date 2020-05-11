@@ -25,6 +25,8 @@ set(APP_COMPILER_FLAGS
         "-fxscope"
         "-Wxcore-fptrgroup"
         "-DDEBUG_PRINT_ENABLE=1"
+        "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_ERROR"
+        "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
 set(APP_XC_SRCS
         ""
@@ -34,13 +36,16 @@ set(APP_C_SRCS
         "src/audio_hw_config/audio_hw_config.c"
         "src/audio_pipeline/audio_pipeline.c"
         "src/gpio_ctrl/gpio_ctrl.c"
-        #"src/NetworkManager/network.c"
+        "src/NetworkManager/network.c"
         "src/queue_to_i2s/queue_to_i2s.c"
-        #"src/queue_to_tcp_stream/queue_to_tcp_stream.c"
-        #"src/thruput_test/thruput_test.c"
-        #"src/udp_cli/CLI-commands.c"
-        #"src/udp_cli/FreeRTOS_CLI.c"
-        #"src/udp_cli/UDPCommandServer.c"
+        "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
+        "src/thruput_test/thruput_test.c"
+        "src/udp_cli/CLI-commands.c"
+        "src/udp_cli/FreeRTOS_CLI.c"
+        "src/udp_cli/UDPCommandServer.c"
+        "src/dhcpd.c"
+        "src/afr_wifi/sl_wfx_callbacks.c"
+        "src/afr_wifi/sl_wfx_iot_wifi.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -50,15 +55,16 @@ set(APP_INCLUDES
         "src/audio_hw_config"
         "src/audio_pipeline"
         "src/gpio_ctrl"
-        #"src/NetworkManager"
+        "src/NetworkManager"
         "src/queue_to_i2s"
-        #"src/queue_to_tcp_stream"
-        #"src/thruput_test"
-        #"src/udp_cli"
+        "src/queue_to_tcp_stream"
+        "src/thruput_test"
+        "src/udp_cli"
+        "src/afr_wifi"
+        "src/afr_wifi/types"
     )
 set(APP_DEPENDENT_MODULES
-        "lib_soc(>=0.6.0)"
-        ##"FreeRTOS-Plus-TCP(>=10.2.1)"
+        "FreeRTOS-Plus-TCP(>=10.2.1)"
     )
 
 set(USE_FREERTOS_SMP True)
@@ -69,6 +75,8 @@ set(LIB_SOC_I2C ${FULL})
 set(LIB_SOC_I2S ${FULL})
 set(LIB_SOC_MICARRAY ${FULL})
 set(LIB_SOC_SPIMASTER ${FULL})
+set(LIB_SOC_QSPI_FLASH ${FULL})
+set(LIB_SOC_WFM200 ${BSP_ONLY})
 
 ## Register the application
 XMOS_REGISTER_APP()

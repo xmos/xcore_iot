@@ -17,7 +17,6 @@
 
 /* BSP/bitstream headers */
 #include "bitstream_devices.h"
-#include "ethernet_driver.h"
 
 /* App headers */
 #include "queue_to_tcp_stream.h"

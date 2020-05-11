@@ -11,6 +11,7 @@
 #include "i2s_dev.h"
 #include "gpio_dev.h"
 #include "spi_master_dev.h"
+#include "qspi_flash_dev.h"
 #endif //__XC__
 
 /*
@@ -20,7 +21,6 @@
  */
 void tile0_device_instantiate(
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]
 );
@@ -31,7 +31,6 @@ void tile0_device_instantiate(
  */
 void tile1_device_instantiate(
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]
 );
@@ -51,8 +50,9 @@ void device_register(
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]
-//        chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]
+        chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+		chanend qspi_flash_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT]
 		);
 
 #ifdef __XC__

@@ -1,10 +1,9 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
-//#include "FreeRTOS_IP.h"
 
 /* Library headers */
 #include <string.h>
@@ -21,7 +20,7 @@
 #include "audio_pipeline.h"
 #include "app_conf.h"
 #include "audio_hw_config.h"
-//#include "queue_to_tcp_stream.h"
+#include "queue_to_tcp_stream.h"
 
 static BaseType_t xStage1_Gain = appconfAUDIO_PIPELINE_STAGE_ONE_GAIN;
 
@@ -84,7 +83,7 @@ void mic_array_isr(soc_peripheral_t device)
 //        debug_printf("mic data rx %d bytes\n", length);
 
         if (xQueueSendFromISR(mic_data_queue, &rx_buf, &xYieldRequired) == errQUEUE_FULL) {
-//            debug_printf("mic data lost\n", length);
+            debug_printf("mic data lost\n", length);
             soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
             soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
         }
@@ -104,26 +103,28 @@ void audio_pipeline_stage1(void *arg)
         int32_t *mic_data;
         int32_t *new_rx_buffer;
         int32_t *mic_data_copy;
+
         xQueueReceive(mic_data_queue, &mic_data, portMAX_DELAY);
 
         new_rx_buffer = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
         soc_dma_ring_rx_buf_set(rx_ring_buf, new_rx_buffer, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
         soc_peripheral_hub_dma_request(mic_dev, SOC_DMA_RX_REQUEST);
 
+#if appconfPRINT_AUDIO_FRAME_POWER
         debug_printf("Mic power: %d\n", frame_power(mic_data));
+#endif
 
         for (int i = 0; i < appconfMIC_FRAME_LENGTH; i++) {
             mic_data[i] *= xStage1_Gain;
         }
 
-#if 0
         mic_data_copy = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
         memcpy(mic_data_copy, mic_data, appconfMIC_FRAME_LENGTH * sizeof(int32_t));
 
         if ( is_queue_to_tcp_connected() )
         {
             if (xQueueSend(stage1_out_queue0, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
-                //            debug_printf("stage 1 output lost\n");
+				debug_printf("stage 1 output lost\n");
                 vPortFree(mic_data);
             }
         }
@@ -132,16 +133,11 @@ void audio_pipeline_stage1(void *arg)
             vPortFree(mic_data);
         }
 
-        if (xQueueSend(stage1_out_queue1, &mic_data_copy, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
-//            debug_printf("dac output lost\n");
+        if (xQueueSend(stage1_out_queue1, &mic_data_copy, pdMS_TO_TICKS(1)) == errQUEUE_FULL)
+        {
+            debug_printf("dac output lost\n");
             vPortFree(mic_data_copy);
         }
-#else
-        if (xQueueSend(stage1_out_queue1, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
-            debug_printf("dac output lost\n");
-            vPortFree(mic_data);
-        }
-#endif
     }
 }
 

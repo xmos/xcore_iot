@@ -36,31 +36,32 @@
 #ifndef FREERTOS_IP_CONFIG_H
 #define FREERTOS_IP_CONFIG_H
 
-#define ipconfigUSE_ETHERNET 1
-#define ipconfigUSE_WIFI     0
+#define ipconfigUSE_ETHERNET 0
+#define ipconfigUSE_WIFI     1
 
 #if ipconfigUSE_WIFI
 #include "sl_wfx_iot_wifi.h"
+#include "sl_wfx_cmd_api.h"
 #endif
 
 /* User defined network parameters */
-#define IPconfig_IP_ADDR_OCTET_0    192
-#define IPconfig_IP_ADDR_OCTET_1    168
-#define IPconfig_IP_ADDR_OCTET_2      1
-#define IPconfig_IP_ADDR_OCTET_3     57
+#define IPconfig_IP_ADDR_OCTET_0    10
+#define IPconfig_IP_ADDR_OCTET_1    0
+#define IPconfig_IP_ADDR_OCTET_2    0
+#define IPconfig_IP_ADDR_OCTET_3    1
 //#define IPconfig_IP_ADDR_OCTET_0     10
 //#define IPconfig_IP_ADDR_OCTET_1    129
 //#define IPconfig_IP_ADDR_OCTET_2     20
 //#define IPconfig_IP_ADDR_OCTET_3     29
 
 #define IPconfig_NET_MASK_OCTET_0   255
-#define IPconfig_NET_MASK_OCTET_1   255
-#define IPconfig_NET_MASK_OCTET_2   255
+#define IPconfig_NET_MASK_OCTET_1     0
+#define IPconfig_NET_MASK_OCTET_2     0
 #define IPconfig_NET_MASK_OCTET_3     0
 
-#define IPconfig_GATEWAY_OCTET_0    192
-#define IPconfig_GATEWAY_OCTET_1    168
-#define IPconfig_GATEWAY_OCTET_2      1
+#define IPconfig_GATEWAY_OCTET_0     10
+#define IPconfig_GATEWAY_OCTET_1      0
+#define IPconfig_GATEWAY_OCTET_2      0
 #define IPconfig_GATEWAY_OCTET_3      1
 
 #define IPconfig_DNS_SERVER_OCTET_0   8
@@ -110,15 +111,16 @@ stack repeating the checksum calculations. */
 #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM   1
 
 #define ipconfigZERO_COPY_RX_DRIVER 1
-#define ipconfigZERO_COPY_TX_DRIVER 1
+#define ipconfigZERO_COPY_TX_DRIVER 0
 
+#define ipconfigSUPPORT_SIGNALS 1
 
 /* Several API's will block until the result is known, or the action has been
 performed, for example FreeRTOS_send() and FreeRTOS_recv().  The timeouts can be
 set per socket, using setsockopt().  If not set, the times below will be
 used as defaults. */
-#define ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME	( 5000 )
-#define	ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME	( 5000 )
+#define ipconfigSOCK_DEFAULT_RECEIVE_BLOCK_TIME ( portMAX_DELAY )
+#define ipconfigSOCK_DEFAULT_SEND_BLOCK_TIME    ( portMAX_DELAY )
 
 /* Include support for LLMNR: Link-local Multicast Name Resolution
 (non-Microsoft) */
@@ -298,7 +300,7 @@ generate replies to incoming ICMP echo (ping) requests. */
 
 /* If ipconfigSUPPORT_OUTGOING_PINGS is set to 1 then the
 FreeRTOS_SendPingRequest() API function is available. */
-#define ipconfigSUPPORT_OUTGOING_PINGS				0
+#define ipconfigSUPPORT_OUTGOING_PINGS				1
 
 /* If ipconfigSUPPORT_SELECT_FUNCTION is set to 1 then the FreeRTOS_select()
 (and associated) API function is available. */
@@ -323,11 +325,17 @@ filtering can be removed by using a value other than 1 or 0. */
 block occasionally to allow other tasks to run. */
 #define configWINDOWS_MAC_INTERRUPT_SIMULATOR_DELAY ( 20 / portTICK_PERIOD_MS )
 
-/* Advanced only: in order to access 32-bit fields in the IP packets with
-32-bit memory instructions, all packets will be stored 32-bit-aligned, plus 16-bits.
-This has to do with the contents of the IP-packets: all 32-bit fields are
-32-bit-aligned, plus 16-bit(!) */
-#define ipconfigPACKET_FILLER_SIZE 2
+
+#ifndef SL_WFX_USE_SECURE_LINK
+/* Allocate space before Ethernet frames to hold the WF200 send frame
+ * request header. This allows FreeRTOS+TCP network buffers to be sent
+ * directly to the WF200 driver without allocating a new buffer and copying
+ * the frame from the FreeRTOS+TCP network buffer into it.
+ *
+ * The + 2 is so that the 14 byte Ethernet frame starts 2 bytes after a 32-bit
+ * boundary so that the IP header can begin on one. */
+#define ipconfigPACKET_FILLER_SIZE ( sizeof(sl_wfx_send_frame_req_t) + 2 )
+#endif
 
 /* Define the size of the pool of TCP window descriptors.  On the average, each
 TCP socket will use up to 2 x 6 descriptors, meaning that it can have 2 x 6
