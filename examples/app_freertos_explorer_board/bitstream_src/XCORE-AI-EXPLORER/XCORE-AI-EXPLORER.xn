@@ -12,14 +12,14 @@
   <Packages>
     <Package id="0" Type="XS3-UnA-1024-FB265">
       <Nodes>
-        <Node Id="0" InPackageId="0" Type="XS3-L16A-1024" Oscillator="24MHz" SystemFrequency="700MHz" ReferenceFrequency="100MHz">
+        <Node Id="0" InPackageId="0" Type="XS3-L16A-1024" Oscillator="24MHz" SystemFrequency="800MHz" ReferenceFrequency="100MHz">
           <Boot>
             <Source Location="bootFlash"/>
           </Boot>
-          <Extmem sizeMbit="1024" Frequency="175MHz">
-            <Padctrl clk="0x0" cke="0x0" cs_n="0x0" we_n="0x0" cas_n="0x0" ras_n="0x0" addr="0x0" ba="0x0" dq="0x0" dqs="0x0" dm="0x0"/>
-            <Lpddr lmr_opcode="0x0" emr_opcode="0x0"/>
-          </Extmem>
+          <!--<Extmem sizeMbit="1024" Frequency="175MHz"> -->
+          <!--  <Padctrl clk="0x0" cke="0x0" cs_n="0x0" we_n="0x0" cas_n="0x0" ras_n="0x0" addr="0x0" ba="0x0" dq="0x0" dqs="0x0" dm="0x0"/> -->
+          <!--  <Lpddr lmr_opcode="0x0" emr_opcode="0x0"/> -->
+          <!--</Extmem> -->
           <Tile Number="0" Reference="tile[0]">
             <Port Location="XS1_PORT_1B" Name="PORT_SQI_CS"/>
             <Port Location="XS1_PORT_1C" Name="PORT_SQI_SCLK"/>
