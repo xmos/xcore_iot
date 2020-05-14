@@ -6,6 +6,7 @@
 #include "soc.h"
 
 /* BSP/bitstream headers */
+#include "bitstream_devices.h"
 #include "spi_master_driver.h"
 #include "gpio_driver.h"
 #include "sl_wfx.h"
@@ -14,6 +15,11 @@
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "semphr.h"
+
+/* FreeRTOS Plus TCP headers */
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_IP_Private.h"
+#include "NetworkBufferManagement.h"
 
 void sl_wfx_host_task_rx_notify(BaseType_t *xYieldRequired);
 void sl_wfx_host_task_stop(void);
@@ -36,16 +42,60 @@ static sl_wfx_host_hif_t hif_ctx;
 
 /**** XCORE Specific Functions Start ****/
 
-void sl_wfx_host_set_hif(soc_peripheral_t spi_dev,
-                         soc_peripheral_t gpio_dev,
+portTIMER_CALLBACK_ATTRIBUTE
+static void deferred_tx(uint8_t *tx_buf, uint32_t index)
+{
+	NetworkBufferDescriptor_t *nbuf;
+	uint8_t *ebuf;
+	static sl_wfx_register_address_t address;
+
+	sl_wfx_send_frame_req_t *send_frame_req = (sl_wfx_send_frame_req_t *) tx_buf;
+
+	if (index == 0) {
+		uint16_t header = sl_wfx_unpack_16bit_big_endian(tx_buf);
+		if ((header & 0x8000) == 0) {
+			address = header >> 12;
+		}
+
+		vPortFree(tx_buf);
+	} else if (index == 1 && address == SL_WFX_IN_OUT_QUEUE_REG_ID && send_frame_req->header.id == SL_WFX_SEND_FRAME_REQ_ID) {
+
+		ebuf = (uint8_t *) tx_buf + sizeof(sl_wfx_send_frame_req_t);
+		nbuf = pxPacketBuffer_to_NetworkBuffer(ebuf);
+
+		vReleaseNetworkBufferAndDescriptor(nbuf);
+	} else {
+		vPortFree(tx_buf);
+	}
+}
+
+static SPI_MASTER_ISR_CALLBACK_FUNCTION(spi_isr_cb, buf, len, buf_index, more, status, xYieldRequired)
+{
+	(void) len;
+	(void) more;
+
+	if (status & SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM) {
+		xTimerPendFunctionCallFromISR( (PendedFunction_t) deferred_tx, buf, buf_index, xYieldRequired );
+	}
+}
+
+void sl_wfx_host_set_hif(int spi_dev_id,
+		                 int gpio_dev_id,
                          gpio_id_t wirq_gpio_port, int wirq_bit,
                          gpio_id_t wup_gpio_port, int wup_bit,
                          gpio_id_t reset_gpio_port, int reset_bit)
 {
     configASSERT(!hif_ctx.initialized);
 
-    hif_ctx.spi_dev = spi_dev;
-    hif_ctx.gpio_dev = gpio_dev;
+    hif_ctx.spi_dev = spi_master_driver_init(
+    		spi_dev_id,
+			ipconfigZERO_COPY_TX_DRIVER ? 3*2 : 2,  /* Uses 2 DMA buffers per transaction for the scatter/gather */
+            0,                                      /* This device's interrupts should happen on core 0 */
+			ipconfigZERO_COPY_TX_DRIVER ? SPI_MASTER_FLAG_TX_NOBLOCK : 0,
+			ipconfigZERO_COPY_TX_DRIVER ? spi_isr_cb : NULL
+			);
+
+    hif_ctx.gpio_dev = bitstream_gpio_devices[gpio_dev_id];
     hif_ctx.wirq_gpio_port = wirq_gpio_port;
     hif_ctx.wirq_bit = wirq_bit;
     hif_ctx.wup_gpio_port = wup_gpio_port;
@@ -124,7 +174,8 @@ sl_status_t sl_wfx_host_init_bus(void)
 
         spi_master_device_init(hif_ctx.spi_dev,
                                0, 0, /* mode 0 */
-                               2,    /* 100 MHz / (2* 2 ) / 2 = 12.5 MHz */
+//                             1,    /* 100 MHz / (2 * 1) / 2 = 25 MHz */
+							   2,    /* 100 MHz / (2 * 2) / 2 = 12.5 MHz */
                                500,  /* really only needs to be 3ns but it is too quick */
                                0,    /* no inter-byte setup delay required */
                                0);   /* no last clock to cs delay required */
@@ -143,7 +194,6 @@ sl_status_t sl_wfx_host_init_bus(void)
 sl_status_t sl_wfx_host_enable_platform_interrupt(void)
 {
     if (hif_ctx.initialized) {
-        rtos_printf("enable irq\n");
         gpio_irq_enable(hif_ctx.gpio_dev, hif_ctx.wirq_gpio_port);
         return SL_STATUS_OK;
     } else {
@@ -194,71 +244,78 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
                                                   uint8_t *buffer,
                                                   uint16_t buffer_length)
 {
-    SemaphoreHandle_t sem;
-    chanend c;
-    soc_dma_ring_buf_t *tx_ring_buf;
+    void *tmp_buf;
+    uint8_t *rx_buf[2], *tx_buf[2];
+    size_t rx_len[2], tx_len[2];
+    size_t rx_buf_count = 0;
+    size_t tx_buf_count = 1; /* always send at least the header */
 
     if (!hif_ctx.initialized) {
         return SL_STATUS_NOT_INITIALIZED;
     }
 
-    sem = (SemaphoreHandle_t) soc_peripheral_app_data(hif_ctx.spi_dev);
-    c = soc_peripheral_ctrl_chanend(hif_ctx.spi_dev);
-    tx_ring_buf = soc_peripheral_tx_dma_ring_buf(hif_ctx.spi_dev);
-
     if (type & SL_WFX_BUS_READ) {
-        soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(hif_ctx.spi_dev);
-        size_t total_length = header_length + buffer_length;
-
-        soc_peripheral_function_code_tx(c, SPI_MASTER_DEV_TRANSACTION);
-
-        soc_peripheral_varlist_tx(
-                c, 1,
-                sizeof(size_t), &total_length);
-
-        soc_dma_ring_rx_buf_sg_set(
-                rx_ring_buf,
-                buffer,
-                buffer_length,
-                1,
-                2);
-
-        soc_dma_ring_rx_buf_sg_set(
-                rx_ring_buf,
-                header,
-                header_length,
-                0,
-                2);
+    	rx_buf_count = 2;
+    	rx_buf[0] = header; rx_len[0] = header_length;
+    	rx_buf[1] = buffer; rx_len[1] = buffer_length;
     }
+
+    /* Always send the header */
+    if (ipconfigZERO_COPY_TX_DRIVER) {
+    	/*
+    	 * In "zero copy" mode we actually have to
+    	 * copy the header into a new malloc'd buffer.
+    	 * The SPI transaction below will not block.
+    	 * Instead the deferred_tx ISR above will
+    	 * be called which will free it.
+    	 */
+		tmp_buf = pvPortMalloc(header_length);
+		memcpy(tmp_buf, header, header_length);
+		tx_buf[0] = tmp_buf;
+    } else {
+    	tx_buf[0] = header;
+    }
+    tx_len[0] = header_length;
 
     if (type & SL_WFX_BUS_WRITE) {
-        soc_dma_ring_tx_buf_sg_set(
-                tx_ring_buf,
-                buffer,
-                buffer_length,
-                1,
-                2);
 
-        soc_dma_ring_tx_buf_sg_set(
-                tx_ring_buf,
-                header,
-                header_length,
-                0,
-                2);
-    } else {
-        soc_dma_ring_tx_buf_set(tx_ring_buf, header, header_length);
+    	/* Also sending the buffer after the header */
+    	tx_buf_count++;
+
+    	if (ipconfigZERO_COPY_TX_DRIVER) {
+			void *tmp_buf;
+
+			sl_wfx_send_frame_req_t *send_frame_req = (sl_wfx_send_frame_req_t *) buffer;
+			sl_wfx_register_address_t address = sl_wfx_unpack_16bit_big_endian(header) >> 12;
+
+			if (address == SL_WFX_IN_OUT_QUEUE_REG_ID && send_frame_req->header.id == SL_WFX_SEND_FRAME_REQ_ID) {
+				/*
+				 * Ethernet frames buffers are handed directly over to device.
+				 * The deferred TX ISR above will free them when the DMA transaction
+				 * is complete.
+				 */
+				tmp_buf = buffer;
+			} else {
+				tmp_buf = pvPortMalloc(buffer_length);
+				memcpy(tmp_buf, buffer, buffer_length);
+			}
+
+			tx_buf[1] = tmp_buf;
+    	} else {
+			tx_buf[1] = buffer;
+    	}
+
+    	tx_len[1] = buffer_length;
     }
 
-    /* this request will take care of both the RX and TX */
-    soc_peripheral_hub_dma_request(hif_ctx.spi_dev, SOC_DMA_TX_REQUEST);
-
-    /* TODO: check return value */
-    xSemaphoreTake(sem, portMAX_DELAY);
-
-    if (type & SL_WFX_BUS_READ) {
-        /* TODO: check return value */
-        xSemaphoreTake(sem, portMAX_DELAY);
-    }
+    spi_transaction_sg(
+    		hif_ctx.spi_dev,
+			rx_buf,
+			rx_len,
+			rx_buf_count,
+			tx_buf,
+			tx_len,
+			tx_buf_count);
 
     return SL_STATUS_OK;
 }

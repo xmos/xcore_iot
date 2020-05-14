@@ -165,7 +165,7 @@ void tile1_device_instantiate(
 	chan t1_gpio_dev_ctrl_ch;
 
     p_rst_shared <: 0xF;
-    set_pll();
+    //set_pll();
 
     micarray_dev_init(pdmclk, NULL, p_mclk, p_pdm_clk, p_pdm_mics);
 

@@ -111,14 +111,14 @@ WIFIReturnCode_t WIFI_On( void )
     if( ret != eWiFiSuccess )
     {
 #if XCORE200_MAB
-        sl_wfx_host_set_hif( bitstream_spi_devices[ BITSTREAM_SPI_DEVICE_A ],
-                             bitstream_gpio_devices[ BITSTREAM_GPIO_DEVICE_A ],
+        sl_wfx_host_set_hif( BITSTREAM_SPI_DEVICE_A,
+                             BITSTREAM_GPIO_DEVICE_A,
                              gpio_1I, 0,  /* header pin 9 */
                              gpio_1P, 0,  /* header pin 10 */
                              gpio_1J, 0 ); /* header pin 12 */
 #elif XCOREAI_EXPLORER
-        sl_wfx_host_set_hif( bitstream_spi_devices[ BITSTREAM_SPI_DEVICE_A ],
-                             bitstream_gpio_devices[ BITSTREAM_GPIO_DEVICE_A ],
+        sl_wfx_host_set_hif( BITSTREAM_SPI_DEVICE_A,
+                             BITSTREAM_GPIO_DEVICE_A,
                              gpio_1I, 0,  /* IRQ */
                              gpio_4E, 0,  /* WUP */
                              gpio_4E, 1 ); /* RST */
