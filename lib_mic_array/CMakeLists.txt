@@ -39,7 +39,9 @@ set(LIB_XC_SRCS
         "lib_mic_array/lib_mic_array/src/decimator_interface.xc"
         "lib_mic_array/lib_mic_array/src/hires_delay.xc"
         "lib_mic_array/lib_mic_array/src/pdm.xc"
+        "lib_mic_array/lib_mic_array/src/mic_array_dual.xc"
         "lib_mic_array/lib_mic_array/src/fir/fir_coefs.xc"
+        "lib_mic_array/lib_mic_array/src/fir/fir_coefs_dual.xc"
     )
 set(LIB_C_SRCS
         ""

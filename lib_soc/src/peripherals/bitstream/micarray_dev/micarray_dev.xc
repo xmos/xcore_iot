@@ -111,30 +111,29 @@ void micarray_dev_to_dma(
     unsafe {
         mic_array_init(c_ds_output);
     }
-
-    while (1) {
-        select {
-        case mic_array_get_next_time_domain_frame_sh(c_ds_output[0], c_ds_output):
-            unsafe {
-                if (!isnull(data_to_dma_c)) {
-                    soc_peripheral_tx_dma_xfer(
-                            data_to_dma_c,
-                            mic_array_data.current->data[0],
-                            sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
-                } else if (peripheral != NULL) {
-                    soc_peripheral_tx_dma_direct_xfer(
-                            peripheral,
-                            mic_array_data.current->data[0],
-                            sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
-                }
-            }
-            break;
-        }
-    }
+    while(1) {
+		select {
+			case mic_array_get_next_time_domain_frame_sh(c_ds_output[0], c_ds_output):
+				unsafe {
+					if (!isnull(data_to_dma_c)) {
+						soc_peripheral_tx_dma_xfer(
+								data_to_dma_c,
+								mic_array_data.current->data[0],
+								sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
+					} else if (peripheral != NULL) {
+						soc_peripheral_tx_dma_direct_xfer(
+								peripheral,
+								mic_array_data.current->data[0],
+								sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
+					}
+				}
+				break;
+		}
+	}
 }
 
-
-void mic_array_setup_sdr(clock pdmclk,
+void mic_array_setup_sdr(
+		clock pdmclk,
 		in port p_mclk,
 		out port p_pdm_clk,
 		buffered in port:32 p_pdm_mics,
@@ -146,7 +145,8 @@ void mic_array_setup_sdr(clock pdmclk,
 	start_clock(pdmclk);
 }
 
-void mic_array_setup_ddr(clock pdmclk,
+void mic_array_setup_ddr(
+		clock pdmclk,
 		clock pdmclk6,
 		in port p_mclk,
 		out port p_pdm_clk,
@@ -202,10 +202,63 @@ void micarray_dev(
         chanend ?ctrl_c,
         in buffered port:32 p_pdm_mics)
 {
-    streaming chan c_ds_output[MICARRAYCONF_DECIMATOR_COUNT];
+    streaming chan c_ds_output[MICARRAYCONF_DECIMATOR_COUNT+1];
 
     par {
         micarray_dev_task(p_pdm_mics, c_ds_output);
         micarray_dev_to_dma(peripheral, data_to_dma_c, c_ds_output);
+    }
+}
+
+[[combinable]]
+void micarray_dev_1b_to_dma(
+        soc_peripheral_t peripheral,
+        chanend ?data_to_dma_c,
+        streaming chanend c_ds_output[])
+{
+	int tmp;
+	int32_t mic_samples[(1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2)];
+
+	while (1) {
+		select {
+			case c_ds_output[0] :> tmp:
+			unsafe {
+				int * unsafe mic_sample_block;
+				mic_sample_block = (int*)tmp;
+				for(int i=0; i< (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2); i++)
+				{
+					mic_samples[i] = mic_sample_block[4*i];
+				}
+
+				if (!isnull(data_to_dma_c)) {
+					soc_peripheral_tx_dma_xfer(
+							data_to_dma_c,
+							&mic_samples[0],
+							sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
+				} else if (peripheral != NULL) {
+					soc_peripheral_tx_dma_direct_xfer(
+							peripheral,
+							&mic_samples[0],
+							sizeof(int32_t) * (1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2));
+				}
+			}
+			break;
+		}
+	}
+}
+
+void micarray_dev_1b(
+        soc_peripheral_t peripheral,
+        chanend ?data_to_dma_c,
+        chanend ?data_from_dma_c,
+        chanend ?ctrl_c,
+        in buffered port:32 p_pdm_mics)
+{
+    streaming chan c_ds_output[2];
+    streaming chan c_4x_pdm_mic_0[1];
+
+    par {
+        mic_dual_pdm_rx_decimate(p_pdm_mics, c_ds_output[0], c_4x_pdm_mic_0);
+        micarray_dev_1b_to_dma(peripheral, data_to_dma_c, c_ds_output);
     }
 }

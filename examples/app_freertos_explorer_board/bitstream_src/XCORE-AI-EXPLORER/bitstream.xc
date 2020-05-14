@@ -34,13 +34,14 @@ spi_fast_ports spi_ctx = {
 
 /* Ports for the PDM microphones */
 out port p_pdm_clk              = PORT_PDM_CLK;
-in buffered port:32 p_pdm_mics  = on MIC_TILE : XS1_PORT_8B;
+in buffered port:32 p_pdm_mics  = PORT_PDM_DATA;
 
 /* Clock port for the PDM mics */
 in port p_mclk  = PORT_MCLK_IN;
 
 /* Clock blocks for PDM mics */
 clock pdmclk    = on MIC_TILE : XS1_CLKBLK_1;
+clock pdmclk2   = on MIC_TILE : XS1_CLKBLK_2;
 
 /* Setup internal clock to be mic PLL */
 clock mclk_internal = on MIC_TILE : XS1_CLKBLK_3;
@@ -186,10 +187,10 @@ void tile1_device_instantiate(
     p_rst_shared <: 0xF;
     set_app_pll();
 
-    micarray_dev_init(pdmclk, null, p_mclk, p_pdm_clk, p_pdm_mics);
+    micarray_dev_init(pdmclk, pdmclk2, p_mclk, p_pdm_clk, p_pdm_mics);
 
     par {
-        micarray_dev(
+    	micarray_dev_1b(
                 NULL,
 				mic_dev_ch[SOC_PERIPHERAL_TO_DMA_CH],
 				mic_dev_ch[SOC_PERIPHERAL_FROM_DMA_CH],

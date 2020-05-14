@@ -39,4 +39,11 @@ void micarray_dev(
         chanend ?ctrl_c,
         in buffered port:32 p_pdm_mics);
 
+void micarray_dev_1b(
+        soc_peripheral_t peripheral,
+        chanend ?data_to_dma_c,
+        chanend ?data_from_dma_c,
+        chanend ?ctrl_c,
+        in buffered port:32 p_pdm_mics);
+
 #endif /* MICARRAY_DEV_H_ */
