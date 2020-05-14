@@ -104,97 +104,25 @@ flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_0, flash
 /*-----------------------------------------------------------*/
 /* Helpers to setup a clock as a PLL */
 /*-----------------------------------------------------------*/
-static void set_node_pll_reg(tileref tile_ref, unsigned reg_val){
-		write_sswitch_reg(get_tile_id(tile_ref), XS1_SSWITCH_PLL_CTL_NUM, reg_val);
+
+// 24MHz in, 24.576MHz out, integer mode
+// Found exact solution:   IN  24000000.0, OUT  24576000.0, VCO 2457600000.0, RD  5, FD  512                       , OD  5, FOD   10
+#define APP_PLL_DISABLE 0x0201FF04
+#define APP_PLL_CTL_0   0x0A01FF04
+#define APP_PLL_DIV_0   0x80000004
+#define APP_PLL_FRAC_0  0x00000000
+
+void set_app_pll(void) {
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_DISABLE);
+	delay_milliseconds(1);
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_CTL_0);
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_CTL_0);
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, APP_PLL_FRAC_0);
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM,        APP_PLL_DIV_0);
 }
 
-static void run_clock(void) {
-    configure_clock_xcore(mclk_internal, 10); // 24.576 MHz
-    configure_port_clock_output(p_mclk, mclk_internal);
-    start_clock(mclk_internal);
-}
-/*
- * Fpll = Fin * (F+1)/2 * 1/(R+1) * 1/(OD+1)
- *		= 24MHz * (1023+1)/2 * 1/(24+1) * 1/(0+1)
- *		= 491.52MHz
- *
- * mclkout = Fpll / (2*(X+1))
- * 		   = 491.52MHz / (2*(9+1))
- * 		   = 24.576MHz
- */
-#define APP_PLL_NOM ( 0 << 29 ) 	| 	/* Don't bypass*/			\
-					( 1 << 28 ) 	| 	/* Use crystal as input*/	\
-					( 1 << 27 ) 	| 	/* Enable*/					\
-					( 5 << 23 ) 	| 	/* OD */					\
-					( 19 << 8  ) 	| 	/* F*/						\
-					( 12 << 0  )		/* R*/
-
-
-//#define APP_PLL_NOM ( 0 << 29 ) 	| 	/* Don't bypass*/			\
-//					( 0 << 28 ) 	| 	/* Use crystal as input*/	\
-//					( 1 << 27 ) 	| 	/* Enable*/					\
-//					( 4 << 23 ) 	| 	/* OD */					\
-//					( 512 << 8  ) 	| 	/* F*/						\
-//					( 12 << 0  )		/* R*/
-
-#define APP_PLL_DIV ( 1 << 31 ) 	| 	/* Enable */				\
-					( 0x0003 << 0 )		/* X */
-
-#define SSWITCH_REG 0
-#define ED_VALS	0
-#include "debug_print.h"
-
-static void set_app_pll(void) {
-	int ret = 0;
-#if SSWITCH_REG
-	write_sswitch_reg(get_tile_id(MIC_TILE), XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0x0201FF04);
-	delay_milliseconds(1);
-	#if ED_VALS
-		write_sswitch_reg(get_tile_id(MIC_TILE), XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            0x0A01FF04);
-		write_sswitch_reg(get_tile_id(MIC_TILE), XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            0x0A01FF04);
-		write_sswitch_reg(get_tile_id(MIC_TILE), XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, 0x80000004);
-	#else /* ED_VALS */
-		write_sswitch_reg(get_tile_id(MIC_TILE), XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_NOM);
-		write_sswitch_reg(get_tile_id(MIC_TILE), XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_NOM);
-		write_sswitch_reg(get_tile_id(MIC_TILE), XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, APP_PLL_DIV);
-	#endif /* ED_VALS */
-	write_sswitch_reg(get_tile_id(MIC_TILE), XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM,        0x00000000);
-
-#else /* SSWITCH_REG */
-	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, 0x0201FF04);
-	delay_milliseconds(1);
-
-	#if ED_VALS
-		write_node_config_reg(tile[1], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            0x0A01FF04);
-		write_node_config_reg(tile[1], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            0x0A01FF04);
-		write_node_config_reg(tile[1], XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, 0x80000004);
-	#else /* ED_VALS */
-//		ret = write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_NOM);
-//		debug_printf("ret:%d\n", ret);
-		ret = write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_NOM);
-		debug_printf("ret:%d\n", ret);
-		ret = write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, APP_PLL_DIV);
-		debug_printf("ret:%d\n", ret);
-
-		unsigned data;
-		ret = read_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM, data);
-		debug_printf("ret:%d\n", ret);
-		debug_printf("pll reg:%d\n", data);
-
-	#endif /* ED_VALS */
-	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM,        0x00000000);
-#endif /* SSWITCH_REG */
-
-	delay_milliseconds(1);
-}
-
-static void set_pll(void) {
-#if 1
+void set_pll(void) {
 	set_app_pll();
-#else
-    set_node_pll_reg(MIC_TILE, PLL_NOM);
-    run_clock();
-#endif
 }
 
 void tile0_device_instantiate(
@@ -263,7 +191,7 @@ void tile1_device_instantiate(
     p_rst_shared <: 0xF;
     set_pll();
 
-    micarray_dev_init(pdmclk, NULL, p_mclk, p_pdm_clk, p_pdm_mics);
+    micarray_dev_init(pdmclk, null, p_mclk, p_pdm_clk, p_pdm_mics);
 
     par {
         micarray_dev(
