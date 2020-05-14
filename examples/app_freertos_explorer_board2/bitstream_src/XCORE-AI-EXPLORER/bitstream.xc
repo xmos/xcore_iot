@@ -45,7 +45,6 @@ clock pdmclk    = on MIC_TILE : XS1_CLKBLK_1;
 /* Setup internal clock to be mic PLL */
 clock mclk_internal = on MIC_TILE : XS1_CLKBLK_3;
 
-#define PLL_NOM 0xC003FF18
 /*-----------------------------------------------------------*/
 /* I2S defines */
 /*-----------------------------------------------------------*/
@@ -104,19 +103,21 @@ flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_0, flash
 /*-----------------------------------------------------------*/
 /* Helpers to setup a clock as a PLL */
 /*-----------------------------------------------------------*/
-static void set_node_pll_reg(tileref tile_ref, unsigned reg_val){
-	write_sswitch_reg(get_tile_id(tile_ref), XS1_SSWITCH_PLL_CTL_NUM, reg_val);
-}
 
-static void run_clock(void) {
-    configure_clock_xcore(mclk_internal, 10); // 24.576 MHz
-    configure_port_clock_output(p_mclk, mclk_internal);
-    start_clock(mclk_internal);
-}
+// 24MHz in, 24.576MHz out, integer mode
+// Found exact solution:   IN  24000000.0, OUT  24576000.0, VCO 2457600000.0, RD  5, FD  512                       , OD  5, FOD   10
+#define APP_PLL_DISABLE 0x0201FF04
+#define APP_PLL_CTL_0   0x0A01FF04
+#define APP_PLL_DIV_0   0x80000004
+#define APP_PLL_FRAC_0  0x00000000
 
-static void set_pll(void) {
-    set_node_pll_reg(MIC_TILE, PLL_NOM);
-    run_clock();
+void set_app_pll(void) {
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_DISABLE);
+	delay_milliseconds(1);
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_CTL_0);
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_CTL_NUM,            APP_PLL_CTL_0);
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, APP_PLL_FRAC_0);
+	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM,        APP_PLL_DIV_0);
 }
 
 void tile0_device_instantiate(
@@ -165,7 +166,7 @@ void tile1_device_instantiate(
 	chan t1_gpio_dev_ctrl_ch;
 
     p_rst_shared <: 0xF;
-    set_pll();
+    set_app_pll();
 
     micarray_dev_init(pdmclk, NULL, p_mclk, p_pdm_clk, p_pdm_mics);
 

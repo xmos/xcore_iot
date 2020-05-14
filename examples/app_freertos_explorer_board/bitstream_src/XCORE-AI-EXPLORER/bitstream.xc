@@ -45,7 +45,6 @@ clock pdmclk    = on MIC_TILE : XS1_CLKBLK_1;
 /* Setup internal clock to be mic PLL */
 clock mclk_internal = on MIC_TILE : XS1_CLKBLK_3;
 
-#define PLL_NOM 0xC003FF18
 /*-----------------------------------------------------------*/
 /* I2S defines */
 /*-----------------------------------------------------------*/
@@ -121,10 +120,6 @@ void set_app_pll(void) {
 	write_node_config_reg(tile[0], XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM,        APP_PLL_DIV_0);
 }
 
-void set_pll(void) {
-	set_app_pll();
-}
-
 void tile0_device_instantiate(
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
@@ -189,7 +184,7 @@ void tile1_device_instantiate(
         chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
     p_rst_shared <: 0xF;
-    set_pll();
+    set_app_pll();
 
     micarray_dev_init(pdmclk, null, p_mclk, p_pdm_clk, p_pdm_mics);
 
