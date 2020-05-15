@@ -34,7 +34,7 @@ your application. */
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE                   64*1024*2
+#define configTOTAL_HEAP_SIZE                   64*1024
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */
@@ -97,5 +97,6 @@ your application. */
 #define INCLUDE_xQueueGetMutexHolder            1
 
 /* A header file that defines trace macro can be included here. */
+#include "xcore_trace.h"
 
 #endif /* FREERTOS_CONFIG_H */

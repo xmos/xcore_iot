@@ -78,6 +78,7 @@ set(LIB_SOC_MICARRAY ${FULL})
 set(LIB_SOC_SPIMASTER ${FULL})
 set(LIB_SOC_QSPI_FLASH ${FULL})
 set(LIB_SOC_WFM200 ${BSP_ONLY})
+set(LIB_SOC_SW_TRACE True)
 
 ## Register the application
 XMOS_REGISTER_APP()
