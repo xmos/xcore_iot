@@ -21,6 +21,7 @@ set(APP_COMPILER_FLAGS
         "-Os"
         "-g"
 		"-D__XS2A__=1"
+        "-DMIC_DUAL_ENABLED=1"
         "-report"
         "-fxscope"
         "-Wxcore-fptrgroup"

@@ -26,7 +26,7 @@
  */
 
 /* I2S Config */
-#define I2SCONF_SAMPLE_FREQ         (48000)
+#define I2SCONF_SAMPLE_FREQ         (16000)
 #define I2SCONF_MASTER_CLK_FREQ     (24576000)
 #define I2SCONF_AUDIO_FRAME_LEN     (256)
 #define I2SCONF_FRAME_BUF_CNT       (4)
