@@ -93,7 +93,10 @@ DEFINE_RTOS_INTERRUPT_CALLBACK( rtos_irq_handler, data )
         pending &= ~( 1 << source_id );
 
         source_id -= RTOS_MAX_CORE_COUNT;
-        isr_info[ source_id ].isr( isr_info[ source_id ].data );
+        if ( isr_info[ source_id ].isr != NULL )
+        {
+            isr_info[ source_id ].isr( isr_info[ source_id ].data );
+        }
     }
 }
 
@@ -108,6 +111,7 @@ void rtos_irq( int core_id, int source_id )
     int num_cores = rtos_core_count();
 
     xassert( core_id >= 0 && core_id < num_cores );
+    xassert( source_id >= 0 && source_id < RTOS_MAX_CORE_COUNT + peripheral_source_count );
 
     /*
      * Atomically set the pending flag and, if the core we are
@@ -125,7 +129,7 @@ void rtos_irq( int core_id, int source_id )
 
         if( pending == 0 )
         {
-            if( source_id < num_cores )
+            if( source_id >= 0 && source_id < num_cores )
             {
                 source_chanend = rtos_irq_chanend[ source_id ];
             }

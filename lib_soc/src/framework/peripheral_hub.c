@@ -92,8 +92,9 @@ soc_peripheral_t soc_peripheral_register(
     peripherals[device_id].control_c = c[SOC_PERIPHERAL_CONTROL_CH];
     peripherals[device_id].irq_c = c[SOC_PERIPHERAL_IRQ_CH];
     peripherals[device_id].tx_ready = 0;
-    peripherals[device_id].irq_source_id = -1;
     peripherals[device_id].app_data = NULL;
+    peripherals[device_id].core_id = -1;
+    peripherals[device_id].irq_source_id = -1;
     peripherals[device_id].interrupt_status = 0;
 
     return &peripherals[device_id];
@@ -134,6 +135,15 @@ int soc_peripheral_rx_dma_direct_xfer(
     int total_length = -1;
     int more;
 
+    /*
+     * In this case the device and RTOS are on the same tile, and the
+     * device is checking to see if the RTOS has any data for it in
+     * DMA buffers. First the device's tx ring buffer descriptor list
+     * is checked to see if it exists. If it does, it checks to see if
+     * the next descriptor points to a buffer that has been filled with
+     * data and handed off to the device. If so, then the transfer can
+     * take place and the buffers are then handed back over to the RTOS.
+     */
     if (device->tx_ring_buf.desc != NULL) {
         if (soc_dma_ring_buf_get(&device->tx_ring_buf, NULL, NULL) >= 0) {
 
@@ -152,7 +162,10 @@ int soc_peripheral_rx_dma_direct_xfer(
             device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM;
             rtos_lock_release(0);
 
-            rtos_irq(device->core_id, device->irq_source_id);
+            /* Do not interrupt the RTOS unless it has registered an ISR */
+            if (device->core_id >= 0 && device->irq_source_id >= 0) {
+                rtos_irq(device->core_id, device->irq_source_id);
+            }
         }
     }
 
@@ -182,6 +195,16 @@ void soc_peripheral_tx_dma_direct_xfer(
     int max_length;
     int more;
 
+    /*
+     * In this case the device and RTOS are on the same tile, and the
+     * device has data to send to the RTOS. First the device's rx ring
+     * buffer descriptor list is checked to see if it exists. If it does
+     * not then the transfer will not take place and the data will be lost.
+     * If it does, it waits for the next descriptor to points to a buffer
+     * that is ready to be filled with data and has been handed off to the
+     * device. At that point the transfer can take place and the buffers
+     * are then handed back over to the RTOS.
+     */
     if (device->rx_ring_buf.desc != NULL) {
         do {
             max_length = soc_dma_ring_buf_length_get(&device->rx_ring_buf);
@@ -204,7 +227,10 @@ void soc_peripheral_tx_dma_direct_xfer(
         device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
         rtos_lock_release(0);
 
-        rtos_irq(device->core_id, device->irq_source_id);
+        /* Do not interrupt the RTOS unless it has registered an ISR */
+        if (device->core_id >= 0 && device->irq_source_id >= 0) {
+            rtos_irq(device->core_id, device->irq_source_id);
+        }
     }
 }
 
@@ -223,7 +249,10 @@ void soc_peripheral_irq_direct_send(
     device->interrupt_status |= status;
     rtos_lock_release(0);
 
-    rtos_irq(device->core_id, device->irq_source_id);
+    /* Do not interrupt the RTOS unless it has registered an ISR */
+    if (device->core_id >= 0 && device->irq_source_id >= 0) {
+        rtos_irq(device->core_id, device->irq_source_id);
+    }
 }
 
 void soc_peripheral_handler_register(
@@ -332,6 +361,16 @@ static void device_to_dma(soc_peripheral_t device)
     uint32_t total_length;
     int more;
 
+    /*
+     * In this case the device and RTOS are on different tiles, and the
+     * device is sending data to the RTOS. The peripheral hub task has
+     * already verified that the device's rx ring buffer descriptor list
+     * exists and that the next descriptor points to a buffer that is ready
+     * to be filled with data and handed off to the device. The data is read
+     * from the device over a channel into the DMA buffers. The buffers are
+     * then handed back over to the RTOS.
+     */
+
     length = soc_dma_ring_buf_length_get(&device->rx_ring_buf);
 
     tc = chan_init_transaction_slave(device->rx_c);
@@ -355,7 +394,10 @@ static void device_to_dma(soc_peripheral_t device)
     device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM;
     rtos_lock_release(0);
 
-    rtos_irq(device->core_id, device->irq_source_id);
+    /* Do not interrupt the RTOS unless it has registered an ISR */
+    if (device->core_id >= 0 && device->irq_source_id >= 0) {
+        rtos_irq(device->core_id, device->irq_source_id);
+    }
 }
 
 static void dma_to_device_ready(soc_peripheral_t device)
@@ -372,6 +414,16 @@ static void dma_to_device(soc_peripheral_t device)
     int total_length;
     uint32_t max_length;
     int more;
+
+    /*
+     * In this case the device and RTOS are on different tiles, and the
+     * device is receiving data from the RTOS. The peripheral hub task has
+     * already verified that the device's tx ring buffer descriptor list
+     * exists and that the next descriptor points to a buffer that has been
+     * filled with data and handed off to the device. The data is read out
+     * of the DMA buffers and sent to the device over a channel. The buffers
+     * are then handed back over to the RTOS.
+     */
 
     total_length = soc_dma_ring_buf_length_get(&device->tx_ring_buf);
 
@@ -400,7 +452,10 @@ static void dma_to_device(soc_peripheral_t device)
     device->interrupt_status |= SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM;
     rtos_lock_release(0);
 
-    rtos_irq(device->core_id, device->irq_source_id);
+    /* Do not interrupt the RTOS unless it has registered an ISR */
+    if (device->core_id >= 0 && device->irq_source_id >= 0) {
+        rtos_irq(device->core_id, device->irq_source_id);
+    }
 }
 
 static void device_to_hub_irq(soc_peripheral_t device)
@@ -413,7 +468,10 @@ static void device_to_hub_irq(soc_peripheral_t device)
     device->interrupt_status |= status;
     rtos_lock_release(0);
 
-    rtos_irq(device->core_id, device->irq_source_id);
+    /* Do not interrupt the RTOS unless it has registered an ISR */
+    if (device->core_id >= 0 && device->irq_source_id >= 0) {
+        rtos_irq(device->core_id, device->irq_source_id);
+    }
 }
 
 void soc_peripheral_hub()
