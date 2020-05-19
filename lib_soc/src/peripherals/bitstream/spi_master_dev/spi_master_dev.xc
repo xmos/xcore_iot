@@ -35,7 +35,7 @@ static void spi_test_fast_handler(
                     transfer_len = tx_len;
                 }
 
-                spi_fast(transfer_len, data_buf, spi_ctx, rx_len > 0 ? SPI_READ_WRITE : SPI_WRITE);
+                spi_fast(transfer_len, data_buf, &spi_ctx, rx_len > 0 ? SPI_READ_WRITE : SPI_WRITE);
 
                 if (rx_len > 0) { /* Send response if it had been requested */
                     soc_peripheral_tx_dma_direct_xfer(
@@ -68,7 +68,7 @@ static void spi_test_fast_handler(
                         sizeof(unsigned), &spi_ctx.byte_setup_ns,
                         sizeof(unsigned), &spi_ctx.data_to_cs_delay_ns);
 
-                spi_fast_init(spi_ctx);
+                spi_fast_init(&spi_ctx);
                 break;
 
             case SPI_MASTER_DEV_TRANSACTION:
@@ -97,7 +97,7 @@ static void spi_test_fast_handler(
                     transfer_len = tx_len;
                 }
 
-                spi_fast(transfer_len, data_buf, spi_ctx, rx_len > 0 ? SPI_READ_WRITE : SPI_WRITE);
+                spi_fast(transfer_len, data_buf, &spi_ctx, rx_len > 0 ? SPI_READ_WRITE : SPI_WRITE);
 
                 if (rx_len > 0) { /* Send response if it had been requested */
                     if (!isnull(data_to_dma_c)) {

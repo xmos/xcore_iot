@@ -15,19 +15,8 @@ typedef struct {
     out buffered port:32 mosi;
     out port cs;
     clock cb;
-    /****************************************/
-
-    /****************************************/
-    /*** May be set at runtime. Must call ***/
-    /*** spi_fast_init() after adjusting. ***/
-    /****************************************/
     unsigned cs_port_bit;
-    unsigned cpol;
-    unsigned cpha;
-    unsigned clock_divide; /* SCK Frequency = 100 MHz / (2 * clock_divide) / 2 */
-    unsigned cs_to_data_delay_ns;
-    unsigned byte_setup_ns;
-    unsigned data_to_cs_delay_ns;
+    /****************************************/
 
     /****************************************/
     /***      For internal use only       ***/
@@ -37,6 +26,19 @@ typedef struct {
     unsigned data_to_cs_delay_ticks;
     unsigned clock_bits;
     unsigned clock_delay;
+    /****************************************/
+
+    /****************************************/
+    /*** May be set at runtime. Must call ***/
+    /*** spi_fast_init() after adjusting. ***/
+    /****************************************/
+    unsigned cpol;
+    unsigned cpha;
+    unsigned clock_divide; /* SCK Frequency = 100 MHz / (2 * clock_divide) / 2 */
+    unsigned cs_to_data_delay_ns;
+    unsigned byte_setup_ns;
+    unsigned data_to_cs_delay_ns;
+    /****************************************/
 } spi_fast_ports;
 
 typedef enum port_time_mode_t {
@@ -51,23 +53,20 @@ typedef enum spi_direction_t {
     SPI_READ_WRITE
 } spi_direction_t;
 
-void spi_fast_init(spi_fast_ports &p);
+void spi_fast_init(spi_fast_ports *p);
 
-void spi_fast(unsigned num_bytes, char *buffer, spi_fast_ports &p, spi_direction_t direction);
+void spi_fast(unsigned num_bytes, char *buffer, spi_fast_ports *p, spi_direction_t direction);
 
-void drive_cs_port_now(spi_fast_ports &p,
-                       uint32_t p_ss_bit,
+void drive_cs_port_now(spi_fast_ports *p,
                        uint32_t bit_value);
 
-void drive_cs_port_at_time(spi_fast_ports &p,
-                           uint32_t p_ss_bit,
+void drive_cs_port_at_time(spi_fast_ports *p,
                            uint32_t bit_value,
-                           unsigned time);
+                           uint32_t time);
 
-void drive_cs_port_get_time(spi_fast_ports &p,
-                            uint32_t p_ss_bit,
+void drive_cs_port_get_time(spi_fast_ports *p,
                             uint32_t bit_value,
-                            unsigned *time);
+                            uint32_t *time);
 
 #endif /* SPI_FAST_H_ */
 
