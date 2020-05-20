@@ -17,13 +17,14 @@ def parse_arguments():
 
     parser.add_argument("-output_file", default="trace_output", help="Output trace file")
     parser.add_argument("-config_file", default="trace_show.json", help="Defines traces to be filtered")
+    parser.add_argument("-cores", default=8, help="Number of FreeRTOS cores")
 
     parser.parse_args()
     args = parser.parse_args()
 
     return args
 
-def main(trace_file, outfile, filter_args):
+def main(trace_file, outfile, filter_args, cores):
     print("Loading trace: {0}\n".format(trace_file))
 
     print("Processing trace to text...\n")
@@ -37,10 +38,12 @@ def main(trace_file, outfile, filter_args):
     processor.decode()
     processor.sort_by_tick()
 
-    writer = trace_writer(outfile)
-    for each in processor.decoded_list:
-        writer.write(each)
-    writer.cleanup()
+    for core in range(cores):
+        writer = trace_writer(outfile + "_" + str(core))
+        for each in processor.decoded_list:
+            if(int(each.core) == core):
+                writer.write(each)
+        writer.cleanup()
 
     print("Trace processing complete\n")
 
@@ -66,4 +69,4 @@ if __name__ == "__main__":
 
     filter_args = json_to_dict(args.config_file)
 
-    main(args.trace_file, args.output_file, filter_args)
+    main(args.trace_file, args.output_file, filter_args, args.cores)
