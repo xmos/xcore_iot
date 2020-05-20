@@ -1,10 +1,4 @@
-/*
- * xcore_IP_trace.h
- *
- *  Created on: Oct 23, 2019
- *      Author: jmccarthy
- */
-
+// Copyright (c) 2020, XMOS Ltd, All rights reserved
 
 #ifndef XCORE_IP_TRACE_H_
 #define XCORE_IP_TRACE_H_

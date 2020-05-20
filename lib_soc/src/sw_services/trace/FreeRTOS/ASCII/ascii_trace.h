@@ -1,10 +1,4 @@
-/*
- * tracemacro.h
- *
- *  Created on: Aug 20, 2019
- *      Author: jmccarthy
- */
-
+// Copyright (c) 2020, XMOS Ltd, All rights reserved
 
 #ifndef TRACEMACRO_H_
 #define TRACEMACRO_H_

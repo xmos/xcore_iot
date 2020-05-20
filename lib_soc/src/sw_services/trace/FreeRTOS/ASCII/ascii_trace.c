@@ -1,9 +1,4 @@
-/*
- * ascii_trace.c
- *
- *  Created on: Sep 16, 2019
- *      Author: jmccarthy
- */
+// Copyright (c) 2020, XMOS Ltd, All rights reserved
 
 #include "FreeRTOS.h"
 
