@@ -44,7 +44,6 @@ typedef struct intertile_cb_footer {
  * \param[in]     device_id      ID of intertile device to use
  * \param[in]     rx_desc_count  Maximum number of rx descriptors
  * \param[in]     tx_desc_count  Maximum number of tx descriptors
- * \param[in]     app_data       User data field
  * \param[in]     isr_core       FreeRTOS core to handle interrupts from device
  *
  * \returns       Initialized intertile device
@@ -53,7 +52,6 @@ soc_peripheral_t intertile_driver_init(
         int device_id,
         int rx_desc_count,
         int tx_desc_count,
-        void *app_data,
         int isr_core);
 
 /**

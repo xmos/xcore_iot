@@ -23,9 +23,7 @@
 
 void t0_test(void *arg)
 {
-    soc_peripheral_t dev = arg;
-
-    intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
+    intertile_msg_buffers_t* msgbuffers = arg;
     MessageBufferHandle_t send_msg_buf = msgbuffers->send_msg_buf;
 
     uint8_t buf[] = "Hello Tile 1";
