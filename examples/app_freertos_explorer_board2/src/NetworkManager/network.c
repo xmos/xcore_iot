@@ -160,7 +160,6 @@ void initalize_wifi( void )
 
     dev = gpio_driver_init(
             BITSTREAM_GPIO_DEVICE_A,
-            NULL,
             0);
 
 #if SOC_QSPI_FLASH_PERIPHERAL_USED

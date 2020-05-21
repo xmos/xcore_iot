@@ -281,7 +281,6 @@ static void wf200_test(void *arg)
 
     gpio_driver_init(
             BITSTREAM_GPIO_DEVICE_A,
-            NULL,
             0);
 
     ret = WIFI_On();
