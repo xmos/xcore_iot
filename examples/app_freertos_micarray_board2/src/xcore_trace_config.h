@@ -1,10 +1,9 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
 #ifndef XCORE_TRACE_CONFIG_H_
 #define XCORE_TRACE_CONFIG_H_
 
 /* Enable trace system */
-#define xcoretraceconfigSYSVIEW 					0
 #define xcoretraceconfigASCII 						0
 
 /* Setup xScope trace Macros */

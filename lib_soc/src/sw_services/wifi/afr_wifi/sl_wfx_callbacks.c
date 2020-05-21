@@ -1,9 +1,4 @@
-/*
- * sl_wfx_callbacks.c
- *
- *  Created on: Jan 21, 2020
- *      Author: mbruno
- */
+// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
 #include <stdlib.h>
 #include <string.h>

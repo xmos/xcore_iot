@@ -44,9 +44,6 @@ set(APP_C_SRCS
         "src/udp_cli/CLI-commands.c"
         "src/udp_cli/FreeRTOS_CLI.c"
         "src/udp_cli/UDPCommandServer.c"
-        "src/dhcpd.c"
-        "src/afr_wifi/sl_wfx_callbacks.c"
-        "src/afr_wifi/sl_wfx_iot_wifi.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -61,8 +58,6 @@ set(APP_INCLUDES
         "src/queue_to_tcp_stream"
         "src/thruput_test"
         "src/udp_cli"
-        "src/afr_wifi"
-        "src/afr_wifi/types"
     )
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"
@@ -78,6 +73,8 @@ set(LIB_SOC_MICARRAY ${FULL})
 set(LIB_SOC_SPIMASTER ${FULL})
 set(LIB_SOC_QSPI_FLASH ${FULL})
 set(LIB_SOC_WFM200 ${BSP_ONLY})
+set(LIB_SOC_SW_WIFI True)
+set(LIB_SOC_SW_DHCPD True)
 
 ## Register the application
 XMOS_REGISTER_APP()
