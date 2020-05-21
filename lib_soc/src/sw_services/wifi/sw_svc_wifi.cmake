@@ -13,4 +13,4 @@ set(SW_SVC_INCLUDES
 set(SW_SVC_DEPENDENT_MODULES
         "")
 set(SW_SVC_OPTIONAL_HEADERS
-        "ff_appconf.h")
+        "aws_wifi_config.h")
