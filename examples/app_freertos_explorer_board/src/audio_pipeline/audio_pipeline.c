@@ -21,11 +21,9 @@
 #include "app_conf.h"
 #include "audio_hw_config.h"
 #include "queue_to_tcp_stream.h"
+#include "queue_to_i2s.h"
 
 static BaseType_t xStage1_Gain = appconfAUDIO_PIPELINE_STAGE_ONE_GAIN;
-
-static QueueHandle_t stage1_out_queue0;
-static QueueHandle_t stage1_out_queue1;
 
 #define MIN(X, Y) ((X) <= (Y) ? (X) : (Y))
 
@@ -95,16 +93,15 @@ void mic_array_isr(soc_peripheral_t device)
 /* Apply gain to mic data */
 void audio_pipeline_stage1(void *arg)
 {
-    soc_peripheral_t mic_dev = arg;
-    QueueHandle_t mic_data_queue = soc_peripheral_app_data(mic_dev);
+	ap_stage_handle_t stage1 = ( ap_stage_handle_t ) arg;
+    soc_peripheral_t mic_dev = ( soc_peripheral_t ) stage1->args;
     soc_dma_ring_buf_t *rx_ring_buf = soc_peripheral_rx_dma_ring_buf(mic_dev);
 
     for (;;) {
         int32_t *mic_data;
         int32_t *new_rx_buffer;
-        int32_t *mic_data_copy;
 
-        xQueueReceive(mic_data_queue, &mic_data, portMAX_DELAY);
+        xQueueReceive(stage1->input, &mic_data, portMAX_DELAY);
 
         new_rx_buffer = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
         soc_dma_ring_rx_buf_set(rx_ring_buf, new_rx_buffer, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
@@ -118,36 +115,66 @@ void audio_pipeline_stage1(void *arg)
             mic_data[i] *= xStage1_Gain;
         }
 
-        mic_data_copy = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
-        memcpy(mic_data_copy, mic_data, appconfMIC_FRAME_LENGTH * sizeof(int32_t));
-
-        if ( is_queue_to_tcp_connected() )
+        if (xQueueSend(stage1->output, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL)
         {
-            if (xQueueSend(stage1_out_queue0, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
-				debug_printf("stage 1 output lost\n");
-                vPortFree(mic_data);
-            }
-        }
-        else
-        {
+//            debug_printf("stage1 output lost\n");
             vPortFree(mic_data);
-        }
-
-        if (xQueueSend(stage1_out_queue1, &mic_data_copy, pdMS_TO_TICKS(1)) == errQUEUE_FULL)
-        {
-            debug_printf("dac output lost\n");
-            vPortFree(mic_data_copy);
         }
     }
 }
 
-void audio_pipeline_create(QueueHandle_t output0, QueueHandle_t output1, UBaseType_t priority)
+/* Output to tcp and i2s */
+void audio_pipeline_stage2(void *arg)
 {
-    QueueHandle_t queue;
+	ap_stage_handle_t stage2 = ( ap_stage_handle_t ) arg;
+
+	QueueHandle_t stage2_to_tcp_queue = xQueueCreate(2, sizeof(void *));
+
+    /* Create queue to tcp task */
+    queue_to_tcp_handle_t mic_to_tcp_handle;
+    mic_to_tcp_handle = queue_to_tcp_create( stage2_to_tcp_queue,
+											 appconfQUEUE_TO_TCP_PORT,
+											 portMAX_DELAY,
+											 pdMS_TO_TICKS( 5000 ),
+											 sizeof(int32_t) * appconfMIC_FRAME_LENGTH );
+    queue_to_tcp_stream_create( mic_to_tcp_handle, appconfQUEUE_TO_TCP_TASK_PRIORITY );
+
+    for (;;) {
+        int32_t *mic_data;
+
+        xQueueReceive(stage2->input, &mic_data, portMAX_DELAY);
+
+        /* If queue_to_tcp is connected, make a copy of the data and give it to the queue*/
+		if( is_queue_to_tcp_connected( mic_to_tcp_handle ) )
+		{
+	        int32_t *mic_data_copy;
+			mic_data_copy = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
+			memcpy(mic_data_copy, mic_data, appconfMIC_FRAME_LENGTH * sizeof(int32_t));
+
+			if (xQueueSend(stage2_to_tcp_queue, &mic_data_copy, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
+//				debug_printf("stage2 mic to tcp output lost\n");
+				vPortFree(mic_data_copy);
+			}
+		}
+		if (xQueueSend(stage2->output, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL)
+		{
+//          debug_printf("stage2 dac output lost\n");
+			vPortFree(mic_data);
+		}
+    }
+}
+
+void audio_pipeline_create( UBaseType_t priority )
+{
+    QueueHandle_t mic_dev_queue;
+    QueueHandle_t stage1_out_queue;
+    QueueHandle_t stage2_out_queue;
     soc_peripheral_t dev;
 
-    stage1_out_queue0 = output0;
-    stage1_out_queue1 = output1;
+    mic_dev_queue = xQueueCreate(2, sizeof(void *));
+    stage1_out_queue = xQueueCreate(2, sizeof(void *));
+    stage2_out_queue = xQueueCreate(2, sizeof(void *));
+
     /*
      * Configure the PLL and DACs. Do this now before
      * starting the scheduler.
@@ -155,15 +182,28 @@ void audio_pipeline_create(QueueHandle_t output0, QueueHandle_t output1, UBaseTy
     dev = i2c_driver_init(BITSTREAM_I2C_DEVICE_A);
     audio_hw_config(dev);
 
-    queue = xQueueCreate(2, sizeof(void *));
     dev = micarray_driver_init(
             BITSTREAM_MICARRAY_DEVICE_A,       /* Initializing mic array device A */
             3,                                  /* Give this device 3 RX buffer descriptors */
             appconfMIC_FRAME_LENGTH * sizeof(int32_t), /* Make each DMA RX buffer MIC_FRAME_LENGTH samples */
             0,                                  /* Give this device no TX buffer descriptors */
-            queue,                              /* The queue associated with this device */
+			mic_dev_queue,                              /* The queue associated with this device */
             0,                                  /* This device's interrupts should happen on core 0 */
             (rtos_irq_isr_t) mic_array_isr); /* The ISR to handle this device's interrupts */
 
-    xTaskCreate(audio_pipeline_stage1, "stage1", portTASK_STACK_DEPTH(audio_pipeline_stage1), dev, priority, NULL);
+    ap_stage_handle_t stage1 = pvPortMalloc( sizeof( ap_stage_t ) );
+    stage1->args = dev;
+    stage1->input = mic_dev_queue;
+    stage1->output = stage1_out_queue;
+
+    xTaskCreate(audio_pipeline_stage1, "stage1", portTASK_STACK_DEPTH(audio_pipeline_stage1), stage1, priority, NULL);
+
+    ap_stage_handle_t stage2 = pvPortMalloc( sizeof( ap_stage_t ) );
+    stage2->args = NULL;
+    stage2->input = stage1_out_queue;
+    stage2->output = stage2_out_queue;
+    xTaskCreate(audio_pipeline_stage2, "stage2", portTASK_STACK_DEPTH(audio_pipeline_stage2), stage2, priority, NULL);
+
+    /* Create queue to i2s task */
+    queue_to_i2s_create( stage2_out_queue, appconfQUEUE_TO_I2S_TASK_PRIORITY );
 }
