@@ -10,6 +10,7 @@
 
 /* Queue to TCP defines */
 #define appconfQUEUE_TO_TCP_PORT                54321
+#define appconfTCP_TO_QUEUE_PORT                12345
 
 #define DEBUG_PRINT_ENABLE_QUEUE_TO_TCP         0
 
@@ -31,6 +32,7 @@
 
 /* Task Priorities */
 #define appconfAUDIO_PIPELINE_TASK_PRIORITY    	( configMAX_PRIORITIES - 3 )
+#define appconfTCP_TO_QUEUE_TASK_PRIORITY    	( configMAX_PRIORITIES - 3 )
 #define appconfQUEUE_TO_TCP_TASK_PRIORITY      	( configMAX_PRIORITIES - 2 )
 #define appconfQUEUE_TO_I2S_TASK_PRIORITY      	( configMAX_PRIORITIES - 2 )
 #define appconfCLI_TASK_PRIORITY               	( configMAX_PRIORITIES - 3 )

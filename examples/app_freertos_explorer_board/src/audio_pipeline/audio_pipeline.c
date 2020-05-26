@@ -21,9 +21,11 @@
 #include "app_conf.h"
 #include "audio_hw_config.h"
 #include "queue_to_tcp_stream.h"
+#include "tcp_stream_to_queue.h"
 #include "queue_to_i2s.h"
 
 static BaseType_t xStage1_Gain = appconfAUDIO_PIPELINE_STAGE_ONE_GAIN;
+static state2_input_sel_t input_sel = eAPINPUT_QUEUE;
 
 #define MIN(X, Y) ((X) <= (Y) ? (X) : (Y))
 
@@ -36,6 +38,17 @@ BaseType_t audiopipeline_set_stage1_gain( BaseType_t xnewgain )
 {
     xStage1_Gain = xnewgain;
     return xStage1_Gain;
+}
+
+BaseType_t audiopipeline_get_stage2_input( void )
+{
+    return input_sel;
+}
+
+BaseType_t audiopipeline_set_stage2_input( state2_input_sel_t input )
+{
+	input_sel = input;
+    return input_sel;
 }
 
 int frame_power(int32_t *mic_data)
@@ -81,7 +94,7 @@ void mic_array_isr(soc_peripheral_t device)
 //        debug_printf("mic data rx %d bytes\n", length);
 
         if (xQueueSendFromISR(mic_data_queue, &rx_buf, &xYieldRequired) == errQUEUE_FULL) {
-            debug_printf("mic data lost\n", length);
+//            debug_printf("mic data lost\n", length);
             soc_dma_ring_rx_buf_set(rx_ring_buf, rx_buf, sizeof(int32_t) * appconfMIC_FRAME_LENGTH);
             soc_peripheral_hub_dma_request(device, SOC_DMA_RX_REQUEST);
         }
@@ -127,6 +140,8 @@ void audio_pipeline_stage1(void *arg)
 void audio_pipeline_stage2(void *arg)
 {
 	ap_stage_handle_t stage2 = ( ap_stage_handle_t ) arg;
+    BaseType_t recv_data = pdFALSE;
+    int32_t *mic_data;
 
 	QueueHandle_t stage2_to_tcp_queue = xQueueCreate(2, sizeof(void *));
 
@@ -139,28 +154,58 @@ void audio_pipeline_stage2(void *arg)
 											 sizeof(int32_t) * appconfMIC_FRAME_LENGTH );
     queue_to_tcp_stream_create( mic_to_tcp_handle, appconfQUEUE_TO_TCP_TASK_PRIORITY );
 
+    QueueHandle_t tcp2q = xQueueCreate(2, sizeof(void *));
+    tcp_to_queue_handle_t handle = tcp_to_queue_create(
+    										tcp2q,
+											appconfTCP_TO_QUEUE_PORT,
+											portMAX_DELAY,
+											portMAX_DELAY,
+											sizeof(int32_t)*appconfMIC_FRAME_LENGTH );
+    tcp_stream_to_queue_create( handle, appconfTCP_TO_QUEUE_TASK_PRIORITY );
+
     for (;;) {
-        int32_t *mic_data;
+    	/* Attempt to receive and item from an input queue.
+    	 * Timeout after 50ms, in case the input queue was changed. */
+        switch( input_sel )
+        {
+			case eAPINPUT_QUEUE:
+				recv_data = xQueueReceive(stage2->input, &mic_data, pdMS_TO_TICKS(50) );
+				break;
+			case eTCP_QUEUE:
+				recv_data = xQueueReceive(tcp2q, &mic_data, pdMS_TO_TICKS(50));
+				break;
+			default:
+				debug_printf("Invalid stage2 input select\n");
+				break;
+        }
 
-        xQueueReceive(stage2->input, &mic_data, portMAX_DELAY);
+        if( recv_data == pdTRUE )
+        {
+			/* If queue_to_tcp is connected, make a copy of the data and give it to the queue*/
+			if( is_queue_to_tcp_connected( mic_to_tcp_handle ) )
+			{
+				int32_t *mic_data_copy;
+				mic_data_copy = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
+				memcpy(mic_data_copy, mic_data, appconfMIC_FRAME_LENGTH * sizeof(int32_t));
 
-        /* If queue_to_tcp is connected, make a copy of the data and give it to the queue*/
-		if( is_queue_to_tcp_connected( mic_to_tcp_handle ) )
-		{
-	        int32_t *mic_data_copy;
-			mic_data_copy = pvPortMalloc(appconfMIC_FRAME_LENGTH * sizeof(int32_t));
-			memcpy(mic_data_copy, mic_data, appconfMIC_FRAME_LENGTH * sizeof(int32_t));
-
-			if (xQueueSend(stage2_to_tcp_queue, &mic_data_copy, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
-//				debug_printf("stage2 mic to tcp output lost\n");
-				vPortFree(mic_data_copy);
+				if (xQueueSend(stage2_to_tcp_queue, &mic_data_copy, pdMS_TO_TICKS(1)) == errQUEUE_FULL) {
+//					debug_printf("stage2 mic to tcp output lost\n");
+					vPortFree(mic_data_copy);
+				}
 			}
-		}
-		if (xQueueSend(stage2->output, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL)
-		{
-//          debug_printf("stage2 dac output lost\n");
-			vPortFree(mic_data);
-		}
+			if( stage2->output != NULL )
+			{
+				if (xQueueSend(stage2->output, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL)
+				{
+//         			debug_printf("stage2 dac output lost\n");
+					vPortFree(mic_data);
+				}
+			}
+			else
+			{
+				vPortFree(mic_data);
+			}
+        }
     }
 }
 

@@ -40,6 +40,7 @@ set(APP_C_SRCS
         "src/NetworkManager/network.c"
         "src/queue_to_i2s/queue_to_i2s.c"
         "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
+        "src/tcp_stream_to_queue/tcp_stream_to_queue.c"
         "src/thruput_test/thruput_test.c"
         "src/udp_cli/CLI-commands.c"
         "src/udp_cli/FreeRTOS_CLI.c"
@@ -56,6 +57,7 @@ set(APP_INCLUDES
         "src/NetworkManager"
         "src/queue_to_i2s"
         "src/queue_to_tcp_stream"
+        "src/tcp_stream_to_queue"
         "src/thruput_test"
         "src/udp_cli"
     )
