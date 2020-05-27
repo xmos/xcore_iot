@@ -46,15 +46,13 @@ INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_msgbuf_recv, device, buf, len, st
 {
     soc_peripheral_t dev = device;
     BaseType_t xYieldRequired = pdFALSE;
-    ( void ) status;
-
-    intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
-    MessageBufferHandle_t recv_msg_buf = msgbuffers->recv_msg_buf;
-
-    uint8_t *payload = buf;
-
-    if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM)
+    if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM )
     {
+        intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
+        MessageBufferHandle_t recv_msg_buf = msgbuffers->recv_msg_buf;
+
+        uint8_t *payload = buf;
+
 		if ( xMessageBufferIsFull(recv_msg_buf) == pdTRUE )
 		{
 			rtos_printf("tile[%d] Message buffer full, %d bytes lost\n", 1&get_local_tile_id(), len);
@@ -85,6 +83,15 @@ static void intertile_msgbuffer(void *arg)
     intertile_driver_footer_init(&msg_ftr, INTERTILE_CB_ID_0);
     intertile_driver_register_callback( dev, intertile_dev_msgbuf_recv, &msg_ftr);
 
+    uint8_t *buf;
+    for(int i=0; i<appconfINTERTILE_DMA_BUF_CNT; i++)
+    {
+		buf = pvPortMalloc(INTERTILE_DEV_BUFSIZE);
+		soc_dma_ring_rx_buf_set(soc_peripheral_rx_dma_ring_buf(dev), buf, INTERTILE_DEV_BUFSIZE);
+    }
+    soc_peripheral_hub_dma_request(dev, SOC_DMA_RX_REQUEST);
+
+
     uint8_t data[INTERTILE_DEV_BUFSIZE];
     for( ;; )
     {
@@ -110,15 +117,14 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 
     soc_peripheral_t dev = intertile_driver_init(
             BITSTREAM_INTERTILE_DEVICE_A,
-            6,
-            6,
+			appconfINTERTILE_DMA_BUF_CNT,
+			appconfINTERTILE_DMA_BUF_CNT,
             &msgbuffers,
             0);
 
     xTaskCreate(t0_test, "tile0_intertile", portTASK_STACK_DEPTH(t0_test), dev, uxPriority, NULL);
     xTaskCreate(rx_task, "tile0_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
     xTaskCreate(intertile_msgbuffer, "tile0_msgbuf", portTASK_STACK_DEPTH(intertile_msgbuffer), dev, uxPriority, NULL);
-
 }
 
 void intertile_ctrl_create_t1( UBaseType_t uxPriority )
@@ -133,8 +139,8 @@ void intertile_ctrl_create_t1( UBaseType_t uxPriority )
 
     soc_peripheral_t dev = intertile_driver_init(
             BITSTREAM_INTERTILE_DEVICE_A,
-            6,
-            6,
+			appconfINTERTILE_DMA_BUF_CNT,
+			appconfINTERTILE_DMA_BUF_CNT,
             &msgbuffers,
             0);
 

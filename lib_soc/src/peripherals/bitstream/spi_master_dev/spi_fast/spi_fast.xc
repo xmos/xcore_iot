@@ -61,6 +61,7 @@ void spi_fast_init(spi_fast_ports &p)
     configure_clock_ref(p.cb, p.clock_divide);
     configure_out_port(p.clk, p.cb, p.cpol ? 0xFFFFFFFF : 0x00000000);
     configure_in_port(p.miso, p.cb);
+    set_port_sample_delay(p.miso);
     configure_out_port(p.mosi, p.cb, 0);
     set_port_clock(p.cs, p.cb);
     start_clock(p.cb);
@@ -90,8 +91,8 @@ void spi_fast(unsigned num_bytes, char *buffer, spi_fast_ports &p, spi_direction
 
     partout_timed(p.clk, 16, p.clock_bits, port_time + p.clock_delay);
     partout_timed(p.mosi, 16, zip(buffer[0], buffer[0], 0), port_time);
-    asm volatile ("setpt res[%0], %1":: "r"(p.miso), "r"(port_time+15));
-    asm volatile ("setpsc res[%0], %1":: "r"(p.miso), "r"(16));
+    asm volatile ("setpt res[%0], %1":: "r"(p.miso), "r"(port_time+14));
+    set_port_shift_count(p.miso, 16);
 
     unsigned i;
     unsigned tmp;
@@ -102,8 +103,8 @@ void spi_fast(unsigned num_bytes, char *buffer, spi_fast_ports &p, spi_direction
         partout_timed(p.clk, 16, p.clock_bits, port_time + p.clock_delay);
         partout_timed(p.mosi, 16, zip(buffer[i], buffer[i], 0), port_time);
         asm volatile ("in %0, res[%1]": "=r"(tmp) : "r"(p.miso));
-        asm volatile ("setpt res[%0], %1":: "r"(p.miso), "r"(port_time+15));
-        asm volatile ("setpsc res[%0], %1":: "r"(p.miso), "r"(16));
+        asm volatile ("setpt res[%0], %1":: "r"(p.miso), "r"(port_time+14));
+        set_port_shift_count(p.miso, 16);
         if (direction != SPI_WRITE) {
             {buffer[i-1], void} = unzip(tmp >> 16, 0);
         }

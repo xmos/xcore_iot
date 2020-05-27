@@ -31,8 +31,8 @@ static QueueHandle_t eventQueue;
 typedef struct {
     const char * const *pds_data;
     int firmware_index;
-    uint16_t pds_size;
     uint8_t firmware_data[DOWNLOAD_BLOCK_SIZE];
+    uint16_t pds_size;
     uint8_t waited_event_id;
 } sl_wfx_host_ctx_t;
 

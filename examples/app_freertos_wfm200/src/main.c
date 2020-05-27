@@ -21,6 +21,7 @@
 #include "bitstream_devices.h"
 #include "spi_master_driver.h"
 #include "gpio_driver.h"
+#include "qspi_flash_driver.h"
 #include "sl_wfx.h"
 
 /* App headers */
@@ -28,7 +29,7 @@
 #include "network.h"
 #include "dhcpd.h"
 
-char *security_name(WIFISecurity_t s)
+static char *security_name(WIFISecurity_t s)
 {
     switch (s) {
     case eWiFiSecurityOpen:
@@ -46,16 +47,34 @@ char *security_name(WIFISecurity_t s)
     }
 }
 
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
+{
+	qspi_flash_read(
+			bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+	        data,
+			0x100000 + index,
+	        size);
+
+	return SL_STATUS_OK;
+}
+#endif
+
 static void wf200_test(void *arg)
 {
     WIFIReturnCode_t ret;
     WIFIScanResult_t scan_results[20];
+    WIFINetworkParams_t pxNetworkParams;
 
     rtos_printf("Hello from wf200 test\n ");
 
     ret = WIFI_On();
 
-    rtos_printf("Returned %x\n", ret);
+    rtos_printf("WIFI_On() returned %x\n", ret);
+
+    if (ret != eWiFiSuccess) {
+        vTaskDelete(NULL);
+    }
 
     initalize_FreeRTOS_IP();
 
@@ -72,9 +91,9 @@ static void wf200_test(void *arg)
             rtos_printf("\tStrength: %d dBm\n", (int) scan_results[i].cRSSI);
             rtos_printf("\t%s\n", security_name(scan_results[i].xSecurity));
         }
+    } else {
+    	rtos_printf("WIFI_Scan() failed %d\n", ret);
     }
-
-    WIFINetworkParams_t pxNetworkParams;
 
     while (1) {
 #if 0
@@ -95,7 +114,9 @@ static void wf200_test(void *arg)
 
         vTaskDelay(pdMS_TO_TICKS(5000));
 
-        WIFI_GetIP( (void *) &ip );
+        while (WIFI_GetIP( (void *) &ip ) != eWiFiSuccess) {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
         FreeRTOS_inet_ntoa(ip, a);
         rtos_printf("My IP is %s\n", a);
 
@@ -122,16 +143,21 @@ static void wf200_test(void *arg)
 
         WIFI_ConfigureAP(&pxNetworkParams);
 
-        do {
-            ret = WIFI_StartAP();
-            rtos_printf("WIFI_StartAP() returned %x\n", ret);
-        } while (ret != eWiFiSuccess);
+        while (WIFI_StartAP() != eWiFiSuccess) {
+        	rtos_printf("WIFI_StartAP() returned %x\n", ret);
+        	vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+
+        rtos_printf("AP SSID: %s and password: %s started\n", pxNetworkParams.pcSSID, pxNetworkParams.pcPassword);
+
         dhcpd_start(16);
+
         vTaskDelay(pdMS_TO_TICKS(60*60000));
 
         dhcpd_stop();
 
         /* FIXME: Why does this cause a firmware exception sometimes? */
+        /* Answer: wf200 firmware bug. There is a firmware update that should fix it */
         ret = WIFI_StopAP();
 
         rtos_printf("WIFI_StopAP() returned %x\n", ret);
@@ -162,6 +188,12 @@ void soc_tile0_main(
             BITSTREAM_GPIO_DEVICE_A,
             NULL,
             0);
+
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
+    dev = qspi_flash_driver_init(
+            BITSTREAM_QSPI_FLASH_DEVICE_A,
+            0);
+#endif
 
     xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
 

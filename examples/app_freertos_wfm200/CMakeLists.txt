@@ -17,37 +17,28 @@ set(PROJECT_VERSION 0.5.0)
 enable_language(C ASM)
 
 ## Set XMOS application variables
-set(APP_HW_TARGET bitstream_src/MIC-ARRAY-1V3.xn)
 set(APP_COMPILER_FLAGS
         "-Os"
         "-g"
         "-report"
         "-fxscope"
         "-Wxcore-fptrgroup"
-        "-lquadflash"
         "-DDEBUG_PRINT_ENABLE=1"
-        "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_INIT"
+        "-DSL_WFX_DEBUG_MASK=SL_WFX_DEBUG_ERROR"
         "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
 set(APP_XC_SRCS
-        "bitstream_src/bitstream.xc"
+        ""
     )
 set(APP_C_SRCS
         "src/main.c"
         "src/network.c"
-        "src/dhcpd.c"
-        "src/afr_wifi/sl_wfx_callbacks.c"
-        "src/afr_wifi/sl_wfx_iot_wifi.c"
-        "bitstream_src/bitstream.c"
     )
 set(APP_ASM_SRCS
         ""
     )
 set(APP_INCLUDES
         "src"
-        "src/afr_wifi"
-        "src/afr_wifi/types"
-        "bitstream_src"
     )
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.3.0)"
@@ -62,6 +53,9 @@ set(LIB_SOC_WFM200 ${BSP_ONLY})
 set(LIB_SOC_MICARRAY ${FULL})
 set(LIB_SOC_I2S ${FULL})
 set(LIB_SOC_I2C ${FULL})
+set(LIB_SOC_QSPI_FLASH ${FULL})
+set(LIB_SOC_SW_WIFI True)
+set(LIB_SOC_SW_DHCPD True)
 
 ## Register the application
 XMOS_REGISTER_APP()

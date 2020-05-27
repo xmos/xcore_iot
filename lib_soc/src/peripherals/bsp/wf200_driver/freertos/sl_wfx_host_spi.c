@@ -115,7 +115,9 @@ sl_status_t sl_wfx_host_init_bus(void)
         }
 
         if (hif_ctx.wup_gpio_port > gpio_none && hif_ctx.wup_gpio_port < GPIO_TOTAL_PORT_CNT) {
-            gpio_init(hif_ctx.gpio_dev, hif_ctx.wup_gpio_port);
+        	if (hif_ctx.wup_gpio_port != hif_ctx.reset_gpio_port) {
+        		gpio_init(hif_ctx.gpio_dev, hif_ctx.wup_gpio_port);
+        	}
         } else {
             hif_ctx.wup_gpio_port = gpio_none;
         }

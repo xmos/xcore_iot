@@ -17,6 +17,7 @@
 
 void micarray_dev_init(
         clock pdmclk,
+        clock ?pdmclk2,
         in port p_mclk,
         out port p_pdm_clk,
         buffered in port:32 p_pdm_mics);
@@ -32,6 +33,13 @@ void micarray_dev_task(
         streaming chanend c_ds_output[]);
 
 void micarray_dev(
+        soc_peripheral_t peripheral,
+        chanend ?data_to_dma_c,
+        chanend ?data_from_dma_c,
+        chanend ?ctrl_c,
+        in buffered port:32 p_pdm_mics);
+
+void micarray_dev_1b(
         soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
         chanend ?data_from_dma_c,

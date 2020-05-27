@@ -13,10 +13,10 @@ clean:
 	make -C build/tile1 clean
 
 build/tile0/Makefile:
-	cmake -B build/tile0 -DTHIS_XCORE_TILE=0
+	cmake -B build/tile0 -DTHIS_XCORE_TILE=0 -DBOARD=$(BOARD)
 
 build/tile1/Makefile:
-	cmake -B build/tile1 -DTHIS_XCORE_TILE=1
+	cmake -B build/tile1 -DTHIS_XCORE_TILE=1 -DBOARD=$(BOARD)
 
 $(EXECUTABLE_T0): build/tile0/Makefile .FORCE
 	make -C build/tile0

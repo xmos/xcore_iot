@@ -1,6 +1,7 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
 #include <string.h>
+#include <xcore/hwtimer.h>
 #include "app_conf.h"
 
 /* FreeRTOS headers */
@@ -32,9 +33,9 @@ static hwtimer_t spitimer;
 static uint32_t time;
 static uint32_t start;
 
-#define SPI_TIMING_INIT()     { hwtimer_alloc(&spitimer); }
-#define SPI_TIMING_START()    { hwtimer_get_time(spitimer, &start); }
-#define SPI_TIMING_END()      { hwtimer_get_time(spitimer, &time);         \
+#define SPI_TIMING_INIT()     { spitimer = hwtimer_alloc(); }
+#define SPI_TIMING_START()    { start = hwtimer_get_time(spitimer); }
+#define SPI_TIMING_END()      { time = hwtimer_get_time(spitimer);         \
                                 debug_printf("transaction time: %d\n", time - start); }
 #else
 #define SPI_TIMING_INIT()     {}

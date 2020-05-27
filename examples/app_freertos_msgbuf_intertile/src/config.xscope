@@ -20,5 +20,5 @@
     <!-- <Probe name="Probe Name" type="CONTINUOUS" datatype="UINT" units="Value" enabled="true"/> -->
     <!-- From the target code, call: xscope_int(PROBE_NAME, value); -->
 
-    <Probe name="segger_trace"         type="CONTINUOUS" datatype="NONE" units="NONE" enabled="true"/>
+    <Probe name="freertos_trace"         type="CONTINUOUS" datatype="NONE" units="NONE" enabled="true"/>
 </xSCOPEconfig>
