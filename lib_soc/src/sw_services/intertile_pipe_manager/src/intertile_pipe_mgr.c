@@ -123,7 +123,11 @@ INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_recv, device, buf, len, status, x
                 len,
                 &xYieldRequired );
 
-        if (xResult != pdPASS)
+        if (xResult == pdPASS)
+        {
+            *xReturnBufferToDMA = pdFALSE;
+        }
+        else
         {
             *xReturnBufferToDMA = pdTRUE;
         }
@@ -404,7 +408,6 @@ BaseType_t IntertilePipeManagerInit( int device_id, intertile_cb_id_t cb_id, UBa
     soc_peripheral_t dev = intertile_driver_init( device_id,
                                                   impconfNUM_INTERTILE_BUFFER_DESCRIPTORS,
                                                   impconfNUM_INTERTILE_BUFFER_DESCRIPTORS,
-                                                  NULL,
                                                   0);
 
     static IntertilePipeManagerArgs_t args;

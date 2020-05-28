@@ -279,14 +279,8 @@ static void wf200_test(void *arg)
 
     rtos_printf("Hello from wf200 test\n ");
 
-    spi_master_driver_init(
-            BITSTREAM_SPI_DEVICE_A,  /* Initializing SPI device A */
-            2,                       /* Use 2 DMA buffers for the scatter/gather */
-            0);                      /* This device's interrupts should happen on core 0 */
-
     gpio_driver_init(
             BITSTREAM_GPIO_DEVICE_A,
-            NULL,
             0);
 
     ret = WIFI_On();

@@ -145,7 +145,6 @@ void gpio_ctrl_create( UBaseType_t priority )
 
     dev = gpio_driver_init(
             BITSTREAM_GPIO_DEVICE_A,        /* Initializing GPIO device A */
-            NULL,                           /* No app data */
             0);                             /* This device's interrupts should happen on core 0 */
 
     xTaskCreate(gpio_ctrl_t0, "t0_gpio_ctrl", portTASK_STACK_DEPTH(gpio_ctrl_t0), dev, priority, &gpio_handler_task);

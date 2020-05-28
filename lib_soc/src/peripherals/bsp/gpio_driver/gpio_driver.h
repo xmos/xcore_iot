@@ -1,5 +1,11 @@
 // Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
+/*
+ * GPIO driver functions. Note that all functions other than
+ * gpio_driver_init() may be safely called both from tasks
+ * and ISRs, as well as in an SMP environment.
+ */
+
 #ifndef GPIO_DRIVER_H_
 #define GPIO_DRIVER_H_
 
@@ -24,7 +30,6 @@ typedef BaseType_t (*gpio_isr_cb_t)(soc_peripheral_t device, gpio_id_t source_id
 /* Initialize device */
 soc_peripheral_t gpio_driver_init(
         int device_id,
-        void *app_data,
         int isr_core);
 
 /* Initialize port */

@@ -4,7 +4,7 @@ set(DEVICE_XC_SRCS
         "src/peripherals/bitstream/spi_master_dev/spi_master_dev.xc"
         "src/peripherals/bitstream/spi_master_dev/spi_fast/spi_fast.xc")
 set(DEVICE_C_SRCS
-        "")
+        "src/peripherals/bitstream/spi_master_dev/spi_fast/spi_fast.S")
 set(DEVICE_ASM_SRCS
         "")
 set(DEVICE_INCLUDES
