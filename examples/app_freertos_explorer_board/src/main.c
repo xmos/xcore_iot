@@ -16,6 +16,7 @@
 #include "thruput_test.h"
 #include "gpio_ctrl.h"
 #include "app_conf.h"
+#include "sntpd.h"
 
 
 void soc_tile0_main(
@@ -40,6 +41,9 @@ void vApplicationDaemonTaskStartupHook( void )
 {
     /* Create audio pipeline */
     audio_pipeline_create( appconfAUDIO_PIPELINE_TASK_PRIORITY );
+
+    /* Create SNTPD */
+    sntp_create( appconfSNTPD_TASK_PRIORITY );
 }
 
 void vApplicationMallocFailedHook(void)

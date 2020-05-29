@@ -78,6 +78,7 @@ set(LIB_SOC_WFM200 ${BSP_ONLY})
 set(LIB_SOC_SW_TRACE True)
 set(LIB_SOC_SW_WIFI True)
 set(LIB_SOC_SW_DHCPD True)
+set(LIB_SOC_SW_SNTPD True)
 
 ## Register the application
 XMOS_REGISTER_APP()

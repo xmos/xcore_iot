@@ -113,7 +113,10 @@ stack repeating the checksum calculations. */
 #define ipconfigZERO_COPY_RX_DRIVER 1
 #define ipconfigZERO_COPY_TX_DRIVER 0
 
-#define ipconfigSUPPORT_SIGNALS 1
+#define ipconfigSUPPORT_SIGNALS					1
+//#define ipconfigSOCKET_HAS_USER_SEMAPHORE 		1
+//#define ipconfigSOCKET_HAS_USER_WAKE_CALLBACK 	1
+//#define ipconfigUSE_CALLBACKS 					1
 
 /* Several API's will block until the result is known, or the action has been
 performed, for example FreeRTOS_send() and FreeRTOS_recv().  The timeouts can be
@@ -137,7 +140,7 @@ call to FreeRTOS_gethostbyname() will return immediately, without even creating
 a socket. */
 #define ipconfigUSE_DNS_CACHE				( 1 )
 #define ipconfigDNS_CACHE_NAME_LENGTH		( 16 )
-#define ipconfigDNS_CACHE_ENTRIES			( 4 )
+#define ipconfigDNS_CACHE_ENTRIES			( 6 )
 #define ipconfigDNS_REQUEST_ATTEMPTS		( 2 )
 
 /* The IP stack executes it its own task (although any application task can make
