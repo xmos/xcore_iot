@@ -83,10 +83,10 @@ void qspi_flash_read(
     /* this request will take care of both the RX and TX */
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 
-    xSemaphoreGive(driver_struct->lock);
-
     xSemaphoreTake(driver_struct->dma_sem, portMAX_DELAY); /* wait for the DMA TX to complete */
     xSemaphoreTake(driver_struct->dma_sem, portMAX_DELAY); /* wait for the DMA RX to complete */
+
+    xSemaphoreGive(driver_struct->lock);
 }
 
 #define WORD_TO_BYTE_ADDRESS(w) ((w) * sizeof(uint32_t))
@@ -137,9 +137,9 @@ void qspi_flash_write(
 
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 
-    xSemaphoreGive(driver_struct->lock);
-
     xSemaphoreTake(driver_struct->dma_sem, portMAX_DELAY); /* wait for the DMA TX to complete */
+
+    xSemaphoreGive(driver_struct->lock);
 }
 
 void qspi_flash_erase(
@@ -161,12 +161,12 @@ void qspi_flash_erase(
 
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
 
-    xSemaphoreGive(driver_struct->lock);
-
     /* wait for the DMA TX to complete before returning,
      * otherwise flash_cmd will go out of scope before
      * the device receives it. */
     xSemaphoreTake(driver_struct->dma_sem, portMAX_DELAY);
+
+    xSemaphoreGive(driver_struct->lock);
 }
 
 soc_peripheral_t qspi_flash_driver_init(

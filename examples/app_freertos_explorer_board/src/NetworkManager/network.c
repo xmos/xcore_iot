@@ -157,14 +157,9 @@ void initalize_wifi( void )
 {
 
     soc_peripheral_t dev;
-    dev = spi_master_driver_init(
-            BITSTREAM_SPI_DEVICE_A,  /* Initializing SPI device A */
-            2,                       /* Use 2 DMA buffers for the scatter/gather */
-            0);                      /* This device's interrupts should happen on core 0 */
 
     dev = gpio_driver_init(
             BITSTREAM_GPIO_DEVICE_A,
-            NULL,
             0);
 
 #if SOC_QSPI_FLASH_PERIPHERAL_USED

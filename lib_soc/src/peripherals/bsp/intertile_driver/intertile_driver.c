@@ -9,6 +9,7 @@
 #include "intertile_driver.h"
 
 #include "FreeRTOS.h"
+#include "semphr.h"
 
 #if ( SOC_INTERTILE_PERIPHERAL_USED == 0 )
 #define BITSTREAM_INTERTILE_DEVICE_COUNT 0
@@ -19,25 +20,18 @@ typedef struct intertile_isr_callback {
     INTERTILE_ISR_CALLBACK_ATTR intertile_isr_cb_t cb;
 } intertile_isr_callback_t;
 
-static intertile_isr_callback_t intertile_isr_callback_map[ BITSTREAM_INTERTILE_DEVICE_COUNT ][ INTERTILE_DEV_HANDLER_COUNT ];
-
-INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_null, device, buf, len, status, xReturnBufferToDMA)
-{
-    (void) device;
-    (void) buf;
-    (void) len;
-    (void) status;
-    (void) xReturnBufferToDMA;
-
-    return pdFALSE;
-}
+typedef struct {
+    soc_peripheral_t dev;
+    SemaphoreHandle_t lock;
+    intertile_isr_callback_t intertile_isr_callback_map[ INTERTILE_DEV_HANDLER_COUNT ];
+} intertile_driver_t;
 
 RTOS_IRQ_ISR_ATTR
 static void intertile_isr( soc_peripheral_t device )
 {
     BaseType_t xYieldRequired = pdFALSE;
     uint32_t status;
-    int device_id = soc_peripheral_get_id( device );
+    intertile_driver_t *driver_struct = (intertile_driver_t *) soc_peripheral_app_data(device);
 
     status = soc_peripheral_interrupt_status(device);
 
@@ -52,18 +46,22 @@ static void intertile_isr( soc_peripheral_t device )
         tx_ring_buf = soc_peripheral_tx_dma_ring_buf(device);
         while( ( bytes_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &bytes_buf_len, &more) ) != NULL )
         {
-            xassert(more);
-            opt_ftr = soc_dma_ring_tx_buf_get(tx_ring_buf, &opt_ftr_len, &more); xassert(more);
-            ftr_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &ftr_buf_len, &more); xassert(!more);
+            configASSERT(more);
+            opt_ftr = soc_dma_ring_tx_buf_get(tx_ring_buf, &opt_ftr_len, &more); configASSERT(more);
+            ftr_buf = soc_dma_ring_tx_buf_get(tx_ring_buf, &ftr_buf_len, &more); configASSERT(!more);
 
-            uint32_t cb_id = ftr_buf[0];
+            intertile_cb_id_t cb_id = ftr_buf[0];
             intertile_isr_callback_t mapped_cb;
 
-            if( ( mapped_cb.cb = intertile_isr_callback_map[ device_id ][ cb_id ].cb ) != NULL )
+            configASSERT( ( cb_id >= 0 ) && ( cb_id < INTERTILE_DEV_HANDLER_COUNT ) );
+            if( ( cb_id >= 0 ) && ( cb_id < INTERTILE_DEV_HANDLER_COUNT ) )
             {
-                if( mapped_cb.cb( device, bytes_buf, bytes_buf_len, SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM, NULL ) == pdTRUE )
+                if( ( mapped_cb.cb = driver_struct->intertile_isr_callback_map[ cb_id ].cb ) != NULL )
                 {
-                    xYieldRequired = pdTRUE;
+                    if( mapped_cb.cb( device, bytes_buf, bytes_buf_len, SOC_PERIPHERAL_ISR_DMA_TX_DONE_BM, NULL ) == pdTRUE )
+                    {
+                        xYieldRequired = pdTRUE;
+                    }
                 }
             }
         }
@@ -80,17 +78,21 @@ static void intertile_isr( soc_peripheral_t device )
 
         while( ( frame_buffer = soc_dma_ring_rx_buf_get(rx_ring_buf, &frame_length, NULL) ) != NULL )
         {
-            BaseType_t xReturnBufferToDMA = pdFALSE;
+            BaseType_t xReturnBufferToDMA = pdTRUE;
             intertile_isr_callback_t mapped_cb;
 
             /* cb_id is located at the start of the footer */
-            uint32_t cb_id = frame_buffer[ frame_length - sizeof( intertile_cb_footer_t ) ];
+            intertile_cb_id_t cb_id = frame_buffer[ frame_length - sizeof( intertile_cb_footer_t ) ];
 
-            if( ( mapped_cb.cb = intertile_isr_callback_map[ device_id ][ cb_id ].cb ) != NULL )
+            configASSERT( ( cb_id >= 0 ) && ( cb_id < INTERTILE_DEV_HANDLER_COUNT ) );
+            if( ( cb_id >= 0 ) && ( cb_id < INTERTILE_DEV_HANDLER_COUNT ) )
             {
-                if( mapped_cb.cb( device, frame_buffer, frame_length, SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM, &xReturnBufferToDMA ) == pdTRUE )
+                if( ( mapped_cb.cb = driver_struct->intertile_isr_callback_map[ cb_id ].cb ) != NULL )
                 {
-                    xYieldRequired = pdTRUE;
+                    if( mapped_cb.cb( device, frame_buffer, frame_length, SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM, &xReturnBufferToDMA ) == pdTRUE )
+                    {
+                        xYieldRequired = pdTRUE;
+                    }
                 }
             }
 
@@ -130,11 +132,12 @@ BaseType_t intertile_driver_register_callback(
         intertile_cb_footer_t* cb_footer)
 {
     BaseType_t xRetVal = pdFAIL;
-    int device_id = soc_peripheral_get_id( dev );
+    intertile_cb_id_t cb_id = cb_footer->cb_id;
+    intertile_driver_t *driver_struct = (intertile_driver_t *) soc_peripheral_app_data(dev);
 
-    if( ( cb_footer->cb_id < INTERTILE_DEV_HANDLER_COUNT ) && ( device_id >= 0 ) && ( device_id < BITSTREAM_INTERTILE_DEVICE_COUNT ) )
+    if( ( cb_id >= 0 ) && ( cb_id < INTERTILE_DEV_HANDLER_COUNT ) )
     {
-        intertile_isr_callback_map[ device_id ][ cb_footer->cb_id ].cb = (isr_cb != NULL) ? isr_cb : intertile_dev_null;
+        driver_struct->intertile_isr_callback_map[ cb_id ].cb = isr_cb;
         xRetVal = pdPASS;
     }
 
@@ -146,11 +149,12 @@ BaseType_t intertile_driver_unregister_callback(
         intertile_cb_footer_t* cb_footer)
 {
     BaseType_t xRetVal = pdFAIL;
-    int device_id = soc_peripheral_get_id( dev );
+    intertile_cb_id_t cb_id = cb_footer->cb_id;
+    intertile_driver_t *driver_struct = (intertile_driver_t *) soc_peripheral_app_data(dev);
 
-    if( ( device_id >= 0 ) && ( device_id < BITSTREAM_INTERTILE_DEVICE_COUNT ) )
+    if( ( cb_id >= 0 ) && ( cb_id < INTERTILE_DEV_HANDLER_COUNT ) )
     {
-        intertile_isr_callback_map[ device_id ][ cb_footer->cb_id ].cb = NULL;
+        driver_struct->intertile_isr_callback_map[ cb_id ].cb = NULL;
         xRetVal = pdPASS;
     }
 
@@ -166,35 +170,46 @@ void intertile_driver_send_bytes(
         intertile_cb_footer_t* cb_footer)
 {
     soc_dma_ring_buf_t *tx_ring_buf = soc_peripheral_tx_dma_ring_buf(dev);
+    intertile_driver_t *driver_struct = (intertile_driver_t *) soc_peripheral_app_data(dev);
 
     configASSERT( (len + opt_len + sizeof(intertile_cb_footer_t)) <= INTERTILE_DEV_BUFSIZE );
+
+    xSemaphoreTake(driver_struct->lock, portMAX_DELAY);
 
     soc_dma_ring_tx_buf_sg_set(tx_ring_buf, cb_footer, sizeof(intertile_cb_footer_t), 2, 3);
     soc_dma_ring_tx_buf_sg_set(tx_ring_buf, opt_footer, opt_len, 1, 3);
     soc_dma_ring_tx_buf_sg_set(tx_ring_buf, bytes, len, 0, 3);
 
     soc_peripheral_hub_dma_request(dev, SOC_DMA_TX_REQUEST);
+
+    xSemaphoreGive(driver_struct->lock);
 }
 
 soc_peripheral_t intertile_driver_init(
         int device_id,
         int rx_desc_count,
         int tx_desc_count,
-        void *app_data,
         int isr_core)
 {
     soc_peripheral_t device;
+    intertile_driver_t *driver_struct;
 
     configASSERT(device_id >= 0 && device_id < BITSTREAM_INTERTILE_DEVICE_COUNT);
 
     device = bitstream_intertile_devices[device_id];
+
+    driver_struct = pvPortMalloc(sizeof(intertile_driver_t));
+
+    driver_struct->lock = xSemaphoreCreateMutex();
+    memset(driver_struct->intertile_isr_callback_map, 0, sizeof(driver_struct->intertile_isr_callback_map));
+    driver_struct->dev = device;
 
     soc_peripheral_common_dma_init(
             device,
             rx_desc_count,
             0,
             tx_desc_count,
-            app_data,
+            driver_struct,
             isr_core,
             (rtos_irq_isr_t)intertile_isr);
 

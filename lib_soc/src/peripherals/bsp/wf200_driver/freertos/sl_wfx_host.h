@@ -45,9 +45,13 @@ typedef struct __attribute__((__packed__)) scan_result_list_s {
  * Must be called prior to calling sl_wfx_init() to let the driver
  * know which devices to use for SPI and GPIO, as well as which
  * GPIO ports and pins to use for the WIRQ, WUP, and RESET pins.
+ *
+ * The GPIO device must already be initialized.
+ * The SPI device must not already be initialized, as the wfx200
+ * driver will initialize it.
  */
-void sl_wfx_host_set_hif(soc_peripheral_t spi_dev,
-                         soc_peripheral_t gpio_dev,
+void sl_wfx_host_set_hif(int spi_dev_id,
+		                 int gpio_dev_id,
                          gpio_id_t wirq_gpio_port, int wirq_bit,
                          gpio_id_t wup_gpio_port, int wup_bit,
                          gpio_id_t reset_gpio_port, int reset_bit);

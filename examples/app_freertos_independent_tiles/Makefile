@@ -2,7 +2,7 @@ EXECUTABLE = bin/app_freertos_independent_tiles.xe
 EXECUTABLE_T0 = bin/tile0/app_freertos_independent_tiles_0.xe
 EXECUTABLE_T1 = bin/tile1/app_freertos_independent_tiles_1.xe
 
-.PHONY: all clean .FORCE
+.PHONY: all clean distclean .FORCE
 .FORCE:
 
 all: $(EXECUTABLE)
@@ -11,6 +11,9 @@ clean:
 	rm -rf build/tmp $(EXECUTABLE) $(EXECUTABLE_T0) $(EXECUTABLE_T1)
 	make -C build/tile0 clean
 	make -C build/tile1 clean
+
+distclean:
+	rm -rf build
 
 build/tile0/Makefile:
 	cmake -B build/tile0 -DTHIS_XCORE_TILE=0 -DBOARD=$(BOARD)

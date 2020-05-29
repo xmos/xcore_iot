@@ -1,5 +1,8 @@
 // Copyright (c) 2016-2020, XMOS Ltd, All rights reserved
 #include "spi_fast.h"
+#include "soc.h"
+#include "xassert.h"
+#include "spi_master_dev.h"
 #include <xclib.h>
 
 static unsigned compute_port_ticks(unsigned nanoseconds, unsigned clock_divide)
@@ -12,115 +15,127 @@ static unsigned compute_port_ticks(unsigned nanoseconds, unsigned clock_divide)
     return (nanoseconds + port_tick_nanoseconds - 1) / port_tick_nanoseconds;
 }
 
-static unsigned compute_port_value(spi_fast_ports &p,
-                                   uint32_t p_ss_bit,
+#pragma unsafe arrays
+static unsigned compute_port_value(spi_fast_ports *p,
                                    uint32_t bit_value)
 {
-    // Get the current state of the port
-    unsigned current_port_value = peek(p.cs);
-    // Zero the p_ss_bit
-    unsigned new_port_value = (current_port_value & ~(1 << p_ss_bit));
-    // Or desired bit value into p_ss_bit
-    return new_port_value | (bit_value << p_ss_bit);
+    unsigned current_port_value = peek(p->cs);
+
+    if (bit_value) {
+        return current_port_value | (1 << p->cs_port_bit);
+    } else {
+        return current_port_value & ~(1 << p->cs_port_bit);
+    }
 }
 
-void drive_cs_port_now(spi_fast_ports &p,
-                       uint32_t p_ss_bit,
+#pragma unsafe arrays
+void drive_cs_port_now(spi_fast_ports *p,
                        uint32_t bit_value)
 {
+    unsigned new_port_value = compute_port_value(p, bit_value);
 
-    unsigned new_port_value = compute_port_value(p, p_ss_bit, bit_value);
-
-    p.cs <: new_port_value;
+    p->cs <: new_port_value;
 }
 
-void drive_cs_port_at_time(spi_fast_ports &p,
-                           uint32_t p_ss_bit,
+#pragma unsafe arrays
+void drive_cs_port_at_time(spi_fast_ports *p,
                            uint32_t bit_value,
-                           unsigned time)
+                           uint32_t time)
 {
-    unsigned new_port_value = compute_port_value(p, p_ss_bit, bit_value);
+    unsigned new_port_value = compute_port_value(p, bit_value);
 
-    p.cs @ time <: new_port_value;
+    p->cs @ time <: new_port_value;
 }
 
-void drive_cs_port_get_time(spi_fast_ports &p,
-                            uint32_t p_ss_bit,
+#pragma unsafe arrays
+void drive_cs_port_get_time(spi_fast_ports *p,
                             uint32_t bit_value,
-                            unsigned *time)
+                            uint32_t *time)
 {
 
-    unsigned new_port_value = compute_port_value(p, p_ss_bit, bit_value);
+    unsigned new_port_value = compute_port_value(p, bit_value);
 
-    p.cs <: new_port_value @ *time;
+    p->cs <: new_port_value @ *time;
 }
 
-void spi_fast_init(spi_fast_ports &p)
+#pragma unsafe arrays
+void spi_fast_init(spi_fast_ports *p)
 {
-    stop_clock(p.cb);
-    configure_clock_ref(p.cb, p.clock_divide);
-    configure_out_port(p.clk, p.cb, p.cpol ? 0xFFFFFFFF : 0x00000000);
-    configure_in_port(p.miso, p.cb);
-    set_port_sample_delay(p.miso);
-    configure_out_port(p.mosi, p.cb, 0);
-    set_port_clock(p.cs, p.cb);
-    start_clock(p.cb);
-    drive_cs_port_now(p, p.cs_port_bit, 1);
+    stop_clock(p->cb);
+    configure_clock_ref(p->cb, p->clock_divide);
+    configure_out_port(p->clk, p->cb, p->cpol ? 0xFFFFFFFF : 0x00000000);
+    configure_in_port(p->miso, p->cb);
+    set_port_sample_delay(p->miso);
+    configure_out_port(p->mosi, p->cb, 0);
+    set_port_clock(p->cs, p->cb);
+    start_clock(p->cb);
+    drive_cs_port_now(p, 1);
 
-    p.cs_to_data_delay_ticks = compute_port_ticks(p.cs_to_data_delay_ns, p.clock_divide);
-    p.byte_setup_ticks       = compute_port_ticks(p.byte_setup_ns,       p.clock_divide);
-    p.data_to_cs_delay_ticks = compute_port_ticks(p.data_to_cs_delay_ns, p.clock_divide);
+    /* There is a worst case minimum time of approximately 500 ns (exact time depends on
+     * system clock frequency and number of cores) between CS going low and the first
+     * data bit going out due to the number of instructions between CS output and first
+     * data output.
+     */
+    unsigned cs_to_data_delay_ns = p->cs_to_data_delay_ns >= SPICONF_MIN_CS_TO_DATA_DELAY_NS ? p->cs_to_data_delay_ns : SPICONF_MIN_CS_TO_DATA_DELAY_NS;
 
-    p.clock_bits = p.cpol ? 0xAAAA : 0x5555;
-    p.clock_delay = p.cpha ? 0 : 1;
+#if !SPICONF_INTERBYTE_DELAY_ENABLE
+    xassert(p->byte_setup_ns == 0);
+#endif
+
+    p->cs_to_data_delay_ticks = compute_port_ticks(cs_to_data_delay_ns,   p->clock_divide);
+    p->byte_setup_ticks       = compute_port_ticks(p->byte_setup_ns,       p->clock_divide);
+    p->data_to_cs_delay_ticks = compute_port_ticks(p->data_to_cs_delay_ns, p->clock_divide);
+
+    p->clock_bits = p->cpol ? 0xAAAA : 0x5555;
+    p->clock_delay = p->cpha ? 0 : 1;
 }
 
-void spi_fast(unsigned num_bytes, char *buffer, spi_fast_ports &p, spi_direction_t direction)
-{
+extern "C" {
+void spi_fast_xfer(
+        unsigned num_bytes,
+        char *buffer,
+        spi_fast_ports *p,
+        int save_input,
+        uint32_t start_time,
+        uint32_t end_time,
+        unsigned cs_disable_value);
+}
 
-    // Prepare the outgoing data
-    // TODO: optimise the data reversal
+#pragma unsafe arrays
+void spi_fast(unsigned num_bytes, char *buffer, spi_fast_ports *p, spi_direction_t direction)
+{
+    uint32_t start_time;
+    uint32_t end_time;
+    int i;
+    int save_input = direction != SPI_WRITE;
+
+    unsigned current_cs_port_value = peek(p->cs);
+
+    unsigned cs_disable_value = current_cs_port_value | (1 << p->cs_port_bit);
+    unsigned cs_enable_value = current_cs_port_value & ~(1 << p->cs_port_bit);
+
+    /* Prepare the outgoing data */
     for (int i = 0; i < num_bytes; i++) {
         buffer[i] = byterev(bitrev(buffer[i]));
     }
 
-    unsigned start_time;
-    drive_cs_port_get_time(p, p.cs_port_bit, 0, &start_time);
+#if SPICONF_INTERBYTE_DELAY_ENABLE
+    end_time = (num_bytes - 1) * (16 + p->byte_setup_ticks) + 16 + p->clock_delay + p->data_to_cs_delay_ticks;
+#else
+    end_time = num_bytes * 16 + p->clock_delay + p->data_to_cs_delay_ticks;
+#endif
 
-    unsigned port_time = start_time + p.cs_to_data_delay_ticks;
+    p->cs <: cs_enable_value @ start_time;
 
-    partout_timed(p.clk, 16, p.clock_bits, port_time + p.clock_delay);
-    partout_timed(p.mosi, 16, zip(buffer[0], buffer[0], 0), port_time);
-    asm volatile ("setpt res[%0], %1":: "r"(p.miso), "r"(port_time+14));
-    set_port_shift_count(p.miso, 16);
+    start_time += p->cs_to_data_delay_ticks;
+    end_time += start_time;
 
-    unsigned i;
-    unsigned tmp;
-    for (i = 1; i < num_bytes; i++) {
+    spi_fast_xfer(num_bytes, buffer, p, save_input, start_time, end_time, cs_disable_value);
 
-        port_time += 16 + p.byte_setup_ticks;
-
-        partout_timed(p.clk, 16, p.clock_bits, port_time + p.clock_delay);
-        partout_timed(p.mosi, 16, zip(buffer[i], buffer[i], 0), port_time);
-        asm volatile ("in %0, res[%1]": "=r"(tmp) : "r"(p.miso));
-        asm volatile ("setpt res[%0], %1":: "r"(p.miso), "r"(port_time+14));
-        set_port_shift_count(p.miso, 16);
-        if (direction != SPI_WRITE) {
-            {buffer[i-1], void} = unzip(tmp >> 16, 0);
+    if (save_input) {
+        /* Prepare the received data */
+        for (i = 0; i < num_bytes; i++) {
+            buffer[i] = byterev(bitrev(buffer[i]));
         }
-    }
-
-    port_time += 16 + p.clock_delay + p.data_to_cs_delay_ticks;
-    drive_cs_port_at_time(p, p.cs_port_bit, 1, port_time);
-
-    asm volatile ("in %0, res[%1]": "=r"(tmp) : "r"(p.miso));
-    if (direction != SPI_WRITE) {
-        {buffer[i-1], void} = unzip(tmp >> 16, 0);
-    }
-
-    // Prepare the received data
-    // TODO: optimise the data reversal
-    for (int i = 0; i < num_bytes; i++) {
-        buffer[i] = byterev(bitrev(buffer[i]));
     }
 }

@@ -20,13 +20,11 @@
 #include "app_conf.h"
 #include "intertile_ctrl.h"
 
+static intertile_msg_buffers_t msgbuffers;
 
 void rx_task(void *arg)
 {
-    soc_peripheral_t dev = arg;
-
-    intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
-    MessageBufferHandle_t recv_msg_buf = msgbuffers->recv_msg_buf;
+    MessageBufferHandle_t recv_msg_buf = msgbuffers.recv_msg_buf;
     for( ;; )
     {
         uint8_t *data = pvPortMalloc( sizeof(uint8_t) * INTERTILE_DEV_BUFSIZE );
@@ -44,12 +42,10 @@ void rx_task(void *arg)
 
 INTERTILE_ISR_CALLBACK_FUNCTION( intertile_dev_msgbuf_recv, device, buf, len, status, xReturnBufferToDMA)
 {
-    soc_peripheral_t dev = device;
     BaseType_t xYieldRequired = pdFALSE;
     if (status & SOC_PERIPHERAL_ISR_DMA_RX_DONE_BM )
     {
-        intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
-        MessageBufferHandle_t recv_msg_buf = msgbuffers->recv_msg_buf;
+        MessageBufferHandle_t recv_msg_buf = msgbuffers.recv_msg_buf;
 
         uint8_t *payload = buf;
 
@@ -76,8 +72,7 @@ static void intertile_msgbuffer(void *arg)
 {
     soc_peripheral_t dev = arg;
 
-    intertile_msg_buffers_t* msgbuffers = (intertile_msg_buffers_t*)soc_peripheral_app_data( dev );
-    MessageBufferHandle_t send_msg_buf = msgbuffers->send_msg_buf;
+    MessageBufferHandle_t send_msg_buf = msgbuffers.send_msg_buf;
 
     intertile_cb_footer_t msg_ftr;
     intertile_driver_footer_init(&msg_ftr, INTERTILE_CB_ID_0);
@@ -107,8 +102,6 @@ static void intertile_msgbuffer(void *arg)
 
 void intertile_ctrl_create_t0( UBaseType_t uxPriority )
 {
-    static intertile_msg_buffers_t msgbuffers;
-
     MessageBufferHandle_t send_msg_buf = xMessageBufferCreate(2 * INTERTILE_DEV_BUFSIZE);
     MessageBufferHandle_t recv_msg_buf = xMessageBufferCreate(2 * INTERTILE_DEV_BUFSIZE);
 
@@ -119,18 +112,15 @@ void intertile_ctrl_create_t0( UBaseType_t uxPriority )
             BITSTREAM_INTERTILE_DEVICE_A,
 			appconfINTERTILE_DMA_BUF_CNT,
 			appconfINTERTILE_DMA_BUF_CNT,
-            &msgbuffers,
             0);
 
-    xTaskCreate(t0_test, "tile0_intertile", portTASK_STACK_DEPTH(t0_test), dev, uxPriority, NULL);
-    xTaskCreate(rx_task, "tile0_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
+    xTaskCreate(t0_test, "tile0_intertile", portTASK_STACK_DEPTH(t0_test), &msgbuffers, uxPriority, NULL);
+    xTaskCreate(rx_task, "tile0_task", portTASK_STACK_DEPTH(rx_task), NULL, uxPriority, NULL);
     xTaskCreate(intertile_msgbuffer, "tile0_msgbuf", portTASK_STACK_DEPTH(intertile_msgbuffer), dev, uxPriority, NULL);
 }
 
 void intertile_ctrl_create_t1( UBaseType_t uxPriority )
 {
-    static intertile_msg_buffers_t msgbuffers;
-
     MessageBufferHandle_t send_msg_buf = xMessageBufferCreate(2 * INTERTILE_DEV_BUFSIZE);
     MessageBufferHandle_t recv_msg_buf = xMessageBufferCreate(2 * INTERTILE_DEV_BUFSIZE);
 
@@ -141,10 +131,9 @@ void intertile_ctrl_create_t1( UBaseType_t uxPriority )
             BITSTREAM_INTERTILE_DEVICE_A,
 			appconfINTERTILE_DMA_BUF_CNT,
 			appconfINTERTILE_DMA_BUF_CNT,
-            &msgbuffers,
             0);
 
-    xTaskCreate(t1_test, "tile1_intertile", portTASK_STACK_DEPTH(t1_test), dev, uxPriority, NULL);
-    xTaskCreate(rx_task, "tile1_task", portTASK_STACK_DEPTH(rx_task), dev, uxPriority, NULL);
+    xTaskCreate(t1_test, "tile1_intertile", portTASK_STACK_DEPTH(t1_test), &msgbuffers, uxPriority, NULL);
+    xTaskCreate(rx_task, "tile1_task", portTASK_STACK_DEPTH(rx_task), NULL, uxPriority, NULL);
     xTaskCreate(intertile_msgbuffer, "tile1_msgbuf", portTASK_STACK_DEPTH(intertile_msgbuffer), dev, uxPriority, NULL);
 }
