@@ -50,3 +50,6 @@
 [submodule "rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT"]
 	path = rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT
 	url = git@github.com:FreeRTOS/Lab-Project-FreeRTOS-FAT.git
+[submodule "thirdparty/mbedtls"]
+	path = thirdparty/mbedtls
+	url = git@github.com:ARMmbed/mbedtls.git
