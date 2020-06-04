@@ -84,27 +84,27 @@ extern "C" {
  * Just like snprintf, but not all of the
  * standard C format control are supported.
  */
-size_t rtos_snprintf(char *str, size_t size, const char *fmt, ...);
+int rtos_snprintf(char *str, size_t size, const char *fmt, ...);
 
 /**
  * Just like sprintf, but not all of the
  * standard C format control are supported.
  */
-size_t rtos_sprintf(char *str, const char *fmt, ...);
+int rtos_sprintf(char *str, const char *fmt, ...);
 
 /**
  * Just like vprintf, but not all of the
  * standard C format control are supported.
  */
 #ifndef __XC__
-size_t rtos_vprintf(const char *fmt, va_list ap);
+int rtos_vprintf(const char *fmt, va_list ap);
 #endif
 
 /**
  * Just like printf, but not all of the
  * standard C format control are supported.
  */
-size_t rtos_printf(const char *fmt, ...);
+int rtos_printf(const char *fmt, ...);
 
 #if defined(__cplusplus) || defined(__XC__)
 }

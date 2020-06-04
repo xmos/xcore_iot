@@ -24,8 +24,8 @@
 #define POINTER64 (INTPTR_MAX == 9223372036854775807L)
 
 typedef struct {
-    size_t size;
-    size_t pos;
+    int size;
+    int pos;
     char *str;
     int writeout;
     int32_t len;
@@ -249,7 +249,7 @@ static int32_t getnum(char **linep)
 /* the supported formats.                            */
 /*                                                   */
 
-static size_t rtos_vsnwprintf(char *str, size_t size, int writeout, const char *fmt, va_list ap)
+static int rtos_vsnwprintf(char *str, size_t size, int writeout, const char *fmt, va_list ap)
 {
     int32_t Check;
 #if LONG64
@@ -437,9 +437,9 @@ static size_t rtos_vsnwprintf(char *str, size_t size, int writeout, const char *
 }
 /*---------------------------------------------------*/
 
-size_t rtos_snprintf(char *str, size_t size, const char *fmt, ...)
+int rtos_snprintf(char *str, size_t size, const char *fmt, ...)
 {
-    size_t len;
+    int len;
     va_list ap;
 
     va_start(ap, fmt);
@@ -449,9 +449,9 @@ size_t rtos_snprintf(char *str, size_t size, const char *fmt, ...)
     return len;
 }
 
-size_t rtos_sprintf(char *str, const char *fmt, ...)
+int rtos_sprintf(char *str, const char *fmt, ...)
 {
-    size_t len;
+    int len;
     va_list ap;
 
     va_start(ap, fmt);
@@ -469,9 +469,9 @@ size_t rtos_sprintf(char *str, const char *fmt, ...)
 #endif
 #endif
 
-size_t rtos_vprintf(const char *fmt, va_list ap)
+int rtos_vprintf(const char *fmt, va_list ap)
 {
-    size_t len;
+    int len;
     uint32_t mask;
     char buf[RTOS_PRINTF_BUFSIZE];
 
@@ -485,9 +485,9 @@ size_t rtos_vprintf(const char *fmt, va_list ap)
     return len;
 }
 
-size_t rtos_printf(const char *fmt, ...)
+int rtos_printf(const char *fmt, ...)
 {
-    size_t len;
+    int len;
     va_list ap;
 
     va_start(ap, fmt);
