@@ -17,7 +17,9 @@
 #include "gpio_ctrl.h"
 #include "app_conf.h"
 #include "sntpd.h"
-
+#include "fs_support.h"
+#include "tls_echo_demo.h"
+#include "tls_support.h"
 
 void soc_tile0_main(
         int tile)
@@ -39,6 +41,15 @@ void soc_tile0_main(
 
 void vApplicationDaemonTaskStartupHook( void )
 {
+    /* Initialize filesystem  */
+	filesystem_init();
+
+    /* Initialize TLS  */
+	tls_platform_init();
+
+    /* Create TLS echo demo */
+	tls_echo_demo_create( appconfTLS_ECHO_TASK_PRIORITY );
+
     /* Create audio pipeline */
     audio_pipeline_create( appconfAUDIO_PIPELINE_TASK_PRIORITY );
 
