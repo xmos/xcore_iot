@@ -22,10 +22,10 @@
 #include "tcp_stream_to_queue.h"
 
 
-static void tcp_to_queue_receiver(void *arg)
+static void tcp_to_queue_receiver( void *arg )
 {
 	tcp_to_queue_handle_t handle = ( tcp_to_queue_handle_t ) arg;
-    Socket_t xConnectedSocket = handle->socket ;
+    Socket_t xConnectedSocket = handle->socket;
     size_t data_length = handle->data_length;
     int8_t *data;
     BaseType_t bytes_rx = 0;

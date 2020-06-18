@@ -208,7 +208,6 @@ int tls_send( void* ctx, const unsigned char* buf, size_t len)
 {
 	tls_ctx_t* tls_ctx = ( tls_ctx_t* ) ctx;
 
-	debug_printf("want to send %s, %d to socket %p\n", buf, len, socket);
 	return FreeRTOS_send( tls_ctx->socket, buf, len, tls_ctx->flags );
 }
 
@@ -241,6 +240,7 @@ int get_cert( mbedtls_x509_crt* cert, const char* filepath )
 
 		if( get_file( filepath, &prvfile, &prvfile_len ) == pdFAIL )
 		{
+			debug_printf("Get cert file failed\n");
 			break;
 		}
 
@@ -307,6 +307,7 @@ int get_key( mbedtls_pk_context* key, const char* filepath )
 
 		if( get_file( filepath, &prvfile, &prvfile_len ) == pdFAIL )
 		{
+			debug_printf("Get key file failed\n");
 			break;
 		}
 

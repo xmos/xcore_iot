@@ -120,13 +120,13 @@
 #define MBEDTLS_SHA256_C
 #define MBEDTLS_SHA512_C
 #define MBEDTLS_SSL_CLI_C
-//#define MBEDTLS_SSL_SRV_C
+#define MBEDTLS_SSL_SRV_C
 #define MBEDTLS_SSL_TLS_C
 #define MBEDTLS_X509_USE_C
 #define MBEDTLS_X509_CRT_PARSE_C
 
 /* Enable debug */
-//#define MBEDTLS_DEBUG_C
+#define MBEDTLS_DEBUG_C
 
 /* Enable platform memory */
 #define MBEDTLS_PLATFORM_MEMORY

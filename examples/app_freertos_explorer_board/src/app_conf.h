@@ -32,6 +32,7 @@
 
 /* Task Priorities */
 #define appconfTLS_ECHO_TASK_PRIORITY    		( configMAX_PRIORITIES - 3 )
+#define appconfTLS_ECHO_SERVER_PRIORITY    		( configMAX_PRIORITIES - 3 )
 #define appconfAUDIO_PIPELINE_TASK_PRIORITY    	( configMAX_PRIORITIES - 3 )
 #define appconfTCP_TO_QUEUE_TASK_PRIORITY    	( configMAX_PRIORITIES - 3 )
 #define appconfQUEUE_TO_TCP_TASK_PRIORITY      	( configMAX_PRIORITIES - 2 )

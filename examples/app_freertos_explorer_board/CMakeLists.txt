@@ -48,6 +48,7 @@ set(APP_C_SRCS
         "src/udp_cli/FreeRTOS_CLI.c"
         "src/udp_cli/UDPCommandServer.c"
         "src/tls_echo_demo/tls_echo_demo.c"
+        "src/tls_echo_server/tls_echo_server.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -64,6 +65,7 @@ set(APP_INCLUDES
         "src/thruput_test"
         "src/udp_cli"
         "src/tls_echo_demo"
+        "src/tls_echo_server"
     )
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"
