@@ -50,3 +50,6 @@
 [submodule "rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT"]
 	path = rtos/FreeRTOS/FreeRTOS-Labs/Lab-Project-FreeRTOS-FAT
 	url = git@github.com:FreeRTOS/Lab-Project-FreeRTOS-FAT.git
+[submodule "lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware"]
+	path = lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware
+	url = git@github.com:SiliconLabs/wfx-firmware.git
