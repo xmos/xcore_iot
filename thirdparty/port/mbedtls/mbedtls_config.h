@@ -126,7 +126,7 @@
 #define MBEDTLS_X509_CRT_PARSE_C
 
 /* Enable debug */
-#define MBEDTLS_DEBUG_C
+//#define MBEDTLS_DEBUG_C
 
 /* Enable platform memory */
 #define MBEDTLS_PLATFORM_MEMORY

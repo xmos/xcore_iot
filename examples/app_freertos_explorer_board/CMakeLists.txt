@@ -24,6 +24,8 @@ set(APP_COMPILER_FLAGS
 		"-DMIC_DUAL_ENABLED=1"
         "-report"
         "-fxscope"
+        "-DMQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h"
+        "-DMQTT_TASK=1"
         "-Wxcore-fptrgroup"
         "-DDEBUG_PRINT_ENABLE=1"
         "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT)"
@@ -49,6 +51,7 @@ set(APP_C_SRCS
         "src/udp_cli/UDPCommandServer.c"
         "src/tls_echo_demo/tls_echo_demo.c"
         "src/tls_echo_server/tls_echo_server.c"
+        "paho.mqtt.embedded-c/MQTTClient-C/samples/FreeRTOS/MQTTEcho.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -70,6 +73,7 @@ set(APP_INCLUDES
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"
         "mbedtls(>=2.16.6)"
+        "mqtt(>=1.0.0)"
     )
 
 set(USE_FREERTOS_SMP True)

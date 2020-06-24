@@ -53,3 +53,6 @@
 [submodule "thirdparty/mbedtls"]
 	path = thirdparty/mbedtls
 	url = git@github.com:ARMmbed/mbedtls.git
+[submodule "thirdparty/paho.mqtt.embedded-c"]
+	path = thirdparty/paho.mqtt.embedded-c
+	url = git@github.com:eclipse/paho.mqtt.embedded-c.git

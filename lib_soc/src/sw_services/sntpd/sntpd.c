@@ -89,6 +89,12 @@ typedef struct __attribute__ ((__packed__)) {
    	   	   	   	   	   	   	   	   	   	   	   reply departed the server */
 } sntp_packet_t;
 
+static int time_synced = pdFALSE;
+
+int is_time_synced( void )
+{
+	return time_synced;
+}
 
 static void sntpd_task( void *args )
 {
@@ -182,6 +188,8 @@ static void sntpd_task( void *args )
 						now.seconds = FreeRTOS_htonl( rxpacket->receiveTimestamp.seconds ) - EPOCH;
 						now.microseconds = FreeRTOS_htonl( rxpacket->receiveTimestamp.fraction ) / UINT_MAX;
 						rtos_time_set( now );
+
+						time_synced = pdTRUE;
 
 						struct tm *info;
 						info = gmtime( (time_t * )(&now.seconds) );

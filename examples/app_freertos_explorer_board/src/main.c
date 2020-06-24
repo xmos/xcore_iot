@@ -22,6 +22,8 @@
 #include "tls_echo_server.h"
 #include "tls_support.h"
 
+extern void vStartMQTTTasks(uint16_t usTaskStackSize, UBaseType_t uxTaskPriority);
+
 void soc_tile0_main(
         int tile)
 {
@@ -49,7 +51,7 @@ void vApplicationDaemonTaskStartupHook( void )
 	tls_platform_init();
 
     /* Create TLS echo demo */
-//	tls_echo_demo_create( appconfTLS_ECHO_TASK_PRIORITY );
+	tls_echo_demo_create( appconfTLS_ECHO_TASK_PRIORITY );
 
     /* Create TLS echo demo */
 	tls_echo_server_create( appconfTLS_ECHO_SERVER_PRIORITY );
@@ -59,6 +61,8 @@ void vApplicationDaemonTaskStartupHook( void )
 
     /* Create SNTPD */
     sntp_create( appconfSNTPD_TASK_PRIORITY );
+
+    vStartMQTTTasks( 800, appconfTLS_ECHO_TASK_PRIORITY - 1);
 }
 
 void vApplicationMallocFailedHook(void)
