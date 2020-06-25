@@ -1,5 +1,7 @@
 // Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
+#define DEBUG_UNIT LIB_SOC_SW_WIFI
+
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -21,9 +23,14 @@
 #include "sl_wfx_host.h"
 #include "brd8023a_pds.h"
 
-/* Application headers */
+/* SW services headers */
 #include "sl_wfx_iot_wifi.h"
+#if LIB_SOC_HAS_SW_DHCPD
 #include "dhcpd.h"
+#endif
+#ifdef LIB_SOC_HAS_SW_FATFS
+#include "ff.h"
+#endif
 
 #define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define HWADDR_ARG(hwaddr) hwaddr.ucBytes[0], hwaddr.ucBytes[1], hwaddr.ucBytes[2], hwaddr.ucBytes[3], hwaddr.ucBytes[4], hwaddr.ucBytes[5]
@@ -329,13 +336,13 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
         {
             sl_status_t sl_ret;
 
-            sl_wfx_host_log( "Connect to: %s(%d):%s(%d) on ch %d with security %d\n",
-                             pxNetworkParams->pcSSID,
-                             pxNetworkParams->ucSSIDLength,
-                             pxNetworkParams->pcPassword,
-                             pxNetworkParams->ucPasswordLength,
-                             pxNetworkParams->cChannel,
-                             security );
+            rtos_printf( "Connect to: %s(%d):%s(%d) on ch %d with security %d\n",
+                         pxNetworkParams->pcSSID,
+                         pxNetworkParams->ucSSIDLength,
+                         pxNetworkParams->pcPassword,
+                         pxNetworkParams->ucPasswordLength,
+                         pxNetworkParams->cChannel,
+                         security );
 
             /*
              * Ensure the connect fail bit is cleared as it is not automatically
@@ -450,41 +457,171 @@ WIFIReturnCode_t WIFI_GetMode( WIFIDeviceMode_t *pxDeviceMode )
     return ret;
 }
 
-/*
- * TODO: later?
- */
 WIFIReturnCode_t WIFI_NetworkAdd( const WIFINetworkProfile_t * const pxNetworkProfile,
                                   uint16_t *pusIndex )
 {
+#if LIB_SOC_HAS_SW_FATFS && FF_FS_MINIMIZE == 0 && !FF_FS_READONLY
+    int opened = 0;
+    WIFIReturnCode_t ret = eWiFiFailure;
+    FRESULT result;
+    FIL networks;
+    FSIZE_t pos;
+
     configASSERT( pxNetworkProfile != NULL );
-    configASSERT( pusIndex != NULL );
+
+    result = f_open(&networks, "/flash/wifi/networks.dat", FA_OPEN_APPEND | FA_WRITE);
+
+    if (result == FR_OK) {
+        opened = 1;
+        pos = f_tell(&networks);
+        if (pos % sizeof(WIFINetworkProfile_t) != 0) {
+            /*
+             * If the size of the networks file is not a multiple of the size of
+             * the network profile struct, then reset the file.
+             */
+            result = f_lseek(&networks, 0);
+            if (result == FR_OK) {
+                result = f_truncate(&networks);
+                pos = 0;
+            }
+        }
+    }
+
+    if (result == FR_OK) {
+        UINT bytes_written;
+        result = f_write(&networks, pxNetworkProfile, sizeof(WIFINetworkProfile_t), &bytes_written);
+        if (result == FR_OK) {
+            if (bytes_written == sizeof(WIFINetworkProfile_t)) {
+                if (pusIndex != NULL) {
+                    *pusIndex = pos / sizeof(WIFINetworkProfile_t);
+                }
+                ret = eWiFiSuccess;
+            } else {
+                /* The write succeeded, but was unable to write the entire profile. Undo. */
+                result = f_lseek(&networks, pos);
+                if (result == FR_OK) {
+                    (void) f_truncate(&networks);
+                }
+            }
+        }
+    }
+
+    if (opened) {
+        (void) f_close(&networks);
+    }
+
+    return ret;
+#else
     return eWiFiNotSupported;
+#endif
 }
 
-/*
- * TODO: later?
- */
 WIFIReturnCode_t WIFI_NetworkGet( WIFINetworkProfile_t *pxNetworkProfile,
                                   uint16_t usIndex )
 {
+#if LIB_SOC_HAS_SW_FATFS
+    WIFIReturnCode_t ret = eWiFiFailure;
+    FRESULT result;
+    FIL networks;
+    FSIZE_t size;
+
     configASSERT( pxNetworkProfile != NULL );
+
+    result = f_open(&networks, "/flash/wifi/networks.dat", FA_READ);
+
+    if (result == FR_OK) {
+        size = f_size(&networks);
+        if (size % sizeof(WIFINetworkProfile_t) == 0) {
+            FSIZE_t pos = usIndex * sizeof(WIFINetworkProfile_t);
+            if (pos < size) {
+                UINT bytes_read;
+
+                /*
+                 * The size of the networks file is a multiple of the size of the
+                 * network profile struct and the requested index is within the file.
+                 */
+
+                if (
+                f_lseek(&networks, pos) == FR_OK &&
+                f_read(&networks, pxNetworkProfile, sizeof(WIFINetworkProfile_t), &bytes_read) == FR_OK &&
+                bytes_read == sizeof(WIFINetworkProfile_t)) {
+                    ret = eWiFiSuccess;
+                }
+            }
+        }
+
+        (void) f_close(&networks);
+    }
+
+    return ret;
+#else
     return eWiFiNotSupported;
+#endif
 }
 
-/*
- * TODO: later?
- */
 WIFIReturnCode_t WIFI_NetworkDelete( uint16_t usIndex )
 {
+#if LIB_SOC_HAS_SW_FATFS && FF_FS_MINIMIZE == 0 && !FF_FS_READONLY
+    WIFIReturnCode_t ret = eWiFiFailure;
+    FRESULT result;
+    FIL networks;
+    FSIZE_t size;
+
+    result = f_open(&networks, "/flash/wifi/networks.dat", FA_READ | FA_WRITE);
+
+    if (result == FR_OK) {
+        size = f_size(&networks);
+        if (size % sizeof(WIFINetworkProfile_t) == 0) {
+            FSIZE_t dest = usIndex * sizeof(WIFINetworkProfile_t);
+            FSIZE_t src = dest + sizeof(WIFINetworkProfile_t);
+            WIFINetworkProfile_t tmp;
+            if (dest < size) {
+                UINT bytes_read;
+                UINT bytes_written;
+
+                /*
+                 * The size of the networks file is a multiple of the size of the
+                 * network profile struct and the requested index is within the file.
+                 */
+
+                while (result == FR_OK && src < size) {
+                    if (
+                    (result = f_lseek(&networks, src)) == FR_OK &&
+                    (result = f_read(&networks, &tmp, sizeof(WIFINetworkProfile_t), &bytes_read)) == FR_OK &&
+                    (result = f_lseek(&networks, dest)) == FR_OK &&
+                    (result = f_write(&networks, &tmp, sizeof(WIFINetworkProfile_t), &bytes_written)) == FR_OK) {
+                        src += sizeof(WIFINetworkProfile_t);
+                        dest += sizeof(WIFINetworkProfile_t);
+                    }
+                }
+
+                if (
+                result == FR_OK &&
+                f_lseek(&networks, dest) == FR_OK &&
+                f_truncate(&networks) == FR_OK) {
+                    ret = eWiFiSuccess;
+                }
+            }
+        }
+
+        (void) f_close(&networks);
+    }
+
+    return ret;
+#else
     return eWiFiNotSupported;
+#endif
 }
 
+__attribute__((weak))
 void vApplicationPingReplyHook(ePingReplyStatus_t eStatus, uint16_t usIdentifier)
 {
+#if LIB_SOC_HAS_SW_DHCPD
     if (eStatus == eSuccess) {
         dhcpcd_ping_reply_received( usIdentifier );
         xQueueOverwrite(ping_reply_queue, &usIdentifier);
     }
+#endif
 }
 
 WIFIReturnCode_t WIFI_Ping( uint8_t *pucIPAddr,
@@ -946,12 +1083,8 @@ BaseType_t WIFI_IsConnected( void )
     return ret;
 }
 
-/*
- * TODO: Make this a function that the application's
- * xApplicationDHCPHook() calls.
- */
-eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
-                                            uint32_t ulIPAddress )
+int WIFI_DHCPHook( int eDHCPPhase,
+                   uint32_t ulIPAddress )
 {
     WIFIDeviceMode_t mode;
     ulIPAddress = FreeRTOS_ntohl( ulIPAddress );
@@ -960,16 +1093,50 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 
     if( mode == SL_WFX_SOFTAP_INTERFACE )
     {
-        sl_wfx_host_log( "DHCP client not used in SoftAP mode\n" );
-        sl_wfx_host_log( "Using default IP address %d.%d.%d.%d\n", ( ulIPAddress >> 24 ) & 0xff, ( ulIPAddress >> 16 ) & 0xff, ( ulIPAddress >> 8 ) & 0xff, ( ulIPAddress >> 0 ) & 0xff );
+        rtos_printf( "DHCP client not used in SoftAP mode\n" );
+        rtos_printf( "Using default IP address %d.%d.%d.%d\n", ( ulIPAddress >> 24 ) & 0xff, ( ulIPAddress >> 16 ) & 0xff, ( ulIPAddress >> 8 ) & 0xff, ( ulIPAddress >> 0 ) & 0xff );
         return eDHCPUseDefaults;
     }
     else
     {
         if( eDHCPPhase == eDHCPPhasePreRequest )
         {
-            sl_wfx_host_log("DHCP assigned IP address %d.%d.%d.%d\n", ( ulIPAddress >> 24 ) & 0xff, ( ulIPAddress >> 16 ) & 0xff, ( ulIPAddress >> 8 ) & 0xff, ( ulIPAddress >> 0 ) & 0xff );
+            rtos_printf("DHCP assigned IP address %d.%d.%d.%d\n", ( ulIPAddress >> 24 ) & 0xff, ( ulIPAddress >> 16 ) & 0xff, ( ulIPAddress >> 8 ) & 0xff, ( ulIPAddress >> 0 ) & 0xff );
         }
         return eDHCPContinue;
     }
+}
+
+__attribute__((weak))
+eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
+                                            uint32_t ulIPAddress )
+{
+    return WIFI_DHCPHook( eDHCPPhase, ulIPAddress );
+}
+
+/**************************************************************************//**
+ * Callback for client connect to AP
+ *****************************************************************************/
+void sl_wfx_client_connected_callback(uint8_t* mac)
+{
+    sl_wfx_host_log("Client connected, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+/**************************************************************************//**
+ * Callback for client rejected from AP
+ *****************************************************************************/
+void sl_wfx_ap_client_rejected_callback(sl_wfx_reason_t reason, uint8_t* mac)
+{
+    sl_wfx_host_log("Client rejected, reason: %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+         reason, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+/**************************************************************************//**
+ * Callback for AP client disconnect
+ *****************************************************************************/
+void sl_wfx_ap_client_disconnected_callback(sl_wfx_reason_t reason, uint8_t* mac)
+{
+    sl_wfx_host_log("Client disconnected, reason: %d, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+         reason, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }

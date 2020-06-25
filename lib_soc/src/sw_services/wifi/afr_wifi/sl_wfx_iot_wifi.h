@@ -544,6 +544,13 @@ WIFIReturnCode_t WIFI_GetPMMode( WIFIPMMode_t * pxPMModeType,
 BaseType_t WIFI_IsConnected( void );
 /* @[declare_wifi_wifi_isconnected] */
 
+/**
+ * If the application implements its own xApplicationDHCPHook() then it can
+ * call this function for the callback answer.
+ */
+int WIFI_DHCPHook( int eDHCPPhase,
+                   uint32_t ulIPAddress );
+
 WIFIReturnCode_t WIFI_GetLock( void );
 void WIFI_ReleaseLock( void );
 

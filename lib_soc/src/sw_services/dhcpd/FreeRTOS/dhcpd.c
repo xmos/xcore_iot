@@ -1,5 +1,7 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
+#define DEBUG_UNIT LIB_SOC_SW_DHCPD
+
 #include "FreeRTOS.h"
 #include "list.h"
 #include "task.h"
