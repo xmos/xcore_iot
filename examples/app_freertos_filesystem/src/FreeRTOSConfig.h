@@ -35,7 +35,11 @@ your application. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
 #define configTOTAL_HEAP_SIZE                   62*1024
+#if XCOREAI_EXPLORER
+#define configAPPLICATION_ALLOCATED_HEAP        1
+#else
 #define configAPPLICATION_ALLOCATED_HEAP        0
+#endif
 
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     0

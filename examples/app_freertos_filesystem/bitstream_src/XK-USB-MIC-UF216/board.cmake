@@ -1,7 +1,7 @@
 # Hardware configurations
 set(BOARD_COMPILE_FLAGS
         "-DXCORE200_MAB=1"
-        "-lquadflash"
+        "-lquadspi"
     )
 set(BOARD_HW_TARGET
         "bitstream_src/${BOARD}/MIC-ARRAY-1V3.xn"
