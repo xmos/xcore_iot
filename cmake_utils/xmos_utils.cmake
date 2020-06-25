@@ -274,12 +274,15 @@ function(XMOS_REGISTER_MODULE)
             include("${AFR_VENDORS_DIR}/xmos/lib_rtos_support/cmake_utils/xmos_afr_support.cmake")
         endif()
 
-        target_link_libraries(
-            ${LIB_NAME}
-            PRIVATE
-                ${DEP_MODULE_LIST}
-        )
-        target_compile_options(${LIB_NAME} PRIVATE ${LIB_ADD_COMPILER_FLAGS})
+        if(NOT ${LIB_NAME}_SILENT_FLAG)
+            target_link_libraries(
+                ${LIB_NAME}
+                PUBLIC
+                    ${DEP_MODULE_LIST}
+            )
+            target_compile_options(${LIB_NAME} PUBLIC ${LIB_ADD_COMPILER_FLAGS})
+        endif()
+
 
         if(NOT ${LIB_NAME}_SILENT_FLAG)
             message("Added ${LIB_NAME} (${LIB_VERSION})")
