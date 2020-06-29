@@ -11,6 +11,7 @@ set(SW_SVC_INCLUDES
         "src/sw_services/tls_support/api"
         "src/sw_services/tls_support/freertos/includes")
 set(SW_SVC_DEPENDENT_MODULES
-        "")
+        "mbedtls(>=2.16.6)"
+        )
 set(SW_SVC_OPTIONAL_HEADERS
         "")

@@ -33,6 +33,7 @@
 #                           ex: set(LIB_OPTIONAL_HEADERS "foo.h" "bar.h")
 set(LIB_NAME mbedtls)
 set(LIB_VERSION 2.16.6)
+set(LIB_ADD_COMPILER_FLAGS "")
 set(LIB_XC_SRCS
         ""
     )
