@@ -24,8 +24,8 @@
 #define POINTER64 (INTPTR_MAX == 9223372036854775807L)
 
 typedef struct {
-    int size;
-    int pos;
+    size_t size;
+    size_t pos;
     char *str;
     int writeout;
     int32_t len;

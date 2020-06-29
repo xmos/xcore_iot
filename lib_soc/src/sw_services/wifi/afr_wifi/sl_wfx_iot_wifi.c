@@ -28,7 +28,7 @@
 #if LIB_SOC_HAS_SW_DHCPD
 #include "dhcpd.h"
 #endif
-#ifdef LIB_SOC_HAS_SW_FATFS
+#if LIB_SOC_HAS_SW_FATFS
 #include "ff.h"
 #endif
 
