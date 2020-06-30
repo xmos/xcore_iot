@@ -21,6 +21,7 @@
 #include "tls_echo_demo.h"
 #include "tls_echo_server.h"
 #include "tls_support.h"
+#include "http_demo.h"
 
 void soc_tile0_main(
         int tile)
@@ -49,10 +50,13 @@ void vApplicationDaemonTaskStartupHook( void )
 	tls_platform_init();
 
     /* Create TLS echo demo */
-//	tls_echo_demo_create( appconfTLS_ECHO_TASK_PRIORITY );
+	tls_echo_demo_create( appconfTLS_ECHO_TASK_PRIORITY );
 
     /* Create TLS echo demo */
 	tls_echo_server_create( appconfTLS_ECHO_SERVER_PRIORITY );
+
+    /* Create http demo */
+	http_demo_create( appconfHTTP_TASK_PRIORITY );
 
     /* Create audio pipeline */
     audio_pipeline_create( appconfAUDIO_PIPELINE_TASK_PRIORITY );

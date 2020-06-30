@@ -56,3 +56,6 @@
 [submodule "thirdparty/mbedtls"]
 	path = thirdparty/mbedtls
 	url = git@github.com:ARMmbed/mbedtls.git
+[submodule "thirdparty/http-parser"]
+	path = lib_soc/src/sw_services/http/thirdparty/http-parser
+	url = git@github.com:nodejs/http-parser.git

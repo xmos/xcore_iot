@@ -47,7 +47,10 @@ BaseType_t audiopipeline_get_stage2_input( void )
 
 BaseType_t audiopipeline_set_stage2_input( state2_input_sel_t input )
 {
-	input_sel = input;
+	if( input < eSTAGE2_INPUT_SEL_CNT )
+	{
+		input_sel = input;
+	}
     return input_sel;
 }
 
@@ -197,7 +200,7 @@ void audio_pipeline_stage2(void *arg)
 			{
 				if (xQueueSend(stage2->output, &mic_data, pdMS_TO_TICKS(1)) == errQUEUE_FULL)
 				{
-//         			debug_printf("stage2 dac output lost\n");
+         			debug_printf("stage2 dac output lost\n");
 					vPortFree(mic_data);
 				}
 			}
