@@ -22,6 +22,54 @@
 #include "network.h"
 #include "app_conf.h"
 #include "dhcpd.h"
+#include "ff.h"
+
+static FIL wf200_fw_file;
+static uint32_t wf200_fw_size;
+
+uint32_t sl_wfx_app_fw_size(void)
+{
+	FRESULT result;
+
+	if (wf200_fw_file.obj.fs == NULL) {
+		rtos_printf("Opening WF200 firmware file\n");
+		result = f_open(&wf200_fw_file, "/flash/firmware/wf200.sec", FA_READ);
+	}
+
+	if (result == FR_OK) {
+		wf200_fw_size = f_size(&wf200_fw_file);
+	} else {
+		wf200_fw_size = 0;
+	}
+
+	rtos_printf("wf200 fw size is %d\n", wf200_fw_size);
+	return wf200_fw_size;
+}
+
+sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
+{
+	FRESULT result;
+	uint32_t bytes_read = 0;
+
+	if (wf200_fw_file.obj.fs != NULL) {
+		result = f_read(&wf200_fw_file, data, size, &bytes_read);
+	}
+
+	if (bytes_read == 0 || index + size >= wf200_fw_size) {
+		if (wf200_fw_file.obj.fs != NULL) {
+			f_close(&wf200_fw_file);
+			wf200_fw_size = 0;
+			rtos_printf("Closed WF200 firmware file\n");
+		}
+	}
+
+	if (bytes_read == size) {
+		return SL_STATUS_OK;
+	} else {
+		rtos_printf("items_read: %d\n", bytes_read);
+		return SL_STATUS_FAIL;
+	}
+}
 
 const uint8_t ucIPAddress[ipIP_ADDRESS_LENGTH_BYTES] = {
                                 ( uint8_t ) IPconfig_IP_ADDR_OCTET_0,
@@ -73,19 +121,6 @@ static char *security_name(WIFISecurity_t s)
     }
 }
 
-#if SOC_QSPI_FLASH_PERIPHERAL_USED
-sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
-{
-	qspi_flash_read(
-			bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
-	        data,
-			0x100000 + index,
-	        size);
-
-	return SL_STATUS_OK;
-}
-#endif
-
 static void wf200_test(void *arg)
 {
     WIFIReturnCode_t ret;
@@ -125,9 +160,9 @@ static void wf200_test(void *arg)
         uint32_t ip;
         char a[16];
 
-        pxNetworkParams.pcSSID = "xxxxxxxx";
+        pxNetworkParams.pcSSID = "xxxxxxxxx";
         pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-        pxNetworkParams.pcPassword = "xxxxxxxx";
+        pxNetworkParams.pcPassword = "xxxxxxxxx";
         pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
         pxNetworkParams.xSecurity = eWiFiSecurityWPA;
         pxNetworkParams.cChannel = 0;
@@ -162,13 +197,11 @@ void initalize_wifi( void )
             BITSTREAM_GPIO_DEVICE_A,
             0);
 
-#if SOC_QSPI_FLASH_PERIPHERAL_USED
     dev = qspi_flash_driver_init(
             BITSTREAM_QSPI_FLASH_DEVICE_A,
             0);
-#endif
 
-    xTaskCreate(wf200_test, "wf200_test", portTASK_STACK_DEPTH(wf200_test), NULL, 15, NULL);
+    xTaskCreate(wf200_test, "wf200_test", 1000/*portTASK_STACK_DEPTH(wf200_test)*/, NULL, 15, NULL);
 
 }
 

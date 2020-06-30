@@ -6,6 +6,8 @@ function trace_help() {
     echo "--playto / -p IP FILENAME : Send raw signed int 32, 16kHz audio"
     echo "--udpcli  / -u IP : Connect to CLI"
     echo "--thruput / -t IP : Run the throughput test"
+    echo "--tlsechosrv / -e : Run an echo server with TLS"
+    echo "--tlsechocli / -c : Connect to an echo server with TLS"
     return
 }
 
@@ -14,6 +16,13 @@ then
     if [ "$1" == "--help" ] || [ "$1" == "-h" ]
     then
         trace_help
+    elif [ "$1" == "--tlsechosrv" ] || [ "$1" == "-e" ]
+    then
+        ncat -e /bin/cat -k -4 -l 25565 --ssl --ssl-cert ./filesystem_support/board_server_certs/server.pem  --ssl-key ./filesystem_support/board_server_certs/server.key
+    elif [ "$1" == "--tlsechocli" ] || [ "$1" == "-c" ]
+    then
+        ncat 10.0.0.142 7777 --ssl --ssl-cert ./filesystem_support/echo_client_certs/client.pem --ssl-key ./filesystem_support/echo_client_certs/client.key
+
     fi
 elif [ $# == 2 ]
 then

@@ -111,9 +111,9 @@ static void sntpd_task( void *args )
 		{
 			ip = FreeRTOS_gethostbyname( default_time_servers[i] );
 
-			char buf[16];
-			FreeRTOS_inet_ntoa( ip, buf );
-			rtos_printf( "%s is %s\n", default_time_servers[i], buf );
+//			char buf[16];
+//			FreeRTOS_inet_ntoa( ip, buf );
+//			rtos_printf( "%s is %s\n", default_time_servers[i], buf );
 
 			if( ip > 0)
 			{
@@ -205,7 +205,7 @@ static void sntpd_task( void *args )
 				if( failed_attempts >= SNTPD_RESET_AFTER_X_FAILURES )
 				{
 				    FreeRTOS_closesocket( sntp_socket );
-
+				    failed_attempts = 0;
 					sntp_socket = NULL;
 					break;
 				}
