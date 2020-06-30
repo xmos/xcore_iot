@@ -73,7 +73,6 @@ set(APP_INCLUDES
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"
         "mbedtls(>=2.16.6)"
-        "mqtt(>=1.0.0)"
     )
 
 set(USE_FREERTOS_SMP True)
@@ -92,6 +91,7 @@ set(LIB_SOC_SW_DHCPD True)
 set(LIB_SOC_SW_SNTPD True)
 set(LIB_SOC_SW_FATFS True)
 set(LIB_SOC_SW_TLS_SUPPORT True)
+set(LIB_SOC_SW_MQTT True)
 
 ## Register the application
 XMOS_REGISTER_APP()
