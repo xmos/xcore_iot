@@ -31,6 +31,7 @@
 #define appconfGPIO_VOLUME_RAPID_FIRE_MS       	100
 
 /* Task Priorities */
+#define appconfMQTT_TASK_PRIORITY    			( configMAX_PRIORITIES - 3 )
 #define appconfHTTP_TASK_PRIORITY    			( configMAX_PRIORITIES - 3 )
 #define appconfTLS_ECHO_TASK_PRIORITY    		( configMAX_PRIORITIES - 3 )
 #define appconfTLS_ECHO_SERVER_PRIORITY    		( configMAX_PRIORITIES - 3 )

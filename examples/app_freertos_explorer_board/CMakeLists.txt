@@ -52,7 +52,7 @@ set(APP_C_SRCS
         "src/tls_echo_demo/tls_echo_demo.c"
         "src/tls_echo_server/tls_echo_server.c"
         "src/http_demo/http_demo.c"
-        "paho.mqtt.embedded-c/MQTTClient-C/samples/FreeRTOS/MQTTEcho.c"
+        "src/mqtt_demo/mqtt_demo_client.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -71,6 +71,7 @@ set(APP_INCLUDES
         "src/tls_echo_demo"
         "src/tls_echo_server"
         "src/http_demo"
+        "src/mqtt_demo"
     )
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"

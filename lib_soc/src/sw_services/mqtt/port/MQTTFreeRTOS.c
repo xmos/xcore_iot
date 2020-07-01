@@ -22,7 +22,7 @@ int ThreadStart(Thread* thread, void (*fn)(void*), void* arg)
 {
 	int rc = 0;
 	uint16_t usTaskStackSize = (configMINIMAL_STACK_SIZE * 5);
-	UBaseType_t uxTaskPriority = uxTaskPriorityGet(NULL); /* set the priority as the same as the calling task*/
+	UBaseType_t uxTaskPriority = uxTaskPriorityGet(NULL) - 1; /* set the priority as the same as the calling task*/
 
 	rc = xTaskCreate(fn,	/* The function that implements the task. */
 		"MQTTTask",			/* Just a text name for the task to aid debugging. */

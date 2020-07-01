@@ -22,8 +22,7 @@
 #include "tls_echo_server.h"
 #include "tls_support.h"
 #include "http_demo.h"
-
-extern void vStartMQTTTasks(uint16_t usTaskStackSize, UBaseType_t uxTaskPriority);
+#include "mqtt_demo_client.h"
 
 void soc_tile0_main(
         int tile)
@@ -57,7 +56,7 @@ void vApplicationDaemonTaskStartupHook( void )
     /* Create TLS echo demo */
 	tls_echo_server_create( appconfTLS_ECHO_SERVER_PRIORITY );
 
-    /* Create http demo */
+    /* Create HTTP demo */
 	http_demo_create( appconfHTTP_TASK_PRIORITY );
 
     /* Create audio pipeline */
@@ -66,7 +65,8 @@ void vApplicationDaemonTaskStartupHook( void )
     /* Create SNTPD */
     sntp_create( appconfSNTPD_TASK_PRIORITY );
 
-    vStartMQTTTasks( 800, appconfTLS_ECHO_TASK_PRIORITY - 1);
+    /* Create MQTT demo*/
+    mqtt_demo_create( appconfMQTT_TASK_PRIORITY );
 }
 
 void vApplicationMallocFailedHook(void)

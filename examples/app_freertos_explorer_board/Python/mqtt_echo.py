@@ -8,7 +8,9 @@ topic = 'echo'
 def on_message(client, userdata, message):
     print('Got message:')
     print(message.payload)
-    client.publish('echo/b', payload=message.payload, qos=0, retain=False)
+    print('Publish to echo/b:')
+    print(message.payload)
+    client.publish('echo/b', payload=message.payload, qos=1, retain=False)
     return;
 
 
