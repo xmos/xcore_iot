@@ -3,7 +3,7 @@
 #include <platform.h>
 #include <stdint.h>
 #include <timer.h>
-#include <quadflashlib.h>
+#include <xmos_flash.h>
 
 #include "xassert.h"
 #include "mic_array.h"
@@ -121,15 +121,23 @@ port p_rst_shared                   = PORT_SHARED_RESET;    // Bit 0: DAC_RST_N,
 }
 
 /**
- * Defines the supported flash chips.
+ * Defines the clock/timing configuration
+ * for the quad spi flash. This configuration
+ * is for 50 MHz.
  */
-#define FLASH_SPECS {             \
-    FL_QUADDEVICE_ISSI_IS25LQ016B \
+#define FLASH_CLOCK_CONFIG {        \
+    flash_clock_reference,          \
+    0,                              \
+    1,                              \
+    flash_clock_input_edge_plusone, \
+    flash_port_pad_delay_1          \
 }
 
 //Configuration for the quad spi flash
-fl_QSPIPorts      flash_ports   = FLASH_PORTS;
-fl_QuadDeviceSpec flash_specs[] = FLASH_SPECS;
+flash_handle_t       flash_handle;
+flash_ports_t        flash_ports        = FLASH_PORTS;
+flash_clock_config_t flash_clock_config = FLASH_CLOCK_CONFIG;
+flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_0, flash_qe_bit_6};
 
 void tile0_device_instantiate(
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
@@ -138,6 +146,7 @@ void tile0_device_instantiate(
 {
     chan t0_gpio_dev_ctrl_ch;
     chan spi_dev_ctrl_ch;
+    chan qspi_flash_dev_ctrl_ch;
 
     micarray_dev_init(pdmclk, NULL, p_mclk, p_pdm_clk, p_pdm_mics);
 
@@ -146,14 +155,9 @@ void tile0_device_instantiate(
             unsafe chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, null, null};
             unsafe chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t0_gpio_dev_ctrl_ch, null};
             unsafe chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, spi_dev_ctrl_ch, null};
+            unsafe chanend qspi_flash_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, qspi_flash_dev_ctrl_ch, null};
 
-            /*
-             * Must be called before device_register() so that it happens before
-             * before the bitstream is "initialized" and the FreeRTOS software starts.
-             */
-            fl_connectToDevice(flash_ports, flash_specs, sizeof(flash_specs)/sizeof(fl_QuadDeviceSpec));
-
-            device_register(mic_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch);
+            device_register(mic_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch, qspi_flash_dev_ch);
             soc_peripheral_hub();
         }
 
@@ -180,6 +184,14 @@ void tile0_device_instantiate(
                         null,
                         spi_dev_ctrl_ch,
                         spi_ctx);
+
+                qspi_flash_dev(
+                        bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+                        null,
+                        null,
+                        qspi_flash_dev_ctrl_ch,
+                        16384, /* Number of pages in the QSPI flash */
+                        &flash_ports, &flash_clock_config, &flash_qe_config);
             }
         }
     }

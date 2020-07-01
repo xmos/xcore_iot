@@ -3,7 +3,6 @@
 #include <platform.h>
 #include <stdint.h>
 #include <timer.h>
-//#include <quadflashlib.h>
 #include <xmos_flash.h>
 
 #include "debug_print.h"
@@ -101,18 +100,6 @@ port p_rst_shared                   = PORT_SHARED_RESET;    // Bit 0: DAC_RST_N,
 }
 
 /**
- * Defines the supported flash chips.
- */
-#define FLASH_SPECS {             \
-    FL_QUADDEVICE_SPANSION_S25FL116K \
-}
-
-#if 0
-//Configuration for the quad spi flash
-fl_QSPIPorts      flash_ports   = FLASH_PORTS;
-fl_QuadDeviceSpec flash_specs[] = FLASH_SPECS;
-#else
-/**
  * Defines the clock/timing configuration
  * for the quad spi flash. This configuration
  * is for 50 MHz.
@@ -131,9 +118,6 @@ flash_ports_t        flash_ports        = FLASH_PORTS;
 flash_clock_config_t flash_clock_config = FLASH_CLOCK_CONFIG;
 flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_0, flash_qe_bit_6}; 
 
-
-
-#endif
 void tile0_device_instantiate(
 #if 0
         chanend i2s_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
@@ -153,13 +137,6 @@ void tile0_device_instantiate(
             unsafe chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, t0_gpio_dev_ctrl_ch, null};
             unsafe chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, spi_dev_ctrl_ch, null};
             unsafe chanend qspi_flash_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, qspi_flash_dev_ctrl_ch, null};
-
-            /*
-             * Must be called before device_register() so that it happens before
-             * before the bitstream is "initialized" and the FreeRTOS software starts.
-             */
-            //fl_connectToDevice(flash_ports, flash_specs, sizeof(flash_specs)/sizeof(fl_QuadDeviceSpec));
-            //flash_connect(&flash_handle, &flash_ports, flash_clock_config, flash_qe_config);
 
             //device_register(mic_dev_ch, i2s_dev_ch, i2c_dev_ch, t0_gpio_dev_ch, t1_gpio_dev_ch, spi_dev_ch, qspi_flash_dev_ch);
             device_register(t0_gpio_dev_ch, spi_dev_ch, qspi_flash_dev_ch);

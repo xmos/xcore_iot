@@ -51,6 +51,7 @@ set(APP_C_SRCS
         "src/udp_cli/UDPCommandServer.c"
         "src/tls_echo_demo/tls_echo_demo.c"
         "src/tls_echo_server/tls_echo_server.c"
+        "src/http_demo/http_demo.c"
         "paho.mqtt.embedded-c/MQTTClient-C/samples/FreeRTOS/MQTTEcho.c"
     )
 set(APP_ASM_SRCS
@@ -69,10 +70,10 @@ set(APP_INCLUDES
         "src/udp_cli"
         "src/tls_echo_demo"
         "src/tls_echo_server"
+        "src/http_demo"
     )
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"
-        "mbedtls(>=2.16.6)"
     )
 
 set(USE_FREERTOS_SMP True)
@@ -92,6 +93,7 @@ set(LIB_SOC_SW_SNTPD True)
 set(LIB_SOC_SW_FATFS True)
 set(LIB_SOC_SW_TLS_SUPPORT True)
 set(LIB_SOC_SW_MQTT True)
+set(LIB_SOC_SW_HTTP True)
 
 ## Register the application
 XMOS_REGISTER_APP()

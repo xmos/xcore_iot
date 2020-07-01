@@ -1,9 +1,8 @@
-set(SW_SVC_NAME LIB_SOC_SW_WIFI)
+set(SW_SVC_NAME WIFI)
 set(SW_SVC_ADD_COMPILER_FLAGS "")
 set(SW_SVC_XC_SRCS
         "")
 set(SW_SVC_C_SRCS
-        "src/sw_services/wifi/afr_wifi/sl_wfx_callbacks.c"
         "src/sw_services/wifi/afr_wifi/sl_wfx_iot_wifi.c")
 set(SW_SVC_ASM_SRCS
         "")

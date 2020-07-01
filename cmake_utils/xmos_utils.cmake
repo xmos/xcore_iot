@@ -65,6 +65,8 @@ define_property(GLOBAL PROPERTY XMOS_TARGETS_LIST BRIEF_DOCS "brief" FULL_DOCS "
 # Setup build output
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
+file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/build/libs")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/libs")
 
 if(DEFINED AFR_ROOT_DIR)
     include("${AFR_VENDORS_DIR}/xmos/lib_rtos_support/cmake_utils/xmos_afr_support.cmake")
@@ -122,8 +124,8 @@ function(XMOS_REGISTER_APP)
     get_target_property(${PROJECT_NAME}_LIB_OPTINCS ${PROJECT_NAME}_LIB OPTIONAL_HEADERS)
     get_target_property(${PROJECT_NAME}_LIB_FILE_FLAGS ${PROJECT_NAME}_LIB FILE_FLAGS)
 
-    set(APP_SOURCES ${${PROJECT_NAME}_LIB_SRCS})
-    set(APP_INCLUDES ${${PROJECT_NAME}_LIB_INCS})
+    set(APP_SOURCES ${APP_XC_SRCS} ${BOARD_XC_SRCS} ${APP_C_SRCS} ${BOARD_C_SRCS} ${APP_ASM_SRCS} ${BOARD_ASM_SRCS})
+    set(APP_INCLUDES ${APP_INCLUDES} ${BOARD_INCLUDES})
 
     get_property(XMOS_TARGETS_LIST GLOBAL PROPERTY XMOS_TARGETS_LIST)
 
@@ -165,23 +167,22 @@ function(XMOS_REGISTER_APP)
 
     set(APP_COMPILE_FLAGS ${APP_TARGET_COMPILER_FLAG} ${LIB_ADD_COMPILER_FLAGS} ${APP_COMPILER_C_FLAGS} ${HEADER_EXIST_FLAGS})
 
+    add_executable(${TARGET_NAME})
+    target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES})
+
+    target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES})
+    target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILE_FLAGS})
+
+    set(DEPS_TO_LINK "")
     foreach(target ${XMOS_TARGETS_LIST})
         target_include_directories(${target} PRIVATE ${APP_INCLUDES})
         target_compile_options(${target} BEFORE PRIVATE ${APP_COMPILE_FLAGS})
-    endforeach()
 
-    set(DEPS_TO_LINK "")
-    foreach(DEP_MODULE ${LIB_DEPENDENT_MODULES})
-        string(REGEX MATCH "^[A-Za-z0-9_ -]+" DEP_NAME ${DEP_MODULE})
-        list(APPEND DEPS_TO_LINK ${DEP_NAME})
+        add_dependencies(${TARGET_NAME} ${target})
+        list(APPEND DEPS_TO_LINK ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/lib${target}.a)
     endforeach()
-
     list(REMOVE_DUPLICATES DEPS_TO_LINK)
 
-    add_executable(${TARGET_NAME})
-    target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES})
-    target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES})
-    target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILE_FLAGS})
     target_link_libraries(${TARGET_NAME} PRIVATE ${DEPS_TO_LINK})
     target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILE_FLAGS})
 endfunction()
@@ -267,19 +268,45 @@ function(XMOS_REGISTER_MODULE)
             set_source_files_properties(${file} PROPERTIES LANGUAGE C)
         endforeach()
 
+        if(NOT ${LIB_NAME}_SILENT_FLAG)
+            if("${LIB_ADD_COMPILER_FLAGS}" STREQUAL "")
+            else()
+                foreach(file ${LIB_XC_SCRS})
+                    get_filename_component(ABS_PATH ${file} ABSOLUTE)
+                    string(REPLACE ";" " " NEW_FLAGS "${LIB_ADD_COMPILER_FLAGS}")
+                    set_source_files_properties(${ABS_PATH} PROPERTIES COMPILE_FLAGS ${NEW_FLAGS})
+                endforeach()
+
+                foreach(file ${LIB_C_SRCS})
+                    get_filename_component(ABS_PATH ${file} ABSOLUTE)
+                    string(REPLACE ";" " " NEW_FLAGS "${LIB_ADD_COMPILER_FLAGS}")
+                    set_source_files_properties(${ABS_PATH} PROPERTIES COMPILE_FLAGS ${NEW_FLAGS})
+                endforeach()
+            endif()
+        endif()
+
         target_sources(${LIB_NAME} PUBLIC ${LIB_XC_SRCS} ${LIB_C_SRCS} ${LIB_ASM_SRCS})
-        target_include_directories(${LIB_NAME} PUBLIC ${LIB_INCLUDES})
+        target_include_directories(${LIB_NAME} PRIVATE ${LIB_INCLUDES})
 
         if(DEFINED AFR_ROOT_DIR)
             include("${AFR_VENDORS_DIR}/xmos/lib_rtos_support/cmake_utils/xmos_afr_support.cmake")
         endif()
 
-        target_link_libraries(
-            ${LIB_NAME}
-            PRIVATE
-                ${DEP_MODULE_LIST}
-        )
-        target_compile_options(${LIB_NAME} PRIVATE ${LIB_ADD_COMPILER_FLAGS})
+
+        if(NOT ${LIB_NAME}_SILENT_FLAG)
+            set(DEPS_TO_LINK "")
+            foreach(module ${DEP_MODULE_LIST})
+                list(APPEND DEPS_TO_LINK "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/lib${module}.a")
+                add_dependencies(${LIB_NAME} ${module})
+            endforeach()
+    
+            target_link_libraries(
+                ${LIB_NAME}
+                PUBLIC
+                    ${DEPS_TO_LINK}
+            )
+            target_compile_options(${LIB_NAME} PUBLIC ${LIB_ADD_COMPILER_FLAGS})
+        endif()
 
         if(NOT ${LIB_NAME}_SILENT_FLAG)
             message("Added ${LIB_NAME} (${LIB_VERSION})")

@@ -1,4 +1,4 @@
-set(SW_SVC_NAME LIB_SOC_SW_MQTT)
+set(SW_SVC_NAME MQTT)
 set(SW_SVC_ADD_COMPILER_FLAGS "")
 set(SW_SVC_XC_SRCS
         "")

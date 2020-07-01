@@ -20,7 +20,8 @@ BaseType_t audiopipeline_set_stage1_gain( BaseType_t xnewgain );
 typedef enum
 {
 	eAPINPUT_QUEUE = 0,
-	eTCP_QUEUE = 1
+	eTCP_QUEUE = 1,
+	eSTAGE2_INPUT_SEL_CNT
 } state2_input_sel_t;
 
 BaseType_t audiopipeline_get_stage2_input( void );

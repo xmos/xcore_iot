@@ -11,6 +11,7 @@ soc_peripheral_t bitstream_i2s_devices[BITSTREAM_I2S_DEVICE_COUNT];
 soc_peripheral_t bitstream_i2c_devices[BITSTREAM_I2C_DEVICE_COUNT];
 soc_peripheral_t bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_COUNT];
 soc_peripheral_t bitstream_spi_devices[BITSTREAM_SPI_DEVICE_COUNT];
+soc_peripheral_t bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_COUNT];
 
 void device_register(
         chanend mic_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
@@ -18,7 +19,8 @@ void device_register(
         chanend i2c_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t0_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
         chanend t1_gpio_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
-        chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
+        chanend spi_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
+        chanend qspi_flash_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT])
 {
     bitstream_micarray_devices[BITSTREAM_MICARRAY_DEVICE_A] = soc_peripheral_register(mic_dev_ch);
     bitstream_i2s_devices[BITSTREAM_I2S_DEVICE_A] = soc_peripheral_register(i2s_dev_ch);
@@ -26,6 +28,7 @@ void device_register(
     bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_A] = soc_peripheral_register(t0_gpio_dev_ch);
     bitstream_gpio_devices[BITSTREAM_GPIO_DEVICE_B] = soc_peripheral_register(t1_gpio_dev_ch);
     bitstream_spi_devices[BITSTREAM_SPI_DEVICE_A] = soc_peripheral_register(spi_dev_ch);
+    bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A] = soc_peripheral_register(qspi_flash_dev_ch);
 
     initialized = 1;
 }

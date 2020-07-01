@@ -203,16 +203,8 @@ sl_status_t sl_wfx_host_hold_in_reset(void)
 
 sl_status_t sl_wfx_host_setup_waited_event(uint8_t event_id)
 {
-    /*
-     * Do not wait for send frame confirmations.
-     *
-     * The driver asks to wait for send frame confirmations
-     * but does not actually wait for them. This causes errors
-     * if we don't filter out the send frame requests here.
-     */
-    if (event_id != SL_WFX_SEND_FRAME_REQ_ID && event_id != SL_WFX_SHUT_DOWN_REQ_ID) {
-        host_ctx.waited_event_id = event_id;
-    }
+    host_ctx.waited_event_id = event_id;
+
     return SL_STATUS_OK;
 }
 
@@ -322,21 +314,32 @@ sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
         }
       case SL_WFX_EXCEPTION_IND_ID:
         {
-          printf("Firmware Exception\r\n");
           sl_wfx_exception_ind_t *firmware_exception = (sl_wfx_exception_ind_t*)event_payload;
-          printf ("Exception data = ");
-          for(int i = 0; i < SL_WFX_EXCEPTION_DATA_SIZE; i++)
-          {
-            printf ("%X, ", firmware_exception->body.data[i]);
+          uint8_t *exception_tmp = (uint8_t *) firmware_exception;
+          printf("firmware exception %lu\r\n", firmware_exception->body.reason);
+          for (uint16_t i = 0; i < firmware_exception->header.length; i += 16) {
+            printf("hif: %.8x:", i);
+            for (uint8_t j = 0; (j < 16) && ((i + j) < firmware_exception->header.length); j ++) {
+                printf(" %.2x", *exception_tmp);
+                exception_tmp++;
+            }
+            printf("\r\n");
           }
-          printf("\r\n");
           break;
         }
       case SL_WFX_ERROR_IND_ID:
         {
-          printf("Firmware Error\r\n");
           sl_wfx_error_ind_t *firmware_error = (sl_wfx_error_ind_t*)event_payload;
-          printf ("Error type = %lu\r\n",firmware_error->body.type);
+          uint8_t *error_tmp = (uint8_t *) firmware_error;
+          printf("firmware error %lu\r\n", firmware_error->body.type);
+          for (uint16_t i = 0; i < firmware_error->header.length; i += 16) {
+            printf("hif: %.8x:", i);
+            for (uint8_t j = 0; (j < 16) && ((i + j) < firmware_error->header.length); j ++) {
+                printf(" %.2x", *error_tmp);
+                error_tmp++;
+            }
+            printf("\r\n");
+          }
           break;
         }
       }
