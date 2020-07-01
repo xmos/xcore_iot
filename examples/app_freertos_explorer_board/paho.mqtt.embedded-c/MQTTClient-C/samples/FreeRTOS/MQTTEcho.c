@@ -15,6 +15,11 @@
 #define MQTT_TASK 1
 #include "MQTTClient.h"
 
+#define MQTT_SERVER_IP_ADDR_OCTET_0    10
+#define MQTT_SERVER_IP_ADDR_OCTET_1    0
+#define MQTT_SERVER_IP_ADDR_OCTET_2    0
+#define MQTT_SERVER_IP_ADDR_OCTET_3    253
+#define MQTT_PORT 1883
 
 void messageArrived(MessageData* data)
 {
@@ -24,7 +29,6 @@ void messageArrived(MessageData* data)
 
 static void prvMQTTEchoTask(void *pvParameters)
 {
-	/* connect to m2m.eclipse.org, subscribe to a topic, send and receive messages regularly every 1 sec */
 	MQTTClient client;
 	Network network;
 	unsigned char sendbuf[80], readbuf[80];
@@ -41,8 +45,12 @@ static void prvMQTTEchoTask(void *pvParameters)
 	NetworkInit(&network);
 	MQTTClientInit(&client, &network, 30000, sendbuf, sizeof(sendbuf), readbuf, sizeof(readbuf));
 
-//	char* address = "mqtt.eclipse.org";
-	while ((rc = NetworkConnectIP(&network, FreeRTOS_inet_addr_quick( 10, 0, 0, 253 ), 1883)) != 0)
+	while ((rc = NetworkConnectIP( &network,
+			FreeRTOS_inet_addr_quick( MQTT_SERVER_IP_ADDR_OCTET_0,
+									  MQTT_SERVER_IP_ADDR_OCTET_1,
+									  MQTT_SERVER_IP_ADDR_OCTET_2,
+									  MQTT_SERVER_IP_ADDR_OCTET_3 ),
+									  MQTT_PORT)) != 0)
 	{
 		debug_printf("Return code from network connect is %d\n", rc);
 	    vTaskDelay( pdMS_TO_TICKS( 1000 ) );
@@ -61,9 +69,6 @@ static void prvMQTTEchoTask(void *pvParameters)
 	else
 		debug_printf("MQTT Connected\n");
 
-//	if ((rc = MQTTSubscribe(&client, "FreeRTOS/sample/#", 2, messageArrived)) != 0)
-//		debug_printf("Return code from MQTT subscribe is %d\n", rc);
-
 	if ((rc = MQTTSubscribe(&client, "echo/#", 2, messageArrived)) != 0)
 		debug_printf("Return code from MQTT subscribe is %d\n", rc);
 	else
@@ -75,7 +80,6 @@ static void prvMQTTEchoTask(void *pvParameters)
 	message.qos = 1;
 	message.retained = 0;
 	message.payload = payload;
-//		rtos_sprintf(payload, "message number %d", count);
 	message.payloadlen = strlen(payload);
 
 	while (++count)
