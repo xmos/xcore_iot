@@ -173,6 +173,11 @@ void audio_pipeline_stage2(void *arg)
 				break;
 			case eTCP_QUEUE:
 				recv_data = xQueueReceive(tcp2q, &mic_data, pdMS_TO_TICKS(50));
+
+		        for (int i = 0; i < appconfMIC_FRAME_LENGTH; i++) {
+		            mic_data[i] /= 4;
+		        }
+
 				break;
 			default:
 				debug_printf("Invalid stage2 input select\n");

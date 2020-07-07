@@ -33,7 +33,7 @@
 #endif
 
 #define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
-#define HWADDR_ARG(hwaddr) hwaddr.ucBytes[0], hwaddr.ucBytes[1], hwaddr.ucBytes[2], hwaddr.ucBytes[3], hwaddr.ucBytes[4], hwaddr.ucBytes[5]
+#define HWADDR_ARG(hwaddr) hwaddr[0], hwaddr[1], hwaddr[2], hwaddr[3], hwaddr[4], hwaddr[5]
 
 #define SL_WFX_CONNECT_TIMEOUT_MS 2000
 #define SL_WFX_DISCONNECT_TIMEOUT_MS 500
@@ -166,20 +166,15 @@ WIFIReturnCode_t WIFI_Off( void )
     if( ret == eWiFiSuccess )
     {
         sl_status_t sl_ret;
-
-        WIFI_StopAP();
-        WIFI_Disconnect();
-
-        /* Ensure these bits are cleared in case either of the above
-        calls failed. They might if the wifi chip is in a bad state. */
-        sl_wfx_context->state &= ~( SL_WFX_AP_INTERFACE_UP | SL_WFX_STA_INTERFACE_CONNECTED );
-        xEventGroupClearBits( sl_wfx_event_group, SL_WFX_START_AP | SL_WFX_CONNECT | SL_WFX_INITIALIZED );
-
         sl_ret = sl_wfx_deinit();
         if( sl_ret != SL_STATUS_OK )
         {
             ret = eWiFiFailure;
         }
+
+        /* Ensure all state bits are cleared */
+        sl_wfx_context->state = 0;
+        xEventGroupClearBits( sl_wfx_event_group, 0x00FFFFFF );
 
         WIFI_ReleaseLock();
     }
@@ -195,12 +190,18 @@ WIFIReturnCode_t WIFI_Off( void )
 
 void sl_wfx_disconnect_callback(uint8_t *mac, sl_wfx_reason_t reason)
 {
-    ( void ) mac;
-    sl_wfx_host_log( "Disconnected %d\n", reason );
+    EventBits_t bits;
+
+    sl_wfx_host_log( "Disconnected from AP " HWADDR_FMT " for reason %d\n", HWADDR_ARG( mac ), reason );
     sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
-    xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT );
+    bits = xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT );
     xEventGroupSetBits( sl_wfx_event_group, SL_WFX_DISCONNECT );
-    FreeRTOS_NetworkDown();
+
+    if( ( bits & SL_WFX_CONNECT ) != 0 )
+    {
+        rtos_printf("Bringing the FreeRTOS network down\n");
+        FreeRTOS_NetworkDown();
+    }
 }
 
 WIFIReturnCode_t WIFI_Disconnect( void )
@@ -211,7 +212,7 @@ WIFIReturnCode_t WIFI_Disconnect( void )
     ret = WIFI_GetLock();
     if( ret == eWiFiSuccess )
     {
-        if( sl_wfx_context->state & SL_WFX_STA_INTERFACE_CONNECTED )
+        if( ( xEventGroupGetBits( sl_wfx_event_group ) & SL_WFX_CONNECT ) != 0 )
         {
             sl_status_t sl_ret;
 
@@ -227,11 +228,20 @@ WIFIReturnCode_t WIFI_Disconnect( void )
 
                 if( ( bits & SL_WFX_DISCONNECT ) == 0 )
                 {
+                    /*
+                     * Timed out waiting for the callback. We are now likely out of
+                     * sync with the device. Reset it to get back to a known state.
+                     */
+                    WIFI_Reset();
                     ret = eWiFiFailure;
                 }
             }
             else
             {
+                if( sl_ret == SL_STATUS_WIFI_WRONG_STATE)
+                {
+                    WIFI_Reset();
+                }
                 ret = eWiFiFailure;
             }
         }
@@ -246,12 +256,10 @@ void sl_wfx_connect_callback( uint8_t *mac, sl_wfx_fmac_status_t status )
 {
     int connected = 0;
 
-    ( void ) mac;
-
     switch ( status )
     {
     case WFM_STATUS_SUCCESS:
-        sl_wfx_host_log( "Connection succeeded\n" );
+        sl_wfx_host_log( "Connection succeeded to AP " HWADDR_FMT "\n", HWADDR_ARG( mac ) );
         connected = 1;
         break;
 
@@ -284,11 +292,28 @@ void sl_wfx_connect_callback( uint8_t *mac, sl_wfx_fmac_status_t status )
     {
         sl_wfx_context->state |= SL_WFX_STA_INTERFACE_CONNECTED;
         xEventGroupSetBits( sl_wfx_event_group, SL_WFX_CONNECT );
+        xEventGroupClearBits( sl_wfx_event_group, SL_WFX_DISCONNECT );
     }
     else
     {
         sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
         xEventGroupSetBits( sl_wfx_event_group, SL_WFX_CONNECT_FAIL );
+
+        if( ( xEventGroupGetBits( sl_wfx_event_group ) & SL_WFX_CONNECT ) != 0 )
+        {
+            /*
+             * The module was already connected, but now it is not. This means that
+             * WIFI_ConnectAP() is likely not waiting, since it ensures that the
+             * module is disconnected first if the connect flag was already set,
+             * thus ensuring it is cleared. Do not clear the connect flag here, as
+             * the module is still in a connected state, and may autonomously
+             * reconnect. Just bring the FreeRTOS TCP stack down, which will
+             * likely cause the application to attempt to reconnect, which will
+             * call WIFI_Disconnect() first.
+             */
+            rtos_printf("Bringing the FreeRTOS network down\n");
+            FreeRTOS_NetworkDown();
+        }
     }
 }
 
@@ -329,7 +354,10 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
 
         if( ret == eWiFiSuccess )
         {
-            ret = WIFI_Disconnect();
+            if( ( xEventGroupGetBits( sl_wfx_event_group ) & SL_WFX_CONNECT ) != 0 )
+            {
+                ret = WIFI_Disconnect();
+            }
         }
 
         if( ret == eWiFiSuccess )
@@ -373,11 +401,23 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
 
                 if( ( bits & SL_WFX_CONNECT ) == 0 )
                 {
+                    if( ( bits & SL_WFX_CONNECT_FAIL ) == 0 )
+                    {
+                        /*
+                         * Timed out waiting for the callback. We are now likely out of
+                         * sync with the device. Reset it to get back to a known state.
+                         */
+                        WIFI_Reset();
+                    }
                     ret = eWiFiFailure;
                 }
             }
             else
             {
+                if( sl_ret == SL_STATUS_WIFI_WRONG_STATE)
+                {
+                    WIFI_Reset();
+                }
                 ret = eWiFiFailure;
             }
         }
@@ -931,11 +971,23 @@ WIFIReturnCode_t WIFI_StartAP( void )
 
                 if( ( bits & SL_WFX_START_AP ) == 0 )
                 {
+                    if( ( bits & SL_WFX_START_AP_FAIL ) == 0 )
+                    {
+                        /*
+                         * Timed out waiting for the callback. We are now likely out of
+                         * sync with the device. Reset it to get back to a known state.
+                         */
+                        WIFI_Reset();
+                    }
                     ret = eWiFiFailure;
                 }
             }
             else
             {
+                if( sl_ret == SL_STATUS_WIFI_WRONG_STATE)
+                {
+                    WIFI_Reset();
+                }
                 ret = eWiFiFailure;
             }
         }
@@ -979,11 +1031,20 @@ WIFIReturnCode_t WIFI_StopAP( void )
 
                 if( ( bits & SL_WFX_STOP_AP ) == 0 )
                 {
+                    /*
+                     * Timed out waiting for the callback. We are now likely out of
+                     * sync with the device. Reset it to get back to a known state.
+                     */
+                    WIFI_Reset();
                     ret = eWiFiFailure;
                 }
             }
             else
             {
+                if( sl_ret == SL_STATUS_WIFI_WRONG_STATE)
+                {
+                    WIFI_Reset();
+                }
                 ret = eWiFiFailure;
             }
         }

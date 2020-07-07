@@ -174,7 +174,7 @@ network event hook at the appropriate times.  If ipconfigUSE_NETWORK_EVENT_HOOK
 is not set to 1 then the network event hook will never be called.  See
 http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_UDP/API/vApplicationIPNetworkEventHook.shtml
 */
-#define ipconfigUSE_NETWORK_EVENT_HOOK 0    // TODO
+#define ipconfigUSE_NETWORK_EVENT_HOOK 1
 
 /* Sockets have a send block time attribute.  If FreeRTOS_sendto() is called but
 a network buffer cannot be obtained then the calling task is held in the Blocked
@@ -348,7 +348,7 @@ simultaneously, one could define TCP_WIN_SEG_COUNT as 120. */
 
 /* Each TCP socket has a circular buffers for Rx and Tx, which have a fixed
 maximum size.  Define the size of Rx buffer for TCP sockets. */
-#define ipconfigTCP_RX_BUFFER_LENGTH			( 2 * ipconfigTCP_MSS )
+#define ipconfigTCP_RX_BUFFER_LENGTH			( 32 * ipconfigTCP_MSS )
 
 /* Define the size of Tx buffer for TCP sockets. */
 #define ipconfigTCP_TX_BUFFER_LENGTH			( 6 * ipconfigTCP_MSS )

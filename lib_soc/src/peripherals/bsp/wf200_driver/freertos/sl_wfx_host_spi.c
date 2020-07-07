@@ -87,13 +87,15 @@ void sl_wfx_host_set_hif(int spi_dev_id,
 {
     configASSERT(!hif_ctx.initialized);
 
-    hif_ctx.spi_dev = spi_master_driver_init(
-    		spi_dev_id,
-			ipconfigZERO_COPY_TX_DRIVER ? 3*2 : 2,  /* Uses 2 DMA buffers per transaction for the scatter/gather */
-            0,                                      /* This device's interrupts should happen on core 0 */
-			ipconfigZERO_COPY_TX_DRIVER ? SPI_MASTER_FLAG_TX_NOBLOCK : 0,
-			ipconfigZERO_COPY_TX_DRIVER ? spi_isr_cb : NULL
-			);
+    if (hif_ctx.spi_dev == NULL) {
+        hif_ctx.spi_dev = spi_master_driver_init(
+                spi_dev_id,
+                ipconfigZERO_COPY_TX_DRIVER ? 3*2 : 2,  /* Uses 2 DMA buffers per transaction for the scatter/gather */
+                0,                                      /* This device's interrupts should happen on core 0 */
+                ipconfigZERO_COPY_TX_DRIVER ? SPI_MASTER_FLAG_TX_NOBLOCK : 0,
+                ipconfigZERO_COPY_TX_DRIVER ? spi_isr_cb : NULL
+                );
+    }
 
     hif_ctx.gpio_dev = bitstream_gpio_devices[gpio_dev_id];
     hif_ctx.wirq_gpio_port = wirq_gpio_port;
