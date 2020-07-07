@@ -179,4 +179,7 @@ static const char* default_time_servers[] = {
 /* Create SNTP task to update rtos_clock */
 void sntp_create( UBaseType_t priority );
 
+/* Check if time has been synced since last power cycle */
+int is_time_synced( void );
+
 #endif /* SRC_SNTPD_SNTPD_H_ */

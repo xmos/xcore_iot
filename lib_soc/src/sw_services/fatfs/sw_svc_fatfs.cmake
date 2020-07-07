@@ -6,7 +6,8 @@ set(SW_SVC_C_SRCS
         "src/sw_services/fatfs/thirdparty/fatfs/src/ff.c"
         "src/sw_services/fatfs/thirdparty/fatfs/src/ffunicode.c"
         "src/sw_services/fatfs/freertos/src/diskio.c"
-        "src/sw_services/fatfs/freertos/src/ffsystem.c")
+        "src/sw_services/fatfs/freertos/src/ffsystem.c"
+        "src/sw_services/fatfs/freertos/src/fs_support.c")
 set(SW_SVC_ASM_SRCS
         "")
 set(SW_SVC_INCLUDES

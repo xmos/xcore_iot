@@ -89,6 +89,12 @@ typedef struct __attribute__ ((__packed__)) {
    	   	   	   	   	   	   	   	   	   	   	   reply departed the server */
 } sntp_packet_t;
 
+static int time_synced = pdFALSE;
+
+int is_time_synced( void )
+{
+	return time_synced;
+}
 
 static void sntpd_task( void *args )
 {
@@ -111,9 +117,9 @@ static void sntpd_task( void *args )
 		{
 			ip = FreeRTOS_gethostbyname( default_time_servers[i] );
 
-			char buf[16];
-			FreeRTOS_inet_ntoa( ip, buf );
-			rtos_printf( "%s is %s\n", default_time_servers[i], buf );
+//			char buf[16];
+//			FreeRTOS_inet_ntoa( ip, buf );
+//			rtos_printf( "%s is %s\n", default_time_servers[i], buf );
 
 			if( ip > 0)
 			{
@@ -183,6 +189,8 @@ static void sntpd_task( void *args )
 						now.microseconds = FreeRTOS_htonl( rxpacket->receiveTimestamp.fraction ) / UINT_MAX;
 						rtos_time_set( now );
 
+						time_synced = pdTRUE;
+
 						struct tm *info;
 						info = gmtime( (time_t * )(&now.seconds) );
 						rtos_printf( "NTP time: %d/%d/%02d %2d:%02d:%02d\n",
@@ -205,7 +213,7 @@ static void sntpd_task( void *args )
 				if( failed_attempts >= SNTPD_RESET_AFTER_X_FAILURES )
 				{
 				    FreeRTOS_closesocket( sntp_socket );
-
+				    failed_attempts = 0;
 					sntp_socket = NULL;
 					break;
 				}

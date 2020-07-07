@@ -24,10 +24,14 @@ set(APP_COMPILER_FLAGS
 		"-DMIC_DUAL_ENABLED=1"
         "-report"
         "-fxscope"
+        "-DMQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h"
+        "-DMQTT_TASK=1"
         "-Wxcore-fptrgroup"
         "-DDEBUG_PRINT_ENABLE=1"
         "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT)"
         "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
+        "-DMBEDTLS_CONFIG_FILE=\"mbedtls_config.h\""
+        #"-DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_user_config.h\"" # User config applied after default XMOS config
         "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
 set(APP_XC_SRCS
         ""
@@ -45,6 +49,10 @@ set(APP_C_SRCS
         "src/udp_cli/CLI-commands.c"
         "src/udp_cli/FreeRTOS_CLI.c"
         "src/udp_cli/UDPCommandServer.c"
+        "src/tls_echo_demo/tls_echo_demo.c"
+        "src/tls_echo_server/tls_echo_server.c"
+        "src/http_demo/http_demo.c"
+        "paho.mqtt.embedded-c/MQTTClient-C/samples/FreeRTOS/MQTTEcho.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -60,6 +68,9 @@ set(APP_INCLUDES
         "src/tcp_stream_to_queue"
         "src/thruput_test"
         "src/udp_cli"
+        "src/tls_echo_demo"
+        "src/tls_echo_server"
+        "src/http_demo"
     )
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"
@@ -79,6 +90,10 @@ set(LIB_SOC_SW_TRACE True)
 set(LIB_SOC_SW_WIFI True)
 set(LIB_SOC_SW_DHCPD True)
 set(LIB_SOC_SW_SNTPD True)
+set(LIB_SOC_SW_FATFS True)
+set(LIB_SOC_SW_TLS_SUPPORT True)
+set(LIB_SOC_SW_MQTT True)
+set(LIB_SOC_SW_HTTP True)
 
 ## Register the application
 XMOS_REGISTER_APP()

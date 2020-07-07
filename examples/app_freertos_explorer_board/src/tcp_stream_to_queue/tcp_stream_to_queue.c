@@ -22,33 +22,31 @@
 #include "tcp_stream_to_queue.h"
 
 
-static void tcp_to_queue_receiver(void *arg)
+static void tcp_to_queue_receiver( void *arg )
 {
 	tcp_to_queue_handle_t handle = ( tcp_to_queue_handle_t ) arg;
-    Socket_t xConnectedSocket = handle->socket ;
+    Socket_t xConnectedSocket = handle->socket;
     size_t data_length = handle->data_length;
     int8_t *data;
+    BaseType_t bytes_rx;
+    BaseType_t total_bytes_rx;
 
     for (;;) {
     	data = pvPortMalloc( sizeof(int8_t) * data_length );
-    	memset( data, 0x00, sizeof(int8_t) * data_length );
-
+    	total_bytes_rx = 0;
     	if( data != NULL )
     	{
-    	    BaseType_t bytes_rx;
-    	    BaseType_t total_bytes_rx = 0;
+        	memset( data, 0x00, sizeof(int8_t) * data_length );
 
-    	    while (total_bytes_rx < data_length) {
-
-    	        bytes_rx = FreeRTOS_recv( xConnectedSocket, data + total_bytes_rx, data_length - total_bytes_rx, 0 );
-    	        total_bytes_rx += bytes_rx;
-
-    	        if ( bytes_rx <= 0 )
-    	        {
-    	            break;
-    	        }
-    	    }
-
+    		while( total_bytes_rx < data_length )
+    		{
+        		bytes_rx = FreeRTOS_recv( xConnectedSocket, data + total_bytes_rx, data_length - total_bytes_rx, 0 );
+        		total_bytes_rx += bytes_rx;
+        		if( bytes_rx <= 0 )
+        		{
+        			break;
+        		}
+    		}
     		if( bytes_rx > 0 )
     		{
 
