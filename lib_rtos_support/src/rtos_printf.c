@@ -303,7 +303,7 @@ static int rtos_vsnwprintf(char *str, size_t size, int writeout, const char *fmt
 
         if (isdigit((int32_t)ch) != 0) {
             if (dot_flag != 0) {
-                par.num2 = getnum(&ctrl);
+				par.num2 = getnum(&ctrl);
             }
             else {
                 if (ch == '0') {
@@ -317,6 +317,11 @@ static int rtos_vsnwprintf(char *str, size_t size, int writeout, const char *fmt
             if(ctrl != NULL) {
             ctrl -= 1;
             }
+            goto try_next;
+        }
+
+        if (dot_flag != 0 && ch == '*') {
+			par.num2 = va_arg(ap, int32_t);
             goto try_next;
         }
 
@@ -417,8 +422,8 @@ static int rtos_vsnwprintf(char *str, size_t size, int writeout, const char *fmt
                 break;
 
             default:
-        Check = 1;
-        break;
+				Check = 1;
+				break;
         }
         if(Check == 1) {
             if(ctrl != NULL) {

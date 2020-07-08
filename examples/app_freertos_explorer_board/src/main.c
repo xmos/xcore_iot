@@ -23,6 +23,7 @@
 #include "tls_support.h"
 #include "http_demo.h"
 #include "mqtt_demo_client.h"
+#include "mem_analysis.h"
 
 void soc_tile0_main(
         int tile)
@@ -67,6 +68,9 @@ void vApplicationDaemonTaskStartupHook( void )
 
     /* Create MQTT demo*/
     mqtt_demo_create( appconfMQTT_TASK_PRIORITY );
+
+    /* Create heap analysis task */
+    mem_analysis_create( "heap" );
 }
 
 void vApplicationMallocFailedHook(void)

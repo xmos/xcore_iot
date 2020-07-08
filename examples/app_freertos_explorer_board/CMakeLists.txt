@@ -53,6 +53,7 @@ set(APP_C_SRCS
         "src/tls_echo_server/tls_echo_server.c"
         "src/http_demo/http_demo.c"
         "src/mqtt_demo/mqtt_demo_client.c"
+        "src/mem_analysis/mem_analysis.c"
     )
 set(APP_ASM_SRCS
         ""
@@ -72,6 +73,7 @@ set(APP_INCLUDES
         "src/tls_echo_server"
         "src/http_demo"
         "src/mqtt_demo"
+        "src/mem_analysis"
     )
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"

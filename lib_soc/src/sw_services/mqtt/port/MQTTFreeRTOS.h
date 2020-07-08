@@ -23,6 +23,9 @@
 #include "semphr.h"
 #include "task.h"
 
+#include "mbedtls_support.h"
+#include "mbedtls/ssl.h"
+
 typedef struct Timer
 {
 	TickType_t xTicksToWait;
@@ -37,37 +40,39 @@ struct Network
 	int (*mqttread) (Network*, unsigned char*, int, int);
 	int (*mqttwrite) (Network*, unsigned char*, int, int);
 	void (*disconnect) (Network*);
+	mbedtls_ssl_context* ssl_ctx;
 };
 
-void TimerInit(Timer*);
-char TimerIsExpired(Timer*);
-void TimerCountdownMS(Timer*, unsigned int);
-void TimerCountdown(Timer*, unsigned int);
-int TimerLeftMS(Timer*);
+void TimerInit( Timer* );
+char TimerIsExpired( Timer* );
+void TimerCountdownMS( Timer*, unsigned int );
+void TimerCountdown( Timer*, unsigned int );
+int TimerLeftMS( Timer* );
 
 typedef struct Mutex
 {
 	SemaphoreHandle_t sem;
 } Mutex;
 
-void MutexInit(Mutex*);
-int MutexLock(Mutex*);
-int MutexUnlock(Mutex*);
+void MutexInit( Mutex* );
+int MutexLock( Mutex* );
+int MutexUnlock( Mutex* );
 
 typedef struct Thread
 {
 	TaskHandle_t task;
 } Thread;
 
-int ThreadStart(Thread*, void (*fn)(void*), void* arg);
+int ThreadStart( Thread*, void (*fn)(void*), void* arg );
 
-int FreeRTOS_read(Network*, unsigned char*, int, int);
-int FreeRTOS_write(Network*, unsigned char*, int, int);
-void FreeRTOS_disconnect(Network*);
+int FreeRTOS_read( Network*, unsigned char*, int, int );
+int FreeRTOS_write( Network*, unsigned char*, int, int );
+void FreeRTOS_disconnect( Network*);
 
-void NetworkInit(Network*);
-int NetworkConnect(Network*, char*, int);
-int NetworkConnectIP(Network*, uint32_t, int);
-/*int NetworkConnectTLS(Network*, char*, int, SlSockSecureFiles_t*, unsigned char, unsigned int, char);*/
+void NetworkInit( Network* n);
+void NetworkDestroy( Network* n );
+int NetworkConnect( Network*, char*, int );
+int NetworkConnectIP( Network*, uint32_t, int );
+
 
 #endif
