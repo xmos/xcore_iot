@@ -1,6 +1,6 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
-//#define DEBUG_UNIT MQTT_DEMO_CLIENT
+#define DEBUG_UNIT MQTT_DEMO_CLIENT
 #include "app_conf.h"
 
 /* FreeRTOS headers */
@@ -15,6 +15,7 @@
 /* Library headers */
 #include "soc.h"
 #include "tls_support.h"
+#include "MQTTClient.h"
 
 /* BSP/bitstream headers */
 #include "bitstream_devices.h"
@@ -23,13 +24,6 @@
 /* App headers */
 #include "mqtt_demo_client.h"
 
-#include "MQTTClient.h"
-
-#define MQTT_SERVER_IP_ADDR_OCTET_0    10
-#define MQTT_SERVER_IP_ADDR_OCTET_1    0
-#define MQTT_SERVER_IP_ADDR_OCTET_2    0
-#define MQTT_SERVER_IP_ADDR_OCTET_3    253
-#define MQTT_PORT 8883
 
 #define MQTT_DEMO_CONNECT_STACK_SIZE 		800
 
@@ -141,12 +135,12 @@ static void mqtt_demo_connect( void* arg )
 	int send_timeout = pdMS_TO_TICKS( 5000 );
 
 	/* TODO make these args */
-	sAddr.sin_port = FreeRTOS_htons( MQTT_PORT );
+	sAddr.sin_port = FreeRTOS_htons( appconfMQTT_PORT );
 	sAddr.sin_addr = FreeRTOS_inet_addr_quick(
-						MQTT_SERVER_IP_ADDR_OCTET_0,
-						MQTT_SERVER_IP_ADDR_OCTET_1,
-						MQTT_SERVER_IP_ADDR_OCTET_2,
-						MQTT_SERVER_IP_ADDR_OCTET_3 );
+						appconfMQTT_SERVER_IP_ADDR_OCTET_0,
+						appconfMQTT_SERVER_IP_ADDR_OCTET_1,
+						appconfMQTT_SERVER_IP_ADDR_OCTET_2,
+						appconfMQTT_SERVER_IP_ADDR_OCTET_3 );
 
 	Socket_t socket;
 	/* These can be shared by multiple connections */

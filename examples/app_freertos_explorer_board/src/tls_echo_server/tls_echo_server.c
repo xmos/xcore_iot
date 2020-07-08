@@ -242,6 +242,10 @@ static void tls_echo_receiver( void *arg )
     {
         vTaskDelay( pdMS_TO_TICKS( 100 ) );
     }
+	while( tls_platform_ready() == 0 )
+	{
+		vTaskDelay( pdMS_TO_TICKS( 100 ) );
+	}
 
     /* Attempt to open the socket. */
     xListeningSocket = FreeRTOS_socket( FREERTOS_AF_INET,
