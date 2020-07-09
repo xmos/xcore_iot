@@ -21,8 +21,6 @@ static const port gpio_lookup[ GPIO_TOTAL_PORT_CNT ] =
     //XS1_PORT_32A, XS1_PORT_32B
 };
 
-static uint32_t port_irq_flags;
-
 static port get_port( gpio_id_t gpio_id )
 {
     return gpio_lookup[ gpio_id ];
@@ -41,6 +39,9 @@ void gpio_dev(
     uint32_t cmd;
     uint32_t data;
     uint32_t mask;
+
+    uint32_t gpio_port_trigger_value[ GPIO_TOTAL_PORT_CNT ];
+    uint32_t port_irq_flags = 0;
 
 
     TRIGGERABLE_SETUP_EVENT_VECTOR(ctrl_c, event_ctrl);
@@ -96,7 +97,11 @@ void gpio_dev(
             }
             xassert(( gpio_id >= 0 ) && ( gpio_id < GPIO_TOTAL_PORT_CNT ));
             mask = ( 0x1 << gpio_id );
-            triggerable_disable_trigger( get_port(gpio_id) );
+
+            port_res = get_port( gpio_id );
+
+            gpio_port_trigger_value[ gpio_id ] = port_in( port_res );
+            triggerable_disable_trigger( port_res );
             port_irq_flags |= mask;
             if ( irq_c != 0 )
             {
@@ -154,7 +159,7 @@ void gpio_dev(
                 if( ( port_irq_flags & mask ) != 0 )
                 {
                     port_irq_flags &= ~mask;
-                    data = port_in( port_res );
+                    data = gpio_port_trigger_value[ gpio_id ];
                     port_set_trigger_in_not_equal( port_res, data );
                     triggerable_enable_trigger( port_res );
                 }
