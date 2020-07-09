@@ -175,11 +175,10 @@ int FreeRTOS_write( Network* n, unsigned char* buffer, int len, int timeout_ms )
 
 void FreeRTOS_disconnect( Network* n )
 {
-	if( n->ssl_ctx != NULL )
+	if( n->ssl_ctx == NULL )
 	{
-		mbedtls_ssl_close_notify( n->ssl_ctx );
+		FreeRTOS_closesocket( n->my_socket );
 	}
-	FreeRTOS_closesocket( n->my_socket );
 }
 
 
