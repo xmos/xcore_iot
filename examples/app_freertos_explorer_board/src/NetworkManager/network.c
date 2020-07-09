@@ -121,6 +121,17 @@ static char *security_name(WIFISecurity_t s)
     }
 }
 
+void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent )
+{
+    if (eNetworkEvent == eNetworkDown) {
+        TaskHandle_t task = xTaskGetHandle("wf200_test");
+        if (task != NULL) {
+            rtos_printf("Network down, notifying the network task\n");
+            xTaskNotifyGive(task);
+        }
+    }
+}
+
 static void wf200_test(void *arg)
 {
     WIFIReturnCode_t ret;
@@ -156,35 +167,44 @@ static void wf200_test(void *arg)
     	rtos_printf("WIFI_Scan() failed %d\n", ret);
     }
 
+    pxNetworkParams.pcSSID = "xxxxxxxx";
+    pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
+    pxNetworkParams.pcPassword = "xxxxxxxx";
+    pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
+    pxNetworkParams.xSecurity = eWiFiSecurityWPA;
+    pxNetworkParams.cChannel = 0;
+
     while (1) {
-        uint32_t ip;
+        int i;
+        uint32_t ip = 0;
         char a[16];
 
-        pxNetworkParams.pcSSID = "xxxxxxxxx";
-        pxNetworkParams.ucSSIDLength = strlen(pxNetworkParams.pcSSID);
-        pxNetworkParams.pcPassword = "xxxxxxxxx";
-        pxNetworkParams.ucPasswordLength = strlen(pxNetworkParams.pcPassword);
-        pxNetworkParams.xSecurity = eWiFiSecurityWPA;
-        pxNetworkParams.cChannel = 0;
 
-        do {
+        ret = eWiFiFailure;
+        for (i = 0; ret != eWiFiSuccess && i < 10; i++) {
             ret = WIFI_ConnectAP(&pxNetworkParams);
             rtos_printf("WIFI_ConnectAP() returned %x\n", ret);
-        } while (ret != eWiFiSuccess);
-
-        vTaskDelay(pdMS_TO_TICKS(5000));
-
-        while (WIFI_GetIP( (void *) &ip ) != eWiFiSuccess) {
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
+
+        if (ret != eWiFiSuccess) {
+            /*
+             * If a certain number of connection attempt fail, reset the device
+             * before continuing to try.
+             */
+            WIFI_Reset();
+            continue;
+        }
+
+        for (i = 0; WIFI_GetIP( (void *) &ip ) != eWiFiSuccess && i < 10; i++) {
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+
         FreeRTOS_inet_ntoa(ip, a);
         rtos_printf("My IP is %s\n", a);
 
-        vTaskDelay(pdMS_TO_TICKS(10*60000));
-
-        ret = WIFI_Disconnect();
-        rtos_printf("WIFI_Disconnect() returned %x\n", ret);
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        rtos_printf("Network down, will attempt to reconnect\n");
     }
 }
 

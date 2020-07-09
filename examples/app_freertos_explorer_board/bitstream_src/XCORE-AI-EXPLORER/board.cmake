@@ -1,7 +1,9 @@
 # Hardware configurations
 set(BOARD_COMPILE_FLAGS
         "-DXCOREAI_EXPLORER=1"
+        "-D__XS2A__=1" # Hack to get some libs to work with XS3
         "-lquadspi"
+        "-mcmodel=large" # For the heap in DDR
     )
 set(BOARD_HW_TARGET
         "bitstream_src/${BOARD}/XCORE-AI-EXPLORER.xn"

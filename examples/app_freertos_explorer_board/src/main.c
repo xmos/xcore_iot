@@ -25,6 +25,14 @@
 #include "mqtt_demo_client.h"
 #include "mem_analysis.h"
 
+#if( configAPPLICATION_ALLOCATED_HEAP == 1 )
+#if XCOREAI_EXPLORER
+__attribute__((section(".ExtMem_data")))
+#endif
+uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+#endif
+
+
 void soc_tile0_main(
         int tile)
 {
