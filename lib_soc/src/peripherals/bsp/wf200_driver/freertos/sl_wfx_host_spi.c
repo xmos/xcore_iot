@@ -125,7 +125,7 @@ void sl_wfx_host_gpio(int gpio,
         return;
     }
 
-    configASSERT(hif_ctx.initialized && port != gpio_none);
+    configASSERT(hif_ctx.gpio_dev != NULL && port != gpio_none);
 
     gpio_write_pin(hif_ctx.gpio_dev, port, bit, value);
 }

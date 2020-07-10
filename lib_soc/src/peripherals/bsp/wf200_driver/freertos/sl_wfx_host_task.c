@@ -41,6 +41,10 @@ static void sl_wfx_host_receive_task(void *arg)
 {
     uint32_t bits;
     BaseType_t ret;
+    TickType_t ticks_to_wait = portMAX_DELAY;
+    int error_count = 0;
+    const int max_errors = 3;
+    int reset = 0;
 
     for (;;) {
         /* Wait for an interrupt from WF200 */
@@ -48,17 +52,55 @@ static void sl_wfx_host_receive_task(void *arg)
         ret = xTaskNotifyWait(0x00000000,
                               0xFFFFFFFF,
                               &bits,
-                              portMAX_DELAY);
+                              ticks_to_wait);
+
+        if (ret == pdFAIL && ticks_to_wait != portMAX_DELAY) {
+            /*
+             * The wait timed out. If a timeout value was set (not portMAX_DELAY)
+             * then treat it as if an interrupt occurred.
+             */
+            bits = SL_WFX_HOST_BUS_IRQ_BM;
+            ret = pdPASS;
+            sl_wfx_host_log("Checking for frames again\n");
+        }
 
         if (ret == pdPASS) {
+
             if (bits & SL_WFX_HOST_BUS_DEINIT_BM) {
                 sl_wfx_host_log("WFX200 host task ending\n");
                 vTaskDelete(NULL);
             }
 
             if (bits & SL_WFX_HOST_BUS_IRQ_BM) {
+                sl_status_t result;
+
                 /* Receive the frame(s) pending in WF200 */
-                sl_wfx_host_receive_frames();
+                result = sl_wfx_host_receive_frames();
+                switch (result) {
+                case SL_STATUS_OK:
+                    ticks_to_wait = portMAX_DELAY;
+                    error_count = 0;
+                    break;
+                case SL_STATUS_WIFI_NO_PACKET_TO_RECEIVE:
+                case SL_STATUS_TIMEOUT:
+                    if (error_count++ == max_errors) {
+                        reset = 1;
+                        ticks_to_wait = portMAX_DELAY;
+                    } else {
+                        ticks_to_wait = pdMS_TO_TICKS(100);
+                    }
+                    break;
+                default:
+                    reset = 1;
+                    ticks_to_wait = portMAX_DELAY;
+                    break;
+                }
+
+                if (reset) {
+                    reset = 0;
+                    sl_wfx_host_log("Frame receive error %04x, will reset module\n", result);
+                    sl_wfx_host_reset();
+                }
             }
         }
     }
@@ -84,6 +126,7 @@ void sl_wfx_host_task_stop(void)
     taskEXIT_CRITICAL();
 
     if (handle != NULL) {
+        xEventGroupClearBits(sl_wfx_event_group, SL_WFX_INITIALIZED);
         xTaskNotify(handle, SL_WFX_HOST_BUS_DEINIT_BM, eSetBits);
     }
 }
@@ -92,7 +135,7 @@ void sl_wfx_host_task_start(void)
 {
     /* create a mutex used for making driver accesses atomic */
     if (s_xDriverSemaphore == NULL) {
-        s_xDriverSemaphore = xSemaphoreCreateMutex();
+        s_xDriverSemaphore = xSemaphoreCreateRecursiveMutex ();
         configASSERT(s_xDriverSemaphore != NULL);
     }
 
@@ -105,7 +148,8 @@ void sl_wfx_host_task_start(void)
     if (receive_task_handle == NULL) {
         /* Ensure all event group bits are clear in case any are
         still set from a previous run. */
-        xEventGroupClearBits( sl_wfx_event_group, 0x00FFFFFF );
+        xEventGroupClearBits(sl_wfx_event_group, 0x00FFFFFF);
+        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_INITIALIZED);
 
         xTaskCreate(sl_wfx_host_receive_task,
                     "sl_wfx_host_receive_task",
