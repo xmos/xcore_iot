@@ -2,19 +2,30 @@
 
 import paho.mqtt.client as mqtt
 import argparse
+import time
 
 topic = 'echo'
+count = 0
 
 def on_message(client, userdata, message):
-    print('Got message:')
-    print(message.payload)
-    print('Publish to echo/b:')
-    print(message.payload)
+    global count
+    #print('Got message:')
+    #print(message.payload)
+    #print('Publish to echo/b:')
+    #print(message.payload) 
+    count = count + 1
+    #print('Count:', count)
+
+    t = time.localtime()
+    current_time = time.strftime("%H:%M:%S", t)
+    print(current_time, 'payload:', message.payload, 'count:', count)
     client.publish('echo/b', payload=message.payload, qos=1, retain=False)
     return;
 
 
 def run(args):
+    global count
+    count = 0
     client = mqtt.Client('host_client')
 
     client.user_data_set(args)
