@@ -18,8 +18,6 @@
 #include "app_conf.h"
 #include "sntpd.h"
 #include "fs_support.h"
-#include "tls_echo_demo.h"
-#include "tls_echo_server.h"
 #include "tls_support.h"
 #include "http_demo.h"
 #include "mqtt_demo_client.h"
