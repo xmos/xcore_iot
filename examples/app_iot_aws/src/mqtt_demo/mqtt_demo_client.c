@@ -1,6 +1,6 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
-//#define DEBUG_UNIT MQTT_DEMO_CLIENT
+#define DEBUG_UNIT MQTT_DEMO_CLIENT
 #include <string.h>
 
 /* FreeRTOS headers */
@@ -24,7 +24,7 @@
 /* App headers */
 #include "app_conf.h"
 #include "mqtt_demo_client.h"
-
+#include "jsmn.h"
 
 #define MQTT_DEMO_CONNECT_STACK_SIZE 		800
 
@@ -41,31 +41,46 @@ static soc_peripheral_t dev;
 static uint32_t val;
 static uint32_t val2;
 
+#define MAX_TOKENS 10
+
+
 void messageArrived(MessageData* data)
 {
 	char* payload = data->message->payload;
+	int payload_len = data->message->payloadlen;
+	jsmn_parser p;
+	jsmntok_t tkn[MAX_TOKENS];
+	int r;
+
+	jsmn_init(&p);
+	r = jsmn_parse(&p, payload, payload_len, tkn, MAX_TOKENS );
+	debug_printf("r:%d\n",r);
+	for( int i=0; i<r; i++ )
+	{
+		debug_printf("json[%d]:%.*s\n", i, tkn[i].end - tkn[i].start, payload + tkn[i].start);
+	}
 
 	/* explorer/ledctrl */
 	if( strstr( payload, "bathroom" ) != NULL )
 	{
 		if( strstr( payload, "on" ) != NULL )
 		{
-			val = 0;
+			val = 1;
 		}
 		else if( strstr( payload, "off" ) != NULL )
 		{
-			val = 1;
+			val = 0;
 		}
 	}
 	else if( strstr( payload, "kitchen" ) != NULL )
 	{
 		if( strstr( payload, "on" ) != NULL )
 		{
-			val2 = 0;
+			val2 = 1;
 		}
 		else if( strstr( payload, "off" ) != NULL )
 		{
-			val2 = 1;
+			val2 = 0;
 		}
 	}
 
@@ -110,16 +125,12 @@ static void mqtt_handler( void* arg )
 		if( ( retval = MQTTConnect( &client, &connectData ) ) != 0 )
 		{
 			debug_printf("Return code from MQTT connect is %d\n", retval);
-			vTaskDelay(pdMS_TO_TICKS(100));
+			break;
 		}
 		else
 		{
 			debug_printf("MQTT Connected\n");
 
-//			if( ( retval = MQTTSubscribe( &client, "echo/b", QOS1, messageArrived ) ) != 0 )
-//			{
-//				debug_printf("Return code from MQTT subscribe is %d\n", retval);
-//			}
 			if( ( retval = MQTTSubscribe( &client, "explorer/ledctrl", QOS1, messageArrived ) ) != 0 )
 			{
 				debug_printf("Return code from MQTT subscribe is %d\n", retval);
@@ -130,34 +141,22 @@ static void mqtt_handler( void* arg )
 
 				while( 1 )
 				{
-					MQTTMessage message;
-					char payload[30] = "hello world\n";
-
-					message.qos = 1;
-					message.retained = 0;
-					message.payload = payload;
-					message.payloadlen = strlen(payload);
-
-					debug_printf("Try to publish: %s\n", payload);
-					if( ( retval = MQTTPublish( &client, "heartbeat", &message ) ) != 0 )
+					vTaskDelay( pdMS_TO_TICKS( 1000 ) );
+					if( MQTTIsConnected( &client ) == 0 )
 					{
-						debug_printf("Return code from MQTT publish is %d\n", retval);
 						break;
 					}
-					else
-					{
-						debug_printf("Published %s\n", payload);
-					}
-					vTaskDelay( pdMS_TO_TICKS( 1000 ) );
 				}
-
-				/* cleanup and resume listener task */
-				vTaskDelete( client.thread.task );
-				vTaskResume( caller );
-				vTaskDelete( NULL );
+				break;
 			}
 		}
 	}
+	debug_printf("MQTT Cleanup\n");
+	/* cleanup and resume listener task */
+	vTaskDelete( client.thread.task );
+	vTaskResume( caller );
+	vTaskDelete( NULL );
+	while(1){;}
 }
 
 static void mqtt_demo_connect( void* arg )

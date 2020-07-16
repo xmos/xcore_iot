@@ -93,6 +93,7 @@ set(LIB_SOC_SW_FATFS True)
 set(LIB_SOC_SW_TLS_SUPPORT True)
 set(LIB_SOC_SW_MQTT True)
 set(LIB_SOC_SW_HTTP True)
+set(LIB_SOC_SW_JSON True)
 
 ## Register the application
 XMOS_REGISTER_APP()
