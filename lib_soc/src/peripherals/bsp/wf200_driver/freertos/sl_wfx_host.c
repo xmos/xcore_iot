@@ -50,6 +50,14 @@ void sl_wfx_host_set_pds(const char * const pds_data[],
     host_ctx.pds_size = pds_size;
 }
 
+void sl_wfx_host_reset(void)
+{
+    sl_wfx_context->state &= ~SL_WFX_STARTED;
+    sl_wfx_host_disable_platform_interrupt();
+    sl_wfx_host_hold_in_reset();
+    sl_wfx_deinit_bus();
+    sl_wfx_reset_request_callback();
+}
 
 /**** XCORE Specific Functions End ****/
 
@@ -59,6 +67,20 @@ void sl_wfx_host_set_pds(const char * const pds_data[],
  * default implementations in case the application
  * does not provide them.
  */
+
+__attribute__((weak))
+void sl_wfx_reset_request_callback(void)
+{
+    while (sl_wfx_init(sl_wfx_context) != SL_STATUS_OK) {
+        sl_wfx_host_wait(100);
+    }
+
+    /*
+     * Ensure the application knows that it is no longer connected to
+     * an AP in case it was.
+     */
+    sl_wfx_disconnect_callback("\x00\x00\x00\x00\x00\x00", WFM_DISCONNECTED_REASON_UNSPECIFIED);
+}
 
 __attribute__((weak))
 uint32_t sl_wfx_app_fw_size(void)
@@ -325,6 +347,7 @@ sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
             }
             printf("\r\n");
           }
+          sl_wfx_host_reset();
           break;
         }
       case SL_WFX_ERROR_IND_ID:
@@ -340,6 +363,7 @@ sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
             }
             printf("\r\n");
           }
+          sl_wfx_host_reset();
           break;
         }
       }
@@ -413,7 +437,7 @@ sl_status_t sl_wfx_host_lock(void)
 {
     sl_status_t status;
 
-    if (xSemaphoreTake(s_xDriverSemaphore, pdMS_TO_TICKS(SL_WFX_DEFAULT_REQUEST_TIMEOUT_MS)) == pdTRUE) {
+    if (xSemaphoreTakeRecursive(s_xDriverSemaphore, pdMS_TO_TICKS(SL_WFX_DEFAULT_REQUEST_TIMEOUT_MS)) == pdTRUE) {
         status = SL_STATUS_OK;
     } else {
         printf("Wi-Fi driver mutex timeout\r\n");
@@ -426,7 +450,7 @@ sl_status_t sl_wfx_host_lock(void)
 sl_status_t sl_wfx_host_unlock(void)
 {
 	if (xSemaphoreGetMutexHolder(s_xDriverSemaphore) == xTaskGetCurrentTaskHandle()) {
-		xSemaphoreGive(s_xDriverSemaphore);
+	    xSemaphoreGiveRecursive(s_xDriverSemaphore);
 	}
 
     return SL_STATUS_OK;

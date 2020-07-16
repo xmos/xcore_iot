@@ -65,19 +65,25 @@ WIFIReturnCode_t WIFI_GetLock( void )
     {
         if( xSemaphoreTakeRecursive( wifi_lock, pdMS_TO_TICKS( wificonfigMAX_SEMAPHORE_WAIT_TIME_MS ) ) == pdPASS )
         {
-            EventBits_t bits;
-            bits = xEventGroupGetBits( sl_wfx_event_group );
-            if( ( bits & SL_WFX_INITIALIZED ) != 0 )
+            if( sl_wfx_event_group != NULL )
             {
-                ret = eWiFiSuccess;
+                EventBits_t bits;
+                bits = xEventGroupGetBits( sl_wfx_event_group );
+                if( ( bits & SL_WFX_INITIALIZED ) != 0 )
+                {
+                    ret = eWiFiSuccess;
+                }
+                else
+                {
+                    xSemaphoreGiveRecursive( wifi_lock );
+                    ret = eWiFiFailure;
+                }
             }
             else
             {
                 xSemaphoreGiveRecursive( wifi_lock );
                 ret = eWiFiFailure;
             }
-
-            ret = eWiFiSuccess;
         }
         else
         {
@@ -112,52 +118,51 @@ WIFIReturnCode_t WIFI_On( void )
 
     if( ret != eWiFiSuccess )
     {
+        if( wifi_lock == NULL )
+        {
+            wifi_lock = xSemaphoreCreateRecursiveMutex();
+            configASSERT( wifi_lock != NULL );
+        }
+        if( ping_reply_queue == NULL )
+        {
+            ping_reply_queue = xQueueCreate(1, sizeof(uint16_t));
+            configASSERT( ping_reply_queue != NULL);
+        }
+
+        if( xSemaphoreTakeRecursive( wifi_lock, pdMS_TO_TICKS( wificonfigMAX_SEMAPHORE_WAIT_TIME_MS ) ) == pdPASS )
+        {
+
 #if XCORE200_MAB
-        sl_wfx_host_set_hif( BITSTREAM_SPI_DEVICE_A,
-                             BITSTREAM_GPIO_DEVICE_A,
-                             gpio_1I, 0,  /* header pin 9 */
-                             gpio_1P, 0,  /* header pin 10 */
-                             gpio_1J, 0 ); /* header pin 12 */
+            sl_wfx_host_set_hif( BITSTREAM_SPI_DEVICE_A,
+                                 BITSTREAM_GPIO_DEVICE_A,
+                                 gpio_1I, 0,  /* header pin 9 */
+                                 gpio_1P, 0,  /* header pin 10 */
+                                 gpio_1J, 0 ); /* header pin 12 */
 #elif XCOREAI_EXPLORER
-        sl_wfx_host_set_hif( BITSTREAM_SPI_DEVICE_A,
-                             BITSTREAM_GPIO_DEVICE_A,
-                             gpio_1I, 0,  /* IRQ */
-                             gpio_4E, 0,  /* WUP */
-                             gpio_4E, 1 ); /* RST */
+            sl_wfx_host_set_hif( BITSTREAM_SPI_DEVICE_A,
+                                 BITSTREAM_GPIO_DEVICE_A,
+                                 gpio_1I, 0,  /* IRQ */
+                                 gpio_4E, 0,  /* WUP */
+                                 gpio_4E, 1 ); /* RST */
 #endif
 
-        sl_wfx_host_set_pds( pds_table_brd8023a, SL_WFX_ARRAY_COUNT( pds_table_brd8023a ) );
+            sl_wfx_host_set_pds( pds_table_brd8023a, SL_WFX_ARRAY_COUNT( pds_table_brd8023a ) );
 
-        sl_ret = sl_wfx_init( &wfx_ctx );
+            sl_ret = sl_wfx_init( &wfx_ctx );
 
-        if( sl_ret == SL_STATUS_OK )
-        {
-            if( wifi_lock == NULL )
+            if( sl_ret == SL_STATUS_OK )
             {
-                wifi_lock = xSemaphoreCreateRecursiveMutex();
-                configASSERT( wifi_lock != NULL );
-            }
-            if( ping_reply_queue == NULL )
-            {
-                ping_reply_queue = xQueueCreate(1, sizeof(uint16_t));
-                configASSERT( ping_reply_queue != NULL);
+                wifi_mode = eWiFiModeStation;
+                ret = eWiFiSuccess;
             }
 
-            wifi_mode = eWiFiModeStation;
-            xEventGroupClearBits( sl_wfx_event_group, 0x00FFFFFF );
-            xEventGroupSetBits( sl_wfx_event_group, SL_WFX_INITIALIZED );
-            ret = eWiFiSuccess;
+            xSemaphoreGiveRecursive( wifi_lock );
         }
     }
 
     return ret;
 }
 
-/*
- * TODO: Verify that the host code that
- * sl_wfx_shutdown() calls does the right
- * things.
- */
 WIFIReturnCode_t WIFI_Off( void )
 {
     WIFIReturnCode_t ret;
@@ -165,11 +170,14 @@ WIFIReturnCode_t WIFI_Off( void )
     ret = WIFI_GetLock();
     if( ret == eWiFiSuccess )
     {
-        sl_status_t sl_ret;
-        sl_ret = sl_wfx_deinit();
-        if( sl_ret != SL_STATUS_OK )
+        if( sl_wfx_context->state & SL_WFX_STARTED )
         {
-            ret = eWiFiFailure;
+            sl_status_t sl_ret;
+            sl_ret = sl_wfx_deinit();
+            if( sl_ret != SL_STATUS_OK )
+            {
+                ret = eWiFiFailure;
+            }
         }
 
         /* Ensure all state bits are cleared */
@@ -190,14 +198,12 @@ WIFIReturnCode_t WIFI_Off( void )
 
 void sl_wfx_disconnect_callback(uint8_t *mac, sl_wfx_reason_t reason)
 {
-    EventBits_t bits;
-
     sl_wfx_host_log( "Disconnected from AP " HWADDR_FMT " for reason %d\n", HWADDR_ARG( mac ), reason );
     sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
-    bits = xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT );
+    xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT );
     xEventGroupSetBits( sl_wfx_event_group, SL_WFX_DISCONNECT );
 
-    if( ( bits & SL_WFX_CONNECT ) != 0 )
+    if( FreeRTOS_IsNetworkUp() != pdFALSE )
     {
         rtos_printf("Bringing the FreeRTOS network down\n");
         FreeRTOS_NetworkDown();
@@ -1004,7 +1010,12 @@ void sl_wfx_stop_ap_callback(void)
     sl_wfx_context->state &= ~SL_WFX_AP_INTERFACE_UP;
     xEventGroupClearBits( sl_wfx_event_group, SL_WFX_START_AP );
     xEventGroupSetBits( sl_wfx_event_group, SL_WFX_STOP_AP );
-    FreeRTOS_NetworkDown();
+
+    if( FreeRTOS_IsNetworkUp() != pdFALSE )
+    {
+        rtos_printf("Bringing the FreeRTOS network down\n");
+        FreeRTOS_NetworkDown();
+    }
 }
 
 WIFIReturnCode_t WIFI_StopAP( void )

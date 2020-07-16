@@ -64,6 +64,16 @@ void sl_wfx_host_set_pds(const char * const pds_data[],
                          uint16_t pds_size);
 
 /*
+ * This is called by the host driver code when unrecoverable errors
+ * are detected. It deinitializes the host interface bus and holds
+ * the WFX module in reset, without attempting to gracefully shut it
+ * down - no communication with the module is attempted. The application
+ * is also notified via a callback that the module has been reset so
+ * that it may attempt to bring it back up.
+ */
+void sl_wfx_host_reset(void);
+
+/*
  * Callback functions to be implemented by the application
  */
 void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t* scan_result);
@@ -76,5 +86,6 @@ void sl_wfx_client_connected_callback(uint8_t* mac);
 void sl_wfx_ap_client_rejected_callback(sl_wfx_reason_t reason, uint8_t* mac);
 void sl_wfx_ap_client_disconnected_callback(sl_wfx_reason_t reason, uint8_t* mac);
 void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t* rx_buffer);
+void sl_wfx_reset_request_callback(void);
 
 #endif /* SL_WFX_HOST_H_ */

@@ -132,6 +132,18 @@ void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent )
     }
 }
 
+static int wifi_reset;
+
+void sl_wfx_reset_request_callback(void)
+{
+    TaskHandle_t task = xTaskGetHandle("wf200_test");
+    if (task != NULL) {
+        rtos_printf("Requesting a WiFi module reset\n");
+        wifi_reset = 1;
+        xTaskNotifyGive(task);
+    }
+}
+
 static void wf200_test(void *arg)
 {
     WIFIReturnCode_t ret;
@@ -192,7 +204,9 @@ static void wf200_test(void *arg)
              * If a certain number of connection attempt fail, reset the device
              * before continuing to try.
              */
-            WIFI_Reset();
+            while (WIFI_Reset() != eWiFiSuccess) {
+                vTaskDelay(pdMS_TO_TICKS(100));
+            }
             continue;
         }
 
@@ -204,7 +218,16 @@ static void wf200_test(void *arg)
         rtos_printf("My IP is %s\n", a);
 
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        rtos_printf("Network down, will attempt to reconnect\n");
+
+        if (wifi_reset) {
+            wifi_reset = 0;
+            rtos_printf("Resetting the WiFi module\n");
+            while (WIFI_Reset() != eWiFiSuccess) {
+                vTaskDelay(pdMS_TO_TICKS(100));
+            }
+        } else {
+            rtos_printf("Network down, will attempt to reconnect\n");
+        }
     }
 }
 
