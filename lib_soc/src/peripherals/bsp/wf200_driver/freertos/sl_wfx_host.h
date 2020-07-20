@@ -79,7 +79,7 @@ void sl_wfx_host_reset(void);
 void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t* scan_result);
 void sl_wfx_scan_complete_callback(sl_wfx_fmac_status_t status);
 void sl_wfx_connect_callback(uint8_t* mac, sl_wfx_fmac_status_t status);
-void sl_wfx_disconnect_callback(uint8_t* mac, sl_wfx_reason_t reason);
+void sl_wfx_disconnect_callback(uint8_t* mac, sl_wfx_disconnected_reason_t reason);
 void sl_wfx_start_ap_callback(sl_wfx_fmac_status_t status);
 void sl_wfx_stop_ap_callback(void);
 void sl_wfx_client_connected_callback(uint8_t* mac);

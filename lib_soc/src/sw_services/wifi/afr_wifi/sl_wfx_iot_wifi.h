@@ -40,6 +40,9 @@
 #include "aws_wifi_config.h"
 #include "types/iot_network_types.h"
 
+/* WFX Driver include */
+#include "sl_wfx.h"
+
 /**
  * @brief Return code denoting API status.
  *
@@ -179,6 +182,8 @@ WIFIReturnCode_t WIFI_On( void );
 /* @[declare_wifi_wifi_off] */
 WIFIReturnCode_t WIFI_Off( void );
 /* @[declare_wifi_wifi_off] */
+
+WIFIReturnCode_t WIFI_ConnectAPSetBSSID(const uint8_t *bssid);
 
 /**
  * @brief Connects to the Wi-Fi Access Point (AP) specified in the input.
@@ -431,6 +436,10 @@ WIFIReturnCode_t WIFI_GetMAC( uint8_t * pucMac );
 WIFIReturnCode_t WIFI_GetHostIP( char * pcHost,
                                  uint8_t * pucIPAddr );
 /* @[declare_wifi_wifi_gethostip] */
+
+WIFIReturnCode_t WIFI_ScanSetSSIDList(const sl_wfx_ssid_def_t *list, int count);
+
+WIFIReturnCode_t WIFI_ScanSetBSSID(const uint8_t *bssid);
 
 /**
  * @brief Perform a Wi-Fi network Scan.

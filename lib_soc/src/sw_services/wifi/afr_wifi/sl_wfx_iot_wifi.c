@@ -33,9 +33,9 @@
 #endif
 
 #define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
-#define HWADDR_ARG(hwaddr) hwaddr[0], hwaddr[1], hwaddr[2], hwaddr[3], hwaddr[4], hwaddr[5]
+#define HWADDR_ARG(hwaddr) (hwaddr)[0], (hwaddr)[1], (hwaddr)[2], (hwaddr)[3], (hwaddr)[4], (hwaddr)[5]
 
-#define SL_WFX_CONNECT_TIMEOUT_MS 2000
+#define SL_WFX_CONNECT_TIMEOUT_MS 10500
 #define SL_WFX_DISCONNECT_TIMEOUT_MS 500
 
 static sl_wfx_context_t wfx_ctx;
@@ -131,7 +131,10 @@ WIFIReturnCode_t WIFI_On( void )
 
         if( xSemaphoreTakeRecursive( wifi_lock, pdMS_TO_TICKS( wificonfigMAX_SEMAPHORE_WAIT_TIME_MS ) ) == pdPASS )
         {
-
+            /*
+             * TODO: This really should be moved into the application.
+             * Perhaps some #defines would be good enough.
+             */
 #if XCORE200_MAB
             sl_wfx_host_set_hif( BITSTREAM_SPI_DEVICE_A,
                                  BITSTREAM_GPIO_DEVICE_A,
@@ -196,14 +199,15 @@ WIFIReturnCode_t WIFI_Off( void )
     return ret;
 }
 
-void sl_wfx_disconnect_callback(uint8_t *mac, sl_wfx_reason_t reason)
+void sl_wfx_disconnect_callback(uint8_t *mac, sl_wfx_disconnected_reason_t reason)
 {
+    EventBits_t bits;
     sl_wfx_host_log( "Disconnected from AP " HWADDR_FMT " for reason %d\n", HWADDR_ARG( mac ), reason );
     sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
-    xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT );
+    bits = xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT );
     xEventGroupSetBits( sl_wfx_event_group, SL_WFX_DISCONNECT );
 
-    if( FreeRTOS_IsNetworkUp() != pdFALSE )
+    if( ( bits & SL_WFX_CONNECT ) != 0 )
     {
         rtos_printf("Bringing the FreeRTOS network down\n");
         FreeRTOS_NetworkDown();
@@ -290,7 +294,7 @@ void sl_wfx_connect_callback( uint8_t *mac, sl_wfx_fmac_status_t status )
         break;
 
     default:
-        sl_wfx_host_log( "Connection attempt error\n" );
+        sl_wfx_host_log( "Connection attempt error %x\n", status );
         break;
     }
 
@@ -302,25 +306,44 @@ void sl_wfx_connect_callback( uint8_t *mac, sl_wfx_fmac_status_t status )
     }
     else
     {
-        sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
-        xEventGroupSetBits( sl_wfx_event_group, SL_WFX_CONNECT_FAIL );
+        EventBits_t bits;
 
-        if( ( xEventGroupGetBits( sl_wfx_event_group ) & SL_WFX_CONNECT ) != 0 )
+        sl_wfx_context->state &= ~SL_WFX_STA_INTERFACE_CONNECTED;
+
+        bits = xEventGroupClearBits( sl_wfx_event_group, SL_WFX_CONNECT );
+        if( ( bits & SL_WFX_CONNECT ) != 0 )
         {
             /*
              * The module was already connected, but now it is not. This means that
              * WIFI_ConnectAP() is likely not waiting, since it ensures that the
              * module is disconnected first if the connect flag was already set,
-             * thus ensuring it is cleared. Do not clear the connect flag here, as
-             * the module is still in a connected state, and may autonomously
-             * reconnect. Just bring the FreeRTOS TCP stack down, which will
-             * likely cause the application to attempt to reconnect, which will
+             * thus ensuring it is cleared. Bring the FreeRTOS TCP stack down, which
+             * will likely cause the application to attempt to reconnect, which will
              * call WIFI_Disconnect() first.
              */
             rtos_printf("Bringing the FreeRTOS network down\n");
             FreeRTOS_NetworkDown();
         }
+
+        xEventGroupSetBits( sl_wfx_event_group, SL_WFX_CONNECT_FAIL );
     }
+}
+
+static const sl_wfx_mac_address_t *connect_bssid;
+
+WIFIReturnCode_t WIFI_ConnectAPSetBSSID(const uint8_t *bssid)
+{
+    WIFIReturnCode_t ret;
+
+    ret = WIFI_GetLock();
+    if( ret == eWiFiSuccess )
+    {
+        connect_bssid = (sl_wfx_mac_address_t *) bssid;
+
+        WIFI_ReleaseLock();
+    }
+
+    return ret;
 }
 
 WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkParams )
@@ -328,6 +351,7 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
     sl_wfx_security_mode_t security;
     EventBits_t bits;
     WIFIReturnCode_t ret;
+    uint8_t prevent_roaming = 0;
 
     configASSERT( pxNetworkParams != NULL );
 
@@ -370,13 +394,30 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
         {
             sl_status_t sl_ret;
 
-            rtos_printf( "Connect to: %s(%d):%s(%d) on ch %d with security %d\n",
-                         pxNetworkParams->pcSSID,
-                         pxNetworkParams->ucSSIDLength,
-                         pxNetworkParams->pcPassword,
-                         pxNetworkParams->ucPasswordLength,
-                         pxNetworkParams->cChannel,
-                         security );
+            if( connect_bssid != NULL )
+            {
+                /* Explicitly prevent roaming if the BSSID of the AP is specified */
+                prevent_roaming = 1;
+                rtos_printf( "Connect to: %s(%d, " HWADDR_FMT "):%s(%d) on ch %d with security %d\n",
+                             pxNetworkParams->pcSSID,
+                             pxNetworkParams->ucSSIDLength,
+                             HWADDR_ARG(connect_bssid->octet),
+                             pxNetworkParams->pcPassword,
+                             pxNetworkParams->ucPasswordLength,
+                             pxNetworkParams->cChannel,
+                             security );
+            }
+            else
+            {
+                rtos_printf( "Connect to: %s(%d):%s(%d) on ch %d with security %d\n",
+                             pxNetworkParams->pcSSID,
+                             pxNetworkParams->ucSSIDLength,
+                             pxNetworkParams->pcPassword,
+                             pxNetworkParams->ucPasswordLength,
+                             pxNetworkParams->cChannel,
+                             security );
+            }
+
 
             /*
              * Ensure the connect fail bit is cleared as it is not automatically
@@ -387,15 +428,16 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
 
             sl_ret = sl_wfx_send_join_command( ( const uint8_t * ) pxNetworkParams->pcSSID,
                                                pxNetworkParams->ucSSIDLength,
-                                               NULL,
+                                               connect_bssid,
                                                pxNetworkParams->cChannel,
                                                security,
-                                               0,
-                                               1,
+                                               prevent_roaming,
+                                               WFM_MGMT_FRAME_PROTECTION_OPTIONAL,
                                                ( const uint8_t * ) pxNetworkParams->pcPassword,
                                                pxNetworkParams->ucPasswordLength,
                                                NULL,
                                                0);
+            connect_bssid = NULL;
 
             if( sl_ret == SL_STATUS_OK )
             {
@@ -810,7 +852,7 @@ void sl_wfx_scan_result_callback( sl_wfx_scan_result_ind_body_t *scan_result )
         memcpy( scan_results[ scan_count ].cSSID, scan_result->ssid_def.ssid, ssid_len );
         memcpy( scan_results[ scan_count ].ucBSSID, scan_result->mac, wificonfigMAX_BSSID_LEN );
         scan_results[ scan_count ].cChannel = scan_result->channel;
-        scan_results[ scan_count ].ucHidden = 0;
+        scan_results[ scan_count ].ucHidden = ssid_len == 0 ? 1 : 0;
         scan_results[ scan_count ].cRSSI = ( ( int16_t ) scan_result->rcpi - 220 ) / 2;
 
         if( *( ( uint8_t * ) &scan_result->security_mode ) == 0 )
@@ -853,12 +895,47 @@ void sl_wfx_scan_complete_callback( sl_wfx_fmac_status_t status )
   xEventGroupSetBits( sl_wfx_event_group, SL_WFX_SCAN_COMPLETE );
 }
 
+static const sl_wfx_ssid_def_t *scan_search_list;
+static int scan_search_list_count;
+
+WIFIReturnCode_t WIFI_ScanSetSSIDList(const sl_wfx_ssid_def_t *list, int count)
+{
+    WIFIReturnCode_t ret;
+
+    ret = WIFI_GetLock();
+    if( ret == eWiFiSuccess )
+    {
+        scan_search_list = list;
+        scan_search_list_count = count;
+
+        WIFI_ReleaseLock();
+    }
+
+    return ret;
+}
+
+static const sl_wfx_mac_address_t *scan_bssid;
+
+WIFIReturnCode_t WIFI_ScanSetBSSID(const uint8_t *bssid)
+{
+    WIFIReturnCode_t ret;
+
+    ret = WIFI_GetLock();
+    if( ret == eWiFiSuccess )
+    {
+        scan_bssid = (sl_wfx_mac_address_t *) bssid;
+
+        WIFI_ReleaseLock();
+    }
+
+    return ret;
+}
+
 WIFIReturnCode_t WIFI_Scan( WIFIScanResult_t *pxBuffer,
                             uint8_t ucNumNetworks )
 {
     EventBits_t bits;
     WIFIReturnCode_t ret;
-    const uint8_t channel_list[] = { 1,2,3,4,5,6,7,8,9,10,11,12,13 };
 
     configASSERT( pxBuffer != NULL );
 
@@ -874,14 +951,17 @@ WIFIReturnCode_t WIFI_Scan( WIFIScanResult_t *pxBuffer,
         memset( pxBuffer, 0, sizeof( WIFIScanResult_t ) * ucNumNetworks );
 
         sl_ret = sl_wfx_send_scan_command( WFM_SCAN_MODE_ACTIVE,
-                                           channel_list,
-                                           SL_WFX_ARRAY_COUNT( channel_list ),
                                            NULL,
                                            0,
+                                           scan_search_list,
+                                           scan_search_list_count,
                                            NULL,
                                            0,
-                                           NULL);
-        if( sl_ret == SL_STATUS_OK )
+                                           scan_bssid);
+
+        scan_bssid = NULL;
+
+        if( sl_ret == SL_STATUS_OK || sl_ret == SL_STATUS_WIFI_WARNING )
         {
             bits = xEventGroupWaitBits( sl_wfx_event_group, SL_WFX_SCAN_COMPLETE, pdTRUE, pdTRUE, pdMS_TO_TICKS( 10000 ) );
 
@@ -892,6 +972,7 @@ WIFIReturnCode_t WIFI_Scan( WIFIScanResult_t *pxBuffer,
         }
         else
         {
+            sl_wfx_host_log( "sl_wfx_send_scan_command() returned %04x\n", sl_ret );
             ret = eWiFiFailure;
         }
 
@@ -957,9 +1038,10 @@ WIFIReturnCode_t WIFI_StartAP( void )
                                               0, /* SSID is not hidden */
                                               0, /* Don't isolate clients */
                                               wifi_ap_settings.security,
-                                              /* enable management frame protection if WPA */
-                                              wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_PSK ||
-                                              wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_WPA1_PSK ? 1 : 0,
+                                              ///* enable management frame protection if WPA */
+                                              //wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_PSK ||
+                                              //wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_WPA1_PSK ? 1 : 0,
+                                              WFM_MGMT_FRAME_PROTECTION_OPTIONAL,
                                               wifi_ap_settings.password,
                                               wifi_ap_settings.password_length,
                                               NULL, /* No vendor specific beacon data */
