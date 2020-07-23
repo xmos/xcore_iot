@@ -17,7 +17,7 @@ def parse_arguments():
 
     parser.add_argument("-output_file", default="trace_output", help="Output trace file")
     parser.add_argument("-config_file", default="trace_show.json", help="Defines traces to be filtered")
-    parser.add_argument("-cores", default=8, help="Number of FreeRTOS cores")
+    parser.add_argument("-cores", default=8, type=int, help="Number of FreeRTOS cores")
     parser.add_argument("--singleout", action="store_true", help="Generate single output file with all cores")
 
     parser.parse_args()

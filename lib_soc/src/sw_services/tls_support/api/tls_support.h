@@ -18,6 +18,14 @@ void tls_platform_init( void );
 void tls_platform_free( void );
 
 /**
+ *  Check if the TLS platform is ready to use
+ *
+ *  \return		 1 if ready
+ *  			 0 otherwise
+ */
+int tls_platform_ready( void );
+
+/**
  * Send to network driver using TLS
  *
  * \param[in]     ctx		     Context to use containing the network,

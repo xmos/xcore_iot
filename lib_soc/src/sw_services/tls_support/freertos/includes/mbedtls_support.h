@@ -3,8 +3,6 @@
 #ifndef FREERTOS_TLS_SUPPORT_H_
 #define FREERTOS_TLS_SUPPORT_H_
 
-#define DRBG_SEED_STRING_DEFAULT "XCOREAI"
-
 #include "mbedtls/ssl.h"
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/entropy.h"
@@ -19,6 +17,12 @@ typedef struct tls_ctx
 	Socket_t socket;
 	int flags;
 } tls_ctx_t;
+
+/**
+ * Initialize the tls_ctx_t required for integration of
+ * mbedtls to network calls
+ */
+void tls_ctx_init( tls_ctx_t* ctx );
 
 /**
  * Get the platform shared entropy context
@@ -130,11 +134,14 @@ int get_device_prvkey( mbedtls_pk_context* prvkey );
  * \returns       return pointer to region of n*size bytes, initialized to all 0x00
  */
 void* freertos_calloc( size_t n, size_t size );
+
 /**
  * Configure platform memory macros
  */
 #define MBEDTLS_PLATFORM_FREE_MACRO vPortFree
 #define MBEDTLS_PLATFORM_CALLOC_MACRO freertos_calloc
+
+#define DRBG_SEED_STRING_DEFAULT "XCOREAI"
 
 #ifdef DRBG_SEED_STRING
 static const char* drbg_seed_string = ( char* )DRBG_SEED_STRING;

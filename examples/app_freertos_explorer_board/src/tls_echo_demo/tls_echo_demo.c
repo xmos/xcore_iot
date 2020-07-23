@@ -283,6 +283,11 @@ static void tls_echo( void *arg )
         vTaskDelay( pdMS_TO_TICKS( 100 ) );
     }
 
+	while( tls_platform_ready() == 0 )
+	{
+		vTaskDelay( pdMS_TO_TICKS( 100 ) );
+	}
+
 	echo_tcp_handle_t handle;
 
 	handle = ( echo_tcp_handle_t ) pvPortMalloc( sizeof( echo_tcp_ctx_t ) );

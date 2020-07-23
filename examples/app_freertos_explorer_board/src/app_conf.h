@@ -30,7 +30,15 @@
 /* GPIO defines */
 #define appconfGPIO_VOLUME_RAPID_FIRE_MS       	100
 
+/* MQTT demo defines */
+#define appconfMQTT_SERVER_IP_ADDR_OCTET_0    	10
+#define appconfMQTT_SERVER_IP_ADDR_OCTET_1    	0
+#define appconfMQTT_SERVER_IP_ADDR_OCTET_2    	0
+#define appconfMQTT_SERVER_IP_ADDR_OCTET_3    	253
+#define appconfMQTT_PORT						8883
+
 /* Task Priorities */
+#define appconfMQTT_TASK_PRIORITY    			( configMAX_PRIORITIES - 3 )
 #define appconfHTTP_TASK_PRIORITY    			( configMAX_PRIORITIES - 3 )
 #define appconfTLS_ECHO_TASK_PRIORITY    		( configMAX_PRIORITIES - 3 )
 #define appconfTLS_ECHO_SERVER_PRIORITY    		( configMAX_PRIORITIES - 3 )

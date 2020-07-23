@@ -10,18 +10,11 @@
 /* Library headers */
 
 /* App headers */
-#include "audio_pipeline.h"
 #include "network.h"
-#include "UDPCommandInterpreter.h"
-#include "thruput_test.h"
-#include "gpio_ctrl.h"
 #include "app_conf.h"
 #include "sntpd.h"
 #include "fs_support.h"
-#include "tls_echo_demo.h"
-#include "tls_echo_server.h"
 #include "tls_support.h"
-#include "http_demo.h"
 #include "mqtt_demo_client.h"
 #include "mem_analysis.h"
 
@@ -32,19 +25,9 @@ __attribute__((section(".ExtMem_data")))
 uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #endif
 
-
 void soc_tile0_main(
         int tile)
 {
-    /* Create UDP CLI */
-    vStartUDPCommandInterpreterTask( portTASK_STACK_DEPTH(vUDPCommandInterpreterTask), appconfCLI_UDP_PORT, appconfCLI_TASK_PRIORITY );
-
-    /* Create the thruput test */
-    thruput_test_create( appconfTHRUPUT_TEST_TASK_PRIORITY );
-
-    /* Create the gpio control task */
-    gpio_ctrl_create( appconfGPIO_TASK_PRIORITY );
-
     /* Initialize WiFi */
     initalize_wifi();
 
@@ -58,18 +41,6 @@ void vApplicationDaemonTaskStartupHook( void )
 
     /* Initialize TLS  */
 	tls_platform_init();
-
-    /* Create TLS echo demo */
-	tls_echo_demo_create( appconfTLS_ECHO_TASK_PRIORITY );
-
-    /* Create TLS echo demo */
-	tls_echo_server_create( appconfTLS_ECHO_SERVER_PRIORITY );
-
-    /* Create HTTP demo */
-	http_demo_create( appconfHTTP_TASK_PRIORITY );
-
-    /* Create audio pipeline */
-    audio_pipeline_create( appconfAUDIO_PIPELINE_TASK_PRIORITY );
 
     /* Create SNTPD */
     sntp_create( appconfSNTPD_TASK_PRIORITY );

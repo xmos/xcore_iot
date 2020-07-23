@@ -62,3 +62,6 @@
 [submodule "thirdparty/http-parser"]
 	path = lib_soc/src/sw_services/http/thirdparty/http-parser
 	url = git@github.com:nodejs/http-parser.git
+[submodule "lib_soc/src/sw_services/json/jsmn"]
+	path = lib_soc/src/sw_services/json/jsmn
+	url = git@github.com:zserge/jsmn.git
