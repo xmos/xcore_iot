@@ -25,6 +25,7 @@
 #include "app_conf.h"
 #include "mqtt_demo_client.h"
 #include "jsmn.h"
+#include "sntpd.h"
 
 #ifdef MBEDTLS_DEBUG_C
 #include "mbedtls/debug.h"
@@ -226,7 +227,7 @@ static void mqtt_demo_connect( void* arg )
 	mbedtls_pk_context* prvkey = pvPortMalloc( sizeof( mbedtls_pk_context ) );
 	mbedtls_x509_crt* ca = pvPortMalloc( sizeof( mbedtls_x509_crt ) );
 
-	while( tls_platform_ready() == 0 )
+	while( ( tls_platform_ready() == 0 ) || ( is_time_synced() == 0 ) )
 	{
 		vTaskDelay( pdMS_TO_TICKS( 100 ) );
 	}

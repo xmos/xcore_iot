@@ -23,7 +23,6 @@
 #include "random.h"
 #include "tls_support.h"
 #include "ff.h"
-#include "sntpd.h"
 
 #ifndef MBEDTLS_PLATFORM_MEMORY
 #error MBEDTLS_PLATFORM_MEMORY must be enabled
@@ -38,7 +37,7 @@ static int platform_ready = 0;
 
 int tls_platform_ready( void )
 {
-	return platform_ready && is_time_synced();
+	return platform_ready;
 }
 
 struct tm *mbedtls_platform_gmtime_r( const mbedtls_time_t *tt,
