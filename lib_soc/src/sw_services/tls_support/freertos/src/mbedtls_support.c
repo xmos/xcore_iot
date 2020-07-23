@@ -23,6 +23,7 @@
 #include "random.h"
 #include "tls_support.h"
 #include "ff.h"
+#include "sntpd.h"
 
 #ifndef MBEDTLS_PLATFORM_MEMORY
 #error MBEDTLS_PLATFORM_MEMORY must be enabled
@@ -37,7 +38,7 @@ static int platform_ready = 0;
 
 int tls_platform_ready( void )
 {
-	return platform_ready;
+	return platform_ready && is_time_synced();
 }
 
 struct tm *mbedtls_platform_gmtime_r( const mbedtls_time_t *tt,
@@ -180,6 +181,11 @@ static int freertos_mutex_unlock( mbedtls_threading_mutex_t* mutex )
     return retval;
 }
 
+void tls_ctx_init( tls_ctx_t* ctx )
+{
+    memset( ctx, 0, sizeof( tls_ctx_t ) );
+}
+
 void tls_platform_init( void )
 {
 	ring_oscillator = random_create_generator_from_hw_seed();
@@ -217,7 +223,6 @@ void tls_platform_free( void )
 int tls_send( void* ctx, const unsigned char* buf, size_t len)
 {
 	tls_ctx_t* tls_ctx = ( tls_ctx_t* ) ctx;
-
 	return FreeRTOS_send( tls_ctx->socket, buf, len, tls_ctx->flags );
 }
 

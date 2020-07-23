@@ -26,9 +26,19 @@
 #include "mqtt_demo_client.h"
 #include "jsmn.h"
 
-#define MQTT_DEMO_CONNECT_STACK_SIZE 		800
+#ifdef MBEDTLS_DEBUG_C
+#include "mbedtls/debug.h"
+#endif
 
-const char* HOSTNAME = "localhost";
+#define MQTT_DEMO_CONNECT_STACK_SIZE 		2000
+#define MQTT_DEMO_HANDLER_STACK_SIZE 		1200
+#define MQTT_RECONNECT_DELAY_MS				1000
+#define MQTT_RECONNECT_DELAY_STEP_MS		1000
+#define MQTT_RECONNECT_DELAY_MAX_MS		   15000
+
+const char* HOSTNAME = appconfMQTT_HOSTNAME;
+const char* client_str = appconfMQTT_CLIENT_ID;
+const char* topic = appconfMQTT_DEMO_TOPIC;
 
 typedef struct net_conn_args
 {
@@ -39,7 +49,6 @@ typedef struct net_conn_args
 
 static soc_peripheral_t dev;
 static uint32_t val;
-static uint32_t val2;
 
 #define MAX_TOKENS 10
 
@@ -60,32 +69,52 @@ void messageArrived(MessageData* data)
 		debug_printf("json[%d]:%.*s\n", i, tkn[i].end - tkn[i].start, payload + tkn[i].start);
 	}
 
-	/* explorer/ledctrl */
-	if( strstr( payload, "bathroom" ) != NULL )
+	if( strstr( payload, "0" ) != NULL )
 	{
 		if( strstr( payload, "on" ) != NULL )
 		{
-			val = 1;
+			val |= ( 1 << 0 );
 		}
 		else if( strstr( payload, "off" ) != NULL )
 		{
-			val = 0;
+			val &= ~( 1 << 0 );
 		}
 	}
-	else if( strstr( payload, "kitchen" ) != NULL )
+	else if( strstr( payload, "1" ) != NULL )
 	{
 		if( strstr( payload, "on" ) != NULL )
 		{
-			val2 = 1;
+			val |= ( 1 << 1 );
 		}
 		else if( strstr( payload, "off" ) != NULL )
 		{
-			val2 = 0;
+			val &= ~( 1 << 1 );
+		}
+	}
+	else if( strstr( payload, "2" ) != NULL )
+	{
+		if( strstr( payload, "on" ) != NULL )
+		{
+			val |= ( 1 << 2 );
+		}
+		else if( strstr( payload, "off" ) != NULL )
+		{
+			val &= ~( 1 << 2 );
+		}
+	}
+	else if( strstr( payload, "3" ) != NULL )
+	{
+		if( strstr( payload, "on" ) != NULL )
+		{
+			val |= ( 1 << 3 );
+		}
+		else if( strstr( payload, "off" ) != NULL )
+		{
+			val &= ~( 1 << 3 );
 		}
 	}
 
-	gpio_write_pin(dev, gpio_4C, 0, val);
-	gpio_write_pin(dev, gpio_4C, 1, val2);
+	gpio_write(dev, gpio_4C, val);
 
 	debug_printf("Message arrived on topic %.*s: %.*s\n", data->topicName->lenstring.len, data->topicName->lenstring.data,
 		data->message->payloadlen, data->message->payload);
@@ -99,13 +128,13 @@ static void mqtt_handler( void* arg )
 	Network network;
 	unsigned char sendbuf[1024], readbuf[1024];
 	int retval = 0;
-	int	count = 0;
+
 	MQTTPacket_connectData connectData = MQTTPacket_connectData_initializer;
 	dev = bitstream_gpio_devices[ BITSTREAM_GPIO_DEVICE_A ];
-	val = 1;
-	val2 = 1;
-	gpio_write_pin(dev, gpio_4C, 0, val);
-	gpio_write_pin(dev, gpio_4C, 1, val2);
+
+    gpio_init(dev, gpio_4C);
+	val = 0x00;
+	gpio_write(dev, gpio_4C, val);
 
 	TaskHandle_t caller = args->connection_task;
 
@@ -118,7 +147,7 @@ static void mqtt_handler( void* arg )
     MQTTStartTask( &client );
 
 	connectData.MQTTVersion = 3;
-	connectData.clientID.cstring = "JerryExplorerBoard";
+	connectData.clientID.cstring = ( char * )client_str;
 
 	for( ;; )
 	{
@@ -131,7 +160,7 @@ static void mqtt_handler( void* arg )
 		{
 			debug_printf("MQTT Connected\n");
 
-			if( ( retval = MQTTSubscribe( &client, "explorer/ledctrl", QOS1, messageArrived ) ) != 0 )
+			if( ( retval = MQTTSubscribe( &client, topic, QOS1, messageArrived ) ) != 0 )
 			{
 				debug_printf("Return code from MQTT subscribe is %d\n", retval);
 			}
@@ -152,18 +181,15 @@ static void mqtt_handler( void* arg )
 		}
 	}
 	debug_printf("MQTT Cleanup\n");
-	/* cleanup and resume listener task */
 	vTaskDelete( client.thread.task );
 	vTaskResume( caller );
 	vTaskDelete( NULL );
-	while(1){;}
 }
 
 static void mqtt_demo_connect( void* arg )
 {
 	( void ) arg;
 	TaskHandle_t handler_task;
-	int retval = 0;
 	int tmpval = 0;
 	struct freertos_sockaddr sAddr;
 	int recv_timeout = pdMS_TO_TICKS( 5000 );
@@ -178,8 +204,8 @@ static void mqtt_demo_connect( void* arg )
 
 	while( 1 )
 	{
-		debug_printf("Try to get ip\n");
-		ip = FreeRTOS_gethostbyname( "a1hzm0bxctmhsn-ats.iot.us-east-1.amazonaws.com" );
+		debug_printf("Try to get host ip\n");
+		ip = FreeRTOS_gethostbyname( HOSTNAME );
 
 		if( ip > 0 )
 		{
@@ -193,11 +219,6 @@ static void mqtt_demo_connect( void* arg )
 
 	/* TODO make these args */
 	sAddr.sin_port = FreeRTOS_htons( appconfMQTT_PORT );
-//	sAddr.sin_addr = FreeRTOS_inet_addr_quick(
-//						appconfMQTT_SERVER_IP_ADDR_OCTET_0,
-//						appconfMQTT_SERVER_IP_ADDR_OCTET_1,
-//						appconfMQTT_SERVER_IP_ADDR_OCTET_2,
-//						appconfMQTT_SERVER_IP_ADDR_OCTET_3 );
 
 	Socket_t socket;
 	/* These can be shared by multiple connections */
@@ -240,16 +261,24 @@ static void mqtt_demo_connect( void* arg )
 	mbedtls_ctr_drbg_context *drbg_ptr = get_shared_drbg_ctx();
 	mbedtls_ssl_conf_rng( ssl_conf, mbedtls_ctr_drbg_random, drbg_ptr );
 
-	mbedtls_ssl_conf_authmode( ssl_conf, MBEDTLS_SSL_VERIFY_NONE );
+	mbedtls_ssl_conf_authmode( ssl_conf, MBEDTLS_SSL_VERIFY_REQUIRED );
 	mbedtls_ssl_conf_ca_chain( ssl_conf, ca, NULL );
+
+#ifdef MBEDTLS_DEBUG_C
+	/* Add debug function to the conf */
+	mbedtls_ssl_conf_dbg( ssl_conf, default_mbedtls_debug, NULL );
+	mbedtls_debug_set_threshold(4);
+#endif
 
 	/* SSL context is per connection */
 	mbedtls_ssl_context* ssl_ctx = pvPortMalloc( sizeof( mbedtls_ssl_context ) );
 
 	tls_ctx_t* tls_ctx = pvPortMalloc( sizeof( tls_ctx_t ) );
 
+	int mqtt_timeout = MQTT_RECONNECT_DELAY_MS;
 	for( ;; )
 	{
+		tls_ctx_init( tls_ctx );
 		mbedtls_ssl_init( ssl_ctx );
 
 		if( mbedtls_ssl_setup( ssl_ctx, ssl_conf ) != 0 )
@@ -302,41 +331,64 @@ static void mqtt_demo_connect( void* arg )
 				}
 			}
 
-			/* verify peer cert */
-			if( ( tmpval = mbedtls_ssl_get_verify_result( ssl_ctx ) ) != 0 )
+			if( tmpval == 0 )
 			{
-				debug_printf("failed to verify peer cert\n");
+				/* Reset timeout on successful handshake */
+				mqtt_timeout = MQTT_RECONNECT_DELAY_MS;
+
+				/* verify peer cert */
+				if( ( tmpval = mbedtls_ssl_get_verify_result( ssl_ctx ) ) != 0 )
+				{
+					debug_printf("failed to verify peer cert\n");
+				}
+				else
+				{
+					/* Call MQTT task */
+					net_conn_args_t* handler_args = pvPortMalloc( sizeof( net_conn_args_t ) );
+
+					handler_args->socket = socket;
+					handler_args->ssl_ctx = ssl_ctx;
+					handler_args->connection_task = xTaskGetCurrentTaskHandle();
+
+					xTaskCreate( mqtt_handler, "mqtt", MQTT_DEMO_HANDLER_STACK_SIZE, ( void * ) handler_args, uxTaskPriorityGet( NULL ) + 1, &handler_task );
+
+					vTaskSuspend( NULL );
+					vPortFree( handler_args );
+				}
+				mbedtls_ssl_close_notify( ssl_ctx );
 			}
 			else
 			{
-				// run mqtt task now
-				net_conn_args_t* handler_args = pvPortMalloc( sizeof( net_conn_args_t ) );
-
-				handler_args->socket = socket;
-				handler_args->ssl_ctx = ssl_ctx;
-				handler_args->connection_task = xTaskGetCurrentTaskHandle();
-
-				xTaskCreate( mqtt_handler, "mqtt", ( 1200 ), ( void * ) handler_args, uxTaskPriorityGet( NULL ) + 1, &handler_task );
-
-				vTaskSuspend( NULL );
-				vPortFree( handler_args );
+				mqtt_timeout += MQTT_RECONNECT_DELAY_STEP_MS;
 			}
-
-			mbedtls_ssl_close_notify( ssl_ctx );
 
 			FreeRTOS_shutdown( socket, FREERTOS_SHUT_RDWR );
 
-			char dummy;
-			while( FreeRTOS_recv( socket, &dummy, 1, FREERTOS_MSG_DONTWAIT ) >= 0 )
+			int cnt = 0;
+
+			char* dummy_buf = pvPortMalloc( sizeof( char ) * 1024 );
+			while( FreeRTOS_recv( socket, dummy_buf, 1024, FREERTOS_MSG_DONTWAIT ) >= 0 )
 			{
-				vTaskDelay( pdMS_TO_TICKS( 100 ) );
+				if( ++cnt > 1000 )
+				{
+					/* Timeout */
+					break;
+				}
+				vTaskDelay( pdMS_TO_TICKS( 1 ) );
 			}
+			vPortFree( dummy_buf );
+		}
+		else
+		{
+			mqtt_timeout = ( ( mqtt_timeout + MQTT_RECONNECT_DELAY_STEP_MS ) > MQTT_RECONNECT_DELAY_MAX_MS )
+							? ( MQTT_RECONNECT_DELAY_MAX_MS )
+							: ( mqtt_timeout + MQTT_RECONNECT_DELAY_STEP_MS );
 		}
 
 		FreeRTOS_closesocket( socket );
 
 		mbedtls_ssl_free( ssl_ctx );
-		vTaskDelay( pdMS_TO_TICKS( 100 ) );
+		vTaskDelay( pdMS_TO_TICKS( mqtt_timeout ) );
 	}
 
 	vPortFree( tls_ctx );
