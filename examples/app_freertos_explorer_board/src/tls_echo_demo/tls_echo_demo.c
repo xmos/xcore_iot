@@ -303,6 +303,7 @@ static void tls_echo( void *arg )
 
 	xTaskCreate( tls_echo_receiver, "echo", 950, ( void * ) handle, uxTaskPriorityGet( NULL ), NULL );
 
+#if 0
     for( ;; )
     {
     	debug_printf("Minimum heap free: %d\n", xPortGetMinimumEverFreeHeapSize());
@@ -312,6 +313,9 @@ static void tls_echo( void *arg )
     	debug_printf("tls_echo_receiver free stack words: %d\n", free_stack_words);
     	vTaskDelay( pdMS_TO_TICKS( 1000 ) );
     }
+#else
+    vTaskDelete( NULL );
+#endif
 }
 
 void tls_echo_demo_create( UBaseType_t priority )

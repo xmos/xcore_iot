@@ -51,7 +51,7 @@ static void my_debug( void *ctx, int level,
 	rtos_printf("Current heap free: %d\n", xPortGetFreeHeapSize());
 
 	int free_stack_words = uxTaskGetStackHighWaterMark( xTaskGetHandle( "echosrv" ) );
-	debug_printf("echosrv free stack words: %d\n", free_stack_words);
+	debug_printf("tls_echo_server free stack words: %d\n", free_stack_words);
 
     debug_printf( "%s:%04d: |%d| %s", basename, line, level, str );
 }
@@ -204,7 +204,7 @@ static void tls_echo_server( void *arg )
 			debug_printf("Current heap free: %d\n", xPortGetFreeHeapSize());
 
 			int free_stack_words = uxTaskGetStackHighWaterMark( NULL );
-			debug_printf("tls_echo_receiver free stack words: %d\n", free_stack_words);
+			debug_printf("tls_echo_server free stack words: %d\n", free_stack_words);
 		} while( exit == 0 );
 
 		mbedtls_ssl_close_notify( &ssl_ctx );

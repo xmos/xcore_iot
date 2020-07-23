@@ -27,7 +27,7 @@ static void thruput_test_sender( void *arg )
     BaseType_t xAlreadyTransmitted = 0, xBytesSent = 0;
     uint8_t snd_buf[ipconfigTCP_MSS * 4];
 
-    const BaseType_t xWaitForFullMSS = 1;
+    BaseType_t xWaitForFullMSS = 1;
 
     for( int i = 0; i < sizeof(snd_buf); i++ )
     {
@@ -56,6 +56,17 @@ static void thruput_test_sender( void *arg )
     {
         /* How many bytes are left to send? */
         xLenToSend = FreeRTOS_min_int32(xTotalLengthToSend - xAlreadyTransmitted, 4 * xMSS);
+
+        if (xLenToSend < 4 * xMSS)
+        {
+            xWaitForFullMSS = 0;
+            /* Ensure the last bit is sent if it's smaller than the MSS */
+            FreeRTOS_setsockopt( xConnectedSocket,
+                                 0,
+                                 FREERTOS_SO_SET_FULL_SIZE,
+                                 &xWaitForFullMSS,
+                                 sizeof( xWaitForFullMSS ) );
+        }
 
         xBytesSent = FreeRTOS_send(
                 xConnectedSocket,

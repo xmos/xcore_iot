@@ -1,5 +1,7 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
+#define DEBUG_UNIT LIB_SOC_SW_WIFI
+
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -14,13 +16,16 @@
 #include "soc.h"
 #include "sl_wfx.h"
 #include "sl_wfx_iot_wifi.h"
+#include "wifi.h"
 #include "heapsort.h"
+#include "dhcpd.h"
 
 #define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define HWADDR_ARG(hwaddr) (hwaddr)[0], (hwaddr)[1], (hwaddr)[2], (hwaddr)[3], (hwaddr)[4], (hwaddr)[5]
 
 #define MAX_SCAN_COUNT 20
 #define MAX_CONNECTION_ATTEMPTS 3
+#define MAX_CONNECTION_ATTEMPTS_BEFORE_CALLBACK 5
 
 #define MAX_SCAN_ATTEMPTS 3
 
@@ -35,8 +40,9 @@
 
 #define RSSI_HISTORY_LENGTH 16
 
-#define NOTIFY_NETWORK_DOWN_BM 0x00000001
-#define NOTIFY_WIFI_RESET_BM   0x00000002
+#define NOTIFY_NETWORK_DOWN_BM          0x00000001
+#define NOTIFY_WIFI_RESET_BM            0x00000002
+#define NOTIFY_WIFI_PROFILES_UPDATED_BM 0x00000004
 
 static TaskHandle_t wifi_conn_mgr_task_handle;
 
@@ -124,30 +130,6 @@ static void build_scan_search_list(scan_list_t *scan_list)
     scan_list->profile_count = profile_count;
 }
 
-#if 0
-inline int ap_cmp(scan_list_t *scan_list, size_t a, size_t b)
-{
-    if (scan_list->scan_results[a].cRSSI > scan_list->scan_results[b].cRSSI) {
-        return -1;
-    } else {
-        return 1;
-    }
-}
-
-inline void ap_swap(scan_list_t *scan_list, size_t a, size_t b)
-{
-    WIFIScanResult_t t;
-    int p;
-
-    t = scan_list->scan_results[a];
-    scan_list->scan_results[a] = scan_list->scan_results[b];
-    scan_list->scan_results[b] = t;
-
-    p = scan_list->scan_result_profile[a];
-    scan_list->scan_result_profile[a] = scan_list->scan_result_profile[b];
-    scan_list->scan_result_profile[b] = p;
-}
-#else
 inline int ap_cmp(scan_list_t *scan_list, size_t a, size_t b)
 {
     if (scan_list->sorted_aps[a]->age == 0) {
@@ -168,25 +150,6 @@ inline void ap_swap(scan_list_t *scan_list, size_t a, size_t b)
     t = scan_list->sorted_aps[a];
     scan_list->sorted_aps[a] = scan_list->sorted_aps[b];
     scan_list->sorted_aps[b] = t;
-}
-#endif
-
-static char *security_name(WIFISecurity_t s)
-{
-    switch (s) {
-    case eWiFiSecurityOpen:
-        return "Open";
-    case eWiFiSecurityWEP:
-        return "WEP";
-    case eWiFiSecurityWPA:
-        return "WPA";
-    case eWiFiSecurityWPA2:
-        return "WPA2";
-    case eWiFiSecurityWPA2_ent:
-        return "WPA2 Enterprise";
-    default:
-        return "Unsupported";
-    }
 }
 
 /*
@@ -326,10 +289,7 @@ static int scan_networks(scan_list_t *scan_list)
 
         rtos_printf("Scan found %d networks, sorting by signal strength\n", scan_count);
 
-        rtos_printf("%d\n", i);
         heapsort(scan_list, i, ap_cmp, ap_swap);
-
-        rtos_printf("Cache list:\n");
 
         for (ap_cache_count = 0; ap_cache_count < CACHED_AP_COUNT; ap_cache_count++) {
             ap = scan_list->sorted_aps[ap_cache_count];
@@ -346,21 +306,6 @@ static int scan_networks(scan_list_t *scan_list)
         }
 
         scan_list->ap_cache_count = ap_cache_count;
-
-
-#if 0
-        for (int i = 0; i < scan_count; i++) {
-            rtos_printf("%d: %s\n", i, scan_results[i].cSSID);
-            rtos_printf("\tBSSID: " HWADDR_FMT "\n", HWADDR_ARG(scan_results[i].ucBSSID));
-            rtos_printf("\tChannel: %d\n", (int) scan_results[i].cChannel);
-            rtos_printf("\tStrength: %d dBm\n", (int) scan_results[i].cRSSI);
-            rtos_printf("\t%s\n", security_name(scan_results[i].xSecurity));
-//            rtos_printf("\tAssociated profile: %d (%s)\n", scan_result_profile[i],
-//                                                           scan_result_profile[i] >= 0 ?
-//                                                           saved_profiles[scan_result_profile[i]].cSSID : "NULL");
-
-        }
-#endif
     }
 
     return ret;
@@ -434,99 +379,240 @@ static int connect_to_network(ap_info_t *ap)
     return ret;
 }
 
+static void reset_scan_search_list_and_ap_cache(scan_list_t *scan_list)
+{
+    int i;
+
+    rtos_printf("Loading WiFi profiles\n");
+
+    memset(scan_list, 0, sizeof(scan_list_t));
+    for (i = 0; i < CACHED_AP_COUNT; i++) {
+        scan_list->sorted_aps[i] = &scan_list->cached_aps[i];
+    }
+
+    build_scan_search_list(scan_list);
+    WIFI_ScanSetSSIDList(scan_list->ssid_scan_search_list, scan_list->profile_count);
+}
+
+static void wifi_conn_mgr_reload_profiles(void)
+{
+    if (wifi_conn_mgr_task_handle != NULL) {
+        xTaskNotify(wifi_conn_mgr_task_handle, NOTIFY_WIFI_PROFILES_UPDATED_BM, eSetBits);
+    }
+}
+
+int wifi_conn_mgr_disconnect_from_ap(int wifi_profiles_updated)
+{
+    int i = 0;
+
+    if (wifi_profiles_updated) {
+        wifi_conn_mgr_reload_profiles();
+    }
+
+    while (WIFI_Disconnect() != eWiFiSuccess) {
+        vTaskDelay(pdMS_TO_TICKS(100));
+        if (++i >= 3) {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+int wifi_conn_mgr_stop_soft_ap(int wifi_profiles_updated)
+{
+    int i = 0;
+
+    if (wifi_profiles_updated) {
+        wifi_conn_mgr_reload_profiles();
+    }
+
+    while (WIFI_StopAP() != eWiFiSuccess) {
+        vTaskDelay(pdMS_TO_TICKS(100));
+        if (++i >= 3) {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+__attribute__((weak))
+int wifi_conn_mgr_event_cb(int state, char *soft_ap_ssid, char *soft_ap_password)
+{
+    (void) soft_ap_ssid;
+    (void) soft_ap_password;
+
+    return WIFI_CONN_MGR_MODE_STATION;
+}
+
+static inline int event_callback(int state, char *ssid_out, char *ssid_in, char *password_in)
+{
+    int mode;
+    char tmp_ssid[wificonfigMAX_SSID_LEN + 1] = "";
+    char tmp_password[wificonfigMAX_PASSPHRASE_LEN + 1] = "";
+
+    if (ssid_out != NULL) {
+        strncat(tmp_ssid, ssid_out, wificonfigMAX_SSID_LEN);
+    }
+
+    mode = wifi_conn_mgr_event_cb(state, tmp_ssid, tmp_password);
+
+    if (mode == WIFI_CONN_MGR_MODE_SOFT_AP) {
+        if (ssid_in != NULL) {
+            ssid_in[0] = '\0';
+            strncat(ssid_in, tmp_ssid, wificonfigMAX_SSID_LEN);
+        }
+        if (password_in != NULL) {
+            password_in[0] = '\0';
+            strncat(password_in, tmp_password, wificonfigMAX_PASSPHRASE_LEN);
+        }
+    }
+
+    return mode;
+}
+
 static void wifi_conn_mgr(void *arg)
 {
     scan_list_t scan_list;
     ap_info_t *connected_ap = NULL;
     int i;
+    int failed_connection_attempts = 0;
+    int mode = WIFI_CONN_MGR_MODE_STATION;
+    WIFINetworkParams_t soft_ap_params;
+
+    char soft_ap_ssid[wificonfigMAX_SSID_LEN + 1];
+    char soft_ap_password[wificonfigMAX_PASSPHRASE_LEN + 1];
 
     (void) arg;
-
-    memset(&scan_list, 0, sizeof(scan_list));
-    for (i = 0; i < CACHED_AP_COUNT; i++) {
-        scan_list.sorted_aps[i] = &scan_list.cached_aps[i];
-    }
 
     while (WIFI_On() != eWiFiSuccess) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 
-    build_scan_search_list(&scan_list);
-    WIFI_ScanSetSSIDList(scan_list.ssid_scan_search_list, scan_list.profile_count);
+    reset_scan_search_list_and_ap_cache(&scan_list);
 
-    /* Wait for FreeRTOS IP to initialize before attempting to connect to an AP */
+    /*
+     * Wait for FreeRTOS IP task to initialize before attempting to
+     * connect to an AP or starting a soft one
+     */
     while (!xIPIsNetworkTaskReady()) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
+
+    mode = event_callback(WIFI_CONN_MGR_EVENT_STARTUP, NULL, soft_ap_ssid, soft_ap_password);
 
     for (;;) {
 
         uint32_t bits;
         ap_info_t *ap;
         int initiate_disconnect = 0;
-        int perform_connection = connected_ap == NULL;
-        int poor_signal = !perform_connection && connected_ap->stable && connected_ap->rssi < POOR_CONNECTION_RSSI_THRESHOLD;
 
-        if (perform_connection || poor_signal) {
-            if (scan_list.profile_count > 0) {
-                int scan_attempts = 0;
-                while (scan_networks(&scan_list) != 0) {
-                    scan_attempts++;
-                    if (scan_attempts >= MAX_SCAN_ATTEMPTS) {
-                        break;
+        if (mode == WIFI_CONN_MGR_MODE_STATION) {
+
+            int perform_connection = connected_ap == NULL;
+            int poor_signal = !perform_connection && connected_ap->stable && connected_ap->rssi < POOR_CONNECTION_RSSI_THRESHOLD;
+
+            if (perform_connection || poor_signal) {
+                if (scan_list.profile_count > 0) {
+                    int scan_attempts = 0;
+                    while (scan_networks(&scan_list) != 0) {
+                        scan_attempts++;
+                        if (scan_attempts >= MAX_SCAN_ATTEMPTS) {
+                            break;
+                        }
+                        vTaskDelay(pdMS_TO_TICKS(1000));
                     }
-                    vTaskDelay(pdMS_TO_TICKS(1000));
                 }
             }
-        }
 
-        if (poor_signal) {
-            for (i = 0; i < scan_list.ap_cache_count; i++) {
-                ap = scan_list.sorted_aps[i];
-                if (ap != connected_ap && ap->connect_failed < MAX_CONNECTION_ATTEMPTS && ap->stable && ap->rssi > connected_ap->rssi + 10) {
-                    rtos_printf("%s:%d is a better AP, connect to it\n", ap->associated_profile->cSSID, ap->channel);
-                    perform_connection = 1;
-                    initiate_disconnect = 1;
-                    connected_ap = NULL;
-                    break;
+            if (poor_signal) {
+                for (i = 0; i < scan_list.ap_cache_count; i++) {
+                    ap = scan_list.sorted_aps[i];
+                    if (ap != connected_ap && ap->connect_failed < MAX_CONNECTION_ATTEMPTS && ap->stable && ap->rssi > connected_ap->rssi + 10) {
+                        rtos_printf("%s:%d is a better AP, connect to it\n", ap->associated_profile->cSSID, ap->channel);
+                        perform_connection = 1;
+                        initiate_disconnect = 1;
+                        connected_ap = NULL;
+                        break;
+                    } else {
+                        if (ap->rssi <= connected_ap->rssi) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (perform_connection) {
+                for (i = 0; i < scan_list.ap_cache_count; i++) {
+                    ap = scan_list.sorted_aps[i];
+                    rtos_printf("ATTEMPTING NEW CONNECTION\n");
+                    if (connect_to_network(ap) != -1) {
+                        connected_ap = ap;
+                        break;
+                    }
+                }
+
+                if (connected_ap == NULL) {
+                    failed_connection_attempts++;
+                    if (failed_connection_attempts == MAX_CONNECTION_ATTEMPTS_BEFORE_CALLBACK || scan_list.profile_count == 0) {
+                        failed_connection_attempts = 0;
+                        mode = event_callback(WIFI_CONN_MGR_EVENT_CONNECT_FAILED, NULL, soft_ap_ssid, soft_ap_password);
+                    }
                 } else {
-                    if (ap->rssi <= connected_ap->rssi) {
-                        break;
-                    }
+                    failed_connection_attempts = 0;
+                    event_callback(WIFI_CONN_MGR_EVENT_CONNECTED, connected_ap->associated_profile->cSSID, NULL, NULL);
                 }
-            }
-        }
-
-        if (perform_connection) {
-            for (i = 0; i < scan_list.ap_cache_count; i++) {
-                ap = scan_list.sorted_aps[i];
-                rtos_printf("ATTEMPTING NEW CONNECTION\n");
-                if (connect_to_network(ap) != -1) {
-                    connected_ap = ap;
-                    break;
-                }
-            }
-
-            if (connected_ap == NULL) {
-                /* start soft AP */
-                rtos_printf("Should start a soft AP now\n");
             } else {
-                rtos_printf("Connected to %s:%d\n", connected_ap->associated_profile->cSSID, connected_ap->channel);
-            }
-        } else {
-            /*
-             * TODO: maybe still perform a scan periodically to keep the cache
-             * up to date, just less frequently?
-             */
-            uint32_t rcpi;
+                /* Already connected to an AP, connected_ap is not NULL */
 
-            if (sl_wfx_get_signal_strength(&rcpi) == SL_STATUS_OK) {
-                int8_t rssi = ((int) rcpi - 220) / 2;
-                update_ap_rssi(connected_ap, rssi);
-                //rtos_printf("Current signal strength of " HWADDR_FMT " is %d dBm\n", HWADDR_ARG(connected_ap->bssid), connected_ap->rssi);
+                /*
+                 * TODO: maybe still perform a scan periodically to keep the cache
+                 * up to date, just less frequently?
+                 */
+                uint32_t rcpi;
+
+                if (sl_wfx_get_signal_strength(&rcpi) == SL_STATUS_OK) {
+                    int8_t rssi = ((int) rcpi - 220) / 2;
+                    update_ap_rssi(connected_ap, rssi);
+                    //rtos_printf("Current signal strength of " HWADDR_FMT " is %d dBm\n", HWADDR_ARG(connected_ap->bssid), connected_ap->rssi);
+                }
             }
         }
 
+        if (mode == WIFI_CONN_MGR_MODE_SOFT_AP) {
+
+            if (!WIFI_IsConnected()) {
+
+                soft_ap_params.pcSSID = soft_ap_ssid;
+                soft_ap_params.pcPassword = soft_ap_password;
+                soft_ap_params.ucSSIDLength = strnlen(soft_ap_ssid, wificonfigMAX_SSID_LEN);
+                soft_ap_params.ucPasswordLength = strnlen(soft_ap_password, wificonfigMAX_PASSPHRASE_LEN);
+
+                /*
+                 * TODO: perhaps implement an algorithm to scan and then choose
+                 * the best channel between 1, 6, and 11.
+                 */
+                soft_ap_params.cChannel = 6;
+
+                if (soft_ap_params.ucPasswordLength > 0) {
+                    soft_ap_params.xSecurity = eWiFiSecurityWPA2;
+                } else {
+                    soft_ap_params.xSecurity = eWiFiSecurityOpen;
+                }
+
+                WIFI_ConfigureAP(&soft_ap_params);
+                while (WIFI_StartAP() != eWiFiSuccess) {
+                    rtos_printf("WIFI_StartAP() failed, will try again\n");
+                    vTaskDelay(pdMS_TO_TICKS(100));
+                }
+
+                /* note: It's safe to call this if the DHCP server is already started. */
+                dhcpd_start(16);
+
+                event_callback(WIFI_CONN_MGR_EVENT_SOFT_AP_STARTED, soft_ap_ssid, NULL, NULL);
+            }
+        }
 
         /*
          * TODO: Get rid of the magic number timeout
@@ -543,30 +629,51 @@ static void wifi_conn_mgr(void *arg)
                 }
                 connected_ap = NULL;
             } else {
+                if (bits & NOTIFY_WIFI_PROFILES_UPDATED_BM) {
+                    reset_scan_search_list_and_ap_cache(&scan_list);
+                }
                 if (bits & NOTIFY_NETWORK_DOWN_BM) {
-                    if (WIFI_IsConnected()) {
-                        /*
-                         * It is likely from the disconnect event
-                         * before a successful reconnection.
-                         */
-                        if (!initiate_disconnect) {
-                            rtos_printf("Unexpected superfluous WiFi disconnect event, ignoring\n");
+                    if (mode == WIFI_CONN_MGR_MODE_STATION) {
+                        if (WIFI_IsConnected()) {
+                            /*
+                             * It is likely from the disconnect event
+                             * before a successful reconnection.
+                             */
+                            if (!initiate_disconnect) {
+                                rtos_printf("Unexpected superfluous WiFi disconnect event, ignoring\n");
+                            } else {
+                                rtos_printf("Superfluous WiFi disconnect event, ignoring\n");
+                            }
                         } else {
-                            rtos_printf("Superfluous WiFi disconnect event, ignoring\n");
-                        }
-                    } else {
-                        if (initiate_disconnect) {
-                            /* A reconnection failed. Wait before retrying. */
-                            rtos_printf("Reconnection failed? Will wait before retrying.\n");
-                            vTaskDelay(pdMS_TO_TICKS(5000));
-                        }
-                        rtos_printf("Disconnecting from the WiFi\n");
+                            if (initiate_disconnect) {
+                                /* A reconnection failed. Wait before retrying. */
+                                rtos_printf("Reconnection failed? Will wait before retrying.\n");
+                                vTaskDelay(pdMS_TO_TICKS(5000));
+                            } else {
+                                mode = event_callback(WIFI_CONN_MGR_EVENT_DISCONNECTED, connected_ap != NULL ? connected_ap->associated_profile->cSSID : NULL, soft_ap_ssid, soft_ap_password);
+                            }
 
-                        /*
-                         * Ensure the connected AP is NULL so
-                         * that a reconnection is attempted.
-                         */
-                        connected_ap = NULL;
+                            /*
+                             * Ensure the connected AP is NULL so
+                             * that a reconnection is attempted.
+                             */
+                            connected_ap = NULL;
+                        }
+                    } else if (mode == WIFI_CONN_MGR_MODE_SOFT_AP) {
+                        if (!WIFI_IsConnected()) {
+                            mode = event_callback(WIFI_CONN_MGR_EVENT_SOFT_AP_STOPPED, soft_ap_ssid, soft_ap_ssid, soft_ap_password);
+                            if (mode != WIFI_CONN_MGR_MODE_SOFT_AP) {
+                                dhcpd_stop(16);
+
+                                /*
+                                 * Ensure the connected AP is NULL so
+                                 * that a reconnection is attempted.
+                                 */
+                                connected_ap = NULL;
+                            }
+                        } else {
+                            rtos_printf("Unexpected superfluous WiFi disconnect event, ignoring\n");
+                        }
                     }
                 }
             }

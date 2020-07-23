@@ -243,7 +243,7 @@ WIFIReturnCode_t WIFI_Disconnect( void )
                      * sync with the device. Reset it to get back to a known state.
                      */
                     WIFI_Reset();
-                    ret = eWiFiFailure;
+                    ret = eWiFiTimeout;
                 }
             }
             else
@@ -314,12 +314,13 @@ void sl_wfx_connect_callback( uint8_t *mac, sl_wfx_fmac_status_t status )
         if( ( bits & SL_WFX_CONNECT ) != 0 )
         {
             /*
+             * This can happen if an autonomous roaming connection attempt fails.
+             *
              * The module was already connected, but now it is not. This means that
              * WIFI_ConnectAP() is likely not waiting, since it ensures that the
              * module is disconnected first if the connect flag was already set,
              * thus ensuring it is cleared. Bring the FreeRTOS TCP stack down, which
-             * will likely cause the application to attempt to reconnect, which will
-             * call WIFI_Disconnect() first.
+             * will likely cause the application to attempt to reconnect.
              */
             rtos_printf("Bringing the FreeRTOS network down\n");
             FreeRTOS_NetworkDown();
@@ -432,7 +433,9 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
                                                pxNetworkParams->cChannel,
                                                security,
                                                prevent_roaming,
-                                               WFM_MGMT_FRAME_PROTECTION_OPTIONAL,
+                                               /* enable management frame protection if WPA */
+                                               security == WFM_SECURITY_MODE_WPA2_PSK ||
+                                               security == WFM_SECURITY_MODE_WPA2_WPA1_PSK ? WFM_MGMT_FRAME_PROTECTION_OPTIONAL : WFM_MGMT_FRAME_PROTECTION_DISABLED,
                                                ( const uint8_t * ) pxNetworkParams->pcPassword,
                                                pxNetworkParams->ucPasswordLength,
                                                NULL,
@@ -457,7 +460,7 @@ WIFIReturnCode_t WIFI_ConnectAP( const WIFINetworkParams_t * const pxNetworkPara
                          */
                         WIFI_Reset();
                     }
-                    ret = eWiFiFailure;
+                    ret = eWiFiTimeout;
                 }
             }
             else
@@ -986,14 +989,35 @@ void sl_wfx_start_ap_callback(sl_wfx_fmac_status_t status)
 {
     if( status == WFM_STATUS_SUCCESS )
     {
-        sl_wfx_host_log( "AP started\n" );
+        sl_wfx_host_log( "SoftAP started\n" );
         sl_wfx_context->state |= SL_WFX_AP_INTERFACE_UP;
         xEventGroupSetBits( sl_wfx_event_group, SL_WFX_START_AP );
+        xEventGroupClearBits( sl_wfx_event_group, SL_WFX_STOP_AP );
     }
     else
     {
+        EventBits_t bits;
+
         sl_wfx_host_log( "AP start failed\n" );
         sl_wfx_context->state &= ~SL_WFX_AP_INTERFACE_UP;
+
+        bits = xEventGroupClearBits( sl_wfx_event_group, SL_WFX_START_AP );
+        if( ( bits & SL_WFX_START_AP ) != 0 )
+        {
+            /*
+             * This is not supposed to be able to happen, but handling the case
+             * just in case.
+             *
+             * The module had already started a soft AP, but now it has stopped.
+             * This means that WIFI_StartAP() is likely not waiting, since it ensures
+             * that the soft AP is stopped first if the start AP flag was already set,
+             * thus ensuring it is cleared. Bring the FreeRTOS TCP stack down, which
+             * will likely cause the application to attempt to restart the soft AP.
+             */
+            rtos_printf("Bringing the FreeRTOS network down\n");
+            FreeRTOS_NetworkDown();
+        }
+
         xEventGroupSetBits( sl_wfx_event_group, SL_WFX_START_AP_FAIL );
     }
 }
@@ -1018,7 +1042,10 @@ WIFIReturnCode_t WIFI_StartAP( void )
 
         if( ret == eWiFiSuccess )
         {
-            ret = WIFI_StopAP();
+            if( ( xEventGroupGetBits( sl_wfx_event_group ) & SL_WFX_START_AP ) != 0 )
+            {
+                ret = WIFI_StopAP();
+            }
         }
 
         if( ret == eWiFiSuccess )
@@ -1038,10 +1065,9 @@ WIFIReturnCode_t WIFI_StartAP( void )
                                               0, /* SSID is not hidden */
                                               0, /* Don't isolate clients */
                                               wifi_ap_settings.security,
-                                              ///* enable management frame protection if WPA */
-                                              //wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_PSK ||
-                                              //wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_WPA1_PSK ? 1 : 0,
-                                              WFM_MGMT_FRAME_PROTECTION_OPTIONAL,
+                                              /* enable management frame protection if WPA */
+                                              wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_PSK ||
+                                              wifi_ap_settings.security == WFM_SECURITY_MODE_WPA2_WPA1_PSK ? WFM_MGMT_FRAME_PROTECTION_OPTIONAL : WFM_MGMT_FRAME_PROTECTION_DISABLED,
                                               wifi_ap_settings.password,
                                               wifi_ap_settings.password_length,
                                               NULL, /* No vendor specific beacon data */
@@ -1067,7 +1093,7 @@ WIFIReturnCode_t WIFI_StartAP( void )
                          */
                         WIFI_Reset();
                     }
-                    ret = eWiFiFailure;
+                    ret = eWiFiTimeout;
                 }
             }
             else
@@ -1088,12 +1114,13 @@ WIFIReturnCode_t WIFI_StartAP( void )
 
 void sl_wfx_stop_ap_callback(void)
 {
+    EventBits_t bits;
     sl_wfx_host_log( "SoftAP stopped\n" );
     sl_wfx_context->state &= ~SL_WFX_AP_INTERFACE_UP;
-    xEventGroupClearBits( sl_wfx_event_group, SL_WFX_START_AP );
+    bits = xEventGroupClearBits( sl_wfx_event_group, SL_WFX_START_AP );
     xEventGroupSetBits( sl_wfx_event_group, SL_WFX_STOP_AP );
 
-    if( FreeRTOS_IsNetworkUp() != pdFALSE )
+    if( ( bits & SL_WFX_START_AP ) != 0 )
     {
         rtos_printf("Bringing the FreeRTOS network down\n");
         FreeRTOS_NetworkDown();
@@ -1108,7 +1135,7 @@ WIFIReturnCode_t WIFI_StopAP( void )
     ret = WIFI_GetLock();
     if( ret == eWiFiSuccess )
     {
-        if( sl_wfx_context->state & SL_WFX_AP_INTERFACE_UP )
+        if( ( xEventGroupGetBits( sl_wfx_event_group ) & SL_WFX_START_AP ) != 0 )
         {
             sl_status_t sl_ret;
 
@@ -1129,7 +1156,7 @@ WIFIReturnCode_t WIFI_StopAP( void )
                      * sync with the device. Reset it to get back to a known state.
                      */
                     WIFI_Reset();
-                    ret = eWiFiFailure;
+                    ret = eWiFiTimeout;
                 }
             }
             else
