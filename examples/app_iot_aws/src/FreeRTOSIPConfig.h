@@ -49,10 +49,6 @@
 #define IPconfig_IP_ADDR_OCTET_1    0
 #define IPconfig_IP_ADDR_OCTET_2    0
 #define IPconfig_IP_ADDR_OCTET_3    1
-//#define IPconfig_IP_ADDR_OCTET_0     10
-//#define IPconfig_IP_ADDR_OCTET_1    129
-//#define IPconfig_IP_ADDR_OCTET_2     20
-//#define IPconfig_IP_ADDR_OCTET_3     29
 
 #define IPconfig_NET_MASK_OCTET_0   255
 #define IPconfig_NET_MASK_OCTET_1     0
