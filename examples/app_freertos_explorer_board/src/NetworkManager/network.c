@@ -4,9 +4,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "timers.h"
 
 /* FreeRTOS Plus headers */
 #include "FreeRTOS_IP.h"
+#include "FreeRTOS_IP_Private.h"
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
@@ -28,9 +30,12 @@
 static FIL wf200_fw_file;
 static uint32_t wf200_fw_size;
 
+#define ALTERNATE_MODES 0
+#define ALTERNATE_TIME pdMS_TO_TICKS(10000)
+
 uint32_t sl_wfx_app_fw_size(void)
 {
-	FRESULT result;
+	FRESULT result = FR_OK;
 
 	if (wf200_fw_file.obj.fs == NULL) {
 		rtos_printf("Opening WF200 firmware file\n");
@@ -50,7 +55,7 @@ uint32_t sl_wfx_app_fw_size(void)
 sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
 {
 	FRESULT result;
-	uint32_t bytes_read = 0;
+	UINT bytes_read = 0;
 
 	if (wf200_fw_file.obj.fs != NULL) {
 		result = f_read(&wf200_fw_file, data, size, &bytes_read);
@@ -114,6 +119,83 @@ void initalize_FreeRTOS_IP( void )
         ucMACAddress );
 }
 
+#define SOFT_AP_SSID "xcore.ai"
+#define SOFT_AP_PASSWORD ""
+
+#if ALTERNATE_MODES
+
+TimerHandle_t ap_timer;
+
+static int ap;
+
+void timer_cb(TimerHandle_t t)
+{
+    if (ap) {
+        wifi_conn_mgr_stop_soft_ap(0);
+    } else {
+        wifi_conn_mgr_disconnect_from_ap(0);
+    }
+}
+
+#endif
+
+int wifi_conn_mgr_event_cb(int event, char *ssid, char *password)
+{
+    switch (event) {
+    case WIFI_CONN_MGR_EVENT_STARTUP:
+        rtos_printf("Directing WiFi manager to go into station mode\n");
+
+        return WIFI_CONN_MGR_MODE_STATION;
+
+    case WIFI_CONN_MGR_EVENT_CONNECT_FAILED:
+        rtos_printf("Directing WiFi manager to start a soft AP\n");
+
+        strcpy(ssid, SOFT_AP_SSID);
+        strcpy(password, SOFT_AP_PASSWORD);
+        return WIFI_CONN_MGR_MODE_SOFT_AP;
+
+    case WIFI_CONN_MGR_EVENT_CONNECTED:
+        rtos_printf("Connected to %s\n", ssid);
+
+#if ALTERNATE_MODES
+        ap = 0;
+        xTimerStart(ap_timer, 0);
+#endif
+
+        return WIFI_CONN_MGR_MODE_STATION; /* this is ignored */
+
+    case WIFI_CONN_MGR_EVENT_DISCONNECTED:
+        if (ssid[0] != '\0') {
+            rtos_printf("Disconnected from %s\n", ssid);
+        } else {
+            rtos_printf("Disconnected from AP\n");
+        }
+#if ALTERNATE_MODES
+        strcpy(ssid, SOFT_AP_SSID);
+        strcpy(password, SOFT_AP_PASSWORD);
+        return WIFI_CONN_MGR_MODE_SOFT_AP;
+#else
+        return WIFI_CONN_MGR_MODE_STATION;
+#endif
+
+    case WIFI_CONN_MGR_EVENT_SOFT_AP_STARTED:
+        rtos_printf("Soft AP %s started\n", ssid);
+#if ALTERNATE_MODES
+        ap = 1;
+        xTimerStart(ap_timer, 0);
+#endif
+        return WIFI_CONN_MGR_MODE_SOFT_AP; /* this is ignored */
+
+    case WIFI_CONN_MGR_EVENT_SOFT_AP_STOPPED:
+        rtos_printf("Soft AP %s stopped. Going into station mode\n", ssid);
+
+        return WIFI_CONN_MGR_MODE_STATION;
+
+    default:
+        return WIFI_CONN_MGR_MODE_STATION;
+    }
+}
+
 void initalize_wifi( void )
 {
     soc_peripheral_t dev;
@@ -127,6 +209,14 @@ void initalize_wifi( void )
             0);
 
     initalize_FreeRTOS_IP();
+
+#if ALTERNATE_MODES
+    ap_timer = xTimerCreate("soft_ap_timer",
+            ALTERNATE_TIME,
+            pdFALSE,
+            NULL,
+            timer_cb);
+#endif
 
     wifi_conn_mgr_start();
 }
