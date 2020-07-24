@@ -5,7 +5,8 @@ Combined with Alexa Voice Service (AVS) and AWS Lambda, this demo allows you to 
 
 To find out more, visit:
 - [IoT Core](https://docs.aws.amazon.com/iot/?id=docs_gateway)
-<!---TODO, add link to AVS custom skill, IOT Core, Lambda--->
+- [Lambda](https://docs.aws.amazon.com/lambda/?id=docs_gateway)
+- [Alexa Skills Kit](https://developer.amazon.com/en-US/docs/alexa/ask-overviews/build-skills-with-the-alexa-skills-kit.html)
 
 ## Prerequisites
 This document assumes familiarity with the XMOS xCORE architecture, FreeRTOS, MQTT, TLS, and the xC language.
@@ -29,18 +30,20 @@ In this section, we will set up the device credentials and security policies.  F
 3. Create a new policy, with a name of your choosing and the following parameters:
 > Action: iot:* <br/>
 > Resource: * <br/>
+> Effect: Allow <br/>
 
     *Note: This policy should NOT be used outside of this demo.  Refer to [AWS documentation](https://docs.aws.amazon.com/iot/latest/developerguide/iot-policies.html) to setup policies where devices have appropriate access.*
 4. In the navigation pane, expand **Manage** and select **Things**.
-5. Create a new single Thing and generate one click credentials.  Download the thing certificate, private key, and CA certificate as you will need them later.  Refer to [AWS documentation](https://docs.aws.amazon.com/iot/latest/developerguide/server-authentication.html?icmpid=docs_iot_console#server-authentication-certs) if unsure which CA to download.  Activate the certificate when prompted.  Attach the policy created in step 3 and register the new Thing.
-6. In the navigation pane, select **Settings** and take note of your endpoint URL.
+5. Create a new single Thing and provide a name.  Type, Group, and attributes are not required.  Press **Next**.
+6. Press **Create certificate** in the generate **One-click certificate creation** section.  Download the thing certificate, private key, and CA certificate as you will need them later.  Refer to [AWS documentation](https://docs.aws.amazon.com/iot/latest/developerguide/server-authentication.html?icmpid=docs_iot_console#server-authentication-certs) if unsure which CA to download.  Activate the certificate when prompted.  Attach the policy created in step 3 and register the new Thing.
+7. In the navigation pane, select **Settings** and take note of your endpoint URL.
 > [*prefix*].iot.[*endpoint location*].amazonaws.com
 
 #### Lambda Function setup
 In this section, we will set up a Lambda function to bridge the gap between AVS and AWS IoT Core.
 1. Sign in to the [Lambda console](https://console.aws.amazon.com/lambda/home) with your developer account credentials.
 2. In the navigation pane, select **Functions**.
-3. Select **Create function** and create a new function using **Author from scratch**, desired runtime, Node.js 12.x in this example, and select **Create a new role with basic Lambda permissions**.
+3. Select **Create function** and create a new function using **Author from scratch**, desired runtime, Node.js 10.x in this example, and select **Create a new role with basic Lambda permissions**.
 4. Select the **Permissions** tab and click the link to the role created in the **Execution role** section.  This will open up the IAM management console.
 5. In the **Permissions** tab under **Permissions policies** press **Attach policies**.  Search for AWSIoTFullAccess and attach this policy.
 
@@ -58,7 +61,7 @@ Please proceed to the Alexa Skill Setup section, as you will need to create a ne
 
     ```var APP_ID = 'amzn1.ask.skill.[your skill id]]';```
 
-10. Copy the Lambda function ARN, which should be located at the top right.  It will be of the format:
+11. Copy the Lambda function ARN, which should be located at the top right.  It will be of the format:
 
     ```arn:aws:lambda:[region]:[idnumber]:function:[function name]]```
 
@@ -81,11 +84,11 @@ Return back to the Lambda setup section, starting at step 9.
 In this section, we will verify the AVS to IoT Core setup.
 1. Sign in to the [IoT Core console](https://console.aws.amazon.com/iot/home) with your developer account credentials.
 2. In the navigation pane, select **Test**.
-3. Set the **Subscription topic** to ```explorer/ledctrl``` and press **Subscribe to topic**.
-4. Sign in to the [AVS console](https://developer.amazon.com/alexa/console/ask) with your developer account credentials.
+3. Set the **Subscription topic** to ```explorer/ledctrl``` and press **Subscribe to topic**.  Keep this window open, as you will be referencing it later to verify the Alexa skill and Lambda functionality.
+4. Sign in to the [AVS console](https://developer.amazon.com/alexa/console/ask) with your developer account credentials, and open your skill.
 5. In the top navigation pane, select **Test**.
 6. In the **Skill testing is enabled in** dropdown, select **Development**.
-7. From here you can type or use a microphone.  Submit the query ```"Alexa open x. core a. i."```.  Alexa should respond with ```"Hello. How may I help you? "```.  From here you can request things like ```"Turn on led zero"```, ```"Turn off led two"```, etc.  In the IoT Core Console you should see the MQTT messages, such as:
+7. From here you can type or use a microphone.  Submit the query ```"Alexa open x. core a. i."```.  Alexa should respond with ```"Hello. How may I help you? "```.  From here you can request things like ```"Turn on led zero"```, ```"Turn off led two"```, etc.  In the IoT Core Console window, opened in step 3, you should see the MQTT messages, such as:
 ```
 {
       "LED": "0",
@@ -104,9 +107,11 @@ In this section, we will configure the demo software to connect to the proper MQ
 This will create the app_iot_aws.xe binary in the bin folder.
 4. Before the application can be run, the flash must be populated with a filesystem containing the crypto credentials for TLS and the WiFi connection details.  From the example application root directory, go to filesystem_support.  Paste the certificates and keys downloaded in the **IoT Core** setup of your **Thing** into the ```aws``` folder.  Rename the CA certificate file ```ca.pem``` , the device certificate file ```client.pem```, and the device private key file ```client.key```.  Run the Python script wifi_profile.py to create the WiFi configuration file.
 5. With the development board and xTag connected, run the flash_image.sh bash script.  This will create a filesystem and flash it to the device.
+    *Note: This script requires sudo, as it mounts and unmounts a disk.*
+
 
 ## Running the Demo
-To run the demo use the command:
+To run the demo navigate to the bin folder and use the command:
 
 ```xrun app_iot_aws.xe```
 

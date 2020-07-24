@@ -13,19 +13,19 @@
 #endif
 
 #ifndef FS_SUP_SUCCESS
-#define FS_SUP_SUCCESS
+#define FS_SUP_SUCCESS		(1)
 #endif
 
 #ifndef FS_SUP_FAIL
-#define FS_SUP_SUCCESS
+#define FS_SUP_FAIL			(0)
 #endif
 
 #ifndef FS_SUP_MALLOC
-#define FS_SUP_MALLOC
+#define FS_SUP_MALLOC		malloc
 #endif
 
 #ifndef FS_SUP_FREE
-#define FS_SUP_FREE
+#define FS_SUP_FREE			free
 #endif
 
 int get_file(const char* filename, FIL* outfile, unsigned int* len )

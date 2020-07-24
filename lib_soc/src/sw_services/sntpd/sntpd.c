@@ -112,11 +112,16 @@ static void sntpd_task( void *args )
 			vTaskDelay( pdMS_TO_TICKS(100) );
 		}
 
+#if( SNTPD_USER_TIME_SERVER == 0 )
 		/* Search default list, use first server resolved */
 		for( int i=0; i<(sizeof( default_time_servers ) / sizeof( default_time_servers[0] )); i++ )
 		{
 			ip = FreeRTOS_gethostbyname( default_time_servers[i] );
-
+#else
+		for( int i=0; i<(sizeof( user_time_servers ) / sizeof( user_time_servers[0] )); i++ )
+		{
+			ip = FreeRTOS_gethostbyname( user_time_servers[i] );
+#endif
 //			char buf[16];
 //			FreeRTOS_inet_ntoa( ip, buf );
 //			rtos_printf( "%s is %s\n", default_time_servers[i], buf );

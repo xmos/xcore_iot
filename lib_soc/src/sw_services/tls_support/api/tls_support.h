@@ -20,7 +20,7 @@ void tls_platform_free( void );
 /**
  *  Check if the TLS platform is ready to use
  *
- *  \return		 1 if ready
+ *  \returns	 1 if ready
  *  			 0 otherwise
  */
 int tls_platform_ready( void );

@@ -27,12 +27,17 @@
 #define SNTPD_RESET_AFTER_X_FAILURES 10
 #endif
 
+/* User may provide time servers list by defining SNTPD_USER_TIME_SERVER
+ * and providing a list of time servers */
+#ifndef SNTPD_USER_TIME_SERVER
+#define	SNTPD_USER_TIME_SERVER 0
 static const char* default_time_servers[] = {
 	"0.pool.ntp.org",
 	"1.pool.ntp.org",
 	"2.pool.ntp.org",
 	"3.pool.ntp.org"
 };
+#endif
 
 #define EPOCH ( 2208988800UL )
 
@@ -176,10 +181,17 @@ static const char* default_time_servers[] = {
  * of RFC 1305.
  */
 
-/* Create SNTP task to update rtos_clock */
+/**
+ * Create SNTP task to update rtos_clock
+ */
 void sntp_create( UBaseType_t priority );
 
-/* Check if time has been synced since last power cycle */
+/**
+ *  Check if time has been synced since last power cycle
+ *
+ *  \returns	 1 if sync has occurred
+ *  			 0 otherwise
+ */
 int is_time_synced( void );
 
 #endif /* SRC_SNTPD_SNTPD_H_ */
