@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "-Os")
 set(LIB_XC_SRCS
         "lib_otpinfo/lib_otpinfo/src/otp_board_info.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         ""
     )

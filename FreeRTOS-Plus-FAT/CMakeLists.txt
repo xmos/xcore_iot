@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "-Os")
 set(LIB_XC_SRCS
         ""
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         "Lab-Project-FreeRTOS-FAT/ff_crc.c"
         #"ff_dev_support.c"

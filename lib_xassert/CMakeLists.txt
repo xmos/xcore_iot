@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "")
 set(LIB_XC_SRCS
         "lib_xassert/lib_xassert/src/xassert.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         ""
     )

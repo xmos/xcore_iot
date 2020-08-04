@@ -51,6 +51,9 @@ set(LIB_XC_SRCS
         "lib_ethernet/lib_ethernet/src/server_state.xc"
         "lib_ethernet/lib_ethernet/src/smi.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         "lib_ethernet/lib_ethernet/src/mii_buffering.c"
         "lib_ethernet/lib_ethernet/src/mii_ts_queue.c"

@@ -43,6 +43,9 @@ set(LIB_XC_SRCS
         "lib_mic_array/lib_mic_array/src/fir/fir_coefs.xc"
         "lib_mic_array/lib_mic_array/src/fir/fir_coefs_dual.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         ""
     )

@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "")
 set(LIB_XC_SRCS
         ""
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         "lib_locks/lib_locks/src/hwlock.c"
         "lib_locks/lib_locks/src/swlock.c"

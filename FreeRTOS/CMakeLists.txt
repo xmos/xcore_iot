@@ -56,6 +56,9 @@ set(LIB_XC_SRCS
         ""
     )
 endif()
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         "croutine.c"
         "event_groups.c"

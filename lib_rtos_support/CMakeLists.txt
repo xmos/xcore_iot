@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "")
 set(LIB_XC_SRCS
         ""
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         "src/rtos_cores.c"
         "src/rtos_irq.c"

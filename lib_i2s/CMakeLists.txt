@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "-O3")
 set(LIB_XC_SRCS
         "lib_i2s/lib_i2s/src/i2s_dummy_impl.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         ""
     )

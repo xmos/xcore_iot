@@ -47,6 +47,9 @@ set(LIB_XC_SRCS
         "lib_dsp/lib_dsp/src/float/floating_fft.xc"
         "lib_dsp/lib_dsp/src/testing/crc32_c.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         "lib_dsp/lib_dsp/src/dsp_adaptive.c"
         "lib_dsp/lib_dsp/src/dsp_design.c"

@@ -40,6 +40,9 @@ set(LIB_XC_SRCS
         "lib_sdram/lib_sdram/src/memory_address_allocator.xc"
         "lib_sdram/lib_sdram/src/server.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         ""
     )

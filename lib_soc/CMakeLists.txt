@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "-Os")
 set(LIB_XC_SRCS
         "src/framework/multitile_main.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         "src/framework/dma_ring_buf.c"
         "src/framework/intertile_channel.c"

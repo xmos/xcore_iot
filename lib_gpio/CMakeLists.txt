@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "-O3")
 set(LIB_XC_SRCS
         "lib_gpio/lib_gpio/src/gpio.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         ""
     )

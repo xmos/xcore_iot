@@ -38,6 +38,9 @@ set(LIB_ADD_COMPILER_FLAGS "-Os")
 set(LIB_XC_SRCS
         ""
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_FAT_Demos/CreateAndVerifyExampleFiles.c"
         "FreeRTOS-Plus/FreeRTOS/FreeRTOS-Labs/Demo/Common/FreeRTOS_Plus_FAT_Demos/test/ff_stdio_tests_with_cwd.c"

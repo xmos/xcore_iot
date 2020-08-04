@@ -42,6 +42,9 @@ set(LIB_XC_SRCS
         "lib_i2c/lib_i2c/src/i2c_master_single_port.xc"
         "lib_i2c/lib_i2c/src/i2c_slave.xc"
     )
+set(LIB_CXX_SRCS
+        ""
+    )
 set(LIB_C_SRCS
         ""
     )
