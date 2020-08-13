@@ -2,6 +2,8 @@ set(DEVICE_NAME LIB_SOC_ETHERNET)
 set(DEVICE_ADD_COMPILER_FLAGS "")
 set(DEVICE_XC_SRCS
         "src/peripherals/bitstream/ethernet_dev/eth_dev.xc")
+set(DEVICE_CXX_SRCS
+        "")
 set(DEVICE_C_SRCS
         "")
 set(DEVICE_ASM_SRCS

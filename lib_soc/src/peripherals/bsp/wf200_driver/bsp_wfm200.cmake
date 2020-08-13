@@ -2,6 +2,8 @@ set(DEVICE_NAME LIB_SOC_WFM200)
 set(DEVICE_ADD_COMPILER_FLAGS "-USL_WFX_USE_SECURE_LINK")
 set(DEVICE_XC_SRCS
         "")
+set(DEVICE_CXX_SRCS
+        "")
 set(DEVICE_C_SRCS
         "src/peripherals/bsp/wf200_driver/freertos/sl_wfx_host.c"
         "src/peripherals/bsp/wf200_driver/freertos/sl_wfx_host_spi.c"

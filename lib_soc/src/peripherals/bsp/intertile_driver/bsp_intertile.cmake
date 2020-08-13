@@ -2,6 +2,8 @@ set(DEVICE_NAME LIB_SOC_INTERTILE)
 set(DEVICE_ADD_COMPILER_FLAGS "")
 set(DEVICE_XC_SRCS
         "")
+set(DEVICE_CXX_SRCS
+        "")
 set(DEVICE_C_SRCS
         "src/peripherals/bsp/intertile_driver/intertile_driver.c")
 set(DEVICE_ASM_SRCS

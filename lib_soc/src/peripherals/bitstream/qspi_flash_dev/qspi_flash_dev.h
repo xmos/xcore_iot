@@ -26,6 +26,17 @@ void qspi_flash_dev(
 		const flash_clock_config_t *flash_clock_config,
 		const flash_qe_config_t    *flash_qe_config);
 
+void qspi_flash_swmem_dev(
+        soc_peripheral_t peripheral,
+		chanend data_to_dma_c,
+        chanend data_from_dma_c,
+		chanend ctrl_c,
+		chanend ctrl_swmem_c,
+		int page_count,
+		const flash_ports_t        *flash_ports,
+		const flash_clock_config_t *flash_clock_config,
+		const flash_qe_config_t    *flash_qe_config);
+
 #ifdef __XC__
 }
 #endif //__XC__

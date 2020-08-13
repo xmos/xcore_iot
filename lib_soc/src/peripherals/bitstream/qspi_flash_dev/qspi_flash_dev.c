@@ -402,3 +402,179 @@ void qspi_flash_dev(
 		}
     }
 }
+
+#include <xcore/swmem_fill.h>
+#include <xcore/thread.h>
+
+__attribute__((aligned(8))) static char swmem_handler_stack[1024];
+static flash_handle_t flash_handle;
+static swmem_fill_t swmem_fill_handle;
+
+
+static void swmem_handler(void *ignored) {
+  swmem_fill_buffer_t buf;
+  unsigned int *buf_ptr = (unsigned int *)buf;
+  fill_slot_t address = 0;
+  rtos_printf("spawn swmem handler\n");
+  while (1) {
+    address = swmem_fill_in_address(swmem_fill_handle);
+    rtos_printf("addr %d\n", address);
+    flash_read_quad(&flash_handle, (address - (void *)XS1_SWMEM_BASE) >> 2,
+                    buf_ptr, SWMEM_FILL_SIZE_WORDS);
+    swmem_fill_populate_from_buffer(swmem_fill_handle, address, buf);
+  }
+}
+
+void qspi_flash_swmem_dev(
+        soc_peripheral_t peripheral,
+		chanend data_to_dma_c,
+        chanend data_from_dma_c,
+		chanend ctrl_c,
+		chanend ctrl_swmem_c,
+		int page_count,
+		const flash_ports_t        *flash_ports,
+		const flash_clock_config_t *flash_clock_config,
+		const flash_qe_config_t    *flash_qe_config)
+{
+	uint8_t *return_buf;
+    uint32_t cmd;
+    recv_buf_t buf;
+    int len;
+
+    flash_size_bytes = page_size * page_count;
+    flash_size_words = BYTES_TO_WORDS(flash_size_bytes);
+
+    flash_connect(&flash_handle, flash_ports, *flash_clock_config, *flash_qe_config);
+
+    /*
+     * Ensure that the quad spi flash is in quad mode
+     */
+    if (!is_quad_mode_enabled(&flash_handle, flash_qe_config)) {
+        rtos_printf("quad mode not enabled!\n");
+        enable_quad_mode(&flash_handle, flash_qe_config);
+        xassert(is_quad_mode_enabled(&flash_handle, flash_qe_config));
+        rtos_printf("quad mode enabled!\n");
+    } else {
+        rtos_printf("quad mode already enabled!\n");
+    }
+
+    triggerable_disable_all();
+
+    if (data_from_dma_c != 0) {
+    	TRIGGERABLE_SETUP_EVENT_VECTOR(data_from_dma_c, event_data_from_dma);
+    	triggerable_enable_trigger(data_from_dma_c);
+    }
+    if (ctrl_c != 0) {
+    	TRIGGERABLE_SETUP_EVENT_VECTOR(ctrl_c, event_ctrl);
+    	triggerable_enable_trigger(ctrl_c);
+    }
+    if (ctrl_swmem_c != 0) {
+    	TRIGGERABLE_SETUP_EVENT_VECTOR(ctrl_swmem_c, swmem_event_ctrl);
+    	triggerable_enable_trigger(ctrl_swmem_c);
+    }
+
+    for (;;) {
+
+		if (peripheral != NULL) {
+			if ((len = soc_peripheral_rx_dma_direct_xfer(peripheral, &buf, sizeof(buf))) >= 0) {
+
+				return_buf = handle_op_request(&flash_handle, &buf, len);
+				if (return_buf != NULL) {
+					rtos_printf("Reply directly with read data now\n");
+					soc_peripheral_tx_dma_direct_xfer(peripheral, return_buf, buf.cmd.byte_count);
+				}
+			}
+		}
+
+		TRIGGERABLE_WAIT_EVENT(event_ctrl, event_data_from_dma, swmem_event_ctrl);
+
+		swmem_event_ctrl: {
+            soc_peripheral_function_code_rx(ctrl_swmem_c, &cmd);
+            //soc_peripheral_function_code_rx_non_rtos(ctrl_swmem_c, &cmd);
+			switch( cmd ) {
+			case QSPI_DEV_SWMEM_SETUP: /* Setup */
+				rtos_printf( "SWMem setup\n" );
+                swmem_fill_handle = swmem_fill_get();
+                soc_peripheral_varlist_tx(ctrl_swmem_c, 1,
+                                          sizeof(swmem_fill_t), &swmem_fill_handle);
+
+                run_async(swmem_handler, NULL, stack_base(swmem_handler_stack, 16));
+
+  				rtos_printf( "SWMem setup done\n" );
+				break;
+
+			case QSPI_DEV_SWMEM_READ: /* Read */
+				rtos_printf( "SWMem read\n" );
+                uintptr_t adr;
+                size_t size;
+                qspi_flash_dev_cmd_t flash_cmd;
+                recv_buf_t recv_buf;
+
+                soc_peripheral_varlist_rx(ctrl_swmem_c, 3,
+                                          sizeof(swmem_fill_t), &swmem_fill_handle,
+                                          sizeof(uintptr_t), &adr,
+                                          sizeof(size_t), &size);
+
+                flash_cmd.operation = qspi_flash_dev_op_read;
+                flash_cmd.byte_address = adr;
+                flash_cmd.byte_count = size;
+
+                recv_buf.cmd = flash_cmd;
+                recv_buf.byte_buf;
+
+      			return_buf = handle_op_request(&flash_handle, &recv_buf, sizeof(recv_buf.cmd));
+                soc_peripheral_varlist_tx(ctrl_swmem_c, 1,
+                                          size, return_buf);
+				break;
+
+            case QSPI_DEV_SWMEM_FILL: /* Fill */
+				rtos_printf( "SWMem break\n" );
+                break;
+
+			case QSPI_DEV_SWMEM_WRITE: /* Write */
+				rtos_printf( "SWMem write\n" );
+				break;
+
+			case QSPI_DEV_SWMEM_DESTROY: /* Destroy */
+				rtos_printf( "SWMem destroy\n" );
+				break;
+
+			default:
+				rtos_printf( "Invalid SWMEM CMD: %d\n", cmd );
+				break;
+			}
+			continue;
+		}
+
+		event_ctrl: {
+			soc_peripheral_function_code_rx(ctrl_c, &cmd);
+			switch( cmd ) {
+			case SOC_PERIPHERAL_DMA_TX:
+				/*
+				 * The application has added a new DMA TX buffer. This
+				 * ensures that this select statement wakes up and gets
+				 * the TX data in the code above.
+				 */
+				break;
+
+			default:
+				rtos_printf( "Invalid CMD\n" );
+				break;
+			}
+			continue;
+		}
+
+		event_data_from_dma: {
+			soc_peripheral_rx_dma_ready(data_from_dma_c);
+			len = soc_peripheral_rx_dma_xfer(data_from_dma_c, &buf, sizeof(buf));
+
+			return_buf = handle_op_request(&flash_handle, &buf, len);
+			if (return_buf != NULL) {
+				rtos_printf("Reply remotely with read data now\n");
+				soc_peripheral_tx_dma_xfer(data_to_dma_c, return_buf, buf.cmd.byte_count);
+			}
+
+			continue;
+		}
+    }
+}

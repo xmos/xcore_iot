@@ -36,6 +36,9 @@ set(APP_COMPILER_FLAGS
 set(APP_XC_SRCS
         ""
     )
+set(APP_CXX_SRCS
+        ""
+)
 set(APP_C_SRCS
         "src/main.c"
         "src/audio_hw_config/audio_hw_config.c"
