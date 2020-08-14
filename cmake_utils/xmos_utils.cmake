@@ -177,7 +177,6 @@ function(XMOS_REGISTER_APP)
     foreach(target ${XMOS_TARGETS_LIST})
         target_include_directories(${target} PRIVATE ${APP_INCLUDES})
         target_compile_options(${target} BEFORE PRIVATE ${APP_COMPILE_FLAGS})
-
         add_dependencies(${TARGET_NAME} ${target})
         list(APPEND DEPS_TO_LINK ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/lib${target}.a)
     endforeach()
@@ -292,8 +291,7 @@ function(XMOS_REGISTER_MODULE)
                 endforeach()
             endif()
         endif()
-
-        target_sources(${LIB_NAME} PUBLIC ${LIB_XC_SRCS} ${LIB_CXX_SRCS} ${LIB_C_SRCS} ${LIB_ASM_SRCS})
+        target_sources(${LIB_NAME} PUBLIC ${LIB_XC_SRCS} ${LIB_CXX_SRCS} ${LIB_ASM_SRCS} ${LIB_C_SRCS})
         target_include_directories(${LIB_NAME} PRIVATE ${LIB_INCLUDES})
 
         if(DEFINED AFR_ROOT_DIR)

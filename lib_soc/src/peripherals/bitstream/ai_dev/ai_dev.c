@@ -177,7 +177,7 @@ void ai_dev(
     }
 }
 #endif
-
+#if 0
 __attribute__((weak))
 void ai_dev(
         soc_peripheral_t peripheral,
@@ -258,3 +258,4 @@ void ai_dev(
 		}
     }
 }
+#endif
