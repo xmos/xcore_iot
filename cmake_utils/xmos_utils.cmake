@@ -1,5 +1,32 @@
 cmake_minimum_required(VERSION 3.13)
 
+# Set up compiler
+set(CMAKE_SYSTEM_NAME XMOS)
+if(DEFINED XMOS_TOOLS_PATH)
+    set(CMAKE_C_COMPILER "${XMOS_TOOLS_PATH}/xcc")
+    set(CMAKE_CXX_COMPILER  "${XMOS_TOOLS_PATH}/xcc")
+    set(CMAKE_ASM_COMPILER  "${XMOS_TOOLS_PATH}/xcc")
+    set(CMAKE_AR "${XMOS_TOOLS_PATH}/xmosar")
+    #set(CMAKE_RANLIB "")
+    set(CMAKE_C_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
+    set(CMAKE_CXX_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
+    set(CMAKE_ASM_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
+else()
+    message(WARNING "XMOS_TOOLS_PATH not specified.  CMake will assume tools have been added to PATH.")
+    set(CMAKE_C_COMPILER "xcc")
+    set(CMAKE_CXX_COMPILER  "xcc")
+    set(CMAKE_ASM_COMPILER  "xcc")
+    set(CMAKE_AR "xmosar")
+    set(CMAKE_RANLIB "")
+    set(CMAKE_C_COMPILER_AR "xmosar")
+    set(CMAKE_CXX_COMPILER_AR "xmosar")
+    set(CMAKE_ASM_COMPILER_AR "xmosar")
+endif()
+
+set(CMAKE_C_COMPILER_FORCED TRUE)
+set(CMAKE_CXX_COMPILER_FORCED TRUE)
+set(CMAKE_ASM_COMPILER_FORCED TRUE)
+
 if(NOT DEFINED XMOS_MODULES_ROOT_DIR)
     message(FATAL_ERROR "XMOS_MODULES_ROOT_DIR must be set before including xmos_utils.cmake")
 endif()
@@ -29,30 +56,6 @@ else()
 endif()
 
 ## Setup at caller scope
-
-# Set up compiler
-if(DEFINED XMOS_TOOLS_PATH)
-    set(CMAKE_C_COMPILER "${XMOS_TOOLS_PATH}/xcc")
-    set(CMAKE_CXX_COMPILER  "${XMOS_TOOLS_PATH}/xcc")
-    set(CMAKE_ASM_COMPILER  "${XMOS_TOOLS_PATH}/xcc")
-    set(CMAKE_AR "${XMOS_TOOLS_PATH}/xmosar")
-    set(CMAKE_C_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
-    set(CMAKE_CXX_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
-    set(CMAKE_ASM_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
-else()
-    message(WARNING "XMOS_TOOLS_PATH not specified.  CMake will assume tools have been added to PATH.")
-    set(CMAKE_C_COMPILER "xcc")
-    set(CMAKE_CXX_COMPILER  "xcc")
-    set(CMAKE_ASM_COMPILER  "xcc")
-    set(CMAKE_AR "xmosar")
-    set(CMAKE_C_COMPILER_AR "xmosar")
-    set(CMAKE_CXX_COMPILER_AR "xmosar")
-    set(CMAKE_ASM_COMPILER_AR "xmosar")
-endif()
-
-set(CMAKE_C_COMPILER_FORCED TRUE)
-set(CMAKE_CXX_COMPILER_FORCED TRUE)
-set(CMAKE_ASM_COMPILER_FORCED TRUE)
 
 # Set up some XMOS specific variables
 set(FULL 1 )
