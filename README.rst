@@ -14,7 +14,7 @@ Example FreeRTOS applications demonstrating how to use the library can be found 
 
 All dependent libraries are included as git submodules. These can be obtained by cloning this repository with the following command::
 
-     git clone --recurse-submodules git@github.com:xmos/lib_rtos_support.git
+     git clone --recurse-submodules git@github.com:xmos/rtos_support.git
 
 Or by running the following commands inside the repository::
 
