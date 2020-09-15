@@ -16,7 +16,7 @@
 #endif
 
 #ifndef I2SCONF_FRAME_BUF_CNT
-#define I2SCONF_FRAME_BUF_CNT       (4)
+#define I2SCONF_FRAME_BUF_CNT       (2)
 #endif
 
 #ifndef I2SCONF_OFF_TILE
