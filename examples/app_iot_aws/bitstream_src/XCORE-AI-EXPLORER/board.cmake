@@ -1,6 +1,8 @@
 # Hardware configurations
 set(BOARD_COMPILE_FLAGS
         "-DXCOREAI_EXPLORER=1"
+        "-D__XS3A__=1"
+        "-D_XCORE_HAS_SWMEM"
         "-D__XS2A__=1" # Hack to get some libs to work with XS3
         "-lquadspi"
         "-mcmodel=large" # For the heap in DDR

@@ -15,10 +15,6 @@ typedef struct {
 	unsigned byte_count;
 } qspi_flash_dev_cmd_t;
 
-#define QSPI_DEV_SWMEM_SETUP      0x01
-#define QSPI_DEV_SWMEM_READ       0x02
-#define QSPI_DEV_SWMEM_WRITE      0x03
-#define QSPI_DEV_SWMEM_DESTROY    0x04
-#define QSPI_DEV_SWMEM_FILL       0x05
+#define QSPI_DEV_SWMEM_REQ      0x01
 
 #endif /* QSPI_FLASH_DEV_CTRL_H_ */

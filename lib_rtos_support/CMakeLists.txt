@@ -34,7 +34,7 @@
 
 set(LIB_NAME lib_rtos_support)
 set(LIB_VERSION 0.5.0)
-set(LIB_ADD_COMPILER_FLAGS "")
+set(LIB_ADD_COMPILER_FLAGS "-DHAS_LIB_RTOS_SUPPORT=1")
 set(LIB_XC_SRCS
         ""
     )
