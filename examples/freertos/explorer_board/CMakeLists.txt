@@ -11,7 +11,7 @@ include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_utils.cmake")
 set(XMOS_APP_MODULES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 ## Define project
-project(app_iot_aws)
+project(explorer_board)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
@@ -21,6 +21,8 @@ enable_language(C ASM)
 set(APP_COMPILER_FLAGS
         "-Os"
         "-g"
+		"-D__XS2A__=1"
+		"-DMIC_DUAL_ENABLED=1"
         "-report"
         "-fxscope"
         "-DMQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h"
@@ -40,7 +42,20 @@ set(APP_CXX_SRCS
 )
 set(APP_C_SRCS
         "src/main.c"
+        "src/audio_hw_config/audio_hw_config.c"
+        "src/audio_pipeline/audio_pipeline.c"
+        "src/gpio_ctrl/gpio_ctrl.c"
         "src/NetworkManager/network.c"
+        "src/queue_to_i2s/queue_to_i2s.c"
+        "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
+        "src/tcp_stream_to_queue/tcp_stream_to_queue.c"
+        "src/thruput_test/thruput_test.c"
+        "src/udp_cli/CLI-commands.c"
+        "src/udp_cli/FreeRTOS_CLI.c"
+        "src/udp_cli/UDPCommandServer.c"
+        "src/tls_echo_demo/tls_echo_demo.c"
+        "src/tls_echo_server/tls_echo_server.c"
+        "src/http_demo/http_demo.c"
         "src/mqtt_demo/mqtt_demo_client.c"
         "src/mem_analysis/mem_analysis.c"
     )
@@ -49,7 +64,18 @@ set(APP_ASM_SRCS
     )
 set(APP_INCLUDES
         "src"
+        "src/audio_hw_config"
+        "src/audio_pipeline"
+        "src/gpio_ctrl"
         "src/NetworkManager"
+        "src/queue_to_i2s"
+        "src/queue_to_tcp_stream"
+        "src/tcp_stream_to_queue"
+        "src/thruput_test"
+        "src/udp_cli"
+        "src/tls_echo_demo"
+        "src/tls_echo_server"
+        "src/http_demo"
         "src/mqtt_demo"
         "src/mem_analysis"
     )
@@ -61,16 +87,20 @@ set(USE_FREERTOS_SMP True)
 
 ## Add lib_soc devices
 set(LIB_SOC_GPIO ${FULL})
+set(LIB_SOC_I2C ${FULL})
+set(LIB_SOC_I2S ${FULL})
+set(LIB_SOC_MICARRAY ${FULL})
 set(LIB_SOC_SPIMASTER ${FULL})
 set(LIB_SOC_QSPI_FLASH ${FULL})
 set(LIB_SOC_WFM200 ${BSP_ONLY})
+set(LIB_SOC_SW_TRACE True)
 set(LIB_SOC_SW_WIFI True)
 set(LIB_SOC_SW_DHCPD True)
 set(LIB_SOC_SW_SNTPD True)
 set(LIB_SOC_SW_FATFS True)
 set(LIB_SOC_SW_TLS_SUPPORT True)
 set(LIB_SOC_SW_MQTT True)
-set(LIB_SOC_SW_JSON True)
+set(LIB_SOC_SW_HTTP True)
 
 ## Register the application
 XMOS_REGISTER_APP()

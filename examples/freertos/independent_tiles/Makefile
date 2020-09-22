@@ -1,6 +1,6 @@
-EXECUTABLE = bin/app_freertos_independent_tiles.xe
-EXECUTABLE_T0 = bin/tile0/app_freertos_independent_tiles_0.xe
-EXECUTABLE_T1 = bin/tile1/app_freertos_independent_tiles_1.xe
+EXECUTABLE = bin/independent_tiles.xe
+EXECUTABLE_T0 = bin/tile0/independent_tiles_0.xe
+EXECUTABLE_T1 = bin/tile1/independent_tiles_1.xe
 
 .PHONY: all clean distclean .FORCE
 .FORCE:

@@ -104,7 +104,7 @@ In this section, we will configure the demo software to connect to the proper MQ
 ```cmake -B build -DBOARD=XCORE-AI-EXPLORER```
 3. Change to the build directory and run:</br>
 ```make```</br>
-This will create the app_iot_aws.xe binary in the bin folder.
+This will create the iot_aws.xe binary in the bin folder.
 4. Before the application can be run, the flash must be populated with a filesystem containing the crypto credentials for TLS and the WiFi connection details.  From the example application root directory, go to filesystem_support.  Paste the certificates and keys downloaded in the **IoT Core** setup of your **Thing** into the ```aws``` folder.  Rename the CA certificate file ```ca.pem``` , the device certificate file ```client.pem```, and the device private key file ```client.key```.  Run the Python script wifi_profile.py to create the WiFi configuration file.
 5. With the development board and xTag connected, run the flash_image.sh bash script.  This will create a filesystem and flash it to the device.
     *Note: This script requires sudo, as it mounts and unmounts a disk.*
@@ -113,8 +113,8 @@ This will create the app_iot_aws.xe binary in the bin folder.
 ## Running the Demo
 To run the demo navigate to the bin folder and use the command:
 
-```xrun app_iot_aws.xe```
+```xrun iot_aws.xe```
 
 For debug output use:
 
-```xrun --xscope app_iot_aws.xe```
+```xrun --xscope iot_aws.xe```

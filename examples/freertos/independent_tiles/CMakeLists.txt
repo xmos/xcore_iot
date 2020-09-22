@@ -11,7 +11,7 @@ include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_utils.cmake")
 set(XMOS_APP_MODULES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 ## Define project
-project(app_freertos_independent_tiles)
+project(independent_tiles)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
