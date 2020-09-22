@@ -108,7 +108,8 @@ void soc_peripheral_irq_direct_send(
         soc_peripheral_t device,
         uint32_t status);
 
-void soc_peripheral_hub();
+void soc_peripheral_hub(void);
+void soc_peripheral_hub_isr_setup(void);
 
 #ifdef __XC__
 }

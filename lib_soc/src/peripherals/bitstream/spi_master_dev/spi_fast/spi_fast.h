@@ -2,19 +2,32 @@
 #ifndef SPI_FAST_H_
 #define SPI_FAST_H_
 
-#include <xs1.h>
 #include <stdint.h>
-#include <stddef.h>
+
+#ifndef __XC__
+#include <xcore/port.h>
+#include <xcore/clock.h>
+#else
+#include <xs1_clock.h>
+#endif
 
 typedef struct {
     /****************************************/
     /*** Must be declared at compile time ***/
     /****************************************/
+#ifdef __XC__
     out buffered port:32 clk;
     in buffered port:32 miso;
     out buffered port:32 mosi;
     out port cs;
     clock cb;
+#else
+    port_t clk;
+    port_t miso;
+    port_t mosi;
+    port_t cs;
+    xclock_t cb;
+#endif
     unsigned cs_port_bit;
     /****************************************/
 

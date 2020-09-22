@@ -9,11 +9,40 @@
 #warning soc_conf.h not found
 #endif
 
+#ifndef __XC__
+#include <xcore/port.h>
+#include <xcore/clock.h>
+#include <xcore/channel.h>
+#endif
+
 #include "micarray_dev_conf_defaults.h"
 
 #if( MICARRAYCONF_DECIMATOR_COUNT != 1 )
 #error Library currently does not support decimator counts other than 1
 #endif
+
+#ifndef __XC__
+void micarray_dev_init(
+        xclock_t pdmclk,
+		xclock_t pdmclk2,
+		port_t p_mclk,
+		port_t p_pdm_clk,
+        port_t p_pdm_mics);
+
+void micarray_dev(
+        soc_peripheral_t peripheral,
+        chanend_t data_to_dma_c,
+		chanend_t data_from_dma_c,
+		chanend_t ctrl_c,
+        port_t p_pdm_mics);
+
+void micarray_dev_1b(
+        soc_peripheral_t peripheral,
+		chanend_t data_to_dma_c,
+		chanend_t data_from_dma_c,
+		chanend_t ctrl_c,
+		port_t p_pdm_mics);
+#else
 
 void micarray_dev_init(
         clock pdmclk,
@@ -45,5 +74,7 @@ void micarray_dev_1b(
         chanend ?data_from_dma_c,
         chanend ?ctrl_c,
         in buffered port:32 p_pdm_mics);
+
+#endif
 
 #endif /* MICARRAY_DEV_H_ */

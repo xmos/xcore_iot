@@ -3,6 +3,7 @@
 #include "soc.h"
 #include "xassert.h"
 #include "spi_master_dev.h"
+#include <xs1.h>
 #include <xclib.h>
 
 static unsigned compute_port_ticks(unsigned nanoseconds, unsigned clock_divide)
