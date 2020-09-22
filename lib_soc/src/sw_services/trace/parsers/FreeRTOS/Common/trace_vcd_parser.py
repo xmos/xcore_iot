@@ -6,8 +6,8 @@ from Common.trace_record import record
 from Common.trace_header import header_rec
 
 regex_header = "\$(\w+)\s(.+\s*)*\$end$"
-regex_initvals = "\$dumpvars\s(.+\s*)*\$end$"
-regex_record = "#(\d+)\s\$comment\sLength=\"(\d+)\" Bytes=\"(\w+)\"\s\$end$"
+regex_enddefs = "\$enddefinitions\s(.+\s*)*\$end$"
+regex_record = "#(\d+)\s\$comment\sl(\d+) (\w+) (\d)\s\$end$"
 
 class trace_parser:
     def __init__(self):
@@ -32,11 +32,8 @@ class trace_parser:
             self.Lines += 1
             cur = cur + line
 
-            # dumpvars should be terminated with $end, but for some reason
-            # it is not.
-            if( line == "$dumpvars\n"):
-                # after initial values are gathered we can begin parsing values
-                # print("dump vars found")
+            p = re.match(regex_enddefs, cur)
+            if p:
                 cur = ""
                 break
 
@@ -62,10 +59,10 @@ class trace_parser:
             if p:
                 rec = record(p.group(3), p.group(2), p.group(1))
                 self.ParsedList.append(rec)
-                # print(p.group(0))   # record
-                # print(p.group(1))   # time
-                # print(p.group(2))   # len
-                # print(p.group(3))   # payload
+                # print('record ' + p.group(0))   # full record
+                # print('time ' + p.group(1))     # time
+                # print('len ' + p.group(2))      # len
+                # print('payload ' + p.group(3))  # payload
                 self.Records += 1
                 cur = ""
 

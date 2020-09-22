@@ -134,7 +134,7 @@ typedef enum
 } eTraceMap_t;
 
 
-#define tracePRINTF( FMT, LOG_LEVEL, ... )				traceOUTPUT( "%d:%d:%d,%d,"FMT"\n", asciitraceGET_CORE_ID(), xscope_gettime(), etraceUSER_MSG, LOG_LEVEL, ##__VA_ARGS__ )
+#define tracePRINTF( FMT, LOG_LEVEL, ... )				traceOUTPUT( "%d:%d:%d,%d," FMT "\n", asciitraceGET_CORE_ID(), xscope_gettime(), etraceUSER_MSG, LOG_LEVEL, ##__VA_ARGS__ )
 
 #define traceSTART()									traceOUTPUT( "%d:%d:%d\n", asciitraceGET_CORE_ID(), xscope_gettime(), etraceSTART )
 #define traceEND()										traceOUTPUT( "%d:%d:%d\n", asciitraceGET_CORE_ID(), xscope_gettime(), etraceEND )
