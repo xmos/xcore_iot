@@ -1,0 +1,22 @@
+// Copyright (c) 2019, XMOS Ltd, All rights reserved
+
+#ifndef SOC_CONF_DEFAULTS_H_
+#define SOC_CONF_DEFAULTS_H_
+
+#ifndef SOC_TILE_0_INCLUDE
+#define SOC_TILE_0_INCLUDE SOC_TILE_HAS_SOFTWARE
+#endif
+
+#ifndef SOC_TILE_1_INCLUDE
+#define SOC_TILE_1_INCLUDE SOC_TILE_UNUSED
+#endif
+
+#ifndef SOC_TILE_2_INCLUDE
+#define SOC_TILE_2_INCLUDE SOC_TILE_UNUSED
+#endif
+
+#ifndef SOC_TILE_3_INCLUDE
+#define SOC_TILE_3_INCLUDE SOC_TILE_UNUSED
+#endif
+
+#endif /* SOC_CONF_DEFAULTS_H_ */
