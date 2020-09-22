@@ -30,31 +30,28 @@ static void i2s_handler(
         case i2s.init(i2s_config_t &?i2s_config, tdm_config_t &?tdm_config):
             i2s_config.mode = I2S_MODE_I2S;
             i2s_config.mclk_bclk_ratio = I2SCONF_MASTER_CLK_FREQ / (I2SCONF_SAMPLE_FREQ * 32 * 2);
-
-#if I2SCONF_OFF_TILE
-            fifo_get_blocking(sample_buffer, &buf_num);
-#else
-            if (peripheral != NULL) {
-                while (soc_peripheral_rx_dma_direct_xfer(peripheral, audio_samples[0], sizeof(audio_samples[0])) == 0);
-            }
-#endif
             break;
 
         case i2s.send(size_t num_chan_out, int32_t sample[num_chan_out]):
-            for (int i = 0; i < num_chan_out; i++) {
-                sample[i] = audio_samples[buf_num][sample_num];
-            }
-
-            sample_num++;
-
-            if (sample_num == I2SCONF_AUDIO_FRAME_LEN) {
+        
+            if (sample_num == 0) {
 #if I2SCONF_OFF_TILE
-                fifo_get_blocking(sample_buffer, &buf_num);
+                fifo_peek_blocking(sample_buffer, &buf_num);
 #else
                 if (peripheral != NULL) {
                     while (soc_peripheral_rx_dma_direct_xfer(peripheral, audio_samples[0], sizeof(audio_samples[0])) == 0);
                 }
 #endif
+            }
+        
+            for (int i = 0; i < num_chan_out; i++) {
+                sample[i] = audio_samples[buf_num][sample_num];
+            }
+            
+            sample_num++;
+
+            if (sample_num == I2SCONF_AUDIO_FRAME_LEN) {
+            	fifo_get(sample_buffer, &buf_num);
                 sample_num = 0;
             }
             break;
@@ -118,9 +115,9 @@ void i2s_dev(
     unsafe {
         fifo_init(
                 sample_buffer,
-                I2SCONF_FRAME_BUF_CNT-1,
+                I2SCONF_FRAME_BUF_CNT,
                 sizeof(int),
-                I2SCONF_FRAME_BUF_CNT-1);
+                I2SCONF_FRAME_BUF_CNT > 1 ? I2SCONF_FRAME_BUF_CNT / 2 : 1);
     }
 #endif
 

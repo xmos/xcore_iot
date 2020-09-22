@@ -60,6 +60,28 @@ void fifo_put_blocking(fifo_t fifo, void *element)
     (void) fifo_put(fifo, element);
 }
 
+int fifo_peek(fifo_t fifo, void *element)
+{
+    unsigned tmp_tail = fifo->tail;
+
+    if (fifo_ready(fifo)) {
+        memcpy(element, fifo->buffer + tmp_tail, fifo->element_size);
+
+        return 0;
+    } else {
+        memset(element, 0, fifo->element_size);
+
+        return -1;
+    }
+}
+
+void fifo_peek_blocking(fifo_t fifo, void *element)
+{
+    while (!fifo_ready(fifo));
+
+    (void) fifo_peek(fifo, element);
+}
+
 int fifo_get(fifo_t fifo, void *element)
 {
     unsigned tmp_tail = fifo->tail;

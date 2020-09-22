@@ -214,14 +214,14 @@ void micarray_dev(
 void micarray_dev_1b_to_dma(
         soc_peripheral_t peripheral,
         chanend ?data_to_dma_c,
-        streaming chanend c_ds_output[])
+        streaming chanend c_2x_pdm_mic)
 {
 	int tmp;
 	int32_t mic_samples[(1 << MIC_ARRAY_MAX_FRAME_SIZE_LOG2)];
 
 	while (1) {
 		select {
-			case c_ds_output[0] :> tmp:
+			case c_2x_pdm_mic :> tmp:
 			unsafe {
 				int * unsafe mic_sample_block;
 				mic_sample_block = (int*)tmp;
@@ -254,11 +254,11 @@ void micarray_dev_1b(
         chanend ?ctrl_c,
         in buffered port:32 p_pdm_mics)
 {
-    streaming chan c_ds_output[2];
-    streaming chan c_4x_pdm_mic_0[1];
+    streaming chan c_2x_pdm_mic;
+    streaming chan c_ref_audio[2];
 
     par {
-        mic_dual_pdm_rx_decimate(p_pdm_mics, c_ds_output[0], c_4x_pdm_mic_0);
-        micarray_dev_1b_to_dma(peripheral, data_to_dma_c, c_ds_output);
+        mic_dual_pdm_rx_decimate(p_pdm_mics, c_2x_pdm_mic, c_ref_audio);
+        micarray_dev_1b_to_dma(peripheral, data_to_dma_c, c_2x_pdm_mic);
     }
 }

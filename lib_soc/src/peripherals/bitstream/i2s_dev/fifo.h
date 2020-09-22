@@ -60,6 +60,8 @@ int fifo_empty(fifo_t fifo);
 int fifo_ready(fifo_t fifo);
 int fifo_put(fifo_t fifo, void *element);
 void fifo_put_blocking(fifo_t fifo, void *element);
+int fifo_peek(fifo_t fifo, void *element);
+void fifo_peek_blocking(fifo_t fifo, void *element);
 int fifo_get(fifo_t fifo, void *element);
 void fifo_get_blocking(fifo_t fifo, void *element);
 
