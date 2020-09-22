@@ -109,3 +109,16 @@ void i2c_dev(
         }
     }
 }
+
+void i2c_dev_c(
+        chanend ctrl_c,
+        port p_scl,
+        port p_sda)
+{
+    i2c_master_if i_i2c[1];
+
+    par {
+        i2c_dev(ctrl_c, i_i2c[0]);
+        [[distribute]] i2c_master(i_i2c, 1, p_scl, p_sda, 100);
+    }
+}

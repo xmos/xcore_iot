@@ -10,6 +10,7 @@
 #include <xcore/channel.h>
 #include <xcore/channel_transaction.h>
 #include <xcore/triggerable.h>
+#include <xcore/interrupt_wrappers.h>
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -695,3 +696,131 @@ void soc_peripheral_hub()
         } while (0);
     }
 }
+
+DEFINE_INTERRUPT_CALLBACK(rtos_isr, soc_peripheral_hub_isr, id)
+{
+    int i;
+
+//    for (;;) {
+        int device_id = (int) id;
+
+		if (device_id < peripheral_count) {
+			/* The device is trying to receive data */
+
+			triggerable_disable_trigger(peripherals[device_id].tx_c);
+			dma_to_device(&peripherals[device_id]);
+
+		} else if ((device_id - 1 * MAX_PERIPHERALS) < peripheral_count) {
+			/* The device is trying to send data */
+
+			/*
+			 * Select wait returns 1 * MAX_DEVICES + device_id when
+			 * data is received on the RX channel, so convert to
+			 * the actual device ID.
+			 */
+			device_id -= 1 * MAX_PERIPHERALS;
+
+			triggerable_disable_trigger(peripherals[device_id].rx_c);
+			device_to_dma(&peripherals[device_id]);
+
+		} else if ((device_id - 2 * MAX_PERIPHERALS) < peripheral_count) {
+			/* The device is trying to send an IRQ */
+
+			/*
+			 * Select wait returns 2 * MAX_DEVICES + device_id when
+			 * data is received on the IRQ channel, so convert to
+			 * the actual device ID.
+			 */
+			device_id -= 2 * MAX_PERIPHERALS;
+
+			triggerable_disable_trigger(peripherals[device_id].irq_c);
+			device_to_hub_irq(&peripherals[device_id]);
+
+		} else if (device_id == 3 * MAX_PERIPHERALS) {
+			/* request from the RTOS */
+
+			/*
+			 * An RTOS task has added a new DMA buffer so wake up
+			 * here so we go back to the start of the loop to make sure
+			 * we are waiting on the right channels.
+			 */
+
+			chanend_check_end_token(rtos_irq_c);
+		}
+
+		/*
+		 * TODO: ROUND ROBIN IS PROBABLY BROKEN.
+		 * TRY TO FIGURE OUT HOW TO ACHEIVE IT WITH INTERRUPTS.
+		 */
+
+        for (i = 0; i < peripheral_count; i++) {
+
+            if (peripherals[i].tx_c != 0 && peripherals[i].tx_ring_buf.desc != NULL) {
+                if (soc_dma_ring_buf_get(&peripherals[i].tx_ring_buf, NULL, NULL) >= 0) {
+                    /*
+                     * If there is a transmit channel and there is a transmit
+                     * buffer available, then we can listen for a data request
+                     * from the device.
+                     */
+//                    debug_printf("DMA to listen for data request from device %d\n", i);
+                    triggerable_enable_trigger(peripherals[i].tx_c);
+
+                    if (!peripherals[i].tx_ready) {
+                        dma_to_device_ready(&peripherals[i]);
+                    }
+                }
+            }
+
+            if (peripherals[i].rx_c != 0 && peripherals[i].rx_ring_buf.desc != NULL) {
+                if (soc_dma_ring_buf_get(&peripherals[i].rx_ring_buf, NULL, NULL) >= 0) {
+                    /*
+                     * If there is a receive channel and there is a receive
+                     * buffer available, then we can listen for data from
+                     * the device.
+                     */
+//                    debug_printf("DMA to listen for data from device %d\n", i);
+                    triggerable_enable_trigger(peripherals[i].rx_c);
+                }
+            }
+
+            if (peripherals[i].irq_c != 0) {
+                triggerable_enable_trigger(peripherals[i].irq_c);
+            }
+        }
+//    }
+}
+
+void soc_peripheral_hub_isr_setup(void)
+//DEFINE_INTERRUPT_PERMITTED(rtos_isr, void, soc_peripheral_hub_isr_setup)
+{
+    int i;
+
+    rtos_irq_c = chanend_alloc();
+
+    for (i = 0; i < peripheral_count; i++) {
+        if (peripherals[i].tx_c  != 0) {
+            triggerable_setup_interrupt_callback(peripherals[i].tx_c,  0 * MAX_PERIPHERALS + i, INTERRUPT_CALLBACK(soc_peripheral_hub_isr));
+        }
+        if (peripherals[i].rx_c  != 0) {
+            triggerable_setup_interrupt_callback(peripherals[i].rx_c,  1 * MAX_PERIPHERALS + i, INTERRUPT_CALLBACK(soc_peripheral_hub_isr));
+        }
+        if (peripherals[i].irq_c != 0) {
+            triggerable_setup_interrupt_callback(peripherals[i].irq_c, 2 * MAX_PERIPHERALS + i, INTERRUPT_CALLBACK(soc_peripheral_hub_isr));
+        }
+    }
+
+    triggerable_setup_interrupt_callback(rtos_irq_c, 3 * MAX_PERIPHERALS, INTERRUPT_CALLBACK(soc_peripheral_hub_isr));
+    triggerable_enable_trigger(rtos_irq_c);
+
+    /*
+     * Should wait until all RTOS cores have enabled IRQs,
+     * or else rtos_irq() could fail.
+     */
+//    while (!rtos_irq_ready());
+
+    rtos_printf("ENABLING RTOS IRQ INTERRUPT\n");
+
+//    rtos_interrupt_unmask_all();
+//    for (;;);
+}
+
