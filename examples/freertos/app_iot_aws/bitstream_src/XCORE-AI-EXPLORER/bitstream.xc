@@ -102,6 +102,8 @@ void tile0_device_instantiate()
                         null,
                         null,
                         qspi_flash_dev_ctrl_ch,
+                        null,
+                        null,
                         16384, /* Number of pages in the QSPI flash */
                         &flash_ports, &flash_clock_config, &flash_qe_config);
             }
