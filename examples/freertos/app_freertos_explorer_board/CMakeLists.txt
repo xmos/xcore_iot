@@ -6,8 +6,9 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Import XMOS configurations
-set(XMOS_MODULES_ROOT_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-include("${XMOS_MODULES_ROOT_DIR}/cmake_utils/xmos_utils.cmake")
+set(XMOS_MODULES_ROOT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_utils.cmake")
+set(XMOS_APP_MODULES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 ## Define project
 project(app_freertos_explorer_board)
