@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 
 #**********************
 # Setup XMOS toolchain
@@ -34,7 +34,7 @@ project(micro_speech VERSION 1.0.0 )
 # Paths
 #**********************
 
-set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/ai_tools")
+set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
 
 set(GEMMLOWP_INCLUDE_DIR "${AI_TOOLS_DIR}/third_party/gemmlowp")
 set(RUY_INCLUDE_DIR "${AI_TOOLS_DIR}/third_party/ruy")
@@ -50,7 +50,7 @@ set(LIB_NN_SOURCE_DIR "${AI_TOOLS_DIR}/lib_nn")
 
 set(KISS_FFT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/kissfft")
 
-set(RTOS_SUPPORT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/rtos_support")
+set(RTOS_SUPPORT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
 
 set(LIB_DSP_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/lib_dsp/api")
 set(LIB_LOGGING_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_logging/lib_logging/lib_logging/api")
@@ -145,6 +145,7 @@ set(TENSORFLOW_LITE_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/memory_planner/linear_memory_planner.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/xcore/debug_log.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/xcore/micro_time.cc"
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/kernel_util.cc"
   )
 
 #*************************************************
