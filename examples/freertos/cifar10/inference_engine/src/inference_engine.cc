@@ -51,7 +51,7 @@ void initialize(const unsigned char *model_content, uint8_t *tensor_arena,
   }
 
   // This pulls in all the operation implementations we need.
-  static tflite::MicroMutableOpResolver<7> resolver;
+  static tflite::MicroMutableOpResolver<6> resolver;
   resolver.AddSoftmax();
   resolver.AddPad();
   resolver.AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode,
