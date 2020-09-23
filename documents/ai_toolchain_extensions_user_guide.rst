@@ -186,16 +186,14 @@ Additionally, you need to write code to setup the TensorFlow Lite for Microcontr
     static tflite::MicroMutableOpResolver<7> resolver;
     resolver.AddSoftmax();
     resolver.AddPad();
-    resolver.AddCustom("XC_maxpool2d",
-                        tflite::ops::micro::xcore::Register_MaxPool2D());
-    resolver.AddCustom("XC_fc_deepin_anyout",
-                        tflite::ops::micro::xcore::Register_FullyConnected_16());
-    resolver.AddCustom("XC_conv2d_shallowin",
-                        tflite::ops::micro::xcore::Register_Conv2D_Shallow());
-    resolver.AddCustom("XC_conv2d_deep",
-                        tflite::ops::micro::xcore::Register_Conv2D_Deep());
-    resolver.AddCustom("XC_requantize_16_to_8",
-                        tflite::ops::micro::xcore::Register_Requantize_16_to_8());
+    resolver.AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode,
+                       tflite::ops::micro::xcore::Register_MaxPool2D());
+    resolver.AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode,
+                       tflite::ops::micro::xcore::Register_FullyConnected_8());
+    resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode,
+                       tflite::ops::micro::xcore::Register_Conv2D_Shallow());
+    resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode,
+                       tflite::ops::micro::xcore::Register_Conv2D_Deep());
 
 You can add as many supported operators as you would like to the ``tflite::MicroMutableOpResolver`` with the ``Add*`` or ``AddCustom`` methods.  However, adding unused operators adds code to the compiled firmware.  We recommend you add only the operators used in your model.  You can determine the used operators by looking at the **Operator Codes** section of the output from ``tflite_visualize.py``.  See Model_Visualization_ for instructions on how to generate the model visualization.
 
@@ -205,25 +203,23 @@ The code snippet below demostrates examples for calls to ``AddCustom`` for the x
 
 .. code-block:: cpp
 
-    resolver.AddCustom("XC_conv2d_shallowin",
-                        tflite::ops::micro::xcore::Register_Conv2D_Shallow());
-    resolver.AddCustom("XC_conv2d_deep",
-                        tflite::ops::micro::xcore::Register_Conv2D_Deep());
-    resolver.AddCustom("XC_conv2d_1x1",
-                        tflite::ops::micro::xcore::Register_Conv2D_1x1());
-    resolver.AddCustom("XC_conv2d_depthwise",
-                        tflite::ops::micro::xcore::Register_Conv2D_Depthwise());
-    resolver.AddCustom("XC_fc_deepin_anyout",
-                        tflite::ops::micro::xcore::Register_FullyConnected_16());
-    resolver.AddCustom("XC_maxpool2d",
-                        tflite::ops::micro::xcore::Register_MaxPool2D());
-    resolver.AddCustom("XC_avgpool2d",
-                        tflite::ops::micro::xcore::Register_AvgPool2D());
-    resolver.AddCustom("XC_avgpool2d_global",
-                        tflite::ops::micro::xcore::Register_AvgPool2D_Global());
-    resolver.AddCustom("XC_requantize_16_to_8",
-                        tflite::ops::micro::xcore::Register_Requantize_16_to_8());
-    resolver.AddCustom("XC_lookup_8",
-                        tflite::ops::micro::xcore::Register_Lookup_8());
+    resolver.AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode,
+                       tflite::ops::micro::xcore::Register_MaxPool2D());
+    resolver.AddCustom(tflite::ops::micro::xcore::AvgPool2D_OpCode,
+                       tflite::ops::micro::xcore::Register_AvgPool2D());
+    resolver.AddCustom(tflite::ops::micro::xcore::AvgPool2D_Global_OpCode,
+                       tflite::ops::micro::xcore::Register_AvgPool2D_Global());
+    resolver.AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode,
+                       tflite::ops::micro::xcore::Register_FullyConnected_8());
+    resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode,
+                       tflite::ops::micro::xcore::Register_Conv2D_Shallow());
+    resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode,
+                       tflite::ops::micro::xcore::Register_Conv2D_Deep());
+    resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_1x1_OpCode,
+                       tflite::ops::micro::xcore::Register_Conv2D_1x1());
+    resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Depthwise_OpCode,
+                       tflite::ops::micro::xcore::Register_Conv2D_Depthwise());
+    resolver.AddCustom(tflite::ops::micro::xcore::Lookup_8_OpCode,
+                       tflite::ops::micro::xcore::Register_Lookup_8());
 
 The ``examples/bare-metal/cifar10`` example is a great place to look at how to deploy a model.  Of course, your application code will vary, but your code for integrating the TensorFlow Lite Micro runtime will be very similar the code in this example located in the ``examples/bare-metal/cifar10/inference_engine/src/`` folder.
