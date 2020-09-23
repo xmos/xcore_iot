@@ -101,12 +101,7 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
 The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
 
-    > python ../../../third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py --input_tflite_file ../../models/CIFAR-10/debug/arm_benchmark/models/model_xcore.tflite --output_header_file src/cifar10_model.h --output_source_file src/cifar10_model.c --array_variable_name cifar10_model --include_guard CIFAR10_MODEL_H_
-
-The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
-
-    > python ../../../../ai_tools/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py --input_tflite_file model/model_xcore.tflite --output_header_file inference_engine/src/cifar10_model.h --output_source_file inference_engine/src/cifar10_model.c --array_variable_name cifar10_model --include_guard CIFAR10_MODEL_H_
-
+    > python ../../../tools/ai_tools/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py --input_tflite_file model/model_xcore.tflite --output_header_file inference_engine/src/cifar10_model.h --output_source_file inference_engine/src/cifar10_model.c --array_variable_name cifar10_model --include_guard CIFAR10_MODEL_H_
 
 Note, the command above will overwrite `inference_engine/src/cifar10_model.c`.  In order to allow the model to be stored in flash or DDR, the file needs to be modified after the script creates it.  Add the following lines directly above the line that sets `cifar10_model[]`.
 

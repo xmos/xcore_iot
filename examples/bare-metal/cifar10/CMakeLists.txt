@@ -45,7 +45,7 @@ enable_language(CXX C ASM)
 # Paths
 #**********************
 
-set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/ai_tools")
+set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
 
 set(GEMMLOWP_INCLUDE_DIR "${AI_TOOLS_DIR}/third_party/gemmlowp")
 set(RUY_INCLUDE_DIR "${AI_TOOLS_DIR}/third_party/ruy")
@@ -122,6 +122,7 @@ set(TENSORFLOW_LITE_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/simple_memory_allocator.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/memory_planner/linear_memory_planner.cc"
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/kernel_util.cc"
   )
 
 if (XCORE)
