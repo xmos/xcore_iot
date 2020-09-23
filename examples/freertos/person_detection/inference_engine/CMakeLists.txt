@@ -40,10 +40,9 @@ set(LIB_XC_SRCS
 set(LIB_CXX_SRCS
         "src/person_detection_dev.cc"
         "src/inference_engine.cc"
-        "src/person_detect_model.cc"
     )
 set(LIB_C_SRCS
-        ""
+        "src/person_detect_model.c"
     )
 set(LIB_ASM_SRCS
         ""

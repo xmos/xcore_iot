@@ -29,7 +29,7 @@ static int start_time = 0;
 #endif
 
 
-#define TENSOR_ARENA_SIZE   (1024*128)
+#define TENSOR_ARENA_SIZE   (1)
 uint8_t tensor_arena[TENSOR_ARENA_SIZE];
 
 static size_t input_size;
@@ -93,7 +93,7 @@ void ai_dev(
                 debug_printf("TF_Device setup tflite\n");
 
                 /* Setup Runtime */
-                initialize(person_detect, tensor_arena, TENSOR_ARENA_SIZE, &input_buffer,
+                initialize(person_detect_model, tensor_arena, TENSOR_ARENA_SIZE, &input_buffer,
                            &input_size, &output_buffer, &output_size);
 
                 debug_printf("TF_Device setup tflite done\n");

@@ -6,14 +6,12 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Import XMOS configurations
-set(XMOS_MODULES_ROOT_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/../../../rtos_support")
-include("${XMOS_MODULES_ROOT_DIR}/cmake_utils/xmos_utils.cmake")
+set(XMOS_MODULES_ROOT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_utils.cmake")
 set(XMOS_APP_MODULES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(AI_TOOLS_DIR "../../../../ai_tools")
-
 ## Define project
-project(app_freertos_person_detection)
+project(person_detection)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
@@ -30,6 +28,7 @@ set(APP_COMPILER_FLAGS
         "-DDEBUG_PRINT_ENABLE=1"
         "-Wno-unknown-pragmas"
         "-DTF_LITE_STATIC_MEMORY"
+        # "-DUSE_EXTMEM"
         "-D_XCORE_HAS_SWMEM"
         "-DTF_LITE_STRIP_ERROR_STRINGS"
         "-DNDEBUG"

@@ -1,5 +1,4 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
-
 #include "inference_engine.h"
 
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
@@ -9,9 +8,9 @@
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/version.h"
 
-tflite::ErrorReporter* reporter = nullptr;
+tflite::ErrorReporter *reporter = nullptr;
 tflite::Profiler *profiler = nullptr;
-const tflite::Model* model = nullptr;
+const tflite::Model *model = nullptr;
 tflite::micro::xcore::XCoreInterpreter *interpreter = nullptr;
 
 // static buffer for XCoreInterpreter class allocation
@@ -34,7 +33,6 @@ void initialize(const unsigned char *model_content, uint8_t *tensor_arena,
   if (reporter == nullptr) {
     reporter = &micro_error_reporter;
   }
-
   // Set up profiling.
   static tflite::micro::xcore::XCoreProfiler xcore_profiler(reporter);
   if (profiler == nullptr) {
@@ -54,18 +52,19 @@ void initialize(const unsigned char *model_content, uint8_t *tensor_arena,
 
   // This pulls in all the operation implementations we need.
   static tflite::MicroMutableOpResolver<8> resolver;
-  resolver.AddConv2D();
-  resolver.AddReshape();
   resolver.AddSoftmax();
   resolver.AddPad();
-  resolver.AddCustom("XC_avgpool2d",
-                      tflite::ops::micro::xcore::Register_AvgPool2D());
-  resolver.AddCustom("XC_conv2d_1x1",
-                      tflite::ops::micro::xcore::Register_Conv2D_1x1());
-  resolver.AddCustom("XC_conv2d_shallowin",
-                      tflite::ops::micro::xcore::Register_Conv2D_Shallow());
-  resolver.AddCustom("XC_conv2d_depthwise",
-                      tflite::ops::micro::xcore::Register_Conv2D_Depthwise());
+  resolver.AddReshape();
+  resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Depthwise_OpCode,
+                     tflite::ops::micro::xcore::Register_Conv2D_Depthwise());
+  resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_1x1_OpCode,
+                     tflite::ops::micro::xcore::Register_Conv2D_1x1());
+  resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode,
+                     tflite::ops::micro::xcore::Register_Conv2D_Shallow());
+  resolver.AddCustom(tflite::ops::micro::xcore::AvgPool2D_OpCode,
+                     tflite::ops::micro::xcore::Register_AvgPool2D());
+  resolver.AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode,
+                     tflite::ops::micro::xcore::Register_FullyConnected_8());
 
   // Build an interpreter to run the model with
   if (interpreter) {
