@@ -40,6 +40,24 @@ You should notice console output, which will update based on the model result.
     Heard silence (167) @544ms
     Heard no (162) @6864ms
 
+## Running the test firmware
+
+The test application loads model input features that are defined in static arrays.  One feature array is provided for "yes", and another for "no". See,
+
+    #include "tensorflow/lite/micro/examples/micro_speech/micro_features/no_micro_features_data.h"
+    #include "tensorflow/lite/micro/examples/micro_speech/micro_features/yes_micro_features_data.h"
+
+Run the following command:
+
+    > xrun --io bin/micro_speech_test.xe
+
+You should notice console output
+
+    Testing TestInvoke
+    Ran successfully
+
+    1/1 tests passed
+    ~~~ALL TESTS PASSED~~~
 
 ## Training
 

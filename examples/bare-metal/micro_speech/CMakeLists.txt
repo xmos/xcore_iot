@@ -66,6 +66,7 @@ set(LIB_XASSERT_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_xassert/lib_xassert")
 # Build flags
 #**********************
 add_executable(micro_speech)
+add_executable(micro_speech_test)
 
 # Optimization
 # -DNDEBUG                        # define this to remove debug and profiling
@@ -84,8 +85,11 @@ set(BUILD_FLAGS
 )
 target_link_options(micro_speech PRIVATE ${BUILD_FLAGS} -lquadspi)
 set_target_properties(micro_speech PROPERTIES OUTPUT_NAME micro_speech.xe)
-
 target_compile_options(micro_speech PRIVATE ${BUILD_FLAGS})
+
+target_link_options(micro_speech_test PRIVATE ${BUILD_FLAGS} -lquadspi)
+set_target_properties(micro_speech_test PROPERTIES OUTPUT_NAME micro_speech_test.xe)
+target_compile_options(micro_speech_test PRIVATE ${BUILD_FLAGS})
 
 #********************************
 # TensorFlow Lite Micro sources
@@ -262,14 +266,29 @@ set(APP_SOURCES
 
 set_source_files_properties("${PROJECT_SOURCE_DIR}/main.xc" PROPERTIES LANGUAGE C)
 
+#*************************************************
+# Test sources
+#*************************************************
+set(TEST_SOURCES
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/no_micro_features_data.cc"
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/yes_micro_features_data.cc"
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.cc"
+  "${PROJECT_SOURCE_DIR}/model/model.cc"
+  "${PROJECT_SOURCE_DIR}/test/micro_speech_test.cc"
+)
+
 #**********************
 # targets
 #**********************
+set(COMMON_TARGET_SOURCES
+  ${LIB_NN_SOURCES}
+  ${TENSORFLOW_LITE_SOURCES}
+  ${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES}
+  ${INFERENCE_ENGINE_SOURCES}
+)
+
 target_sources(micro_speech
-  PRIVATE ${LIB_NN_SOURCES}
-  PRIVATE ${TENSORFLOW_LITE_SOURCES}
-  PRIVATE ${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES}
-  PRIVATE ${INFERENCE_ENGINE_SOURCES}
+  PRIVATE ${COMMON_TARGET_SOURCES}
   PRIVATE ${KISS_FFT_SOURCES}
   PRIVATE ${MICRO_FEATURES_SOURCES}
   PRIVATE ${LIB_DSP_SOURCES}
@@ -279,26 +298,40 @@ target_sources(micro_speech
   PRIVATE ${APP_SOURCES}
 )
 
-target_include_directories(micro_speech
-  PRIVATE ${GEMMLOWP_INCLUDE_DIR}
-  PRIVATE ${RUY_INCLUDE_DIR}
-  PRIVATE ${TENSORFLOW_INCLUDE_DIR}
-  PRIVATE ${FLATBUFFERS_INCLUDE_DIR}
-  PRIVATE ${LIB_NN_ALT_INCLUDE_DIR}
-  PRIVATE ${LIB_NN_INCLUDE_DIR}
-  PRIVATE ${KISS_FFT_INCLUDE_DIR}
-  PRIVATE ${LIB_DSP_INCLUDE_DIR}
-  PRIVATE ${LIB_LOGGING_INCLUDE_DIR}
-  PRIVATE ${LIB_MIC_ARRAY_INCLUDE_DIR}
-  PRIVATE ${LIB_XASSERT_INCLUDE_DIR}
-  PRIVATE "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir"
-  PRIVATE "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech"
-  PRIVATE "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib"
-  PRIVATE "${PROJECT_SOURCE_DIR}/model"
-  PRIVATE "${PROJECT_SOURCE_DIR}/app"
+target_sources(micro_speech_test
+  PRIVATE ${COMMON_TARGET_SOURCES}
+  PRIVATE ${TEST_SOURCES}
 )
+
+set(COMMON_TARGET_INCLUDES
+  ${GEMMLOWP_INCLUDE_DIR}
+  ${RUY_INCLUDE_DIR}
+  ${TENSORFLOW_INCLUDE_DIR}
+  ${FLATBUFFERS_INCLUDE_DIR}
+  ${LIB_NN_ALT_INCLUDE_DIR}
+  ${LIB_NN_INCLUDE_DIR}
+  ${KISS_FFT_INCLUDE_DIR}
+  ${LIB_DSP_INCLUDE_DIR}
+  ${LIB_LOGGING_INCLUDE_DIR}
+  ${LIB_MIC_ARRAY_INCLUDE_DIR}
+  ${LIB_XASSERT_INCLUDE_DIR}
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir"
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech"
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib"
+  "${PROJECT_SOURCE_DIR}/model"
+  "${PROJECT_SOURCE_DIR}/app"
+)
+
+target_include_directories(micro_speech
+  PRIVATE ${COMMON_TARGET_INCLUDES}
+)
+
+target_include_directories(micro_speech_test
+  PRIVATE ${COMMON_TARGET_INCLUDES}
+)
+
 #**********************
 # install
 #**********************
 set(INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin")
-install(TARGETS micro_speech DESTINATION ${INSTALL_DIR})
+install(TARGETS micro_speech micro_speech_test DESTINATION ${INSTALL_DIR})

@@ -21,8 +21,9 @@ limitations under the License.
 #include "tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.h"
 #include "tensorflow/lite/micro/examples/micro_speech/micro_features/model.h"
 #include "tensorflow/lite/micro/examples/micro_speech/recognize_commands.h"
+#include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
+#include "tensorflow/lite/micro/kernels/xcore/xcore_ops.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
-#include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
@@ -89,7 +90,7 @@ void setup() {
   }
 
   // Build an interpreter to run the model with.
-  static tflite::MicroInterpreter static_interpreter(
+  static tflite::micro::xcore::XCoreInterpreter static_interpreter(
       model, micro_op_resolver, tensor_arena, kTensorArenaSize, error_reporter);
   interpreter = &static_interpreter;
 
@@ -119,7 +120,8 @@ void setup() {
                                                  feature_buffer);
   feature_provider = &static_feature_provider;
 
-  static RecognizeCommands static_recognizer(error_reporter, 1000, 150, 2000, 3);
+  static RecognizeCommands static_recognizer(error_reporter, 1000, 150, 2000,
+                                             3);
   recognizer = &static_recognizer;
 
   previous_time = 0;
