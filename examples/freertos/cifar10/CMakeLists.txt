@@ -6,14 +6,12 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Import XMOS configurations
-set(XMOS_MODULES_ROOT_DIR  "${CMAKE_CURRENT_SOURCE_DIR}/../../../rtos_support")
-include("${XMOS_MODULES_ROOT_DIR}/cmake_utils/xmos_utils.cmake")
+set(XMOS_MODULES_ROOT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_utils.cmake")
 set(XMOS_APP_MODULES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(AI_TOOLS_DIR "../../../../ai_tools")
-
 ## Define project
-project(app_freertos_cifar10)
+project(cifar10)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
@@ -56,7 +54,7 @@ set(APP_DEPENDENT_MODULES
         "inference_engine(>=0.0.0)"
     )
 
-list(APPEND APP_COMPILER_FLAGS "-DUSE_SWMEM" "-DUSE_QSPI_SWMEM_DEV=1")
+# list(APPEND APP_COMPILER_FLAGS "-DUSE_SWMEM" "-DUSE_QSPI_SWMEM_DEV=1")
 # list(APPEND APP_COMPILER_FLAGS "-DUSE_EXTMEM")
 
 ## Set any additional flags only for C++
