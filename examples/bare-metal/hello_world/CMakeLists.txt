@@ -34,7 +34,7 @@ project(hello_world VERSION 1.0.0 )
 # Paths
 #**********************
 
-set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/ai_tools")
+set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
 
 set(GEMMLOWP_INCLUDE_DIR "${AI_TOOLS_DIR}/third_party/gemmlowp")
 set(RUY_INCLUDE_DIR "${AI_TOOLS_DIR}/third_party/ruy")
@@ -100,6 +100,7 @@ set(TENSORFLOW_LITE_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/memory_planner/linear_memory_planner.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/xcore/debug_log.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/xcore/micro_time.cc"
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/kernel_util.cc"
   )
 
 #*************************************************

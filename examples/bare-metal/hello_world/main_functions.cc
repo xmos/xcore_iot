@@ -62,11 +62,9 @@ void setup() {
 
   // This pulls in all the operation implementations we need.
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroMutableOpResolver<2> resolver;
-  resolver.AddCustom("XC_fc_deepin_anyout",
-                     tflite::ops::micro::xcore::Register_FullyConnected_16());
-  resolver.AddCustom("XC_requantize_16_to_8",
-                     tflite::ops::micro::xcore::Register_Requantize_16_to_8());
+  static tflite::MicroMutableOpResolver<1> resolver;
+  resolver.AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode,
+                     tflite::ops::micro::xcore::Register_FullyConnected_8());
 
   // Build an interpreter to run the model with.
   static tflite::micro::xcore::XCoreInterpreter static_interpreter(
