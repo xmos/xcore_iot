@@ -105,20 +105,12 @@ void memload(void *dest, void *src, size_t size) {
         WORD_TO_BYTE_ADDRESS(((uintptr_t)src - XS1_SWMEM_BASE) >> 2);
     local_cmd.byte_count = WORDS_TO_BYTES(size);
 
-printf("want byte addr %x %d bytes\n", local_cmd.byte_address, local_cmd.byte_count);
     if(local_cmd.byte_count <= QSPI_FLASH_DEV_WRITE_BUFSIZE) {
         soc_peripheral_function_code_tx(swmem_c, QSPI_DEV_SWMEM_REQ);
         soc_peripheral_varlist_tx(swmem_c, 1, sizeof(qspi_flash_dev_cmd_t),
                                   &local_cmd);
         soc_peripheral_varlist_rx(swmem_c, 1, local_cmd.byte_count,
                                   (unsigned int *)dest);
-
-printf("start\n");
-for(int i=0; i<10; i++){
-    printf("%02x",*(unsigned char*)(dest+i));
-}
-printf("\nend\n");
-
 
     } else {
       size_t read_bytes = 0;
@@ -139,11 +131,6 @@ printf("\nend\n");
                                   (unsigned int *)(dest + BYTES_TO_WORDS(read_bytes)));
         read_bytes += local_cmd.byte_count;
       }
-// printf("start\n");
-// for(int i=0; i< size; i++){
-// printf("%02x",(unsigned char*)(dest+i));
-// }
-// printf("\nend\n");
     }
 #else
     flash_read_quad(&flash_handle, ((uintptr_t)src - XS1_SWMEM_BASE) >> 2,
