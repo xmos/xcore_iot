@@ -10,23 +10,8 @@ OPTION (XCORE "If disabled, will build the x86 version." ON)
 #**********************
 
 if (XCORE)
-  set(CMAKE_SYSTEM_NAME XMOS)
-  set(CMAKE_C_COMPILER "xcc")
-  set(CMAKE_CXX_COMPILER  "xcc")
-  set(CMAKE_ASM_COMPILER  "xcc")
-  set(CMAKE_AR "xmosar")
-  set(CMAKE_C_COMPILER_AR "xmosar")
-  set(CMAKE_CXX_COMPILER_AR "xmosar")
-  set(CMAKE_ASM_COMPILER_AR "xmosar")
-
-  set(CMAKE_C_COMPILER_FORCED TRUE)
-  set(CMAKE_CXX_COMPILER_FORCED TRUE)
-  set(CMAKE_ASM_COMPILER_FORCED TRUE)
+    include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 endif ()
-
-set(CMAKE_CXX_FLAGS_INIT "-std=c++11")
-
-enable_language(CXX C ASM)
 
 #**********************
 # Project
@@ -65,8 +50,8 @@ set(LIB_NN_SOURCE_DIR "${AI_TOOLS_DIR}/lib_nn")
 
 add_executable(cifar10)
 
-# Optimization 
-# -DNDEBUG                        # define this to remove debug and profiling 
+# Optimization
+# -DNDEBUG                        # define this to remove debug and profiling
 # -DTF_LITE_STRIP_ERROR_STRINGS   # define this to remove logging
 
 if (XCORE)
@@ -152,7 +137,6 @@ set(TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES
 # TensorFlow Lite Micro xcore kernel sources
 #*************************************************
 set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_device_memory.c"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_profiler.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_interpreter.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_planning.cc"
@@ -213,6 +197,14 @@ if (XCORE)
 endif ()
 
 #**********************
+# Additional support sources
+#**********************
+set(ADDITIONAL_C_SOURCES
+  "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/tensorflow/tensorflow/lite/micro/kernels/xcore/xcore_device_memory.c"
+)
+set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/tensorflow")
+
+#**********************
 # APP sources
 #**********************
 set(INFERENCE_ENGINE_SOURCE_DIR
@@ -240,6 +232,7 @@ set(APP_SOURCES
 # targets
 #**********************
 target_sources(cifar10
+  PRIVATE ${ADDITIONAL_C_SOURCES}
   PRIVATE ${TENSORFLOW_LITE_SOURCES}
   PRIVATE ${TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES}
   PRIVATE ${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES}
@@ -249,6 +242,7 @@ target_sources(cifar10
 )
 
 target_include_directories(cifar10
+  PRIVATE ${ADDITIONAL_INCLUDE_DIR}
   PRIVATE ${GEMMLOWP_INCLUDE_DIR}
   #PRIVATE ${RUY_INCLUDE_DIR}
   PRIVATE ${TENSORFLOW_INCLUDE_DIR}

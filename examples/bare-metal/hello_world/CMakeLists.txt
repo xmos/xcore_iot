@@ -3,22 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 #**********************
 # Setup XMOS toolchain
 #**********************
-set(CMAKE_SYSTEM_NAME XMOS)
-set(CMAKE_C_COMPILER "xcc")
-set(CMAKE_CXX_COMPILER  "xcc")
-set(CMAKE_ASM_COMPILER  "xcc")
-set(CMAKE_AR "xmosar")
-set(CMAKE_C_COMPILER_AR "xmosar")
-set(CMAKE_CXX_COMPILER_AR "xmosar")
-set(CMAKE_ASM_COMPILER_AR "xmosar")
-
-set(CMAKE_C_COMPILER_FORCED TRUE)
-set(CMAKE_CXX_COMPILER_FORCED TRUE)
-set(CMAKE_ASM_COMPILER_FORCED TRUE)
-
-set(CMAKE_CXX_FLAGS_INIT "-std=c++11")
-
-enable_language(CXX C ASM)
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -29,6 +14,8 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 project(hello_world VERSION 1.0.0 )
+
+enable_language(CXX C ASM)
 
 #**********************
 # Paths
@@ -53,8 +40,8 @@ set(LIB_NN_SOURCE_DIR "${AI_TOOLS_DIR}/lib_nn")
 #**********************
 add_executable(hello_world)
 
-# Optimization 
-# -DNDEBUG                        # define this to remove debug and profiling 
+# Optimization
+# -DNDEBUG                        # define this to remove debug and profiling
 # -DTF_LITE_STRIP_ERROR_STRINGS   # define this to remove logging
 
 set(BUILD_FLAGS
@@ -107,7 +94,6 @@ set(TENSORFLOW_LITE_SOURCES
 # TensorFlow Lite Micro xcore kernel sources
 #*************************************************
 set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_device_memory.c"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_profiler.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_interpreter.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_planning.cc"
@@ -132,6 +118,14 @@ set(LIB_NN_SOURCES
 )
 
 #**********************
+# Additional support sources
+#**********************
+set(ADDITIONAL_C_SOURCES
+  "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/tensorflow/tensorflow/lite/micro/kernels/xcore/xcore_device_memory.c"
+)
+set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/tensorflow")
+
+#**********************
 # APP sources
 #**********************
 set(APP_SOURCES
@@ -153,6 +147,7 @@ set(TEST_APP_SOURCES
 # targets
 #**********************
 target_sources(hello_world
+  PRIVATE ${ADDITIONAL_C_SOURCES}
   PRIVATE ${LIB_NN_SOURCES}
   PRIVATE ${TENSORFLOW_LITE_SOURCES}
   PRIVATE ${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES}
@@ -161,6 +156,7 @@ target_sources(hello_world
 )
 
 target_include_directories(hello_world
+  PRIVATE ${ADDITIONAL_INCLUDE_DIR}
   PRIVATE ${GEMMLOWP_INCLUDE_DIR}
   PRIVATE ${RUY_INCLUDE_DIR}
   PRIVATE ${TENSORFLOW_INCLUDE_DIR}

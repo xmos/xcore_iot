@@ -54,7 +54,7 @@ set(APP_DEPENDENT_MODULES
         "inference_engine(>=0.0.0)"
     )
 
-# list(APPEND APP_COMPILER_FLAGS "-DUSE_SWMEM" "-DUSE_QSPI_SWMEM_DEV=1")
+list(APPEND APP_COMPILER_FLAGS "-DUSE_SWMEM" "-DUSE_QSPI_SWMEM_DEV=1")
 # list(APPEND APP_COMPILER_FLAGS "-DUSE_EXTMEM")
 
 ## Set any additional flags only for C++

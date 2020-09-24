@@ -1,37 +1,15 @@
 cmake_minimum_required(VERSION 3.13)
 
+IF(NOT DEFINED ENV{XMOS_AIOT_SDK_PATH})
+    message(FATAL_ERROR "Environment var XMOS_AIOT_SDK_PATH must be set before including xmos_utils.cmake")
+endif()
+
 # Set up compiler
-set(CMAKE_SYSTEM_NAME XMOS)
-if(DEFINED XMOS_TOOLS_PATH)
-    set(CMAKE_C_COMPILER "${XMOS_TOOLS_PATH}/xcc")
-    set(CMAKE_CXX_COMPILER  "${XMOS_TOOLS_PATH}/xcc")
-    set(CMAKE_ASM_COMPILER  "${XMOS_TOOLS_PATH}/xcc")
-    set(CMAKE_AR "${XMOS_TOOLS_PATH}/xmosar")
-    #set(CMAKE_RANLIB "")
-    set(CMAKE_C_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
-    set(CMAKE_CXX_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
-    set(CMAKE_ASM_COMPILER_AR "${XMOS_TOOLS_PATH}/xmosar")
-else()
-    message(WARNING "XMOS_TOOLS_PATH not specified.  CMake will assume tools have been added to PATH.")
-    set(CMAKE_C_COMPILER "xcc")
-    set(CMAKE_CXX_COMPILER  "xcc")
-    set(CMAKE_ASM_COMPILER  "xcc")
-    set(CMAKE_AR "xmosar")
-    set(CMAKE_RANLIB "")
-    set(CMAKE_C_COMPILER_AR "xmosar")
-    set(CMAKE_CXX_COMPILER_AR "xmosar")
-    set(CMAKE_ASM_COMPILER_AR "xmosar")
-endif()
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
-set(CMAKE_C_COMPILER_FORCED TRUE)
-set(CMAKE_CXX_COMPILER_FORCED TRUE)
-set(CMAKE_ASM_COMPILER_FORCED TRUE)
+set(XMOS_MODULES_ROOT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
 
-if(NOT DEFINED XMOS_MODULES_ROOT_DIR)
-    message(FATAL_ERROR "XMOS_MODULES_ROOT_DIR must be set before including xmos_utils.cmake")
-endif()
-
-if(PROJECT_SOURCE_DIR AND NOT DEFINED AFR_VENDORS_DIR)
+if(PROJECT_SOURCE_DIR)
     message(FATAL_ERROR "xmos_utils.cmake must be included before a project definition")
 endif()
 
@@ -42,14 +20,14 @@ if(DEFINED BOARD)
         include("bitstream_src/${BOARD}/board.cmake")
     else()
         message("\nConfiguration for ${BOARD} not found.\nPreconfigured bitstreams are:")
-        foreach(HW ${SUPPORTED_HW})    
+        foreach(HW ${SUPPORTED_HW})
             message("\t${HW}")
         endforeach()
         message(FATAL_ERROR "")
     endif()
 else()
     message("\n-DBOARD must be specified.\nPreconfigured bitstreams are:")
-    foreach(HW ${SUPPORTED_HW})    
+    foreach(HW ${SUPPORTED_HW})
         message("\t${HW}")
     endforeach()
     message(FATAL_ERROR "")
@@ -62,7 +40,6 @@ set(FULL 1 )
 set(BITSTREAM_ONLY 2 )
 set(BSP_ONLY 3 )
 define_property(TARGET PROPERTY OPTIONAL_HEADERS BRIEF_DOCS "Contains list of optional headers." FULL_DOCS "Contains a list of optional headers.  The application level should search through all app includes and define D__[header]_h_exists__ for each header that is in both the app and optional headers.")
-# define_property(TARGET PROPERTY FILE_FLAGS BRIEF_DOCS "List of files with additional compile flags." FULL_DOCS "List of files with additional compile flags.  The target level needs to set_source_files_properties for each file flag pair.")
 define_property(GLOBAL PROPERTY XMOS_TARGETS_LIST BRIEF_DOCS "brief" FULL_DOCS "full")
 
 # Setup build output
@@ -307,7 +284,7 @@ function(XMOS_REGISTER_MODULE)
                 list(APPEND DEPS_TO_LINK "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/lib${module}.a")
                 add_dependencies(${LIB_NAME} ${module})
             endforeach()
-    
+
             target_link_libraries(
                 ${LIB_NAME}
                 PUBLIC

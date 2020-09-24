@@ -6,7 +6,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Import XMOS configurations
-set(XMOS_MODULES_ROOT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_utils.cmake")
 set(XMOS_APP_MODULES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -15,7 +14,7 @@ project(independent_tiles)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
-enable_language(C ASM)
+enable_language(CXX C ASM)
 
 ## Set XMOS application variables
 set(APP_COMPILER_FLAGS
