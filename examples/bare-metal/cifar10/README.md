@@ -53,18 +53,18 @@ To install, run:
 
 To building with the model stored in flash, replace the call to cmake above with the following:
 
-    > cmake ../ -DUSE_SWMEM=ON
+    > cmake ../ -DUSE_SWMEM=1
 
 To flash the model, run the following commands:
 
     > cd bin
     > xobjdump --strip cifar10.xe
     > xobjdump --split cifar10.xb
-    > xflash --write-all image_n0c0.bin --target XCORE-AI-EXPLORER
+    > xflash --write-all image_n0c0.swmem --target XCORE-AI-EXPLORER
 
 To building with the model stored in LPDDR, replace the call to cmake above with the following:
 
-    > cmake ../ -DUSE_EXTMEM=ON
+    > cmake ../ -DUSE_EXTMEM=1
 
 No additional steps are necessary to copy the model into LPDDR.
 
@@ -95,7 +95,7 @@ Unoptimized and optimized models are included with the example.
 
 First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
-    > xformer.py --analyze -par 5 model/model.tflite model/model_xcore.tflite
+    > xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
 
 ### Converting flatbuffer to Source File
 

@@ -48,7 +48,7 @@ If the model is retrained, you will need to optimize it for xcore.ai.
 
 First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
-    > xformer.py --analyze model/model.tflite model/model_xcore.tflite
+    > xformer.py --analyze model/model_quant.tflite model/model_xcore.tflite
 
 The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
 
