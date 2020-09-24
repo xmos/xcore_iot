@@ -7,6 +7,7 @@
 
 #include "cifar10_model.h"
 #include "inference_engine.h"
+#include "tensorflow/lite/micro/kernels/xcore/xcore_device_memory.h"
 
 #define TENSOR_ARENA_SIZE \
   63000  // NOTE: This is big enough fo the model to live in RAM or external

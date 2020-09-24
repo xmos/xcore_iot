@@ -99,10 +99,6 @@ set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES_CXX
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_custom_options.cc"
 )
 
-set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES_C
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_device_memory.c"
-)
-
 #**********************
 # lib_nn sources
 #**********************
@@ -146,6 +142,15 @@ set(LIB_NN_SOURCES_ASM
   "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/depthwise/nn_conv2d_hstrip_depthwise.S"
 )
 
+#**********************
+# Additional support sources
+#**********************
+set(ADDITIONAL_C_SOURCES
+  "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/tensorflow/tensorflow/lite/micro/kernels/xcore/xcore_device_memory.c"
+)
+set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/tensorflow")
+
+
 set(LIB_NAME inference_engine_core)
 set(LIB_VERSION 0.0.0)
 set(LIB_ADD_COMPILER_FLAGS "-Os" )
@@ -159,14 +164,15 @@ set(LIB_CXX_SRCS
 
     )
 set(LIB_C_SRCS
+        "${ADDITIONAL_C_SOURCES}"
         "${TENSORFLOW_LITE_SOURCES_C}"
-        "${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES_C}"
         "${LIB_NN_SOURCES_C}"
     )
 set(LIB_ASM_SRCS
         "${LIB_NN_SOURCES_ASM}"
     )
 set(LIB_INCLUDES
+        "${ADDITIONAL_INCLUDE_DIR}"
         "${GEMMLOWP_INCLUDE_DIR}"
         #"${RUY_INCLUDE_DIR}"
         "${TENSORFLOW_INCLUDE_DIR}"
