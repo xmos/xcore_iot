@@ -29,7 +29,7 @@ static int start_time = 0;
 #endif
 
 
-#define TENSOR_ARENA_SIZE   (1)
+#define TENSOR_ARENA_SIZE   (1024*128)
 uint8_t tensor_arena[TENSOR_ARENA_SIZE];
 
 static size_t input_size;

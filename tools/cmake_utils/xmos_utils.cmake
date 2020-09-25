@@ -47,10 +47,6 @@ file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/libs")
 
-if(DEFINED AFR_ROOT_DIR)
-    include("${AFR_VENDORS_DIR}/xmos/lib_rtos_support/cmake_utils/xmos_afr_support.cmake")
-endif()
-
 function(XMOS_ADD_FILE_COMPILER_FLAGS)
     if(NOT ${ARGC} EQUAL 2)
         message(FATAL_ERROR "XMOS_ADD_FILE_COMPILER_FLAGS requires 2 arguments, a file and string of flags")
@@ -273,10 +269,6 @@ function(XMOS_REGISTER_MODULE)
         endif()
         target_sources(${LIB_NAME} PUBLIC ${LIB_XC_SRCS} ${LIB_CXX_SRCS} ${LIB_ASM_SRCS} ${LIB_C_SRCS})
         target_include_directories(${LIB_NAME} PRIVATE ${LIB_INCLUDES})
-
-        if(DEFINED AFR_ROOT_DIR)
-            include("${AFR_VENDORS_DIR}/xmos/lib_rtos_support/cmake_utils/xmos_afr_support.cmake")
-        endif()
 
         if(NOT ${LIB_NAME}_SILENT_FLAG)
             set(DEPS_TO_LINK "")

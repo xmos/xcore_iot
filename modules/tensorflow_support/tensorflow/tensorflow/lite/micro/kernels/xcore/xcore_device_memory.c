@@ -9,18 +9,18 @@
 #include <xcore/swmem_fill.h>
 #include <xmos_flash.h>
 
+#define WORDS_TO_BYTES(w) ((w) * sizeof(uint32_t))
+#define BYTES_TO_WORDS(b) (((b) + sizeof(uint32_t) - 1) / sizeof(uint32_t))
+
+#define WORD_TO_BYTE_ADDRESS(w) WORDS_TO_BYTES(w)
+#define BYTE_TO_WORD_ADDRESS(b) ((b) / sizeof(uint32_t))
+
 #ifdef USE_SWMEM
 #ifdef USE_QSPI_SWMEM_DEV
 #include "soc.h"
 #include "qspi_flash_dev.h"
 
 static chanend_t swmem_c;
-
-#define WORDS_TO_BYTES(w) ((w) * sizeof(uint32_t))
-#define BYTES_TO_WORDS(b) (((b) + sizeof(uint32_t) - 1) / sizeof(uint32_t))
-
-#define WORD_TO_BYTE_ADDRESS(w) WORDS_TO_BYTES(w)
-#define BYTE_TO_WORD_ADDRESS(b) ((b) / sizeof(uint32_t))
 #else
 flash_ports_t flash_ports_0 = {PORT_SQI_CS, PORT_SQI_SCLK, PORT_SQI_SIO,
                                XS1_CLKBLK_5};
@@ -44,8 +44,7 @@ void swmem_fill(fill_slot_t address) {
 #ifdef USE_QSPI_SWMEM_DEV
   qspi_flash_dev_cmd_t local_cmd;
   local_cmd.operation = qspi_flash_dev_op_read;
-  local_cmd.byte_address =
-      WORD_TO_BYTE_ADDRESS((address - (void *)XS1_SWMEM_BASE) >> 2);
+  local_cmd.byte_address = (address - (void *)XS1_SWMEM_BASE);
   local_cmd.byte_count = WORDS_TO_BYTES(SWMEM_FILL_SIZE_WORDS);
 
   soc_peripheral_function_code_tx(swmem_c, QSPI_DEV_SWMEM_REQ);
@@ -54,10 +53,9 @@ void swmem_fill(fill_slot_t address) {
   soc_peripheral_varlist_rx(swmem_c, 1, local_cmd.byte_count, buf_ptr);
   swmem_fill_populate_from_buffer(swmem_fill_handle, address, buf);
 #else
-  flash_read_quad(&flash_handle, (address - (void *)XS1_SWMEM_BASE) >> 2,
+  flash_read_quad(&flash_handle,
+                  BYTE_TO_WORD_ADDRESS(address - (void *)XS1_SWMEM_BASE),
                   buf_ptr, SWMEM_FILL_SIZE_WORDS);
-
-  uint32_t adr = (address - (void *)XS1_SWMEM_BASE) >> 2;
 
   swmem_fill_populate_from_buffer(swmem_fill_handle, address, buf);
 #endif /* USE_QSPI_SWMEM_DEV */
@@ -101,9 +99,8 @@ void memload(void *dest, void *src, size_t size) {
 #ifdef USE_QSPI_SWMEM_DEV
     qspi_flash_dev_cmd_t local_cmd;
     local_cmd.operation = qspi_flash_dev_op_read;
-    local_cmd.byte_address =
-        WORD_TO_BYTE_ADDRESS(((uintptr_t)src - XS1_SWMEM_BASE) >> 2);
-    local_cmd.byte_count = WORDS_TO_BYTES(size);
+    local_cmd.byte_address = ((uintptr_t)src - XS1_SWMEM_BASE);
+    local_cmd.byte_count = size;
 
     if(local_cmd.byte_count <= QSPI_FLASH_DEV_WRITE_BUFSIZE) {
         soc_peripheral_function_code_tx(swmem_c, QSPI_DEV_SWMEM_REQ);
@@ -114,27 +111,27 @@ void memload(void *dest, void *src, size_t size) {
 
     } else {
       size_t read_bytes = 0;
-      const size_t size_bytes = WORDS_TO_BYTES(size);
 
-      while(read_bytes < size_bytes) {
+      while(read_bytes < size) {
         local_cmd.byte_address =
-            WORD_TO_BYTE_ADDRESS(((uintptr_t)src - XS1_SWMEM_BASE) >> 2) + read_bytes;
+            ((uintptr_t)src - XS1_SWMEM_BASE) + read_bytes;
         local_cmd.byte_count =
-            ((size_bytes - read_bytes) >= QSPI_FLASH_DEV_WRITE_BUFSIZE)
+            ((size - read_bytes) >= QSPI_FLASH_DEV_WRITE_BUFSIZE)
             ? QSPI_FLASH_DEV_WRITE_BUFSIZE
-            : (size_bytes - read_bytes);
+            : (size - read_bytes);
 
         soc_peripheral_function_code_tx(swmem_c, QSPI_DEV_SWMEM_REQ);
         soc_peripheral_varlist_tx(swmem_c, 1, sizeof(qspi_flash_dev_cmd_t),
                                   &local_cmd);
         soc_peripheral_varlist_rx(swmem_c, 1, local_cmd.byte_count,
-                                  (unsigned int *)(dest + BYTES_TO_WORDS(read_bytes)));
+                                  (unsigned int *)(dest + read_bytes));
         read_bytes += local_cmd.byte_count;
       }
     }
 #else
-    flash_read_quad(&flash_handle, ((uintptr_t)src - XS1_SWMEM_BASE) >> 2,
-                    (unsigned int *)dest, size);
+    flash_read_quad(&flash_handle,
+                    BYTE_TO_WORD_ADDRESS(((uintptr_t)src - XS1_SWMEM_BASE)),
+                    (unsigned int *)dest, BYTES_TO_WORDS(size));
 #endif /* USE_QSPI_SWMEM_DEV */
   } else
 #endif /* USE_SWMEM */
