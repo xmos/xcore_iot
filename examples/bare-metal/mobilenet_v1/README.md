@@ -65,7 +65,7 @@ Unoptimized and optimized models are included with the example.
 
 First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
-    > xformer.py --analyze -par 5 model/model.tflite model/model_xcore.tflite
+    > xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
 
 ### Converting flatbuffer to Source File
 

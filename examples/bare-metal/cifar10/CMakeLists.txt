@@ -69,6 +69,11 @@ if (XCORE)
   )
   target_link_options(cifar10 PRIVATE ${BUILD_FLAGS} -lquadspi -w)
   set_target_properties(cifar10 PROPERTIES OUTPUT_NAME cifar10.xe)
+  if (${USE_SWMEM})
+    add_definitions(-DUSE_SWMEM)
+  elseif (${USE_EXTMEM})
+    add_definitions(-DUSE_EXTMEM)
+  endif ()
 else ()
   set(BUILD_FLAGS
     "-g"
@@ -219,14 +224,6 @@ set(INFERENCE_ENGINE_SOURCES
 set(APP_SOURCES
   "${PROJECT_SOURCE_DIR}/app/src/main.c"
 )
-
-#if (XCORE)
-#  set(APP_SOURCES
-#    ${APP_SOURCES}
-#    "${PROJECT_SOURCE_DIR}/app/src/main.xc"
-#    )
-#  set_source_files_properties("${PROJECT_SOURCE_DIR}/app/src/main.xc" PROPERTIES LANGUAGE C)
-#endif ()
 
 #**********************
 # targets

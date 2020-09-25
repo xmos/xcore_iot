@@ -9,6 +9,12 @@
 #include "inference_engine.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_device_memory.h"
 
+#if defined(USE_SWMEM)
+#include "tensorflow/lite/micro/kernels/xcore/xcore_device_memory.h"
+
+__attribute__((aligned(8))) static char swmem_handler_stack[1024];
+#endif
+
 #define TENSOR_ARENA_SIZE \
   63000  // NOTE: This is big enough fo the model to live in RAM or external
          // memory
@@ -19,8 +25,6 @@ static int8_t *input_buffer;
 
 static size_t output_size;
 static int8_t *output_buffer;
-
-__attribute__((aligned(8))) static char swmem_handler_stack[1024];
 
 static int argmax(const int8_t *A, const int N) {
   int m = 0;
@@ -52,7 +56,7 @@ static int load_test_input(const char *filename, int8_t *input, size_t esize) {
 }
 
 int main(int argc, char *argv[]) {
-#if defined(USE_SWMEM) || defined(USE_EXTMEM)
+#if defined(USE_SWMEM)
   // start SW_Mem handler
   swmem_setup();
   size_t stack_words;
