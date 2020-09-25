@@ -67,4 +67,4 @@
 	url = git@github.com:zserge/jsmn.git
 [submodule "tools/ai_tools"]
 	path = tools/ai_tools
-	url = https://github.com/xmos/ai_tools
+	url = git@github.com:xmos/ai_tools.git
