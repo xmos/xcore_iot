@@ -25,7 +25,7 @@ Make a directory for the build.
 
 Run cmake:
 
-    > cmake ../
+    > cmake ../ -DBOARD=XCORE-AI-EXPLORER
     > make
 
 ## Hardware Setup
@@ -40,10 +40,10 @@ To connect the Arducam to the Explorer Board use the schematic and following tab
 
 | ArduCam  | Explorer Board |
 |:--------:|:--------------:|
-| CS       | J6 : X0D00     |
-| MOSI     | J14 : MOSI     |
-| MISO     | J14 : MISO     |
-| SCK      | J14 : CLK      |
+| CS       | J14 : X0D00    |
+| MOSI     | J6 : MOSI      |
+| MISO     | J6 : MISO      |
+| SCK      | J6 : CLK       |
 | GND      | J5 : GND       |
 | VCC      | TP8 : 3V3      |
 | SDA      | TP19 : SDA_IOL |
@@ -59,7 +59,7 @@ Running with GPIO only:
 
 Running with GPIO and host:
 
-    > xrun --xscope --xscope-port localhost:10234 ../bin/app_freertos_person_detection.xe
+    > xrun --xscope --xscope-port localhost:10234 ../bin/person_detection.xe
 
 In a second terminal:
 
