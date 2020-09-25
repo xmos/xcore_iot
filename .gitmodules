@@ -68,3 +68,6 @@
 [submodule "tools/ai_tools"]
 	path = tools/ai_tools
 	url = git@github.com:xmos/ai_tools.git
+[submodule "modules/lib_xs3_math"]
+	path = modules/lib_xs3_math
+	url = git@github.com:xmos/lib_xs3_math.git
