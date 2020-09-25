@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 #**************************
 # Build bare-metal examples
@@ -32,7 +33,3 @@ for example in ${freertos_examples[@]}; do
     (cd examples/freertos/${example}; mkdir -p build) 
     (cd examples/freertos/${example}/build; cmake ../ ${BOARD}; make) 
 done
-
-#**************************
-# Run bare-metal tests
-#**************************
