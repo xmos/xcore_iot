@@ -6,8 +6,7 @@ Summary
 
 The XMOS AIoT SDK and is intended to enable basic evaluation of xcore.ai functionality and perfomance. It comprises the following components:
 
-- AIoT Tools - Scripts, tools and libraries to convert TensorFlowLite for Microcontroller models to a
-format targetting accelerated operations.
+- AIoT Tools - Scripts, tools and libraries to convert TensorFlowLite for Microcontroller models to a format targetting accelerated operations.
 - FreeRTOS - Libraries to support FreeRTOS operation.
 - Examples - Examples showing a variety of operations based on bare-metal and FreeRTOS operation.
 - Documentation - Getting started guides and example build and execution instructions.
