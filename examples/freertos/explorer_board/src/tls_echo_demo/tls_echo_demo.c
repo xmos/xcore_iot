@@ -73,7 +73,10 @@ static void tls_echo_receiver( void *arg )
     socklen_t xSize = sizeof( xClient );
 
     /* Set the listening port */
-    xBindAddress.sin_addr = FreeRTOS_inet_addr_quick( 10, 0, 0, 253 );
+    xBindAddress.sin_addr = FreeRTOS_inet_addr_quick( appconfECHO_IP_ADDR_OCTET_0,
+                                                      appconfECHO_IP_ADDR_OCTET_1,
+                                                      appconfECHO_IP_ADDR_OCTET_2,
+                                                      appconfECHO_IP_ADDR_OCTET_3 );
     xBindAddress.sin_port = FreeRTOS_htons( handle->port );
 
 	/* Get shared deterministic random bit generator */
@@ -297,7 +300,7 @@ static void tls_echo( void *arg )
 		configASSERT(0);
 	}
 
-	handle->port = 25565;
+	handle->port = appconfECHO_PORT;
     handle->rx_timeout = pdMS_TO_TICKS( 5000 );
     handle->tx_timeout = pdMS_TO_TICKS( 5000 );
 

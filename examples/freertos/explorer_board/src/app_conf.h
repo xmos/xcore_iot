@@ -30,6 +30,13 @@
 /* GPIO defines */
 #define appconfGPIO_VOLUME_RAPID_FIRE_MS       	100
 
+/* Echo demo defines */
+#define appconfECHO_IP_ADDR_OCTET_0    	10
+#define appconfECHO_IP_ADDR_OCTET_1    	0
+#define appconfECHO_IP_ADDR_OCTET_2    	0
+#define appconfECHO_IP_ADDR_OCTET_3    	253
+#define appconfECHO_PORT				25565
+
 /* MQTT demo defines */
 #define appconfMQTT_SERVER_IP_ADDR_OCTET_0    	10
 #define appconfMQTT_SERVER_IP_ADDR_OCTET_1    	0
