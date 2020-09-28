@@ -1,3 +1,12 @@
+# Editor cruft
+**/.vscode/
+
+# Python cruft
+**/*.pyc
+**/__pycache__/*
+**/.ipynb_checkpoints/*
+
+# Build & debug cruft
 **/.build*/*
 **/bin/*
 *.o
@@ -14,16 +23,17 @@
 **/html/*
 **/.settings/*
 .metadata
-*.pyc
 **/test_results.csv
 **/.venv/**
 .metadata
 
-# waf build files
+# waf build cruft
 .lock-waf_*
 .waf-*/
 build/
 
-# systemview debug files
+# systemview debug cruft
 *.SVDAT
 
+# macOS cruft
+.DS_Store
