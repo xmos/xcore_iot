@@ -77,11 +77,25 @@ To install the AI toolchain extensions, follow these steps:
 
 `Version 15 of the XMOS Toolchain <https://www.xmos.com/software/tools/>`_ and `CMake 3.14 <https://cmake.org/download/>`_ + are required for building the example applications.  If necessary, download and follow the installation instructions for those components.
 
-**Step 2. Download the XMOS AIoT SDK**
+If installing the AI Extensions Python module from source, are a standard C/C++ compiler is required (tested with gcc 8.3.1+ and clang 11.0.0+).  
 
-Download and unzip the archive.
+**Step 2. Clone the XMOS AIoT SDK**
 
-**Step 3. Set up the environment variables**
+Clone the AIoT SDK repository with the following command:
+
+.. code-block:: console
+
+    $ git clone --recurse-submodules https://github.com/xmos/aiot_sdk.git
+
+**Step 3. Build library prerequisites for the AI Extensions Python module**
+
+The following command will build libtflite2xcore which is required for the AI Extensions Python module.
+
+.. code-block:: console
+
+    $ ./build_dist.sh
+
+**Step 4. Set up the environment variables**
 
 .. code-block:: console
 
@@ -89,7 +103,7 @@ Download and unzip the archive.
 
 You can also add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set in a new terminal window.
 
-**Step 4. Create a Conda environment**
+**Step 5. Create a Conda environment**
 
 .. code-block:: console
 
@@ -103,11 +117,11 @@ Activate the environment
 
 .. note:: You may need to specify the fully-qualified path to your environment.
 
-**Step 5. Install AI Extensions Python module**
+**Step 6. Install AI Extensions Python module**
 
 .. code-block:: console
 
-    $ pip install -e ${XMOS_AIOT_SDK_PATH}/ai_tools/tflite2xcore
+    $ pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/tflite2xcore
 
 Optimizing and Deploying Your Model
 -----------------------------------
@@ -119,7 +133,6 @@ The **recommended** option is to use Python or a Jupyter Notebook.  We've provid
 .. code-block:: console
 
     $ pip install jupyter
-    $ pip install matplotlib
 
 Command-line Python scripts are also provided for those that prefer not to write your own Python scripts or use Jupyter Notebooks.
 
