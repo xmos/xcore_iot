@@ -8,7 +8,7 @@ sudo umount -q fat_mnt
 
 mkdir -p fat_mnt
 
-WF200_FW=../../../lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware/wfm_wf200_C0.sec
+WF200_FW=$XMOS_AIOT_SDK_PATH/modules/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware/wfm_wf200_C0.sec
 sudo mount -o loop fat.fs fat_mnt
 sudo mkdir fat_mnt/firmware
 sudo mkdir fat_mnt/crypto
@@ -25,4 +25,3 @@ sudo cp networks.dat fat_mnt/wifi
 sudo umount fat_mnt
 
 rmdir fat_mnt
-
