@@ -2,8 +2,6 @@
 
 #define DEBUG_UNIT CIFAR10_DEV
 
-#include "tensorflow/lite/micro/kernels/xcore/xcore_device_memory.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,6 +18,7 @@ extern "C" {
 #include "qspi_flash_dev.h"
 #include "ai_dev.h"
 
+#include "xcore_device_memory.h"
 #include "cifar10_model.h"
 #include "inference_engine.h"
 

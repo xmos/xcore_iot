@@ -7,11 +7,9 @@
 
 #include "cifar10_model.h"
 #include "inference_engine.h"
-#include "tensorflow/lite/micro/kernels/xcore/xcore_device_memory.h"
+#include "xcore_device_memory.h"
 
 #if defined(USE_SWMEM)
-#include "tensorflow/lite/micro/kernels/xcore/xcore_device_memory.h"
-
 __attribute__((aligned(8))) static char swmem_handler_stack[1024];
 #endif
 

@@ -88,7 +88,6 @@ static void cifar10_task( void *arg )
     uint8_t *data = NULL;
     FRESULT result;
     unsigned int bytes_read = 0;
-    uint32_t status;
     int32_t output_tensor_bytes = 0;
     char classification[12] = {0};
 
@@ -147,7 +146,7 @@ static void cifar10_task( void *arg )
             debug_printf("********received result time: %d us\n", (end_time - start_time) / 100 );
 #endif
 
-            int m = argmax(output_tensor_buf, 10);
+            int m = argmax((const int8_t*)output_tensor_buf, 10);
             switch (m) {
             case 0:
               snprintf(classification, 9, "Airplane");

@@ -1,5 +1,5 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
-#include "tensorflow/lite/micro/kernels/xcore/xcore_device_memory.h"
+#include "xcore_device_memory.h"
 
 #include <stddef.h>
 #include <string.h>

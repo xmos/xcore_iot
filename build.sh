@@ -10,26 +10,33 @@ declare -a bare_metal_examples=(
     "micro_speech"
     "mobilenet_v1"
     )
- 
+
 for example in ${bare_metal_examples[@]}; do
-    (cd examples/bare-metal/${example}; mkdir -p build) 
-    (cd examples/bare-metal/${example}/build; cmake ../ ; make install) 
+    (cd examples/bare-metal/${example}; mkdir -p build)
+    (cd examples/bare-metal/${example}/build; cmake ../ ; make install)
 done
 
 #**************************
 # Build FreeRTOS examples
 #**************************
-BOARD="-DBOARD=XCORE-AI-EXPLORER"
+BOARD=XCORE-AI-EXPLORER
 
 declare -a freertos_examples=(
     "cifar10"
     "explorer_board"
-    "independent_tiles"
     "iot_aws"
     "person_detection"
     )
 
 for example in ${freertos_examples[@]}; do
-    (cd examples/freertos/${example}; mkdir -p build) 
-    (cd examples/freertos/${example}/build; cmake ../ ${BOARD}; make) 
+    (cd examples/freertos/${example}; mkdir -p build)
+    (cd examples/freertos/${example}/build; cmake ../ -DBOARD=${BOARD}; make)
+done
+
+declare -a freertos_make_examples=(
+    "independent_tiles"
+    )
+
+for example in ${freertos_make_examples[@]}; do
+    (cd examples/freertos/${example}; make BOARD=${BOARD})
 done

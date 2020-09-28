@@ -54,8 +54,11 @@ set(APP_DEPENDENT_MODULES
         "inference_engine(>=0.0.0)"
     )
 
-list(APPEND APP_COMPILER_FLAGS "-DUSE_SWMEM" "-DUSE_QSPI_SWMEM_DEV=1")
-# list(APPEND APP_COMPILER_FLAGS "-DUSE_EXTMEM")
+if(${USE_SWMEM})
+  add_definitions(-DUSE_SWMEM -DUSE_QSPI_SWMEM_DEV=1)
+elseif(${USE_EXTMEM})
+  add_definitions(-DUSE_EXTMEM)
+endif()
 
 ## Set any additional flags only for C++
 set(CMAKE_CXX_FLAGS  "-std=c++11")

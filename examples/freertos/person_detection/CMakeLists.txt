@@ -27,7 +27,7 @@ set(APP_COMPILER_FLAGS
         "-DDEBUG_PRINT_ENABLE=1"
         "-Wno-unknown-pragmas"
         "-DTF_LITE_STATIC_MEMORY"
-        # "-DUSE_EXTMEM"
+        "-DUSE_EXTMEM"
         "-D_XCORE_HAS_SWMEM"
         "-DTF_LITE_STRIP_ERROR_STRINGS"
         "-DNDEBUG"

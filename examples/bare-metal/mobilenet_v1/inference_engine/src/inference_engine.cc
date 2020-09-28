@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include "mobilenet_v1.h"
-#include "tensorflow/lite/micro/kernels/xcore/xcore_device_memory.h"
+#include "xcore_device_memory.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_ops.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_profiler.h"

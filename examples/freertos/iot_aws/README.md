@@ -96,17 +96,33 @@ In this section, we will verify the AVS to IoT Core setup.
 }
 ```
 
+## Prerequisites for building
+
+[XMOS Toolchain 15.0.1](https://www.xmos.com/software/tools/) or newer.
+
+Install [CMake](https://cmake.org/download/) version 3.10 or newer.
+
+Set environment variable for the XMOS AIoT SDK:
+
+    > export XMOS_AIOT_SDK_PATH=<path to>/aiot_sdk
+
 #### Explorer Board Configuration and Build
 In this section, we will configure the demo software to connect to the proper MQTT broker.
-1. In appconf.h, set appconfMQTT_HOSTNAME to your IoT endpoint URL:</br>
-```#define appconfMQTT_HOSTNAME "[prefix].iot.[endpoint location].amazonaws.com"```
-2. In the example application root directory, run:</br>
-```cmake -B build -DBOARD=XCORE-AI-EXPLORER```
-3. Change to the build directory and run:</br>
-```make```</br>
-This will create the iot_aws.xe binary in the bin folder.
-4. Before the application can be run, the flash must be populated with a filesystem containing the crypto credentials for TLS and the WiFi connection details.  From the example application root directory, go to filesystem_support.  Paste the certificates and keys downloaded in the **IoT Core** setup of your **Thing** into the ```aws``` folder.  Rename the CA certificate file ```ca.pem``` , the device certificate file ```client.pem```, and the device private key file ```client.key```.  Run the Python script wifi_profile.py to create the WiFi configuration file.
-5. With the development board and xTag connected, run the flash_image.sh bash script.  This will create a filesystem and flash it to the device.
+1. In appconf.h, set appconfMQTT_HOSTNAME to your IoT endpoint URL:
+
+    ```#define appconfMQTT_HOSTNAME "[prefix].iot.[endpoint location].amazonaws.com"```
+
+2. In the example application root directory, run:
+
+        > mkdir build
+        > cd build
+        > cmake ../ -DBOARD=XCORE-AI-EXPLORER
+        > make -j
+
+    This will create the iot_aws.xe binary in the bin folder.
+
+3. Before the application can be run, the flash must be populated with a filesystem containing the crypto credentials for TLS and the WiFi connection details.  From the example application root directory, go to filesystem_support.  Paste the certificates and keys downloaded in the **IoT Core** setup of your **Thing** into the ```aws``` folder.  Rename the CA certificate file ```ca.pem``` , the device certificate file ```client.pem```, and the device private key file ```client.key```.  Run the Python script wifi_profile.py to create the WiFi configuration file.
+4. With the development board and xTag connected, run the flash_image.sh bash script.  This will create a filesystem and flash it to the device.
     *Note: This script requires sudo, as it mounts and unmounts a disk.*
 
 
