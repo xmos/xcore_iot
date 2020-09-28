@@ -1,7 +1,7 @@
-RTOS support library change log
-======================
+AIoT SDK change log
+===================
 
-0.5.0
+0.9.3
 -----
 
-  * Initial beta release
+  * Initial pre-Alpha release
