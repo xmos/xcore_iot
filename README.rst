@@ -17,6 +17,7 @@ device are available to authorised parties on `www.xmos.ai <https://www.xmos.ai/
 
 Installation
 ------------
+
 Some dependent components are included as git submodules. These can be obtained by cloning this repository with the following command:
 
 .. code-block:: console
@@ -27,5 +28,10 @@ Documentation
 -------------
 
 See the `AI Toolchain Extensions User Guide <https://github.com/xmos/aiot_sdk/blob/develop/documents/ai_toolchain_extensions_user_guide.rst>`_ for instructions on installing and using the AI Toolchain Extensions.
+
+Contributing
+------------
+
+See the `CONTRIBUTING.rst <https://github.com/xmos/aiot_sdk/blob/develop/CONTRIBUTING.rst>`_ for information on building example applications, running tests, and guidelines for adding code.
 
 
