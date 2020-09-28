@@ -57,7 +57,7 @@ $ ./build_examples.sh
 
 ### Running Tests
 
-A script is provided to run all the tests.  Run this script with:
+A script is provided to run all the tests on a connected xcore.ai device.  Run this script with:
 
 ```bash
 $ ./run_tests.sh
