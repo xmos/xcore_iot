@@ -17,10 +17,15 @@
 
 /* BSP/bitstream headers */
 #include "bitstream_devices.h"
+
+#if SOC_QSPI_FLASH_PERIPHERAL_USED
 #include "qspi_flash_driver.h"
+
+static soc_peripheral_t qspi_dev = NULL;
 
 #define QSPI_FLASH_FILESYSTEM_START_ADDRESS 0x100000
 #define QSPI_FLASH_SECTOR_SIZE 4096
+#endif
 
 static DSTATUS drive_status[FF_VOLUMES] = {
 #if FF_VOLUMES >= 10
@@ -76,7 +81,7 @@ DSTATUS disk_status (
 
 
 /*-----------------------------------------------------------------------*/
-/* Inidialize a Drive                                                    */
+/* Initialize a Drive                                                    */
 /*-----------------------------------------------------------------------*/
 
 __attribute__((weak))
@@ -90,9 +95,10 @@ DSTATUS disk_initialize (
 #if FF_VOLUMES >= 1
 #if SOC_QSPI_FLASH_PERIPHERAL_USED
 	case 0:
-		qspi_flash_driver_init(
-				BITSTREAM_QSPI_FLASH_DEVICE_A,
-				0);
+        if(qspi_dev == NULL) {
+    		qspi_dev = qspi_flash_driver_init(BITSTREAM_QSPI_FLASH_DEVICE_A,
+                                			  0);
+        }
 		drive_status[pdrv] &= ~STA_NOINIT;
 		stat = drive_status[pdrv];
 		break;
