@@ -9,8 +9,8 @@
 /* storage control modules to the FatFs module with a defined API.       */
 /*-----------------------------------------------------------------------*/
 
-#include "ff.h"			/* Obtains integer types */
-#include "diskio.h"		/* Declarations of disk functions */
+#include "ff.h"            /* Obtains integer types */
+#include "diskio.h"        /* Declarations of disk functions */
 
 /* Library headers */
 #include "soc.h"
@@ -21,42 +21,40 @@
 #if SOC_QSPI_FLASH_PERIPHERAL_USED
 #include "qspi_flash_driver.h"
 
-static soc_peripheral_t qspi_dev = NULL;
-
 #define QSPI_FLASH_FILESYSTEM_START_ADDRESS 0x100000
 #define QSPI_FLASH_SECTOR_SIZE 4096
 #endif
 
 static DSTATUS drive_status[FF_VOLUMES] = {
 #if FF_VOLUMES >= 10
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 9
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 8
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 7
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 6
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 5
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 4
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 3
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 2
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 #if FF_VOLUMES >= 1
-		STA_NOINIT,
+        STA_NOINIT,
 #endif
 
 };
@@ -67,16 +65,16 @@ static DSTATUS drive_status[FF_VOLUMES] = {
 
 __attribute__((weak))
 DSTATUS disk_status (
-	BYTE pdrv		/* Physical drive nmuber to identify the drive */
+    BYTE pdrv        /* Physical drive nmuber to identify the drive */
 )
 {
-	DSTATUS stat = STA_NOINIT;
+    DSTATUS stat = STA_NOINIT;
 
-	if (pdrv < FF_VOLUMES) {
-		stat = drive_status[pdrv];
-	}
+    if (pdrv < FF_VOLUMES) {
+        stat = drive_status[pdrv];
+    }
 
-	return stat;
+    return stat;
 }
 
 
@@ -86,30 +84,30 @@ DSTATUS disk_status (
 
 __attribute__((weak))
 DSTATUS disk_initialize (
-	BYTE pdrv				/* Physical drive nmuber to identify the drive */
+    BYTE pdrv                /* Physical drive nmuber to identify the drive */
 )
 {
-	DSTATUS stat;
+    DSTATUS stat;
 
-	switch (pdrv) {
+    switch (pdrv) {
 #if FF_VOLUMES >= 1
 #if SOC_QSPI_FLASH_PERIPHERAL_USED
-	case 0:
-        if(qspi_dev == NULL) {
-    		qspi_dev = qspi_flash_driver_init(BITSTREAM_QSPI_FLASH_DEVICE_A,
-                                			  0);
+    case 0:
+         if ((drive_status[pdrv] & STA_NOINIT )== STA_NOINIT) {
+            qspi_flash_driver_init(BITSTREAM_QSPI_FLASH_DEVICE_A,
+                                   0);
+            drive_status[pdrv] &= ~STA_NOINIT;
         }
-		drive_status[pdrv] &= ~STA_NOINIT;
-		stat = drive_status[pdrv];
-		break;
+        stat = drive_status[pdrv];
+        break;
 #endif
 #endif
-	default:
-		stat = STA_NOINIT;
-		break;
-	}
+    default:
+        stat = STA_NOINIT;
+        break;
+    }
 
-	return stat;
+    return stat;
 }
 
 
@@ -120,39 +118,39 @@ DSTATUS disk_initialize (
 
 __attribute__((weak))
 DRESULT disk_read (
-	BYTE pdrv,		/* Physical drive nmuber to identify the drive */
-	BYTE *buff,		/* Data buffer to store read data */
-	LBA_t sector,	/* Start sector in LBA */
-	UINT count		/* Number of sectors to read */
+    BYTE pdrv,        /* Physical drive nmuber to identify the drive */
+    BYTE *buff,        /* Data buffer to store read data */
+    LBA_t sector,    /* Start sector in LBA */
+    UINT count        /* Number of sectors to read */
 )
 {
-	DRESULT res;
+    DRESULT res;
 
-	switch (pdrv) {
+    switch (pdrv) {
 #if FF_VOLUMES >= 1
 #if SOC_QSPI_FLASH_PERIPHERAL_USED
-	case 0:
-		if ((drive_status[pdrv] & ~STA_PROTECT) == 0) {
-			qspi_flash_read(
-					bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
-					buff,
-					QSPI_FLASH_FILESYSTEM_START_ADDRESS + (sector * QSPI_FLASH_SECTOR_SIZE),
-					count * QSPI_FLASH_SECTOR_SIZE);
-			res = RES_OK;
-		} else if (drive_status[pdrv] & STA_NOINIT) {
-			res = RES_NOTRDY;
-		} else {
-			res = RES_ERROR;
-		}
-		break;
+    case 0:
+        if ((drive_status[pdrv] & ~STA_PROTECT) == 0) {
+            qspi_flash_read(
+                    bitstream_qspi_flash_devices[BITSTREAM_QSPI_FLASH_DEVICE_A],
+                    buff,
+                    QSPI_FLASH_FILESYSTEM_START_ADDRESS + (sector * QSPI_FLASH_SECTOR_SIZE),
+                    count * QSPI_FLASH_SECTOR_SIZE);
+            res = RES_OK;
+        } else if (drive_status[pdrv] & STA_NOINIT) {
+            res = RES_NOTRDY;
+        } else {
+            res = RES_ERROR;
+        }
+        break;
 #endif
 #endif
-	default:
-		res = RES_PARERR;
-		break;
-	}
+    default:
+        res = RES_PARERR;
+        break;
+    }
 
-	return res;
+    return res;
 }
 
 
@@ -165,45 +163,45 @@ DRESULT disk_read (
 
 __attribute__((weak))
 DRESULT disk_write (
-	BYTE pdrv,			/* Physical drive nmuber to identify the drive */
-	const BYTE *buff,	/* Data to be written */
-	LBA_t sector,		/* Start sector in LBA */
-	UINT count			/* Number of sectors to write */
+    BYTE pdrv,            /* Physical drive nmuber to identify the drive */
+    const BYTE *buff,    /* Data to be written */
+    LBA_t sector,        /* Start sector in LBA */
+    UINT count            /* Number of sectors to write */
 )
 {
-	DRESULT res;
+    DRESULT res;
 
-	switch (pdrv) {
+    switch (pdrv) {
 #if FF_VOLUMES >= 1
 #if SOC_QSPI_FLASH_PERIPHERAL_USED
-	case 0:
-		if (drive_status[pdrv] == 0) {
-			qspi_flash_erase(
-					bitstream_qspi_flash_devices[ BITSTREAM_QSPI_FLASH_DEVICE_A ],
-					QSPI_FLASH_FILESYSTEM_START_ADDRESS + ( sector * QSPI_FLASH_SECTOR_SIZE ),
-					count * QSPI_FLASH_SECTOR_SIZE );
-			qspi_flash_write(
-					bitstream_qspi_flash_devices[ BITSTREAM_QSPI_FLASH_DEVICE_A ],
-					(uint8_t *) buff,
-					QSPI_FLASH_FILESYSTEM_START_ADDRESS + ( sector * QSPI_FLASH_SECTOR_SIZE ),
-					count * QSPI_FLASH_SECTOR_SIZE );
-			res = RES_OK;
-		} else if (drive_status[pdrv] & STA_NOINIT) {
-			res = RES_NOTRDY;
-		} else if (drive_status[pdrv] & STA_PROTECT) {
-			res = RES_WRPRT;
-		} else {
-			res = RES_ERROR;
-		}
-		break;
+    case 0:
+        if (drive_status[pdrv] == 0) {
+            qspi_flash_erase(
+                    bitstream_qspi_flash_devices[ BITSTREAM_QSPI_FLASH_DEVICE_A ],
+                    QSPI_FLASH_FILESYSTEM_START_ADDRESS + ( sector * QSPI_FLASH_SECTOR_SIZE ),
+                    count * QSPI_FLASH_SECTOR_SIZE );
+            qspi_flash_write(
+                    bitstream_qspi_flash_devices[ BITSTREAM_QSPI_FLASH_DEVICE_A ],
+                    (uint8_t *) buff,
+                    QSPI_FLASH_FILESYSTEM_START_ADDRESS + ( sector * QSPI_FLASH_SECTOR_SIZE ),
+                    count * QSPI_FLASH_SECTOR_SIZE );
+            res = RES_OK;
+        } else if (drive_status[pdrv] & STA_NOINIT) {
+            res = RES_NOTRDY;
+        } else if (drive_status[pdrv] & STA_PROTECT) {
+            res = RES_WRPRT;
+        } else {
+            res = RES_ERROR;
+        }
+        break;
 #endif
 #endif
-	default:
-		res = RES_PARERR;
-		break;
-	}
+    default:
+        res = RES_PARERR;
+        break;
+    }
 
-	return res;
+    return res;
 }
 
 #endif
@@ -215,66 +213,66 @@ DRESULT disk_write (
 
 __attribute__((weak))
 DRESULT disk_ioctl (
-	BYTE pdrv,		/* Physical drive nmuber (0..) */
-	BYTE cmd,		/* Control code */
-	void *buff		/* Buffer to send/receive control data */
+    BYTE pdrv,        /* Physical drive nmuber (0..) */
+    BYTE cmd,        /* Control code */
+    void *buff        /* Buffer to send/receive control data */
 )
 {
-	DRESULT res;
+    DRESULT res;
 
-	switch (pdrv) {
+    switch (pdrv) {
 #if FF_VOLUMES >= 1
 #if SOC_QSPI_FLASH_PERIPHERAL_USED
-	case 0:
-		if ((drive_status[pdrv] & ~STA_PROTECT) == 0) {
+    case 0:
+        if ((drive_status[pdrv] & ~STA_PROTECT) == 0) {
 
-			switch (cmd) {
-			case CTRL_SYNC:
-				if (drive_status[pdrv] & STA_PROTECT) {
-					res = RES_ERROR;
-				} else {
-					res = RES_OK;
-				}
-				break;
+            switch (cmd) {
+            case CTRL_SYNC:
+                if (drive_status[pdrv] & STA_PROTECT) {
+                    res = RES_ERROR;
+                } else {
+                    res = RES_OK;
+                }
+                break;
 
-			case GET_SECTOR_COUNT:
-				/* TODO: need to be able to query the flash driver for this */
-				*((LBA_t *) buff) = 1024;
-				res = RES_OK;
-				break;
+            case GET_SECTOR_COUNT:
+                /* TODO: need to be able to query the flash driver for this */
+                *((LBA_t *) buff) = 1024;
+                res = RES_OK;
+                break;
 
-			case GET_SECTOR_SIZE:
-				*((WORD *) buff) = QSPI_FLASH_SECTOR_SIZE;
-				res = RES_OK;
-				break;
+            case GET_SECTOR_SIZE:
+                *((WORD *) buff) = QSPI_FLASH_SECTOR_SIZE;
+                res = RES_OK;
+                break;
 
-			case GET_BLOCK_SIZE:
-				*((DWORD *) buff) = QSPI_FLASH_SECTOR_SIZE;
-				res = RES_OK;
-				break;
+            case GET_BLOCK_SIZE:
+                *((DWORD *) buff) = QSPI_FLASH_SECTOR_SIZE;
+                res = RES_OK;
+                break;
 
-			case CTRL_TRIM:
-				res = RES_OK;
-				break;
+            case CTRL_TRIM:
+                res = RES_OK;
+                break;
 
-			default:
-				res = RES_PARERR;
-				break;
-			}
+            default:
+                res = RES_PARERR;
+                break;
+            }
 
-			res = RES_OK;
-		} else if (drive_status[pdrv] & STA_NOINIT) {
-			res = RES_NOTRDY;
-		} else {
-			res = RES_ERROR;
-		}
-		break;
+            res = RES_OK;
+        } else if (drive_status[pdrv] & STA_NOINIT) {
+            res = RES_NOTRDY;
+        } else {
+            res = RES_ERROR;
+        }
+        break;
 #endif
 #endif
-	default:
-		res = RES_PARERR;
-		break;
-	}
+    default:
+        res = RES_PARERR;
+        break;
+    }
 
-	return res;
+    return res;
 }
