@@ -42,4 +42,4 @@ elif [ "$UNAME" == "Darwin" ] ; then
     hdiutil detach fat_mnt
 fi
 
-rm -rf fat_mnt
+sudo rm -rf fat_mnt
