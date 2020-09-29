@@ -60,6 +60,10 @@ If you plan on running the demo where the Explorer Board connects to a host side
 ## Filesystem setup
 Before the demo can be run, the filesystem must be configured and flashed.
 
+Note, macOS users will need to install `dosfstools`.
+
+    > brew install dosfstools
+
 To create certificates for the demos run:
 
     > cd filesystem_support
