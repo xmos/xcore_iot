@@ -77,7 +77,7 @@ To install the AI toolchain extensions, follow these steps:
 
 `Version 15 of the XMOS Toolchain <https://www.xmos.com/software/tools/>`_ and `CMake 3.14 <https://cmake.org/download/>`_ + are required for building the example applications.  If necessary, download and follow the installation instructions for those components.
 
-If installing the AI Extensions Python module from source, are a standard C/C++ compiler is required (tested with gcc 8.3.1+ and clang 11.0.0+).  
+If installing the AI Extensions Python module from source, are a standard C/C++ compiler is required (tested with gcc 8.3.1+ and clang 11.0.0+).  macOS users can use the Xcode command line tools.
 
 **Step 2. Clone the XMOS AIoT SDK**
 
