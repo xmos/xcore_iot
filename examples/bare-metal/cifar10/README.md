@@ -15,7 +15,7 @@ The example reads a test image specified on the command line over JTAG.  Input i
 - ship
 - truck
 
-A Python 3 script is provided that will generate one example image from each of the classes above. This script requires [Tensorflow](https://www.tensorflow.org/) and [Numpy](https://numpy.org/).  If you have already installed the XMOS AI Toolchain extenstions then you have these requirements.  Alternatively, you can install using `pip`.  To generate the images run:
+A Python 3 script is provided that will generate one example image from each of the classes above. This script requires [Tensorflow](https://www.tensorflow.org/) and [Numpy](https://numpy.org/).  If you have already installed the XMOS AI Toolchain extensions then you have these requirements.  Alternatively, you can install using `pip`.  To generate the images run:
 
     > cd test_inputs
     > ./make_test_tensors.py
