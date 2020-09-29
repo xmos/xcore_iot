@@ -29,6 +29,8 @@ Documentation
 
 See the `AI Toolchain Extensions User Guide <https://github.com/xmos/aiot_sdk/blob/develop/documents/ai_toolchain_extensions_user_guide.rst>`_ for instructions on installing and using the AI Toolchain Extensions.
 
+We have created an application template for a new FreeRTOS application.  See `rtos_app_template <https://github.com/xmos/rtos_app_template>`_.  And, we have created and documented an example application using this template.  See `freertos_app_example <https://github.com/xmos/freertos_app_example>`_
+
 Contributing
 ------------
 
