@@ -55,7 +55,7 @@ This demo can be run with only GPIO or GPIO and host output.
 
 Running with GPIO only:
 
-    > xrun --xscope ../bin/app_freertos_person_detection.xe
+    > xrun --xscope ../bin/person_detection.xe
 
 Running with GPIO and host:
 
