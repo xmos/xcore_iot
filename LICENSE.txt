@@ -132,4 +132,4 @@ This License shall be governed by and construed in accordance with English law a
 This License has been entered into on the date stated at the beginning of it.
 
 Schedule
-XMOS I2S/TDM Library software
+XMOS AIoT SDK software
