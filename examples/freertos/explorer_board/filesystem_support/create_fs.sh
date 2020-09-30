@@ -13,7 +13,7 @@ elif [ "$UNAME" == "Darwin" ] ; then
 fi
 
 # Create an empty FAT filesystem in it
-$MKFS_VFAT_PATH/mkfs.vfat -v -F12 -s1 -S4096 -n xcore_filesystem fat.fs
+$MKFS_VFAT_PATH/mkfs.vfat -v -F12 -s1 -S4096 -n xcore_fs fat.fs
 
 mkdir -p fat_mnt
 
