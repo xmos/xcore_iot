@@ -21,8 +21,13 @@
 #if SOC_QSPI_FLASH_PERIPHERAL_USED
 #include "qspi_flash_driver.h"
 
+#ifndef QSPI_FLASH_FILESYSTEM_START_ADDRESS
 #define QSPI_FLASH_FILESYSTEM_START_ADDRESS 0x100000
+#endif
+
+#ifndef QSPI_FLASH_SECTOR_SIZE
 #define QSPI_FLASH_SECTOR_SIZE 4096
+#endif
 #endif
 
 static DSTATUS drive_status[FF_VOLUMES] = {
