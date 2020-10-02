@@ -115,7 +115,10 @@ static void ov2640_reg_jpeg_init()
     do
     {
         regop_res = ov2640_i2c_write_reg( OV2640_JPEG_INIT[i].reg, OV2640_JPEG_INIT[i].val );
-        configASSERT( regop_res == I2C_REGOP_SUCCESS );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+        }
         i++;
     }
     while( ( OV2640_JPEG_INIT[i].reg != 0xFF ) | ( OV2640_JPEG_INIT[i].val != 0xFF ) );
@@ -128,7 +131,10 @@ static void ov2640_reg_yuv()
     do
     {
         regop_res = ov2640_i2c_write_reg( OV2640_YUV422[i].reg, OV2640_YUV422[i].val );
-        configASSERT( regop_res == I2C_REGOP_SUCCESS );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+        }
         i++;
     }
     while( ( OV2640_YUV422[i].reg != 0xFF ) | ( OV2640_YUV422[i].val != 0xFF ) );
@@ -141,7 +147,10 @@ static void ov2640_reg_no_jpeg_compression()
     do
     {
         regop_res = ov2640_i2c_write_reg( OV2640_NONCOMPRESSED[i].reg, OV2640_NONCOMPRESSED[i].val );
-        configASSERT( regop_res == I2C_REGOP_SUCCESS );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+        }
         i++;
     }
     while( ( OV2640_NONCOMPRESSED[i].reg != 0xFF ) | ( OV2640_NONCOMPRESSED[i].val != 0xFF ) );
@@ -154,7 +163,10 @@ static void ov2640_reg_96x96_jpeg()
     do
     {
         regop_res = ov2640_i2c_write_reg( OV2640_96x96_JPEG[i].reg, OV2640_96x96_JPEG[i].val );
-        configASSERT( regop_res == I2C_REGOP_SUCCESS );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+        }
         i++;
     }
     while( ( OV2640_96x96_JPEG[i].reg != 0xFF ) | ( OV2640_96x96_JPEG[i].val != 0xFF ) );
@@ -167,7 +179,10 @@ static void ov2640_reg_160x120_JPEG()
     do
     {
         regop_res = ov2640_i2c_write_reg( OV2640_160x120_JPEG[i].reg, OV2640_160x120_JPEG[i].val );
-        configASSERT( regop_res == I2C_REGOP_SUCCESS );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+        }
         i++;
     }
     while( ( OV2640_160x120_JPEG[i].reg != 0xFF ) | ( OV2640_160x120_JPEG[i].val != 0xFF ) );
@@ -203,93 +218,151 @@ uint32_t ov2640_read_fifo_length()
     return ( ( ( len3 << 16 ) | ( len2 << 8 ) | len1 ) & 0x07fffff );
 }
 
-void ov2640_init( int32_t spi_dev_id, int32_t i2c_dev_id )
+int32_t ov2640_init( int32_t spi_dev_id, int32_t i2c_dev_id )
 {
+    int32_t retval = pdFALSE;
     i2c_regop_res_t regop_res;
     uint8_t tmp;
 
-    if( ov2640_host_ctx.initialized )
+    do
     {
-        configASSERT( 0 );
-        return;
-    }
+        if( ov2640_host_ctx.initialized )
+        {
+            debug_printf("ov2640 context has already been initialized.\n");
+            break;
+        }
 
-    ov2640_host_ctx.spi_dev = spi_master_driver_init(
-                               spi_dev_id,
-                               3*2, /* 6 DMA buffers */
-                               0,/* This device's interrupts should happen on core 0 */
-                               0,
-                               NULL );
+        ov2640_host_ctx.spi_dev = spi_master_driver_init(
+                                   spi_dev_id,
+                                   3*2, /* 6 DMA buffers */
+                                   0,/* This device's interrupts should happen on core 0 */
+                                   0,
+                                   NULL );
 
-    /* Camera supports 8 MHz max */
-    spi_master_device_init( ov2640_host_ctx.spi_dev,
-                            0, 0, /* mode 0 */
-                            8,    /* 100 MHz / (8*2) / 2 = 3.125 MHz SPI clock */
-                            3,    /* 3 nanosecond cs to data minimum time */
-                            0,    /* no inter-byte setup delay required */
-                            0 );  /* no last clock to cs delay required */
+        /* Camera supports 8 MHz max */
+        spi_master_device_init( ov2640_host_ctx.spi_dev,
+                                0, 0, /* mode 0 */
+                                8,    /* 100 MHz / (8*2) / 2 = 3.125 MHz SPI clock */
+                                3,    /* 3 nanosecond cs to data minimum time */
+                                0,    /* no inter-byte setup delay required */
+                                0 );  /* no last clock to cs delay required */
 
 
-    ov2640_host_ctx.device_addr = OV2640_I2C_ADDR;
-    ov2640_host_ctx.i2c_dev = i2c_driver_init( i2c_dev_id );
+        ov2640_host_ctx.device_addr = OV2640_I2C_ADDR;
+        ov2640_host_ctx.i2c_dev = i2c_driver_init( i2c_dev_id );
 
-    //Reset the CPLD
-    ov2640_spi_write(0x07, 0x80);
-    DELAY_MS( 100 );
-    ov2640_spi_write(0x07, 0x00);
-    DELAY_MS( 100 );
+        //Reset the CPLD
+        ov2640_spi_write(0x07, 0x80);
+        DELAY_MS( 100 );
+        ov2640_spi_write(0x07, 0x00);
+        DELAY_MS( 100 );
 
-    debug_printf("Arducam Rev: 0x%x\n", ov2640_spi_read( ARDUCAM_REV ) );
+        debug_printf("Arducam Rev: 0x%x\n", ov2640_spi_read( ARDUCAM_REV ) );
 
-    /* Test that SPI is functional */
-    ov2640_spi_write( ARDUCAM_TEST_REG, 0xA5 );
-    tmp = ov2640_spi_read( ARDUCAM_TEST_REG );
-    configASSERT( tmp == 0xA5 );        /* Test write or read failed */
+        /* Test that SPI is functional */
+        ov2640_spi_write( ARDUCAM_TEST_REG, 0xA5 );
+        tmp = ov2640_spi_read( ARDUCAM_TEST_REG );
+        if( tmp != 0xA5 )
+        {
+            debug_printf("Test write or read to Arducam failed.\n");
+            break;
+        }
 
-    /* Test that I2C is functional */
-    /* Switch to bank 1 */
-    regop_res = ov2640_i2c_write_reg( 0xFF, 0x01 );
-    configASSERT( regop_res == I2C_REGOP_SUCCESS );
+        /* Test that I2C is functional */
+        /* Switch to bank 1 */
+        regop_res = ov2640_i2c_write_reg( 0xFF, 0x01 );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+            break;
+        }
 
-    /* Check vid, should be 0x26 for OV2640 */
-    ov2640_i2c_read_reg( OV2640_CHIPID_HIGH, &tmp, &regop_res );
-    configASSERT( regop_res == I2C_REGOP_SUCCESS );
-    configASSERT( tmp == 0x26 );
+        /* Check vid, should be 0x26 for OV2640 */
+        ov2640_i2c_read_reg( OV2640_CHIPID_HIGH, &tmp, &regop_res );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+            break;
+        }
+        if( tmp != 0x26 )
+        {
+            debug_printf("CHIPID_HIGH is not expected value for OV2640.\n");
+            break;
+        }
 
-    /* Check pid, pid should be 0x41 or 0x42 for OV2640 */
-    ov2640_i2c_read_reg( OV2640_CHIPID_LOW, &tmp, &regop_res );
-    configASSERT( regop_res == I2C_REGOP_SUCCESS );
-    configASSERT( ( tmp == 0x41 ) || ( tmp == 0x42 ) );
+        /* Check pid, pid should be 0x41 or 0x42 for OV2640 */
+        ov2640_i2c_read_reg( OV2640_CHIPID_LOW, &tmp, &regop_res );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+            break;
+        }
+        if( !( ( tmp == 0x41 ) || ( tmp == 0x42 ) ) )
+        {
+            debug_printf("CHIPID_LOW is not expected value for OV2640.\n");
+            break;
+        }
 
-    ov2640_host_ctx.initialized = pdTRUE;
+        ov2640_host_ctx.initialized = pdTRUE;
+        retval = pdTRUE;
+    } while( 0 );
+
+    return retval;
 }
 
-void ov2640_configure()
+int32_t ov2640_configure()
 {
+    int32_t retval = pdFALSE;
     i2c_regop_res_t regop_res;
 
-    configASSERT( ov2640_host_ctx.initialized );
+    do
+    {
+        if( !ov2640_host_ctx.initialized )
+        {
+            debug_printf("ov2640 context has not been initialized.\n");
+            break;
+        }
 
-    /* Reset the sensor */
-    regop_res = ov2640_i2c_write_reg( 0xFF, 0x01 );
-    configASSERT( regop_res == I2C_REGOP_SUCCESS );
-    regop_res = ov2640_i2c_write_reg( 0x12, 0x80 );
-    configASSERT( regop_res == I2C_REGOP_SUCCESS );
+        /* Reset the sensor */
+        regop_res = ov2640_i2c_write_reg( 0xFF, 0x01 );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+            break;
+        }
+        regop_res = ov2640_i2c_write_reg( 0x12, 0x80 );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+            break;
+        }
 
-    DELAY_MS( 100 );
+        DELAY_MS( 100 );
 
-    /* Write sensor program */
-    ov2640_reg_jpeg_init();
-    ov2640_reg_yuv();
-    ov2640_reg_no_jpeg_compression();
+        /* Write sensor program */
+        ov2640_reg_jpeg_init();
+        ov2640_reg_yuv();
+        ov2640_reg_no_jpeg_compression();
 
-    regop_res = ov2640_i2c_write_reg( 0xff, 0x01 );
-    configASSERT( regop_res == I2C_REGOP_SUCCESS );
-    regop_res = ov2640_i2c_write_reg( 0x15, 0x00 );
-    configASSERT( regop_res == I2C_REGOP_SUCCESS );
+        regop_res = ov2640_i2c_write_reg( 0xff, 0x01 );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+            break;
+        }
+        regop_res = ov2640_i2c_write_reg( 0x15, 0x00 );
+        if( regop_res != I2C_REGOP_SUCCESS )
+        {
+            debug_printf("I2C operation failed.\n");
+            break;
+        }
 
-    ov2640_reg_96x96_jpeg();
+        ov2640_reg_96x96_jpeg();
 
-    /* Set Arducam mode */
-    ov2640_spi_write( ARDUCAM_MODE_REG, ARDUCAM_MODE_MCU2LCD );
+        /* Set Arducam mode */
+        ov2640_spi_write( ARDUCAM_MODE_REG, ARDUCAM_MODE_MCU2LCD );
+        retval = pdTRUE;
+    } while( 0 );
+
+    return retval;
 }

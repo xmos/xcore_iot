@@ -60,17 +60,31 @@ static void camera_task( void *arg )
     }
 }
 
-static void setup()
+static int32_t setup()
 {
-    ov2640_init( BITSTREAM_SPI_DEVICE_A, BITSTREAM_I2C_DEVICE_A );
-    ov2640_configure();
+    int32_t retval = pdFALSE;
+
+    retval = ov2640_init( BITSTREAM_SPI_DEVICE_A, BITSTREAM_I2C_DEVICE_A );
+
+    if( retval == pdTRUE )
+    {
+        retval = ov2640_configure();
+    }
+
+    return retval;
 }
 
-void create_spi_camera_to_queue( UBaseType_t priority, QueueHandle_t q_output )
+int32_t create_spi_camera_to_queue( UBaseType_t priority, QueueHandle_t q_output )
 {
-    /* Setup camera */
-    setup();
+    int32_t retval = pdFALSE;
 
-    /* Create camera task to take images and feed them to queue */
-    xTaskCreate( camera_task, "camera", portTASK_STACK_DEPTH( camera_task ), q_output , priority, NULL );
+    /* Setup camera */
+    if( setup() == pdTRUE )
+    {
+        /* Create camera task to take images and feed them to queue */
+        xTaskCreate( camera_task, "camera", portTASK_STACK_DEPTH( camera_task ), q_output , priority, NULL );
+        retval = pdTRUE;
+    }
+
+    return retval;
 }

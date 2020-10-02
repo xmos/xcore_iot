@@ -43,8 +43,8 @@
 #define ARDUCAM_BURST_FIFO_READ			0x3C
 #define ARDUCAM_SINGLE_FIFO_READ		0x3D
 
-void ov2640_init( int32_t spi_dev_id, int32_t i2c_dev_id );
-void ov2640_configure();
+int32_t ov2640_init( int32_t spi_dev_id, int32_t i2c_dev_id );
+int32_t ov2640_configure();
 
 void ov2640_flush_fifo();
 void ov2640_clear_fifo_flag();

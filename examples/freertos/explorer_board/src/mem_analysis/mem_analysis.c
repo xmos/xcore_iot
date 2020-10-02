@@ -24,8 +24,8 @@ static void mem_analysis( void *arg )
 	{
 		for( ;; )
 		{
-			debug_printf("Minimum heap free: %d\n", xPortGetMinimumEverFreeHeapSize());
-			debug_printf("Current heap free: %d\n", xPortGetFreeHeapSize());
+			debug_printf("\tMinimum heap free: %d\n", xPortGetMinimumEverFreeHeapSize());
+			debug_printf("\tCurrent heap free: %d\n", xPortGetFreeHeapSize());
 
 			vTaskDelay( pdMS_TO_TICKS( 1000 ) );
 		}
@@ -42,7 +42,7 @@ static void mem_analysis( void *arg )
 		if( task != NULL )
 		{
 			free_stack_words = uxTaskGetStackHighWaterMark( task );
-			debug_printf("%s free stack words: %d\n", task_name, free_stack_words);
+			debug_printf("\t%s free stack words: %d\n", task_name, free_stack_words);
 		}
 		vTaskDelay( pdMS_TO_TICKS( 1000 ) );
     }

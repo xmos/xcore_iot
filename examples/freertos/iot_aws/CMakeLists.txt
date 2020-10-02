@@ -26,7 +26,7 @@ set(APP_COMPILER_FLAGS
         "-DMQTT_TASK=1"
         "-Wxcore-fptrgroup"
         "-DDEBUG_PRINT_ENABLE=1"
-        "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT)"
+        "-DDEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1"
         "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
         "-DMBEDTLS_CONFIG_FILE=\"mbedtls_config.h\""
         #"-DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_user_config.h\"" # User config applied after default XMOS config
@@ -55,6 +55,12 @@ set(APP_INCLUDES
 set(APP_DEPENDENT_MODULES
         "FreeRTOS-Plus-TCP(>=10.2.1)"
     )
+
+if(${VERBOSE})
+    list(APPEND APP_COMPILER_FLAGS "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT)")
+else()
+    list(APPEND APP_COMPILER_FLAGS "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR)")
+endif()
 
 set(USE_FREERTOS_SMP True)
 

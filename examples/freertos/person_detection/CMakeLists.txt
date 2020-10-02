@@ -27,7 +27,6 @@ set(APP_COMPILER_FLAGS
         "-DDEBUG_PRINT_ENABLE=1"
         "-Wno-unknown-pragmas"
         "-DTF_LITE_STATIC_MEMORY"
-        "-DUSE_EXTMEM"
         "-D_XCORE_HAS_SWMEM"
         "-DTF_LITE_STRIP_ERROR_STRINGS"
         "-DNDEBUG"
@@ -60,6 +59,10 @@ set(APP_DEPENDENT_MODULES
         "lib_soc(>=0.6.0)"
         "inference_engine(>=0.0.0)"
     )
+
+if(${USE_EXTMEM})
+  add_definitions(-DUSE_EXTMEM)
+endif()
 
 ## Set any additional flags only for C++
 set(CMAKE_CXX_FLAGS  "-std=c++11")
