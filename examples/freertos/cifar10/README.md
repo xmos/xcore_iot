@@ -29,7 +29,7 @@ For background information on the CIFAR-10 dataset, please read [Learning Multip
 
 [XMOS Toolchain 15.0.1](https://www.xmos.com/software/tools/) or newer.
 
-Install [CMake](https://cmake.org/download/) version 3.10 or newer.
+Install [CMake](https://cmake.org/download/) version 3.14 or newer.
 
 Set environment variable for the XMOS AIoT SDK:
 
