@@ -58,6 +58,10 @@ void queue_to_ai(void *arg)
     uint8_t* img_buf = NULL;
     int toggle = 0;
 
+#ifdef OUTPUT_IMAGE_STREAM
+    xscope_mode_lossless();
+#endif
+
     task_args = pvPortMalloc( sizeof( person_detection_task_args_t ) );
     configASSERT( task_args != NULL );
 
