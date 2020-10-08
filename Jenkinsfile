@@ -26,7 +26,11 @@ pipeline {
         //buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
     }
-
+    
+    environment {
+        XMOS_AIOT_SDK_PATH = 'aiot_sdk'
+    }
+    
     stages {
         stage("Setup") {
             // Clone and install build dependencies
@@ -44,6 +48,8 @@ pipeline {
                                   shallow: false,
                                   parentCredentials: true,
                                   recursiveSubmodules: true],
+                                 [$class: 'RelativeTargetDirectory',
+                                  relativeTargetDir: ${XMOS_AIOT_SDK_PATH}]
                                  [$class: 'CleanCheckout']],
                     userRemoteConfigs: [[credentialsId: 'xmos-bot',
                                          url: 'git@github.com:xmos/aiot_sdk']]
@@ -64,12 +70,12 @@ pipeline {
         stage("Build examples") {
             steps {
                 sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                      . activate ./aiot_sdk_venv && export XMOS_AIOT_SDK_PATH=./aiot_sdk && ./build_examples.sh"""
+                      . activate ./aiot_sdk_venv && pushd ${XMOS_AIOT_SDK_PATH} && ./build_examples.sh && popd"""
             }
         }
         stage("Build distribution") {
             steps {
-                sh """. activate ./aiot_sdk_venv && ./build_dist.sh"""
+                sh """. activate ./aiot_sdk_venv && pushd ${XMOS_AIOT_SDK_PATH} && ./build_dist.sh && popd"""
             }
         }
         stage("Test") {
