@@ -78,8 +78,7 @@ pipeline {
         }
         stage("Test") {
             steps {
-                // below is how we can activate the tools
-                sh """run_tests.sh"""
+                sh """./run_tests.sh"""
             }
         }
     }
