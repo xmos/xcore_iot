@@ -64,7 +64,7 @@ pipeline {
         stage("Build examples") {
             steps {
                 sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                      . activate ./aiot_sdk_venv && ./build_examples.sh"""
+                      . activate ./aiot_sdk_venv && export XMOS_AIOT_SDK_PATH=$PWD && ./build_examples.sh"""
             }
         }
         stage("Build distribution") {
