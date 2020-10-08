@@ -49,7 +49,7 @@ pipeline {
                                   parentCredentials: true,
                                   recursiveSubmodules: true],
                                  [$class: 'RelativeTargetDirectory',
-                                  relativeTargetDir: ${XMOS_AIOT_SDK_PATH}]
+                                  relativeTargetDir: ${XMOS_AIOT_SDK_PATH}],
                                  [$class: 'CleanCheckout']],
                     userRemoteConfigs: [[credentialsId: 'xmos-bot',
                                          url: 'git@github.com:xmos/aiot_sdk']]
