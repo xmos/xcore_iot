@@ -76,11 +76,6 @@ pipeline {
                 sh """. activate ./aiot_sdk_venv && ./build_dist.sh"""
             }
         }
-        stage("Test") {
-            steps {
-                sh """./run_tests.sh"""
-            }
-        }
     }
     post {
         cleanup {
