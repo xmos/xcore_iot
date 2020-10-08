@@ -38,7 +38,7 @@ pipeline {
                 // clean auto default checkout
                 sh "rm -rf *"
                 // clone
-                dir(${XMOS_AIOT_SDK_PATH}) {
+                dir("${XMOS_AIOT_SDK_PATH}") {
                     checkout([
                         $class: 'GitSCM',
                         branches: scm.branches,
