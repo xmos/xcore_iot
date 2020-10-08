@@ -28,7 +28,7 @@ pipeline {
     }
     
     environment {
-        XMOS_AIOT_SDK_PATH = 'aiot_sdk'
+        XMOS_AIOT_SDK_PATH = "${env.WORKSPACE}"
     }
     
     stages {
@@ -38,24 +38,22 @@ pipeline {
                 // clean auto default checkout
                 sh "rm -rf *"
                 // clone
-                dir("${XMOS_AIOT_SDK_PATH}") {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: scm.branches,
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions: [[$class: 'SubmoduleOption',
-                                    threads: 8,
-                                    timeout: 20,
-                                    shallow: false,
-                                    parentCredentials: true,
-                                    recursiveSubmodules: true],
-                                    [$class: 'CleanCheckout']],
-                        userRemoteConfigs: [[credentialsId: 'xmos-bot',
-                                            url: 'git@github.com:xmos/aiot_sdk']]
-                    ])
-                }
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [[$class: 'SubmoduleOption',
+                                threads: 8,
+                                timeout: 20,
+                                shallow: false,
+                                parentCredentials: true,
+                                recursiveSubmodules: true],
+                                [$class: 'CleanCheckout']],
+                    userRemoteConfigs: [[credentialsId: 'xmos-bot',
+                                        url: 'git@github.com:xmos/aiot_sdk']]
+                ])
                 // create venv
-                sh "conda env create -q -p aiot_sdk_venv -f ${XMOS_AIOT_SDK_PATH}/environment.yml"
+                sh "conda env create -q -p aiot_sdk_venv -f environment.yml"
                 // Install xmos tools version
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
             }
@@ -70,12 +68,12 @@ pipeline {
         stage("Build examples") {
             steps {
                 sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                      . activate ./aiot_sdk_venv && pushd ${XMOS_AIOT_SDK_PATH} && ./build_examples.sh && popd"""
+                      . activate ./aiot_sdk_venv && ./build_examples.sh"""
             }
         }
         stage("Build distribution") {
             steps {
-                sh """. activate ./aiot_sdk_venv && pushd ${XMOS_AIOT_SDK_PATH} && ./build_dist.sh && popd"""
+                sh """. activate ./aiot_sdk_venv && ./build_dist.sh"""
             }
         }
         stage("Test") {
