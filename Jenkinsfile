@@ -55,7 +55,7 @@ pipeline {
                     ])
                 }
                 // create venv
-                sh "conda env create -q -p aiot_sdk_venv -f environment.yml"
+                sh "conda env create -q -p aiot_sdk_venv -f ${XMOS_AIOT_SDK_PATH}/environment.yml"
                 // Install xmos tools version
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
             }
