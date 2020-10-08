@@ -38,22 +38,22 @@ pipeline {
                 // clean auto default checkout
                 sh "rm -rf *"
                 // clone
-                checkout([
-                    $class: 'GitSCM',
-                    branches: scm.branches,
-                    doGenerateSubmoduleConfigurations: false,
-                    extensions: [[$class: 'SubmoduleOption',
-                                  threads: 8,
-                                  timeout: 20,
-                                  shallow: false,
-                                  parentCredentials: true,
-                                  recursiveSubmodules: true],
-                                 [$class: 'RelativeTargetDirectory',
-                                  relativeTargetDir: ${XMOS_AIOT_SDK_PATH}],
-                                 [$class: 'CleanCheckout']],
-                    userRemoteConfigs: [[credentialsId: 'xmos-bot',
-                                         url: 'git@github.com:xmos/aiot_sdk']]
-                ])
+                dir(${XMOS_AIOT_SDK_PATH}) {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: scm.branches,
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [[$class: 'SubmoduleOption',
+                                    threads: 8,
+                                    timeout: 20,
+                                    shallow: false,
+                                    parentCredentials: true,
+                                    recursiveSubmodules: true],
+                                    [$class: 'CleanCheckout']],
+                        userRemoteConfigs: [[credentialsId: 'xmos-bot',
+                                            url: 'git@github.com:xmos/aiot_sdk']]
+                    ])
+                }
                 // create venv
                 sh "conda env create -q -p aiot_sdk_venv -f environment.yml"
                 // Install xmos tools version
