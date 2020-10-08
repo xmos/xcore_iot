@@ -41,7 +41,7 @@ pipeline {
                     extensions: [[$class: 'SubmoduleOption',
                                   threads: 8,
                                   timeout: 20,
-                                  shallow: true,
+                                  shallow: false,
                                   parentCredentials: true,
                                   recursiveSubmodules: true],
                                  [$class: 'CleanCheckout']],
@@ -61,19 +61,21 @@ pipeline {
                 sh "conda update --all -y -q -p aiot_sdk_venv"
             }
         }
-        stage("Build") {
+        stage("Build examples") {
             steps {
-                // below is how we can activate the tools
                 sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                      ./build_examples.sh && ./build_dist.sh"""
+                      . activate ./aiot_sdk_venv && ./build_examples.sh"""
+            }
+        }
+        stage("Build distribution") {
+            steps {
+                sh """. activate ./aiot_sdk_venv && ./build_dist.sh"""
             }
         }
         stage("Test") {
-            // due to the Makefile, we've combined build and test stages
             steps {
                 // below is how we can activate the tools
-                sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                      ./run_tests.sh"""
+                sh """run_tests.sh"""
             }
         }
     }
