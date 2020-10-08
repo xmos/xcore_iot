@@ -5,6 +5,7 @@ getApproval()
 pipeline {
     agent {
         dockerfile {
+            args ""
         }
     }
 
@@ -13,6 +14,11 @@ pipeline {
             name: 'TOOLS_VERSION',
             defaultValue: '15.0.2',
             description: 'The tools version to build with (check /projects/tools/ReleasesTools/)'
+        )
+        booleanParam( // use to check results of rolling all conda deps forward
+            name: 'UPDATE_ALL',
+            defaultValue: false,
+            description: 'Update all conda packages before building'
         )
     }
 
@@ -42,8 +48,17 @@ pipeline {
                     userRemoteConfigs: [[credentialsId: 'xmos-bot',
                                          url: 'git@github.com:xmos/aiot_sdk']]
                 ])
+                // create venv
+                sh "conda env create -q -p aiot_sdk_venv -f environment.yml"
                 // Install xmos tools version
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
+            }
+        }
+        stage("Update all packages") {
+            // Roll all conda packages forward beyond their pinned versions
+            when { expression { return params.UPDATE_ALL } }
+            steps {
+                sh "conda update --all -y -q -p aiot_sdk_venv"
             }
         }
         stage("Build") {
