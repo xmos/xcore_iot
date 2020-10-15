@@ -27,7 +27,7 @@ __attribute__((aligned(8))) static char swmem_handler_stack[1024];
 #endif
 
 #define TENSOR_ARENA_SIZE \
-  63000  // NOTE: This is big enough fo the model to live in RAM or external
+  58000  // NOTE: This is big enough fo the model to live in RAM or external
          // memory
 uint8_t tensor_arena[TENSOR_ARENA_SIZE];
 

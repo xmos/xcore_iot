@@ -54,7 +54,6 @@ void initialize(const unsigned char *model_content, uint8_t *tensor_arena,
   static tflite::MicroMutableOpResolver<8> resolver;
   resolver.AddSoftmax();
   resolver.AddPad();
-  resolver.AddReshape();
   resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Depthwise_OpCode,
                      tflite::ops::micro::xcore::Register_Conv2D_Depthwise());
   resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_1x1_OpCode,
