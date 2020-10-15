@@ -18,7 +18,9 @@
 #include "sl_wfx_iot_wifi.h"
 #include "wifi.h"
 #include "heapsort.h"
+#if LIB_SOC_HAS_SW_DHCPD
 #include "dhcpd.h"
+#endif
 
 #define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define HWADDR_ARG(hwaddr) (hwaddr)[0], (hwaddr)[1], (hwaddr)[2], (hwaddr)[3], (hwaddr)[4], (hwaddr)[5]
@@ -606,9 +608,10 @@ static void wifi_conn_mgr(void *arg)
                     rtos_printf("WIFI_StartAP() failed, will try again\n");
                     vTaskDelay(pdMS_TO_TICKS(100));
                 }
-
+#if LIB_SOC_HAS_SW_DHCPD
                 /* note: It's safe to call this if the DHCP server is already started. */
                 dhcpd_start(16);
+#endif
 
                 event_callback(WIFI_CONN_MGR_EVENT_SOFT_AP_STARTED, soft_ap_ssid, NULL, NULL);
             }
@@ -663,7 +666,9 @@ static void wifi_conn_mgr(void *arg)
                         if (!WIFI_IsConnected()) {
                             mode = event_callback(WIFI_CONN_MGR_EVENT_SOFT_AP_STOPPED, soft_ap_ssid, soft_ap_ssid, soft_ap_password);
                             if (mode != WIFI_CONN_MGR_MODE_SOFT_AP) {
+#if LIB_SOC_HAS_SW_DHCPD
                                 dhcpd_stop(16);
+#endif
 
                                 /*
                                  * Ensure the connected AP is NULL so

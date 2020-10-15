@@ -106,6 +106,52 @@ void WIFI_ReleaseLock( void )
     }
 }
 
+#if LIB_SOC_HAS_SW_FATFS
+static char *pds_file_load(char **pds, int *line_count)
+{
+    FRESULT result;
+    FIL wf200_pds_file;
+    uint32_t wf200_pds_size = -1;
+    UINT bytes_read = 0;
+    int max_lines = *line_count;
+    char *pds_data = NULL;
+
+    *line_count = 0;
+
+    result = f_open(&wf200_pds_file, "/flash/firmware/wf200pds.dat", FA_READ);
+    if (result == FR_OK) {
+    	wf200_pds_size = f_size(&wf200_pds_file);
+    	pds_data = pvPortMalloc(wf200_pds_size);
+    }
+    if (pds_data != NULL) {
+    	result = f_read(&wf200_pds_file, pds_data, wf200_pds_size, &bytes_read);
+    }
+	if (result == FR_OK && bytes_read == wf200_pds_size) {
+		char *saveptr;
+		char *line;
+
+		line = strtok_r(pds_data, "\r\n", &saveptr);
+		while (line != NULL) {
+			pds[(*line_count)++] = line;
+			if (*line_count >= max_lines) {
+				break;
+			}
+			line = strtok_r(NULL, "\r\n", &saveptr);
+		}
+	}
+
+	if (wf200_pds_size != -1) {
+		f_close(&wf200_pds_file);
+	}
+	if (*line_count == 0 && pds_data != NULL) {
+		vPortFree(pds_data);
+		pds_data = NULL;
+	}
+
+	return pds_data;
+}
+#endif
+
 WIFIReturnCode_t WIFI_On( void )
 {
     WIFIReturnCode_t ret = eWiFiFailure;
@@ -147,9 +193,34 @@ WIFIReturnCode_t WIFI_On( void )
                                  gpio_1I, 0,  /* IRQ */
                                  gpio_4E, 0,  /* WUP */
                                  gpio_4E, 1 ); /* RST */
+#elif OSPREY_BOARD
+            sl_wfx_host_set_hif( BITSTREAM_SPI_DEVICE_A,
+                                 BITSTREAM_GPIO_DEVICE_A,
+                                 gpio_1L, 0,  /* IRQ */
+                                 gpio_8D, 4,  /* WUP */
+                                 gpio_8D, 5 ); /* RST */
 #endif
 
-            sl_wfx_host_set_pds( pds_table_brd8023a, SL_WFX_ARRAY_COUNT( pds_table_brd8023a ) );
+#if LIB_SOC_HAS_SW_FATFS
+            char *pds_data;
+			char *pds[10];
+			int line_count = 10;
+
+			pds_data = pds_file_load( pds, &line_count );
+
+			if( line_count > 0 ) {
+				rtos_printf("Loading %d lines of WF200 PDS data from filesystem:\n", line_count);
+				sl_wfx_host_set_pds( (const char **) pds, line_count );
+				for (int i = 0; i < line_count; i++) {
+					rtos_printf("  %s\n", pds[i]);
+				}
+			}
+			else
+#endif
+			{
+				rtos_printf("WF200 PDS data not found in filesystem.\nUsing brd8023a PDS data\n");
+				sl_wfx_host_set_pds( pds_table_brd8023a, SL_WFX_ARRAY_COUNT( pds_table_brd8023a ) );
+			}
 
             sl_ret = sl_wfx_init( &wfx_ctx );
 
@@ -160,6 +231,13 @@ WIFIReturnCode_t WIFI_On( void )
             }
 
             xSemaphoreGiveRecursive( wifi_lock );
+
+#if LIB_SOC_HAS_SW_FATFS
+            if( pds_data != NULL )
+            {
+            	vPortFree( pds_data );
+            }
+#endif
         }
     }
 
@@ -960,7 +1038,7 @@ WIFIReturnCode_t WIFI_Scan( WIFIScanResult_t *pxBuffer,
                                            scan_search_list_count,
                                            NULL,
                                            0,
-                                           scan_bssid);
+                                           (uint8_t *) scan_bssid);
 
         scan_bssid = NULL;
 
