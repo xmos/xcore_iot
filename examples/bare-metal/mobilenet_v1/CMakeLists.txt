@@ -130,13 +130,10 @@ set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES
 file(GLOB_RECURSE LIB_NN_C_SOURCES "${LIB_NN_SOURCE_DIR}/lib_nn/src/*.c")
 file(GLOB_RECURSE LIB_NN_ASM_SOURCES "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/*.S")
 
-set(LIB_NN_SOURCES LIB_NN_C_SOURCES)
-if (XCORE)
-  set(LIB_NN_SOURCES
-    ${LIB_NN_C_SOURCES}
-    ${LIB_NN_ASM_SOURCES}
-  )
-endif ()
+set(LIB_NN_SOURCES
+  ${LIB_NN_C_SOURCES}
+  ${LIB_NN_ASM_SOURCES}
+)
 
 #**********************
 # Additional support sources
