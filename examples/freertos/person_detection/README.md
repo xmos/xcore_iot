@@ -25,7 +25,7 @@ Make a directory for the build.
 
 Run cmake:
 
-    > cmake ../ -DBOARD=XCORE-AI-EXPLORER -DUSE_EXTMEM=1
+    > cmake ../ -DBOARD=XCORE-AI-EXPLORER
     > make
 
 ## Hardware Setup
