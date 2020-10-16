@@ -59,7 +59,7 @@ To building with the model stored in flash, replace the call to cmake above with
 To flash the model and example images, run the following commands:
 
     > cd filesystem_support
-    > ./flash_image -s
+    > ./flash_image.sh -s
 
 ### Using external DDR memory
 
@@ -71,7 +71,7 @@ To building with the model stored in LPDDR, replace the call to cmake above with
 To flash the example images, run the following commands:
 
     > cd filesystem_support
-    > ./flash_image -f
+    > ./flash_image.sh -f
 
 ### Running the firmware
 

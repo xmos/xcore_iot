@@ -102,45 +102,8 @@ set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES_CXX
 #**********************
 # lib_nn sources
 #**********************
-set(LIB_NN_SOURCES_C
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/asm_constants.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/vpu_sim.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/nn_op_utils.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/nn_operator.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/nn_operator_conv.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/conv2d_deep.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/conv2d_shallowin.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/conv2d_1x1.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/conv2d_depthwise.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/avgpool2d.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/maxpool2d.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/fully_connected.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/util/deep/nn_conv2d_hstrip_deep.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/util/shallow/nn_conv2d_hstrip_shallowin.c"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/util/depthwise/nn_conv2d_hstrip_depthwise.c"
-)
-
-set(LIB_NN_SOURCES_ASM
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/conv2d_1x1.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/fully_connected_16.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/avgpool2d.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/maxpool2d.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/avgpool2d_2x2.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/avgpool2d_global.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/vpu_memcpy.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/requantize_16_to_8.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/lookup8.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/shallow/nn_conv2d_hstrip_shallowin.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/shallow/nn_conv2d_hstrip_shallowin_padded.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/shallow/nn_conv2d_hstrip_tail_shallowin.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/shallow/nn_conv2d_hstrip_tail_shallowin_padded.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/deep/nn_conv2d_hstrip_deep.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/deep/nn_conv2d_hstrip_deep_padded.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/deep/nn_conv2d_hstrip_tail_deep.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/deep/nn_conv2d_hstrip_tail_deep_padded.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/depthwise/nn_conv2d_hstrip_depthwise_padded.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/util/depthwise/nn_conv2d_hstrip_depthwise.S"
-)
+file(GLOB_RECURSE LIB_NN_SOURCES_C "${LIB_NN_SOURCE_DIR}/lib_nn/src/*.c")
+file(GLOB_RECURSE LIB_NN_SOURCES_ASM "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/*.S")
 
 #**********************
 # Additional support sources

@@ -9,19 +9,19 @@
 #include <iostream>
 
 #include "mobilenet_v1.h"
-#include "xcore_device_memory.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_ops.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_profiler.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/version.h"
+#include "xcore_device_memory.h"
 
 tflite::ErrorReporter *reporter = nullptr;
 tflite::Profiler *profiler = nullptr;
 const tflite::Model *model = nullptr;
 tflite::micro::xcore::XCoreInterpreter *interpreter = nullptr;
-constexpr int kTensorArenaSize = 220000 + 140000;
+constexpr int kTensorArenaSize = 286000;
 uint8_t tensor_arena[kTensorArenaSize];
 
 void invoke() {

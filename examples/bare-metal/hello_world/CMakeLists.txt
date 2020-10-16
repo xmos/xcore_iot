@@ -107,14 +107,14 @@ set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES
 # lib_nn sources
 #**********************
 set(LIB_NN_SOURCES
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/vpu_memcpy.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/fully_connected_16.S"
-  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/requantize_16_to_8.S"
   "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/asm_constants.c"
+  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/asm_symbols.c"
   "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/vpu_sim.c"
   "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/nn_op_utils.c"
   "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/nn_operator.c"
   "${LIB_NN_SOURCE_DIR}/lib_nn/src/c/fully_connected.c"
+  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/vpu_memcpy.S"
+  "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/fully_connected_8.S"
 )
 
 #**********************
