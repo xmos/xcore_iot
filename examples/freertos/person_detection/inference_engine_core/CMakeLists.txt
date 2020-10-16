@@ -139,9 +139,6 @@ set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES_CXX
 file(GLOB_RECURSE LIB_NN_SOURCES_C "${LIB_NN_SOURCE_DIR}/lib_nn/src/*.c")
 file(GLOB_RECURSE LIB_NN_SOURCES_ASM "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/*.S")
 
-#TODO: Remove me when avgpool bug is fixed
-list(REMOVE_ITEM LIB_NN_SOURCES_ASM "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/avgpool2d.S")
-
 #**********************
 # Additional support sources
 #**********************
