@@ -21,6 +21,7 @@
 #include "gpio_driver.h"
 #include "sl_wfx.h"
 #include "sl_wfx_host.h"
+#include "brd8022a_pds.h"
 #include "brd8023a_pds.h"
 
 /* SW services headers */
@@ -218,8 +219,13 @@ WIFIReturnCode_t WIFI_On( void )
 			else
 #endif
 			{
+#if XCOREAI_EXPLORER || XCORE200_MAB
 				rtos_printf("WF200 PDS data not found in filesystem.\nUsing brd8023a PDS data\n");
 				sl_wfx_host_set_pds( pds_table_brd8023a, SL_WFX_ARRAY_COUNT( pds_table_brd8023a ) );
+#elif OSPREY_BOARD
+				rtos_printf("WF200 PDS data not found in filesystem.\nUsing brd8022a PDS data\n");
+				sl_wfx_host_set_pds( pds_table_brd8022a, SL_WFX_ARRAY_COUNT( pds_table_brd8022a ) );
+#endif
 			}
 
             sl_ret = sl_wfx_init( &wfx_ctx );
