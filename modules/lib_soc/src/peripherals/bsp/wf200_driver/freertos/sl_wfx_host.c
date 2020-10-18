@@ -7,7 +7,6 @@
 #include "quadflashlib.h"
 
 #include "sl_wfx.h"
-#include "sl_wfx_wf200_C0.h"
 #include "sl_wfx_host.h"
 
 #include "FreeRTOS.h"
@@ -79,8 +78,13 @@ void sl_wfx_reset_request_callback(void)
      * Ensure the application knows that it is no longer connected to
      * an AP in case it was.
      */
-    sl_wfx_disconnect_callback("\x00\x00\x00\x00\x00\x00", WFM_DISCONNECTED_REASON_UNSPECIFIED);
+    sl_wfx_disconnect_callback((uint8_t *) "\x00\x00\x00\x00\x00\x00", WFM_DISCONNECTED_REASON_UNSPECIFIED);
 }
+
+#define const /* workaround a compiler bug that causes relocation
+                 errors when using large arrays marked as const */
+#include "sl_wfx_wf200_C0.h"
+#undef const
 
 __attribute__((weak))
 uint32_t sl_wfx_app_fw_size(void)
@@ -91,16 +95,12 @@ uint32_t sl_wfx_app_fw_size(void)
 __attribute__((weak))
 sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
 {
-	int ret;
-    taskENTER_CRITICAL();
-    ret = fl_readData(index, size, data);
-    taskEXIT_CRITICAL();
-
-    if (ret == 0) {
-    	return SL_STATUS_OK;
-    } else {
-    	return SL_STATUS_FAIL;
-    }
+	if (index + size <= sl_wfx_firmware_size) {
+		memcpy(data, &sl_wfx_firmware[index], size);
+		return SL_STATUS_OK;
+	} else {
+		return SL_STATUS_FAIL;
+	}
 }
 
 /**** WF200 Driver Required Host Functions Start ****/
