@@ -190,7 +190,7 @@ set(INFERENCE_ENGINE_SOURCES
 )
 
 set(APP_SOURCES
-  "${PROJECT_SOURCE_DIR}/app/src/main.c"
+  "${PROJECT_SOURCE_DIR}/app/main.c"
 )
 
 #**********************

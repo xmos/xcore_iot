@@ -156,11 +156,11 @@ set(INFERENCE_ENGINE_SOURCES
 )
 
 set(APP_SOURCES
-  "${PROJECT_SOURCE_DIR}/app/src/main.xc"
-  "${PROJECT_SOURCE_DIR}/app/src/main.c"
+  "${PROJECT_SOURCE_DIR}/app/main.xc"
+  "${PROJECT_SOURCE_DIR}/app/main.c"
 )
 
-set_source_files_properties("${PROJECT_SOURCE_DIR}/app/src/main.xc" PROPERTIES LANGUAGE C)
+set_source_files_properties("${PROJECT_SOURCE_DIR}/app/main.xc" PROPERTIES LANGUAGE C)
 
 #**********************
 # targets
