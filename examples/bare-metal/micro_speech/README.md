@@ -75,4 +75,4 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
 The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
 
-    > python ../../../tools/ai_tools/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py --input_tflite_file model/model_xcore.tflite --output_header_file model.h --output_source_file model.c --array_variable_name g_model --include_guard TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MODEL_H_
+    > python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model.h --source model.c --variable-name g_model --include-guard TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MODEL_H_

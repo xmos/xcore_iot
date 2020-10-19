@@ -1,23 +1,13 @@
 
 // This is a TensorFlow Lite model file that has been converted into a C data
-// array using the tensorflow.lite.util.convert_bytes_to_c_source() function.
-// This form is useful for compiling into a binary for devices that don't have a
-// file system.
+// array using the convert_tflite_to_c_source() tool.
 
-
-// We need to keep the data array aligned on some architectures.
-#ifdef __has_attribute
-#define HAVE_ATTRIBUTE(x) __has_attribute(x)
-#else
-#define HAVE_ATTRIBUTE(x) 0
+#ifdef USE_SWMEM
+__attribute__((section(".SwMem_data")))
+#elif USE_EXTMEM
+__attribute__((section(".ExtMem_data")))
 #endif
-#if HAVE_ATTRIBUTE(aligned) || (defined(__GNUC__) && !defined(__clang__))
-#define DATA_ALIGN_ATTRIBUTE __attribute__((aligned(4)))
-#else
-#define DATA_ALIGN_ATTRIBUTE
-#endif
-
-const unsigned char cifar10_model[] DATA_ALIGN_ATTRIBUTE = {
+unsigned char cifar10_model[] __attribute__((aligned(4))) = {
     0x20, 0x00, 0x00, 0x00, 0x54, 0x46, 0x4c, 0x33, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x12, 0x00, 0x1c, 0x00, 0x18, 0x00, 0x14, 0x00, 0x10, 0x00, 0x0c, 0x00,
     0x08, 0x00, 0x00, 0x00, 0x04, 0x00, 0x12, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00,
@@ -7563,4 +7553,5 @@ const unsigned char cifar10_model[] DATA_ALIGN_ATTRIBUTE = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x0c, 0x00, 0x00, 0x00, 0x58, 0x43, 0x5f,
     0x6d, 0x61, 0x78, 0x70, 0x6f, 0x6f, 0x6c, 0x32, 0x64, 0x00, 0x00, 0x00, 0x00,
 };
+
 const int cifar10_model_len = 98072;

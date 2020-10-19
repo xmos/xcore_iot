@@ -1,6 +1,12 @@
 # MobileNet V1 Example applications
 
-This example application implements a [MobileNet V1](https://arxiv.org/abs/1704.04861) CNN architecture trained on the [ImageNet](http://www.image-net.org/) dataset.  This example demonstrates how to place models in LPDDR and to recieve input data using `xscope`.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
+This example application implements a [MobileNet V1](https://arxiv.org/abs/1704.04861) CNN architecture trained on the [ImageNet](http://www.image-net.org/) dataset.  The model was trained with the following parameters:
+
+- Classes = 10
+- Alpha = 0.50
+- Image size = 128x128
+
+This example demonstrates how to place models in LPDDR and to recieve input data using `xscope`.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
 
 - tench
 - goldfish
@@ -71,12 +77,4 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
 The following unix command will generate a C source file that contains the TensorFlow Lite model as a char array
 
-    > python ../../../tools/ai_tools/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py --input_tflite_file model/model_xcore.tflite --output_header_file inference_engine/src/mobilenet_v1.h --output_source_file inference_engine/src/mobilenet_v1.c --array_variable_name mobilenet_v1_model --include_guard MOBILENET_V1_MODEL_H_
-
-Note, the command above will overwrite `mobilenet_v1.c`.  In order to allow the model to be stored in flash or DDR, the file needs to be modified after the script creates it.  Add the following lines directly above the line that sets `mobilenet_v1_model[]`.
-
-    // NOTE: The following model was generated with:
-    //        classes = 10
-    //        alpha = 0.50
-    //        image size 128x128
-    __attribute__((section(".ExtMem_data")))
+    > python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/mobilenet_v1.h --source inference_engine/src/mobilenet_v1.c --variable-name mobilenet_v1_model
