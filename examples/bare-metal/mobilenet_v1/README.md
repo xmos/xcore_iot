@@ -19,6 +19,8 @@ This example demonstrates how to place models in LPDDR and to recieve input data
 - hen
 - ostrich
 
+This example also demonstrates how to to build the inference engine into a static library.
+
 ## Prerequisites for building
 
 [XMOS Toolchain 15.0.1](https://www.xmos.com/software/tools/) or newer.

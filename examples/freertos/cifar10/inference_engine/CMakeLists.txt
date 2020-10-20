@@ -34,23 +34,31 @@
 set(LIB_NAME inference_engine)
 set(LIB_VERSION 0.0.0)
 set(LIB_ADD_COMPILER_FLAGS "-Os" )
+
+# include XCORE Interpreter sources and include directories
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools/utils/cmake/xcore_interpreter.cmake")
+
 set(LIB_XC_SRCS
         ""
     )
 set(LIB_CXX_SRCS
+        ${XCORE_INTERPRETER_SOURCES_CXX}
         "src/cifar10_dev.cc"
         "src/inference_engine.cc"
     )
 set(LIB_C_SRCS
+        ${XCORE_INTERPRETER_SOURCES_C}
+        "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
         "src/cifar10_model.c"
     )
 set(LIB_ASM_SRCS
-        ""
+        ${XCORE_INTERPRETER_SOURCES_ASM}
     )
 set(LIB_INCLUDES
+        ${XCORE_INTERPRETER_INCLUDE_DIRS}
+        "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash"
         "src"
     )
-set(LIB_DEPENDENT_MODULES "inference_engine_core(>=0.0.0)")
 set(LIB_OPTIONAL_HEADERS "")
 
 #=============================================================================

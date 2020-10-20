@@ -78,17 +78,6 @@ Running with hardware.
 
     > xrun --io --xscope --args bin/cifar10.xe test_inputs/horse.bin
 
-## Building for x86
-
-TO build for x86, run:
-
-    > cmake ../ -DXCORE=OFF
-    > make install
-
-Run the following command on the host PC:
-
-    > ./bin/cifar10 test_inputs/horse.bin
-
 ## Optimizing Model
 
 Unoptimized and optimized models are included with the example.
