@@ -1,6 +1,6 @@
 # CIFAR-10 example application
 
-This example application implements a CNN architecture trained on the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset.  This example demonstrates how to place models in SRAM, Flash or LPDDR.
+This example application implements a CNN architecture trained on the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset.  This example demonstrates how to place models in SRAM, Flash or LPDDR.  And, how to benchmark your inference.
 
 The example reads a test image specified on the command line over JTAG.  Input images must be raw RGB buffers with size 32x32x3.  Any image with the proper shape should work.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
 
