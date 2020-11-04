@@ -1,15 +1,17 @@
+########################################
 XMOS AI Toolchain Extenstions User Guide
-========================================
+########################################
 
+************
 Introduction
-------------
+************
 
 XCORE is a family of cross-over processors for the IoT and AIoT, helping you to get to the market fast, with products that stand out from the competition.  With XCORE, multiple cores are available for the execution of real-time machine learnig inferencing, decisioning at the edge, signal processing, control and communication - all wrapped up in a single chip.
 
 At the heart of the machine learning inference capabilities lies the vector processing unit (VPU). To keep the system simple and the die area small, while retaining the hard-real-time guarantees of XCORE processors, we decided to integrate the VPU closely with the rest of the ALU. This allows for reduced latency and increased throughput since there is no need to copy memory to/from the accelerator’s memory. Moreover, the VPU breaks with some traditions of traditional RISC architectures.
 
 AI Toolchain Extensions
-^^^^^^^^^^^^^^^^^^^^^^^
+=======================
 
 We have developed a Python module that extends the xTIMEcomposer toolchain and allows model designers and embedded software developers to convert and deploy models to the xcore.ai processor.
 
@@ -51,11 +53,12 @@ It is worth noting that our optimizer is a standalone executable with the input 
 
 The final step in our optimization workflow is to deploy your model in our port of the TensorFlow Lite for Microcontrollers runtime. The TensorFlow Lite for Microcontrollers project provides the tools necessary to encapsulate the model and the runtime in source files that can be linked with the rest of your embedded project, compiled using our tools, and deployed on the hardware or tested in our cycle-accurate simulator. To execute the optimized graph, our runtime relies on a library of fine-tuned neural network kernels that take full advantage of the xcore.ai VPU. This library is also self-contained, so you can implement the model execution yourself if the computation constraints do not allow the overhead associated with the runtime. This overhead can be anything between 20KB and 160KB, depending on how many and which kernels your model uses, but decreases continuously as we improve our implementation of the runtime and the kernels.
 
+************
 Installation
-------------
+************
 
 System Requirements
-^^^^^^^^^^^^^^^^^^^
+===================
 
 The AI Toolchain Extensions are officially supported on the following platforms:
 
@@ -64,30 +67,21 @@ The AI Toolchain Extensions are officially supported on the following platforms:
 
 The tools also work on many other versions of Linux, including Fedora 30 +.
 
-*Windows 10 is not currently supported.  However, support for Windows is expected for initial product release*
+Prerequisites
+=============
+
+A standard C/C++ compiler is required (tested with gcc 8.3.1+ and clang 11.0.0+).  macOS users may use the Xcode command line tools.
 
 Installation Step by Step
-^^^^^^^^^^^^^^^^^^^^^^^^^
+=========================
 
 To install the AI toolchain extensions, follow these steps:
 
-**Step 1. Install prerequisites.**
+**Step 1. Install the AIoT SDK**
 
-`Python 3.6 <https://www.python.org/downloads/>`_ + is required, however, we recommend you setup an `Anaconda <https://www.anaconda.com/products/individual/>`_ environment before installing.  If necessary, download and follow Anaconda's installation instructions.
+Follow the installation instructions in the `AIoT SDK Getting Started Guide <getting_started_guide.rst>`_
 
-`Version 15 of the XMOS Toolchain <https://www.xmos.com/software/tools/>`_ and `CMake 3.14 <https://cmake.org/download/>`_ + are required for building the example applications.  If necessary, download and follow the installation instructions for those components.
-
-If installing the AI Extensions Python module from source, are a standard C/C++ compiler is required (tested with gcc 8.3.1+ and clang 11.0.0+).  macOS users can use the Xcode command line tools.
-
-**Step 2. Clone the XMOS AIoT SDK**
-
-Clone the AIoT SDK repository with the following command:
-
-.. code-block:: console
-
-    $ git clone --recurse-submodules https://github.com/xmos/aiot_sdk.git
-
-**Step 3. Build library prerequisites for the AI Extensions Python module**
+**Step 2. Build library prerequisites for the AI Extensions Python module**
 
 The following command will build libtflite2xcore which is required for the AI Extensions Python module.
 
@@ -95,19 +89,11 @@ The following command will build libtflite2xcore which is required for the AI Ex
 
     $ ./build_dist.sh
 
-**Step 4. Set up the environment variables**
+**Step 3. Create a Conda environment**
 
 .. code-block:: console
 
-    $ export XMOS_AIOT_SDK_PATH=<path to>/aiot_sdk
-
-You can also add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set in a new terminal window.
-
-**Step 5. Create a Conda environment**
-
-.. code-block:: console
-
-    $ conda create --prefix xmos_env python=3.6
+    $ conda create **prefix xmos_env python#3.6
 
 Activate the environment
 
@@ -117,14 +103,15 @@ Activate the environment
 
 .. note:: You may need to specify the fully-qualified path to your environment.
 
-**Step 6. Install AI Extensions Python module**
+**Step 4. Install AI Extensions Python module**
 
 .. code-block:: console
 
     $ pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/tflite2xcore
 
+***********************************
 Optimizing and Deploying Your Model
------------------------------------
+***********************************
 
 We've provided two paths for you to optimize your model for xcore.ai.
 
@@ -137,7 +124,7 @@ The **recommended** option is to use Python or a Jupyter Notebook.  We've provid
 Command-line Python scripts are also provided for those that prefer not to write your own Python scripts or use Jupyter Notebooks.
 
 Model Optimization
-^^^^^^^^^^^^^^^^^^
+==================
 
 The ``xformer.py`` script is used to transform a quantized TensorFlow Lite model to a format optimized for xcore.ai. Run the following command to transform your model into an optimized version:
 
@@ -155,7 +142,13 @@ The ``xformer.py`` script is used to transform a quantized TensorFlow Lite model
     "--num_threads NUM_THREADS", "Number of parallel threads for xcore.ai optimization. (default: 1)"
     "-v, --verbose", "Set verbosity level. -v: summary info of mutations; -vv: detailed mutation and debug info. (default: 0)"
 
-Run the following command to see the full list of command-line arguments:
+Run the following command to print the version number:
+
+.. code-block:: console
+
+    $ xformer.py --version
+
+Run the following command to print the full list of command-line arguments:
 
 .. code-block:: console
 
@@ -164,7 +157,7 @@ Run the following command to see the full list of command-line arguments:
 .. _Model_Visualization:
 
 Model Visualization
-^^^^^^^^^^^^^^^^^^^
+===================
 
 For visualizing the model graph, we recommend using `Netron <https://lutzroeder.github.io/netron/>`_.
 
@@ -172,13 +165,13 @@ Moreover, included in the installation, the ``tflite_visualize.py`` script can a
 
 .. code-block:: console
 
-    $ tflite_visualize.py <input .tflite file>} -o <output .html file>
+    $ tflite_visualize.py <input .tflite file> -o <output .html file>
 
 Open ``<output .html file>`` in your browser to inspect the model.
 
 
 Model Deployment
-^^^^^^^^^^^^^^^^
+================
 
 Preparing your optimized model for inference on the xcore.ai device involves generating a few source code files.
 
@@ -188,7 +181,7 @@ The first step is to convert your model to source code.  We recommend you use th
 
 .. code-block:: console
 
-    $ python $XMOS_AIOT_SDK_PATH/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py --input_tflite_file <model_xcore.tflite> --output_header_file <model.h> --output_source_file <model.c> --array_variable_name <model> --include_guard <MODEL_H_>
+    $ python $XMOS_AIOT_SDK_PATH/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py **input_tflite_file <model_xcore.tflite> **output_header_file <model.h> **output_source_file <model.c> **array_variable_name <model> **include_guard <MODEL_H_>
 
 Of course, you will need to replace the details inside the brackets with values you prefer to use in your application firmware.  See the README files of the example firmware applications for instructions on how those models are converted to source code.
 
