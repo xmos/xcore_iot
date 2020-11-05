@@ -1,6 +1,6 @@
-###################
-Hardware References
-###################
+######################
+Hardware Documentation
+######################
 
 **********
 Datasheets

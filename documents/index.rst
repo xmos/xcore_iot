@@ -1,25 +1,23 @@
-AIoT SDK Programming Guide
-==========================
+.. _aiot_sdk_user_guide:
 
-This is the documentation for the `XMOS AIoT Software Development Kit <https://github.com/xmos/aiot_sdk>`_. 
+###################
+AIoT SDK User Guide
+###################
 
-
-- `Getting Started <getting_started_guide.html>`_
-- `AI Toolchain Extensions User Guide <ai_toolchain_extensions_user_guide.html>`_
-- `API References <api_references.html>`_
-- `Example Applications <examples.html>`_
-- `Hardware References <hardware_references.html>`_
-
+This is the user guide for the `XMOS AIoT Software Development Kit <https://github.com/xmos/aiot_sdk>`_. 
 
 .. toctree::
-   :hidden:
+   :maxdepth: 2
 
-   Getting Started <getting_started_guide>
-   AI Toolchain Extensions User Guide <ai_toolchain_extensions_user_guide>
-   Example Applications <examples/index>
-   API References <api_reference/index>
-   Hardware References <hardware_references>
-   Contributing <contributing>
-   Copyright <copyright>
+   quick_start/index
+   tutorials/index
+   reference/index
+   copyright
 
-* :ref:`genindex`
+.. only:: html
+
+   ******************
+   Indices and tables
+   ******************
+
+   * :ref:`genindex`

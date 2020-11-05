@@ -1,6 +1,6 @@
-########################################
-XMOS AI Toolchain Extenstions User Guide
-########################################
+###################################
+AI Toolchain Extenstions User Guide
+###################################
 
 ************
 Introduction
@@ -17,7 +17,7 @@ We have developed a Python module that extends the xTIMEcomposer toolchain and a
 
 The figure below illustrates our neural network deployment workflow, starting with a trained model (with floating point weights and activations) on the left. Our workflow currently targets only `TensorFlow <https://www.tensorflow.org/>`_ models, so you need to convert your model first if you are training in a different framework. Once your model is in TensorFlow, the first step is to convert and quantize it using the built-in `TensorFlow Lite converter <https://www.tensorflow.org/lite/microcontrollers/build_convert>`_. You can do this manually, but we provide you with a helper function that takes a tf.keras Model object and a representative dataset for quantization, then configures and calls the converter/quantizer with the appropriate settings for xcore.ai.
 
-.. figure:: images/model_deployment_workflow.png
+.. figure:: model_deployment_workflow.png
     :width: 1024px
     :align: center
     :height: 445px
@@ -79,7 +79,7 @@ To install the AI toolchain extensions, follow these steps:
 
 **Step 1. Install the AIoT SDK**
 
-Follow the installation instructions in the `AIoT SDK Getting Started Guide <getting_started_guide.rst>`_
+Follow the installation instructions in the :ref:`AIoT SDK Getting Started Guide <aiot-sdk-installation-label>`
 
 **Step 2. Build library prerequisites for the AI Extensions Python module**
 
@@ -93,7 +93,7 @@ The following command will build libtflite2xcore which is required for the AI Ex
 
 .. code-block:: console
 
-    $ conda create **prefix xmos_env python#3.6
+    $ conda create --prefix xmos_env python#3.6
 
 Activate the environment
 
@@ -115,7 +115,7 @@ Optimizing and Deploying Your Model
 
 We've provided two paths for you to optimize your model for xcore.ai.
 
-The **recommended** option is to use Python or a Jupyter Notebook.  We've provided an `example Notebook <training_and_converting.ipynb>`_ where we demonstrate how to load a TensorFlow CNN model trained using the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset, convert it to TensorFlow Lite, then optimize it to be deployed to xcore.ai.  This notebook requires the installation of some additional Python packages
+The **recommended** option is to use Python or a Jupyter Notebook.  We've provided an `example Notebook <https://github.com/xmos/aiot_sdk/tree/develop/examples/bare-metal/cifar10/train/training_and_converting.ipynb>`_ where we demonstrate how to load a TensorFlow CNN model trained using the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset, convert it to TensorFlow Lite, then optimize it to be deployed to xcore.ai.  This notebook requires the installation of some additional Python packages
 
 .. code-block:: console
 
@@ -181,7 +181,7 @@ The first step is to convert your model to source code.  We recommend you use th
 
 .. code-block:: console
 
-    $ python $XMOS_AIOT_SDK_PATH/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py **input_tflite_file <model_xcore.tflite> **output_header_file <model.h> **output_source_file <model.c> **array_variable_name <model> **include_guard <MODEL_H_>
+    $ python $XMOS_AIOT_SDK_PATH/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py --input_tflite_file <model_xcore.tflite> --output_header_file <model.h> --output_source_file <model.c> --array_variable_name <model> --include_guard <MODEL_H_>
 
 Of course, you will need to replace the details inside the brackets with values you prefer to use in your application firmware.  See the README files of the example firmware applications for instructions on how those models are converted to source code.
 
