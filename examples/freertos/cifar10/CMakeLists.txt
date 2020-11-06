@@ -15,7 +15,7 @@ project(cifar10)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
-enable_language(CXX C ASM)
+enable_language(CXX XC C ASM)
 
 ## Set XMOS application variables
 set(APP_COMPILER_FLAGS

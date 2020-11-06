@@ -16,7 +16,7 @@ endif()
 
 project(mobilenet_v1 VERSION 1.0.0)
 
-enable_language(CXX C ASM)
+enable_language(CXX XC C ASM)
 
 #**********************
 # Paths
