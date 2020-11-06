@@ -132,27 +132,7 @@ The ``xformer.py`` script is used to transform a quantized TensorFlow Lite model
 
     $ xformer.py <input .tflite file> <output .tflite file>
 
-``xformer.py`` has several helpful command-line arguments. 
-
-.. csv-table::
-    :header: "Argument", "Help"
-    :widths: 10, 50
-
-    "--analyze", "Analyze the output model. A report is printed showing the runtime memory footprint of the model. (default: False)"
-    "--num_threads NUM_THREADS", "Number of parallel threads for xcore.ai optimization. (default: 1)"
-    "-v, --verbose", "Set verbosity level. -v: summary info of mutations; -vv: detailed mutation and debug info. (default: 0)"
-
-Run the following command to print the version number:
-
-.. code-block:: console
-
-    $ xformer.py --version
-
-Run the following command to print the full list of command-line arguments:
-
-.. code-block:: console
-
-    $ xformer.py --help
+``xformer.py`` has several helpful command-line arguments. Read moreo on the :ref:`xformer.py manpage <xformer-manpage-label>`.
 
 .. _Model_Visualization:
 

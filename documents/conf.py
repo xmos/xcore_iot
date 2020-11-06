@@ -33,7 +33,6 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.ifconfig",
     "sphinx.ext.githubpages",
-    "recommonmark",
     "breathe"
 ]
 
@@ -43,12 +42,6 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'README.rst']
-
-source_suffix = {
-    '.rst': 'restructuredtext',
-    '.txt': 'markdown',
-    '.md': 'markdown',
-}
 
 todo_include_todos = True
 

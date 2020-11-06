@@ -78,15 +78,15 @@ In a second terminal:
 
 Once the host script connects to the xscope server the image and associated output tensor values will be displayed.
 
-Example Person Detected:
-
-.. image:: images/person.png
+.. figure:: images/person.png
     :align: left
 
-Example No Person Detected:
+    Example Person Detected
 
-.. image:: images/not_person.png
+.. figure:: images/not_person.png
     :align: left
+
+    Example No Person Detected
 
 ********************
 Optimizing the model

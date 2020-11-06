@@ -45,7 +45,7 @@ To install, run:
     $ make install
 
 Using external memory
-====================
+=====================
 
 To building with the model stored in flash, replace the call to cmake above with the following:
 
