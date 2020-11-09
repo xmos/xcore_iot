@@ -93,7 +93,7 @@ The following command will build libtflite2xcore which is required for the AI Ex
 
 .. code-block:: console
 
-    $ conda create --prefix xmos_env python#3.6
+    $ conda create --prefix xmos_env python=3.6
 
 Activate the environment
 
