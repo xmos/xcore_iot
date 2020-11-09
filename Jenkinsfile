@@ -76,6 +76,17 @@ pipeline {
                 sh """. activate ./aiot_sdk_venv && ./build_dist.sh"""
             }
         }
+        stage("Test") {
+            steps {
+                // install tflite2xcore
+                sh """. activate ./aiot_sdk_venv && pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/tflite2xcore"""
+                // run tests
+                sh """. activate ./aiot_sdk_venv && cd test && pytest -v --junitxml tests_junit.xml"""
+                // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
+                // This step collects these files for display in Jenkins UI
+                junit "**/*_junit.xml"
+            }
+        }
     }
     post {
         cleanup {
