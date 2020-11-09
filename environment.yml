@@ -6,6 +6,7 @@ channels:
   - defaults
 dependencies:
   - cmake=3.14.0
+  - ipython=7.8.0
   - make=4.2.1
   - ncurses=6.1
   - python=3.6.8
