@@ -1,6 +1,6 @@
-###################################
-AI Toolchain Extenstions User Guide
-###################################
+##################################
+AI Toolchain Extensions User Guide
+##################################
 
 ************
 Introduction
