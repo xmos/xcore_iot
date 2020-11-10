@@ -1,20 +1,23 @@
-.. AIoT SDK documentation master file, created by
-   sphinx-quickstart on Wed Sep  2 14:49:18 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _aiot_sdk_user_guide:
 
-Welcome to AIoT SDK's documentation!
-====================================
+###################
+AIoT SDK User Guide
+###################
+
+This is the user guide for the `XMOS AIoT Software Development Kit <https://github.com/xmos/aiot_sdk>`_. 
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
+   quick_start/index
+   tutorials/index
+   reference/index
+   copyright
 
+.. only:: html
 
-Indices and tables
-==================
+   ******************
+   Indices and tables
+   ******************
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   * :ref:`genindex`
