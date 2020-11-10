@@ -12,6 +12,7 @@ dependencies:
   - jupyter_console=6.0.0
   - jupyter_core=4.5.0
   - make=4.2.1
+  - nbval=0.9.6
   - ncurses=6.1
   - python=3.6.8
   - pytest=5.2.0
