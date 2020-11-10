@@ -157,11 +157,11 @@ Preparing your optimized model for inference on the xcore.ai device involves gen
 
 .. note:: Future releases will contain scripts to automate the model deployment process.
 
-The first step is to convert your model to source code.  We recommend you use the ``convert_file_to_c_source.py`` utility provided by the TensorFlow community.  This script is located in the AIoT SDK under ``ai_tools/third_party/tensorflow/tensorflow/lite/python``.  An example command would look like:
+The first step is to convert your model to source code.  We recommend you use the ``convert_tflite_to_c_source.py`` utility provided.  This script is located in the AIoT SDK under ``tools/generate``.  An example command would look like:
 
 .. code-block:: console
 
-    $ python $XMOS_AIOT_SDK_PATH/third_party/tensorflow/tensorflow/lite/python/convert_file_to_c_source.py --input_tflite_file <model_xcore.tflite> --output_header_file <model.h> --output_source_file <model.c> --array_variable_name <model> --include_guard <MODEL_H_>
+    $ python $XMOS_AIOT_SDK_PATH/tools/generate/convert_tflite_to_c_source.py --input <model_xcore.tflite> --header <model.h> --source <model.c> --variable_name <model> --include_guard <MODEL_H_>
 
 Of course, you will need to replace the details inside the brackets with values you prefer to use in your application firmware.  See the README files of the example firmware applications for instructions on how those models are converted to source code.
 

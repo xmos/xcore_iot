@@ -12,6 +12,10 @@ declare -a bare_metal_examples=(
     )
 
 for example in ${bare_metal_examples[@]}; do
+    echo '***************************'
+    echo '* Building' ${example}
+    echo '***************************'
+    (cd examples/bare-metal/${example}; rm -rf build)
     (cd examples/bare-metal/${example}; mkdir -p build)
     (cd examples/bare-metal/${example}/build; cmake ../ ; make install)
 done
@@ -29,6 +33,10 @@ declare -a freertos_examples=(
     )
 
 for example in ${freertos_examples[@]}; do
+    echo '***************************'
+    echo '* Building' ${example}
+    echo '***************************'
+    (cd examples/freertos/${example}; rm -rf build)
     (cd examples/freertos/${example}; mkdir -p build)
     (cd examples/freertos/${example}/build; cmake ../ -DBOARD=${BOARD}; make)
 done
@@ -38,5 +46,8 @@ declare -a freertos_make_examples=(
     )
 
 for example in ${freertos_make_examples[@]}; do
+    echo '***************************'
+    echo '* Building' ${example}
+    echo '***************************'
     (cd examples/freertos/${example}; make BOARD=${BOARD})
 done

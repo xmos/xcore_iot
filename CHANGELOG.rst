@@ -1,7 +1,7 @@
 AIoT SDK change log
 ===================
 
-TBD
+0.9.4
 -----
 
   * Reduced RAM used for models using multiple cores
