@@ -39,8 +39,6 @@ set(LIB_LOGGING_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_logging/lib_logging")
 set(LIB_MIC_ARRAY_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_mic_array/lib_mic_array")
 set(LIB_XASSERT_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_xassert/lib_xassert")
 
-include("${AI_TOOLS_DIR}/utils/cmake/xcore_interpreter.cmake")
-
 #**********************
 # Build flags
 #**********************
@@ -146,6 +144,8 @@ set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/
 #**********************
 # APP sources
 #**********************
+include("${AI_TOOLS_DIR}/utils/cmake/xcore_interpreter.cmake")
+
 set(APP_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/feature_provider.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/recognize_commands.cc"

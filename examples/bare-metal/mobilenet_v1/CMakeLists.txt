@@ -21,6 +21,7 @@ enable_language(CXX XC C ASM)
 #**********************
 # Paths
 #**********************
+
 set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
 
 #**********************
@@ -51,6 +52,7 @@ set_target_properties(mobilenet_v1 PROPERTIES OUTPUT_NAME mobilenet_v1.xe)
 
 target_compile_options(mobilenet_v1 PRIVATE ${BUILD_FLAGS})
 
+
 #**********************
 # Additional support sources
 #**********************
@@ -69,8 +71,14 @@ set(INFERENCE_ENGINE_SOURCE_DIR
 )
 
 set(INFERENCE_ENGINE_SOURCES
+  ${XCORE_INTERPRETER_SOURCES}
   "${INFERENCE_ENGINE_SOURCE_DIR}/inference_engine.cc"
   "${INFERENCE_ENGINE_SOURCE_DIR}/mobilenet_v1.c"
+)
+
+set(INFERENCE_ENGINE_INCLUDE_DIRS
+  ${XCORE_INTERPRETER_INCLUDE_DIRS}
+  ${INFERENCE_ENGINE_SOURCE_DIR}
 )
 
 set(APP_SOURCES
@@ -83,15 +91,13 @@ set(APP_SOURCES
 #**********************
 target_sources(mobilenet_v1
   PRIVATE ${ADDITIONAL_C_SOURCES}
-  PRIVATE ${XCORE_INTERPRETER_SOURCES}
   PRIVATE ${INFERENCE_ENGINE_SOURCES}
   PRIVATE ${APP_SOURCES}
 )
 
 target_include_directories(mobilenet_v1
   PRIVATE ${ADDITIONAL_INCLUDE_DIR}
-  PRIVATE ${XCORE_INTERPRETER_INCLUDE_DIRS}
-  PRIVATE "${INFERENCE_ENGINE_SOURCE_DIR}"
+  PRIVATE "${INFERENCE_ENGINE_INCLUDE_DIRS}"
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/app/src"
 )
 
