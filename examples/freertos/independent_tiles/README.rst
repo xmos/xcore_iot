@@ -21,4 +21,4 @@ Running with hardware.
 
 .. code-block:: console
 
-    $ xrun --xscope bin/independent_tiles.xe
+    $ xrun --xscope bin/XCORE-AI-EXPLORER/independent_tiles.xe

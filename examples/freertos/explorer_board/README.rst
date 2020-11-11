@@ -93,7 +93,7 @@ To run the demo navigate to the bin folder and use the command:
 
 .. code-block:: console
 
-    $ xrun --xscope explorer_board.xe
+    $ xrun --xscope XCORE-AI-EXPLORER/explorer_board.xe
 
 ****************************
 Running the host application
