@@ -55,11 +55,11 @@ This demo can be run with only GPIO or GPIO and host output.
 
 Running with GPIO only:
 
-    > xrun --xscope ../bin/person_detection.xe
+    > xrun --xscope ../bin/XCORE-AI-EXPLORER/person_detection.xe
 
 Running with GPIO and host:
 
-    > xrun --xscope --xscope-port localhost:10234 ../bin/person_detection.xe
+    > xrun --xscope --xscope-port localhost:10234 ../bin/XCORE-AI-EXPLORER/person_detection.xe
 
 In a second terminal:
 

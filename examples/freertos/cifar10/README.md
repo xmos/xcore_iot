@@ -59,7 +59,7 @@ To building with the model stored in flash, replace the call to cmake above with
 To flash the model and example images, run the following commands:
 
     > cd filesystem_support
-    > ./flash_image.sh -s
+    > ./flash_image.sh -s XCORE-AI-EXPLORER
 
 ### Using external DDR memory
 
@@ -71,13 +71,13 @@ To building with the model stored in LPDDR, replace the call to cmake above with
 To flash the example images, run the following commands:
 
     > cd filesystem_support
-    > ./flash_image.sh -f
+    > ./flash_image.sh -f XCORE-AI-EXPLORER
 
 ### Running the firmware
 
 Running with hardware.
 
-    > xrun --xscope bin/cifar10.xe
+    > xrun --xscope bin/XCORE-AI-EXPLORER/cifar10.xe
 
 ## Optimizing Model
 
@@ -92,4 +92,3 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
 
     > python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/cifar10_model.h --source inference_engine/src/cifar10_model.c --variable-name cifar10_model
-

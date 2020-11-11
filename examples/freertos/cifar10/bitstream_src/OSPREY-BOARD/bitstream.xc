@@ -6,10 +6,10 @@
 #include <xmos_flash.h>
 
 #include "xassert.h"
-#include "mic_array.h"
 #include "soc.h"
 #include "bitstream.h"
 #include "bitstream_devices.h"
+
 
 /*-----------------------------------------------------------*/
 /* Quad SPI Flash defines */
@@ -25,13 +25,6 @@
     on tile[0]: XS1_CLKBLK_2    \
 }
 
-/**
- * Defines the supported flash chips.
- */
-#define FLASH_SPECS {             \
-    FL_QUADDEVICE_SPANSION_S25FL116K \
-}
-
 #define FLASH_CLOCK_CONFIG {        \
     flash_clock_reference,          \
     0,                              \
@@ -44,7 +37,7 @@
 flash_handle_t       flash_handle;
 flash_ports_t        flash_ports        = FLASH_PORTS;
 flash_clock_config_t flash_clock_config = FLASH_CLOCK_CONFIG;
-flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_0, flash_qe_bit_6};
+flash_qe_config_t    flash_qe_config    = {flash_qe_location_status_reg_1, flash_qe_bit_1};
 
 void tile0_device_instantiate(
         chanend ai_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT],
@@ -56,7 +49,7 @@ void tile0_device_instantiate(
         unsafe {
             unsafe chanend qspi_flash_dev_ch[SOC_PERIPHERAL_CHANNEL_COUNT] = {null, null, qspi_flash_dev_ctrl_ch, null};
 
-            device_register(qspi_flash_dev_ch, ai_dev_ch);
+            device_register( qspi_flash_dev_ch, ai_dev_ch);
             soc_peripheral_hub();
         }
         {
@@ -69,7 +62,7 @@ void tile0_device_instantiate(
                         qspi_flash_dev_ctrl_ch,
                         null,
                         swmem_t1_ctrl_ch,
-                        16384, /* Number of pages in the QSPI flash */
+                        32768, /* Number of pages in the QSPI flash */
                         &flash_ports, &flash_clock_config, &flash_qe_config);
             }
         }

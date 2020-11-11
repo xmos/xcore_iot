@@ -22,4 +22,4 @@ To build this project run:
 
 Running with hardware.
 
-    > xrun --xscope bin/independent_tiles.xe
+    > xrun --xscope bin/XCORE-AI-EXPLORER/independent_tiles.xe
