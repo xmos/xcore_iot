@@ -113,13 +113,6 @@ function(XMOS_REGISTER_APP)
     list(REMOVE_DUPLICATES APP_SOURCES)
     list(REMOVE_DUPLICATES APP_INCLUDES)
 
-    foreach(file ${APP_SOURCES})
-        get_filename_component(ext ${file} EXT)
-        if(${ext} STREQUAL ".xc")
-            set_source_files_properties(${file} PROPERTIES LANGUAGE C)
-        endif()
-    endforeach()
-
     # Only define header exists, if header optional
     foreach(inc ${APP_INCLUDES})
         file(GLOB headers ${inc}/*.h)
@@ -240,10 +233,6 @@ function(XMOS_REGISTER_MODULE)
         list(REMOVE_DUPLICATES LIB_OPTIONAL_HEADERS)
         list(FILTER LIB_OPTIONAL_HEADERS EXCLUDE REGEX "^.+-NOTFOUND$")
         set_property(TARGET ${LIB_NAME} PROPERTY OPTIONAL_HEADERS ${LIB_OPTIONAL_HEADERS})
-
-        foreach(file ${LIB_XC_SRCS})
-            set_source_files_properties(${file} PROPERTIES LANGUAGE C)
-        endforeach()
 
         if(NOT ${LIB_NAME}_SILENT_FLAG)
             if("${LIB_ADD_COMPILER_FLAGS}" STREQUAL "")

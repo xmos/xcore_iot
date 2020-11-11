@@ -15,14 +15,15 @@ endif()
 
 project(micro_speech VERSION 1.0.0 )
 
-enable_language(CXX C ASM)
+enable_language(CXX XC C ASM)
 
 #**********************
 # Paths
 #**********************
 
 set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
-include("${AI_TOOLS_DIR}/utils/cmake/xcore_interpreter.cmake")
+
+set(TENSORFLOW_SOURCE_DIR "${AI_TOOLS_DIR}/third_party/tensorflow")
 
 set(KISS_FFT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/kissfft")
 
@@ -119,18 +120,12 @@ set(LIB_MIC_ARRAY_SOURCES
   "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs.xc"
 )
 
-set_source_files_properties("${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/mic_array_dual.xc" PROPERTIES LANGUAGE C)
-set_source_files_properties("${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs_dual.xc" PROPERTIES LANGUAGE C)
-set_source_files_properties("${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs.xc" PROPERTIES LANGUAGE C)
-
 #**********************
 # lib_xassert sources
 #**********************
 set(LIB_XASSERT_SOURCES
   "${LIB_XASSERT_SOURCE_DIR}/lib_xassert/src/xassert.xc"
 )
-
-set_source_files_properties("${LIB_XASSERT_SOURCE_DIR}/lib_xassert/src/xassert.xc" PROPERTIES LANGUAGE C)
 
 #**********************
 # Additional support sources
@@ -143,6 +138,8 @@ set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/
 #**********************
 # APP sources
 #**********************
+include("${AI_TOOLS_DIR}/utils/cmake/xcore_interpreter.cmake")
+
 set(APP_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/feature_provider.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/recognize_commands.cc"
@@ -157,8 +154,6 @@ set(APP_SOURCES
   "${PROJECT_SOURCE_DIR}/main.cc"
   "${PROJECT_SOURCE_DIR}/main.xc"
 )
-
-set_source_files_properties("${PROJECT_SOURCE_DIR}/main.xc" PROPERTIES LANGUAGE C)
 
 #*************************************************
 # Test sources
