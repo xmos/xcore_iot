@@ -161,7 +161,7 @@ The first step is to convert your model to source code.  We recommend you use th
 
 .. code-block:: console
 
-    $ python $XMOS_AIOT_SDK_PATH/tools/generate/convert_tflite_to_c_source.py --input <model_xcore.tflite> --header <model.h> --source <model.c> --variable_name <model> --include_guard <MODEL_H_>
+    $ python $XMOS_AIOT_SDK_PATH/tools/generate/convert_tflite_to_c_source.py --input <model_xcore.tflite> --header <model.h> --source <model.c> --variable-name <model> --include-guard <MODEL_H_>
 
 Of course, you will need to replace the details inside the brackets with values you prefer to use in your application firmware.  See the README files of the example firmware applications for instructions on how those models are converted to source code.
 
