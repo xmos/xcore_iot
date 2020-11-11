@@ -9,7 +9,8 @@ The AIoT SDK is officially supported on the following platforms:
 
 The tools also work on many other versions of Linux, including Fedora 30 +.
 
-*Windows 10 is not currently supported.  However, support for Windows is expected for initial product release*
+
+.. note:: Windows 10 is not currently supported.  However, support for Windows is expected for initial product release
 
 *************
 Prerequisites

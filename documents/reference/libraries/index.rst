@@ -1,19 +1,10 @@
-##############
-API References
-##############
-
-************
-IO Libraries
-************
-
-.. todo:: Add IO Libraries
-
-
-*******************
-Optimized Libraries
-*******************
+#########
+Libraries
+#########
 
 .. toctree::
+   :maxdepth: 2
 
-   lib_xs3_math
+   io/index
+   optimized/index
 
