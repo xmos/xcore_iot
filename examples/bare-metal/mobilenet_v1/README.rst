@@ -29,15 +29,21 @@ Building the firmware
 
 Make a directory for the build.
 
+.. code-block:: console
+
     $ mkdir build
     $ cd build
 
 Run cmake:
 
+.. code-block:: console
+
     $ cmake ../
     $ make
 
 To install, run:
+
+.. code-block:: console
 
     $ make install
 
@@ -46,19 +52,27 @@ Running the firmware
 
 Running with hardware
 
+.. code-block:: console
+
     $ xrun --io --xscope --xscope-port localhost:10234 bin/mobilenet_v1.xe
 
 Running with simulator
 
+.. code-block:: console
+
     $ xsim --xscope "-realtime localhost:10234" bin/mobilenet_v1.xe
 
 Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires the following Python modules:
+
+.. code-block:: console
 
     $ pip install numpy
     $ pip install matplotlib
     $ pip install opencv-python
 
 Sending a test image to the xcore.ai Explorer board using `xscope`.
+
+.. code-block:: console
 
     $ ./test_image.py path/to/image
 
@@ -70,11 +84,15 @@ Unoptimized and optimized models are included with the example.
 
 First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
+.. code-block:: console
+
     $ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
 
 Converting flatbuffer to source file
 ====================================
 
 The following unix command will generate a C source file that contains the TensorFlow Lite model as a char array
+
+.. code-block:: console
 
     $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/mobilenet_v1.h --source inference_engine/src/mobilenet_v1.c --variable-name mobilenet_v1_model

@@ -32,15 +32,21 @@ Building the firmware
 
 Make a directory for the build.
 
+.. code-block:: console
+
     $ mkdir build
     $ cd build
 
 Run cmake:
 
+.. code-block:: console
+
     $ cmake ../
     $ make
 
 To install, run:
+
+.. code-block:: console
 
     $ make install
 
@@ -49,9 +55,13 @@ Using external memory
 
 To building with the model stored in flash, replace the call to cmake above with the following:
 
+.. code-block:: console
+
     $ cmake ../ -DUSE_SWMEM=1
 
 To flash the model, run the following commands:
+
+.. code-block:: console
 
     $ cd bin
     $ xobjdump --strip cifar10.xe
@@ -59,6 +69,8 @@ To flash the model, run the following commands:
     $ xflash --write-all image_n0c0.swmem --target XCORE-AI-EXPLORER
 
 To building with the model stored in LPDDR, replace the call to cmake above with the following:
+
+.. code-block:: console
 
     $ cmake ../ -DUSE_EXTMEM=1
 
@@ -69,9 +81,13 @@ Running the firmware
 
 Running with the xCORE simulator.
 
+.. code-block:: console
+
     $ xsim --xscope "-offline trace.xmt" --args bin/cifar10.xe test_inputs/horse.bin
 
 Running with hardware.
+
+.. code-block:: console
 
     $ xrun --io --xscope --args bin/cifar10.xe test_inputs/horse.bin
 
@@ -83,11 +99,15 @@ Unoptimized and optimized models are included with the example.
 
 First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
+.. code-block:: console
+
     $ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
 
 Converting flatbuffer to source file
 ====================================
 
 The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
+
+.. code-block:: console
 
     $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/cifar10_model.h --source inference_engine/src/cifar10_model.c --variable-name cifar10_model
