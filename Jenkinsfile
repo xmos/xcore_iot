@@ -89,6 +89,22 @@ pipeline {
                 junit "**/*_junit.xml"
             }
         }
+        stage("Build documentation") {
+            agent {
+                docker {
+                    image 'sphinxdoc/sphinx-latexpdf'
+                }
+            }
+            steps {
+                dir('documents') {
+                    sh 'make html latexpdf'
+                    dir('_build') {
+                        archiveArtifacts artifacts: 'html/**/*', fingerprint: false
+                        archiveArtifacts artifacts: 'latex/aiot_sdk.pdf', fingerprint: false
+                    }
+                }
+            }
+        }
     }
     post {
         cleanup {
