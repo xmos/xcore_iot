@@ -32,6 +32,7 @@ declare -a bare_metal_examples=(
     "cifar10"
     "hello_world"
     "mobilenet_v1"
+    "hotdog_not_hotdog"
     )
 
 for example in ${bare_metal_examples[@]}; do
