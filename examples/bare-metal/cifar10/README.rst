@@ -83,13 +83,13 @@ Running with the xCORE simulator.
 
 .. code-block:: console
 
-    $ xsim --xscope "-offline trace.xmt" --args bin/cifar10.xe test_inputs/horse.bin
+    $ xsim --xscope "-offline trace.vcd" --args bin/cifar10.xe test_inputs/horse.bin
 
 Running with hardware.
 
 .. code-block:: console
 
-    $ xrun --io --xscope --args bin/cifar10.xe test_inputs/horse.bin
+    $ xrun --xscope --args bin/cifar10.xe test_inputs/horse.bin
 
 ********************
 Optimizing the model

@@ -16,7 +16,7 @@ endif()
 
 project(hotdog_not_hotdog VERSION 1.0.0)
 
-enable_language(CXX C ASM)
+enable_language(CXX C XC ASM)
 
 #**********************
 # Paths
@@ -91,8 +91,6 @@ set(APP_SOURCES
   "${PROJECT_SOURCE_DIR}/app/main.xc"
   "${PROJECT_SOURCE_DIR}/app/main.c"
 )
-
-set_source_files_properties("${PROJECT_SOURCE_DIR}/app/main.xc" PROPERTIES LANGUAGE C)
 
 #**********************
 # targets
