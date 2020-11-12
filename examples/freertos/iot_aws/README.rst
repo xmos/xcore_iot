@@ -194,10 +194,10 @@ To run the demo navigate to the bin folder and use the command:
 
 .. code-block:: console
 
-    $ xrun iot_aws.xe
+    $ xrun XCORE-AI-EXPLORER/iot_aws.xe
 
 For debug output use:
 
 .. code-block:: console
 
-    $ xrun --xscope iot_aws.xe
+    $ xrun --xscope XCORE-AI-EXPLORER/iot_aws.xe

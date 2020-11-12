@@ -62,13 +62,13 @@ Running with GPIO only:
 
 .. code-block:: console
 
-    $ xrun --xscope ../bin/person_detection.xe
+    $ xrun --xscope ../bin/XCORE-AI-EXPLORER/person_detection.xe
 
 Running with GPIO and host:
 
 .. code-block:: console
 
-    $ xrun --xscope --xscope-port localhost:10234 ../bin/person_detection.xe
+    $ xrun --xscope --xscope-port localhost:10234 ../bin/XCORE-AI-EXPLORER/person_detection.xe
 
 In a second terminal:
 
@@ -99,4 +99,3 @@ Training the model
 ******************
 
 You may wish to retrain this model.  This should rarely be necessary. However, if you would like to learn more about how this model is trained, see: https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/micro/examples/person_detection/training_a_model.md
-

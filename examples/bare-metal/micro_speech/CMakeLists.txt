@@ -49,8 +49,14 @@ add_executable(micro_speech_test)
 # -DNDEBUG                        # define this to remove debug and profiling
 # -DTF_LITE_STRIP_ERROR_STRINGS   # define this to remove logging
 
+if(DEFINED BOARD)
+    set(BOARD_FLAG "${CMAKE_SOURCE_DIR}/board_support/${BOARD}.xn")
+else()
+    message(FATAL_ERROR "\n-DBOARD must be specified.")
+endif()
+
 set(BUILD_FLAGS
-"-target=XCORE-AI-EXPLORER"
+${BOARD_FLAG}
 "-mcmodel=large"
 "-Wno-xcore-fptrgroup"
 "-Wno-unknown-pragmas"
@@ -216,5 +222,5 @@ target_include_directories(micro_speech_test
 #**********************
 # install
 #**********************
-set(INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin")
+set(INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin/${BOARD}")
 install(TARGETS micro_speech micro_speech_test DESTINATION ${INSTALL_DIR})

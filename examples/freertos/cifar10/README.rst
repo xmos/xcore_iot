@@ -64,7 +64,7 @@ To flash the model and example images, run the following commands:
 .. code-block:: console
 
     $ cd filesystem_support
-    $ ./flash_image.sh -s
+    $ ./flash_image.sh -s XCORE-AI-EXPLORER
 
 Using external DDR memory
 =========================
@@ -81,7 +81,7 @@ To flash the example images, run the following commands:
 .. code-block:: console
 
     $ cd filesystem_support
-    $ ./flash_image.sh -f
+    $ ./flash_image.sh -f XCORE-AI-EXPLORER
 
 Running the firmware
 ====================
@@ -90,7 +90,7 @@ Running with hardware.
 
 .. code-block:: console
 
-    $ xrun --xscope bin/cifar10.xe
+    $ xrun --xscope bin/XCORE-AI-EXPLORER/cifar10.xe
 
 ********************
 Optimizing the model
@@ -112,4 +112,3 @@ The following command will generate a C source file that contains the TensorFlow
 .. code-block:: console
 
     $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/cifar10_model.h --source inference_engine/src/cifar10_model.c --variable-name cifar10_model
-
