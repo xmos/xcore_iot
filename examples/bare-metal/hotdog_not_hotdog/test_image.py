@@ -9,10 +9,12 @@ import ctypes
 
 import numpy as np
 from matplotlib import pyplot
+from PIL import Image
 
 CHUCK_SIZE = 128
 
-INPUT_SHAPE = (128, 128, 3)
+IMAGE_SHAPE = (128, 128)
+INPUT_SHAPE = IMAGE_SHAPE+(3,)
 INPUT_SCALE = 0.007843137718737125
 INPUT_ZERO_POINT = -1
 NORM_SCALE = 127.5
@@ -84,10 +86,14 @@ try:
         print("Failed to connect")
     else:
         # time.sleep(5)
-        with open(sys.argv[1], "rb") as fd:
-            raw_img = fd.read()
-            for i in range(0, len(raw_img), CHUCK_SIZE):
-                retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
+        img = Image.open(sys.argv[1])
+        img = img.resize(IMAGE_SHAPE)
+             
+        img_array = np.array(img).astype(np.uint8)
+        raw_img = img_array.flatten().tobytes()
+        for i in range(0, len(raw_img), CHUCK_SIZE):
+            retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
+
         while not ep.ready:
             pass
 
@@ -112,10 +118,7 @@ if raw_img is not None:
     prob = (max_value - OUTPUT_ZERO_POINT) * OUTPUT_SCALE * 100.0
     print(OBJECT_CLASSES[max_value_index], f"{prob:0.2f}%")
 
-    np_img = np.frombuffer(raw_img, dtype=np.int8).reshape(INPUT_SHAPE)
-    np_img = np.round(
-        (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
-    ).astype(np.uint8)
+    np_img = np.frombuffer(raw_img, dtype=np.uint8).reshape(INPUT_SHAPE)
 
-    # pyplot.imshow(np_img)
-    # pyplot.show()
+    pyplot.imshow(np_img)
+    pyplot.show()
