@@ -18,17 +18,16 @@ pipeline {
         //buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
     }
-    
-    environment {
-        XMOS_AIOT_SDK_PATH = "${env.WORKSPACE}"
-    }
-    
+        
     stages {
         stage("Build Software") {
             agent {
                 dockerfile {
                     args ""
                 }
+            }
+            environment {
+                XMOS_AIOT_SDK_PATH = "${env.WORKSPACE}"
             }
             stages {
                 stage("Setup") {
