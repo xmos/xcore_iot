@@ -13,19 +13,13 @@
 
 import sys
 import os
-import subprocess
 
 # -- Project information -----------------------------------------------------
 
 project = u"AIoT Software Development Kit"
 copyright = u"2020, XMOS"
 
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-#
-version = subprocess.check_output(["git", "describe", "--tags"]).strip().decode("utf-8")
-release = version
+release = '1.x.x'
 
 # -- General configuration ---------------------------------------------------
 
