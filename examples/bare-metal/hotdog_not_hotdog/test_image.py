@@ -15,8 +15,8 @@ CHUCK_SIZE = 128
 
 IMAGE_SHAPE = (128, 128)
 INPUT_SHAPE = IMAGE_SHAPE+(3,)
-INPUT_SCALE = 0.007843137718737125
-INPUT_ZERO_POINT = -1
+INPUT_SCALE = 0.003921568859368563
+INPUT_ZERO_POINT = -128
 NORM_SCALE = 127.5
 NORM_SHIFT = 1
 
@@ -85,9 +85,15 @@ try:
         img = Image.open(sys.argv[1])
         img = img.resize(IMAGE_SHAPE)
              
-        img_array = np.array(img).astype(np.uint8)
+        img_array = np.array(img).astype(np.float32)
+        # convert from range 0..255 to range 0..1. Needed for quantization input
+        img_array = img_array/255
+
+        # This import takes a very long time (10 seconds) in the script !???
         from tflite2xcore.utils import quantize, dequantize   
+        img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)   
         raw_img = img_array.flatten().tobytes()
+
         for i in range(0, len(raw_img), CHUCK_SIZE):
             retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
 
@@ -115,7 +121,10 @@ if raw_img is not None:
     prob = (max_value - OUTPUT_ZERO_POINT) * OUTPUT_SCALE * 100.0
     print(OBJECT_CLASSES[max_value_index], f"{prob:0.2f}%")
 
-    np_img = np.frombuffer(raw_img, dtype=np.uint8).reshape(INPUT_SHAPE)
+    np_img = np.frombuffer(raw_img, dtype=np.int8).reshape(INPUT_SHAPE)
+    np_img = np.round(
+        (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
+    ).astype(np.uint8)
 
     pyplot.imshow(np_img)
     pyplot.show()
