@@ -34,10 +34,6 @@ PRINT_CALLBACK = ctypes.CFUNCTYPE(
 )
 
 
-def dequantize(arr, scale, zero_point):
-    return np.float32((arr.astype(np.int32) - np.int32(zero_point)) * scale)
-
-
 class Endpoint(object):
     def __init__(self):
         tool_path = os.environ.get("XMOS_TOOL_PATH")
@@ -90,6 +86,7 @@ try:
         img = img.resize(IMAGE_SHAPE)
              
         img_array = np.array(img).astype(np.uint8)
+        from tflite2xcore.utils import quantize, dequantize   
         raw_img = img_array.flatten().tobytes()
         for i in range(0, len(raw_img), CHUCK_SIZE):
             retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
