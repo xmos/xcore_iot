@@ -88,6 +88,11 @@ pipeline {
                     }
                 }
             }
+            post {
+                cleanup {
+                    cleanWs()
+                }
+            }
         }
         stage("Build documentation") {
             agent {
@@ -105,11 +110,11 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-    post {
-        cleanup {
-            cleanWs()
+            post {
+                cleanup {
+                    cleanWs()
+                }
+            }
         }
     }
 }
