@@ -39,7 +39,7 @@ Run the following command:
 
 You should notice a wave pattern moving back and forth on the LEDs.
 
-.. image:: images/leds.gif
+.. image:: images/leds.*
     :width: 200px
     :align: left
 

@@ -14,14 +14,18 @@
 import sys
 import os
 
+from sphinx.builders.html import StandaloneHTMLBuilder
+
 # -- Project information -----------------------------------------------------
 
 project = u"AIoT Software Development Kit"
 copyright = u"2020, XMOS"
 
-release = '1.x.x'
+release = "1.x.x"
 
 # -- General configuration ---------------------------------------------------
+
+StandaloneHTMLBuilder.supported_image_types = ["image/gif", "image/png", "image/jpeg"]
 
 extensions = [
     "sphinx.ext.todo",
