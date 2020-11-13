@@ -13,19 +13,13 @@
 
 import sys
 import os
-import subprocess
 
 # -- Project information -----------------------------------------------------
 
 project = u"AIoT Software Development Kit"
 copyright = u"2020, XMOS"
 
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-#
-version = subprocess.check_output(['git', 'describe', '--tags']).strip().decode('utf-8')
-release = version
+release = "1.x.x"
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,19 +27,16 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.ifconfig",
     "sphinx.ext.githubpages",
-    "breathe"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'README.rst']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.rst"]
 
 todo_include_todos = True
-
-#breathe_projects = { "lib_xs3_math": "../modules/lib_xs3_math/lib_xs3_math/doc/.build/xml/" }
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -54,13 +45,8 @@ todo_include_todos = True
 html_theme = "nature"
 
 html_sidebars = {
-   '**': ['globaltoc.html', 'sourcelink.html', 'searchbox.html'],
-   'using/windows': ['windowssidebar.html', 'searchbox.html'],
+    "**": ["globaltoc.html", "sourcelink.html", "searchbox.html"],
+    "using/windows": ["windowssidebar.html", "searchbox.html"],
 }
 
-html_logo = 'images/xmos_logo.png'
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+html_logo = "images/xmos_logo.png"

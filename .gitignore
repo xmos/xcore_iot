@@ -18,6 +18,7 @@
 *.a
 *.xmt
 **/_build/
+**/build_*/
 **/run_*.log
 **/pdf/*
 **/html/*
