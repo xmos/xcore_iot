@@ -73,6 +73,7 @@ class Endpoint(object):
             ctypes.c_uint(len(data) + 1), ctypes.c_char_p(data)
         )
 
+from tflite2xcore.utils import quantize, dequantize   
 
 ep = Endpoint()
 raw_img = None
@@ -86,11 +87,9 @@ try:
         img = img.resize(IMAGE_SHAPE)
              
         img_array = np.array(img).astype(np.float32)
-        # convert from range 0..255 to range 0..1. Needed for quantization input
-        img_array = img_array/255
+        # Normalize to range 0..1. Needed for quantize function
+        img_array = (img_array - img_array.min()) / img_array.ptp()
 
-        # This import takes a very long time (10 seconds) in the script !???
-        from tflite2xcore.utils import quantize, dequantize   
         img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)   
         raw_img = img_array.flatten().tobytes()
 
