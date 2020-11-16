@@ -120,18 +120,18 @@ def get_child_xgdb_pid(port):
                         return pid
 
 
-def run_test_model(xtag_id):
+def run_xcore_interpreter(xtag_id):
     """
     Run the test_model firmware
     """
     port = get_open_port()
 
     __PARENT_DIR = Path(__file__).parent.absolute()
-    test_model_exe = str(
+    xcore_interpreter_exe = str(
         __PARENT_DIR
         / ".."
         / ".."
-        / "xcore_interpreter"
+        / "xcore_firmware"
         / "bin"
         / "xcore_interpreter_xscope.xe"
     )
@@ -143,7 +143,7 @@ def run_test_model(xtag_id):
         f"localhost:{port}",
         "--id",
         f"{xtag_id}",
-        test_model_exe,
+        xcore_interpreter_exe,
     ]
 
     xrun_proc = subprocess.Popen(
@@ -400,7 +400,7 @@ class XCOREDeviceServer(object):
         # setup device which means launcing xrun and
         #   and setting all pids, ports and in_use status
         logging.debug(f"Setting up device: {device}")
-        xrun_pid, xgdb_pid, xscope_port = run_test_model(device["id"])
+        xrun_pid, xgdb_pid, xscope_port = run_xcore_interpreter(device["id"])
         device["xrun_pid"] = xrun_pid
         device["xgdb_pid"] = xgdb_pid
         device["xscope_port"] = xscope_port
