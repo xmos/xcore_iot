@@ -14,6 +14,8 @@
 import sys
 import os
 
+from sphinx.builders.html import StandaloneHTMLBuilder
+
 # -- Project information -----------------------------------------------------
 
 project = u"AIoT Software Development Kit"
@@ -22,6 +24,16 @@ copyright = u"2020, XMOS"
 release = "1.x.x"
 
 # -- General configuration ---------------------------------------------------
+
+# NOTE: By default, .png files are favored over .gif.  Reversing the order here in order for anaimated GIFs
+#       to be favored.  See: https://www.sphinx-doc.org/en/master/usage/builders/index.html
+StandaloneHTMLBuilder.supported_image_types = [
+    "image/svg+xml",
+    "image/gif",
+    "image/png",
+    "image/jpeg",
+]
+
 
 extensions = [
     "sphinx.ext.todo",
