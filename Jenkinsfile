@@ -102,11 +102,10 @@ pipeline {
             }
             steps {
                 dir('documents') {
-                    sh 'make html'
-                    // sh 'make html latexpdf'
+                    sh 'make html latexpdf'
                     dir('_build') {
                         archiveArtifacts artifacts: 'html/**/*', fingerprint: false
-                        // archiveArtifacts artifacts: 'latex/aiot_sdk.pdf', fingerprint: false
+                        archiveArtifacts artifacts: 'latex/aiotsoftwaredevelopmentkit.pdf', fingerprint: false
                     }
                 }
             }

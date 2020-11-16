@@ -15,6 +15,7 @@ Bare-metal
    bare-metal/cifar10
    bare-metal/micro_speech
    bare-metal/mobilenet_v1
+   bare-metal/hotdog_not_hotdog
 
 ********
 FreeRTOS
