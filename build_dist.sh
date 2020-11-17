@@ -19,5 +19,5 @@ echo "*******************************"
 echo "* Building xcore_interpreters *"
 echo "******************************"
 (cd ${XCORE_INTERPRETERS_DIR}; mkdir -p build) 
-(cd ${XCORE_INTERPRETERS_DIR}/build; cmake ../ ; make) 
+(cd ${XCORE_INTERPRETERS_DIR}/build; cmake ../ ; make install) 
 
