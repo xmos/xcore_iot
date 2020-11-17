@@ -9,12 +9,14 @@ import ctypes
 
 import numpy as np
 from matplotlib import pyplot
+from PIL import Image
 
 CHUCK_SIZE = 128
 
-INPUT_SHAPE = (128, 128, 3)
-INPUT_SCALE = 0.007843137718737125
-INPUT_ZERO_POINT = -1
+IMAGE_SHAPE = (128, 128)
+INPUT_SHAPE = IMAGE_SHAPE+(3,)
+INPUT_SCALE = 0.003921568859368563
+INPUT_ZERO_POINT = -128
 NORM_SCALE = 127.5
 NORM_SHIFT = 1
 
@@ -30,10 +32,6 @@ OBJECT_CLASSES = [
 PRINT_CALLBACK = ctypes.CFUNCTYPE(
     None, ctypes.c_ulonglong, ctypes.c_uint, ctypes.c_char_p
 )
-
-
-def dequantize(arr, scale, zero_point):
-    return np.float32((arr.astype(np.int32) - np.int32(zero_point)) * scale)
 
 
 class Endpoint(object):
@@ -75,6 +73,7 @@ class Endpoint(object):
             ctypes.c_uint(len(data) + 1), ctypes.c_char_p(data)
         )
 
+from tflite2xcore.utils import quantize, dequantize   
 
 ep = Endpoint()
 raw_img = None
@@ -84,10 +83,19 @@ try:
         print("Failed to connect")
     else:
         # time.sleep(5)
-        with open(sys.argv[1], "rb") as fd:
-            raw_img = fd.read()
-            for i in range(0, len(raw_img), CHUCK_SIZE):
-                retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
+        img = Image.open(sys.argv[1])
+        img = img.resize(IMAGE_SHAPE)
+             
+        img_array = np.array(img).astype(np.float32)
+        # Normalize to range 0..1. Needed for quantize function
+        img_array = (img_array - img_array.min()) / img_array.ptp()
+
+        img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)   
+        raw_img = img_array.flatten().tobytes()
+
+        for i in range(0, len(raw_img), CHUCK_SIZE):
+            retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
+
         while not ep.ready:
             pass
 
@@ -117,5 +125,5 @@ if raw_img is not None:
         (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
     ).astype(np.uint8)
 
-    # pyplot.imshow(np_img)
-    # pyplot.show()
+    pyplot.imshow(np_img)
+    pyplot.show()
