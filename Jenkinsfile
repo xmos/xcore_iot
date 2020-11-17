@@ -78,6 +78,8 @@ pipeline {
                     steps {
                         // install tflite2xcore
                         sh """. activate ./aiot_sdk_venv && pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/tflite2xcore"""
+                        // install xcore_interpreters
+                        sh """. activate ./aiot_sdk_venv && pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/xcore_interpreters"""
                         // run tests
                         sh """. activate ./aiot_sdk_venv && cd test && pytest -v --junitxml tests_junit.xml"""
                         // run notebook tests
