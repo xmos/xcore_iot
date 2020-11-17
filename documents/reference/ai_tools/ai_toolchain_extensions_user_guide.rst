@@ -103,11 +103,12 @@ Activate the environment
 
 .. note:: You may need to specify the fully-qualified path to your environment.
 
-**Step 4. Install AI Extensions Python module**
+**Step 4. Install AI Extensions Python modules**
 
 .. code-block:: console
 
     $ pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/tflite2xcore
+    $ pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/xcore_interpreters
 
 ***********************************
 Optimizing and Deploying Your Model

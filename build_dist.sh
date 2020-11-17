@@ -2,16 +2,22 @@
 set -e
 
 #********************************
-# Build & install libtflite2xcore
+# Build & install lib_flexbuffers
 #********************************
-LIBTFLITE2XCORE_DIR=tools/ai_tools/utils/python_bindings
+LIB_FLEXBUFFERS_DIR=tools/ai_tools/utils/lib_flexbuffers
 echo "****************************"
 echo "* Building libtflite2xcore *"
 echo "****************************"
-(cd ${LIBTFLITE2XCORE_DIR}; mkdir -p build) 
-(cd ${LIBTFLITE2XCORE_DIR}/build; cmake ../ ; make) 
+(cd ${LIB_FLEXBUFFERS_DIR}; mkdir -p build) 
+(cd ${LIB_FLEXBUFFERS_DIR}/build; cmake ../ ; make install) 
 
+#***********************************
+# Build & install xcore_interpreters
+#***********************************
+XCORE_INTERPRETERS_DIR=tools/ai_tools/xcore_interpreters/python_bindings
+echo "*******************************"
+echo "* Building xcore_interpreters *"
 echo "******************************"
-echo "* Installing libtflite2xcore *"
-echo "******************************"
-(cd ${LIBTFLITE2XCORE_DIR}/build; make install) 
+(cd ${XCORE_INTERPRETERS_DIR}; mkdir -p build) 
+(cd ${XCORE_INTERPRETERS_DIR}/build; cmake ../ ; make install) 
+
