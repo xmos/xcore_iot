@@ -208,18 +208,33 @@ class XCOREInterpreter:
 
         if model_path:
             with open(model_path, "rb") as fd:
-                model_content = fd.read()
+                self._model_content = fd.read()
+        else:
+            self._model_content = model_content
 
+        self._max_tensor_arena_size = max_tensor_arena_size
         self._is_allocated = False
         self._op_states = []
+
+    def __enter__(self) -> None:
+        self.acquire()
+
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
+        self.release()
+
+    def acquire(self) -> None:
         self.obj = lib.new_interpreter()
         status = lib.initialize(
-            self.obj, model_content, len(model_content), max_tensor_arena_size,
+            self.obj,
+            self._model_content,
+            len(self._model_content),
+            self._max_tensor_arena_size,
         )
         if XCOREInterpreterStatus(status) is XCOREInterpreterStatus.ERROR:
             raise RuntimeError("Unable to initialize interpreter")
 
-    def __del__(self) -> None:
+    def release(self) -> None:
+
         lib.delete_interpreter(self.obj)
 
     def _verify_allocated(self) -> None:
