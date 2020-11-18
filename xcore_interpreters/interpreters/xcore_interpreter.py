@@ -217,12 +217,6 @@ class XCOREInterpreter:
         self._op_states = []
 
     def __enter__(self) -> None:
-        self.acquire()
-
-    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        self.release()
-
-    def acquire(self) -> None:
         self.obj = lib.new_interpreter()
         status = lib.initialize(
             self.obj,
@@ -233,9 +227,12 @@ class XCOREInterpreter:
         if XCOREInterpreterStatus(status) is XCOREInterpreterStatus.ERROR:
             raise RuntimeError("Unable to initialize interpreter")
 
-    def release(self) -> None:
+        return self
 
-        lib.delete_interpreter(self.obj)
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
+        if self.obj:
+            lib.delete_interpreter(self.obj)
+            self.obj = None
 
     def _verify_allocated(self) -> None:
         if not self._is_allocated:
