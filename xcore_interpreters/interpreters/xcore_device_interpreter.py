@@ -40,16 +40,13 @@ class XCOREDeviceInterpreter(XCOREInterpreter):
 
     def __enter__(self) -> None:
         super().__enter__()
-        if not self._endpoint:
-            self._endpoint = XCOREDeviceServer.acquire()
+        self._endpoint = XCOREDeviceServer.acquire()
 
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         super().__exit__(exc_type, exc_value, exc_traceback)
-        if self._endpoint:
-            XCOREDeviceServer.release(self._endpoint)
-            self._endpoint = None
+        XCOREDeviceServer.release(self._endpoint)
 
     def allocate_tensors(self) -> None:
         super().allocate_tensors()

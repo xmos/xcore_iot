@@ -230,9 +230,7 @@ class XCOREInterpreter:
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        if self.obj:
-            lib.delete_interpreter(self.obj)
-            self.obj = None
+        lib.delete_interpreter(self.obj)
 
     def _verify_allocated(self) -> None:
         if not self._is_allocated:
