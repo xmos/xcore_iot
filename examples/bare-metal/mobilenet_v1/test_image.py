@@ -105,11 +105,16 @@ try:
         img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)   
         raw_img = img_array.flatten().tobytes()
 
+        start_time = time.time()
         for i in range(0, len(raw_img), CHUCK_SIZE):
             retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
 
         while not ep.ready:
             pass
+
+        end_time = time.time()
+        time_ms = int(1000*(end_time-start_time))
+        print("Time taken for inference: {} milliseconds".format(time_ms))
 
 except KeyboardInterrupt:
     pass
