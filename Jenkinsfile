@@ -66,24 +66,20 @@ pipeline {
                 stage("Build examples") {
                     steps {
                         sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                              . activate ./aiot_sdk_venv && ./build_examples.sh"""
+                              . activate ./aiot_sdk_venv && bash build_examples.sh"""
                     }
                 }
-                stage("Build distribution") {
+                stage("Install") {
                     steps {
-                        sh """. activate ./aiot_sdk_venv && ./build_dist.sh"""
+                        sh """. activate ./aiot_sdk_venv && bash install_tools.sh"""
                     }
                 }
                 stage("Test") {
                     steps {
-                        // install tflite2xcore
-                        sh """. activate ./aiot_sdk_venv && pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/tflite2xcore"""
-                        // install xcore_interpreters
-                        sh """. activate ./aiot_sdk_venv && pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/xcore_interpreters"""
-                        // run tests
+                        // run unit tests
                         sh """. activate ./aiot_sdk_venv && cd test && pytest -v --junitxml tests_junit.xml"""
                         // run notebook tests
-                        sh """. activate ./aiot_sdk_venv && cd test && ./test_notebooks.sh"""
+                        sh """. activate ./aiot_sdk_venv && cd test && bash test_notebooks.sh"""
                         // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
                         // This step collects these files for display in Jenkins UI
                         junit "**/*_junit.xml"
