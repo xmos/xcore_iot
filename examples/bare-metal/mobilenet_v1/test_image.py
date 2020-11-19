@@ -6,20 +6,21 @@ import os
 import time
 import struct
 import ctypes
-import cv2
 
 import numpy as np
 from matplotlib import pyplot
+from PIL import Image
 
 CHUCK_SIZE = 128
 
-INPUT_SHAPE = (128, 128, 3)
+IMAGE_SHAPE = (128, 128)
+INPUT_SHAPE = IMAGE_SHAPE+(3,)
 INPUT_SCALE = 0.007843137718737125
 INPUT_ZERO_POINT = -1
 NORM_SCALE = 127.5
 NORM_SHIFT = 1
 
-OUTPUT_SCALE = 0.00390625
+OUTPUT_SCALE = 1/256
 OUTPUT_ZERO_POINT = -128
 
 OBJECT_CLASSES = [
@@ -35,18 +36,10 @@ OBJECT_CLASSES = [
     "ostrich",
 ]
 
+
 PRINT_CALLBACK = ctypes.CFUNCTYPE(
     None, ctypes.c_ulonglong, ctypes.c_uint, ctypes.c_char_p
 )
-
-
-def quantize(arr, scale, zero_point, dtype=np.int8):
-    t = np.round(arr / scale + zero_point)
-    return dtype(np.round(np.clip(t, np.iinfo(dtype).min, np.iinfo(dtype).max)))
-
-
-def dequantize(arr, scale, zero_point):
-    return np.float32((arr.astype(np.int32) - np.int32(zero_point)) * scale)
 
 
 class Endpoint(object):
@@ -88,6 +81,7 @@ class Endpoint(object):
             ctypes.c_uint(len(data) + 1), ctypes.c_char_p(data)
         )
 
+from tflite2xcore.utils import quantize, dequantize   
 
 ep = Endpoint()
 raw_img = None
@@ -96,24 +90,31 @@ try:
     if ep.connect():
         print("Failed to connect")
     else:
-        print("Connected")
+        image_file_path = sys.argv[1]
+        print("Connnected")
+        print("Running inference on image "+image_file_path)
+        # Some png files have RGBA format. convert to RGB to be on the safe side
+        img = Image.open(image_file_path).convert('RGB')
+        img = img.resize(IMAGE_SHAPE)
 
-        img = cv2.imread(sys.argv[1])
-        img = cv2.resize(img, (INPUT_SHAPE[0], INPUT_SHAPE[1]))
+        img_array = np.array(img).astype(np.float32)
+        print(img_array.shape)
+        # Normalize to range 0..1. Needed for quantize function
+        img_array = (img_array - img_array.min()) / img_array.ptp()
 
-        # Channel swapping due to mismatch between open CV and XMOS
-        img = img[:, :, ::-1]  # or image = image[:, :, (2, 1, 0)]
+        img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)   
+        raw_img = img_array.flatten().tobytes()
 
-        img = (img / NORM_SCALE) - NORM_SHIFT
-        img = np.round(quantize(img, INPUT_SCALE, INPUT_ZERO_POINT))
-
-        raw_img = bytes(img)
-
+        start_time = time.time()
         for i in range(0, len(raw_img), CHUCK_SIZE):
             retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
 
         while not ep.ready:
             pass
+
+        end_time = time.time()
+        time_ms = int(1000*(end_time-start_time))
+        print("Time taken for inference: {} milliseconds".format(time_ms))
 
 except KeyboardInterrupt:
     pass
@@ -141,5 +142,5 @@ if raw_img is not None:
         (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
     ).astype(np.uint8)
 
-    pyplot.imshow(np_img)
-    pyplot.show()
+    #pyplot.imshow(np_img)
+    #pyplot.show()
