@@ -35,19 +35,21 @@ class XCOREDeviceInterpreter(XCOREInterpreter):
 
         super().__init__(model_path, model_content, max_tensor_arena_size)
 
-        self._model_content = model_content
         self._endpoint = None
         self._set_model = False
 
-    def __del__(self) -> None:
-        if self._endpoint:
-            XCOREDeviceServer.release(self._endpoint)
+    def __enter__(self) -> None:
+        super().__enter__()
+        self._endpoint = XCOREDeviceServer.acquire()
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
+        super().__exit__(exc_type, exc_value, exc_traceback)
+        XCOREDeviceServer.release(self._endpoint)
 
     def allocate_tensors(self) -> None:
         super().allocate_tensors()
-
-        if not self._endpoint:
-            self._endpoint = XCOREDeviceServer.acquire()
 
         if not self._set_model:
             # send model to device
