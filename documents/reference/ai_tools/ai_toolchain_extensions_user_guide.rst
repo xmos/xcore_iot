@@ -81,15 +81,7 @@ To install the AI toolchain extensions, follow these steps:
 
 Follow the installation instructions in the :ref:`AIoT SDK Getting Started Guide <aiot-sdk-installation-label>`
 
-**Step 2. Build library prerequisites for the AI Extensions Python module**
-
-The following command will build libtflite2xcore which is required for the AI Extensions Python module.
-
-.. code-block:: console
-
-    $ ./build_dist.sh
-
-**Step 3. Create a Conda environment**
+**Step 2. Create a Conda environment**
 
 .. code-block:: console
 
@@ -103,12 +95,13 @@ Activate the environment
 
 .. note:: You may need to specify the fully-qualified path to your environment.
 
-**Step 4. Install AI Extensions Python modules**
+**Step 3. Install AI Extensions**
+
+The following command will build two libraries and install the AI Extensions Python modules.
 
 .. code-block:: console
 
-    $ pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/tflite2xcore
-    $ pip install -e ${XMOS_AIOT_SDK_PATH}/tools/ai_tools/xcore_interpreters
+    $ ./install_tools.sh
 
 ***********************************
 Optimizing and Deploying Your Model
