@@ -2,41 +2,12 @@
 
 from __future__ import print_function
 
-import argparse
 import sys
-
-HEADER_TEMPLATE = """
-// This is a TensorFlow Lite model file that has been converted into a C data
-// array using the convert_tflite_to_c_source() tool.
-
-#ifndef {include_guard}
-#define {include_guard}
-
-extern {const_keyword}unsigned char {array_name}[];
-extern const int {array_name}_len;
-
-#endif  // {include_guard}
-"""
-
-SOURCE_TEMPLATE = """
-// This is a TensorFlow Lite model file that has been converted into a C data
-// array using the convert_tflite_to_c_source() tool.
-
-#ifdef USE_SWMEM
-__attribute__((section(".SwMem_data")))
-#elif USE_EXTMEM
-__attribute__((section(".ExtMem_data")))
-#endif
-{const_keyword}unsigned char {array_name}[] __attribute__((aligned(4))) = {{
-{array_values}}};
-
-const int {array_name}_len = {array_length};
-"""
+import argparse
+from pathlib import Path
 
 
-def convert_bytes_to_c_source(
-    data, array_name, max_line_width, include_guard, use_const
-):
+def convert_bytes_to_c_source(data, array_name, max_line_width, include_guard):
     """Returns strings representing a C constant array containing `data`.
   """
 
@@ -53,24 +24,21 @@ def convert_bytes_to_c_source(
             array_lines.append(array_line + "\n")
         return "".join(array_lines)
 
-    if use_const:
-        const_keyword = "const "
-    else:
-        const_keyword = ""
+    source_template_path = Path(__file__).parent / f"templates/model_data_source.tpl"
+    with open(source_template_path, "r") as source_template_fd:
+        source_template = source_template_fd.read()
+        source_text = source_template.format(
+            array_name=array_name,
+            array_length=len(data),
+            array_values=data_to_array_values(data),
+        )
 
-    source_text = SOURCE_TEMPLATE.format(
-        const_keyword=const_keyword,
-        array_name=array_name,
-        array_length=len(data),
-        array_values=data_to_array_values(data),
-    )
-
-    header_text = HEADER_TEMPLATE.format(
-        include_guard=include_guard,
-        const_keyword=const_keyword,
-        array_name=array_name,
-        array_length=len(data),
-    )
+    header_template_path = Path(__file__).parent / f"templates/model_data_header.tpl"
+    with open(header_template_path, "r") as header_template_fd:
+        header_template = header_template_fd.read()
+        header_text = header_template.format(
+            include_guard=include_guard, array_name=array_name, array_length=len(data),
+        )
 
     return source_text, header_text
 
@@ -108,12 +76,6 @@ if __name__ == "__main__":
         "--line-width", type=int, help="Width to use for formatting.", default=80
     )
 
-    parser.add_argument(
-        "--use-const",
-        action="store_true",
-        help="Optional path to include in generated source file.",
-    )
-
     args = parser.parse_args()
 
     # setup defaults
@@ -133,7 +95,6 @@ if __name__ == "__main__":
         array_name=variable_name,
         max_line_width=args.line_width,
         include_guard=include_guard,
-        use_const=args.use_const,
     )
 
     with open(source_file, "w") as source_fd:
