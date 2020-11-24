@@ -19,6 +19,8 @@ __attribute__((aligned(8))) static char swmem_handler_stack[1024];
          // memory
 static unsigned char tensor_arena[TENSOR_ARENA_SIZE];
 
+static model_runner_t model_runner_ctx_s;
+static model_runner_t *model_runner_ctx = &model_runner_ctx_s;
 static int8_t *input_buffer;
 static size_t input_size;
 static int8_t *output_buffer;
@@ -63,10 +65,11 @@ int main(int argc, char *argv[]) {
 #endif
 
   // setup model runner
-  model_runner_initialize(cifar10_model_data, tensor_arena, TENSOR_ARENA_SIZE);
-  input_buffer = model_runner_get_input();
-  input_size = model_runner_get_input_size();
-  output_buffer = model_runner_get_output();
+  model_runner_init(model_runner_ctx, cifar10_model_data, tensor_arena,
+                    TENSOR_ARENA_SIZE);
+  input_buffer = model_runner_get_input(model_runner_ctx);
+  input_size = model_runner_get_input_size(model_runner_ctx);
+  output_buffer = model_runner_get_output(model_runner_ctx);
 
   if (argc > 1) {
     printf("Input filename = %s\n", argv[1]);
@@ -79,7 +82,7 @@ int main(int argc, char *argv[]) {
 
   // Run inference, and report any error
   printf("Running inference...\n");
-  model_runner_invoke();
+  model_runner_invoke(model_runner_ctx);
 
   char classification[12] = {0};
   int m = argmax(output_buffer, 10);
