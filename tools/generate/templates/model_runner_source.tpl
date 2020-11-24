@@ -12,14 +12,14 @@
 #include "tensorflow/lite/version.h"
 
 // shorthand typedefs
-//typedef tflite::MicroAllocator micro_allocator_t;
-//typedef tflite::SimpleMemoryAllocator simple_allocator_t;
+typedef tflite::MicroAllocator micro_allocator_t;
+typedef tflite::SimpleMemoryAllocator simple_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
 typedef tflite::micro::xcore::XCoreProfiler profiler_t;
 
 // static variables
-//static micro_allocator_t *allocator = nullptr;
+static micro_allocator_t *allocator = nullptr;
 static error_reporter_t *reporter = nullptr;
 static profiler_t *profiler = nullptr;
 static uint8_t interpreter_buffer[sizeof(interpreter_t)];
@@ -30,6 +30,12 @@ void model_runner_init(model_runner_t *ctx, const uint8_t* model_content, uint8_
   static error_reporter_t error_reporter_s;
   if (reporter == nullptr) {{
     reporter = &error_reporter_s;
+  }}
+
+  // Set up allocator
+  static simple_allocator_t simple_allocator_s(reporter, arena, arena_size);
+  if (allocator == nullptr) {{
+    allocator = micro_allocator_t::Create(&simple_allocator_s, reporter);
   }}
 
   // Set up profiling
@@ -55,11 +61,8 @@ void model_runner_init(model_runner_t *ctx, const uint8_t* model_content, uint8_
 {operator_list}
 
   // Build an interpreter to run the model with
-//  interpreter_t *interpreter = new (interpreter_buffer) interpreter_t(
-//    model, resolver, allocator, reporter, true,
-//    profiler);
   interpreter_t *interpreter = new (interpreter_buffer) interpreter_t(
-    model, resolver, arena, arena_size, reporter, true,
+    model, resolver, allocator, reporter, true,
     profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.
