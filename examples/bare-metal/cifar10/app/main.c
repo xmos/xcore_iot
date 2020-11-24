@@ -21,6 +21,7 @@ static unsigned char tensor_arena[TENSOR_ARENA_SIZE];
 
 static model_runner_t model_runner_ctx_s;
 static model_runner_t *model_runner_ctx = &model_runner_ctx_s;
+
 static int8_t *input_buffer;
 static size_t input_size;
 static int8_t *output_buffer;

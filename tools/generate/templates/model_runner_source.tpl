@@ -8,7 +8,6 @@
 #include "tensorflow/lite/micro/kernels/xcore/xcore_profiler.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
-//#include "tensorflow/lite/micro/simple_memory_allocator.h"
 #include "tensorflow/lite/version.h"
 
 // shorthand typedefs
@@ -22,7 +21,6 @@ typedef tflite::micro::xcore::XCoreProfiler profiler_t;
 static micro_allocator_t *allocator = nullptr;
 static error_reporter_t *reporter = nullptr;
 static profiler_t *profiler = nullptr;
-static uint8_t interpreter_buffer[sizeof(interpreter_t)];
 
 void model_runner_init(uint8_t* arena, int arena_size)
 {{
@@ -64,6 +62,8 @@ void model_runner_create(model_runner_t *ctx, const uint8_t* model_content)
 {operator_list}
 
   // Build an interpreter to run the model with
+  void *interpreter_buffer =
+      allocator->AllocatePersistentBuffer(sizeof(interpreter_t));
   interpreter_t *interpreter = new (interpreter_buffer) interpreter_t(
     model, resolver, allocator, reporter, true,
     profiler);
