@@ -65,8 +65,8 @@ int main(int argc, char *argv[]) {
 #endif
 
   // setup model runner
-  model_runner_init(model_runner_ctx, cifar10_model_data, tensor_arena,
-                    TENSOR_ARENA_SIZE);
+  model_runner_init(tensor_arena, TENSOR_ARENA_SIZE);
+  model_runner_create(model_runner_ctx, cifar10_model_data);
   input_buffer = model_runner_get_input(model_runner_ctx);
   input_size = model_runner_get_input_size(model_runner_ctx);
   output_buffer = model_runner_get_output(model_runner_ctx);

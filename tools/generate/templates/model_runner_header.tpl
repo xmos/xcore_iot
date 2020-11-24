@@ -17,7 +17,8 @@ struct model_runner_struct {{
 extern "C" {{
 #endif
 
-void model_runner_init(model_runner_t *ctx, const uint8_t* model_content, uint8_t* arena, int arena_size);
+void model_runner_init(uint8_t* arena, int arena_size);
+void model_runner_create(model_runner_t *ctx, const uint8_t* model_content);
 
 int8_t* model_runner_get_input(model_runner_t *ctx);
 size_t model_runner_get_input_size(model_runner_t *ctx);

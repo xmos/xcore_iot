@@ -24,7 +24,7 @@ static error_reporter_t *reporter = nullptr;
 static profiler_t *profiler = nullptr;
 static uint8_t interpreter_buffer[sizeof(interpreter_t)];
 
-void model_runner_init(model_runner_t *ctx, const uint8_t* model_content, uint8_t* arena, int arena_size)
+void model_runner_init(uint8_t* arena, int arena_size)
 {{
   // Set up error reporting
   static error_reporter_t error_reporter_s;
@@ -43,7 +43,10 @@ void model_runner_init(model_runner_t *ctx, const uint8_t* model_content, uint8_
   if (profiler == nullptr) {{
     profiler = &profiler_s;
   }}
+}}
 
+void model_runner_create(model_runner_t *ctx, const uint8_t* model_content)
+{{
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   const tflite::Model* model;
