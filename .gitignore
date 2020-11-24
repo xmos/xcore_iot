@@ -5,6 +5,7 @@
 **/*.pyc
 **/__pycache__/*
 **/.ipynb_checkpoints/*
+aiot_sdk_venv/*
 
 # Build & debug cruft
 **/.build*/*
