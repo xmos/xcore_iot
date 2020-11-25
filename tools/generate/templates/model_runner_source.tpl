@@ -47,7 +47,7 @@ void model_runner_init(uint8_t* arena, int arena_size)
   if (resolver == nullptr) {{
     resolver = &resolver_s;
   }}
-{operator_list}
+{operator_registrations}
 
 #ifndef NDEBUG
   // Set up profiling

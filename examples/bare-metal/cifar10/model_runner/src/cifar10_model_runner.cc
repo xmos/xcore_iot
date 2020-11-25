@@ -16,7 +16,7 @@ typedef tflite::SimpleMemoryAllocator simple_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
 typedef tflite::micro::xcore::XCoreProfiler profiler_t;
-typedef tflite::MicroMutableOpResolver<8> resolver_t;
+typedef tflite::MicroMutableOpResolver<6> resolver_t;
 
 // static variables
 static error_reporter_t error_reporter_s;
@@ -47,14 +47,12 @@ void model_runner_init(uint8_t* arena, int arena_size)
   if (resolver == nullptr) {
     resolver = &resolver_s;
   }
-  resolver->AddQuantize();
-  resolver->AddConv2d();
-  resolver->AddMinimum();
-  resolver->AddMaximum();
-  resolver->AddDepthwiseConv2d();
+  resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Deep());
+  resolver->AddSoftmax();
+  resolver->AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode, tflite::ops::micro::xcore::Register_FullyConnected_8());
+  resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
   resolver->AddPad();
-  resolver->AddAdd();
-  resolver->AddDequantize();
+  resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Shallow());
 
 #ifndef NDEBUG
   // Set up profiling

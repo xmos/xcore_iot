@@ -64,6 +64,7 @@ def make_operator_code_lut():
     # extend LUT with BuiltIn operators
     for op_code in BuiltinOpCodes:
         nm = "".join(x.capitalize() or "_" for x in op_code.name.split("_"))
+        nm = nm.replace("2d", "2D")
         operator_code_lut[op_code] = BUILTIN_TPL.format(nm=nm)
 
     return operator_code_lut
@@ -110,25 +111,26 @@ def generate_model_data(model_path, output_path, variable_name, line_width=80):
             source_fd.write(source)
 
 
-def generate_model_runner(model_path, output_path, variable_name, indent=" " * 2):
-    def generate_op_resolver(model_path):
-        operator_count = 0
-        operator_list = []
-        with open(model_path, "rb") as model_fd:
+def generate_op_resolver_registrations(model_path, indent=" " * 2):
+    operator_count = 0
+    operator_registrations = []
+    with open(model_path, "rb") as model_fd:
 
-            model_content = model_fd.read()
-            model = XCOREModel.deserialize(model_content)
-            operator_count = len(model.operator_codes)
-            operator_code_lut = make_operator_code_lut()
-            for op_code in model.operator_codes:
-                registration_line = operator_code_lut.get(
-                    op_code.code,
-                    f"// Unable to generate registration code for op_code {op_code.code}",
-                )
-                operator_list.append(f"{indent}{registration_line}")
+        model_content = model_fd.read()
+        model = XCOREModel.deserialize(model_content)
+        operator_count = len(model.operator_codes)
+        operator_code_lut = make_operator_code_lut()
+        for op_code in model.operator_codes:
+            registration_line = operator_code_lut.get(
+                op_code.code,
+                f"// Unable to generate registration code for op_code {op_code.code}",
+            )
+            operator_registrations.append(f"{indent}{registration_line}")
 
-        return operator_count, "\n".join(operator_list)
+    return operator_registrations
 
+
+def generate_model_runner(operator_registrations, output_path, variable_name):
     header_file_rel, source_file_rel = make_model_runner_filenames(variable_name)
     header_file = output_path / header_file_rel
     source_file = output_path / source_file_rel
@@ -147,13 +149,10 @@ def generate_model_runner(model_path, output_path, variable_name, indent=" " * 2
     source_template_path = Path(__file__).parent / f"templates/model_runner_source.tpl"
     with open(source_template_path, "r") as source_template_fd:
         source_template = source_template_fd.read()
-
-        operator_count, operator_list = generate_op_resolver(model_path)
-
         source_text = source_template.format(
             header_file=header_file,
-            operator_count=operator_count,
-            operator_list=operator_list,
+            operator_count=len(operator_registrations),
+            operator_registrations="\n".join(operator_registrations),
         )
         print("Generating source file:", source_file)
         with open(source_file, "w") as source_fd:
@@ -178,19 +177,24 @@ def generate_build_files(output_path, variable_name):
 
 
 def generate_project(args):
-    runner_name = args.name
-    model_path = Path(args.input)
+    inputs = args.input
+    runner_basename = args.name
     output_path = Path(args.output) / "model_runner"
     print("Generating output path:", output_path)
 
     # create output_path if it does not exist
     output_path.mkdir(parents=True, exist_ok=True)
 
-    generate_model_data(model_path, output_path, runner_name)
+    resolver_registrations = set([])
 
-    generate_model_runner(model_path, output_path, runner_name)
+    for i, input_ in enumerate(inputs):
+        model_path = Path(input_)
+        runner_name = f"{runner_basename}-{i}" if len(inputs) > 1 else runner_basename
+        generate_model_data(model_path, output_path, runner_name)
+        resolver_registrations.update(generate_op_resolver_registrations(model_path))
 
-    generate_build_files(output_path, runner_name)
+    generate_model_runner(resolver_registrations, output_path, runner_basename)
+    generate_build_files(output_path, runner_basename)
 
 
 if __name__ == "__main__":
@@ -204,7 +208,7 @@ if __name__ == "__main__":
         "--input",
         help="Full filepath of the input TensorFlow Lite file.",
         required=True,
-        # action="append",
+        action="append",
     )
 
     parser.add_argument(
