@@ -7,6 +7,7 @@ from pathlib import Path
 from convert_tflite_to_c_source import convert_bytes_to_c_source
 from tflite2xcore.xcore_model import XCOREModel
 from tflite2xcore.xcore_schema import XCOREOpCodes, ExternalOpCodes, BuiltinOpCodes
+from tflite2xcore import analyze
 
 SOURCE_DIRECTORY = "src"
 
@@ -84,7 +85,9 @@ def make_model_runner_filenames(variable_name):
     return header_file, source_file
 
 
-def generate_model_data(model_path, output_path, variable_name, line_width=80):
+def generate_model_data(
+    model_path, output_path, variable_name, *, line_width=80, do_analyze=False
+):
     header_file_rel, source_file_rel = make_model_data_filenames(variable_name)
     header_file = output_path / header_file_rel
     source_file = output_path / source_file_rel
@@ -93,6 +96,10 @@ def generate_model_data(model_path, output_path, variable_name, line_width=80):
     include_guard = variable_name.upper() + "_MODEL_H_"
 
     with open(model_path, "rb") as model_fd:
+        if do_analyze:
+            print("Analyzing model:", model_path)
+            analyze.print_report(model_path)
+
         model_data = model_fd.read()
 
         source, header = convert_bytes_to_c_source(
@@ -190,7 +197,9 @@ def generate_project(args):
     for i, input_ in enumerate(inputs):
         model_path = Path(input_)
         runner_name = f"{runner_basename}-{i}" if len(inputs) > 1 else runner_basename
-        generate_model_data(model_path, output_path, runner_name)
+        generate_model_data(
+            model_path, output_path, runner_name, do_analyze=args.analyze
+        )
         resolver_registrations.update(generate_op_resolver_registrations(model_path))
 
     generate_model_runner(resolver_registrations, output_path, runner_basename)
@@ -215,6 +224,14 @@ if __name__ == "__main__":
         "--output",
         help="Full filepath of the output runner project parent directory.",
         default=Path.cwd(),
+    )
+
+    parser.add_argument(
+        "--analyze",
+        action="store_true",
+        default=False,
+        help="Analyze the output model. "
+        "A report is printed showing the runtime memory footprint of the model.",
     )
 
     parser.add_argument(
