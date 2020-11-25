@@ -12,8 +12,8 @@ SOURCE_DIRECTORY = "src"
 
 
 def make_operator_code_lut():
-    BUILTIN_TPL = "resolver.Add{nm}();"
-    CUSTOM_TPL = "resolver.AddCustom(tflite::ops::micro::xcore::{oc}, tflite::ops::micro::xcore::{fun}());"
+    BUILTIN_TPL = "resolver->Add{nm}();"
+    CUSTOM_TPL = "resolver->AddCustom(tflite::ops::micro::xcore::{oc}, tflite::ops::micro::xcore::{fun}());"
 
     operator_code_lut = {
         # XCORE 8-bit
@@ -178,7 +178,7 @@ def generate_build_files(output_path, variable_name):
 
 
 def generate_project(args):
-    model_name = args.model_name
+    runner_name = args.name
     model_path = Path(args.input)
     output_path = Path(args.output) / "model_runner"
     print("Generating output path:", output_path)
@@ -186,11 +186,11 @@ def generate_project(args):
     # create output_path if it does not exist
     output_path.mkdir(parents=True, exist_ok=True)
 
-    generate_model_data(model_path, output_path, model_name)
+    generate_model_data(model_path, output_path, runner_name)
 
-    generate_model_runner(model_path, output_path, model_name)
+    generate_model_runner(model_path, output_path, runner_name)
 
-    generate_build_files(output_path, model_name)
+    generate_build_files(output_path, runner_name)
 
 
 if __name__ == "__main__":
@@ -204,6 +204,7 @@ if __name__ == "__main__":
         "--input",
         help="Full filepath of the input TensorFlow Lite file.",
         required=True,
+        # action="append",
     )
 
     parser.add_argument(
@@ -213,7 +214,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--model-name", help="Name to use for the model.",
+        "--name", help="Name to use for the model runner.", default="app",
     )
     args = parser.parse_args()
 

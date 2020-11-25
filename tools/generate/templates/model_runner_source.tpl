@@ -16,16 +16,22 @@ typedef tflite::SimpleMemoryAllocator simple_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
 typedef tflite::micro::xcore::XCoreProfiler profiler_t;
+typedef tflite::MicroMutableOpResolver<{operator_count}> resolver_t;
 
 // static variables
-static micro_allocator_t *allocator = nullptr;
+static error_reporter_t error_reporter_s;
 static error_reporter_t *reporter = nullptr;
+
+static micro_allocator_t *allocator = nullptr;
+
 static profiler_t *profiler = nullptr;
+
+static resolver_t resolver_s;
+static resolver_t *resolver = nullptr;
 
 void model_runner_init(uint8_t* arena, int arena_size)
 {{
   // Set up error reporting
-  static error_reporter_t error_reporter_s;
   if (reporter == nullptr) {{
     reporter = &error_reporter_s;
   }}
@@ -36,11 +42,20 @@ void model_runner_init(uint8_t* arena, int arena_size)
     allocator = micro_allocator_t::Create(&simple_allocator_s, reporter);
   }}
 
+  // Set up op resolver
+  //   This pulls in all the operation implementations we need.
+  if (resolver == nullptr) {{
+    resolver = &resolver_s;
+  }}
+{operator_list}
+
+#ifndef NDEBUG
   // Set up profiling
   static profiler_t profiler_s(reporter);
   if (profiler == nullptr) {{
     profiler = &profiler_s;
   }}
+#endif
 }}
 
 void model_runner_create(model_runner_t *ctx, const uint8_t* model_content)
@@ -57,15 +72,11 @@ void model_runner_create(model_runner_t *ctx, const uint8_t* model_content)
     exit(1);
   }}
 
-  // This pulls in all the operation implementations we need.
-  static tflite::MicroMutableOpResolver<{operator_count}> resolver;
-{operator_list}
-
   // Build an interpreter to run the model with
   void *interpreter_buffer =
       allocator->AllocatePersistentBuffer(sizeof(interpreter_t));
   interpreter_t *interpreter = new (interpreter_buffer) interpreter_t(
-    model, resolver, allocator, reporter, true,
+    model, *resolver, allocator, reporter, true,
     profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.
