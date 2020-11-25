@@ -50,7 +50,7 @@ size_t model_runner_get_input_size(model_runner_t *ctx);
 
 /** Get the model input quantization parameters.
  *
- * @param[in] ctx    Model runner context
+ * @param[in]  ctx    Model runner context
  * @param[out] ctx   Quantization scale
  * @param[out] ctx   Quantization zero point
  */
@@ -80,7 +80,7 @@ size_t model_runner_get_output_size(model_runner_t *ctx);
 
 /** Get the model output quantization parameters.
  *
- * @param[in] ctx    Model runner context
+ * @param[in]  ctx    Model runner context
  * @param[out] ctx   Quantization scale
  * @param[out] ctx   Quantization zero point
  */

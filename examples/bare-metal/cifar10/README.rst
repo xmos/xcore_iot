@@ -103,11 +103,25 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
     $ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
 
-Converting flatbuffer to source file
-====================================
 
-The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
+********************
+Optimizing the model
+********************
+
+Generating the model runner
+===========================
+
+The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
 
 .. code-block:: console
 
-    $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/cifar10_model.h --source inference_engine/src/cifar10_model.c --variable-name cifar10_model
+    $ python ../../../tools/generate/generate_model_runner.py --input model/model_xcore.tflite --name cifar10
+
+Converting flatbuffer to source file
+====================================
+
+If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
+
+.. code-block:: console
+
+    $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/src/cifar10_model_data.h --source model_runner/src/cifar10_model_data.c --variable-name cifar10

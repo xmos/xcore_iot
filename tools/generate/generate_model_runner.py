@@ -209,7 +209,7 @@ def generate_project(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=(
-            "Command line tool to convert .tflite file to a model runner project."
+            "Command line tool to generate a model runner project for given .tflite model file(s)."
         )
     )
 
