@@ -157,7 +157,7 @@ def generate_model_runner(operator_registrations, output_path, variable_name):
     with open(source_template_path, "r") as source_template_fd:
         source_template = source_template_fd.read()
         source_text = source_template.format(
-            header_file=header_file,
+            header_file=header_file_rel.name,
             operator_count=len(operator_registrations),
             operator_registrations="\n".join(operator_registrations),
         )

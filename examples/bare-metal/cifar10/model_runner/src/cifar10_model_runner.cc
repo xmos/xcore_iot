@@ -1,7 +1,7 @@
 // This is a TensorFlow Lite model runner interface that has been
 // generated using the generate_model_runner tool.
 
-#include "/home/kmoulton/repos/hotdog/aiot_sdk/examples/bare-metal/cifar10/model_runner/src/cifar10_model_runner.h"
+#include "cifar10_model_runner.h"
 
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_ops.h"
@@ -47,12 +47,12 @@ void model_runner_init(uint8_t* arena, int arena_size)
   if (resolver == nullptr) {
     resolver = &resolver_s;
   }
-  resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Deep());
   resolver->AddPad();
-  resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
   resolver->AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode, tflite::ops::micro::xcore::Register_FullyConnected_8());
   resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Shallow());
+  resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
   resolver->AddSoftmax();
+  resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Deep());
 
 #ifndef NDEBUG
   // Set up profiling
