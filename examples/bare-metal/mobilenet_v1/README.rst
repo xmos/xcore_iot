@@ -47,6 +47,12 @@ To install, run:
 
     $ make install
 
+Now return back the application directory:
+
+.. code-block:: console
+
+    $ cd ..
+
 Running the firmware
 ====================
 
@@ -54,7 +60,7 @@ Running with hardware
 
 .. code-block:: console
 
-    $ xrun --io --xscope --xscope-port localhost:10234 bin/mobilenet_v1.xe
+    $ xrun --xscope-port localhost:10234 bin/mobilenet_v1.xe
 
 Running with simulator
 
@@ -62,7 +68,7 @@ Running with simulator
 
     $ xsim --xscope "-realtime localhost:10234" bin/mobilenet_v1.xe
 
-Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires the following Python modules:
+The firmware will now wait until a data is sent from a host application. Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires the following Python modules and should be run in a new terminal window:
 
 .. code-block:: console
 
@@ -70,7 +76,7 @@ Test images can be sent to the firmware using `xscope`.  Most RGB images should 
     $ pip install matplotlib
     $ pip install opencv-python
 
-Sending a test image to the xcore.ai Explorer board using `xscope`.
+Sending a test image to the xcore.ai Explorer board using `xscope`. The `test_image.py` script can be found in the application directory:
 
 .. code-block:: console
 
