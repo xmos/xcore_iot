@@ -63,7 +63,7 @@ System Requirements
 The AI Toolchain Extensions are officially supported on the following platforms:
 
 - MacOS 10.13 +
-- Linux CentOS 5.8 or Ubuntu 12.04 LTS
+- Linux CentOS 5.8 + or Ubuntu 12.04 LTS +
 
 The tools also work on many other versions of Linux, including Fedora 30 +.
 
