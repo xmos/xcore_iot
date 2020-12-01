@@ -77,6 +77,7 @@ else (X86)
     "-Wno-xcore-fptrgroup"
     "-Wno-unknown-pragmas"
     "-report"
+    "-fno-rtti"
     #"-DNDEBUG" 
     "-DXCORE"
     "-Os"
