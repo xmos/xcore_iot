@@ -1,20 +1,20 @@
 // This is a TensorFlow Lite model runner interface that has been
 // generated using the generate_model_runner tool.
 
-#ifndef {include_guard}
-#define {include_guard}
+#ifndef MODEL_RUNNER_H_
+#define MODEL_RUNNER_H_
 
 #include <stddef.h>
 #include <stdint.h>
 
 typedef struct model_runner_struct model_runner_t;
 
-struct model_runner_struct {{
+struct model_runner_struct {
     void *handle;
-}};
+};
 
 #ifdef __cplusplus
-extern "C" {{
+extern "C" {
 #endif
 
 /** Initialize the model runner global state.
@@ -87,7 +87,7 @@ size_t model_runner_get_output_size(model_runner_t *ctx);
 void model_runner_get_ouput_quant(float *scale, int* zero_point);
 
 #ifdef __cplusplus
-}};
+};
 #endif
 
-#endif  // {include_guard}
+#endif  // MODEL_RUNNER_H_

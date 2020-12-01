@@ -33,10 +33,6 @@
 #   LIB_OPTIONAL_HEADERS    List of optional header files
 #                           Must contain full header file names
 #                           ex: set(LIB_OPTIONAL_HEADERS "foo.h" "bar.h")
-set(LIB_NAME model_runner)
-set(LIB_VERSION 0.0.0)
-set(LIB_ADD_COMPILER_FLAGS "-Os" )
-
 # include XCORE Interpreter sources and include directories
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools/utils/cmake/xcore_interpreter.cmake")
 
@@ -45,7 +41,7 @@ set(LIB_XC_SRCS
     )
 set(LIB_CXX_SRCS
         ${XCORE_INTERPRETER_SOURCES_CXX}
-        "src/cifar10_model_runner.cc"
+        "src/model_runner.cc"
     )
 set(LIB_C_SRCS
         ${XCORE_INTERPRETER_SOURCES_C}
@@ -61,8 +57,3 @@ set(LIB_INCLUDES
         "src"
     )
 set(LIB_OPTIONAL_HEADERS "")
-
-#=============================================================================
-# The following part of the CMakeLists includes the common build infrastructure
-# for compiling XMOS applications. You should not need to edit below here.
-XMOS_REGISTER_MODULE()

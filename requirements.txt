@@ -1,0 +1,3 @@
+Jinja2 == 2.11.2
+-e tools/ai_tools/xcore_interpreters
+-e tools/ai_tools/tflite2xcore

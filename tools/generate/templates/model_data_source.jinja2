@@ -6,7 +6,7 @@ __attribute__((section(".SwMem_data")))
 #elif USE_EXTMEM
 __attribute__((section(".ExtMem_data")))
 #endif
-const unsigned char {array_name}_model_data[] __attribute__((aligned(4))) = {{
-{array_values}}};
+const unsigned char {{array_name}}_model_data[] __attribute__((aligned(4))) = {
+{{array_values}}};
 
-const int {array_name}_model_data_len = {array_length};
+const int {{array_name}}_model_data_len = {{array_length}};

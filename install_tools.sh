@@ -19,14 +19,8 @@ XCORE_INTERPRETERS_DIR=${AI_TOOLS_DIR}/xcore_interpreters/python_bindings
 (cd ${XCORE_INTERPRETERS_DIR}; mkdir -p build) 
 (cd ${XCORE_INTERPRETERS_DIR}/build; cmake ../ ; make install) 
 
-echo "***************************"
-echo "* Installing tflite2xcore *"
-echo "***************************"
-TFLITE2XCORE_DIR=${AI_TOOLS_DIR}/tflite2xcore
-(pip install -e ${TFLITE2XCORE_DIR})
+echo "**********************************"
+echo "* Installing Python requirements *"
+echo "**********************************"
+(pip install -r requirements.txt)
 
-echo "*********************************"
-echo "* Installing xcore_interpreters *"
-echo "********************************"
-XCORE_INTERPRETERS_DIR=${AI_TOOLS_DIR}/xcore_interpreters
-(pip install -e ${XCORE_INTERPRETERS_DIR})

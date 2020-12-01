@@ -43,6 +43,7 @@ set(BUILD_FLAGS
   "-mcmodel=large"
   "-Wno-xcore-fptrgroup"
   "-Wno-unknown-pragmas"
+  "-fno-rtti"
   "-report"
   "-DTF_LITE_STATIC_MEMORY"
   "-DXCORE"
@@ -77,7 +78,7 @@ set(MODEL_RUNNER_SOURCE_DIR
 
 set(MODEL_RUNNER_SOURCES
   ${XCORE_INTERPRETER_SOURCES}
-  "${MODEL_RUNNER_SOURCE_DIR}/cifar10_model_runner.cc"
+  "${MODEL_RUNNER_SOURCE_DIR}/model_runner.cc"
   "${MODEL_RUNNER_SOURCE_DIR}/cifar10_model_data.c"
 )
 

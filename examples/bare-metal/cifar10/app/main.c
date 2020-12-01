@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "cifar10_model_data.h"
-#include "cifar10_model_runner.h"
+#include "model_runner.h"
 #include "xcore_device_memory.h"
 
 #if defined(USE_SWMEM)

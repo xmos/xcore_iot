@@ -6,6 +6,16 @@ import sys
 import argparse
 from pathlib import Path
 
+import jinja2
+
+
+def get_template(filename):
+    jinja_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(searchpath=Path(__file__).parent / "templates")
+    )
+
+    return jinja_env.get_template(filename)
+
 
 def convert_bytes_to_c_source(data, array_name, max_line_width, include_guard):
     """Returns strings representing a C constant array containing `data`.
@@ -24,21 +34,23 @@ def convert_bytes_to_c_source(data, array_name, max_line_width, include_guard):
             array_lines.append(array_line + "\n")
         return "".join(array_lines)
 
-    source_template_path = Path(__file__).parent / f"templates/model_data_source.tpl"
-    with open(source_template_path, "r") as source_template_fd:
-        source_template = source_template_fd.read()
-        source_text = source_template.format(
-            array_name=array_name,
-            array_length=len(data),
-            array_values=data_to_array_values(data),
-        )
+    source_template = get_template("model_data_source.jinja2")
+    source_text = source_template.render(
+        {
+            "array_name": array_name,
+            "array_length": len(data),
+            "array_values": data_to_array_values(data),
+        }
+    )
 
-    header_template_path = Path(__file__).parent / f"templates/model_data_header.tpl"
-    with open(header_template_path, "r") as header_template_fd:
-        header_template = header_template_fd.read()
-        header_text = header_template.format(
-            include_guard=include_guard, array_name=array_name, array_length=len(data),
-        )
+    header_template = get_template("model_data_header.jinja2")
+    header_text = header_template.render(
+        {
+            "include_guard": include_guard,
+            "array_name": array_name,
+            "array_length": len(data),
+        }
+    )
 
     return source_text, header_text
 
