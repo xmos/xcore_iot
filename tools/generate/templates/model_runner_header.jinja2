@@ -50,9 +50,9 @@ size_t model_runner_get_input_size(model_runner_t *ctx);
 
 /** Get the model input quantization parameters.
  *
- * @param[in]  ctx    Model runner context
- * @param[out] ctx   Quantization scale
- * @param[out] ctx   Quantization zero point
+ * @param[in]  ctx          Model runner context
+ * @param[out] scale        Quantization scale
+ * @param[out] zero_point   Quantization zero point
  */
 void model_runner_get_input_quant(model_runner_t *ctx, float *scale, int* zero_point);
 
@@ -80,11 +80,11 @@ size_t model_runner_get_output_size(model_runner_t *ctx);
 
 /** Get the model output quantization parameters.
  *
- * @param[in]  ctx    Model runner context
- * @param[out] ctx   Quantization scale
- * @param[out] ctx   Quantization zero point
+ * @param[in]  ctx          Model runner context
+ * @param[out] scale        Quantization scale
+ * @param[out] zero_point   Quantization zero point
  */
-void model_runner_get_ouput_quant(float *scale, int* zero_point);
+void model_runner_get_ouput_quant(model_runner_t *ctx, float *scale, int* zero_point);
 
 #ifdef __cplusplus
 };
