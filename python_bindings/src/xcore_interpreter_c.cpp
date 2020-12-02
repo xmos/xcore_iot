@@ -102,6 +102,9 @@ int initialize(ExtendedXCoreInterpreterContext* ctx, const char* model_content,
   ctx->resolver->AddCustom(
       tflite::ops::micro::xcore::BConv2d_Bitpacked_OpCode,
       tflite::ops::micro::xcore::Register_BConv2D_Bitpacked());
+  ctx->resolver->AddCustom(
+      tflite::ops::micro::xcore::BConv2d_Int8_DeepIn_DeepOut_OpCode,
+      tflite::ops::micro::xcore::Register_BConv2D_Int8_Deepin_Deepout());
   ctx->resolver->AddCustom(tflite::ops::micro::xcore::Pad_OpCode,
                            tflite::ops::micro::xcore::Register_Pad());
 
