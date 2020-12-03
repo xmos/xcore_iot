@@ -28,6 +28,21 @@ A Python 3 script is provided that will generate one example image from each of 
 
 For background information on the CIFAR-10 dataset, please read `Learning Multiple Layers of Features from Tiny Images <https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf>`__, Alex Krizhevsky, 2009.
 
+****************
+Supported Boards
+****************
+
+This example is supported on the XCORE-AI-EXPLORER board and the AiOT Board (OSPREY-BOARD). 
+Set the $TARGET environment variable to the board that you are using. For example:
+
+.. code-block:: console
+
+    $ export TARGET=OSPREY-BOARD
+
+The build and run commands shown below will then pick up the correct target automatically.
+Please note: The external DDR memory options are only available on the XCORE-AI-EXPLORER board. 
+
+
 *********************
 Building the firmware
 *********************
@@ -46,7 +61,7 @@ Run cmake:
 
 .. code-block:: console
 
-    $ cmake ../ -DBOARD=XCORE-AI-EXPLORER
+    $ cmake ../ -DBOARD=$TARGET
     $ make
 
 Using external flash memory
@@ -56,7 +71,7 @@ To building with the model stored in flash, replace the call to cmake above with
 
 .. code-block:: console
 
-    $ cmake ../ -DBOARD=XCORE-AI-EXPLORER -DUSE_SWMEM=1
+    $ cmake ../ -DBOARD=$TARGET -DUSE_SWMEM=1
     $ make
 
 To flash the model and example images, run the following commands:
@@ -64,7 +79,7 @@ To flash the model and example images, run the following commands:
 .. code-block:: console
 
     $ cd filesystem_support
-    $ ./flash_image.sh -s XCORE-AI-EXPLORER
+    $ ./flash_image.sh -s $TARGET
 
 Using external DDR memory
 =========================
@@ -90,7 +105,7 @@ Running with hardware.
 
 .. code-block:: console
 
-    $ xrun --xscope bin/XCORE-AI-EXPLORER/cifar10.xe
+    $ xrun --xscope bin/$TARGET/cifar10.xe
 
 ********************
 Optimizing the model
