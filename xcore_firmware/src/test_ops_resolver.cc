@@ -101,6 +101,8 @@ TestOpsResolver::TestOpsResolver() {
             tflite::ops::micro::xcore::Register_BConv2D_Bitpacked());
   AddCustom(tflite::ops::micro::xcore::BConv2d_Int8_DeepIn_DeepOut_OpCode,
             tflite::ops::micro::xcore::Register_BConv2D_Int8_Deepin_Deepout());
+  AddCustom(tflite::ops::micro::xcore::BConv2d_Int8_OpCode,
+            tflite::ops::micro::xcore::Register_BConv2D_Int8());
   AddCustom(tflite::ops::micro::xcore::Pad_OpCode,
             tflite::ops::micro::xcore::Register_Pad());
 }
