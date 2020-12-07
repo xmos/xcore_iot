@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "inference_engine.h"
+#include "model_runner.h"
 
 #ifdef XCORE
 #define ATTRIBUTE_EXTMEM_SECTION __attribute__((section(".ExtMem_data")))
@@ -91,9 +91,8 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   // setup runtime
-  initialize_inference_engine(model_content, tensor_arena, TENSOR_ARENA_SIZE,
-                              &input_buffer, &input_size, &output_buffer,
-                              &output_size);
+  model_runner_init(model_content, tensor_arena, TENSOR_ARENA_SIZE,
+                    &input_buffer, &input_size, &output_buffer, &output_size);
 
   // Load input tensor
   if (!load_input(input_filename, input_buffer, input_size)) {
@@ -102,7 +101,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Run inference, and report any error
-  invoke_inference_engine();
+  model_runner_invoke();
 
   // save output
   if (!save_output(output_filename, output_buffer, output_size)) {

@@ -24,4 +24,5 @@
     <Probe name="invoke_ack" type="CONTINUOUS" datatype="UINT" units="Value" enabled="true"/>  -->
     <Probe name="error" type="CONTINUOUS" datatype="NONE" units="Value" enabled="true"/>  -->
     <Probe name="get_tensor" type="CONTINUOUS" datatype="NONE" units="Value" enabled="true"/>  -->
+    <Probe name="get_profiler_times" type="CONTINUOUS" datatype="NONE" units="Value" enabled="true"/>  -->
 </xSCOPEconfig>

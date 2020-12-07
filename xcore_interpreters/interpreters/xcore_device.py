@@ -28,6 +28,7 @@ from .exceptions import (
     InvokeError,
     SetTensorError,
     GetTensorError,
+    GetProfilerTimesError,
     ArenaSizeError,
     DeviceTimeoutError,
 )
@@ -196,6 +197,7 @@ class XCOREDeviceEndpoint(object):
     INVOKE_ACK_PROBE_ID = 3
     ERROR_PROBE_ID = 4
     GET_TENSOR_PROBE_ID = 5
+    GET_PROFILER_TIMES_PROBE_ID = 6
 
     def __init__(self, release_callback=None):
         tool_path = os.environ.get("XMOS_TOOL_PATH")
@@ -265,7 +267,9 @@ class XCOREDeviceEndpoint(object):
         self._publish_blob_chunk_ready = False
         self._initialize_ready = False
         self._invoke_ready = False
+        self._profiler_ready = False
         self._get_tensor_buffer = None
+        self._get_profiler_times = None
         self._error = None
 
     @property
@@ -293,6 +297,9 @@ class XCOREDeviceEndpoint(object):
         elif id_ == XCOREDeviceEndpoint.GET_TENSOR_PROBE_ID:
             self._get_tensor_buffer = data_bytes[0:length]
             self._get_tensor_ready = True
+        elif id_ == XCOREDeviceEndpoint.GET_PROFILER_TIMES_PROBE_ID:
+            self._get_profiler_times = data_bytes[0:length]
+            self._profiler_ready = True
 
     def connect(self, hostname="localhost", port=10234):
         ep_connect = self.lib_xscope.xscope_ep_connect(
@@ -344,7 +351,7 @@ class XCOREDeviceEndpoint(object):
         except TimeoutError:
             self._raise_exception(DeviceTimeoutError("Initialize timeout"))
 
-    def set_invoke(self, timeout=5):
+    def call_invoke(self, timeout=5):
         self._invoke_ready = False
         try:
             self.publish(b"CALL_INVOKE")
@@ -378,6 +385,17 @@ class XCOREDeviceEndpoint(object):
             return self._get_tensor_buffer
         except TimeoutError:
             self._raise_exception(DeviceTimeoutError("Get tensor timeout"))
+
+    def get_profiler_times(self, timeout=5):
+        self._profiler_ready = False
+        try:
+            self.publish(f"GET_PROFILER_TIMES\0".encode())
+            self._wait_for("_profiler_ready", timeout)
+            if self._error:
+                self._raise_exception(GetProfilerTimesError(self._error))
+            return self._get_profiler_times
+        except TimeoutError:
+            self._raise_exception(DeviceTimeoutError("Get profile times timeout"))
 
 
 class XCOREDeviceServer(object):

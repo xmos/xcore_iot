@@ -31,3 +31,7 @@ class ArenaSizeError(InterpreterError):
 
 class DeviceTimeoutError(InterpreterError):
     pass
+
+
+class GetProfilerTimesError(InterpreterError):
+    pass
