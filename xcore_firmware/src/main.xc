@@ -8,7 +8,7 @@
 
 extern "C" {
 void xscope_main();
-void xscope_data(void *data, size_t size);
+void xscope_data_recv(void *data, size_t size);
 }
 
 unsafe {
@@ -21,7 +21,7 @@ unsafe {
     while (1) {
       select {
         case xscope_data_from_host(xscope_data_in, buffer, bytes_read):
-          xscope_data(buffer, bytes_read);
+          xscope_data_recv(buffer, bytes_read);
           break;
       }
     }

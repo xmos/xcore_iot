@@ -67,7 +67,7 @@ class XCOREDeviceInterpreter(XCOREInterpreter):
         if preinvoke_callback != None or postinvoke_callback != None:
             raise NotImplementedError("Callbacks not implemented")
 
-        self._endpoint.set_invoke()
+        self._endpoint.call_invoke()
 
     def set_tensor(self, tensor_index, value):
         self._verify_allocated()
@@ -88,3 +88,9 @@ class XCOREDeviceInterpreter(XCOREInterpreter):
         tensor = tensor.reshape(tensor_details["shape"])
 
         return tensor
+
+    def get_profiler_times(self):
+        buffer = self._endpoint.get_profiler_times()
+        times = np.frombuffer(buffer, np.uint32)
+
+        return times
