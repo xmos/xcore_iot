@@ -4,6 +4,10 @@
 
 #include "inference_engine.h"
 
+// Include xCORE port functions
+#include <xcore/port.h>
+#define LED_PORT XS1_PORT_4C
+
 static int input_bytes = 0;
 static int input_size;
 static unsigned char *input_buffer;
@@ -17,8 +21,21 @@ void print_output() {
   printf("DONE!\n");
 }
 
+void show_result() {
+  if(output_buffer[0] > output_buffer[1]) {
+    // It's a hotdog! illuminate all LEDs
+    port_out(LED_PORT, 0xffff);
+  } else {
+    // not a hotdog :(. Turn off LEDs
+    port_out(LED_PORT, 0);
+  }
+}
+
 void app_main() {
+  printf("Initialising app\n");
   initialize(&input_buffer, &input_size, &output_buffer, &output_size);
+  port_enable(LED_PORT);
+  port_out(LED_PORT, 0);
 }
 
 void app_data(void *data, size_t size) {
@@ -27,6 +44,7 @@ void app_data(void *data, size_t size) {
   if (input_bytes == input_size) {
     invoke();
     print_output();
+    show_result();
     input_bytes = 0;
   }
 }
