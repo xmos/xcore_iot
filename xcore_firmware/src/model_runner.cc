@@ -20,6 +20,7 @@ static error_reporter_t error_reporter_s;
 static error_reporter_t *reporter = nullptr;
 static resolver_t resolver_s;
 static resolver_t *resolver = nullptr;
+static profiler_t profiler_s;
 static profiler_t *profiler = nullptr;
 static interpreter_t *interpreter = nullptr;
 static const model_t *model = nullptr;
@@ -74,7 +75,6 @@ TfLiteStatus model_runner_init(uint8_t *model_content, uint8_t *tensor_arena,
 
 #ifndef NDEBUG
   // Set up profiling
-  static profiler_t profiler_s(reporter);
   if (profiler == nullptr) {
     profiler = &profiler_s;
   }
