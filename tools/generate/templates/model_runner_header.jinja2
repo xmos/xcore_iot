@@ -86,6 +86,24 @@ size_t model_runner_get_output_size(model_runner_t *ctx);
  */
 void model_runner_get_ouput_quant(model_runner_t *ctx, float *scale, int* zero_point);
 
+#ifndef NDEBUG
+
+/** Get the model profiler inference durations.
+ *
+ * @param[in]  ctx          Model runner context
+ * @param[out] count   Number of inference durations (one per operator)
+ * @param[out] times   Point to array of inference durarions
+ */
+void model_runner_get_profiler_times(model_runner_t *ctx, uint32_t *count, const uint32_t **times);
+
+/** Print a summary report of profiler inference durations.
+ *
+ * @param[in]  ctx          Model runner context
+ */
+void model_runner_print_profiler_summary(model_runner_t *ctx);
+
+#endif
+
 #ifdef __cplusplus
 };
 #endif

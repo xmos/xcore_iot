@@ -24,6 +24,7 @@ static error_reporter_t *reporter = nullptr;
 
 static micro_allocator_t *allocator = nullptr;
 
+static profiler_t profiler_s;
 static profiler_t *profiler = nullptr;
 
 static resolver_t resolver_s;
@@ -47,16 +48,15 @@ void model_runner_init(uint8_t* arena, int arena_size)
   if (resolver == nullptr) {
     resolver = &resolver_s;
   }
-  resolver->AddPad();
   resolver->AddSoftmax();
+  resolver->AddPad();
   resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
-  resolver->AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode, tflite::ops::micro::xcore::Register_FullyConnected_8());
   resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Deep());
+  resolver->AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode, tflite::ops::micro::xcore::Register_FullyConnected_8());
   resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Shallow());
 
 #ifndef NDEBUG
   // Set up profiling
-  static profiler_t profiler_s(reporter);
   if (profiler == nullptr) {
     profiler = &profiler_s;
   }
@@ -142,3 +142,46 @@ void model_runner_get_output_quant(model_runner_t *ctx, float *scale, int *zero_
   *scale = interpreter->output(0)->params.scale;
   *zero_point = interpreter->output(0)->params.zero_point;
 }
+
+#ifndef NDEBUG
+
+void model_runner_get_profiler_times(model_runner_t *ctx, uint32_t *count, const uint32_t **times) {
+  if (profiler) {
+    *count = profiler->GetNumTimes();
+    *times = profiler->GetTimes();
+  } else {
+    *count = 0;
+    *times = static_cast<uint32_t *>(nullptr);
+  }
+}
+
+void model_runner_print_profiler_summary(model_runner_t *ctx) {
+  uint32_t count;
+  uint32_t const *times;
+  const char *op_name;
+  uint32_t total = 0;
+
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+
+  model_runner_get_profiler_times(ctx, &count, &times);
+
+  for (size_t i = 0; i < interpreter->operators_size(); ++i) {
+    if (i < count) {
+      tflite::NodeAndRegistration node_and_reg =
+          interpreter->node_and_registration(static_cast<int>(i));
+      const TfLiteRegistration *registration = node_and_reg.registration;
+      if (registration->builtin_code == tflite::BuiltinOperator_CUSTOM) {
+        op_name = registration->custom_name;
+      } else {
+        op_name = tflite::EnumNameBuiltinOperator(
+            tflite::BuiltinOperator(registration->builtin_code));
+      }
+      total += times[i];
+      printf("Operator %d, %s took %lu microseconds\n", i, op_name, times[i]);
+    }
+  }
+  printf("TOTAL %lu microseconds\n", total);
+}
+
+
+#endif

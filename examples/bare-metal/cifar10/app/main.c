@@ -85,6 +85,8 @@ int main(int argc, char *argv[]) {
   printf("Running inference...\n");
   model_runner_invoke(model_runner_ctx);
 
+  model_runner_print_profiler_summary(model_runner_ctx);
+
   char classification[12] = {0};
   int m = argmax(output_buffer, 10);
 
