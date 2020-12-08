@@ -67,16 +67,16 @@ def make_operator_code_lut():
     return builtin_operator_lut, custom_operator_lut
 
 
-def make_model_data_filenames(variable_name):
-    header_file = Path(SOURCE_DIRECTORY) / f"{variable_name}_model_data.h"
-    source_file = Path(SOURCE_DIRECTORY) / f"{variable_name}_model_data.c"
+def make_model_data_filenames(name):
+    header_file = Path(SOURCE_DIRECTORY) / f"{name}_model_data.h"
+    source_file = Path(SOURCE_DIRECTORY) / f"{name}_model_data.c"
 
     return header_file, source_file
 
 
-def make_model_runner_filenames(variable_name):
-    header_file = Path(SOURCE_DIRECTORY) / "model_runner.h"
-    source_file = Path(SOURCE_DIRECTORY) / "model_runner.cc"
+def make_model_runner_filenames(name):
+    header_file = Path(SOURCE_DIRECTORY) / f"{name}_model_runner.h"
+    source_file = Path(SOURCE_DIRECTORY) / f"{name}_model_runner.cc"
 
     return header_file, source_file
 
@@ -134,17 +134,17 @@ def get_operator_registrations(model_path):
     return builtin_operators, custom_operators, unknown_operators
 
 
-def generate_model_runner(operator_registrations, output_path, variable_name):
-    header_file_rel, source_file_rel = make_model_runner_filenames(variable_name)
+def generate_model_runner(operator_registrations, output_path, name):
+    header_file_rel, source_file_rel = make_model_runner_filenames(name)
     header_file = output_path / header_file_rel
     source_file = output_path / source_file_rel
     source_file.parent.mkdir(exist_ok=True)
 
-    include_guard = "MODEL_RUNNER_H_"
+    include_guard = name.upper() + "_MODEL_RUNNER_H_"
 
     print("Generating header file:", header_file)
     header_template = get_template("model_runner_header.jinja2")
-    header_text = header_template.render({"include_guard": include_guard})
+    header_text = header_template.render({"include_guard": include_guard, "name": name})
     with open(header_file, "w") as header_fd:
         header_fd.write(header_text)
 
@@ -153,6 +153,7 @@ def generate_model_runner(operator_registrations, output_path, variable_name):
     source_text = source_template.render(
         {
             "header_file": header_file_rel.name,
+            "name": name,
             "builtin_operators": operator_registrations["builtin_operators"],
             "custom_operators": operator_registrations["custom_operators"],
             "unknown_operators": operator_registrations["unknown_operators"],
@@ -160,21 +161,6 @@ def generate_model_runner(operator_registrations, output_path, variable_name):
     )
     with open(source_file, "w") as source_fd:
         source_fd.write(source_text)
-
-
-def generate_build_files(output_path, variable_name):
-    cmake_file = output_path / "CMakeLists.txt"
-    _, runner_src = make_model_runner_filenames(variable_name)
-    _, array_src = make_model_data_filenames(variable_name)
-    include_dir = array_src.parent
-
-    print("Generating build file:", cmake_file)
-    cmake_template = get_template("project_cmake.jinja2")
-    cmake_text = cmake_template.render(
-        {"runner_src": runner_src, "array_src": array_src, "include_dir": include_dir}
-    )
-    with open(cmake_file, "w") as cmake_fd:
-        cmake_fd.write(cmake_text)
 
 
 def generate_project(inputs, runner_basename, output, *, do_analyze=False):
@@ -204,7 +190,6 @@ def generate_project(inputs, runner_basename, output, *, do_analyze=False):
         operator_registrations["unknown_operators"].update(unknown_operators)
 
     generate_model_runner(operator_registrations, output_path, runner_basename)
-    generate_build_files(output_path, runner_basename)
 
 
 if __name__ == "__main__":

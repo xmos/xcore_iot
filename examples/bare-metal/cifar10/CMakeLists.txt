@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.14)
 
+set(AIOT_SDK_PATH $ENV{XMOS_AIOT_SDK_PATH})
+
 #**********************
 # Setup XMOS toolchain
 #**********************
 
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -18,13 +20,6 @@ endif()
 project(cifar10 VERSION 1.0.0)
 
 enable_language(CXX C ASM)
-
-
-#**********************
-# Paths
-#**********************
-
-set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
 
 #**********************
 # Build flags
@@ -63,31 +58,18 @@ target_compile_options(cifar10 PRIVATE ${BUILD_FLAGS})
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
+  "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
+set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
 
 #**********************
 # APP sources
 #**********************
-include("${AI_TOOLS_DIR}/utils/cmake/xcore_interpreter.cmake")
-
-set(MODEL_RUNNER_SOURCE_DIR
-  "${PROJECT_SOURCE_DIR}/model_runner/src"
-)
-
-set(MODEL_RUNNER_SOURCES
-  ${XCORE_INTERPRETER_SOURCES}
-  "${MODEL_RUNNER_SOURCE_DIR}/model_runner.cc"
-  "${MODEL_RUNNER_SOURCE_DIR}/cifar10_model_data.c"
-)
-
-set(MODEL_RUNNER_INCLUDE_DIRS
-  ${XCORE_INTERPRETER_INCLUDE_DIRS}
-  ${MODEL_RUNNER_SOURCE_DIR}
-)
+include("${AIOT_SDK_PATH}/modules/drivers/sw_services/model_runner/model_runner.cmake")
 
 set(APP_SOURCES
+  "${PROJECT_SOURCE_DIR}/model_runner/src/cifar10_model_data.c"
+  "${PROJECT_SOURCE_DIR}/model_runner/src/cifar10_model_runner.cc"
   "${PROJECT_SOURCE_DIR}/app/main.c"
 )
 
@@ -101,9 +83,11 @@ target_sources(cifar10
 )
 
 target_include_directories(cifar10
-  PRIVATE ${MODEL_RUNNER_INCLUDE_DIRS}
+  PRIVATE "${AIOT_SDK_PATH}/modules"
+  PRIVATE ${MODEL_RUNNER_INCLUDES}
   PRIVATE ${ADDITIONAL_INCLUDE_DIR}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/model_runner/src"
 )
 
 #**********************

@@ -1,8 +1,8 @@
 // This is a TensorFlow Lite model runner interface that has been
 // generated using the generate_model_runner tool.
 
-#ifndef {{include_guard}}
-#define {{include_guard}}
+#ifndef CIFAR10_MODEL_RUNNER_H_
+#define CIFAR10_MODEL_RUNNER_H_
 
 #include "drivers/sw_services/model_runner/api/model_runner.h"
 
@@ -15,10 +15,10 @@ extern "C" {
  * @param[out] ctx             Model runner context
  * @param[in]  model_content   Array containing model content
  */
-ModelRunnerStatus {{name}}_model_runner_create(model_runner_t *ctx, const uint8_t* model_content);
+ModelRunnerStatus cifar10_model_runner_create(model_runner_t *ctx, const uint8_t* model_content);
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif  // {{include_guard}}
+#endif  // CIFAR10_MODEL_RUNNER_H_
