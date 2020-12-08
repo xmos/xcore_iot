@@ -26,6 +26,7 @@ void app_data(void *data, size_t size) {
   input_bytes += size - 1;
   if (input_bytes == input_size) {
     invoke();
+    print_profiler_summary();
     print_output();
     input_bytes = 0;
   }

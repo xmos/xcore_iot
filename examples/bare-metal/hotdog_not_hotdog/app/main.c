@@ -22,7 +22,7 @@ void print_output() {
 }
 
 void show_result() {
-  if(output_buffer[0] > output_buffer[1]) {
+  if (output_buffer[0] > output_buffer[1]) {
     // It's a hotdog! illuminate all LEDs
     port_out(LED_PORT, 0xffff);
   } else {
@@ -43,6 +43,7 @@ void app_data(void *data, size_t size) {
   input_bytes += size - 1;
   if (input_bytes == input_size) {
     invoke();
+    print_profiler_summary();
     print_output();
     show_result();
     input_bytes = 0;

@@ -34,7 +34,7 @@ void initialize(const unsigned char *model_content, uint8_t *tensor_arena,
     reporter = &micro_error_reporter;
   }
   // Set up profiling.
-  static tflite::micro::xcore::XCoreProfiler xcore_profiler(reporter);
+  static tflite::micro::xcore::XCoreProfiler xcore_profiler;
   if (profiler == nullptr) {
     profiler = &xcore_profiler;
   }
