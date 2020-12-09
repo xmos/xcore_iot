@@ -2,6 +2,7 @@
 
 #include "drivers/sw_services/model_runner/api/model_runner.h"
 
+#include "drivers/sw_services/model_runner/api/model_runner_profiler.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_profiler.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
@@ -13,8 +14,8 @@ typedef tflite::MicroAllocator micro_allocator_t;
 typedef tflite::SimpleMemoryAllocator simple_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::MicroOpResolver micro_op_resolver_t;
+typedef xcore::ModelRunnerProfiler profiler_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
-typedef tflite::micro::xcore::XCoreProfiler profiler_t;
 
 // static variables
 static error_reporter_t error_reporter_s;
@@ -22,7 +23,6 @@ static error_reporter_t *reporter = nullptr;
 
 static micro_allocator_t *allocator = nullptr;
 
-static profiler_t profiler_s;
 static profiler_t *profiler = nullptr;
 
 void model_runner_init(uint8_t *arena, int arena_size) {
@@ -36,13 +36,6 @@ void model_runner_init(uint8_t *arena, int arena_size) {
   if (allocator == nullptr) {
     allocator = micro_allocator_t::Create(&simple_allocator_s, reporter);
   }
-
-#ifndef NDEBUG
-  // Set up profiling
-  if (profiler == nullptr) {
-    profiler = &profiler_s;
-  }
-#endif
 }
 
 ModelRunnerStatus model_runner_create(model_runner_t *ctx, void *resolver,
@@ -54,6 +47,20 @@ ModelRunnerStatus model_runner_create(model_runner_t *ctx, void *resolver,
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     return ModelVersionError;
   }
+
+#ifndef NDEBUG
+  if (profiler == nullptr) {
+    // Set up profiling
+    size_t max_profile_times = (*model->subgraphs())[0]->operators()->size();
+    uint32_t *profiler_times_buffer =
+        static_cast<uint32_t *>(allocator->AllocatePersistentBuffer(
+            max_profile_times * sizeof(uint32_t)));
+
+    static profiler_t profiler_s(profiler_times_buffer, max_profile_times);
+
+    profiler = &profiler_s;
+  }
+#endif
 
   micro_op_resolver_t *op_resolver =
       static_cast<micro_op_resolver_t *>(resolver);
@@ -128,15 +135,12 @@ void model_runner_get_profiler_times(model_runner_t *ctx, uint32_t *count,
   if (profiler) {
     *count = profiler->GetNumTimes();
     *times = profiler->GetTimes();
-  } else {
-    *count = 0;
-    *times = static_cast<uint32_t *>(nullptr);
   }
 }
 
-void model_runner_print_profiler_summary(model_runner_t *ctx) {
-  uint32_t count;
-  uint32_t const *times;
+void model_runner_profiler_summary(model_runner_t *ctx) {
+  uint32_t count = 0;
+  const uint32_t *times = nullptr;
   const char *op_name;
   uint32_t total = 0;
 

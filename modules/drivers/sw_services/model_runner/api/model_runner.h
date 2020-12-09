@@ -33,7 +33,7 @@ void model_runner_init(uint8_t *arena, int arena_size);
 /** Create a new model runner for the model content specified.
  *
  * @param[out] ctx             Model runner context
- * @param[in]  resolver        MicroMutableOpResolver (cast to void*)
+ * @param[in]  resolver        tflite::MicroMutableOpResolver (cast to void*)
  * @param[in]  model_content   Array containing model content
  */
 ModelRunnerStatus model_runner_create(model_runner_t *ctx, void *resolver,
@@ -108,9 +108,9 @@ void model_runner_get_profiler_times(model_runner_t *ctx, uint32_t *count,
 
 /** Print a summary report of profiler inference durations.
  *
- * @param[in]  ctx          Model runner context
+ * @param[in] ctx     Model runner context
  */
-void model_runner_print_profiler_summary(model_runner_t *ctx);
+void model_runner_profiler_summary(model_runner_t *ctx);
 
 #endif
 
