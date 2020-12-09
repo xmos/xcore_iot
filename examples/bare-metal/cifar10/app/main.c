@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
   // setup model runner
   model_runner_init(tensor_arena, TENSOR_ARENA_SIZE);
-  cifar10_model_runner_create(model_runner_ctx, cifar10_model_data);
+  cifar10_create(model_runner_ctx, cifar10_model_data);
   input_buffer = model_runner_get_input(model_runner_ctx);
   input_size = model_runner_get_input_size(model_runner_ctx);
   output_buffer = model_runner_get_output(model_runner_ctx);
@@ -83,9 +83,9 @@ int main(int argc, char *argv[]) {
 
   // Run inference, and report any error
   printf("Running inference...\n");
-  model_runner_invoke(model_runner_ctx);
+  cifar10_invoke(model_runner_ctx);
 
-  model_runner_profiler_summary(model_runner_ctx);
+  cifar10_print_profiler_summary(model_runner_ctx);
 
   char classification[12] = {0};
   int m = argmax(output_buffer, 10);

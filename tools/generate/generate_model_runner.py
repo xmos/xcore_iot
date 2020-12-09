@@ -114,7 +114,7 @@ def generate_model_data(
             source_fd.write(source)
 
 
-def get_operator_registrations(model_path):
+def get_model_information(model_path):
     builtin_operators = set([])
     custom_operators = set([])
     unknown_operators = set([])
@@ -122,6 +122,9 @@ def get_operator_registrations(model_path):
     with open(model_path, "rb") as model_fd:
         model_content = model_fd.read()
         model = XCOREModel.deserialize(model_content)
+
+        layer_count = len(model.subgraphs[0].operators)
+
         builtin_operator_lut, custom_operator_lut = make_operator_code_lut()
         for op_code in model.operator_codes:
             if op_code.code in builtin_operator_lut:
@@ -131,10 +134,10 @@ def get_operator_registrations(model_path):
             else:
                 unknown_operators.add(op_code.code)
 
-    return builtin_operators, custom_operators, unknown_operators
+    return layer_count, builtin_operators, custom_operators, unknown_operators
 
 
-def generate_model_runner(operator_registrations, output_path, name):
+def generate_model_runner(layer_count, operator_registrations, output_path, name):
     header_file_rel, source_file_rel = make_model_runner_filenames(name)
     header_file = output_path / header_file_rel
     source_file = output_path / source_file_rel
@@ -154,6 +157,7 @@ def generate_model_runner(operator_registrations, output_path, name):
         {
             "header_file": header_file_rel.name,
             "name": name,
+            "layer_count": layer_count,
             "builtin_operators": operator_registrations["builtin_operators"],
             "custom_operators": operator_registrations["custom_operators"],
             "unknown_operators": operator_registrations["unknown_operators"],
@@ -170,6 +174,7 @@ def generate_project(inputs, runner_basename, output, *, do_analyze=False):
     # create output_path if it does not exist
     output_path.mkdir(parents=True, exist_ok=True)
 
+    layer_count = 0
     operator_registrations = {
         "builtin_operators": set([]),
         "custom_operators": set([]),
@@ -181,15 +186,19 @@ def generate_project(inputs, runner_basename, output, *, do_analyze=False):
         runner_name = f"{runner_basename}-{i}" if len(inputs) > 1 else runner_basename
         generate_model_data(model_path, output_path, runner_name, do_analyze=do_analyze)
         (
+            model_layer_count,
             builtin_operators,
             custom_operators,
             unknown_operators,
-        ) = get_operator_registrations(model_path)
+        ) = get_model_information(model_path)
+        layer_count = max(layer_count, model_layer_count)
         operator_registrations["builtin_operators"].update(builtin_operators)
         operator_registrations["custom_operators"].update(custom_operators)
         operator_registrations["unknown_operators"].update(unknown_operators)
 
-    generate_model_runner(operator_registrations, output_path, runner_basename)
+    generate_model_runner(
+        model_layer_count, operator_registrations, output_path, runner_basename
+    )
 
 
 if __name__ == "__main__":

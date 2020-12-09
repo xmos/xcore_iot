@@ -20,12 +20,10 @@ extern "C" {
 
 namespace xcore {
 
+template <unsigned int tMaxEventCount>
 class ModelRunnerProfiler : public tflite::Profiler {
  public:
-  explicit ModelRunnerProfiler(uint32_t* event_times, size_t max_count)
-      : event_count_(0),
-        event_times_(event_times),
-        max_event_count_(max_count) {}
+  explicit ModelRunnerProfiler() : event_count_(0) {}
   ~ModelRunnerProfiler() override = default;
 
   // AddEvent is unused for TFLu.
@@ -48,7 +46,7 @@ class ModelRunnerProfiler : public tflite::Profiler {
     event_duration =
         (event_end_time - event_start_time_) / PLATFORM_REFERENCE_MHZ;
 
-    if (event_count_ < max_event_count_) {
+    if (event_count_ < tMaxEventCount) {
       event_times_[event_count_] = event_duration;
       event_count_++;
     }
@@ -63,8 +61,7 @@ class ModelRunnerProfiler : public tflite::Profiler {
  private:
   uint32_t event_start_time_;
   uint32_t event_count_;
-  uint32_t* event_times_;
-  uint32_t max_event_count_;
+  uint32_t event_times_[tMaxEventCount];
   TF_LITE_REMOVE_VIRTUAL_DELETE
 };
 

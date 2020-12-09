@@ -34,9 +34,12 @@ void model_runner_init(uint8_t *arena, int arena_size);
  *
  * @param[out] ctx             Model runner context
  * @param[in]  resolver        tflite::MicroMutableOpResolver (cast to void*)
+ * @param[in]  profiler        tflite::Profiler (cast to void*, can be nullptr)
+ * @param[in]  buffer          Buffer large enough to store Interpreter object
  * @param[in]  model_content   Array containing model content
  */
 ModelRunnerStatus model_runner_create(model_runner_t *ctx, void *resolver,
+                                      void *profiler, void *buffer,
                                       const uint8_t *model_content);
 
 /** Get the model input.
@@ -97,20 +100,12 @@ void model_runner_get_ouput_quant(model_runner_t *ctx, float *scale,
 
 #ifndef NDEBUG
 
-/** Get the model profiler inference durations.
- *
- * @param[in]  ctx          Model runner context
- * @param[out] count   Number of inference durations (one per operator)
- * @param[out] times   Point to array of inference durarions
- */
-void model_runner_get_profiler_times(model_runner_t *ctx, uint32_t *count,
-                                     const uint32_t **times);
-
 /** Print a summary report of profiler inference durations.
  *
  * @param[in] ctx     Model runner context
  */
-void model_runner_profiler_summary(model_runner_t *ctx);
+void model_runner_print_profiler_summary(model_runner_t *ctx, uint32_t count,
+                                         const uint32_t *times);
 
 #endif
 
