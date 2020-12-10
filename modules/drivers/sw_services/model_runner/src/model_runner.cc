@@ -2,6 +2,14 @@
 
 #include "drivers/sw_services/model_runner/api/model_runner.h"
 
+#include <ctime>
+extern "C" {
+#ifdef _TIME_H_
+#define _clock_defined
+#endif
+}
+#include <platform.h>  // for PLATFORM_REFERENCE_MHZ
+
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
@@ -129,12 +137,13 @@ void model_runner_output_quant_get(model_runner_t *ctx, float *scale,
 void model_runner_profiler_summary_print(model_runner_t *ctx) {
   uint32_t count = 0;
   uint32_t total = 0;
-  const uint32_t *times = nullptr;
+  uint32_t time_ms = 0;
+  const uint32_t *times_ticks = nullptr;
   const char *op_name;
 
   interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
 
-  ctx->profiler_times_get_fun(&count, &times);
+  ctx->profiler_times_get_fun(&count, &times_ticks);
 
   for (size_t i = 0; i < interpreter->operators_size(); ++i) {
     if (i < count) {
@@ -147,8 +156,9 @@ void model_runner_profiler_summary_print(model_runner_t *ctx) {
         op_name = tflite::EnumNameBuiltinOperator(
             tflite::BuiltinOperator(registration->builtin_code));
       }
-      total += times[i];
-      printf("Operator %d, %s took %lu microseconds\n", i, op_name, times[i]);
+      time_ms = times_ticks[i] / PLATFORM_REFERENCE_MHZ;
+      total += time_ms;
+      printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_ms);
     }
   }
   printf("TOTAL %lu microseconds\n", total);

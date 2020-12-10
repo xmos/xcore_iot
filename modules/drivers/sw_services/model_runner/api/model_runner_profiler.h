@@ -3,16 +3,6 @@
 #ifndef MODEL_RUNNER_PROFILER_H_
 #define MODEL_RUNNER_PROFILER_H_
 
-#include <ctime>
-
-extern "C" {
-#ifdef _TIME_H_
-#define _clock_defined
-#endif
-}
-
-#include <platform.h>  // for PLATFORM_REFERENCE_MHZ
-
 #include "tensorflow/lite/core/api/profiler.h"
 #include "tensorflow/lite/kernels/internal/compatibility.h"
 #include "tensorflow/lite/micro/compatibility.h"
@@ -43,8 +33,7 @@ class ModelRunnerProfiler : public tflite::Profiler {
   void EndEvent(uint32_t event_handle) {
     uint32_t event_duration;
     int32_t event_end_time = tflite::GetCurrentTimeTicks();
-    event_duration =
-        (event_end_time - event_start_time_) / PLATFORM_REFERENCE_MHZ;
+    event_duration = (event_end_time - event_start_time_);
 
     if (event_count_ < tMaxEventCount) {
       event_times_[event_count_] = event_duration;
