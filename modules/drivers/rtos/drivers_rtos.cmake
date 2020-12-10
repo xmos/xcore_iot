@@ -13,11 +13,18 @@ set(MIC_ARRAY_DIR "${RTOS_DIR}/mic_array")
 set(RPC_DIR "${RTOS_DIR}/rpc")
 set(SPI_DIR "${RTOS_DIR}/spi")
 set(TRACE_DIR "${RTOS_DIR}/trace")
+set(WIFI_DIR "${RTOS_DIR}/wifi")
 
-set(RTOS_CMAKE_RTOS "FreeRTOS") # Only FreeRTOS is currently supported
+if(NOT DEFINED RTOS_CMAKE_RTOS)
+    set(RTOS_CMAKE_RTOS "FreeRTOS") # Only FreeRTOS is currently supported
+endif()
+
+if(NOT DEFINED RTOS_WIFI_CHIP)
+    set(RTOS_WIFI_CHIP "sl_wf200") # only WiFi module currently supported
+endif()
 
 #********************************
-# Gather kernel sources
+# Gather rtos sources
 #********************************
 include("$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/${RTOS_CMAKE_RTOS}/kernel.cmake")
 
@@ -154,12 +161,52 @@ set(${THIS_LIB}_INCLUDES
 
 unset(THIS_LIB)
 
+#********************************
+# Gather wifi sources
+#********************************
+set(THIS_LIB WIFI)
+set(${THIS_LIB}_FLAGS "-USL_WFX_USE_SECURE_LINK")
+
+if(${RTOS_WIFI_CHIP} STREQUAL "sl_wf200")
+    set(${THIS_LIB}_SOURCES
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/sl_wfx_host_spi.c"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/sl_wfx_host_task.c"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/sl_wfx_host.c"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/sl_wfx_iot_wifi.c"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/sl_wfx.c"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/bus/sl_wfx_bus.c"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/bus/sl_wfx_bus_spi.c"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/secure_link/sl_wfx_secure_link.c"
+    )
+
+    set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/api"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/bus"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/firmware"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/secure_link"
+    )
+else()
+    file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/*.c")
+
+    set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/api"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}"
+    )
+endif()
+
+set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
-set(RTOS_SOURCES
+set(DRIVERS_RTOS_SOURCES
     ${KERNEL_SOURCES}
-    #${KERNEL_OPT_SOURCES}
     ${GPIO_SOURCES}
     ${I2C_SOURCES}
     ${I2S_SOURCES}
@@ -170,9 +217,8 @@ set(RTOS_SOURCES
     ${TRACE_SOURCES}
 )
 
-set(RTOS_INCLUDES
+set(DRIVERS_RTOS_INCLUDES
     ${KERNEL_INCLUDES}
-    #${KERNEL_OPT_INCLUDES}
     ${GPIO_INCLUDES}
     ${I2C_INCLUDES}
     ${I2S_INCLUDES}
@@ -182,3 +228,19 @@ set(RTOS_INCLUDES
     ${SPI_INCLUDES}
     ${TRACE_INCLUDES}
 )
+
+list(REMOVE_DUPLICATES DRIVERS_RTOS_SOURCES)
+list(REMOVE_DUPLICATES DRIVERS_RTOS_INCLUDES)
+
+set(DRIVERS_RTOS_NETWORKING_SOURCES
+    ${KERNEL_NETWORKING_SOURCES}
+    ${WIFI_SOURCES}
+)
+
+set(DRIVERS_RTOS_NETWORKING_INCLUDES
+    ${KERNEL_NETWORKING_INCLUDES}
+    ${WIFI_INCLUDES}
+)
+
+list(REMOVE_DUPLICATES DRIVERS_RTOS_NETWORKING_SOURCES)
+list(REMOVE_DUPLICATES DRIVERS_RTOS_NETWORKING_INCLUDES)

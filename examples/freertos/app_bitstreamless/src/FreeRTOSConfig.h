@@ -48,7 +48,7 @@ your application. */
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE                   256*1024
+#define configTOTAL_HEAP_SIZE                   128*1024
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */
@@ -70,7 +70,7 @@ your application. */
 
 /* Software timer related definitions. */
 #define configUSE_TIMERS                        1
-#define configTIMER_TASK_PRIORITY               ( configMAX_PRIORITIES - 1 )
+#define configTIMER_TASK_PRIORITY               ( configMAX_PRIORITIES - 3 ) /* so as not to preempt the i2s or mic tasks */
 #define configTIMER_QUEUE_LENGTH                10
 #define configTIMER_TASK_STACK_DEPTH            ( configMINIMAL_STACK_SIZE << 2 )
 
@@ -87,10 +87,10 @@ your application. */
 
 /* Define to enable debug prints from tasks.c */
 #if ON_TILE(0)
-#define configTASKS_DEBUG 1
+#define configTASKS_DEBUG 0
 #endif
 #if ON_TILE(1)
-#define configTASKS_DEBUG 1
+#define configTASKS_DEBUG 0
 #endif
 
 /* FreeRTOS MPU specific definitions. */

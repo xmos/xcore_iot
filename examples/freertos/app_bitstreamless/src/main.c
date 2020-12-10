@@ -16,7 +16,7 @@
 #define INTERTILE_TEST 0
 #define RPC_TEST 0
 #define GPIO_TEST 1
-#define WIFI_TEST 0
+#define WIFI_TEST 1
 
 #define I2C_TILE 0
 #define PIPELINE_TILE 0

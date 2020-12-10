@@ -119,9 +119,9 @@ void board_tile0_init(
             SPI_MODE_0,
             spi_master_source_clock_ref,
             0, /* 50 MHz */
-            spi_master_sample_delay_3, /* what should this be? 2? 3? 4? */
+            spi_master_sample_delay_2, /* what should this be? 2? 3? 4? */
             0, /* should this be > 0 if the above is 3-4 ? */
-            0,
+            1,
             0,
             0);
 

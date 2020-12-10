@@ -84,3 +84,6 @@
 [submodule "modules/drivers/hil/lib_spi"]
 	path = modules/drivers/hil/lib_spi
 	url = git@github.com:xmos/lib_spi.git
+[submodule "modules/drivers/rtos/wifi/SL_WF200/wfx-fullMAC-driver"]
+	path = modules/drivers/rtos/wifi/sl_wf200/thirdparty/wfx-fullMAC-driver
+	url = git@github.com:SiliconLabs/wfx-fullMAC-driver.git

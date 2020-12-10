@@ -16,20 +16,21 @@ set(PROJECT_VERSION 0.5.0)
 enable_language(XC CXX C ASM)
 
 set(APP_COMPILER_FLAGS
-        "-Os"
-        "-g"
-        "-D__XS2A__=1"
-        "-report"
-        "-fxscope"
-        "-Wno-xcore-fptrgroup"
-        "-DDEBUG_PRINT_ENABLE=1"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
+    "-Os"
+    "-g"
+    "-D__XS2A__=1"
+    "-report"
+    "-fxscope"
+    "-Wno-xcore-fptrgroup"
+    "-DDEBUG_PRINT_ENABLE=1"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
+    "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT)"
 
-        "$ENV{XMOS_AIOT_SDK_PATH}/examples/freertos/app_bitstreamless/bitstream_src/${BOARD}/${BOARD}.xn"
-        "-DXCOREAI_EXPLORER=1"
-        "-lquadspi"
-        "-mcmodel=large"
-    )
+    "$ENV{XMOS_AIOT_SDK_PATH}/examples/freertos/app_bitstreamless/bitstream_src/${BOARD}/${BOARD}.xn"
+    "-DXCOREAI_EXPLORER=1"
+    "-lquadspi"
+    "-mcmodel=large"
+)
 
 set(FREERTOS_PORT "XCOREAI")
 
@@ -46,7 +47,7 @@ set(APP_SOURCES
     "src/intertile_stress_test/intertile_stress_test.c"
     "src/rpc_test/rpc_test.c"
     "src/gpio_test/gpio_test.c"
-    #"src/wifi_test/wifi_test.c"
+    "src/wifi_test/wifi_test.c"
 )
 
 set(APP_INCLUDES
@@ -65,7 +66,11 @@ endif()
 
 add_executable(${TARGET_NAME})
 
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
+#target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
+#target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
+
+target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES} ${WIFI_SOURCES})
+target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES} ${WIFI_INCLUDES})
+
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
