@@ -43,7 +43,7 @@ Overall Options
 
 .. option:: --output
 
-    Full filepath of the output runner project parent directory.
+    Full filepath of the output directory where source files will be generated.
 
 .. option:: --name <NAME>
 

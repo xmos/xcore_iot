@@ -11,8 +11,6 @@ from tflite2xcore.xcore_model import XCOREModel
 from tflite2xcore.xcore_schema import XCOREOpCodes, ExternalOpCodes, BuiltinOpCodes
 from tflite2xcore import analyze
 
-SOURCE_DIRECTORY = "src"
-
 
 def get_template(filename):
     jinja_env = jinja2.Environment(
@@ -68,15 +66,15 @@ def make_operator_code_lut():
 
 
 def make_model_data_filenames(name):
-    header_file = Path(SOURCE_DIRECTORY) / f"{name}_model_data.h"
-    source_file = Path(SOURCE_DIRECTORY) / f"{name}_model_data.c"
+    header_file = Path(f"{name}_model_data.h")
+    source_file = Path(f"{name}_model_data.c")
 
     return header_file, source_file
 
 
 def make_model_runner_filenames(name):
-    header_file = Path(SOURCE_DIRECTORY) / f"{name}_model_runner.h"
-    source_file = Path(SOURCE_DIRECTORY) / f"{name}_model_runner.cc"
+    header_file = Path(f"{name}_model_runner.h")
+    source_file = Path(f"{name}_model_runner.cc")
 
     return header_file, source_file
 
@@ -168,7 +166,7 @@ def generate_model_runner(layer_count, operator_registrations, output_path, name
 
 
 def generate_project(inputs, runner_basename, output, *, do_analyze=False):
-    output_path = Path(output) / "model_runner"
+    output_path = Path(output)
     print("Generating output path:", output_path)
 
     # create output_path if it does not exist
@@ -217,7 +215,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--output",
-        help="Full filepath of the output runner project parent directory.",
+        help="Full filepath of the output directory where source files will be generated.",
         default=Path.cwd(),
     )
 

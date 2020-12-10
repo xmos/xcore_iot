@@ -27,7 +27,7 @@ typedef enum ModelRunnerStatus {
 extern "C" {
 #endif
 
-/** Get size of buffer need in call to model_runner_create.
+/** Get size of buffer needed for call to model_runner_create.
  *
  * @return   The size (in bytes)
  */
