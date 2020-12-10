@@ -18,9 +18,9 @@
 #include "xcore_device_memory.h"
 
 tflite::ErrorReporter *reporter = nullptr;
-tflite::Profiler *profiler = nullptr;
 const tflite::Model *model = nullptr;
 tflite::micro::xcore::XCoreInterpreter *interpreter = nullptr;
+tflite::micro::xcore::XCoreProfiler *profiler = nullptr;
 constexpr int kTensorArenaSize = 286000;
 uint8_t tensor_arena[kTensorArenaSize];
 
@@ -40,7 +40,7 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
   static tflite::MicroErrorReporter error_reporter;
   reporter = &error_reporter;
   // Set up profiling.
-  static tflite::micro::xcore::XCoreProfiler xcore_profiler(reporter);
+  static tflite::micro::xcore::XCoreProfiler xcore_profiler;
   profiler = &xcore_profiler;
 
   // Map the model into a usable data structure. This doesn't involve any
@@ -87,4 +87,33 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
   *input_size = interpreter->input(0)->bytes;
   *output = (unsigned char *)(interpreter->output(0)->data.raw);
   *output_size = interpreter->output(0)->bytes;
+}
+
+void print_profiler_summary() {
+  uint32_t count = 0;
+  uint32_t const *times = nullptr;
+  const char *op_name;
+  uint32_t total = 0;
+
+  if (profiler) {
+    count = profiler->GetNumTimes();
+    times = profiler->GetTimes();
+  }
+
+  for (size_t i = 0; i < interpreter->operators_size(); ++i) {
+    if (i < count) {
+      tflite::NodeAndRegistration node_and_reg =
+          interpreter->node_and_registration(static_cast<int>(i));
+      const TfLiteRegistration *registration = node_and_reg.registration;
+      if (registration->builtin_code == tflite::BuiltinOperator_CUSTOM) {
+        op_name = registration->custom_name;
+      } else {
+        op_name = tflite::EnumNameBuiltinOperator(
+            tflite::BuiltinOperator(registration->builtin_code));
+      }
+      total += times[i];
+      printf("Operator %d, %s took %lu microseconds\n", i, op_name, times[i]);
+    }
+  }
+  printf("TOTAL %lu microseconds\n", total);
 }
