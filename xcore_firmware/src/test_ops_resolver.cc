@@ -75,10 +75,23 @@ TestOpsResolver::TestOpsResolver() {
   AddTanh();
   // AddUnpack();
 
+  // Please keep this list of Custom Operators in alphabetical order.
+  AddCustom(tflite::ops::micro::xcore::Add_8_OpCode,
+            tflite::ops::micro::xcore::Register_Add_8());
   AddCustom(tflite::ops::micro::xcore::AvgPool2D_OpCode,
             tflite::ops::micro::xcore::Register_AvgPool2D());
   AddCustom(tflite::ops::micro::xcore::AvgPool2D_Global_OpCode,
             tflite::ops::micro::xcore::Register_AvgPool2D_Global());
+  AddCustom(tflite::ops::micro::xcore::BConv2d_Bitpacked_DeepIn_OpCode,
+            tflite::ops::micro::xcore::Register_BConv2D_Bitpacked_Deepin());
+  AddCustom(tflite::ops::micro::xcore::BConv2d_Bitpacked_OpCode,
+            tflite::ops::micro::xcore::Register_BConv2D_Bitpacked());
+  AddCustom(tflite::ops::micro::xcore::BConv2d_Int8_DeepIn_DeepOut_OpCode,
+            tflite::ops::micro::xcore::Register_BConv2D_Int8_Deepin_Deepout());
+  AddCustom(tflite::ops::micro::xcore::BConv2d_Int8_OpCode,
+            tflite::ops::micro::xcore::Register_BConv2D_Int8());
+  AddCustom(tflite::ops::micro::xcore::Bsign_8_OpCode,
+            tflite::ops::micro::xcore::Register_BSign_8());
   AddCustom(tflite::ops::micro::xcore::Conv2D_1x1_OpCode,
             tflite::ops::micro::xcore::Register_Conv2D_1x1());
   AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode,
@@ -93,16 +106,6 @@ TestOpsResolver::TestOpsResolver() {
             tflite::ops::micro::xcore::Register_Lookup_8());
   AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode,
             tflite::ops::micro::xcore::Register_MaxPool2D());
-  AddCustom(tflite::ops::micro::xcore::Bsign_8_OpCode,
-            tflite::ops::micro::xcore::Register_BSign_8());
-  AddCustom(tflite::ops::micro::xcore::BConv2d_Bitpacked_DeepIn_OpCode,
-            tflite::ops::micro::xcore::Register_BConv2D_Bitpacked_Deepin());
-  AddCustom(tflite::ops::micro::xcore::BConv2d_Bitpacked_OpCode,
-            tflite::ops::micro::xcore::Register_BConv2D_Bitpacked());
-  AddCustom(tflite::ops::micro::xcore::BConv2d_Int8_DeepIn_DeepOut_OpCode,
-            tflite::ops::micro::xcore::Register_BConv2D_Int8_Deepin_Deepout());
-  AddCustom(tflite::ops::micro::xcore::BConv2d_Int8_OpCode,
-            tflite::ops::micro::xcore::Register_BConv2D_Int8());
   AddCustom(tflite::ops::micro::xcore::Pad_OpCode,
             tflite::ops::micro::xcore::Register_Pad());
 }

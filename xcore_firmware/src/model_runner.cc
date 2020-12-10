@@ -28,7 +28,7 @@ static const model_t *model = nullptr;
 // static buffer for interpreter_t class allocation
 uint8_t interpreter_buffer[sizeof(interpreter_t)];
 
-void model_runner_get_tensor_bytes(int index, void **bytes, size_t *size) {
+void model_runner_tensor_bytes_get(int index, void **bytes, size_t *size) {
   TfLiteTensor *tensor = interpreter->tensor(index);
   if (tensor != nullptr) {
     *bytes = tensor->data.raw;
@@ -39,7 +39,7 @@ void model_runner_get_tensor_bytes(int index, void **bytes, size_t *size) {
   }
 }
 
-TfLiteStatus model_runner_invoke() {
+ModelRunnerStatus model_runner_invoke() {
   // reset the profiler
   if (profiler) {
     profiler->Reset();
@@ -49,9 +49,9 @@ TfLiteStatus model_runner_invoke() {
   TfLiteStatus invoke_status = interpreter->Invoke();
 
   if (invoke_status != kTfLiteOk) {
-    printf("Invoke failed\n");
+    return InvokeError;
   }
-  return invoke_status;
+  return Ok;
 }
 
 void model_runner_reset(uint8_t *tensor_arena, size_t tensor_arena_size) {
@@ -64,10 +64,11 @@ void model_runner_reset(uint8_t *tensor_arena, size_t tensor_arena_size) {
   }
 }
 
-TfLiteStatus model_runner_init(uint8_t *model_content, uint8_t *tensor_arena,
-                               size_t tensor_arena_size, uint8_t **input,
-                               size_t *input_size, uint8_t **output,
-                               size_t *output_size) {
+ModelRunnerStatus model_runner_init(uint8_t *model_content,
+                                    uint8_t *tensor_arena,
+                                    size_t tensor_arena_size, uint8_t **input,
+                                    size_t *input_size, uint8_t **output,
+                                    size_t *output_size) {
   // Set up logging
   if (reporter == nullptr) {
     reporter = &error_reporter_s;
@@ -90,11 +91,7 @@ TfLiteStatus model_runner_init(uint8_t *model_content, uint8_t *tensor_arena,
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(model_content);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
-    printf(
-        "Model provided is schema version %lu not equal "
-        "to supported version %d.",
-        model->version(), TFLITE_SCHEMA_VERSION);
-    return kTfLiteError;
+    return ModelVersionError;
   }
 
   // Build an interpreter to run the model with
@@ -105,8 +102,7 @@ TfLiteStatus model_runner_init(uint8_t *model_content, uint8_t *tensor_arena,
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_tensors_status = interpreter->AllocateTensors();
   if (allocate_tensors_status != kTfLiteOk) {
-    printf("AllocateTensors() failed");
-    return kTfLiteError;
+    return AllocateTensorsError;
   }
 
   // Obtain pointers to the model's input and output tensors.
@@ -115,10 +111,10 @@ TfLiteStatus model_runner_init(uint8_t *model_content, uint8_t *tensor_arena,
   *output = reinterpret_cast<unsigned char *>(interpreter->output(0)->data.raw);
   *output_size = interpreter->output(0)->bytes;
 
-  return kTfLiteOk;
+  return Ok;
 }
 
-void model_runner_get_profiler_times(uint32_t *count, const uint32_t **times) {
+void model_runner_profiler_times_get(uint32_t *count, const uint32_t **times) {
   if (profiler) {
     *count = profiler->GetNumTimes();
     *times = profiler->GetTimes();

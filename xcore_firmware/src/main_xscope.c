@@ -92,7 +92,7 @@ void query_protocol_state(void *data) {
 }
 
 void xscope_data_recv(void *data, size_t size) {
-  TfLiteStatus status;
+  ModelRunnerStatus status;
 
   query_protocol_state(data);
 
@@ -126,7 +126,7 @@ void xscope_data_recv(void *data, size_t size) {
       state = RecvTensor;
       break;
     case RecvTensor:
-      model_runner_get_tensor_bytes(tensor_index, &tensor_buffer, &tensor_size);
+      model_runner_tensor_bytes_get(tensor_index, &tensor_buffer, &tensor_size);
       memcpy(tensor_buffer + tensor_received_bytes, data, size);
       tensor_received_bytes += size;
       if (tensor_received_bytes > tensor_size) {
@@ -139,28 +139,30 @@ void xscope_data_recv(void *data, size_t size) {
       status = model_runner_init(model_content, tensor_arena, TENSOR_ARENA_SIZE,
                                  &input_buffer, &input_size, &output_buffer,
                                  &output_size);
-      if (status == kTfLiteError) {
+      if (status == AllocateTensorsError) {
         send_error(
             "Unable to initialize inference engine. Check tensor arena "
             "size.\0");
+      } else if (status == ModelVersionError) {
+        send_error("Incorrect model version.\0");
       }
       xscope_int(INIT_ACK, 0);
       break;
     case Invoke:
       status = model_runner_invoke();
-      if (status == kTfLiteError) {
+      if (status == InvokeError) {
         send_error("Unable to invoke inference engine.\0");
       }
       xscope_int(INVOKE_ACK, 0);
       break;
     case GetTensor:
       sscanf(data, "GET_TENSOR %d", &tensor_index);
-      model_runner_get_tensor_bytes(tensor_index, &tensor_buffer, &tensor_size);
+      model_runner_tensor_bytes_get(tensor_index, &tensor_buffer, &tensor_size);
       LOG_STATUS("GET_TENSOR index=%d  size=%d\n", tensor_index, tensor_size);
       send_tensor(tensor_buffer, tensor_size);
       break;
     case GetProfilerTimes:
-      model_runner_get_profiler_times(&profiler_times_count, &profiler_times);
+      model_runner_profiler_times_get(&profiler_times_count, &profiler_times);
       LOG_STATUS("GET_PROFILER_TIMES profiler_times_count=%d\n",
                  profiler_times_count);
       send_profiler_times(profiler_times_count, profiler_times);
