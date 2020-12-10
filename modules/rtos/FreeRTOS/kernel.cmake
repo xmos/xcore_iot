@@ -1,0 +1,135 @@
+cmake_minimum_required(VERSION 3.14)
+
+#**********************
+# Paths
+#**********************
+set(FREERTOS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Plus/FreeRTOS/FreeRTOS/Source")
+set(FREERTOS_SMP_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Plus/FreeRTOS-SMP/FreeRTOS/Source")
+
+set(RTOS_SUPPORT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/rtos_support")
+
+include("$ENV{XMOS_AIOT_SDK_PATH}/modules/modules.cmake")
+#********************************
+# Gather RTOS support sources
+#********************************
+set(THIS_LIB RTOS_SUPPORT)
+set(${THIS_LIB}_FLAGS "-Os")
+
+file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${RTOS_SUPPORT_DIR}/src/*.c")
+
+set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+set(${THIS_LIB}_INCLUDES
+    "${RTOS_SUPPORT_DIR}/api"
+    "${RTOS_SUPPORT_DIR}/src"
+)
+
+unset(THIS_LIB)
+
+#********************************
+# Gather FreeRTOS sources
+#********************************
+set(THIS_LIB FREERTOS)
+
+if(NOT DEFINED FREERTOS_PORT)
+    set(FREERTOS_PORT "XCOREAI")
+    message("FreeRTOS port set to XCOREAI by default")
+endif()
+
+if(FREERTOS_PORT STREQUAL "XCOREAI")
+    set(${THIS_LIB}_FLAGS "-Os -march=xs3a")
+elseif(FREERTOS_PORT STREQUAL "XCORE200")
+    set(${THIS_LIB}_FLAGS "-Os -march=xs2a")
+endif()
+
+if(NOT DEFINED FREERTOS_SMP)
+    set(FREERTOS_SMP True)
+    message("FreeRTOS SMP used by default.  Set FREERTOS_SMP to False to use single core kernel.")
+endif()
+
+if(FREERTOS_SMP)
+    set(${THIS_LIB}_DIR ${FREERTOS_SMP_DIR})
+else()
+    set(${THIS_LIB}_DIR ${FREERTOS_DIR})
+endif()
+
+set(${THIS_LIB}_SOURCES
+    "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}/port.xc"
+    "${${THIS_LIB}_DIR}/croutine.c"
+    "${${THIS_LIB}_DIR}/event_groups.c"
+    "${${THIS_LIB}_DIR}/list.c"
+    "${${THIS_LIB}_DIR}/queue.c"
+    "${${THIS_LIB}_DIR}/stream_buffer.c"
+    "${${THIS_LIB}_DIR}/tasks.c"
+    "${${THIS_LIB}_DIR}/timers.c"
+    "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}/port.c"
+    "${${THIS_LIB}_DIR}/portable/MemMang/heap_4.c"
+    "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}/portasm.S"
+)
+
+set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+set(${THIS_LIB}_INCLUDES
+    "${${THIS_LIB}_DIR}/include"
+    "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}"
+)
+
+unset(THIS_LIB)
+
+#********************************
+# Gather FreeRTOS-Plus-TCP sources
+#********************************
+set(THIS_LIB FREERTOS_PLUS_TCP)
+set(${THIS_LIB}_FLAGS "-Os")
+
+# Always use the sources from the single core kernel dir for Plus TCP
+set(${THIS_LIB}_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Plus/FreeRTOS/FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP")
+
+set(${THIS_LIB}_SOURCES
+    "${${THIS_LIB}_DIR}/FreeRTOS_ARP.c"
+    "${${THIS_LIB}_DIR}/FreeRTOS_DHCP.c"
+    "${${THIS_LIB}_DIR}/FreeRTOS_DNS.c"
+    "${${THIS_LIB}_DIR}/FreeRTOS_IP.c"
+    "${${THIS_LIB}_DIR}/FreeRTOS_Sockets.c"
+    "${${THIS_LIB}_DIR}/FreeRTOS_Stream_Buffer.c"
+    "${${THIS_LIB}_DIR}/FreeRTOS_TCP_IP.c"
+    "${${THIS_LIB}_DIR}/FreeRTOS_TCP_WIN.c"
+    "${${THIS_LIB}_DIR}/FreeRTOS_UDP_IP.c"
+    "${${THIS_LIB}_DIR}/portable/BufferManagement/BufferAllocation_2.c"
+    "${${THIS_LIB}_DIR}/portable/NetworkInterface/XCC/XCORE200/FreeRTOS_TCP_port.c"
+    "${${THIS_LIB}_DIR}/portable/NetworkInterface/XCC/XCORE200/NetworkInterface.c"
+    "${${THIS_LIB}_DIR}/portable/NetworkInterface/XCC/XCORE200/NetworkInterfaceWiFi.c"
+)
+
+set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+set(${THIS_LIB}_INCLUDES
+    "${${THIS_LIB}_DIR}/include"
+    "${${THIS_LIB}_DIR}/portable/Compiler/XCC"
+    "${${THIS_LIB}_DIR}/portable/XCC/XCORE200"
+)
+
+unset(THIS_LIB)
+
+#**********************
+# Set user variables
+#**********************
+set(KERNEL_SOURCES
+    ${FREERTOS_SOURCES}
+    ${RTOS_SUPPORT_SOURCES}
+    ${LIB_XASSERT_SOURCES}
+)
+
+set(KERNEL_INCLUDES
+    ${FREERTOS_INCLUDES}
+    ${RTOS_SUPPORT_INCLUDES}
+    ${LIB_XASSERT_INCLUDES}
+)
+
+set(KERNEL_OPT_SOURCES
+    ${FREERTOS_PLUS_TCP_SOURCES}
+)
+
+set(KERNEL_OPT_INCLUDES
+    ${FREERTOS_PLUS_TCP_INCLUDES}
+)

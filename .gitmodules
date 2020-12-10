@@ -72,3 +72,15 @@
 [submodule "modules/lib_xs3_math"]
 	path = modules/lib_xs3_math
 	url = git@github.com:xmos/lib_xs3_math.git
+[submodule "modules/drivers/hil/lib_i2c"]
+	path = modules/drivers/hil/lib_i2c
+	url = git@github.com:xmos/lib_i2c.git
+[submodule "modules/drivers/hil/lib_i2s"]
+	path = modules/drivers/hil/lib_i2s
+	url = git@github.com:xmos/lib_i2s.git
+[submodule "modules/drivers/hil/lib_mic_array"]
+	path = modules/drivers/hil/lib_mic_array
+	url = git@github.com:xmos/lib_mic_array.git
+[submodule "modules/drivers/hil/lib_spi"]
+	path = modules/drivers/hil/lib_spi
+	url = git@github.com:xmos/lib_spi.git
