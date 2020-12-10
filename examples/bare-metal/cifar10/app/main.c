@@ -65,12 +65,15 @@ int main(int argc, char *argv[]) {
             stack_base(swmem_handler_stack, stack_words + 2));
 #endif
 
-  // setup model runner
+  // initialize model runner global state
   model_runner_init(tensor_arena, TENSOR_ARENA_SIZE);
-  cifar10_create(model_runner_ctx, cifar10_model_data);
-  input_buffer = model_runner_get_input(model_runner_ctx);
-  input_size = model_runner_get_input_size(model_runner_ctx);
-  output_buffer = model_runner_get_output(model_runner_ctx);
+
+  // setup model runner
+  cifar10_model_runner_create(model_runner_ctx, NULL);
+  model_runner_allocate(model_runner_ctx, cifar10_model_data);
+  input_buffer = model_runner_input_buffer_get(model_runner_ctx);
+  input_size = model_runner_input_size_get(model_runner_ctx);
+  output_buffer = model_runner_output_buffer_get(model_runner_ctx);
 
   if (argc > 1) {
     printf("Input filename = %s\n", argv[1]);
@@ -83,9 +86,9 @@ int main(int argc, char *argv[]) {
 
   // Run inference, and report any error
   printf("Running inference...\n");
-  cifar10_invoke(model_runner_ctx);
+  model_runner_invoke(model_runner_ctx);
 
-  cifar10_print_profiler_summary(model_runner_ctx);
+  model_runner_profiler_summary_print(model_runner_ctx);
 
   char classification[12] = {0};
   int m = argmax(output_buffer, 10);

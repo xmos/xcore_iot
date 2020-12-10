@@ -21,7 +21,9 @@ static error_reporter_t *reporter = nullptr;
 
 static micro_allocator_t *allocator = nullptr;
 
-void model_runner_init(uint8_t *arena, int arena_size) {
+size_t model_runner_buffer_size_get() { return sizeof(interpreter_t); }
+
+void model_runner_init(uint8_t *arena, size_t arena_size) {
   // Set up error reporting
   if (reporter == nullptr) {
     reporter = &error_reporter_s;
@@ -34,9 +36,8 @@ void model_runner_init(uint8_t *arena, int arena_size) {
   }
 }
 
-ModelRunnerStatus model_runner_create(model_runner_t *ctx, void *resolver,
-                                      void *profiler, void *buffer,
-                                      const uint8_t *model_content) {
+ModelRunnerStatus model_runner_allocate(model_runner_t *ctx,
+                                        const uint8_t *model_content) {
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   const tflite::Model *model;
@@ -45,14 +46,24 @@ ModelRunnerStatus model_runner_create(model_runner_t *ctx, void *resolver,
     return ModelVersionError;
   }
 
-  micro_op_resolver_t *op_resolver =
-      static_cast<micro_op_resolver_t *>(resolver);
+  // Get model specific resolver
+  void *v_resolver = nullptr;
+  ctx->resolver_get_fun(&v_resolver);
+  micro_op_resolver_t *resolver =
+      static_cast<micro_op_resolver_t *>(v_resolver);
 
-  tflite_profiler_t *op_profiler = static_cast<tflite_profiler_t *>(profiler);
+  // Get model specific profiler
+  void *v_profiler = nullptr;
+  ctx->profiler_get_fun(&v_profiler);
+  tflite_profiler_t *profiler = static_cast<tflite_profiler_t *>(v_profiler);
 
+  // Allocate buffer for interpreter (if not already allocated)
+  if (ctx->hInterpreter == nullptr) {
+    ctx->hInterpreter = malloc(model_runner_buffer_size_get());
+  }
   // Build an interpreter to run the model with
-  interpreter_t *interpreter = new (buffer) interpreter_t(
-      model, *op_resolver, allocator, reporter, true, op_profiler);
+  interpreter_t *interpreter = new (ctx->hInterpreter)
+      interpreter_t(model, *resolver, allocator, reporter, true, profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_tensors_status = interpreter->AllocateTensors();
@@ -60,30 +71,32 @@ ModelRunnerStatus model_runner_create(model_runner_t *ctx, void *resolver,
     return AllocateTensorsError;
   }
 
-  ctx->handle = static_cast<void *>(interpreter);
-
   return Ok;
 }
 
-int8_t *model_runner_get_input(model_runner_t *ctx) {
-  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+int8_t *model_runner_input_buffer_get(model_runner_t *ctx) {
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
   return interpreter->input(0)->data.int8;
 }
 
-size_t model_runner_get_input_size(model_runner_t *ctx) {
-  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+size_t model_runner_input_size_get(model_runner_t *ctx) {
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
   return interpreter->input(0)->bytes;
 }
 
-void model_runner_get_input_quant(model_runner_t *ctx, float *scale,
+void model_runner_input_quant_get(model_runner_t *ctx, float *scale,
                                   int *zero_point) {
-  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
   *scale = interpreter->input(0)->params.scale;
   *zero_point = interpreter->input(0)->params.zero_point;
 }
 
 ModelRunnerStatus model_runner_invoke(model_runner_t *ctx) {
-  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
+
+  // Rset the profiler
+  ctx->profiler_reset_fun();
+
   // Run inference, and report any error
   TfLiteStatus invoke_status = interpreter->Invoke();
 
@@ -94,31 +107,34 @@ ModelRunnerStatus model_runner_invoke(model_runner_t *ctx) {
   return Ok;
 }
 
-int8_t *model_runner_get_output(model_runner_t *ctx) {
-  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+int8_t *model_runner_output_buffer_get(model_runner_t *ctx) {
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
   return interpreter->output(0)->data.int8;
 }
 
-size_t model_runner_get_output_size(model_runner_t *ctx) {
-  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+size_t model_runner_output_size_get(model_runner_t *ctx) {
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
   return interpreter->output(0)->bytes;
 }
 
-void model_runner_get_output_quant(model_runner_t *ctx, float *scale,
+void model_runner_output_quant_get(model_runner_t *ctx, float *scale,
                                    int *zero_point) {
-  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
   *scale = interpreter->output(0)->params.scale;
   *zero_point = interpreter->output(0)->params.zero_point;
 }
 
 #ifndef NDEBUG
 
-void model_runner_print_profiler_summary(model_runner_t *ctx, uint32_t count,
-                                         const uint32_t *times) {
-  const char *op_name;
+void model_runner_profiler_summary_print(model_runner_t *ctx) {
+  uint32_t count = 0;
   uint32_t total = 0;
+  const uint32_t *times = nullptr;
+  const char *op_name;
 
-  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->handle);
+  interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
+
+  ctx->profiler_times_get_fun(&count, &times);
 
   for (size_t i = 0; i < interpreter->operators_size(); ++i) {
     if (i < count) {

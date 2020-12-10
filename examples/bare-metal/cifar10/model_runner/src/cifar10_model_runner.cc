@@ -15,22 +15,26 @@ static resolver_t *resolver = nullptr;
 
 static profiler_t *profiler = nullptr;
 
-static char interpreter_buffer[sizeof(tflite::micro::xcore::XCoreInterpreter)];
-
-ModelRunnerStatus cifar10_create(model_runner_t *ctx, const uint8_t* model_content)
+__attribute__((fptrgroup("model_runner_function")))
+void cifar10_resolver_get(void **v_resolver)
 {
   // Set up op resolver
   //   This pulls in all the operation implementations we need.
   if (resolver == nullptr) {
     resolver = &resolver_s;
-    resolver->AddSoftmax();
     resolver->AddPad();
-    resolver->AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode, tflite::ops::micro::xcore::Register_FullyConnected_8());
+    resolver->AddSoftmax();
     resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
     resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Deep());
     resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Shallow());
+    resolver->AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode, tflite::ops::micro::xcore::Register_FullyConnected_8());
   }
 
+  *v_resolver = static_cast<void *>(resolver);
+}
+
+__attribute__((fptrgroup("model_runner_function")))
+void cifar10_profiler_get(void **v_profiler) {
 #ifndef NDEBUG
   if (profiler == nullptr) {
     // Set up profiling
@@ -40,37 +44,35 @@ ModelRunnerStatus cifar10_create(model_runner_t *ctx, const uint8_t* model_conte
   }
 #endif
 
-  return model_runner_create(
-      ctx, static_cast<void *>(resolver), static_cast<void *>(profiler),
-      static_cast<void *>(interpreter_buffer), model_content);
+  *v_profiler = static_cast<void *>(profiler);
 }
 
-ModelRunnerStatus cifar10_invoke(model_runner_t *ctx) {
+__attribute__((fptrgroup("model_runner_function")))
+void cifar10_profiler_reset() {
   if (profiler) {
     profiler->Reset();
   }
-
-  return model_runner_invoke(ctx);
 }
-
 
 #ifndef NDEBUG
 
-void cifar10_get_profiler_times(model_runner_t *ctx, uint32_t *count,
-                                     const uint32_t **times) {
+__attribute__((fptrgroup("model_runner_function")))
+void cifar10_profiler_times_get(uint32_t *count, const uint32_t **times) {
   if (profiler) {
     *count = profiler->GetNumTimes();
     *times = profiler->GetTimes();
   }
 }
 
-void cifar10_print_profiler_summary(model_runner_t *ctx) {
-  uint32_t count = 0;
-  const uint32_t *times = nullptr;
-
-  cifar10_get_profiler_times(ctx, &count, &times);
-
-  model_runner_print_profiler_summary(ctx, count, times);
-}
-
 #endif
+
+//********************************
+// Create a cifar10 model runner.
+//********************************
+void cifar10_model_runner_create(model_runner_t *ctx, void *buffer) {
+  ctx->hInterpreter = buffer;
+  ctx->resolver_get_fun = &cifar10_resolver_get;
+  ctx->profiler_get_fun = &cifar10_profiler_get;
+  ctx->profiler_reset_fun = &cifar10_profiler_reset;
+  ctx->profiler_times_get_fun = &cifar10_profiler_times_get;
+}

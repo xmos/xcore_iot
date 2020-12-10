@@ -183,7 +183,7 @@ def generate_project(inputs, runner_basename, output, *, do_analyze=False):
 
     for i, input_ in enumerate(inputs):
         model_path = Path(input_)
-        runner_name = f"{runner_basename}-{i}" if len(inputs) > 1 else runner_basename
+        runner_name = f"{runner_basename}_{i}" if len(inputs) > 1 else runner_basename
         generate_model_data(model_path, output_path, runner_name, do_analyze=do_analyze)
         (
             model_layer_count,

@@ -6,11 +6,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct model_runner_struct model_runner_t;
-
 struct model_runner_struct {
-  void *handle;
+  void *hInterpreter;
+  void (*resolver_get_fun)(void **);
+  void (*profiler_get_fun)(void **);
+  void (*profiler_reset_fun)(void);
+  void (*profiler_times_get_fun)(uint32_t *, const uint32_t **);
 };
+
+typedef struct model_runner_struct model_runner_t;
 
 typedef enum ModelRunnerStatus {
   Ok = 0,
@@ -23,32 +27,34 @@ typedef enum ModelRunnerStatus {
 extern "C" {
 #endif
 
+/** Get size of buffer need in call to model_runner_create.
+ *
+ * @return   The size (in bytes)
+ */
+size_t model_runner_buffer_size_get();
+
 /** Initialize the model runner global state.
  *
  * @param[in] arena        Array for scratch and activations.
  * @param[in] arena_size   Size (in bytes) of arena array
  */
-void model_runner_init(uint8_t *arena, int arena_size);
+void model_runner_init(uint8_t *arena, size_t arena_size);
 
-/** Create a new model runner for the model content specified.
+/** Allocate the model runner with the specified model content.
  *
- * @param[out] ctx             Model runner context
- * @param[in]  resolver        tflite::MicroMutableOpResolver (cast to void*)
- * @param[in]  profiler        tflite::Profiler (cast to void*, can be nullptr)
- * @param[in]  buffer          Buffer large enough to store Interpreter object
- * @param[in]  model_content   Array containing model content
+ * @param[in] ctx              Model runner context
+ * @param[in] model_content    Array containing model content
  */
-ModelRunnerStatus model_runner_create(model_runner_t *ctx, void *resolver,
-                                      void *profiler, void *buffer,
-                                      const uint8_t *model_content);
+ModelRunnerStatus model_runner_allocate(model_runner_t *ctx,
+                                        const uint8_t *model_content);
 
-/** Get the model input.
+/** Get the model input buffer.
  *
  * @param[in] ctx   Model runner context
  *
  * @return    Pointer to model input buffer.
  */
-int8_t *model_runner_get_input(model_runner_t *ctx);
+int8_t *model_runner_input_buffer_get(model_runner_t *ctx);
 
 /** Get the model input size.
  *
@@ -56,7 +62,7 @@ int8_t *model_runner_get_input(model_runner_t *ctx);
  *
  * @return    Model input size (in bytes).
  */
-size_t model_runner_get_input_size(model_runner_t *ctx);
+size_t model_runner_input_size_get(model_runner_t *ctx);
 
 /** Get the model input quantization parameters.
  *
@@ -64,7 +70,7 @@ size_t model_runner_get_input_size(model_runner_t *ctx);
  * @param[out] scale        Quantization scale
  * @param[out] zero_point   Quantization zero point
  */
-void model_runner_get_input_quant(model_runner_t *ctx, float *scale,
+void model_runner_input_quant_get(model_runner_t *ctx, float *scale,
                                   int *zero_point);
 
 /** Run inference using the model runner.
@@ -73,13 +79,13 @@ void model_runner_get_input_quant(model_runner_t *ctx, float *scale,
  */
 ModelRunnerStatus model_runner_invoke(model_runner_t *ctx);
 
-/** Get the model output.
+/** Get the model output buffer.
  *
  * @param[in] ctx   Model runner context
  *
  * @return    Pointer to model output buffer.
  */
-int8_t *model_runner_get_output(model_runner_t *ctx);
+int8_t *model_runner_output_buffer_get(model_runner_t *ctx);
 
 /** Get the model output size.
  *
@@ -87,7 +93,7 @@ int8_t *model_runner_get_output(model_runner_t *ctx);
  *
  * @return    Model output size (in bytes).
  */
-size_t model_runner_get_output_size(model_runner_t *ctx);
+size_t model_runner_output_size_get(model_runner_t *ctx);
 
 /** Get the model output quantization parameters.
  *
@@ -95,7 +101,7 @@ size_t model_runner_get_output_size(model_runner_t *ctx);
  * @param[out] scale        Quantization scale
  * @param[out] zero_point   Quantization zero point
  */
-void model_runner_get_ouput_quant(model_runner_t *ctx, float *scale,
+void model_runner_ouput_quant_get(model_runner_t *ctx, float *scale,
                                   int *zero_point);
 
 #ifndef NDEBUG
@@ -104,8 +110,7 @@ void model_runner_get_ouput_quant(model_runner_t *ctx, float *scale,
  *
  * @param[in] ctx     Model runner context
  */
-void model_runner_print_profiler_summary(model_runner_t *ctx, uint32_t count,
-                                         const uint32_t *times);
+void model_runner_profiler_summary_print(model_runner_t *ctx);
 
 #endif
 
