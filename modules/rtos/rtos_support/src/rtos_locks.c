@@ -1,7 +1,6 @@
 // Copyright (c) 2019, XMOS Ltd, All rights reserved
 
 #include "rtos_support.h"
-#include "xassert.h"
 
 lock_t rtos_locks[RTOS_LOCK_COUNT] = {
 #if RTOS_LOCK_COUNT >= 1

@@ -7,7 +7,7 @@
 
 #include "rtos_support_rtos_config.h"
 #include <xcore/lock.h>
-#include "xassert.h"
+#include <xcore/assert.h>
 
 #ifndef RTOS_LOCK_COUNT
 #error You must define RTOS_LOCK_COUNT in rtos_support_rtos_config.h
