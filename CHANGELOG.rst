@@ -4,10 +4,11 @@ AIoT SDK change log
 In progress
 -----------
 
+  * Implemented optimized ADD TensorFlow Lite Micro operator
   * Added model runner project generation command-line utility
   * Added hotdog_not_hotdog bare-metal example application
   * Simplified SDK installation steps
-  * Example applications that utilize ``xscope`` for input now support common image formats.
+  * Example applications that utilize ``xscope`` for input now support common image formats
 
 0.9.4
 -----

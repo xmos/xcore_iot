@@ -35,13 +35,14 @@ The most important xcore.ai specific transformations performed are related to th
 
 Below is a list of `TensorFlow Lite for Microcontrollers <https://www.tensorflow.org/lite/microcontrollers>`_ operators that have been optimized for xcore.ai.  Depending on the parameters of the operator, the optimized implementation will be 10-50 times faster than the reference implementation.
 
+- ADD
+- AVERAGE_POOL_2D
 - CONV_2D
 - DEPTHWISE_CONV_2D
 - FULLY_CONNECTED
-- MAX_POOL_2D
-- AVERAGE_POOL_2D
-- MEAN
 - LOGISTIC
+- MAX_POOL_2D
+- MEAN
 - RELU
 - RELU6
 
