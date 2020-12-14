@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("${CMAKE_CURRENT_SOURCE_DIR}/../../utils/cmake/xmos_toolchain.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/xmos_toolchain.cmake")
 
 project(xcore_interpreter VERSION 1.0.0)
 
@@ -55,7 +55,7 @@ set_target_properties(xcore_interpreter_cmdline PROPERTIES OUTPUT_NAME xcore_int
 #**********************
 # targets
 #**********************
-include("${CMAKE_CURRENT_SOURCE_DIR}/../../utils/cmake/xcore_interpreter.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/xcore_interpreter.cmake")
 
 set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/main.xc" PROPERTIES LANGUAGE C)
 
