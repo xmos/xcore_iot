@@ -85,3 +85,9 @@ At times submodule repositories will need to be updated.  To update all submodul
 .. code-block:: console
 
     $ git submodule update --init --recursive
+
+Due to some large submodules, cloning the repository can take a few minutes.  The following command will only close a history depth of 1 and is considerably faster.
+
+.. code-block:: console
+
+    $ git clone --recurse-submodules --depth 1 --shallow-submodules https://github.com/xmos/aiot_sdk.git
