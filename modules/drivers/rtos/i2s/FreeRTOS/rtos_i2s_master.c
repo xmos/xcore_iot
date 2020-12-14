@@ -49,6 +49,10 @@ static void i2s_master_thread(rtos_i2s_master_t *ctx)
             ctx
     };
 
+    /* Exclude from core 0 */
+    vTaskPreemptionDisable(NULL);
+    vTaskCoreExclusionSet(NULL, (1 << 0));
+
     rtos_printf("I2S on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
     i2s_master(
                &i2s_cbg,

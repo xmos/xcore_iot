@@ -18,6 +18,10 @@ static void mic_array_thread(rtos_mic_array_t *ctx)
     chanend_t *ref_audio_ends = NULL;
 #endif
 
+    /* Exclude from core 0 */
+    vTaskPreemptionDisable(NULL);
+    vTaskCoreExclusionSet(NULL, (1 << 0));
+
     rtos_printf("PDM mics on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
     mic_dual_pdm_rx_decimate(
             ctx->p_pdm_mics,
@@ -44,7 +48,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
                                        MIC_DUAL_FRAME_SIZE * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS) * sizeof(int32_t),
                                        &yield_required);
     } else {
-        rtos_printf("mic samples lost\n");
+        //rtos_printf("mic samples lost\n");
     }
 
     portEND_SWITCHING_ISR(yield_required);

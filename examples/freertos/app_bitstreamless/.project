@@ -3,7 +3,7 @@
 	<name>app_bitstreamless</name>
 	<comment></comment>
 	<projects>
-		<project>rtos_support</project>
+		<project>aiot_sdk</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -99,7 +99,7 @@
     	
     <storageModule moduleId="cdtBuildSystem" version="4.0.0">
         		
-        <project id="rtos_support.null.1472077972" name="rtos_support"/>
+        <project id="aiot_sdk.null.1472077972" name="aiot_sdk"/>
         	
     </storageModule>
     	
@@ -109,7 +109,7 @@
         		
         <configuration configurationName="Default">
             			
-            <resource resourceType="PROJECT" workspacePath="/rtos_support"/>
+            <resource resourceType="PROJECT" workspacePath="/aiot_sdk"/>
             		
         </configuration>
         	

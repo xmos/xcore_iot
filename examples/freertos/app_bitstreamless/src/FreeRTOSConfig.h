@@ -27,6 +27,8 @@ your application. */
 #define configTICK_RATE_HZ                      1000
 #define configMAX_PRIORITIES                    32
 #define configRUN_MULTIPLE_PRIORITIES           1
+#define configUSE_TASK_PREEMPTION_DISABLE       1
+#define configUSE_CORE_EXCLUSION                1
 #define configMINIMAL_STACK_SIZE                ( configSTACK_DEPTH_TYPE ) 256
 #define configMAX_TASK_NAME_LEN                 32
 #define configUSE_16_BIT_TICKS                  0
@@ -70,7 +72,7 @@ your application. */
 
 /* Software timer related definitions. */
 #define configUSE_TIMERS                        1
-#define configTIMER_TASK_PRIORITY               ( configMAX_PRIORITIES - 3 ) /* so as not to preempt the i2s or mic tasks */
+#define configTIMER_TASK_PRIORITY               ( configMAX_PRIORITIES - 1 )
 #define configTIMER_QUEUE_LENGTH                10
 #define configTIMER_TASK_STACK_DEPTH            ( configMINIMAL_STACK_SIZE << 2 )
 

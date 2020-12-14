@@ -18,9 +18,9 @@
 #define GPIO_TEST 1
 #define WIFI_TEST 1
 
-#define I2C_TILE 0
+#define I2C_TILE 1
 #define PIPELINE_TILE 0
-#define GPIO_TILE 1
+#define GPIO_TILE 0
 #define SPI_TILE 1
 
 #if RPC_TEST
@@ -237,7 +237,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     #if INTERTILE_TEST
     {
-        intertile_stress_test_start(intertile_ctx, intertile_ctx);
+        intertile_stress_test_start(intertile_ctx, intertile2_ctx);
     }
     #endif
 
@@ -286,7 +286,7 @@ void main_tile1(chanend_t c)
                 "vApplicationDaemonTaskStartup",
                 RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
                 NULL,
-                configMAX_PRIORITIES-2,
+                configMAX_PRIORITIES-1,
                 NULL);
 
     rtos_printf("start scheduler on tile 1\n");
