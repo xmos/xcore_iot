@@ -1,40 +1,44 @@
-[submodule "dependencies/lib_dsp"]
+[submodule "lib_dsp"]
 	path = modules/lib_dsp/lib_dsp
 	url = git@github.com:xmos/lib_dsp.git
-[submodule "dependencies/lib_ethernet"]
+[submodule "lib_xs3_math"]
+	path = modules/lib_xs3_math
+	url = git@github.com:xmos/lib_xs3_math.git
+	shallow = true
+[submodule "lib_ethernet"]
 	path = modules/lib_ethernet/lib_ethernet
 	url = git@github.com:xmos/lib_ethernet.git
-[submodule "dependencies/lib_gpio"]
+[submodule "lib_gpio"]
 	path = modules/lib_gpio/lib_gpio
 	url = git@github.com:xmos/lib_gpio.git
-[submodule "dependencies/lib_i2c"]
+[submodule "lib_i2c"]
 	path = modules/lib_i2c/lib_i2c
 	url = git@github.com:xmos/lib_i2c.git
-[submodule "dependencies/lib_i2s"]
+[submodule "lib_i2s"]
 	path = modules/lib_i2s/lib_i2s
 	url = git@github.com:xmos/lib_i2s.git
-[submodule "dependencies/lib_locks"]
+[submodule "lib_locks"]
 	path = modules/lib_locks/lib_locks
 	url = git@github.com:xmos/lib_locks.git
-[submodule "dependencies/lib_logging"]
+[submodule "lib_logging"]
 	path = modules/lib_logging/lib_logging
 	url = git@github.com:xmos/lib_logging.git
-[submodule "dependencies/lib_mic_array"]
+[submodule "lib_mic_array"]
 	path = modules/lib_mic_array/lib_mic_array
 	url = git@github.com:xmos/lib_mic_array.git
-[submodule "dependencies/lib_otpinfo"]
+[submodule "lib_otpinfo"]
 	path = modules/lib_otpinfo/lib_otpinfo
 	url = git@github.com:xmos/lib_otpinfo.git
-[submodule "dependencies/lib_random"]
+[submodule "lib_random"]
 	path = modules/lib_random/lib_random
 	url = git@github.com:xmos/lib_random.git
-[submodule "dependencies/lib_sdram"]
+[submodule "lib_sdram"]
 	path = modules/lib_sdram/lib_sdram
 	url = git@github.com:xmos/lib_sdram.git
-[submodule "dependencies/lib_trycatch"]
+[submodule "lib_trycatch"]
 	path = modules/lib_trycatch/lib_trycatch
 	url = git@github.com:xmos/lib_trycatch.git
-[submodule "dependencies/lib_xassert"]
+[submodule "lib_xassert"]
 	path = modules/lib_xassert/lib_xassert
 	url = git@github.com:xmos/lib_xassert.git
 [submodule "FreeRTOS"]
@@ -54,21 +58,23 @@
 [submodule "lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware"]
 	path = modules/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware
 	url = git@github.com:SiliconLabs/wfx-firmware.git
-[submodule "thirdparty/mbedtls"]
+[submodule "mbedtls"]
 	path = modules/lib_soc/src/sw_services/tls_support/thirdparty/mbedtls
 	url = git@github.com:ARMmbed/mbedtls.git
-[submodule "thirdparty/paho.mqtt.embedded-c"]
+	shallow = true
+[submodule "paho.mqtt.embedded-c"]
 	path = modules/lib_soc/src/sw_services/mqtt/paho.mqtt.embedded-c
 	url = git@github.com:eclipse/paho.mqtt.embedded-c.git
-[submodule "thirdparty/http-parser"]
+	shallow = true
+[submodule "http-parser"]
 	path = modules/lib_soc/src/sw_services/http/thirdparty/http-parser
 	url = git@github.com:nodejs/http-parser.git
+	shallow = true
 [submodule "lib_soc/src/sw_services/json/jsmn"]
 	path = modules/lib_soc/src/sw_services/json/jsmn
 	url = git@github.com:zserge/jsmn.git
-[submodule "tools/ai_tools"]
+	shallow = true
+[submodule "ai_tools"]
 	path = tools/ai_tools
 	url = git@github.com:xmos/ai_tools.git
-[submodule "modules/lib_xs3_math"]
-	path = modules/lib_xs3_math
-	url = git@github.com:xmos/lib_xs3_math.git
+	shallow = true
