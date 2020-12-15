@@ -13,9 +13,9 @@ set(FLATBUFFERS_SOURCE_DIR "${AI_TOOLS_ROOT_DIR}/third_party/flatbuffers/src")
 set(TENSORFLOW_SOURCE_DIR "${AI_TOOLS_ROOT_DIR}/third_party/tensorflow")
 set(TENSORFLOW_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/third_party/tensorflow")
 
-set(LIB_NN_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/lib_nn")
-set(LIB_NN_ALT_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/lib_nn/lib_nn/api")
-set(LIB_NN_SOURCE_DIR "${AI_TOOLS_ROOT_DIR}/lib_nn")
+set(LIB_NN_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/xcore_interpreters/lib_nn")
+set(LIB_NN_ALT_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/xcore_interpreters/lib_nn/lib_nn/api")
+set(LIB_NN_SOURCE_DIR "${AI_TOOLS_ROOT_DIR}/xcore_interpreters/lib_nn")
 
 #********************************
 # TensorFlow Lite Micro sources
