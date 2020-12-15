@@ -5,6 +5,9 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
+set(USE_WIFI_MANAGER TRUE)
+set(USE_DHCPD TRUE)
+
 ## Import XMOS configurations
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
@@ -23,6 +26,7 @@ set(APP_COMPILER_FLAGS
     "-fxscope"
     "-Wno-xcore-fptrgroup"
     "-DDEBUG_PRINT_ENABLE=1"
+    "-DDEBUG_PRINT_ENABLE_IOT_WIFI=1"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
     "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT)"
 
@@ -30,6 +34,8 @@ set(APP_COMPILER_FLAGS
     "-DXCOREAI_EXPLORER=1"
     "-lquadspi"
     "-mcmodel=large"
+    
+    "-DUSE_DHCPD=1" # TODO: Would like this to be set automatically when DHCPD is compiled in
 )
 
 set(FREERTOS_PORT "XCOREAI")
@@ -66,11 +72,8 @@ endif()
 
 add_executable(${TARGET_NAME})
 
-#target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
-#target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
-
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES} ${WIFI_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES} ${WIFI_INCLUDES})
+target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
+target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})

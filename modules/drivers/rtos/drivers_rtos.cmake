@@ -48,7 +48,7 @@ unset(THIS_LIB)
 # Gather I2C sources
 #********************************
 set(THIS_LIB I2C)
-set(${THIS_LIB}_FLAGS "-O3")
+set(${THIS_LIB}_FLAGS "-Os")
 
 file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
 
@@ -82,7 +82,7 @@ unset(THIS_LIB)
 # Gather intertile sources
 #********************************
 set(THIS_LIB INTERTILE)
-set(${THIS_LIB}_FLAGS "-O3")
+set(${THIS_LIB}_FLAGS "-Os")
 
 file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
 
@@ -116,7 +116,7 @@ unset(THIS_LIB)
 # Gather rpc sources
 #********************************
 set(THIS_LIB RPC)
-set(${THIS_LIB}_FLAGS "-O3")
+set(${THIS_LIB}_FLAGS "-Os")
 
 file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
 
@@ -132,7 +132,7 @@ unset(THIS_LIB)
 # Gather spi sources
 #********************************
 set(THIS_LIB SPI)
-set(${THIS_LIB}_FLAGS "-O3")
+set(${THIS_LIB}_FLAGS "-Os")
 
 file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
 
@@ -149,7 +149,7 @@ unset(THIS_LIB)
 # Gather trace sources
 #********************************
 set(THIS_LIB TRACE)
-set(${THIS_LIB}_FLAGS "-O3")
+set(${THIS_LIB}_FLAGS "-Os")
 
 file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
 
@@ -173,6 +173,7 @@ if(${RTOS_WIFI_CHIP} STREQUAL "sl_wf200")
         "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/sl_wfx_host_task.c"
         "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/sl_wfx_host.c"
         "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/sl_wfx_iot_wifi.c"
+        "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/${RTOS_CMAKE_RTOS}/sl_wfx_network_interface.c"
         "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/sl_wfx.c"
         "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/bus/sl_wfx_bus.c"
         "${${THIS_LIB}_DIR}/${RTOS_WIFI_CHIP}/thirdparty/wfx-fullMAC-driver/wfx_fmac_driver/bus/sl_wfx_bus_spi.c"

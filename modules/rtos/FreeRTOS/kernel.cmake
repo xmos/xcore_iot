@@ -68,6 +68,8 @@ set(${THIS_LIB}_SOURCES
 )
 
 set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+# Use O2 for tasks.c to give it a slight speedup
+set_source_files_properties(${${THIS_LIB}_DIR}/tasks.c PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -O2")
 
 set(${THIS_LIB}_INCLUDES
     "${${THIS_LIB}_DIR}/include"
@@ -84,6 +86,7 @@ set(${THIS_LIB}_FLAGS "-Os")
 
 # Always use the sources from the single core kernel dir for Plus TCP
 set(${THIS_LIB}_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Plus/FreeRTOS/FreeRTOS-Plus/Source/FreeRTOS-Plus-TCP")
+set(${THIS_LIB}_PORTABLE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Plus/portable/FreeRTOS-Plus-TCP")
 
 set(${THIS_LIB}_SOURCES
     "${${THIS_LIB}_DIR}/FreeRTOS_ARP.c"
@@ -96,17 +99,15 @@ set(${THIS_LIB}_SOURCES
     "${${THIS_LIB}_DIR}/FreeRTOS_TCP_WIN.c"
     "${${THIS_LIB}_DIR}/FreeRTOS_UDP_IP.c"
     "${${THIS_LIB}_DIR}/portable/BufferManagement/BufferAllocation_2.c"
-    "${${THIS_LIB}_DIR}/portable/NetworkInterface/XCC/XCORE200/FreeRTOS_TCP_port.c"
-    "${${THIS_LIB}_DIR}/portable/NetworkInterface/XCC/XCORE200/NetworkInterface.c"
-    "${${THIS_LIB}_DIR}/portable/NetworkInterface/XCC/XCORE200/NetworkInterfaceWiFi.c"
+    "${${THIS_LIB}_PORTABLE_DIR}/NetworkInterface/FreeRTOS_TCP_port.c"
 )
 
 set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
 set(${THIS_LIB}_INCLUDES
     "${${THIS_LIB}_DIR}/include"
-    "${${THIS_LIB}_DIR}/portable/Compiler/XCC"
-    "${${THIS_LIB}_DIR}/portable/XCC/XCORE200"
+    "${${THIS_LIB}_PORTABLE_DIR}/Compiler"
+    "${${THIS_LIB}_PORTABLE_DIR}/NetworkInterface"
 )
 
 unset(THIS_LIB)

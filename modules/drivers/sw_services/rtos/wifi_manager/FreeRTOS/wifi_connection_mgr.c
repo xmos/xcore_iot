@@ -1,6 +1,6 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
-#define DEBUG_UNIT LIB_SOC_SW_WIFI
+#define DEBUG_UNIT WIFI_CONN_MGR
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -13,12 +13,11 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "soc.h"
 #include "sl_wfx.h"
 #include "sl_wfx_iot_wifi.h"
 #include "wifi.h"
 #include "heapsort.h"
-#if LIB_SOC_HAS_SW_DHCPD
+#if USE_DHCPD
 #include "dhcpd.h"
 #endif
 
@@ -103,6 +102,9 @@ void sl_wfx_reset_request_callback(void)
     }
 }
 
+#if( ipconfigUSE_NETWORK_EVENT_HOOK != 1 )
+    #error The WiFi connection manager requries that ipconfigUSE_NETWORK_EVENT_HOOK be set to 1
+#endif
 __attribute__((weak))
 void vApplicationIPNetworkEventHook(eIPCallbackEvent_t eNetworkEvent)
 {
@@ -608,7 +610,7 @@ static void wifi_conn_mgr(void *arg)
                     rtos_printf("WIFI_StartAP() failed, will try again\n");
                     vTaskDelay(pdMS_TO_TICKS(100));
                 }
-#if LIB_SOC_HAS_SW_DHCPD
+#if USE_DHCPD
                 /* note: It's safe to call this if the DHCP server is already started. */
                 dhcpd_start(16);
 #endif
@@ -666,7 +668,7 @@ static void wifi_conn_mgr(void *arg)
                         if (!WIFI_IsConnected()) {
                             mode = event_callback(WIFI_CONN_MGR_EVENT_SOFT_AP_STOPPED, soft_ap_ssid, soft_ap_ssid, soft_ap_password);
                             if (mode != WIFI_CONN_MGR_MODE_SOFT_AP) {
-#if LIB_SOC_HAS_SW_DHCPD
+#if USE_DHCPD
                                 dhcpd_stop(16);
 #endif
 

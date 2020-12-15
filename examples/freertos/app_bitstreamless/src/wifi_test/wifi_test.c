@@ -5,6 +5,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/* FreeRTOS Plus headers */
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_IP_Private.h"
+#include "FreeRTOS_Sockets.h"
+
 #include "wifi_test.h"
 
 #include "sl_wfx_iot_wifi.h"
@@ -17,53 +22,31 @@ typedef struct {
 static void wifi_test_task(wifi_test_devs_t *wifi_devs)
 {
     const rtos_gpio_port_id_t wifi_wup_rst_port = rtos_gpio_port(WIFI_WUP_RST_N);
+    const rtos_gpio_port_id_t wifi_irq_port = rtos_gpio_port(WIFI_WIRQ);
 
     rtos_spi_master_device_t *wifi_device_ctx = wifi_devs->wifi_device_ctx;
     rtos_gpio_t *gpio_ctx = wifi_devs->gpio_ctx;
 
-//    rtos_gpio_port_enable(gpio_ctx, wifi_wup_rst_port);
-//    rtos_gpio_port_out(gpio_ctx, wifi_wup_rst_port, 3); /* set bits 0 (WUP) and 1 (RST) high. */
-
     vTaskDelay(pdMS_TO_TICKS(100));
-
-    uint8_t config_read_cmd[2] = {0x80, 0x02}; /* read 2 16-bit words from address 0 */
-    uint8_t config_write_cmd[2] = {0x00, 0x02}; /* read 2 16-bit words from address 0 */
-    uint8_t config_reg[4];
-
-    // byte_number: 03_02_01_00
-    // ar index #:  00 01 02 03
-    // on wire:     01 00 03 02
-    //              02 03 00 01
-
-//    for (int i = 0; i < 2; i++) {
-//        rtos_spi_master_transaction_start(wifi_device_ctx);
-//        rtos_spi_master_transfer(wifi_device_ctx, config_read_cmd, NULL, 2);
-//        rtos_spi_master_transfer(wifi_device_ctx, NULL, config_reg, 4);
-//        rtos_spi_master_transaction_end(wifi_device_ctx);
-//        rtos_printf("Config reg: 0x%02x%02x%02x%02x\n", config_reg[2], config_reg[3], config_reg[0], config_reg[1]);
-//    }
-//
-//    rtos_spi_master_transaction_start(wifi_device_ctx);
-//    rtos_spi_master_transfer(wifi_device_ctx, config_write_cmd, NULL, 2);
-//    config_reg[3] = 0x04;
-//    rtos_spi_master_transfer(wifi_device_ctx, config_reg, NULL, 4);
-//    rtos_spi_master_transaction_end(wifi_device_ctx);
-//
-//    for (int i = 0; i < 2; i++) {
-//        rtos_spi_master_transaction_start(wifi_device_ctx);
-//        rtos_spi_master_transfer(wifi_device_ctx, config_read_cmd, NULL, 2);
-//        rtos_spi_master_transfer(wifi_device_ctx, NULL, config_reg, 4);
-//        rtos_spi_master_transaction_end(wifi_device_ctx);
-//        rtos_printf("Config reg: 0x%02x%02x%02x%02x\n", config_reg[2], config_reg[3], config_reg[0], config_reg[1]);
-//    }
 
     sl_wfx_host_set_hif(wifi_device_ctx,
                         gpio_ctx,
-                        rtos_gpio_port_1I, 0, /* IRQ */
-                        rtos_gpio_port_4E, 0, /* WUP */
-                        rtos_gpio_port_4E, 1 ); /* RST */
+                        wifi_irq_port, 0,
+                        wifi_wup_rst_port, 0,
+                        wifi_wup_rst_port, 1);
 
     WIFI_On();
+
+    const uint8_t ucIPAddress[ 4 ] = { IPconfig_IP_ADDR_OCTET_0, IPconfig_IP_ADDR_OCTET_1, IPconfig_IP_ADDR_OCTET_2, IPconfig_IP_ADDR_OCTET_3 };
+    const uint8_t ucNetMask[ 4 ] = { IPconfig_NET_MASK_OCTET_0, IPconfig_NET_MASK_OCTET_1, IPconfig_NET_MASK_OCTET_2, IPconfig_NET_MASK_OCTET_3 };
+    const uint8_t ucGatewayAddress[ 4 ] = { IPconfig_GATEWAY_OCTET_0, IPconfig_GATEWAY_OCTET_1, IPconfig_GATEWAY_OCTET_2, IPconfig_GATEWAY_OCTET_3 };
+    const uint8_t ucDNSServerAddress[ 4 ] = { IPconfig_DNS_SERVER_OCTET_0, IPconfig_DNS_SERVER_OCTET_1, IPconfig_DNS_SERVER_OCTET_2, IPconfig_DNS_SERVER_OCTET_3 };
+    uint8_t ucMACAddress[ 6 ] = { 0, 0, 0, 0, 0, 0 };
+    FreeRTOS_IPInit(ucIPAddress,
+                    ucNetMask,
+                    ucGatewayAddress,
+                    ucDNSServerAddress,
+                    ucMACAddress);
 
     WIFIScanResult_t scan_results[10];
 
@@ -77,18 +60,43 @@ static void wifi_test_task(wifi_test_devs_t *wifi_devs)
                 break;
             }
 
-#define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
-#define HWADDR_ARG(hwaddr) (hwaddr)[0], (hwaddr)[1], (hwaddr)[2], (hwaddr)[3], (hwaddr)[4], (hwaddr)[5]
+            #define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
+            #define HWADDR_ARG(hwaddr) (hwaddr)[0], (hwaddr)[1], (hwaddr)[2], (hwaddr)[3], (hwaddr)[4], (hwaddr)[5]
             rtos_printf("Scan result %d:\n", i);
             rtos_printf("\tBSSID: " HWADDR_FMT "\n", i, HWADDR_ARG(scan_result->ucBSSID));
             rtos_printf("\tSSID: %s\n", scan_result->cSSID);
-            rtos_printf("\tSecurity: %s\n", scan_result->xSecurity == eWiFiSecurityOpen ? "open" :
-                    scan_result->xSecurity == eWiFiSecurityWEP ? "WEP" : "WPA");
+            rtos_printf("\tSecurity: %s\n", scan_result->xSecurity == eWiFiSecurityOpen ? "open" : scan_result->xSecurity == eWiFiSecurityWEP ? "WEP" : "WPA");
             rtos_printf("\tChannel: %d\n", (int) scan_result->cChannel);
             rtos_printf("\tStrength: %d dBm\n\n", (int) scan_result->cRSSI);
 
             scan_result++;
         }
+    }
+
+    WIFINetworkParams_t network_params = {
+            .pcSSID = "xxxxx",             /**< SSID of the Wi-Fi network to join. */
+            .ucSSIDLength = 15,            /**< SSID length not including NULL termination. */
+            .pcPassword = "xxxxx",         /**< Password needed to join the AP. */
+            .ucPasswordLength = 8,         /**< Password length not including NULL termination. */
+            .xSecurity = eWiFiSecurityWPA, /**< Wi-Fi Security. @see WIFISecurity_t. */
+            .cChannel = 0                  /**< Channel number. */
+    };
+    WIFIReturnCode_t connected;
+
+    connected = WIFI_ConnectAP(&network_params);
+    rtos_printf("WIFI_ConnectAP() returned %x\n", connected);
+    if (connected == eWiFiSuccess) {
+        uint8_t ip[4];
+
+        while (WIFI_GetIP(ip) != eWiFiSuccess) {
+            vTaskDelay(pdMS_TO_TICKS(100));
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        WIFI_GetHostIP("google.com", ip);
+        rtos_printf("google.com has IP address %d.%d.%d.%d\n", ip[0], ip[1], ip[2], ip[3]);
+        WIFI_Ping(ip, 3, 1000);
     }
 
     vTaskDelete(NULL);

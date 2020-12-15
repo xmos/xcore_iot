@@ -294,8 +294,7 @@ sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
           sl_wfx_received_ind_t* ethernet_frame = (sl_wfx_received_ind_t*) event_payload;
           if ( ethernet_frame->body.frame_type == 0 )
           {
-              printf("wf200 received a frame\n");
-//            sl_wfx_host_received_frame_callback( ethernet_frame );
+            sl_wfx_host_received_frame_callback( ethernet_frame );
           }
           break;
         }

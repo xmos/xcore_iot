@@ -1,16 +1,16 @@
 // Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
 
-#define DEBUG_UNIT LIB_SOC_SW_WIFI
+#define DEBUG_UNIT IOT_WIFI
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
 
-//#include "FreeRTOS_IP.h"
-//#include "FreeRTOS_IP_Private.h"
-//#include "FreeRTOS_ARP.h"
-//#include "FreeRTOS_DHCP.h"
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_IP_Private.h"
+#include "FreeRTOS_ARP.h"
+#include "FreeRTOS_DHCP.h"
 
 #include "sl_wfx.h"
 #include "FreeRTOS/sl_wfx_host.h"
@@ -263,7 +263,7 @@ void sl_wfx_disconnect_callback(uint8_t *mac, sl_wfx_disconnected_reason_t reaso
     if( ( bits & SL_WFX_CONNECT ) != 0 )
     {
         rtos_printf("Bringing the FreeRTOS network down\n");
-//        FreeRTOS_NetworkDown();
+        FreeRTOS_NetworkDown();
     }
 }
 
@@ -376,7 +376,7 @@ void sl_wfx_connect_callback( uint8_t *mac, sl_wfx_fmac_status_t status )
              * will likely cause the application to attempt to reconnect.
              */
             rtos_printf("Bringing the FreeRTOS network down\n");
-//            FreeRTOS_NetworkDown();
+            FreeRTOS_NetworkDown();
         }
 
         xEventGroupSetBits( sl_wfx_event_group, SL_WFX_CONNECT_FAIL );
@@ -757,16 +757,16 @@ WIFIReturnCode_t WIFI_NetworkDelete( uint16_t usIndex )
 #endif
 }
 
-#if 0
+#if ( ipconfigSUPPORT_OUTGOING_PINGS == 1 )
 __attribute__((weak))
 void vApplicationPingReplyHook(ePingReplyStatus_t eStatus, uint16_t usIdentifier)
 {
-#if LIB_SOC_HAS_SW_DHCPD
-    if (eStatus == eSuccess) {
-        dhcpcd_ping_reply_received( usIdentifier );
-        xQueueOverwrite(ping_reply_queue, &usIdentifier);
-    }
-#endif
+	if (eStatus == eSuccess) {
+		#if LIB_SOC_HAS_SW_DHCPD
+			dhcpd_ping_reply_received( usIdentifier );
+		#endif
+		xQueueOverwrite(ping_reply_queue, &usIdentifier);
+	}
 }
 
 WIFIReturnCode_t WIFI_Ping( uint8_t *pucIPAddr,
@@ -828,6 +828,7 @@ WIFIReturnCode_t WIFI_Ping( uint8_t *pucIPAddr,
 
     return good > 0 ? eWiFiSuccess : eWiFiFailure;
 }
+#endif
 
 WIFIReturnCode_t WIFI_GetIP( uint8_t *pucIPAddr )
 {
@@ -843,7 +844,6 @@ WIFIReturnCode_t WIFI_GetIP( uint8_t *pucIPAddr )
     }
     return ret;
 }
-#endif
 
 WIFIReturnCode_t WIFI_GetMAC( uint8_t *pucMac )
 {
@@ -873,7 +873,6 @@ WIFIReturnCode_t WIFI_GetMAC( uint8_t *pucMac )
     return ret;
 }
 
-#if 0
 WIFIReturnCode_t WIFI_GetHostIP( char *pcHost,
                                  uint8_t *pucIPAddr )
 {
@@ -891,7 +890,6 @@ WIFIReturnCode_t WIFI_GetHostIP( char *pcHost,
 
     return ret;
 }
-#endif
 
 static WIFIScanResult_t *scan_results;
 static uint8_t scan_result_max_count;
@@ -952,7 +950,7 @@ void sl_wfx_scan_result_callback( sl_wfx_scan_result_ind_body_t *scan_result )
 
 void sl_wfx_scan_complete_callback( sl_wfx_fmac_status_t status )
 {
-  xEventGroupSetBits( sl_wfx_event_group, SL_WFX_SCAN_COMPLETE );
+	xEventGroupSetBits( sl_wfx_event_group, SL_WFX_SCAN_COMPLETE );
 }
 
 static const sl_wfx_ssid_def_t *scan_search_list;
@@ -1072,7 +1070,7 @@ void sl_wfx_start_ap_callback(sl_wfx_fmac_status_t status)
              * will likely cause the application to attempt to restart the soft AP.
              */
             rtos_printf("Bringing the FreeRTOS network down\n");
-//            FreeRTOS_NetworkDown();
+            FreeRTOS_NetworkDown();
         }
 
         xEventGroupSetBits( sl_wfx_event_group, SL_WFX_START_AP_FAIL );
@@ -1180,7 +1178,7 @@ void sl_wfx_stop_ap_callback(void)
     if( ( bits & SL_WFX_START_AP ) != 0 )
     {
         rtos_printf("Bringing the FreeRTOS network down\n");
-//        FreeRTOS_NetworkDown();
+        FreeRTOS_NetworkDown();
     }
 }
 
@@ -1321,7 +1319,6 @@ BaseType_t WIFI_IsConnected( void )
     return ret;
 }
 
-#if 0
 int WIFI_DHCPHook( int eDHCPPhase,
                    uint32_t ulIPAddress )
 {
@@ -1352,7 +1349,6 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 {
     return WIFI_DHCPHook( eDHCPPhase, ulIPAddress );
 }
-#endif
 
 /**************************************************************************//**
  * Callback for client connect to AP

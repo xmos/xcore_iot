@@ -104,6 +104,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>rtos/FreeRTOS/portable</name>
+			<type>2</type>
+			<locationURI>MODULES_ROOT/rtos/FreeRTOS/FreeRTOS-Plus/portable</locationURI>
+		</link>
+		<link>
 			<name>rtos/FreeRTOS/kernel/FreeRTOS</name>
 			<type>2</type>
 			<locationURI>MODULES_ROOT/rtos/FreeRTOS/FreeRTOS-Plus/FreeRTOS/FreeRTOS/Source</locationURI>

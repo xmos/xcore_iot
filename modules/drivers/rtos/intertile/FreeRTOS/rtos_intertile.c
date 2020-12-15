@@ -33,8 +33,6 @@ void rtos_intertile_tx(
         void *msg,
         uint32_t len)
 {
-    transacting_chanend_t tc;
-
     xSemaphoreTake(ctx->lock, portMAX_DELAY);
 
     s_chan_out_byte(ctx->c, port); //to the ISR
