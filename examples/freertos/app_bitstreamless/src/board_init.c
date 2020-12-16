@@ -150,6 +150,11 @@ void board_tile0_init(
 
             1, /* Enable quad page programming */
             QSPI_IO_BYTE_TO_MOSI(0x38), /* The quad page program command */
+
+            QSPI_IO_BYTE_TO_MOSI(0x05),  /* The quad enable register read command */
+            QSPI_IO_BYTE_TO_MOSI(0x01),  /* The quad enable register write command */
+            0x40,                        /* quad_enable_bitmask */
+
             256, /* page size is 256 bytes */
             16384); /* the flash has 16384 pages */
 

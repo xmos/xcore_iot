@@ -34,6 +34,9 @@ struct rtos_qspi_flash_struct {
 
     qspi_flash_ctx_t ctx;
 
+    uint32_t quad_enable_register_read_cmd;
+    uint32_t quad_enable_register_write_cmd;
+    uint32_t quad_enable_bitmask;
     size_t page_size;
     size_t flash_size;
     uint32_t page_address_mask;
@@ -106,6 +109,9 @@ void rtos_qspi_flash_init(
         uint32_t spi_read_sio_pad_delay,
         int quad_page_program_enable,
         uint32_t quad_page_program_cmd,
+        uint32_t quad_enable_register_read_cmd,
+        uint32_t quad_enable_register_write_cmd,
+        uint32_t quad_enable_bitmask,
         size_t page_size,
         size_t page_count);
 

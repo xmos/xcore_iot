@@ -212,11 +212,41 @@ typedef struct {
     size_t len;
     unsigned priority;
     TaskHandle_t requesting_task;
-} qspi_flash_prgm_op_req_t;
+} qspi_flash_op_req_t;
+
+static enable_quad_mode(rtos_qspi_flash_t *ctx)
+{
+    uint8_t status;
+
+    interrupt_mask_all();
+    qspi_flash_read_register(&ctx->ctx, ctx->quad_enable_register_read_cmd, &status, sizeof(status));
+    interrupt_unmask_all();
+
+    if ((status & ctx->quad_enable_bitmask) == 0) {
+        status |= ctx->quad_enable_bitmask;
+        interrupt_mask_all();
+        qspi_flash_write_enable(&ctx->ctx);
+        interrupt_unmask_all();
+        interrupt_mask_all();
+        qspi_flash_write_register(&ctx->ctx, ctx->quad_enable_register_write_cmd, &status, 1);
+        interrupt_unmask_all();
+        while_busy(&ctx->ctx);
+
+        interrupt_mask_all();
+        qspi_flash_read_register(&ctx->ctx, ctx->quad_enable_register_read_cmd, &status, sizeof(status));
+        interrupt_unmask_all();
+        xassert((status & ctx->quad_enable_bitmask) != 0);
+    }
+}
 
 static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
 {
-    qspi_flash_prgm_op_req_t op;
+    qspi_flash_op_req_t op;
+
+    /*
+     * Before entering the main loop, ensure the flash is in quad mode
+     */
+    enable_quad_mode(ctx);
 
     for (;;) {
         xQueueReceive(ctx->op_queue, &op, portMAX_DELAY);
@@ -251,7 +281,7 @@ static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
 
 static void request(
         rtos_qspi_flash_t *ctx,
-        qspi_flash_prgm_op_req_t *op)
+        qspi_flash_op_req_t *op)
 {
     xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
 
@@ -282,7 +312,7 @@ static void qspi_flash_local_read(
         unsigned address,
         size_t len)
 {
-    qspi_flash_prgm_op_req_t op = {
+    qspi_flash_op_req_t op = {
             .op = FLASH_PRGM_OP_READ,
             .data = data,
             .address = address,
@@ -307,7 +337,7 @@ static void qspi_flash_local_write(
         unsigned address,
         size_t len)
 {
-    qspi_flash_prgm_op_req_t op = {
+    qspi_flash_op_req_t op = {
             .op = FLASH_PRGM_OP_WRITE,
             .address = address,
             .len = len
@@ -325,7 +355,7 @@ static void qspi_flash_local_erase(
         unsigned address,
         size_t len)
 {
-    qspi_flash_prgm_op_req_t op = {
+    qspi_flash_op_req_t op = {
             .op = FLASH_PRGM_OP_ERASE,
             .address = address,
             .len = len
@@ -340,7 +370,7 @@ void rtos_qspi_flash_start(
 {
     ctx->mutex = xSemaphoreCreateRecursiveMutex();
 
-    ctx->op_queue = xQueueCreate(2, sizeof(qspi_flash_prgm_op_req_t));
+    ctx->op_queue = xQueueCreate(2, sizeof(qspi_flash_op_req_t));
 
     ctx->op_task_priority = priority;
     xTaskCreate(
@@ -373,6 +403,9 @@ void rtos_qspi_flash_init(
         uint32_t spi_read_sio_pad_delay,
         int quad_page_program_enable,
         uint32_t quad_page_program_cmd,
+        uint32_t quad_enable_register_read_cmd,
+        uint32_t quad_enable_register_write_cmd,
+        uint32_t quad_enable_bitmask,
         size_t page_size,
         size_t page_count)
 {
@@ -399,6 +432,9 @@ void rtos_qspi_flash_init(
 
     qspi_flash_init(qspi_flash_ctx);
 
+    ctx->quad_enable_register_read_cmd = quad_enable_register_read_cmd;
+    ctx->quad_enable_register_write_cmd = quad_enable_register_write_cmd;
+    ctx->quad_enable_bitmask = quad_enable_bitmask;
     ctx->page_size = page_size;
     ctx->flash_size = page_size * page_count;
     ctx->page_address_mask = page_size - 1;
