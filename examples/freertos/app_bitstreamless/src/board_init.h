@@ -19,7 +19,7 @@
 #define I2S_RPC_ENABLED 1
 #define GPIO_RPC_ENABLED 1
 #define SPI_RPC_ENABLED 1
-#define QSPI_FLASH_RPC_ENABLED 0
+#define QSPI_FLASH_RPC_ENABLED 1
 
 void board_tile0_init(
         chanend_t tile1,

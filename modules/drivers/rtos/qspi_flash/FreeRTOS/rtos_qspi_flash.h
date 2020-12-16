@@ -88,6 +88,12 @@ inline void rtos_qspi_flash_erase(
     ctx->erase(ctx, address, len);
 }
 
+inline size_t rtos_qspi_flash_size_get(
+        rtos_qspi_flash_t *qspi_flash_ctx)
+{
+    return qspi_flash_ctx->flash_size;
+}
+
 void rtos_qspi_flash_start(
         rtos_qspi_flash_t *qspi_flash_ctx,
         unsigned priority);

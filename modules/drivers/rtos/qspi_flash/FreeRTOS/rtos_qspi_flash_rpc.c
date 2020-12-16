@@ -1,195 +1,259 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
-#if 0
+
+#include <string.h>
+#include <xcore/assert.h>
+
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+
 #include "drivers/rtos/rpc/api/rtos_rpc.h"
 
-#include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
+#include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
 
 enum {
-    fcode_transaction_start,
-    fcode_transfer,
-    fcode_delay_before_next_transfer,
-    fcode_transaction_end,
+    fcode_lock,
+    fcode_unlock,
+    fcode_read,
+    fcode_write,
+    fcode_erase,
 };
 
-__attribute__((fptrgroup("rtos_spi_master_transaction_start_fptr_grp")))
-static void spi_master_remote_transaction_start(
-        rtos_spi_master_device_t *dev_ctx)
+__attribute__((fptrgroup("rtos_qspi_flash_lock_fptr_grp")))
+static void qspi_flash_remote_lock(
+        rtos_qspi_flash_t *ctx)
 {
-    rtos_spi_master_t *bus_ctx = dev_ctx->bus_ctx;
-    rtos_intertile_address_t *host_address = &bus_ctx->rpc_config->host_address;
-    rtos_spi_master_device_t *host_dev_ctx_ptr = dev_ctx->host_dev_ctx_ptr;
+    rtos_intertile_address_t *host_address = &ctx->rpc_config->host_address;
+    rtos_qspi_flash_t *host_ctx_ptr = ctx->rpc_config->host_ctx_ptr;
 
     xassert(host_address->port >= 0);
 
     const rpc_param_desc_t rpc_param_desc[] = {
-            RPC_PARAM_TYPE(dev_ctx),
+            RPC_PARAM_TYPE(ctx),
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTake(bus_ctx->lock, portMAX_DELAY);
+    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
 
     rpc_client_call_generic(
-            host_address->intertile_ctx, host_address->port, fcode_transaction_start, rpc_param_desc,
-            &host_dev_ctx_ptr);
+            host_address->intertile_ctx, host_address->port, fcode_lock, rpc_param_desc,
+            &host_ctx_ptr);
 }
 
-__attribute__((fptrgroup("rtos_spi_master_transfer_fptr_grp")))
-static void spi_master_remote_transfer(
-        rtos_spi_master_device_t *dev_ctx,
-        uint8_t *data_out,
-        uint8_t *data_in,
-        size_t len)
+__attribute__((fptrgroup("rtos_qspi_flash_unlock_fptr_grp")))
+static void qspi_flash_remote_unlock(
+        rtos_qspi_flash_t *ctx)
 {
-    rtos_spi_master_t *bus_ctx = dev_ctx->bus_ctx;
-    rtos_intertile_address_t *host_address = &bus_ctx->rpc_config->host_address;
-    rtos_spi_master_device_t *host_dev_ctx_ptr = dev_ctx->host_dev_ctx_ptr;
+    rtos_intertile_address_t *host_address = &ctx->rpc_config->host_address;
+    rtos_qspi_flash_t *host_ctx_ptr = ctx->rpc_config->host_ctx_ptr;
 
     xassert(host_address->port >= 0);
 
     const rpc_param_desc_t rpc_param_desc[] = {
-            RPC_PARAM_TYPE(dev_ctx),
-            RPC_PARAM_IN_BUFFER(data_out, data_out != NULL ? len : 0),
-            RPC_PARAM_OUT_BUFFER(data_in, data_in != NULL ? len : 0),
+            RPC_PARAM_TYPE(ctx),
+            RPC_PARAM_LIST_END
+    };
+
+    rpc_client_call_generic(
+            host_address->intertile_ctx, host_address->port, fcode_unlock, rpc_param_desc,
+            &host_ctx_ptr);
+
+    xSemaphoreGiveRecursive(ctx->mutex);
+}
+
+__attribute__((fptrgroup("rtos_qspi_flash_read_fptr_grp")))
+static void qspi_flash_remote_read(
+        rtos_qspi_flash_t *ctx,
+        uint8_t *data,
+        unsigned address,
+        size_t len)
+{
+    rtos_intertile_address_t *host_address = &ctx->rpc_config->host_address;
+    rtos_qspi_flash_t *host_ctx_ptr = ctx->rpc_config->host_ctx_ptr;
+
+    xassert(host_address->port >= 0);
+
+    const rpc_param_desc_t rpc_param_desc[] = {
+            RPC_PARAM_TYPE(ctx),
+            RPC_PARAM_OUT_BUFFER(data, len),
+            RPC_PARAM_TYPE(address),
             RPC_PARAM_TYPE(len),
             RPC_PARAM_LIST_END
     };
 
+    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+
     rpc_client_call_generic(
-            host_address->intertile_ctx, host_address->port, fcode_transfer, rpc_param_desc,
-            &host_dev_ctx_ptr, data_out, data_in, &len);
+            host_address->intertile_ctx, host_address->port, fcode_read, rpc_param_desc,
+            &host_ctx_ptr, data, &address, &len);
+
+    xSemaphoreGiveRecursive(ctx->mutex);
 }
 
-__attribute__((fptrgroup("rtos_spi_master_delay_before_next_transfer_fptr_grp")))
-static void spi_master_remote_delay_before_next_transfer(
-        rtos_spi_master_device_t *dev_ctx,
-        uint32_t delay_ticks)
+__attribute__((fptrgroup("rtos_qspi_flash_write_fptr_grp")))
+static void qspi_flash_remote_write(
+        rtos_qspi_flash_t *ctx,
+        const uint8_t *data,
+        unsigned address,
+        size_t len)
 {
-    rtos_spi_master_t *bus_ctx = dev_ctx->bus_ctx;
-    rtos_intertile_address_t *host_address = &bus_ctx->rpc_config->host_address;
-    rtos_spi_master_device_t *host_dev_ctx_ptr = dev_ctx->host_dev_ctx_ptr;
+    rtos_intertile_address_t *host_address = &ctx->rpc_config->host_address;
+    rtos_qspi_flash_t *host_ctx_ptr = ctx->rpc_config->host_ctx_ptr;
 
     xassert(host_address->port >= 0);
 
     const rpc_param_desc_t rpc_param_desc[] = {
-            RPC_PARAM_TYPE(dev_ctx),
-            RPC_PARAM_TYPE(delay_ticks),
+            RPC_PARAM_TYPE(ctx),
+            RPC_PARAM_IN_BUFFER(data, len),
+            RPC_PARAM_TYPE(address),
+            RPC_PARAM_TYPE(len),
             RPC_PARAM_LIST_END
     };
 
+    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+
     rpc_client_call_generic(
-            host_address->intertile_ctx, host_address->port, fcode_delay_before_next_transfer, rpc_param_desc,
-            &host_dev_ctx_ptr, &delay_ticks);
+            host_address->intertile_ctx, host_address->port, fcode_write, rpc_param_desc,
+            &host_ctx_ptr, data, &address, &len);
+
+    xSemaphoreGiveRecursive(ctx->mutex);
 }
 
-__attribute__((fptrgroup("rtos_spi_master_transaction_end_fptr_grp")))
-static void spi_master_remote_transaction_end(
-        rtos_spi_master_device_t *dev_ctx)
+__attribute__((fptrgroup("rtos_qspi_flash_erase_fptr_grp")))
+static void qspi_flash_remote_erase(
+        rtos_qspi_flash_t *ctx,
+        unsigned address,
+        size_t len)
 {
-    rtos_spi_master_t *bus_ctx = dev_ctx->bus_ctx;
-    rtos_intertile_address_t *host_address = &bus_ctx->rpc_config->host_address;
-    rtos_spi_master_device_t *host_dev_ctx_ptr = dev_ctx->host_dev_ctx_ptr;
+    rtos_intertile_address_t *host_address = &ctx->rpc_config->host_address;
+    rtos_qspi_flash_t *host_ctx_ptr = ctx->rpc_config->host_ctx_ptr;
 
     xassert(host_address->port >= 0);
 
     const rpc_param_desc_t rpc_param_desc[] = {
-            RPC_PARAM_TYPE(dev_ctx),
+            RPC_PARAM_TYPE(ctx),
+            RPC_PARAM_TYPE(address),
+            RPC_PARAM_TYPE(len),
             RPC_PARAM_LIST_END
     };
 
-    rpc_client_call_generic(
-            host_address->intertile_ctx, host_address->port, fcode_transaction_end, rpc_param_desc,
-            &host_dev_ctx_ptr);
+    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
 
-    xSemaphoreGive(bus_ctx->lock);
+    rpc_client_call_generic(
+            host_address->intertile_ctx, host_address->port, fcode_erase, rpc_param_desc,
+            &host_ctx_ptr, &address, &len);
+
+    xSemaphoreGiveRecursive(ctx->mutex);
 }
 
-static int spi_transaction_start_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+static int qspi_flash_lock_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 {
     int msg_length;
 
-    rtos_spi_master_device_t *dev_ctx;
+    rtos_qspi_flash_t *ctx;
 
     rpc_request_unmarshall(
             rpc_msg,
-            &dev_ctx);
+            &ctx);
 
-    rtos_spi_master_transaction_start(dev_ctx);
+    rtos_qspi_flash_lock(ctx);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
-            dev_ctx);
+            ctx);
 
     return msg_length;
 }
 
-static int spi_transfer_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+static int qspi_flash_unlock_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 {
     int msg_length;
 
-    rtos_spi_master_device_t *dev_ctx;
-    uint8_t *data_out;
-    uint8_t *data_in;
+    rtos_qspi_flash_t *ctx;
+
+    rpc_request_unmarshall(
+            rpc_msg,
+            &ctx);
+
+    rtos_qspi_flash_unlock(ctx);
+
+    msg_length = rpc_response_marshall(
+            resp_msg, rpc_msg,
+            ctx);
+
+    return msg_length;
+}
+
+static int qspi_flash_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+{
+    int msg_length;
+
+    rtos_qspi_flash_t *ctx;
+    uint8_t *data;
+    unsigned address;
     size_t len;
 
     rpc_request_unmarshall(
             rpc_msg,
-            &dev_ctx, &data_out, &data_in, &len);
+            &ctx, &data, &address, &len);
 
-    if (data_in != NULL) {
-        data_in = pvPortMalloc(len);
-    }
+    data = pvPortMalloc(len);
 
-    rtos_spi_master_transfer(dev_ctx, data_out, data_in, len);
+    rtos_qspi_flash_read(ctx, data, address, len);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
-            dev_ctx, data_out, data_in, len);
+            ctx, data, address, len);
 
-    vPortFree(data_in);
+    vPortFree(data);
 
     return msg_length;
 }
 
-static int spi_delay_before_next_transfer_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+static int qspi_flash_write_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 {
     int msg_length;
 
-    rtos_spi_master_device_t *dev_ctx;
-    uint32_t delay_ticks;
+    rtos_qspi_flash_t *ctx;
+    uint8_t *data;
+    unsigned address;
+    size_t len;
 
     rpc_request_unmarshall(
             rpc_msg,
-            &dev_ctx, &delay_ticks);
+            &ctx, &data, &address, &len);
 
-    rtos_spi_master_delay_before_next_transfer(dev_ctx, delay_ticks);
+    rtos_qspi_flash_write(ctx, data, address, len);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
-            dev_ctx, delay_ticks);
+            ctx, data, address, len);
 
     return msg_length;
 }
 
-static int spi_transaction_end_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+static int qspi_flash_erase_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 {
     int msg_length;
 
-    rtos_spi_master_device_t *dev_ctx;
+    rtos_qspi_flash_t *ctx;
+    unsigned address;
+    size_t len;
 
     rpc_request_unmarshall(
             rpc_msg,
-            &dev_ctx);
+            &ctx, &address, &len);
 
-    rtos_spi_master_transaction_end(dev_ctx);
+    rtos_qspi_flash_erase(ctx, address, len);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
-            dev_ctx);
+            ctx, address, len);
 
     return msg_length;
 }
 
-static void spi_master_rpc_thread(rtos_intertile_address_t *client_address)
+static void qspi_flash_rpc_thread(rtos_intertile_address_t *client_address)
 {
     int msg_length;
     uint8_t *req_msg;
@@ -205,17 +269,20 @@ static void spi_master_rpc_thread(rtos_intertile_address_t *client_address)
         rpc_request_parse(&rpc_msg, req_msg);
 
         switch (rpc_msg.fcode) {
-        case fcode_transaction_start:
-            msg_length = spi_transaction_start_rpc_host(&rpc_msg, &resp_msg);
+        case fcode_lock:
+            msg_length = qspi_flash_lock_rpc_host(&rpc_msg, &resp_msg);
             break;
-        case fcode_transfer:
-            msg_length = spi_transfer_rpc_host(&rpc_msg, &resp_msg);
+        case fcode_unlock:
+            msg_length = qspi_flash_unlock_rpc_host(&rpc_msg, &resp_msg);
             break;
-        case fcode_delay_before_next_transfer:
-            msg_length = spi_delay_before_next_transfer_rpc_host(&rpc_msg, &resp_msg);
+        case fcode_read:
+            msg_length = qspi_flash_read_rpc_host(&rpc_msg, &resp_msg);
             break;
-        case fcode_transaction_end:
-            msg_length = spi_transaction_end_rpc_host(&rpc_msg, &resp_msg);
+        case fcode_write:
+            msg_length = qspi_flash_write_rpc_host(&rpc_msg, &resp_msg);
+            break;
+        case fcode_erase:
+            msg_length = qspi_flash_erase_rpc_host(&rpc_msg, &resp_msg);
             break;
         }
 
@@ -228,7 +295,7 @@ static void spi_master_rpc_thread(rtos_intertile_address_t *client_address)
 }
 
 __attribute__((fptrgroup("rtos_driver_rpc_host_start_fptr_grp")))
-static void spi_master_rpc_start(
+static void qspi_flash_rpc_start(
         rtos_driver_rpc_t *rpc_config)
 {
     xassert(rpc_config->host_task_priority >= 0);
@@ -240,27 +307,27 @@ static void spi_master_rpc_start(
         xassert(client_address->port >= 0);
 
         xTaskCreate(
-                    (TaskFunction_t) spi_master_rpc_thread,
-                    "spi_master_rpc_thread",
-                    RTOS_THREAD_STACK_SIZE(spi_master_rpc_thread),
+                    (TaskFunction_t) qspi_flash_rpc_thread,
+                    "qspi_flash_rpc_thread",
+                    RTOS_THREAD_STACK_SIZE(qspi_flash_rpc_thread),
                     client_address,
                     rpc_config->host_task_priority,
                     NULL);
     }
 }
 
-void rtos_spi_master_rpc_config(
-        rtos_spi_master_t *spi_master_ctx,
+void rtos_qspi_flash_rpc_config(
+        rtos_qspi_flash_t *qspi_flash_ctx,
         unsigned intertile_port,
         unsigned host_task_priority)
 {
-    rtos_driver_rpc_t *rpc_config = spi_master_ctx->rpc_config;
+    rtos_driver_rpc_t *rpc_config = qspi_flash_ctx->rpc_config;
 
     if (rpc_config->remote_client_count == 0) {
         /* This is a client */
         rpc_config->host_address.port = intertile_port;
 
-        spi_master_ctx->lock = xSemaphoreCreateMutex();
+        qspi_flash_ctx->mutex = xSemaphoreCreateMutex();
 
     } else {
         for (int i = 0; i < rpc_config->remote_client_count; i++) {
@@ -270,59 +337,48 @@ void rtos_spi_master_rpc_config(
     }
 }
 
-void rtos_spi_master_rpc_client_init(
-        rtos_spi_master_t *spi_master_ctx,
-        rtos_spi_master_device_t *spi_device_ctx[],
-        size_t spi_device_count,
+void rtos_qspi_flash_rpc_client_init(
+        rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_driver_rpc_t *rpc_config,
         rtos_intertile_t *host_intertile_ctx)
 {
-    spi_master_ctx->rpc_config = rpc_config;
-    spi_master_ctx->transaction_start = spi_master_remote_transaction_start;
-    spi_master_ctx->transfer = spi_master_remote_transfer;
-    spi_master_ctx->delay_before_next_transfer = spi_master_remote_delay_before_next_transfer;
-    spi_master_ctx->transaction_end = spi_master_remote_transaction_end;
+    qspi_flash_ctx->rpc_config = rpc_config;
+    qspi_flash_ctx->lock = qspi_flash_remote_lock;
+    qspi_flash_ctx->unlock = qspi_flash_remote_unlock;
+    qspi_flash_ctx->read = qspi_flash_remote_read;
+    qspi_flash_ctx->write = qspi_flash_remote_write;
+    qspi_flash_ctx->erase = qspi_flash_remote_erase;
     rpc_config->rpc_host_start = NULL;
     rpc_config->remote_client_count = 0;
     rpc_config->host_task_priority = -1;
 
-    /* This must be configured later with rtos_spi_master_rpc_config() */
+    /* This must be configured later with rtos_qspi_flash_rpc_config() */
     rpc_config->host_address.port = -1;
 
     rpc_config->host_address.intertile_ctx = host_intertile_ctx;
     rpc_config->host_ctx_ptr = (void *) s_chan_in_word(host_intertile_ctx->c);
-
-    for (int i = 0; i < spi_device_count; i++) {
-        spi_device_ctx[i]->bus_ctx = spi_master_ctx;
-        spi_device_ctx[i]->host_dev_ctx_ptr = (void *) s_chan_in_word(host_intertile_ctx->c);
-    }
+    qspi_flash_ctx->flash_size = s_chan_in_word(host_intertile_ctx->c);
 }
 
-void rtos_spi_master_rpc_host_init(
-        rtos_spi_master_t *spi_master_ctx,
-        rtos_spi_master_device_t *spi_device_ctx[],
-        size_t spi_device_count,
+void rtos_qspi_flash_rpc_host_init(
+        rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_driver_rpc_t *rpc_config,
         rtos_intertile_t *client_intertile_ctx[],
         size_t remote_client_count)
 {
-    spi_master_ctx->rpc_config = rpc_config;
-    rpc_config->rpc_host_start = spi_master_rpc_start;
+    qspi_flash_ctx->rpc_config = rpc_config;
+    rpc_config->rpc_host_start = qspi_flash_rpc_start;
     rpc_config->remote_client_count = remote_client_count;
 
-    /* This must be configured later with rtos_spi_master_rpc_config() */
+    /* This must be configured later with rtos_qspi_flash_rpc_config() */
     rpc_config->host_task_priority = -1;
 
     for (int i = 0; i < remote_client_count; i++) {
         rpc_config->client_address[i].intertile_ctx = client_intertile_ctx[i];
-        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) spi_master_ctx);
+        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) qspi_flash_ctx);
+        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) qspi_flash_ctx->flash_size);
 
-        for (int j = 0; j < spi_device_count; j++) {
-            s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) spi_device_ctx[i]);
-        }
-
-        /* This must be configured later with rtos_spi_master_rpc_config() */
+        /* This must be configured later with rtos_qspi_flash_rpc_config() */
         rpc_config->client_address[i].port = -1;
     }
 }
-#endif

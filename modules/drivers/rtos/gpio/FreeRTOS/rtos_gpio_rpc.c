@@ -1,15 +1,5 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
-/*
- * Note, it is not safe for any of GPIO calls to be made from an ISR
- * when doing RPC. Consider just not allowing the local GPIO calls from
- * ISRs either and take a mutex around them to prevent the resource
- * dependency exception. Using a deferred interrupt handler can be the
- * workaround. Acknowledge that using the lib_xcore port functions directly
- * will always be much faster and are allowed from interrupts, but that they
- * must be used with care.
- */
-
 #include <string.h>
 #include <xcore/triggerable.h>
 #include <xcore/assert.h>

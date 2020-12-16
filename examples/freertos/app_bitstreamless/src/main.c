@@ -22,7 +22,7 @@
 #define PIPELINE_TILE 0
 #define GPIO_TILE 0
 #define SPI_TILE 1
-#define QSPI_FLASH_TILE 0
+#define QSPI_FLASH_TILE 1
 
 #if RPC_TEST
 #include "rpc_test/rpc_test.h"
@@ -128,6 +128,9 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
 #define SPI_RPC_PORT 13
 #define SPI_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
+#define QSPI_RPC_PORT 14
+#define QSPI_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2 - 1)
+
 void vApplicationDaemonTaskStartup(void *arg)
 {
     uint32_t dac_configured;
@@ -153,6 +156,9 @@ void vApplicationDaemonTaskStartup(void *arg)
 #endif
 #if SPI_RPC_ENABLED
     rtos_spi_master_rpc_config(spi_master_ctx, SPI_RPC_PORT, SPI_RPC_HOST_TASK_PRIORITY);
+#endif
+#if QSPI_FLASH_RPC_ENABLED
+    rtos_qspi_flash_rpc_config(qspi_flash_ctx, QSPI_RPC_PORT, QSPI_RPC_HOST_TASK_PRIORITY);
 #endif
 
     #if ON_TILE(0)
@@ -287,7 +293,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 
         if (erase) {
             rtos_printf("Starting chip erase\n");
-            rtos_qspi_flash_erase(qspi_flash_ctx, 0, qspi_flash_ctx->flash_size);
+            rtos_qspi_flash_erase(qspi_flash_ctx, 0, rtos_qspi_flash_size_get(qspi_flash_ctx));
         }
         rtos_qspi_flash_unlock(qspi_flash_ctx);
     }

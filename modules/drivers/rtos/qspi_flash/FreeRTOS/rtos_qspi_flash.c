@@ -214,7 +214,7 @@ typedef struct {
     TaskHandle_t requesting_task;
 } qspi_flash_op_req_t;
 
-static enable_quad_mode(rtos_qspi_flash_t *ctx)
+static void enable_quad_mode(rtos_qspi_flash_t *ctx)
 {
     uint8_t status;
 
