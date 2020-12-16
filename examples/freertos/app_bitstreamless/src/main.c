@@ -273,6 +273,7 @@ void vApplicationDaemonTaskStartup(void *arg)
             rtos_printf("First read appears empty\n");
         }
 
+        rtos_qspi_flash_lock(qspi_flash_ctx);
         rtos_qspi_flash_erase(qspi_flash_ctx, 0, len);
         rtos_qspi_flash_write(qspi_flash_ctx, "hello, world\n", 0, len);
         rtos_qspi_flash_read(qspi_flash_ctx, data, 0, len);
@@ -287,8 +288,8 @@ void vApplicationDaemonTaskStartup(void *arg)
         if (erase) {
             rtos_printf("Starting chip erase\n");
             rtos_qspi_flash_erase(qspi_flash_ctx, 0, qspi_flash_ctx->flash_size);
-            rtos_printf("Chip erase complete\n");
         }
+        rtos_qspi_flash_unlock(qspi_flash_ctx);
     }
     #endif
 

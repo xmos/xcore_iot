@@ -7,53 +7,17 @@
 
 #include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
 
-//typedef struct {
-//    rtos_spi_master_device_t *ctx;
-//    uint8_t *data_out;
-//    uint8_t *data_in;
-//    size_t len;
-//    TaskHandle_t req_task;
-//} spi_xfer_req_t;
+#define FLASH_PRGM_OP_READ 0
+#define FLASH_PRGM_OP_WRITE 1
+#define FLASH_PRGM_OP_ERASE 2
 
-//static void spi_xfer_thread(rtos_spi_master_t *ctx)
-//{
-//    spi_xfer_req_t req;
-//
-//    for (;;) {
-//        xQueueReceive(ctx->xfer_req_queue, &req, portMAX_DELAY);
-//
-//        /*
-//         * It would be nicer if spi_master_transfer() could handle being
-//         * interrupted. At the moment it doesn't seem possible. This is
-//         * the safest thing to do.
-//         */
-//        interrupt_mask_all();
-//
-//        spi_master_transfer(&req.ctx->dev_ctx,
-//                req.data_out,
-//                req.data_in,
-//                req.len);
-//
-//        interrupt_unmask_all();
-//
-//        if (req.data_in != NULL) {
-//            xTaskNotify(req.req_task, 0, eNoAction);
-//        } else {
-//            vPortFree(req.data_out);
-//        }
-//    }
-//}
-
-__attribute__((fptrgroup("rtos_qspi_flash_read_fptr_grp")))
-static void qspi_flash_local_read(
+static void read_op(
         rtos_qspi_flash_t *ctx,
         uint8_t *data,
         unsigned address,
         size_t len)
 {
     qspi_flash_ctx_t *qspi_flash_ctx = &ctx->ctx;
-
-    xSemaphoreTakeRecursive(ctx->lock, portMAX_DELAY);
 
     rtos_printf("Asked to read %d bytes at address 0x%08x\n", len, address);
 
@@ -81,8 +45,6 @@ static void qspi_flash_local_read(
     interrupt_mask_all();
     qspi_flash_read(qspi_flash_ctx, data, address, len);
     interrupt_unmask_all();
-
-    xSemaphoreGiveRecursive(ctx->lock);
 }
 
 static void while_busy(qspi_flash_ctx_t *ctx)
@@ -96,16 +58,13 @@ static void while_busy(qspi_flash_ctx_t *ctx)
     } while (status & QSPI_FLASH_STATUS_REG_WIP_BM);
 }
 
-__attribute__((fptrgroup("rtos_qspi_flash_write_fptr_grp")))
-static void qspi_flash_local_write(
+static void write_op(
         rtos_qspi_flash_t *ctx,
         const uint8_t *data,
         unsigned address,
         size_t len)
 {
     qspi_flash_ctx_t *qspi_flash_ctx = &ctx->ctx;
-
-    xSemaphoreTakeRecursive(ctx->lock, portMAX_DELAY);
 
     size_t bytes_left_to_write = len;
     unsigned address_to_write = address;
@@ -135,8 +94,6 @@ static void qspi_flash_local_write(
         write_buf += bytes_to_write;
         address_to_write += bytes_to_write;
     }
-
-    xSemaphoreGiveRecursive(ctx->lock);
 }
 
 #define SECTORS_TO_BYTES(s, ss) ((s) * (ss))
@@ -150,15 +107,12 @@ static void qspi_flash_local_write(
 #define ERASE_SIZE_64K 65536
 static const int erase_sizes[] = {ERASE_SIZE_4K, ERASE_SIZE_32K, ERASE_SIZE_64K};
 
-__attribute__((fptrgroup("rtos_qspi_flash_erase_fptr_grp")))
-static void qspi_flash_local_erase(
+static void erase_op(
         rtos_qspi_flash_t *ctx,
         unsigned address,
         size_t len)
 {
     qspi_flash_ctx_t *qspi_flash_ctx = &ctx->ctx;
-
-    xSemaphoreTakeRecursive(ctx->lock, portMAX_DELAY);
 
     size_t bytes_left_to_erase = len;
     unsigned address_to_erase = address;
@@ -192,7 +146,6 @@ static void qspi_flash_local_erase(
 
         while (bytes_left_to_erase > 0) {
             int erase_length = erase_sizes[0];
-            int sector_address;
             qspi_flash_erase_length_t erase_cmd;
 
             if (address_to_erase >= ctx->flash_size) {
@@ -249,79 +202,154 @@ static void qspi_flash_local_erase(
         }
     }
 
-    xSemaphoreGiveRecursive(ctx->lock);
+    rtos_printf("Erasing complete\n");
 }
 
-#if 0
-__attribute__((fptrgroup("rtos_spi_master_transfer_fptr_grp")))
-static void spi_master_local_transfer(
-        rtos_spi_master_device_t *ctx,
-        uint8_t *data_out,
-        uint8_t *data_in,
+typedef struct {
+    int op;
+    uint8_t *data;
+    unsigned address;
+    size_t len;
+    unsigned priority;
+    TaskHandle_t requesting_task;
+} qspi_flash_prgm_op_req_t;
+
+static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
+{
+    qspi_flash_prgm_op_req_t op;
+
+    for (;;) {
+        xQueueReceive(ctx->op_queue, &op, portMAX_DELAY);
+
+        /*
+         * Inherit the priority of the task that requested this
+         * operation.
+         */
+        vTaskPrioritySet(ctx->op_task, op.priority);
+
+        switch (op.op) {
+        case FLASH_PRGM_OP_READ:
+            read_op(ctx, op.data, op.address, op.len);
+            xTaskNotify(op.requesting_task, 0, eNoAction);
+            break;
+        case FLASH_PRGM_OP_WRITE:
+            write_op(ctx, op.data, op.address, op.len);
+            vPortFree(op.data);
+            break;
+        case FLASH_PRGM_OP_ERASE:
+            erase_op(ctx, op.address, op.len);
+            break;
+
+        }
+
+        /*
+         * Reset back to the priority set by rtos_qspi_flash_start().
+         */
+        vTaskPrioritySet(ctx->op_task, ctx->op_task_priority);
+    }
+}
+
+static void request(
+        rtos_qspi_flash_t *ctx,
+        qspi_flash_prgm_op_req_t *op)
+{
+    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+
+    op->priority = uxTaskPriorityGet(NULL);
+    xQueueSend(ctx->op_queue, op, portMAX_DELAY);
+
+    xSemaphoreGiveRecursive(ctx->mutex);
+}
+
+__attribute__((fptrgroup("rtos_qspi_flash_lock_fptr_grp")))
+static void qspi_flash_local_lock(
+        rtos_qspi_flash_t *ctx)
+{
+    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+}
+
+__attribute__((fptrgroup("rtos_qspi_flash_unlock_fptr_grp")))
+static void qspi_flash_local_unlock(
+        rtos_qspi_flash_t *ctx)
+{
+    xSemaphoreGiveRecursive(ctx->mutex);
+}
+
+__attribute__((fptrgroup("rtos_qspi_flash_read_fptr_grp")))
+static void qspi_flash_local_read(
+        rtos_qspi_flash_t *ctx,
+        uint8_t *data,
+        unsigned address,
         size_t len)
 {
-#if 1
-    interrupt_mask_all();
+    qspi_flash_prgm_op_req_t op = {
+            .op = FLASH_PRGM_OP_READ,
+            .data = data,
+            .address = address,
+            .len = len
+    };
 
-    spi_master_transfer(&ctx->dev_ctx,
-            data_out,
-            data_in,
-            len);
+    op.requesting_task = xTaskGetCurrentTaskHandle();
 
-    interrupt_unmask_all();
-#else
+    request(ctx, &op);
 
-    spi_xfer_req_t req;
-
-    req.ctx = ctx;
-    req.data_in = data_in;
-    req.len = len;
-
-    if (data_in != NULL) {
-        req.data_out = data_out;
-        req.req_task = xTaskGetCurrentTaskHandle();
-    } else {
-        /*
-         * TODO: Consider a zero copy option? Caller would
-         * be required to malloc data_out. Also a no-free
-         * option where the caller knows that data_out will
-         * still be in scope by the time the xfer is done,
-         * for example if this tx only call is followed by
-         * an rx.
-         */
-        req.data_out = pvPortMalloc(len);
-        memcpy(req.data_out, data_out, len);
-        req.req_task = NULL;
-    }
-
-    xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
-
-    if (data_in != NULL) {
-        xTaskNotifyWait(
-                0x00000000UL,    /* Don't clear notification bits on entry */
-                0xFFFFFFFFUL,    /* Reset full notification value on exit */
-                NULL,          /* Pass out notification value into value */
-                portMAX_DELAY ); /* Wait indefinitely until next notification */
-    }
-#endif
+    xTaskNotifyWait(
+            0x00000000UL,    /* Don't clear notification bits on entry */
+            0xFFFFFFFFUL,    /* Reset full notification value on exit */
+            NULL,            /* Don't need the notification value */
+            portMAX_DELAY ); /* Wait indefinitely until the notification */
 }
-#endif
+
+__attribute__((fptrgroup("rtos_qspi_flash_write_fptr_grp")))
+static void qspi_flash_local_write(
+        rtos_qspi_flash_t *ctx,
+        const uint8_t *data,
+        unsigned address,
+        size_t len)
+{
+    qspi_flash_prgm_op_req_t op = {
+            .op = FLASH_PRGM_OP_WRITE,
+            .address = address,
+            .len = len
+    };
+
+    op.data = pvPortMalloc(len);
+    memcpy(op.data, data, len);
+
+    request(ctx, &op);
+}
+
+__attribute__((fptrgroup("rtos_qspi_flash_erase_fptr_grp")))
+static void qspi_flash_local_erase(
+        rtos_qspi_flash_t *ctx,
+        unsigned address,
+        size_t len)
+{
+    qspi_flash_prgm_op_req_t op = {
+            .op = FLASH_PRGM_OP_ERASE,
+            .address = address,
+            .len = len
+    };
+
+    request(ctx, &op);
+}
 
 void rtos_qspi_flash_start(
         rtos_qspi_flash_t *ctx,
         unsigned priority)
 {
-    ctx->lock = xSemaphoreCreateRecursiveMutex();
+    ctx->mutex = xSemaphoreCreateRecursiveMutex();
 
-//    ctx->xfer_req_queue = xQueueCreate(2, sizeof(spi_xfer_req_t));
+    ctx->op_queue = xQueueCreate(2, sizeof(qspi_flash_prgm_op_req_t));
 
-//    xTaskCreate(
-//                (TaskFunction_t) qspi_flash_prgm_thread,
-//                "qspi_flash_prgm_thread",
-//                RTOS_THREAD_STACK_SIZE(qspi_flash_prgm_thread),
-//                ctx,
-//                priority,
-//                NULL);
+    ctx->op_task_priority = priority;
+    xTaskCreate(
+                (TaskFunction_t) qspi_flash_op_thread,
+                "qspi_flash_op_thread",
+                RTOS_THREAD_STACK_SIZE(qspi_flash_op_thread),
+                ctx,
+                priority,
+                &ctx->op_task);
 
     if (ctx->rpc_config != NULL && ctx->rpc_config->rpc_host_start != NULL) {
         ctx->rpc_config->rpc_host_start(ctx->rpc_config);
@@ -382,4 +410,6 @@ void rtos_qspi_flash_init(
     ctx->read = qspi_flash_local_read;
     ctx->write = qspi_flash_local_write;
     ctx->erase = qspi_flash_local_erase;
+    ctx->lock = qspi_flash_local_lock;
+    ctx->unlock = qspi_flash_local_unlock;
 }

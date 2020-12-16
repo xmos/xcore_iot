@@ -26,18 +26,38 @@ struct rtos_qspi_flash_struct {
     __attribute__((fptrgroup("rtos_qspi_flash_erase_fptr_grp")))
     void (*erase)(rtos_qspi_flash_t *, unsigned, size_t);
 
+    __attribute__((fptrgroup("rtos_qspi_flash_lock_fptr_grp")))
+    void (*lock)(rtos_qspi_flash_t *);
+
+    __attribute__((fptrgroup("rtos_qspi_flash_unlock_fptr_grp")))
+    void (*unlock)(rtos_qspi_flash_t *);
+
     qspi_flash_ctx_t ctx;
 
     size_t page_size;
     size_t flash_size;
     uint32_t page_address_mask;
 
+    unsigned op_task_priority;
     /* BEGIN RTOS SPECIFIC MEMBERS. */
-    QueueHandle_t xfer_req_queue;
-    SemaphoreHandle_t lock;
+    TaskHandle_t op_task;
+    QueueHandle_t op_queue;
+    SemaphoreHandle_t mutex;
 };
 
 #include "drivers/rtos/qspi_flash/api/rtos_qspi_flash_rpc.h"
+
+inline void rtos_qspi_flash_lock(
+        rtos_qspi_flash_t *ctx)
+{
+    ctx->lock(ctx);
+}
+
+inline void rtos_qspi_flash_unlock(
+        rtos_qspi_flash_t *ctx)
+{
+    ctx->unlock(ctx);
+}
 
 inline void rtos_qspi_flash_read(
         rtos_qspi_flash_t *ctx,
