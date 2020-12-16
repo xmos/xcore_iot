@@ -9,6 +9,7 @@ set(LIB_I2C_DIR "${HIL_DIR}/lib_i2c")
 set(LIB_I2S_DIR "${HIL_DIR}/lib_i2s")
 set(LIB_MIC_ARRAY_DIR "${HIL_DIR}/lib_mic_array")
 set(LIB_SPI_DIR "${HIL_DIR}/lib_spi")
+set(LIB_QSPI_IO_DIR "${HIL_DIR}/lib_qspi_io")
 
 #********************************
 # Gather I2C sources
@@ -113,6 +114,31 @@ set(${THIS_LIB}_INCLUDES
 
 unset(THIS_LIB)
 
+#********************************
+# Gather QSPI I/O sources
+#********************************
+set(THIS_LIB LIB_QSPI_IO)
+set(${THIS_LIB}_FLAGS "-O2")
+
+string(TOLOWER ${THIS_LIB} THIS_PATH)
+file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.xc")
+file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.c")
+file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.S")
+
+set(${THIS_LIB}_SOURCES
+    ${${THIS_LIB}_XC_SOURCES}
+    ${${THIS_LIB}_C_SOURCES}
+    ${${THIS_LIB}_ASM_SOURCES}
+)
+
+set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+set(${THIS_LIB}_INCLUDES
+    "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
+)
+
+unset(THIS_LIB)
+
 #**********************
 # Set user variables
 #**********************
@@ -121,6 +147,7 @@ set(DRIVERS_HIL_SOURCES
     ${LIB_I2S_SOURCES}
     ${LIB_MIC_ARRAY_SOURCES}
     ${LIB_SPI_SOURCES}
+    ${LIB_QSPI_IO_SOURCES}
 )
 
 set(DRIVERS_HIL_INCLUDES
@@ -128,6 +155,7 @@ set(DRIVERS_HIL_INCLUDES
     ${LIB_I2S_INCLUDES}
     ${LIB_MIC_ARRAY_INCLUDES}
     ${LIB_SPI_INCLUDES}
+    ${LIB_QSPI_IO_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES DRIVERS_HIL_SOURCES)

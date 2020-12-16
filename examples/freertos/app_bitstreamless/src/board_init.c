@@ -79,6 +79,9 @@ static rtos_driver_rpc_t gpio_rpc_config;
 #if SPI_RPC_ENABLED
 static rtos_driver_rpc_t spi_rpc_config;
 #endif
+#if QSPI_FLASH_RPC_ENABLED
+static rtos_driver_rpc_t qspi_flash_rpc_config;
+#endif
 
 void board_tile0_init(
         chanend_t tile1,
@@ -88,11 +91,10 @@ void board_tile0_init(
         rtos_i2s_master_t *i2s_master_ctx,
         rtos_i2c_master_t *i2c_master_ctx,
         rtos_spi_master_t *spi_master_ctx,
+        rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_spi_master_device_t *wifi_device_ctx,
         rtos_gpio_t *gpio_ctx)
 {
-    xclock_t spi_clk = clock_init(XS1_CLKBLK_1);
-
     rtos_intertile_init(intertile1_ctx, tile1);
     rtos_intertile_init(intertile2_ctx, tile1);
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
@@ -106,7 +108,7 @@ void board_tile0_init(
 
     rtos_spi_master_init(
             spi_master_ctx,
-            spi_clk,
+            XS1_CLKBLK_1,
             WIFI_CS_N,
             WIFI_CLK,
             WIFI_MOSI,
@@ -124,6 +126,32 @@ void board_tile0_init(
             1,
             0,
             0);
+
+    rtos_qspi_flash_init(
+            qspi_flash_ctx,
+            XS1_CLKBLK_2,
+            PORT_SQI_CS,
+            PORT_SQI_SCLK,
+            PORT_SQI_SIO,
+
+            /** Derive QSPI clock from the 700 MHz xcore clock **/
+            qspi_io_source_clock_xcore,
+
+            /** Full speed clock configuration **/
+            5, // 700 MHz / (2*5) -> 70 MHz,
+            1,
+            qspi_io_sample_edge_rising,
+            0,
+            /** SPI read clock configuration **/
+            12, // 700 MHz / (2*12) -> ~29 MHz
+            0,
+            qspi_io_sample_edge_falling,
+            0,
+
+            1, /* Enable quad page programming */
+            QSPI_IO_BYTE_TO_MOSI(0x38), /* The quad page program command */
+            256, /* page size is 256 bytes */
+            16384); /* the flash has 16384 pages */
 
     rtos_gpio_init(
             gpio_ctx);
@@ -150,6 +178,13 @@ void board_tile0_init(
             client_intertile_ctx,
             1);
 #endif
+#if QSPI_FLASH_RPC_ENABLED
+    rtos_qspi_flash_rpc_host_init(
+            qspi_flash_ctx,
+            &qspi_flash_rpc_config,
+            client_intertile_ctx,
+            1);
+#endif
 #if MIC_ARRAY_RPC_ENABLED
     rtos_mic_array_rpc_client_init(
             mic_array_ctx,
@@ -172,6 +207,7 @@ void board_tile1_init(
         rtos_i2s_master_t *i2s_master_ctx,
         rtos_i2c_master_t *i2c_master_ctx,
         rtos_spi_master_t *spi_master_ctx,
+        rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_spi_master_device_t *wifi_device_ctx,
         rtos_gpio_t *gpio_ctx)
 {
@@ -242,6 +278,12 @@ void board_tile1_init(
             spi_master_ctx,
             &wifi_device_ctx, 1,
             &spi_rpc_config,
+            intertile1_ctx);
+#endif
+#if QSPI_FLASH_RPC_ENABLED
+    rtos_qspi_flash_rpc_client_init(
+            qspi_flash_ctx,
+            &qspi_flash_rpc_config,
             intertile1_ctx);
 #endif
 #if MIC_ARRAY_RPC_ENABLED

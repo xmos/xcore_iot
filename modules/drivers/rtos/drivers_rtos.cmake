@@ -12,6 +12,7 @@ set(INTERTILE_DIR "${RTOS_DIR}/intertile")
 set(MIC_ARRAY_DIR "${RTOS_DIR}/mic_array")
 set(RPC_DIR "${RTOS_DIR}/rpc")
 set(SPI_DIR "${RTOS_DIR}/spi")
+set(QSPI_FLASH_DIR "${RTOS_DIR}/qspi_flash")
 set(TRACE_DIR "${RTOS_DIR}/trace")
 set(WIFI_DIR "${RTOS_DIR}/wifi")
 
@@ -146,6 +147,23 @@ set(${THIS_LIB}_INCLUDES
 unset(THIS_LIB)
 
 #********************************
+# Gather qspi flash sources
+#********************************
+set(THIS_LIB QSPI_FLASH)
+set(${THIS_LIB}_FLAGS "-Os")
+
+file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
+
+set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+set(${THIS_LIB}_INCLUDES
+    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
+    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/${RTOS_CMAKE_RTOS}"
+)
+
+unset(THIS_LIB)
+
+#********************************
 # Gather trace sources
 #********************************
 set(THIS_LIB TRACE)
@@ -215,6 +233,7 @@ set(DRIVERS_RTOS_SOURCES
     ${MIC_ARRAY_SOURCES}
     ${RPC_SOURCES}
     ${SPI_SOURCES}
+    ${QSPI_FLASH_SOURCES}
     ${TRACE_SOURCES}
 )
 
@@ -227,6 +246,7 @@ set(DRIVERS_RTOS_INCLUDES
     ${MIC_ARRAY_INCLUDES}
     ${RPC_INCLUDES}
     ${SPI_INCLUDES}
+    ${QSPI_FLASH_INCLUDES}
     ${TRACE_INCLUDES}
 )
 

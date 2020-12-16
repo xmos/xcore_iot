@@ -22,6 +22,7 @@
 #define PIPELINE_TILE 0
 #define GPIO_TILE 0
 #define SPI_TILE 1
+#define QSPI_FLASH_TILE 0
 
 #if RPC_TEST
 #include "rpc_test/rpc_test.h"
@@ -46,6 +47,7 @@ static rtos_i2c_master_t i2c_master_ctx_s;
 static rtos_i2s_master_t i2s_master_ctx_s;
 static rtos_spi_master_t spi_master_ctx_s;
 static rtos_spi_master_device_t wifi_device_ctx_s;
+static rtos_qspi_flash_t qspi_flash_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
 static rtos_intertile_t intertile_ctx_s;
 static rtos_intertile_t intertile2_ctx_s;
@@ -55,6 +57,7 @@ static rtos_i2c_master_t *i2c_master_ctx = &i2c_master_ctx_s;
 static rtos_i2s_master_t *i2s_master_ctx = &i2s_master_ctx_s;
 static rtos_spi_master_t *spi_master_ctx = &spi_master_ctx_s;
 static rtos_spi_master_device_t *wifi_device_ctx = &wifi_device_ctx_s;
+static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
 static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 static rtos_intertile_t *intertile2_ctx = &intertile2_ctx_s;
@@ -160,6 +163,9 @@ void vApplicationDaemonTaskStartup(void *arg)
         rtos_printf("Starting SPI driver\n");
         rtos_spi_master_start(spi_master_ctx, configMAX_PRIORITIES-1);
 
+        rtos_printf("Starting QSPI flash driver\n");
+        rtos_qspi_flash_start(qspi_flash_ctx, configMAX_PRIORITIES-1);
+
         rtos_printf("Starting i2c driver\n");
         rtos_i2c_master_start(i2c_master_ctx);
     }
@@ -253,13 +259,46 @@ void vApplicationDaemonTaskStartup(void *arg)
     }
     #endif
 
+    #if ON_TILE(QSPI_FLASH_TILE)
+    {
+        uint8_t data[256];
+        const int len = strlen("hello, world\n")+1;
+        int erase = 0;
+
+        rtos_qspi_flash_read(qspi_flash_ctx, data, 0, len);
+        if (data[0] != 0xFF) {
+            rtos_printf("First read: %s", data);
+            erase = 1;
+        } else {
+            rtos_printf("First read appears empty\n");
+        }
+
+        rtos_qspi_flash_erase(qspi_flash_ctx, 0, len);
+        rtos_qspi_flash_write(qspi_flash_ctx, "hello, world\n", 0, len);
+        rtos_qspi_flash_read(qspi_flash_ctx, data, 0, len);
+        rtos_printf("Second read: %s", data);
+
+        rtos_qspi_flash_read(qspi_flash_ctx, data, 0x123456, 256);
+        for (int i = 0; i < 256; i++) {
+            rtos_printf("%02x ", data[i]);
+        }
+        rtos_printf("\n");
+
+        if (erase) {
+            rtos_printf("Starting chip erase\n");
+            rtos_qspi_flash_erase(qspi_flash_ctx, 0, qspi_flash_ctx->flash_size);
+            rtos_printf("Chip erase complete\n");
+        }
+    }
+    #endif
+
     vTaskDelete(NULL);
 }
 
 
 void main_tile0(chanend_t c)
 {
-    board_tile0_init(c, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, wifi_device_ctx, gpio_ctx);
+    board_tile0_init(c, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
 
     other_tile_c = c;
 
@@ -267,7 +306,7 @@ void main_tile0(chanend_t c)
                 "vApplicationDaemonTaskStartup",
                 RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
                 NULL,
-                configMAX_PRIORITIES-1,
+                1,
                 NULL);
 
     rtos_printf("start scheduler on tile 0\n");
@@ -278,7 +317,7 @@ void main_tile0(chanend_t c)
 
 void main_tile1(chanend_t c)
 {
-    board_tile1_init(c, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, wifi_device_ctx, gpio_ctx);
+    board_tile1_init(c, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
 
     other_tile_c = c;
 
@@ -286,7 +325,7 @@ void main_tile1(chanend_t c)
                 "vApplicationDaemonTaskStartup",
                 RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
                 NULL,
-                configMAX_PRIORITIES-1,
+                1,
                 NULL);
 
     rtos_printf("start scheduler on tile 1\n");
