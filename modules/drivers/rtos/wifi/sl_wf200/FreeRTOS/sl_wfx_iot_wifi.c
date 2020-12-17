@@ -19,10 +19,10 @@
 
 /* SW services headers */
 #include "FreeRTOS/sl_wfx_iot_wifi.h"
-#if LIB_SOC_HAS_SW_DHCPD
+#if USE_DHCPD
 #include "dhcpd.h"
 #endif
-#if LIB_SOC_HAS_SW_FATFS
+#if USE_FATFS
 #include "ff.h"
 #endif
 
@@ -100,7 +100,7 @@ void WIFI_ReleaseLock( void )
     }
 }
 
-#if LIB_SOC_HAS_SW_FATFS
+#if USE_FATFS
 static char *pds_file_load(char **pds, int *line_count)
 {
     FRESULT result;
@@ -171,7 +171,7 @@ WIFIReturnCode_t WIFI_On( void )
 
         if( xSemaphoreTakeRecursive( wifi_lock, pdMS_TO_TICKS( wificonfigMAX_SEMAPHORE_WAIT_TIME_MS ) ) == pdPASS )
         {
-#if LIB_SOC_HAS_SW_FATFS
+#if USE_FATFS
             char *pds_data;
 			char *pds[10];
 			int line_count = 10;
@@ -207,7 +207,7 @@ WIFIReturnCode_t WIFI_On( void )
 
             xSemaphoreGiveRecursive( wifi_lock );
 
-#if LIB_SOC_HAS_SW_FATFS
+#if USE_FATFS
             if( pds_data != NULL )
             {
             	vPortFree( pds_data );
@@ -604,7 +604,7 @@ WIFIReturnCode_t WIFI_GetMode( WIFIDeviceMode_t *pxDeviceMode )
 WIFIReturnCode_t WIFI_NetworkAdd( const WIFINetworkProfile_t * const pxNetworkProfile,
                                   uint16_t *pusIndex )
 {
-#if LIB_SOC_HAS_SW_FATFS && FF_FS_MINIMIZE == 0 && !FF_FS_READONLY
+#if USE_FATFS && FF_FS_MINIMIZE == 0 && !FF_FS_READONLY
     int opened = 0;
     WIFIReturnCode_t ret = eWiFiFailure;
     FRESULT result;
@@ -663,7 +663,7 @@ WIFIReturnCode_t WIFI_NetworkAdd( const WIFINetworkProfile_t * const pxNetworkPr
 WIFIReturnCode_t WIFI_NetworkGet( WIFINetworkProfile_t *pxNetworkProfile,
                                   uint16_t usIndex )
 {
-#if LIB_SOC_HAS_SW_FATFS
+#if USE_FATFS
     WIFIReturnCode_t ret = eWiFiFailure;
     FRESULT result;
     FIL networks;
@@ -705,7 +705,7 @@ WIFIReturnCode_t WIFI_NetworkGet( WIFINetworkProfile_t *pxNetworkProfile,
 
 WIFIReturnCode_t WIFI_NetworkDelete( uint16_t usIndex )
 {
-#if LIB_SOC_HAS_SW_FATFS && FF_FS_MINIMIZE == 0 && !FF_FS_READONLY
+#if USE_FATFS && FF_FS_MINIMIZE == 0 && !FF_FS_READONLY
     WIFIReturnCode_t ret = eWiFiFailure;
     FRESULT result;
     FIL networks;
@@ -762,7 +762,7 @@ __attribute__((weak))
 void vApplicationPingReplyHook(ePingReplyStatus_t eStatus, uint16_t usIdentifier)
 {
 	if (eStatus == eSuccess) {
-		#if LIB_SOC_HAS_SW_DHCPD
+		#if USE_DHCPD
 			dhcpd_ping_reply_received( usIdentifier );
 		#endif
 		xQueueOverwrite(ping_reply_queue, &usIdentifier);

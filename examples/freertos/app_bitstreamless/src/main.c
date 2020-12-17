@@ -17,11 +17,16 @@
 #define RPC_TEST 0
 #define GPIO_TEST 1
 #define WIFI_TEST 1
+#define QSPI_TEST 0
+
+#if WIFI_TEST && QSPI_TEST
+#error Cannot test the QSPI when the WIFI test is enabled
+#endif
 
 #define I2C_TILE 1
 #define PIPELINE_TILE 0
 #define GPIO_TILE 0
-#define SPI_TILE 1
+#define WIFI_TILE 1 /* Uses SPI, GPIO, and QSPI */
 #define QSPI_FLASH_TILE 1
 
 #if RPC_TEST
@@ -38,6 +43,7 @@
 
 #if WIFI_TEST
 #include "wifi_test/wifi_test.h"
+#include "fs_support.h"
 #endif
 
 #include "board_init.h"
@@ -259,16 +265,18 @@ void vApplicationDaemonTaskStartup(void *arg)
     }
     #endif
 
-    #if WIFI_TEST && ON_TILE(SPI_TILE)
+    #if WIFI_TEST && ON_TILE(WIFI_TILE)
     {
+        rtos_fatfs_init(qspi_flash_ctx);
         wifi_test_start(wifi_device_ctx, gpio_ctx);
     }
     #endif
 
-    #if ON_TILE(QSPI_FLASH_TILE)
+    #if QSPI_TEST && ON_TILE(QSPI_FLASH_TILE)
     {
-        uint8_t data[256];
-        const int len = strlen("hello, world\n")+1;
+        const char test_str[] = "hello, world\n";
+        const int len = strlen(test_str) + 1;
+        uint8_t data[len];
         int erase = 0;
 
         rtos_qspi_flash_read(qspi_flash_ctx, data, 0, len);
@@ -281,15 +289,9 @@ void vApplicationDaemonTaskStartup(void *arg)
 
         rtos_qspi_flash_lock(qspi_flash_ctx);
         rtos_qspi_flash_erase(qspi_flash_ctx, 0, len);
-        rtos_qspi_flash_write(qspi_flash_ctx, "hello, world\n", 0, len);
+        rtos_qspi_flash_write(qspi_flash_ctx, (const uint8_t *) test_str, 0, len);
         rtos_qspi_flash_read(qspi_flash_ctx, data, 0, len);
         rtos_printf("Second read: %s", data);
-
-        rtos_qspi_flash_read(qspi_flash_ctx, data, 0x123456, 256);
-        for (int i = 0; i < 256; i++) {
-            rtos_printf("%02x ", data[i]);
-        }
-        rtos_printf("\n");
 
         if (erase) {
             rtos_printf("Starting chip erase\n");

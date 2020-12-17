@@ -7,6 +7,7 @@ set(DRIVERS_SW_SERVICES_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/drivers/sw_service
 
 set(WIFI_MANAGER_DIR "${DRIVERS_SW_SERVICES_DIR}/rtos/wifi_manager")
 set(DHCPD_DIR "${DRIVERS_SW_SERVICES_DIR}/rtos/dhcpd")
+set(FATFS_DIR "${DRIVERS_SW_SERVICES_DIR}/rtos/fatfs")
 
 if(NOT DEFINED RTOS_CMAKE_RTOS)
     set(RTOS_CMAKE_RTOS "FreeRTOS") # Only FreeRTOS is currently supported
@@ -22,6 +23,10 @@ endif()
 
 if(NOT DEFINED USE_DHCPD)
     set(USE_DHCPD FALSE)
+endif()
+
+if(NOT DEFINED USE_FATFS)
+    set(USE_FATFS FALSE)
 endif()
 
 #********************************
@@ -58,15 +63,35 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather FATFS sources
+#********************************
+set(THIS_LIB FATFS)
+if(${USE_${THIS_LIB}})
+	set(${THIS_LIB}_FLAGS "-Os")
+	
+	file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
+	list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/thirdparty/src/ff.c")
+	list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/thirdparty/src/ffunicode.c")
+	
+	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+	
+	set(${THIS_LIB}_INCLUDES
+	    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
+	    "${${THIS_LIB}_DIR}/thirdparty/api"
+	)
+endif()
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
 set(DRIVERS_SW_SERVICES_SOURCES
-    ""
+    ${FATFS_SOURCES}
 )
 
 set(DRIVERS_SW_SERVICES_INCLUDES
-    ""
+    ${FATFS_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES DRIVERS_SW_SERVICES_SOURCES)

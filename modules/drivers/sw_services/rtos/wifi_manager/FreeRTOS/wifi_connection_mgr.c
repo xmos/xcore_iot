@@ -92,6 +92,11 @@ void wifi_conn_mgr_network_event(eIPCallbackEvent_t eNetworkEvent)
             xTaskNotify(wifi_conn_mgr_task_handle, NOTIFY_NETWORK_DOWN_BM, eSetBits);
         }
     }
+    /*
+     * TODO: When eNetworkUp, call wifi_conn_mgr_event_cb() with a new WIFI_CONN_MGR_EVENT_NETWORK_UP?
+     * This would let the app know that an IP has been assigned.
+     * Alternatively, the app can provide vApplicationIPNetworkEventHook() and call wifi_conn_mgr_network_event().
+     */
 }
 
 void sl_wfx_reset_request_callback(void)

@@ -7,6 +7,7 @@ endif()
 
 set(USE_WIFI_MANAGER TRUE)
 set(USE_DHCPD TRUE)
+set(USE_FATFS TRUE)
 
 ## Import XMOS configurations
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
@@ -36,6 +37,7 @@ set(APP_COMPILER_FLAGS
     "-mcmodel=large"
     
     "-DUSE_DHCPD=1" # TODO: Would like this to be set automatically when DHCPD is compiled in
+    "-DUSE_FATFS=1" # TODO: Would like this to be set automatically when FATFS is compiled in
 )
 
 set(FREERTOS_PORT "XCOREAI")

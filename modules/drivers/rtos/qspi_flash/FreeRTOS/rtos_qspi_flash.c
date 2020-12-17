@@ -1,5 +1,7 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
+#define DEBUG_UNIT RTOS_QSPI_FLASH
+
 #include <string.h>
 
 #include <xcore/assert.h>
