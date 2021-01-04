@@ -5,7 +5,7 @@ if(NOT CMAKE_INCLUDE_FLAG_XC)
   set(CMAKE_INCLUDE_FLAG_XC ${CMAKE_INCLUDE_FLAG_C})
 endif()
 
-set(CMAKE_XC_FLAGS_INIT "$ENV{XCFLAGS} ${CMAKE_XC_FLAGS_INIT}")
+set(CMAKE_XC_FLAGS_INIT "$ENV{XCFLAGS} ${CMAKE_INCLUDE_FLAG_XC} ${CMAKE_XC_FLAGS_INIT}")
 
 # Create a static archive incrementally for large object file counts.
 # If CMAKE_CXX_CREATE_STATIC_LIBRARY is set it will override these.
