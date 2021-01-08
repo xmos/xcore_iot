@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 #pragma once
 
 /** \file
@@ -29,10 +29,10 @@ typedef struct {
 
 	/**
 	 * The source clock to use for the QSPI I/O interface. Must be
-	 * either QSPI_IO_SOURCE_CLOCK_REF or QSPI_IO_SOURCE_CLOCK_XCORE.
+	 * either qspi_io_source_clock_ref or qspi_io_source_clock_xcore.
 	 * This must be set prior to calling qspi_flash_init().
 	 */
-	int source_clock;
+	qspi_io_source_clock_t source_clock;
 
 	/**
 	 * If set to false, then qspi_flash_init() will setup safe default
@@ -61,10 +61,10 @@ typedef struct {
  * as well as the entire chip.
  */
 typedef enum {
-	qspi_flash_erase_4k,
-	qspi_flash_erase_32k,
-	qspi_flash_erase_64k,
-	qspi_flash_erase_chip,
+	qspi_flash_erase_4k,   /**< Erase a 4k byte sector */
+	qspi_flash_erase_32k,  /**< Erase a 32k byte block */
+	qspi_flash_erase_64k,  /**< Erase a 64k byte block */
+	qspi_flash_erase_chip, /**< Erase the entire chip */
 } qspi_flash_erase_length_t;
 
 /**
