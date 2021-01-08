@@ -49,7 +49,7 @@ void qspi_io_init(const qspi_io_ctx_t *ctx,
 	 */
 	port_set_clock(ctx->sio_port, XS1_CLKBLK_REF);
 	port_out(ctx->sio_port, 0xF);
-	qspi_io_port_sync(ctx->sio_port);
+	port_sync(ctx->sio_port);
 
 	/* Now set SIO to use the desired clock block. */
 	port_set_clock(ctx->sio_port, ctx->clock_block);

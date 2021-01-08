@@ -90,10 +90,8 @@ static i2c_regop_res_t i2c_master_local_reg_write(
         } else {
             reg_res = I2C_REGOP_SUCCESS;
         }
-    } else if (res == I2C_NACK) {
-        reg_res = I2C_REGOP_DEVICE_NACK;
     } else {
-        reg_res = I2C_REGOP_NOT_STARTED;
+        reg_res = I2C_REGOP_DEVICE_NACK;
     }
 
     return reg_res;
@@ -120,10 +118,8 @@ static i2c_regop_res_t  i2c_master_local_reg_read(
         } else {
             reg_res = I2C_REGOP_SUCCESS;
         }
-    } else if (res == I2C_NACK) {
-        reg_res = I2C_REGOP_DEVICE_NACK;
     } else {
-        reg_res = I2C_REGOP_NOT_STARTED;
+        reg_res = I2C_REGOP_DEVICE_NACK;
     }
 
     if (reg_res == I2C_REGOP_SUCCESS) {
@@ -131,10 +127,8 @@ static i2c_regop_res_t  i2c_master_local_reg_read(
 
         if (res == I2C_ACK) {
             reg_res = I2C_REGOP_SUCCESS;
-        } else if (res == I2C_NACK) {
-            reg_res = I2C_REGOP_DEVICE_NACK;
         } else {
-            reg_res = I2C_REGOP_NOT_STARTED;
+            reg_res = I2C_REGOP_DEVICE_NACK;
         }
     }
 
