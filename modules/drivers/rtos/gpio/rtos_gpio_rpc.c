@@ -1,18 +1,13 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #include <string.h>
 #include <xcore/triggerable.h>
 #include <xcore/assert.h>
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-
 #include "rtos_interrupt.h"
 
-#include "drivers/rtos/rpc/api/rtos_rpc.h"
-
 #include "drivers/rtos/gpio/api/rtos_gpio.h"
+#include "drivers/rtos/rpc/api/rtos_rpc.h"
 
 RTOS_GPIO_ISR_CALLBACK_ATTR
 static void rtos_gpio_rpc_host_isr(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_t port_id, uint32_t value)
@@ -33,13 +28,13 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_gpio_rpc_client_isr, arg)
     port_id = chanend_in_byte(gpio_ctx->rpc_interrupt_c);
     value = chanend_in_word(gpio_ctx->rpc_interrupt_c);
 
-    taskENTER_CRITICAL_FROM_ISR();
+    int state = rtos_osal_critical_enter();
     {
         rtos_gpio_isr_info_t *isr_info = gpio_ctx->isr_info[port_id];
         isr_app_data = isr_info->isr_app_data;
         cb = isr_info->callback;
     }
-    taskEXIT_CRITICAL_FROM_ISR(0);
+    rtos_osal_critical_exit(state);
 
     cb(gpio_ctx, isr_app_data, port_id, value);
 }
@@ -69,11 +64,11 @@ static void gpio_remote_port_enable(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTake(gpio_ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_port_enable, rpc_param_desc,
             &host_ctx_ptr, &port_id);
-    xSemaphoreGive(gpio_ctx->lock);
+    rtos_osal_mutex_put(&gpio_ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_gpio_port_in_fptr_grp")))
@@ -94,11 +89,11 @@ static uint32_t gpio_remote_port_in(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTake(gpio_ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_port_in, rpc_param_desc,
             &host_ctx_ptr, &port_id, &ret);
-    xSemaphoreGive(gpio_ctx->lock);
+    rtos_osal_mutex_put(&gpio_ctx->lock);
 
     return ret;
 }
@@ -121,11 +116,11 @@ static void gpio_remote_port_out(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTake(gpio_ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_port_out, rpc_param_desc,
             &host_ctx_ptr, &port_id, &value);
-    xSemaphoreGive(gpio_ctx->lock);
+    rtos_osal_mutex_put(&gpio_ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_gpio_isr_callback_set_fptr_grp")))
@@ -140,7 +135,7 @@ static void gpio_remote_isr_callback_set(
 
     xassert(host_address->port >= 0);
 
-    taskENTER_CRITICAL();
+    int state = rtos_osal_critical_enter();
     {
         if (gpio_ctx->isr_info[port_id] == NULL) {
             gpio_ctx->isr_info[port_id] = pvPortMalloc(sizeof(rtos_gpio_isr_info_t));
@@ -149,7 +144,7 @@ static void gpio_remote_isr_callback_set(
         gpio_ctx->isr_info[port_id]->callback = cb;
         gpio_ctx->isr_info[port_id]->isr_app_data = app_data;
     }
-    taskEXIT_CRITICAL();
+    rtos_osal_critical_exit(state);
 
     const rpc_param_desc_t rpc_param_desc[] = {
             RPC_PARAM_TYPE(gpio_ctx),
@@ -157,11 +152,11 @@ static void gpio_remote_isr_callback_set(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTake(gpio_ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_isr_callback_set, rpc_param_desc,
             &host_ctx_ptr, &port_id);
-    xSemaphoreGive(gpio_ctx->lock);
+    rtos_osal_mutex_put(&gpio_ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_gpio_interrupt_enable_fptr_grp")))
@@ -180,11 +175,11 @@ static void gpio_remote_interrupt_enable(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTake(gpio_ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_interrupt_enable, rpc_param_desc,
             &host_ctx_ptr, &port_id);
-    xSemaphoreGive(gpio_ctx->lock);
+    rtos_osal_mutex_put(&gpio_ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_gpio_interrupt_disable_fptr_grp")))
@@ -203,11 +198,11 @@ static void gpio_remote_interrupt_disable(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTake(gpio_ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_interrupt_disable, rpc_param_desc,
             &host_ctx_ptr, &port_id);
-    xSemaphoreGive(gpio_ctx->lock);
+    rtos_osal_mutex_put(&gpio_ctx->lock);
 }
 
 
@@ -369,11 +364,11 @@ static void gpio_rpc_thread(rtos_intertile_address_t *client_address)
             break;
         }
 
-        vPortFree(req_msg);
+        rtos_osal_free(req_msg);
 
         /* send RPC response message to client */
         rtos_intertile_tx(intertile_ctx, intertile_port, resp_msg, msg_length);
-        vPortFree(resp_msg);
+        rtos_osal_free(resp_msg);
     }
 }
 
@@ -389,13 +384,13 @@ static void gpio_rpc_start(
 
         xassert(client_address->port >= 0);
 
-        xTaskCreate(
-                    (TaskFunction_t) gpio_rpc_thread,
-                    "gpio_rpc_thread",
-                    RTOS_THREAD_STACK_SIZE(gpio_rpc_thread),
-                    client_address,
-                    rpc_config->host_task_priority,
-                    NULL);
+        rtos_osal_thread_create(
+                NULL,
+                "gpio_rpc_thread",
+                (rtos_osal_entry_function_t) gpio_rpc_thread,
+                client_address,
+                RTOS_THREAD_STACK_SIZE(gpio_rpc_thread),
+                rpc_config->host_task_priority);
     }
 }
 
@@ -410,8 +405,7 @@ void rtos_gpio_rpc_config(
         /* This is a client */
         rpc_config->host_address.port = intertile_port;
 
-        gpio_ctx->lock = xSemaphoreCreateMutex();
-
+        rtos_osal_mutex_create(&gpio_ctx->lock, "gpio_rpc_lock", 0);
     } else {
         for (int i = 0; i < rpc_config->remote_client_count; i++) {
             rpc_config->client_address[i].port = intertile_port;

@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 set(RTOS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/drivers/rtos")
 
+set(OSAL_DIR "${RTOS_DIR}/osal")
 set(GPIO_DIR "${RTOS_DIR}/gpio")
 set(I2C_DIR "${RTOS_DIR}/i2c")
 set(I2S_DIR "${RTOS_DIR}/i2s")
@@ -30,12 +31,29 @@ endif()
 include("$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/${RTOS_CMAKE_RTOS}/kernel.cmake")
 
 #********************************
+# Gather OSAL sources
+#********************************
+set(THIS_LIB OSAL)
+set(${THIS_LIB}_FLAGS "-Os")
+
+file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
+
+set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+set(${THIS_LIB}_INCLUDES
+    "${${THIS_LIB}_DIR}/api"
+    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
+)
+
+unset(THIS_LIB)
+
+#********************************
 # Gather GPIO sources
 #********************************
 set(THIS_LIB GPIO)
 set(${THIS_LIB}_FLAGS "-Os")
 
-file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
+file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/*.c")
 
 set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
@@ -226,6 +244,7 @@ unset(THIS_LIB)
 #**********************
 set(DRIVERS_RTOS_SOURCES
     ${KERNEL_SOURCES}
+    ${OSAL_SOURCES}
     ${GPIO_SOURCES}
     ${I2C_SOURCES}
     ${I2S_SOURCES}
@@ -239,6 +258,7 @@ set(DRIVERS_RTOS_SOURCES
 
 set(DRIVERS_RTOS_INCLUDES
     ${KERNEL_INCLUDES}
+    ${OSAL_INCLUDES}
     ${GPIO_INCLUDES}
     ${I2C_INCLUDES}
     ${I2S_INCLUDES}

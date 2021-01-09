@@ -1,10 +1,11 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #ifndef RTOS_GPIO_H_
 #define RTOS_GPIO_H_
 
 #include <xcore/port.h>
 
+#include "drivers/rtos/osal/api/rtos_osal.h"
 #include "drivers/rtos/rpc/api/rtos_driver_rpc.h"
 
 typedef enum {
@@ -82,8 +83,7 @@ struct rtos_gpio_struct{
 
     rtos_gpio_isr_info_t *isr_info[RTOS_GPIO_TOTAL_PORT_CNT];
 
-    /* BEGIN RTOS SPECIFIC MEMBERS. */
-    SemaphoreHandle_t lock; /* Only used by RPC client */
+    rtos_osal_mutex_t lock; /* Only used by RPC client */
 };
 
 #include "drivers/rtos/gpio/api/rtos_gpio_rpc.h"
