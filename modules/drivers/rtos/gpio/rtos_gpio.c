@@ -102,7 +102,7 @@ static void gpio_local_isr_callback_set(rtos_gpio_t *ctx, rtos_gpio_port_id_t po
     int state = rtos_osal_critical_enter();
     {
         if (ctx->isr_info[port_id] == NULL) {
-            ctx->isr_info[port_id] = pvPortMalloc(sizeof(rtos_gpio_isr_info_t));
+            ctx->isr_info[port_id] = rtos_osal_malloc(sizeof(rtos_gpio_isr_info_t));
             ctx->isr_info[port_id]->ctx = ctx;
             ctx->isr_info[port_id]->port_id = port_id;
             ctx->isr_info[port_id]->enabled = INTERRUPT_DISABLED;

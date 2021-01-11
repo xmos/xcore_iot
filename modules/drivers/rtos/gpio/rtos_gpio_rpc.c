@@ -138,7 +138,7 @@ static void gpio_remote_isr_callback_set(
     int state = rtos_osal_critical_enter();
     {
         if (gpio_ctx->isr_info[port_id] == NULL) {
-            gpio_ctx->isr_info[port_id] = pvPortMalloc(sizeof(rtos_gpio_isr_info_t));
+            gpio_ctx->isr_info[port_id] = rtos_osal_malloc(sizeof(rtos_gpio_isr_info_t));
         }
 
         gpio_ctx->isr_info[port_id]->callback = cb;
