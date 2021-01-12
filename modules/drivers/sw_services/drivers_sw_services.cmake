@@ -266,8 +266,6 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/thirdparty/mbedtls/library/ssl_tls.c"
     )
 
-        message(WARNING ${${THIS_LIB}_SOURCES})
-        message(WARNING  ${${THIS_LIB}_FLAGS})
     if(${${THIS_LIB}_FLAGS})
 	       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
     endif()
