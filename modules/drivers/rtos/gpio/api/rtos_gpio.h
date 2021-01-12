@@ -5,6 +5,7 @@
 
 /**
  * \defgroup rtos_gpio_driver
+ *
  * The public API for using the RTOS GPIO driver.
  * @{
  */
@@ -101,7 +102,7 @@ typedef struct {
  *
  * The members in this struct should not be accessed directly.
  */
-struct rtos_gpio_struct{
+struct rtos_gpio_struct {
     rtos_driver_rpc_t *rpc_config;
     chanend_t rpc_interrupt_c;
 
@@ -223,7 +224,7 @@ inline rtos_gpio_port_id_t rtos_gpio_port(port_t p)
  * Enables a GPIO port. This must be called on a port before
  * using it with any other GPIO driver function.
  *
- * \param ctx      A pointer to the associated GPIO driver instance.
+ * \param ctx      A pointer to the GPIO driver instance to use.
  * \param port_id  The GPIO port to enable.
  */
 inline void rtos_gpio_port_enable(
@@ -236,7 +237,7 @@ inline void rtos_gpio_port_enable(
 /**
  * Inputs the value present on a GPIO port's pins.
  *
- * \param ctx      A pointer to the associated GPIO driver instance.
+ * \param ctx      A pointer to the GPIO driver instance to use.
  * \param port_id  The GPIO port to read from.
  *
  * \returns the value on the port's pins.
@@ -251,7 +252,7 @@ inline uint32_t rtos_gpio_port_in(
 /**
  * Outputs a value to a GPIO port's pins.
  *
- * \param ctx      A pointer to the associated GPIO driver instance.
+ * \param ctx      A pointer to the GPIO driver instance to use.
  * \param port_id  The GPIO port to write to.
  * \param value    The value to write to the GPIO port.
  */
@@ -270,7 +271,7 @@ inline void rtos_gpio_port_out(
  * This must be called prior to enabling interrupts on \p port_id.
  * It is also safe to be called while interrupts are enabled on it.
  *
- * \param ctx      A pointer to the associated GPIO driver instance.
+ * \param ctx      A pointer to the GPIO driver instance to use.
  * \param port_id  Interrupts triggered by this port will call the application
  *                 callback function \p cb.
  * \param cb       The application callback function to call when there is an
@@ -291,7 +292,7 @@ inline void rtos_gpio_isr_callback_set(
  * Enables interrupts on a GPIO port. Interrupts are triggered whenever
  * the value on the port changes.
  *
- * \param ctx      A pointer to the associated GPIO driver instance.
+ * \param ctx      A pointer to the GPIO driver instance to use.
  * \param port_id  The GPIO port to enable interrupts on.
  */
 inline void rtos_gpio_interrupt_enable(
@@ -304,7 +305,7 @@ inline void rtos_gpio_interrupt_enable(
 /**
  * Disables interrupts on a GPIO port.
  *
- * \param ctx      A pointer to the associated GPIO driver instance.
+ * \param ctx      A pointer to the GPIO driver instance to use.
  * \param port_id  The GPIO port to disable interrupts on.
  */
 inline void rtos_gpio_interrupt_disable(

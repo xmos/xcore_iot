@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #ifndef RTOS_GPIO_RPC_H_
 #define RTOS_GPIO_RPC_H_
