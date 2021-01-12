@@ -1,9 +1,6 @@
 [submodule "dependencies/lib_dsp"]
 	path = modules/lib_dsp
 	url = git@github.com:xmos/lib_dsp.git
-[submodule "dependencies/lib_ethernet"]
-	path = modules/to_remove/lib_ethernet/lib_ethernet
-	url = git@github.com:xmos/lib_ethernet.git
 [submodule "dependencies/lib_gpio"]
 	path = modules/to_remove/lib_gpio/lib_gpio
 	url = git@github.com:xmos/lib_gpio.git
