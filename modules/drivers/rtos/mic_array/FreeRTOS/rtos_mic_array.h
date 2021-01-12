@@ -91,7 +91,7 @@ inline size_t rtos_mic_array_rx(
         size_t frame_count,
         unsigned timeout)
 {
-    return mic_array_ctx->rx(mic_array_ctx, sample_buf, sample_count, timeout);
+    return mic_array_ctx->rx(mic_array_ctx, sample_buf, frame_count, timeout);
 }
 
 /**@}*/
