@@ -4,8 +4,18 @@ IF(NOT DEFINED ENV{XMOS_AIOT_SDK_PATH})
     message(FATAL_ERROR "Environment var XMOS_AIOT_SDK_PATH must be set before including xmos_utils.cmake")
 endif()
 
+#********************************
 # Set up compiler
+#********************************
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+
+#********************************
+# Set up hardware target
+#********************************
+IF(NOT DEFINED BOARD)
+    message(FATAL_ERROR "BOARD must be defined to specify the hardware target.")
+endif()
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/board_support/${BOARD}.cmake")
 
 #**********************
 # Paths
@@ -24,29 +34,15 @@ include("$ENV{XMOS_AIOT_SDK_PATH}/modules/modules.cmake")
 set(XMOS_RTOS_PLATFORM_SOURCES
     ${DRIVERS_SOURCES}
     ${MODULES_SOURCES}
+    ${DRIVERS_NETWORKING_SOURCES}
 )
 
 set(XMOS_RTOS_PLATFORM_INCLUDES
     ${DRIVERS_INCLUDES}
     ${MODULES_INCLUDES}
     ${MODULES_DIR}
+    ${DRIVERS_NETWORKING_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES XMOS_RTOS_PLATFORM_SOURCES)
 list(REMOVE_DUPLICATES XMOS_RTOS_PLATFORM_INCLUDES)
-
-set(XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES
-    ${DRIVERS_SOURCES}
-    ${MODULES_SOURCES}
-    ${DRIVERS_NETWORKING_SOURCES}
-)
-
-set(XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES
-    ${DRIVERS_INCLUDES}
-    ${MODULES_INCLUDES}
-    ${DRIVERS_NETWORKING_INCLUDES}
-    ${MODULES_DIR}
-)
-
-list(REMOVE_DUPLICATES XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES)
-list(REMOVE_DUPLICATES XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES)
