@@ -1,12 +1,25 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #ifndef RTOS_GPIO_H_
 #define RTOS_GPIO_H_
 
+/**
+ * \defgroup rtos_gpio_driver
+ *
+ * The public API for using the RTOS GPIO driver.
+ * @{
+ */
+
 #include <xcore/port.h>
 
+#include "drivers/rtos/osal/api/rtos_osal.h"
 #include "drivers/rtos/rpc/api/rtos_driver_rpc.h"
 
+/**
+ * Enumerator type representing each available GPIO port.
+ *
+ * To be used with the RTOS GPIO driver functions.
+ */
 typedef enum {
     rtos_gpio_port_none = -1,
     rtos_gpio_port_1A,
@@ -41,15 +54,41 @@ typedef enum {
     rtos_gpio_port_16D,
     rtos_gpio_port_32A,
     rtos_gpio_port_32B,
-    RTOS_GPIO_TOTAL_PORT_CNT
+    RTOS_GPIO_TOTAL_PORT_CNT /**< Total number of I/O ports */
 } rtos_gpio_port_id_t;
 
+/**
+ * This attribute must be specified on all RTOS GPIO interrupt callback functions
+ * provided by the application.
+ */
 #define RTOS_GPIO_ISR_CALLBACK_ATTR __attribute__((fptrgroup("rtos_gpio_isr_cb_fptr_grp")))
 
+/**
+ * Typedef to the RTOS GPIO driver instance struct.
+ */
 typedef struct rtos_gpio_struct rtos_gpio_t;
 
+/**
+ * Function pointer type for application provided RTOS GPIO interrupt callback functions.
+ *
+ * These callback functions are called when there is a GPIO port interrupt.
+ *
+ * \param ctx           A pointer to the associated GPIO driver instance.
+ * \param app_data      A pointer to application specific data provided
+ *                      by the application. Used to share data between
+ *                      this callback function and the application.
+ * \param port_id       The GPIO port that triggered the interrupt.
+ * \param value         The value on the GPIO port that caused the interrupt.
+ *                      \note this is the latched value that triggered the interrupt,
+ *                      not the current value.
+ */
 typedef void (*rtos_gpio_isr_cb_t)(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_t port_id, uint32_t value);
 
+/**
+ * Struct to hold interrupt state data for GPIO ports.
+ *
+ * The members in this struct should not be accessed directly.
+ */
 typedef struct {
     RTOS_GPIO_ISR_CALLBACK_ATTR rtos_gpio_isr_cb_t callback;
     void *isr_app_data;
@@ -58,7 +97,12 @@ typedef struct {
     rtos_gpio_t *ctx;
 } rtos_gpio_isr_info_t;
 
-struct rtos_gpio_struct{
+/**
+ * Struct representing an RTOS GPIO driver instance.
+ *
+ * The members in this struct should not be accessed directly.
+ */
+struct rtos_gpio_struct {
     rtos_driver_rpc_t *rpc_config;
     chanend_t rpc_interrupt_c;
 
@@ -82,12 +126,19 @@ struct rtos_gpio_struct{
 
     rtos_gpio_isr_info_t *isr_info[RTOS_GPIO_TOTAL_PORT_CNT];
 
-    /* BEGIN RTOS SPECIFIC MEMBERS. */
-    SemaphoreHandle_t lock; /* Only used by RPC client */
+    rtos_osal_mutex_t lock; /* Only used by RPC client */
 };
 
 #include "drivers/rtos/gpio/api/rtos_gpio_rpc.h"
 
+/**
+ * Helper function to convert an xcore I/O port resource ID
+ * to an RTOS GPIO driver port ID.
+ *
+ * \param p An xcore I/O port resource ID.
+ *
+ * \returns the equivalent RTOS GPIO driver port ID.
+ */
 inline rtos_gpio_port_id_t rtos_gpio_port(port_t p)
 {
     switch (p) {
@@ -160,6 +211,22 @@ inline rtos_gpio_port_id_t rtos_gpio_port(port_t p)
     }
 }
 
+/**
+ * \defgroup rtos_gpio_driver_core
+ *
+ * The core functions for using an RTOS GPIO driver instance after
+ * it has been initialized and started. These functions may be used
+ * by both the host and any client tiles that RPC has been enabled for.
+ * @{
+ */
+
+/**
+ * Enables a GPIO port. This must be called on a port before
+ * using it with any other GPIO driver function.
+ *
+ * \param ctx      A pointer to the GPIO driver instance to use.
+ * \param port_id  The GPIO port to enable.
+ */
 inline void rtos_gpio_port_enable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
@@ -167,6 +234,14 @@ inline void rtos_gpio_port_enable(
     return ctx->port_enable(ctx, port_id);
 }
 
+/**
+ * Inputs the value present on a GPIO port's pins.
+ *
+ * \param ctx      A pointer to the GPIO driver instance to use.
+ * \param port_id  The GPIO port to read from.
+ *
+ * \returns the value on the port's pins.
+ */
 inline uint32_t rtos_gpio_port_in(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
@@ -174,6 +249,13 @@ inline uint32_t rtos_gpio_port_in(
     return ctx->port_in(ctx, port_id);
 }
 
+/**
+ * Outputs a value to a GPIO port's pins.
+ *
+ * \param ctx      A pointer to the GPIO driver instance to use.
+ * \param port_id  The GPIO port to write to.
+ * \param value    The value to write to the GPIO port.
+ */
 inline void rtos_gpio_port_out(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id,
@@ -182,6 +264,21 @@ inline void rtos_gpio_port_out(
     return ctx->port_out(ctx, port_id, value);
 }
 
+/**
+ * Sets the application callback function to be called when there is an
+ * interrupt on a GPIO port.
+ *
+ * This must be called prior to enabling interrupts on \p port_id.
+ * It is also safe to be called while interrupts are enabled on it.
+ *
+ * \param ctx      A pointer to the GPIO driver instance to use.
+ * \param port_id  Interrupts triggered by this port will call the application
+ *                 callback function \p cb.
+ * \param cb       The application callback function to call when there is an
+ *                 interrupt triggered by the port \p port_id.
+ * \param app_data A pointer to application specific data to pass to the application
+ *                 callback function \p cb.
+ */
 inline void rtos_gpio_isr_callback_set(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id,
@@ -191,6 +288,13 @@ inline void rtos_gpio_isr_callback_set(
     return ctx->isr_callback_set(ctx, port_id, cb, app_data);
 }
 
+/**
+ * Enables interrupts on a GPIO port. Interrupts are triggered whenever
+ * the value on the port changes.
+ *
+ * \param ctx      A pointer to the GPIO driver instance to use.
+ * \param port_id  The GPIO port to enable interrupts on.
+ */
 inline void rtos_gpio_interrupt_enable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
@@ -198,6 +302,12 @@ inline void rtos_gpio_interrupt_enable(
     return ctx->interrupt_enable(ctx, port_id);
 }
 
+/**
+ * Disables interrupts on a GPIO port.
+ *
+ * \param ctx      A pointer to the GPIO driver instance to use.
+ * \param port_id  The GPIO port to disable interrupts on.
+ */
 inline void rtos_gpio_interrupt_disable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
@@ -205,10 +315,33 @@ inline void rtos_gpio_interrupt_disable(
     return ctx->interrupt_disable(ctx, port_id);
 }
 
+/**@}*/
+
+/**
+ * Starts an RTOS GPIO driver instance. This must only be called by the tile that
+ * owns the driver instance. It may be called either before or after starting
+ * the RTOS, but must be called before any of the core GPIO driver functions are
+ * called with this instance.
+ *
+ * rtos_gpio_init() must be called on this GPIO driver instance prior to calling this.
+ *
+ * \param ctx A pointer to the GPIO driver instance to start.
+ */
 void rtos_gpio_start(
         rtos_gpio_t *ctx);
 
+/**
+ * Initializes an RTOS GPIO driver instance. There should only be one per tile.
+ * This instance represents all the GPIO ports owned by the calling tile.
+ * This must only be called by the tile that owns the driver instance. It may be
+ * called either before or after starting the RTOS, but must be called before calling
+ * rtos_gpio_start() or any of the core GPIO driver functions with this instance.
+ *
+ * \param ctx A pointer to the GPIO driver instance to initialize.
+ */
 void rtos_gpio_init(
         rtos_gpio_t *ctx);
+
+/**@}*/
 
 #endif /* RTOS_GPIO_H_ */

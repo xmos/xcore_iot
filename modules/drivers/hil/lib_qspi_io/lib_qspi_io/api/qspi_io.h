@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 #pragma once
 
 /** \file
@@ -11,24 +11,38 @@
 #include <xcore/port.h>
 #include <xcore/clock.h>
 
+/**
+ * Enum type used to set which SCLK edge SIO is sampled on.
+ */
 typedef enum {
-	qspi_io_sample_edge_rising = 0,
-	qspi_io_sample_edge_falling
+	qspi_io_sample_edge_rising = 0, /**< Sample SIO on the rising edge */
+	qspi_io_sample_edge_falling     /**< Sample SIO on the falling edge */
 } qspi_io_sample_edge_t;
 
+/**
+ * Enum type used to set which of the two clock sources SCLK is derived from.
+ */
 typedef enum {
-	qspi_io_source_clock_ref = 0,
-	qspi_io_source_clock_xcore
+	qspi_io_source_clock_ref = 0, /**< SCLK is derived from the 100 MHz reference clock */
+	qspi_io_source_clock_xcore    /**< SCLK is derived from the core clock */
 } qspi_io_source_clock_t;
 
+/**
+ * Enum type used to specify whether or not nibbles should be swapped during transfers.
+ */
 typedef enum {
-	qspi_io_transfer_normal = 0,
-	qspi_io_transfer_nibble_swap
+	qspi_io_transfer_normal = 0, /**< Do not swap nibbles */
+	qspi_io_transfer_nibble_swap /**< Swap nibbles */
 } qspi_io_transfer_mode_t;
 
+/**
+ * Enum type used to specify whether the next transaction will be a full speed
+ * QSPI transaction with dummy cycles, or a lower speed SPI read transaction
+ * without dummy cycles.
+ */
 typedef enum {
-	qspi_io_full_speed = 0,
-	qspi_io_spi_read
+	qspi_io_full_speed = 0, /**< The transaction will be full speed with dummy cycles */
+	qspi_io_spi_read        /**< The transaction will be low speed without dummy cycles */
 } qspi_io_transaction_type_t;
 
 /**
@@ -49,6 +63,8 @@ typedef enum {
  * each nibble in the word that is sent out on
  * SIO contains one bit from the byte in bit 0
  * (which corresponds to SIO0, or MOSI).
+ *
+ * \param x The byte to send out to MOSI.
  */
 #define QSPI_IO_BYTE_TO_MOSI(x)     ( \
 ((((x) >> 0) & 1) | 0xE) << (0 * 4) | \
@@ -62,7 +78,9 @@ typedef enum {
 
 
 /**
- * The context structure that must be passed to each of the qspi_io functions. 
+ * The context structure that must be passed to each of the qspi_io functions.
+ * Several of the members in this structure must be set by the application prior
+ * to calling either qspi_io_init() or qspi_io_start_transaction().
  */
 typedef struct {
 	/**
@@ -206,6 +224,10 @@ typedef struct {
  * transformation as QSPI_IO_BYTE_TO_MOSI() but
  * also integrates the byte reversal and nibble
  * swap performed by qspi_io_words_out().
+ *
+ * \param x The byte to send out to MOSI.
+ *
+ * \returns the word to output to SIO.
  */
 __attribute__((always_inline))
 inline uint32_t qspi_io_byte_to_mosi(uint32_t x)
@@ -232,6 +254,10 @@ inline uint32_t qspi_io_byte_to_mosi(uint32_t x)
  * be transformed such that bit one from each
  * nibble (which corresponds to SIO1, or MISO)
  * is shifted into the correct bit position.
+ *
+ * \param x The word received on SIO.
+ *
+ * \returns the byte received on MISO.
  */
 __attribute__((always_inline))
 inline uint32_t qspi_io_miso_to_byte(uint32_t x)
@@ -281,22 +307,6 @@ inline uint32_t qspi_io_nibble_swap(uint32_t word)
 #define QSPI_IO_SETSR(c) asm volatile("setsr %0" : : "n"(c));
 #define QSPI_IO_CLRSR(c) asm volatile("clrsr %0" : : "n"(c));
 
-
-/* is syncr available in lib_xcore or anywhere else..??? */
-__attribute__((always_inline))
-inline void qspi_io_port_sync(resource_t __p)
-{
-	asm volatile("syncr res[%0]" : : "r" (__p));
-}
-
-/* is setpsc available in lib_xcore or anywhere else..??? */
-__attribute__((always_inline))
-inline void qspi_io_port_shift_count(resource_t __p,
-                                     uint32_t __shift_count)
-{
-	asm volatile("setpsc res[%0], %1" : : "r" (__p), "r" (__shift_count));
-}
-
 /**
  * Begins a new QSPI I/O transaction by starting the clock,
  * asserting CS, and sending out the first word which is
@@ -319,14 +329,15 @@ inline void qspi_io_port_shift_count(resource_t __p,
  * sufficiently slow. Fortunately in practice this rarely, if ever,
  * required.
  *
- * \param ctx         Pointer to the QSPI I/O context.
- * \param first_word  The first word to output.
- * \param len         The total number of clock cycles in the transaction.
- *                    CS will at some point during the transaction be setup
- *                    to deassert automatically after this number of cycles.
- * \param is_spi_read Set to true if the transaction will be a SPI read with
-                      no dummy cycles. This may run at a slower clock frequency
-                      in order to turn around SIO from output to input in time.
+ * \param ctx              Pointer to the QSPI I/O context.
+ * \param first_word       The first word to output.
+ * \param len              The total number of clock cycles in the transaction.
+ *                         CS will at some point during the transaction be setup
+ *                         to deassert automatically after this number of cycles.
+ * \param transaction_type Set to qspi_io_spi_read if the transaction will be a SPI
+ *                         read with no dummy cycles. This may run at a slower clock
+ *                         frequency in order to turn around SIO from output to input
+ *                         in time. Otherwise set to qspi_io_full_speed.
  */
 __attribute__((always_inline))
 inline void qspi_io_start_transaction(qspi_io_ctx_t *ctx,
@@ -416,7 +427,7 @@ inline void qspi_io_bytes_out(const qspi_io_ctx_t *ctx,
 		if (transfer_mode == qspi_io_transfer_normal) {
 			word = qspi_io_nibble_swap(word);
 		}
-		qspi_io_port_shift_count(ctx->sio_port, len);
+		port_set_shift_count(ctx->sio_port, len);
 		port_out(ctx->sio_port, word);
 	}
 }
@@ -522,7 +533,7 @@ inline void qspi_io_sio_direction_input(qspi_io_ctx_t *ctx)
 	 */
 	if (ctx->transaction_length != 0) {
 		uint32_t cs_start;
-		qspi_io_port_sync(ctx->cs_port);
+		port_sync(ctx->cs_port);
 		cs_start = port_get_trigger_time(ctx->cs_port);
 		port_out_at_time(ctx->cs_port, cs_start + ctx->transaction_length, 0);
 		ctx->transaction_length = 0;
@@ -551,7 +562,7 @@ inline void qspi_io_sio_direction_input(qspi_io_ctx_t *ctx)
 	 * then executing the appropriate setc instructions.
 	 */
 	if (ctx->sample_edge == qspi_io_sample_edge_falling) {
-		//qspi_io_port_sync(ctx->sio_port);
+		//port_sync(ctx->sio_port);
 		//port_reset(ctx->sio_port);
 		//port_set_sample_falling_edge(ctx->sio_port);
 		//port_set_buffered(ctx->sio_port);
@@ -567,7 +578,7 @@ inline void qspi_io_sio_direction_input(qspi_io_ctx_t *ctx)
 			"n"(XS1_SETC_BUF_BUFFERS)
 		);
 	} else {
-		//qspi_io_port_sync(ctx->sio_port);
+		//port_sync(ctx->sio_port);
 		//port_reset(ctx->sio_port);
 		//port_set_buffered(ctx->sio_port);
 		asm volatile (
@@ -672,7 +683,7 @@ inline void qspi_io_bytes_in(const qspi_io_ctx_t *ctx,
 			 * So we only set the port shift count here if there
 			 * is not an active port time.
 			 */
-			qspi_io_port_shift_count(ctx->sio_port, len * 8);
+			port_set_shift_count(ctx->sio_port, len * 8);
 		}
 
 		word = port_in(ctx->sio_port);
@@ -833,12 +844,12 @@ inline void qspi_io_end_transaction(const qspi_io_ctx_t *ctx)
 	 */
 	if (ctx->transaction_length != 0) {
 		uint32_t cs_start;
-		qspi_io_port_sync(ctx->cs_port);
+		port_sync(ctx->cs_port);
 		cs_start = port_get_trigger_time(ctx->cs_port);
 		port_out_at_time(ctx->cs_port, cs_start + ctx->transaction_length, 0);
 	}
 
-	qspi_io_port_sync(ctx->cs_port);
+	port_sync(ctx->cs_port);
 	clock_stop(ctx->clock_block);
 
 	/*
@@ -875,7 +886,7 @@ void qspi_io_deinit(const qspi_io_ctx_t *ctx);
  * other QSPI I/O function.
  *
  * \param ctx          Pointer to the QSPI I/O context. This must be initialized
- *                     with the clock block, ports, and clock divisors to use.
+ *                     with the clock block and ports to use.
  * \param source_clock Set to qspi_io_source_clock_ref to use the 100 MHz reference 
  *                     clock as the source for SCLK. Set to qspi_io_source_clock_xcore
  *                     to use the xcore clock.

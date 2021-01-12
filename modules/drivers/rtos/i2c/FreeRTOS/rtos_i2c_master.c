@@ -9,7 +9,7 @@
 __attribute__((fptrgroup("rtos_i2c_master_write_fptr_grp")))
 static i2c_res_t i2c_master_local_write(
         rtos_i2c_master_t *ctx,
-        uint8_t device,
+        uint8_t device_addr,
         uint8_t buf[],
         size_t n,
         size_t *num_bytes_sent,
@@ -21,7 +21,7 @@ static i2c_res_t i2c_master_local_write(
 
     res = i2c_master_write(
                            &ctx->ctx,
-                           device,
+                           device_addr,
                            buf,
                            n,
                            num_bytes_sent,
@@ -35,9 +35,9 @@ static i2c_res_t i2c_master_local_write(
 __attribute__((fptrgroup("rtos_i2c_master_read_fptr_grp")))
 static i2c_res_t i2c_master_local_read(
         rtos_i2c_master_t *ctx,
-        uint8_t device,
+        uint8_t device_addr,
         uint8_t buf[],
-        size_t m,
+        size_t n,
         int send_stop_bit)
 {
     i2c_res_t res;
@@ -46,9 +46,9 @@ static i2c_res_t i2c_master_local_read(
 
     res = i2c_master_read(
                           &ctx->ctx,
-                          device,
+                          device_addr,
                           buf,
-                          m,
+                          n,
                           send_stop_bit);
 
     xSemaphoreGiveRecursive(ctx->lock);
@@ -68,8 +68,8 @@ static void i2c_master_local_stop_bit_send(
 __attribute__((fptrgroup("rtos_i2c_master_reg_write_fptr_grp")))
 static i2c_regop_res_t i2c_master_local_reg_write(
         rtos_i2c_master_t *ctx,
-        uint8_t device,
-        uint8_t reg,
+        uint8_t device_addr,
+        uint8_t reg_addr,
         uint8_t data)
 {
     i2c_regop_res_t reg_res;
@@ -77,10 +77,10 @@ static i2c_regop_res_t i2c_master_local_reg_write(
     size_t num_bytes_sent = 0;
     uint8_t buf[2];
 
-    buf[0] = reg;
+    buf[0] = reg_addr;
     buf[1] = data;
 
-    res = i2c_master_local_write(ctx, device, buf, 2, &num_bytes_sent, 1);
+    res = i2c_master_local_write(ctx, device_addr, buf, 2, &num_bytes_sent, 1);
 
     if (res == I2C_ACK) {
         if (num_bytes_sent == 0) {
@@ -90,10 +90,8 @@ static i2c_regop_res_t i2c_master_local_reg_write(
         } else {
             reg_res = I2C_REGOP_SUCCESS;
         }
-    } else if (res == I2C_NACK) {
-        reg_res = I2C_REGOP_DEVICE_NACK;
     } else {
-        reg_res = I2C_REGOP_NOT_STARTED;
+        reg_res = I2C_REGOP_DEVICE_NACK;
     }
 
     return reg_res;
@@ -102,8 +100,8 @@ static i2c_regop_res_t i2c_master_local_reg_write(
 __attribute__((fptrgroup("rtos_i2c_master_reg_read_fptr_grp")))
 static i2c_regop_res_t  i2c_master_local_reg_read(
         rtos_i2c_master_t *ctx,
-        uint8_t device,
-        uint8_t reg,
+        uint8_t device_addr,
+        uint8_t reg_addr,
         uint8_t *data)
 {
     i2c_regop_res_t reg_res;
@@ -112,7 +110,7 @@ static i2c_regop_res_t  i2c_master_local_reg_read(
 
     xSemaphoreTakeRecursive(ctx->lock, portMAX_DELAY);
 
-    res = i2c_master_local_write(ctx, device, &reg, 1, &num_bytes_sent, 0);
+    res = i2c_master_local_write(ctx, device_addr, &reg_addr, 1, &num_bytes_sent, 0);
 
     if (res == I2C_ACK) {
         if (num_bytes_sent == 0) {
@@ -120,21 +118,17 @@ static i2c_regop_res_t  i2c_master_local_reg_read(
         } else {
             reg_res = I2C_REGOP_SUCCESS;
         }
-    } else if (res == I2C_NACK) {
-        reg_res = I2C_REGOP_DEVICE_NACK;
     } else {
-        reg_res = I2C_REGOP_NOT_STARTED;
+        reg_res = I2C_REGOP_DEVICE_NACK;
     }
 
     if (reg_res == I2C_REGOP_SUCCESS) {
-        res = i2c_master_local_read(ctx, device, data, 1, 1);
+        res = i2c_master_local_read(ctx, device_addr, data, 1, 1);
 
         if (res == I2C_ACK) {
             reg_res = I2C_REGOP_SUCCESS;
-        } else if (res == I2C_NACK) {
-            reg_res = I2C_REGOP_DEVICE_NACK;
         } else {
-            reg_res = I2C_REGOP_NOT_STARTED;
+            reg_res = I2C_REGOP_DEVICE_NACK;
         }
     }
 

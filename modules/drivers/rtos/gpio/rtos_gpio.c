@@ -1,10 +1,8 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #include <string.h>
 #include <xcore/triggerable.h>
 #include <xcore/assert.h>
-
-#include "FreeRTOS.h"
 
 #include "drivers/rtos/gpio/api/rtos_gpio.h"
 
@@ -32,7 +30,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_gpio_isr, arg)
     RTOS_GPIO_ISR_CALLBACK_ATTR rtos_gpio_isr_cb_t cb;
     int enabled = INTERRUPT_ENABLED;
 
-    taskENTER_CRITICAL_FROM_ISR();
+    int state = rtos_osal_critical_enter();
     {
         value = port_in(p);
         isr_app_data = cb_arg->isr_app_data;
@@ -43,7 +41,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_gpio_isr, arg)
             cb_arg->enabled = INTERRUPT_DISABLED;
         }
     }
-    taskEXIT_CRITICAL_FROM_ISR(0);
+    rtos_osal_critical_exit(state);
 
     if (enabled) {
         cb(ctx, isr_app_data, cb_arg->port_id, value);
@@ -73,11 +71,11 @@ static uint32_t gpio_local_port_in(rtos_gpio_t *ctx, rtos_gpio_port_id_t port_id
 
     xassert(port_valid(port_id));
 
-    taskENTER_CRITICAL();
+    int state = rtos_osal_critical_enter();
     {
         value = port_peek(gpio_port_lookup[port_id]);
     }
-    taskEXIT_CRITICAL();
+    rtos_osal_critical_exit(state);
 
     return value;
 }
@@ -89,11 +87,11 @@ static void gpio_local_port_out(rtos_gpio_t *ctx, rtos_gpio_port_id_t port_id, u
 
     xassert(port_valid(port_id));
 
-    taskENTER_CRITICAL();
+    int state = rtos_osal_critical_enter();
     {
         port_out(gpio_port_lookup[port_id], value);
     }
-    taskEXIT_CRITICAL();
+    rtos_osal_critical_exit(state);
 }
 
 __attribute__((fptrgroup("rtos_gpio_isr_callback_set_fptr_grp")))
@@ -101,10 +99,10 @@ static void gpio_local_isr_callback_set(rtos_gpio_t *ctx, rtos_gpio_port_id_t po
 {
     xassert(port_valid(port_id));
 
-    taskENTER_CRITICAL();
+    int state = rtos_osal_critical_enter();
     {
         if (ctx->isr_info[port_id] == NULL) {
-            ctx->isr_info[port_id] = pvPortMalloc(sizeof(rtos_gpio_isr_info_t));
+            ctx->isr_info[port_id] = rtos_osal_malloc(sizeof(rtos_gpio_isr_info_t));
             ctx->isr_info[port_id]->ctx = ctx;
             ctx->isr_info[port_id]->port_id = port_id;
             ctx->isr_info[port_id]->enabled = INTERRUPT_DISABLED;
@@ -115,7 +113,7 @@ static void gpio_local_isr_callback_set(rtos_gpio_t *ctx, rtos_gpio_port_id_t po
         ctx->isr_info[port_id]->callback = cb;
         ctx->isr_info[port_id]->isr_app_data = app_data;
     }
-    taskEXIT_CRITICAL();
+    rtos_osal_critical_exit(state);
 }
 
 __attribute__((fptrgroup("rtos_gpio_interrupt_enable_fptr_grp")))
@@ -127,7 +125,7 @@ static void gpio_local_interrupt_enable(rtos_gpio_t *ctx, rtos_gpio_port_id_t po
     xassert(port_valid(port_id));
     p = gpio_port_lookup[port_id];
 
-    taskENTER_CRITICAL();
+    int state = rtos_osal_critical_enter();
     {
         if (ctx->isr_info[port_id] != NULL && !ctx->isr_info[port_id]->enabled) {
             value = port_peek(p);
@@ -136,7 +134,7 @@ static void gpio_local_interrupt_enable(rtos_gpio_t *ctx, rtos_gpio_port_id_t po
         }
         ctx->isr_info[port_id]->enabled = INTERRUPT_ENABLED;
     }
-    taskEXIT_CRITICAL();
+    rtos_osal_critical_exit(state);
 }
 
 __attribute__((fptrgroup("rtos_gpio_interrupt_disable_fptr_grp")))
@@ -144,13 +142,13 @@ static void gpio_local_interrupt_disable(rtos_gpio_t *ctx, rtos_gpio_port_id_t p
 {
     xassert(port_valid(port_id));
 
-    taskENTER_CRITICAL();
+    int state = rtos_osal_critical_enter();
     {
         if (ctx->isr_info[port_id] != NULL && ctx->isr_info[port_id]->enabled) {
             ctx->isr_info[port_id]->enabled = INTERRUPT_DISABLE_PENDING;
         }
     }
-    taskEXIT_CRITICAL();
+    rtos_osal_critical_exit(state);
 }
 
 void rtos_gpio_start(
