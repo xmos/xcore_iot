@@ -15,7 +15,7 @@ enum {
 __attribute__((fptrgroup("rtos_i2c_master_write_fptr_grp")))
 static i2c_res_t i2c_master_remote_write(
         rtos_i2c_master_t *i2c_master_ctx,
-        uint8_t device,
+        uint8_t device_addr,
         uint8_t buf[],
         size_t n,
         size_t *num_bytes_sent,
@@ -29,7 +29,7 @@ static i2c_res_t i2c_master_remote_write(
 
     const rpc_param_desc_t rpc_param_desc[] = {
             RPC_PARAM_TYPE(i2c_master_ctx),
-            RPC_PARAM_TYPE(device),
+            RPC_PARAM_TYPE(device_addr),
             RPC_PARAM_IN_BUFFER(buf, n),
             RPC_PARAM_TYPE(n),
             RPC_PARAM_RETURN(size_t),
@@ -40,7 +40,7 @@ static i2c_res_t i2c_master_remote_write(
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_write, rpc_param_desc,
-            &host_ctx_ptr, &device, buf, &n, num_bytes_sent, &send_stop_bit, &ret);
+            &host_ctx_ptr, &device_addr, buf, &n, num_bytes_sent, &send_stop_bit, &ret);
 
     return ret;
 }
@@ -48,9 +48,9 @@ static i2c_res_t i2c_master_remote_write(
 __attribute__((fptrgroup("rtos_i2c_master_read_fptr_grp")))
 static i2c_res_t i2c_master_remote_read(
         rtos_i2c_master_t *i2c_master_ctx,
-        uint8_t device,
+        uint8_t device_addr,
         uint8_t buf[],
-        size_t m,
+        size_t n,
         int send_stop_bit)
 {
     rtos_intertile_address_t *host_address = &i2c_master_ctx->rpc_config->host_address;
@@ -61,9 +61,9 @@ static i2c_res_t i2c_master_remote_read(
 
     const rpc_param_desc_t rpc_param_desc[] = {
             RPC_PARAM_TYPE(i2c_master_ctx),
-            RPC_PARAM_TYPE(device),
-            RPC_PARAM_OUT_BUFFER(buf, m),
-            RPC_PARAM_TYPE(m),
+            RPC_PARAM_TYPE(device_addr),
+            RPC_PARAM_OUT_BUFFER(buf, n),
+            RPC_PARAM_TYPE(n),
             RPC_PARAM_TYPE(send_stop_bit),
             RPC_PARAM_RETURN(i2c_res_t),
             RPC_PARAM_LIST_END
@@ -71,7 +71,7 @@ static i2c_res_t i2c_master_remote_read(
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_read, rpc_param_desc,
-            &host_ctx_ptr, &device, buf, &m, &send_stop_bit, &ret);
+            &host_ctx_ptr, &device_addr, buf, &n, &send_stop_bit, &ret);
 
     return ret;
 }
@@ -98,8 +98,8 @@ static void i2c_master_remote_stop_bit_send(
 __attribute__((fptrgroup("rtos_i2c_master_reg_write_fptr_grp")))
 static i2c_regop_res_t i2c_master_remote_reg_write(
         rtos_i2c_master_t *i2c_master_ctx,
-        uint8_t device,
-        uint8_t reg,
+        uint8_t device_addr,
+        uint8_t reg_addr,
         uint8_t data)
 {
     rtos_intertile_address_t *host_address = &i2c_master_ctx->rpc_config->host_address;
@@ -110,8 +110,8 @@ static i2c_regop_res_t i2c_master_remote_reg_write(
 
     const rpc_param_desc_t rpc_param_desc[] = {
             RPC_PARAM_TYPE(i2c_master_ctx),
-            RPC_PARAM_TYPE(device),
-            RPC_PARAM_TYPE(reg),
+            RPC_PARAM_TYPE(device_addr),
+            RPC_PARAM_TYPE(reg_addr),
             RPC_PARAM_TYPE(data),
             RPC_PARAM_RETURN(i2c_regop_res_t),
             RPC_PARAM_LIST_END
@@ -119,7 +119,7 @@ static i2c_regop_res_t i2c_master_remote_reg_write(
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_reg_write, rpc_param_desc,
-            &host_ctx_ptr, &device, &reg, &data, &ret);
+            &host_ctx_ptr, &device_addr, &reg_addr, &data, &ret);
 
     return ret;
 }
@@ -127,8 +127,8 @@ static i2c_regop_res_t i2c_master_remote_reg_write(
 __attribute__((fptrgroup("rtos_i2c_master_reg_read_fptr_grp")))
 static i2c_regop_res_t  i2c_master_remote_reg_read(
         rtos_i2c_master_t *i2c_master_ctx,
-        uint8_t device,
-        uint8_t reg,
+        uint8_t device_addr,
+        uint8_t reg_addr,
         uint8_t *data)
 {
     rtos_intertile_address_t *host_address = &i2c_master_ctx->rpc_config->host_address;
@@ -139,8 +139,8 @@ static i2c_regop_res_t  i2c_master_remote_reg_read(
 
     const rpc_param_desc_t rpc_param_desc[] = {
             RPC_PARAM_TYPE(i2c_master_ctx),
-            RPC_PARAM_TYPE(device),
-            RPC_PARAM_TYPE(reg),
+            RPC_PARAM_TYPE(device_addr),
+            RPC_PARAM_TYPE(reg_addr),
             RPC_PARAM_RETURN(uint8_t),
             RPC_PARAM_RETURN(i2c_regop_res_t),
             RPC_PARAM_LIST_END
@@ -148,7 +148,7 @@ static i2c_regop_res_t  i2c_master_remote_reg_read(
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_reg_read, rpc_param_desc,
-            &host_ctx_ptr, &device, &reg, data, &ret);
+            &host_ctx_ptr, &device_addr, &reg_addr, data, &ret);
 
     return ret;
 }
@@ -158,20 +158,20 @@ static int i2c_master_reg_write_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
     int msg_length;
 
     rtos_i2c_master_t *i2c_master_ctx;
-    uint8_t device;
-    uint8_t reg;
+    uint8_t device_addr;
+    uint8_t reg_addr;
     uint8_t data;
     i2c_regop_res_t ret;
 
     rpc_request_unmarshall(
             rpc_msg,
-            &i2c_master_ctx, &device, &reg, &data, &ret);
+            &i2c_master_ctx, &device_addr, &reg_addr, &data, &ret);
 
-    ret = rtos_i2c_master_reg_write(i2c_master_ctx, device, reg, data);
+    ret = rtos_i2c_master_reg_write(i2c_master_ctx, device_addr, reg_addr, data);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
-            i2c_master_ctx, device, reg, data, ret);
+            i2c_master_ctx, device_addr, reg_addr, data, ret);
 
     return msg_length;
 }
