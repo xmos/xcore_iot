@@ -8,7 +8,7 @@ __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_remote_rx(
         rtos_mic_array_t *mic_array_ctx,
         int32_t sample_buf[][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS],
-        size_t sample_count,
+        size_t frame_count,
         unsigned timeout)
 {
     rtos_intertile_address_t *host_address = &mic_array_ctx->rpc_config->host_address;
@@ -19,8 +19,8 @@ static size_t mic_array_remote_rx(
 
     const rpc_param_desc_t rpc_param_desc[] = {
             RPC_PARAM_TYPE(mic_array_ctx),
-            RPC_PARAM_OUT_BUFFER(sample_buf[0], sample_count * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS)),
-            RPC_PARAM_TYPE(sample_count),
+            RPC_PARAM_OUT_BUFFER(sample_buf[0], frame_count * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS)),
+            RPC_PARAM_TYPE(frame_count),
             RPC_PARAM_TYPE(timeout),
             RPC_PARAM_RETURN(size_t),
             RPC_PARAM_LIST_END
@@ -28,7 +28,7 @@ static size_t mic_array_remote_rx(
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, 0, rpc_param_desc,
-            &host_ctx_ptr, &sample_buf[0][0], &sample_count, &timeout, &ret);
+            &host_ctx_ptr, &sample_buf[0][0], &frame_count, &timeout, &ret);
 
     return ret;
 }
@@ -39,7 +39,7 @@ static int mic_array_rx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 
     rtos_mic_array_t *mic_array_ctx;
     int32_t (*sample_buf)[MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS];
-    size_t sample_count;
+    size_t frame_count;
     unsigned timeout;
     size_t ret;
 
@@ -47,20 +47,18 @@ static int mic_array_rx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
     pointer will not get set. */
     rpc_request_unmarshall(
             rpc_msg,
-            &mic_array_ctx, &sample_buf, &sample_count, &timeout, &ret);
+            &mic_array_ctx, &sample_buf, &frame_count, &timeout, &ret);
 
     /* Instead allocate a buffer with the length parameter
     before calling, as this is what would be done by
-    the client. Alternatively this could be allocated
-    statically or on the stack if the length is known
-    at compile time. */
-    sample_buf = pvPortMalloc(sample_count * sizeof(sample_buf[0]));
+    the client. */
+    sample_buf = pvPortMalloc(frame_count * sizeof(sample_buf[0]));
 
-    ret = rtos_mic_array_rx(mic_array_ctx, sample_buf, sample_count, timeout);
+    ret = rtos_mic_array_rx(mic_array_ctx, sample_buf, frame_count, timeout);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
-            mic_array_ctx, sample_buf, sample_count, timeout, ret);
+            mic_array_ctx, sample_buf, frame_count, timeout, ret);
 
     /* The data from buffer has been copied into the response
     message. Since buffer was allocated on the heap, free

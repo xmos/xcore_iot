@@ -64,12 +64,12 @@ __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_local_rx(
         rtos_mic_array_t *mic_array_ctx,
         int32_t sample_buf[][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS],
-        size_t sample_count,
+        size_t frame_count,
         unsigned timeout)
 {
     size_t bytes_recvd;
 
-    bytes_recvd = xStreamBufferReceive(mic_array_ctx->audio_stream_buffer, sample_buf, sample_count * sizeof(sample_buf[0]), timeout);
+    bytes_recvd = xStreamBufferReceive(mic_array_ctx->audio_stream_buffer, sample_buf, frame_count * sizeof(sample_buf[0]), timeout);
 
     return bytes_recvd / sizeof(sample_buf[0]);
 }

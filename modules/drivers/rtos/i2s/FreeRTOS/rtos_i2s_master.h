@@ -63,7 +63,7 @@ struct rtos_i2s_master_struct{
  */
 
 /**
- * Transmits samples out to the I2S interface.
+ * Transmits sample frames out to the I2S interface.
  *
  * The samples are stored into a buffer and are not necessarily sent out to the
  * I2S interface before this function returns.
@@ -93,7 +93,7 @@ inline size_t rtos_i2s_master_tx(
  * desired sample rate.
  *
  * \param audio_clock_frequency The frequency of the audio clock at the port p_mclk.
- * \param sample_rate The desired sample rate.
+ * \param sample_rate           The desired sample rate.
  *
  * \returns the MCLK/BCLK ratio that should be provided to rtos_i2s_master_start().
  */
