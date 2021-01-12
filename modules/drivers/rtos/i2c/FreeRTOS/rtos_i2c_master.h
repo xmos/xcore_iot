@@ -214,7 +214,7 @@ void rtos_i2c_master_start(
  * called either before or after starting the RTOS, but must be called before calling
  * rtos_i2c_master_start() or any of the core I2C master driver functions with this instance.
  *
- * \param ctx                 A pointer to the I2C master driver instance to initialize.
+ * \param i2c_master_ctx      A pointer to the I2C master driver instance to initialize.
  * \param p_scl               The port containing SCL. This may be either the same as
  *                            or different than \p p_sda.
  * \param scl_bit_position    The bit number of the SCL line on the port \p p_scl.
