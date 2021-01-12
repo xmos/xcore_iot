@@ -5,6 +5,17 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 set(DRIVERS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/drivers")
 
+#**********************
+# Set default configuration variables
+#**********************
+if(NOT DEFINED RTOS_CMAKE_RTOS)
+    set(RTOS_CMAKE_RTOS "FreeRTOS") # Only FreeRTOS is currently supported
+endif()
+
+if(NOT DEFINED RTOS_WIFI_CHIP)
+    set(RTOS_WIFI_CHIP "sl_wf200") # only WiFi module currently supported
+endif()
+
 #********************************
 # Gather various sources
 #********************************
@@ -13,7 +24,7 @@ include("${DRIVERS_DIR}/rtos/drivers_rtos.cmake")
 include("${DRIVERS_DIR}/sw_services/drivers_sw_services.cmake")
 
 #**********************
-# set user variables
+# Set user variables
 #**********************
 set(DRIVERS_SOURCES
     ${DRIVERS_HIL_SOURCES}
