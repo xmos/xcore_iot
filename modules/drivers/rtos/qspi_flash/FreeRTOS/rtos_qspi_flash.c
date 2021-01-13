@@ -9,9 +9,9 @@
 
 #include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
 
-#define FLASH_PRGM_OP_READ 0
-#define FLASH_PRGM_OP_WRITE 1
-#define FLASH_PRGM_OP_ERASE 2
+#define FLASH_OP_READ  0
+#define FLASH_OP_WRITE 1
+#define FLASH_OP_ERASE 2
 
 static void read_op(
         rtos_qspi_flash_t *ctx,
@@ -260,15 +260,15 @@ static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
         vTaskPrioritySet(ctx->op_task, op.priority);
 
         switch (op.op) {
-        case FLASH_PRGM_OP_READ:
+        case FLASH_OP_READ:
             read_op(ctx, op.data, op.address, op.len);
             xTaskNotify(op.requesting_task, 0, eNoAction);
             break;
-        case FLASH_PRGM_OP_WRITE:
+        case FLASH_OP_WRITE:
             write_op(ctx, op.data, op.address, op.len);
             vPortFree(op.data);
             break;
-        case FLASH_PRGM_OP_ERASE:
+        case FLASH_OP_ERASE:
             erase_op(ctx, op.address, op.len);
             break;
 
@@ -315,7 +315,7 @@ static void qspi_flash_local_read(
         size_t len)
 {
     qspi_flash_op_req_t op = {
-            .op = FLASH_PRGM_OP_READ,
+            .op = FLASH_OP_READ,
             .data = data,
             .address = address,
             .len = len
@@ -340,7 +340,7 @@ static void qspi_flash_local_write(
         size_t len)
 {
     qspi_flash_op_req_t op = {
-            .op = FLASH_PRGM_OP_WRITE,
+            .op = FLASH_OP_WRITE,
             .address = address,
             .len = len
     };
@@ -358,7 +358,7 @@ static void qspi_flash_local_erase(
         size_t len)
 {
     qspi_flash_op_req_t op = {
-            .op = FLASH_PRGM_OP_ERASE,
+            .op = FLASH_OP_ERASE,
             .address = address,
             .len = len
     };
@@ -394,7 +394,7 @@ void rtos_qspi_flash_init(
         port_t cs_port,
         port_t sclk_port,
         port_t sio_port,
-        int source_clock,
+        qspi_io_source_clock_t source_clock,
         int full_speed_clk_divisor,
         uint32_t full_speed_sclk_sample_delay,
         qspi_io_sample_edge_t full_speed_sclk_sample_edge,
