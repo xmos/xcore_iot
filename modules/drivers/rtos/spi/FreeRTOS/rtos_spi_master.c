@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #include <string.h>
 
@@ -7,39 +7,73 @@
 
 #include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
 
+#define SPI_OP_START 0
+#define SPI_OP_XFER  1
+#define SPI_OP_DELAY 2
+#define SPI_OP_END   3
+
 typedef struct {
     rtos_spi_master_device_t *ctx;
+    int op;
     uint8_t *data_out;
     uint8_t *data_in;
     size_t len;
-    TaskHandle_t req_task;
+    unsigned priority;
+    TaskHandle_t requesting_task;
 } spi_xfer_req_t;
 
 static void spi_xfer_thread(rtos_spi_master_t *ctx)
 {
     spi_xfer_req_t req;
+    unsigned current_priority = ctx->op_task_priority;
 
     for (;;) {
         xQueueReceive(ctx->xfer_req_queue, &req, portMAX_DELAY);
 
-        /*
-         * It would be nicer if spi_master_transfer() could handle being
-         * interrupted. At the moment it doesn't seem possible. This is
-         * the safest thing to do.
-         */
-        interrupt_mask_all();
+        switch (req.op) {
+        case SPI_OP_START:
+            if (current_priority != req.priority) {
+                vTaskPrioritySet(ctx->op_task, req.priority);
+                current_priority = req.priority;
+            }
 
-        spi_master_transfer(&req.ctx->dev_ctx,
-                req.data_out,
-                req.data_in,
-                req.len);
+            spi_master_start_transaction(&req.ctx->dev_ctx);
+            break;
 
-        interrupt_unmask_all();
+        case SPI_OP_XFER:
+            /*
+             * It would be nicer if spi_master_transfer() could handle being
+             * interrupted. At the moment it doesn't seem possible. This is
+             * the safest thing to do.
+             */
+            interrupt_mask_all();
 
-        if (req.data_in != NULL) {
-            xTaskNotify(req.req_task, 0, eNoAction);
-        } else {
-            vPortFree(req.data_out);
+            spi_master_transfer(&req.ctx->dev_ctx,
+                    req.data_out,
+                    req.data_in,
+                    req.len);
+
+            interrupt_unmask_all();
+
+            if (req.data_in != NULL) {
+                xTaskNotify(req.requesting_task, 0, eNoAction);
+            } else {
+                vPortFree(req.data_out);
+            }
+            break;
+
+        case SPI_OP_DELAY:
+            spi_master_delay_before_next_transfer(&req.ctx->dev_ctx, req.len);
+            break;
+
+        case SPI_OP_END:
+            spi_master_end_transaction(&req.ctx->dev_ctx);
+
+            if (current_priority != ctx->op_task_priority) {
+                vTaskPrioritySet(ctx->op_task, ctx->op_task_priority);
+                current_priority = ctx->op_task_priority;
+            }
+            break;
         }
     }
 }
@@ -50,7 +84,11 @@ static void spi_master_local_transaction_start(
 {
     xSemaphoreTakeRecursive(ctx->bus_ctx->lock, portMAX_DELAY);
 
-    spi_master_start_transaction(&ctx->dev_ctx);
+    spi_xfer_req_t req;
+    req.op = SPI_OP_START;
+    req.ctx = ctx;
+    req.priority = uxTaskPriorityGet(NULL);
+    xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
 }
 
 __attribute__((fptrgroup("rtos_spi_master_transfer_fptr_grp")))
@@ -60,26 +98,16 @@ static void spi_master_local_transfer(
         uint8_t *data_in,
         size_t len)
 {
-#if 1
-    interrupt_mask_all();
-
-    spi_master_transfer(&ctx->dev_ctx,
-            data_out,
-            data_in,
-            len);
-
-    interrupt_unmask_all();
-#else
-
     spi_xfer_req_t req;
 
+    req.op = SPI_OP_XFER;
     req.ctx = ctx;
     req.data_in = data_in;
     req.len = len;
 
     if (data_in != NULL) {
         req.data_out = data_out;
-        req.req_task = xTaskGetCurrentTaskHandle();
+        req.requesting_task = xTaskGetCurrentTaskHandle();
     } else {
         /*
          * TODO: Consider a zero copy option? Caller would
@@ -91,7 +119,7 @@ static void spi_master_local_transfer(
          */
         req.data_out = pvPortMalloc(len);
         memcpy(req.data_out, data_out, len);
-        req.req_task = NULL;
+        req.requesting_task = NULL;
     }
 
     xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
@@ -103,7 +131,6 @@ static void spi_master_local_transfer(
                 NULL,          /* Pass out notification value into value */
                 portMAX_DELAY ); /* Wait indefinitely until next notification */
     }
-#endif
 }
 
 __attribute__((fptrgroup("rtos_spi_master_delay_before_next_transfer_fptr_grp")))
@@ -111,14 +138,20 @@ static void spi_master_local_delay_before_next_transfer(
         rtos_spi_master_device_t *ctx,
         uint32_t delay_ticks)
 {
-    spi_master_delay_before_next_transfer(&ctx->dev_ctx, delay_ticks);
+    spi_xfer_req_t req;
+    req.op = SPI_OP_DELAY;
+    req.len = delay_ticks;
+    xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
 }
 
 __attribute__((fptrgroup("rtos_spi_master_transaction_end_fptr_grp")))
 static void spi_master_local_transaction_end(
         rtos_spi_master_device_t *ctx)
 {
-    spi_master_end_transaction(&ctx->dev_ctx);
+    spi_xfer_req_t req;
+    req.op = SPI_OP_END;
+    req.ctx = ctx;
+    xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
 
     xSemaphoreGiveRecursive(ctx->bus_ctx->lock);
 }
@@ -131,13 +164,14 @@ void rtos_spi_master_start(
 
     spi_master_ctx->xfer_req_queue = xQueueCreate(2, sizeof(spi_xfer_req_t));
 
+    spi_master_ctx->op_task_priority = priority;
     xTaskCreate(
                 (TaskFunction_t) spi_xfer_thread,
                 "spi_xfer_thread",
                 RTOS_THREAD_STACK_SIZE(spi_xfer_thread),
                 spi_master_ctx,
                 priority,
-                NULL);
+                &spi_master_ctx->op_task);
 
     if (spi_master_ctx->rpc_config != NULL && spi_master_ctx->rpc_config->rpc_host_start != NULL) {
         spi_master_ctx->rpc_config->rpc_host_start(spi_master_ctx->rpc_config);

@@ -239,4 +239,6 @@ void rtos_mic_array_init(
         const port_t p_pdm_clk,
         const port_t p_pdm_mics);
 
+/**@}*/
+
 #endif /* RTOS_MIC_ARRAY_H_ */

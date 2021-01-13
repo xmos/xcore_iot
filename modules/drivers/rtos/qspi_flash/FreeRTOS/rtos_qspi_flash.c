@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #define DEBUG_UNIT RTOS_QSPI_FLASH
 
