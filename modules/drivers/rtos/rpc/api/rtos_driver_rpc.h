@@ -7,8 +7,18 @@
 
 #include "rtos_intertile.h"
 
+/**
+ * Typedef to the RTOS driver RPC configuration struct.
+ */
 typedef struct rtos_driver_rpc_struct rtos_driver_rpc_t;
 
+/**
+ * Struct representing an RTOS driver RPC configuration.
+ *
+ * This struct is intended for use by the RTOS drivers to implement
+ * their intertile RPC support. The members in this struct should not
+ * be accessed directly by applications.
+ */
 struct rtos_driver_rpc_struct {
     union {
         rtos_intertile_address_t client_address[RTOS_DRIVER_RPC_MAX_CLIENT_TILES];

@@ -1,4 +1,10 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
+
+/**
+ * This is the API for the RPC library used by the XCORE RTOS drivers.
+ * Applications may also use this API directly. Note its usage by the
+ * drivers for examples.
+ */
 
 #ifndef RTOS_RPC_H_
 #define RTOS_RPC_H_
@@ -92,8 +98,9 @@ typedef struct {
 /**
  * Creates an RPC request message to call a remote function. See also rpc_client_call_generic().
  *
- * \param[out] msg        The RPC request message that can be sent to the remote tile. An intertile message
- *                        buffer is allocated for it and a pointer to it is returned via this parameter.
+ * \param[out] msg        The RPC request message that can be sent to the remote tile. A buffer is allocated
+ *                        for it and a pointer to it is returned via this parameter. It must be freed with
+ *                        rtos_osal_free() when it is no longer needed.
  * \param[in]  fcode      The function code enumerator. This is used by the remote tile to determine which function
  *                        to execute.
  * \param[in]  param_desc Parameter descriptor list. This describes each of the remote function's parameters,
@@ -111,8 +118,9 @@ int rpc_request_marshall_va(uint8_t **msg, int fcode, const rpc_param_desc_t par
  * This is the same as rpc_request_marshall_va(), except that it takes a variable number
  * of arguments for the remote function arguments, rather than a va_list of them.
  *
- * \param[out] msg        The RPC request message that can be sent to the remote tile. An intertile message
- *                        buffer is allocated for it and a pointer to it is returned via this parameter.
+ * \param[out] msg        The RPC request message that can be sent to the remote tile. A buffer is allocated
+ *                        for it and a pointer to it is returned via this parameter. It must be freed with
+ *                        rtos_osal_free() when it is no longer needed.
  * \param[in]  fcode      The function code enumerator. This is used by the remote tile to determine which function
  *                        to execute.
  * \param[in]  param_desc Parameter descriptor list. This describes each of the remote function's parameters,
@@ -136,7 +144,7 @@ int rpc_request_marshall(uint8_t **msg, int fcode, const rpc_param_desc_t param_
 void rpc_request_parse(rpc_msg_t *rpc_msg, uint8_t *msg_buf);
 
 /**
- * Retreives the arguments from a parsed RPC request message into a list of parameters.
+ * Retrieves the arguments from a parsed RPC request message into a list of parameters.
  *
  * \param[in]  rpc_msg A pointer to an rpc_msg_t struct that has already been filled in by rpc_request_parse().
  * \param[out] ap      The arguments to pass to the function corresponding to rpc_msg->fcode. They must be in
@@ -161,8 +169,9 @@ void rpc_request_unmarshall(rpc_msg_t *rpc_msg, ...);
 /**
  * Creates an RPC response message to send back a function's return value and any output buffer data to the remote caller.
  *
- * \param[out] msg        The RPC response message that can be sent to the remote tile. An intertile message
- *                        buffer is allocated for it and a pointer to it is returned via this parameter.
+ * \param[out] msg        The RPC response message that can be sent to the remote tile. A buffer is allocated
+ *                        for it and a pointer to it is returned via this parameter. It must be freed with
+ *                        rtos_osal_free() when it is no longer needed.
  * \param[in]  rpc_msg    A pointer to an rpc_msg_t struct that has already been filled in by rpc_request_parse().
  * \param[in]  ap         The arguments that were passed to the called function. They must be in the same order
  *                        and match the parameters that were passed to the function. Note that these should be the
@@ -177,8 +186,9 @@ int rpc_response_marshall_va(uint8_t **msg, const rpc_msg_t *rpc_msg, va_list ap
  * This is the same as rpc_response_marshall_va(), except that it takes a variable number
  * of arguments for the function arguments, rather than a va_list of them.
  *
- * \param[out] msg        The RPC response message that can be sent to the remote tile. An intertile message
- *                        buffer is allocated for it and a pointer to it is returned via this parameter.
+ * \param[out] msg        The RPC response message that can be sent to the remote tile. A buffer is allocated
+ *                        for it and a pointer to it is returned via this parameter. It must be freed with
+ *                        rtos_osal_free() when it is no longer needed.
  * \param[in]  rpc_msg    A pointer to an rpc_msg_t struct that has already been filled in by rpc_request_parse().
  * \param[in]  ap         The arguments that were passed to the called function. They must be in the same order
  *                        and match the parameters that were passed to the function. Note that these should be the
@@ -199,7 +209,7 @@ int rpc_response_marshall(uint8_t **msg, const rpc_msg_t *rpc_msg, ...);
 void rpc_response_parse(rpc_msg_t *rpc_msg, uint8_t *msg_buf);
 
 /**
- * Retreives the return value and output buffer data from a parsed RPC response message into a list of parameters.
+ * Retrieves the return value and output buffer data from a parsed RPC response message into a list of parameters.
  * See also rpc_client_call_generic().
  *
  * \param[in]  rpc_msg A pointer to an rpc_msg_t struct that has already been filled in by rpc_response_parse().
@@ -223,20 +233,21 @@ void rpc_response_unmarshall_va(const rpc_msg_t *rpc_msg, const rpc_param_desc_t
 void rpc_response_unmarshall(const rpc_msg_t *rpc_msg, const rpc_param_desc_t param_desc[], ...);
 
 /**
- * Calls a remote function given a function code enumerator, a parameter descriptor list, and an intertile pipe
- * that has already been established.
+ * Calls a remote function given a function code enumerator, a parameter descriptor list, and an intertile instance
+ * that has already been started.
  *
  * This function may be used to call a remote function rather than the three separate functions rpc_request_marshall_va(),
  * rpc_response_parse(), and rpc_response_unmarshall_va(), as the sequence is generic enough to handle most remote functions.
  *
- * \param[in] rpc_pipe An intertile pipe that has already been established and connected to the remote tile that
- *                     hosts the remote function. See intertile_pipe().
- * \param[in] fcode    The function code enumerator. This is used by the remote tile to determine which function
- *                     to execute.
- * \param[in,out] ...  The arguments to pass to the remote function. They must be in the same order and match
- *                     the parameters described in the list \p param_desc. Each must be a pointer to the argument
- *                     data. Input argument data will be copied into the request message and sent to the remote
- *                     function. Output argument data will be received and copied to the argument pointers.
+ * \param[in] intertile_ctx An intertile driver instance that has already been initialized and started, and is connected
+ *                          to the tile that hosts the remote function.
+ * \param[in] port          The intertile port to send the request to, and listen for the response from.
+ * \param[in] fcode         The function code enumerator. This is used by the remote tile to determine which function
+ *                          to execute.
+ * \param[in,out] ...       The arguments to pass to the remote function. They must be in the same order and match
+ *                          the parameters described in the list \p param_desc. Each must be a pointer to the argument
+ *                          data. Input argument data will be copied into the request message and sent to the remote
+ *                          function. Output argument data will be received and copied to the argument pointers.
  */
 void rpc_client_call_generic(rtos_intertile_t *intertile_ctx, uint8_t port, int fcode, const rpc_param_desc_t param_desc[], ...);
 

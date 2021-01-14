@@ -149,7 +149,7 @@ set(THIS_LIB RTOS_RPC_DRIVER)
 if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_FLAGS "-Os")
 
-    file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/*.c")
 
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 

@@ -5,9 +5,8 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "FreeRTOS.h"
-
 #include "rtos_intertile.h"
+#include "drivers/rtos/osal/api/rtos_osal.h"
 #include "drivers/rtos/rpc/api/rtos_rpc.h"
 
 int rpc_request_marshall_va(uint8_t **msg, int fcode, const rpc_param_desc_t param_desc[], va_list ap)
@@ -31,7 +30,7 @@ int rpc_request_marshall_va(uint8_t **msg, int fcode, const rpc_param_desc_t par
                  sizeof(rpc_param_desc_t) * param_count +  /* Space for each parameter descriptor */
                  param_total_length;                       /* Space for the parameters themselves */
 
-    *msg = pvPortMalloc(msg_length);
+    *msg = rtos_osal_malloc(msg_length);
     msg_ptr = *msg;
 
     memcpy(msg_ptr, &fcode, sizeof(int));
@@ -137,7 +136,7 @@ int rpc_response_marshall_va(uint8_t **msg, const rpc_msg_t *rpc_msg, va_list ap
     msg_length = sizeof(int) +                             /* Space for the function code */
                  param_total_length;                       /* Space for the parameters themselves */
 
-    *msg = pvPortMalloc(msg_length);
+    *msg = rtos_osal_malloc(msg_length);
     msg_ptr = *msg;
 
     memcpy(msg_ptr, &rpc_msg->fcode, sizeof(int));
@@ -246,7 +245,7 @@ void rpc_client_call_generic(rtos_intertile_t *intertile_ctx, uint8_t port, int 
 
     /* send RPC request message to host */
     rtos_intertile_tx(intertile_ctx, port, req_msg, msg_length);
-    vPortFree(req_msg);
+    rtos_osal_free(req_msg);
 
     /* receive RPC response message from host */
     msg_length = rtos_intertile_rx(intertile_ctx, port, (void **) &resp_msg, portMAX_DELAY);
@@ -265,7 +264,7 @@ void rpc_client_call_generic(rtos_intertile_t *intertile_ctx, uint8_t port, int 
             ap);
     va_end(ap);
 
-    vPortFree(resp_msg);
+    rtos_osal_free(resp_msg);
 
     va_end(ap_init);
 }
