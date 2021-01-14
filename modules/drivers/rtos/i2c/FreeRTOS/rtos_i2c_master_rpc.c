@@ -153,6 +153,78 @@ static i2c_regop_res_t  i2c_master_remote_reg_read(
     return ret;
 }
 
+static int i2c_master_write_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+{
+    int msg_length;
+
+    rtos_i2c_master_t *i2c_master_ctx;
+    uint8_t device_addr;
+    uint8_t *buf;
+    size_t n;
+    size_t num_bytes_sent;
+    int send_stop_bit;
+    i2c_res_t ret;
+
+    rpc_request_unmarshall(
+            rpc_msg,
+            &i2c_master_ctx, &device_addr, &buf, &n, &num_bytes_sent, &send_stop_bit, &ret);
+
+    ret = rtos_i2c_master_write(i2c_master_ctx, device_addr, buf, n, &num_bytes_sent, send_stop_bit);
+
+    msg_length = rpc_response_marshall(
+            resp_msg, rpc_msg,
+            i2c_master_ctx, device_addr, buf, n, num_bytes_sent, send_stop_bit, ret);
+
+    return msg_length;
+}
+
+static int i2c_master_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+{
+    int msg_length;
+
+    rtos_i2c_master_t *i2c_master_ctx;
+    uint8_t device_addr;
+    uint8_t *buf;
+    size_t n;
+    int send_stop_bit;
+    i2c_res_t ret;
+
+    rpc_request_unmarshall(
+            rpc_msg,
+            &i2c_master_ctx, &device_addr, &buf, &n, &send_stop_bit, &ret);
+
+    buf = pvPortMalloc(n);
+
+    ret = rtos_i2c_master_read(i2c_master_ctx, device_addr, buf, n, send_stop_bit);
+
+    msg_length = rpc_response_marshall(
+            resp_msg, rpc_msg,
+            i2c_master_ctx, device_addr, buf, n, send_stop_bit, ret);
+
+    vPortFree(buf);
+
+    return msg_length;
+}
+
+static int i2c_master_stop_bit_send_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+{
+    int msg_length;
+
+    rtos_i2c_master_t *i2c_master_ctx;
+
+    rpc_request_unmarshall(
+            rpc_msg,
+            &i2c_master_ctx);
+
+    rtos_i2c_master_stop_bit_send(i2c_master_ctx);
+
+    msg_length = rpc_response_marshall(
+            resp_msg, rpc_msg,
+            i2c_master_ctx);
+
+    return msg_length;
+}
+
 static int i2c_master_reg_write_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 {
     int msg_length;
@@ -176,9 +248,28 @@ static int i2c_master_reg_write_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
     return msg_length;
 }
 
-/*
- * TODO: IMPLEMENT THE REST OF THE HOST SIDE RPC FUNCTIONS
- */
+static int i2c_master_reg_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+{
+    int msg_length;
+
+    rtos_i2c_master_t *i2c_master_ctx;
+    uint8_t device_addr;
+    uint8_t reg_addr;
+    uint8_t data;
+    i2c_regop_res_t ret;
+
+    rpc_request_unmarshall(
+            rpc_msg,
+            &i2c_master_ctx, &device_addr, &reg_addr, &data, &ret);
+
+    ret = rtos_i2c_master_reg_read(i2c_master_ctx, device_addr, reg_addr, &data);
+
+    msg_length = rpc_response_marshall(
+            resp_msg, rpc_msg,
+            i2c_master_ctx, device_addr, reg_addr, data, ret);
+
+    return msg_length;
+}
 
 static void i2c_master_rpc_thread(rtos_intertile_address_t *client_address)
 {
@@ -197,15 +288,19 @@ static void i2c_master_rpc_thread(rtos_intertile_address_t *client_address)
 
         switch (rpc_msg.fcode) {
         case fcode_write:
+            msg_length = i2c_master_write_rpc_host(&rpc_msg, &resp_msg);
             break;
         case fcode_read:
+            msg_length = i2c_master_read_rpc_host(&rpc_msg, &resp_msg);
             break;
         case fcode_stop_bit_send:
+            msg_length = i2c_master_stop_bit_send_rpc_host(&rpc_msg, &resp_msg);
             break;
         case fcode_reg_write:
             msg_length = i2c_master_reg_write_rpc_host(&rpc_msg, &resp_msg);
             break;
         case fcode_reg_read:
+            msg_length = i2c_master_reg_read_rpc_host(&rpc_msg, &resp_msg);
             break;
         }
 
