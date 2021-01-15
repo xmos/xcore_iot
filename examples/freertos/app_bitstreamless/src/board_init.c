@@ -3,6 +3,7 @@
 #include <platform.h>
 #include <xs1.h>
 #include <stdarg.h>
+#include <xcore/hwtimer.h>
 
 #include "board_init.h"
 
@@ -55,8 +56,12 @@ static void set_app_pll(void)
 
     write_sswitch_reg(tileid, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, APP_PLL_DISABLE);
 
-    /* TODO: Allocate a timer, wait a millisecond, deallocate */
-    delay_milliseconds(1);
+    hwtimer_t tmr = hwtimer_alloc();
+    {
+        xassert(tmr != 0);
+        hwtimer_delay(tmr, 100000); // 1ms with 100 MHz timer tick
+    }
+    hwtimer_free(tmr);
 
     write_sswitch_reg(tileid, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, APP_PLL_CTL_0);
     write_sswitch_reg(tileid, XS1_SSWITCH_SS_APP_PLL_CTL_NUM, APP_PLL_CTL_0);
