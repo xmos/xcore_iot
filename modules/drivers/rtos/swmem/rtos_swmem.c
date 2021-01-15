@@ -1,13 +1,10 @@
 // Copyright (c) 2021, XMOS Ltd, All rights reserved
 
-#if defined(__XS2A__) && defined(__XS3A__)
-#undef __XS2A__
-#endif
+#include <stdbool.h>
 
 #include <xcore/swmem_fill.h>
 #include <xcore/swmem_evict.h>
 #include <xcore/triggerable.h>
-#include <stdbool.h>
 
 #include "rtos_interrupt.h"
 #include "drivers/rtos/swmem/api/rtos_swmem.h"
