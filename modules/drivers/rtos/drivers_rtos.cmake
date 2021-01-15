@@ -13,6 +13,7 @@ set(RTOS_INTERTILE_DRIVER_DIR "${RTOS_DIR}/intertile")
 set(RTOS_MIC_ARRAY_DRIVER_DIR "${RTOS_DIR}/mic_array")
 set(RTOS_RPC_DRIVER_DIR "${RTOS_DIR}/rpc")
 set(RTOS_SPI_DRIVER_DIR "${RTOS_DIR}/spi")
+set(RTOS_SWMEM_DRIVER_DIR "${RTOS_DIR}/swmem")
 set(RTOS_QSPI_FLASH_DRIVER_DIR "${RTOS_DIR}/qspi_flash")
 set(RTOS_TRACE_DRIVER_DIR "${RTOS_DIR}/trace")
 set(RTOS_WIFI_DRIVER_DIR "${RTOS_DIR}/wifi")
@@ -27,6 +28,7 @@ option(USE_RTOS_INTERTILE_DRIVER "Enable to include RTOS intertile communication
 option(USE_RTOS_MIC_ARRAY_DRIVER "Enable to include RTOS microphone array driver" TRUE)
 option(USE_RTOS_RPC_DRIVER "Enable to include RTOS intertile remote procedure call driver" TRUE)
 option(USE_RTOS_SPI_DRIVER "Enable to include RTOS SPI driver" TRUE)
+option(USE_RTOS_SWMEM_DRIVER "Enable to include RTOS SWMem driver" TRUE)
 option(USE_RTOS_QSPI_FLASH_DRIVER "Enable to include RTOS QSPI flash driver" TRUE)
 option(USE_RTOS_TRACE_DRIVER "Enable to include RTOS trace driver" TRUE)
 option(USE_RTOS_WIFI_DRIVER "Enable to include RTOS WiFi driver" TRUE)
@@ -178,6 +180,23 @@ endif()
 unset(THIS_LIB)
 
 #********************************
+# Gather SwMem sources
+#********************************
+set(THIS_LIB RTOS_SWMEM_DRIVER)
+if(${USE_${THIS_LIB}})
+    set(${THIS_LIB}_FLAGS "-O3")
+
+    file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/*.c")
+
+    set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+    set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
+    )
+endif()
+unset(THIS_LIB)
+
+#********************************
 # Gather qspi flash sources
 #********************************
 set(THIS_LIB RTOS_QSPI_FLASH_DRIVER)
@@ -268,6 +287,7 @@ set(DRIVERS_RTOS_SOURCES
     ${RTOS_MIC_ARRAY_DRIVER_SOURCES}
     ${RTOS_RPC_DRIVER_SOURCES}
     ${RTOS_SPI_DRIVER_SOURCES}
+    ${RTOS_SWMEM_DRIVER_SOURCES}
     ${RTOS_QSPI_FLASH_DRIVER_SOURCES}
     ${RTOS_TRACE_DRIVER_SOURCES}
 )
@@ -282,6 +302,7 @@ set(DRIVERS_RTOS_INCLUDES
     ${RTOS_MIC_ARRAY_DRIVER_INCLUDES}
     ${RTOS_RPC_DRIVER_INCLUDES}
     ${RTOS_SPI_DRIVER_INCLUDES}
+    ${RTOS_SWMEM_DRIVER_INCLUDES}
     ${RTOS_QSPI_FLASH_DRIVER_INCLUDES}
     ${RTOS_TRACE_DRIVER_INCLUDES}
     ${RTOS_DIR}
