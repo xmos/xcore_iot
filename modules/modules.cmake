@@ -46,6 +46,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -72,6 +73,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -98,6 +100,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -124,6 +127,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -150,6 +154,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -162,6 +167,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 

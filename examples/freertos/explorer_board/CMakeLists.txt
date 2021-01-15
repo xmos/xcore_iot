@@ -41,9 +41,14 @@ set(APP_COMPILER_FLAGS
 
 set(APP_SOURCES
     "src/main.c"
+    "src/main_0.c"
+    "src/main_1.c"
+    "src/board_init.c"
 
     # "src/audio_hw_config/audio_hw_config.c"
-    # "src/audio_pipeline/audio_pipeline.c"
+    "src/audio_pipeline/audio_pipeline.c"
+    "src/example_pipeline/example_pipeline.c"
+    "src/example_pipeline/dac_init.c"
     # "src/gpio_ctrl/gpio_ctrl.c"
     # "src/NetworkManager/network.c"
     # "src/queue_to_i2s/queue_to_i2s.c"

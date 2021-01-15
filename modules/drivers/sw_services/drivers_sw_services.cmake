@@ -47,6 +47,7 @@ if(${USE_${THIS_LIB}})
     add_compile_definitions(
         USE_WIFI_MANAGER=1
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -70,6 +71,7 @@ if(${USE_${THIS_LIB}})
     add_compile_definitions(
         USE_DHCPD=1
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -96,6 +98,7 @@ if(${USE_${THIS_LIB}})
     add_compile_definitions(
         USE_FATFS=1
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -115,6 +118,7 @@ if(${USE_${THIS_LIB}})
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/thirdparty/http-parser"
 	)
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -134,6 +138,7 @@ if(${USE_${THIS_LIB}})
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/thirdparty/jsmn"
 	)
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -168,6 +173,7 @@ if(${USE_${THIS_LIB}})
 	    "${${THIS_LIB}_DIR}/thirdparty/paho.mqtt.embedded-c/MQTTClient-C/src"
 	    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
 	)
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -187,6 +193,7 @@ if(${USE_${THIS_LIB}})
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
 	)
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -296,8 +303,10 @@ if(${USE_${THIS_LIB}})
         add_compile_definitions(
             MBEDTLS_CONFIG_FILE=\"mbedtls_config.h\"
         )
-        message(WARNING "\nUsing example mbedtls configuration.\nTo use a different configuration, enable cmake option USE_CUSTOM_MBEDTLS_CONFIG, provide an mbedtls_config.h file with options required for your application, and add compiler definition MBEDTLS_CONFIG_FILE=\\\"path_to_your_file/mbedtls_config.h\\\"\n\n")
+
+        message(WARNING "${COLOR_YELLOW}Using example mbedtls configuration.\nTo use a different configuration, enable cmake option USE_CUSTOM_MBEDTLS_CONFIG, provide an mbedtls_config.h file with options required for your application, and add compiler definition MBEDTLS_CONFIG_FILE=\\\"path_to_your_file/mbedtls_config.h\\\"${COLOR_RESET}")
     endif()
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 

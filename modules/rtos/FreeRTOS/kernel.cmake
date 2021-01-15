@@ -24,6 +24,7 @@ set(${THIS_LIB}_INCLUDES
     "${RTOS_SUPPORT_DIR}/src"
 )
 
+message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 unset(THIS_LIB)
 
 #********************************
@@ -33,7 +34,7 @@ set(THIS_LIB FREERTOS)
 
 if(NOT DEFINED FREERTOS_PORT)
     set(FREERTOS_PORT "XCOREAI")
-    message("FreeRTOS port set to XCOREAI by default")
+    message("${COLOR_CYAN}FreeRTOS port set to XCOREAI by default${COLOR_RESET}")
 endif()
 
 if(FREERTOS_PORT STREQUAL "XCOREAI")
@@ -44,7 +45,7 @@ endif()
 
 if(NOT DEFINED FREERTOS_SMP)
     set(FREERTOS_SMP True)
-    message("FreeRTOS SMP used by default.  Set FREERTOS_SMP to False to use single core kernel.")
+    message("${COLOR_CYAN}FreeRTOS SMP used by default.  Set FREERTOS_SMP to False to use single core kernel.${COLOR_RESET}")
 endif()
 
 if(FREERTOS_SMP)
@@ -78,6 +79,7 @@ set(${THIS_LIB}_INCLUDES
 
 add_compile_definitions(RTOS_FREERTOS)
 
+message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 unset(THIS_LIB)
 
 #********************************
@@ -112,6 +114,7 @@ set(${THIS_LIB}_INCLUDES
     "${${THIS_LIB}_PORTABLE_DIR}/NetworkInterface"
 )
 
+message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 unset(THIS_LIB)
 
 #**********************

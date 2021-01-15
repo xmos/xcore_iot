@@ -48,9 +48,4 @@
 #define AIC3204_AN_IN_CHRG    0x47 // Register 71 - Analog Input Quick Charging Config
 #define AIC3204_REF_STARTUP   0x7B // Register 123 - Reference Power Up Config
 
-// TLV320AIC3204 easy register access defines
-#define AIC3204_REGREAD(reg, data)  {data = i2c_driver_read_reg(i2c_dev, AIC3204_I2C_DEVICE_ADDR, reg, &i2c_res); debug_printf("read reg:%x\n", data);}
-#define AIC3204_REGWRITE(reg, val) {i2c_regop_res_t ret = i2c_driver_write_reg(i2c_dev, AIC3204_I2C_DEVICE_ADDR, reg, val); if(ret != I2C_REGOP_SUCCESS) debug_printf("DAC I2C NACK..\n");}
-
-
 #endif /* SRC_AUDIO_HW_CONFIG_DAC3204_H_ */

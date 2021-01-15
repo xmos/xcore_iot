@@ -1,30 +1,22 @@
-// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2020, XMOS Ltd, All rights reserved
 
-#ifndef AUDIO_PIPELINE_H_
-#define AUDIO_PIPELINE_H_
+#ifndef SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_
+#define SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_
 
-typedef struct ap_stage
-{
-	QueueHandle_t input;
-	QueueHandle_t output;
-	void * args;
-} ap_stage_t;
 
-typedef struct ap_stage * ap_stage_handle_t;
+typedef void * (*audio_pipeline_input_t)(void *data);
+typedef int (*audio_pipeline_output_t)(void *audio_frame_buffer, void *data);
 
-void audio_pipeline_create( UBaseType_t priority);
+typedef void (*audio_pipeline_stage_t)(void *audio_frame_buffer);
 
-BaseType_t audiopipeline_get_stage1_gain( void );
-BaseType_t audiopipeline_set_stage1_gain( BaseType_t xnewgain );
+void audio_pipeline_init(
+		const audio_pipeline_input_t input,
+		const audio_pipeline_output_t output,
+		void * const input_data,
+		void * const output_data,
+		const audio_pipeline_stage_t * const stage_functions,
+		const configSTACK_DEPTH_TYPE * const stage_stack_sizes,
+		const int pipeline_priority,
+		const int stage_count);
 
-typedef enum
-{
-	eAPINPUT_QUEUE = 0,
-	eTCP_QUEUE = 1,
-	eSTAGE2_INPUT_SEL_CNT
-} state2_input_sel_t;
-
-BaseType_t audiopipeline_get_stage2_input( void );
-BaseType_t audiopipeline_set_stage2_input( state2_input_sel_t input );
-
-#endif /* AUDIO_PIPELINE_H_ */
+#endif /* SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_ */

@@ -53,6 +53,7 @@ set(${THIS_LIB}_INCLUDES
     "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
 )
 
+message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 unset(THIS_LIB)
 
 #********************************
@@ -69,6 +70,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/api"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -87,6 +89,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/api"
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}" # TODO abstract FreeRTOS specific calls so this can be removed
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -105,6 +108,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/api"
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}" # TODO abstract FreeRTOS specific calls so this can be removed
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -123,6 +127,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/api"
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}" # TODO abstract FreeRTOS specific calls so this can be removed
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -141,6 +146,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/api"
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}" # TODO abstract FreeRTOS specific calls so this can be removed
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -158,6 +164,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/api"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -176,6 +183,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/${RTOS_CMAKE_RTOS}"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -193,6 +201,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -211,6 +220,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/${RTOS_CMAKE_RTOS}"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -228,6 +238,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
     )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -271,6 +282,7 @@ if(${USE_${THIS_LIB}})
     endif()
 
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 

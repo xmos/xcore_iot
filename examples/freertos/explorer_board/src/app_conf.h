@@ -3,6 +3,9 @@
 #ifndef APP_CONF_H_
 #define APP_CONF_H_
 
+#define appconfAUDIO_CLOCK_FREQUENCY    24576000
+#define appconfPDM_CLOCK_FREQUENCY      3072000
+
 /* Audio Pipeline defines */
 #define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN   	42
 #define appconfMIC_FRAME_LENGTH                	256
