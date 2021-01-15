@@ -3,8 +3,7 @@
 
 /* Here is a good place to include header files that are required across
 your application. */
-
-#define ON_TILE(t) (!defined(THIS_XCORE_TILE) || THIS_XCORE_TILE == (t))
+#include "platform.h"
 
 /*
  * TODO remove this. Just a hack to prevent the i2s task from calling vTaskSuspendAll(). Not a good solution.

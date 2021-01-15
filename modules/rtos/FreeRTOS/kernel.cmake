@@ -76,6 +76,8 @@ set(${THIS_LIB}_INCLUDES
     "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}"
 )
 
+add_compile_definitions(RTOS_FREERTOS)
+
 unset(THIS_LIB)
 
 #********************************

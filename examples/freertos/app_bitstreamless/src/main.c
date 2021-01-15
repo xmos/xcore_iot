@@ -305,6 +305,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 }
 
 
+#if ON_TILE(0)
 void main_tile0(chanend_t c)
 {
     board_tile0_init(c, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
@@ -323,7 +324,9 @@ void main_tile0(chanend_t c)
 
     return;
 }
+#endif
 
+#if ON_TILE(1)
 void main_tile1(chanend_t c)
 {
     board_tile1_init(c, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
@@ -342,3 +345,4 @@ void main_tile1(chanend_t c)
 
     return;
 }
+#endif

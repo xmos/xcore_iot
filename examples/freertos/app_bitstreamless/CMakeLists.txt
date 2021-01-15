@@ -25,17 +25,14 @@ set(APP_COMPILER_FLAGS
     "-g"
     "-report"
     "-fxscope"
+    "-lquadspi"
+    "-mcmodel=large"
     "-Wno-xcore-fptrgroup"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
     "${CMAKE_CURRENT_SOURCE_DIR}/bitstream_src/${BOARD}/${BOARD}.xn"
-
-    "-lquadspi"
-    "-mcmodel=large"
 )
 
 set(APP_SOURCES
-    "src/tile_map.xc"
-
     "src/main.c"
     "src/board_init.c"
 
@@ -54,10 +51,11 @@ set(APP_INCLUDES
 )
 
 add_compile_definitions(
-    __XS2A__=1
     DEBUG_PRINT_ENABLE=1
     DEBUG_PRINT_ENABLE_IOT_WIFI=1
     SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\)
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
 )
 
 if(DEFINED THIS_XCORE_TILE)

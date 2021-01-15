@@ -36,7 +36,9 @@ if(${USE_${THIS_LIB}})
 
 	file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
 
-	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    if(${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
 
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/api"
@@ -57,7 +59,9 @@ if(${USE_${THIS_LIB}})
 
 	file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
 
-	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    if(${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
 
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/api"
@@ -80,7 +84,9 @@ if(${USE_${THIS_LIB}})
 	list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/thirdparty/src/ff.c")
 	list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/thirdparty/src/ffunicode.c")
 
-	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    if(${${THIS_LIB}_FLAGS})
+        set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
 
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
@@ -102,7 +108,9 @@ if(${USE_${THIS_LIB}})
 
 	set(${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/thirdparty/http-parser/http_parser.c")
 
-	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    if(${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
 
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/thirdparty/http-parser"
@@ -119,7 +127,9 @@ if(${USE_${THIS_LIB}})
 
 	set(${THIS_LIB}_SOURCES "")
 
-	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    if(${${THIS_LIB}_FLAGS})
+    	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
 
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/thirdparty/jsmn"
@@ -149,7 +159,9 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/MQTT${RTOS_CMAKE_RTOS}.c"
     )
 
-	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    if(${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
 
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/thirdparty/paho.mqtt.embedded-c/MQTTPacket/src"
@@ -168,7 +180,9 @@ if(${USE_${THIS_LIB}})
 
 	set(${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/sntpd.c")
 
-	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    if(${${THIS_LIB}_FLAGS})
+    	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
 
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
@@ -267,7 +281,7 @@ if(${USE_${THIS_LIB}})
     )
 
     if(${${THIS_LIB}_FLAGS})
-	       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
     endif()
 
 	set(${THIS_LIB}_INCLUDES

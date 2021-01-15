@@ -11,7 +11,6 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "soc.h"
 
 /* App headers */
 #include "mem_analysis.h"
