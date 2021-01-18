@@ -326,9 +326,12 @@ class XCOREDeviceEndpoint(object):
         try:
             self.publish(b"PING_RECV")
             self._wait_for("_device_ready", timeout)
-            return self._device_ready
         except TimeoutError:
             raise DeviceTimeoutError("Ping timeout")
+        except Exception:
+            pass  # NOTE: the return below does the right thing if any other exeption is raised
+
+        return self._device_ready
 
     def set_model(self, model_content, timeout=5):
         # send the model
