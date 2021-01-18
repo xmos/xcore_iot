@@ -14,7 +14,7 @@ set(CMAKE_OSX_SYSROOT /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk)
 #**********************
 # Build flags
 #**********************
-set(BUILD_FLAGS "-g -DTF_LITE_DISABLE_X86_NEON -O3")
+set(BUILD_FLAGS "-g -DTF_LITE_DISABLE_X86_NEON -O3 -DNN_USE_REF")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS ${BUILD_FLAGS})
