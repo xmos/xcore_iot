@@ -12,31 +12,19 @@
 static swmem_fill_t swmem_fill_res;
 static swmem_evict_t swmem_evict_res;
 
-////////////TEMPORARY UNTIL EVENT FLAGS ARE IN THE OSAL/////////////////////////////
-static EventGroupHandle_t swmem_event_group;
-////////////////////////////////////////////////////////////////////////////////////
+static rtos_osal_event_group_t swmem_event_group;
 
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(sw_mem_fill_isr, arg)
 {
-    BaseType_t yield_required = false;
-
     triggerable_disable_trigger(swmem_fill_res);
-
-    ////////////////////// CHANGE TO OSAL FUNCTION ////////////////////
-    xEventGroupSetBitsFromISR(swmem_event_group, RTOS_SWMEM_READ_FLAG, &yield_required);
-    portYIELD_FROM_ISR(yield_required);
+    rtos_osal_event_group_set_bits(&swmem_event_group, RTOS_SWMEM_READ_FLAG);
 }
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(sw_mem_evict_isr, arg)
 {
-    BaseType_t yield_required = false;
-
     triggerable_disable_trigger(swmem_evict_res);
-
-    ////////////////////// CHANGE TO OSAL FUNCTION ////////////////////
-    xEventGroupSetBitsFromISR(swmem_event_group, RTOS_SWMEM_WRITE_FLAG, &yield_required);
-    portYIELD_FROM_ISR(yield_required);
+    rtos_osal_event_group_set_bits(&swmem_event_group, RTOS_SWMEM_WRITE_FLAG);
 }
 
 __attribute__((weak))
@@ -63,16 +51,18 @@ void rtos_swmem_write_request(unsigned offset, uint32_t dirty_mask, const uint32
 
 static void rtos_swmem_thread(void *arg)
 {
-    EventBits_t flags;
+    uint32_t flags;
+    rtos_osal_status_t status;
 
     for (;;) {
-        flags = xEventGroupWaitBits(swmem_event_group,
-                                    RTOS_SWMEM_READ_FLAG | RTOS_SWMEM_WRITE_FLAG,
-                                    true,
-                                    false,
-                                    RTOS_OSAL_WAIT_FOREVER);
+        status = rtos_osal_event_group_get_bits(
+                &swmem_event_group,
+                RTOS_SWMEM_READ_FLAG | RTOS_SWMEM_WRITE_FLAG,
+                RTOS_OSAL_OR_CLEAR,
+                &flags,
+                RTOS_OSAL_WAIT_FOREVER);
 
-        if ((flags & (RTOS_SWMEM_READ_FLAG | RTOS_SWMEM_WRITE_FLAG)) == 0) {
+        if (status != RTOS_OSAL_SUCCESS) {
             continue;
         }
 
@@ -86,7 +76,7 @@ static void rtos_swmem_thread(void *arg)
          * swmem_*_in_address() and swmem_*_buffer() be called from the same core.
          */
         rtos_interrupt_mask_all();
-        vTaskCoreExclusionSet(NULL, ~(1 << rtos_core_id_get()));
+        rtos_osal_thread_core_exclusion_set(NULL, ~(1 << rtos_core_id_get()));
 
         if (flags & RTOS_SWMEM_READ_FLAG) {
             uint32_t buf[SWMEM_FILL_SIZE_WORDS];
@@ -108,14 +98,13 @@ static void rtos_swmem_thread(void *arg)
         /*
          * Allow this thread to run on any core once again
          */
-        vTaskCoreExclusionSet(NULL, 0);
+        rtos_osal_thread_core_exclusion_set(NULL, 0);
     }
 }
 
 void rtos_swmem_start(unsigned priority)
 {
-    ////////////////////// CHANGE TO OSAL FUNCTION ////////////////////
-    swmem_event_group = xEventGroupCreate();
+    rtos_osal_event_group_create(&swmem_event_group, "swmem_event_group");;
 
     rtos_osal_thread_create(
             NULL,
