@@ -306,11 +306,14 @@ void vApplicationDaemonTaskStartup(void *arg)
 
 
 #if ON_TILE(0)
-void main_tile0(chanend_t c)
+void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile0_init(c, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
+    (void) c0;
+    board_tile0_init(c1, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
+    (void) c2;
+    (void) c3;
 
-    other_tile_c = c;
+    other_tile_c = c1;
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
@@ -327,11 +330,14 @@ void main_tile0(chanend_t c)
 #endif
 
 #if ON_TILE(1)
-void main_tile1(chanend_t c)
+void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile1_init(c, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
+    board_tile1_init(c0, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
+    (void) c1;
+    (void) c2;
+    (void) c3;
 
-    other_tile_c = c;
+    other_tile_c = c0;
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",

@@ -36,7 +36,6 @@ set(APP_COMPILER_FLAGS
     "-Wxcore-fptrgroup"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
     "${CMAKE_CURRENT_SOURCE_DIR}/bitstream_src/${BOARD}/${BOARD}.xn"
-    "-save-temps"
 )
 
 set(APP_SOURCES
@@ -84,7 +83,6 @@ set(APP_INCLUDES
 )
 
 add_compile_definitions(
-    __XS2A__=1
     DEBUG_PRINT_ENABLE=1
     DEBUG_PRINT_ENABLE_IOT_WIFI=1
     MIC_DUAL_ENABLED=1

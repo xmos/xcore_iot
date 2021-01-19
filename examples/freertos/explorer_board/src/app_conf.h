@@ -1,7 +1,11 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
 
 #ifndef APP_CONF_H_
 #define APP_CONF_H_
+
+/* Intertile communication defines */
+#define I2C_MASTER_RPC_PORT 9
+#define I2C_MASTER_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
 #define appconfAUDIO_CLOCK_FREQUENCY    24576000
 #define appconfPDM_CLOCK_FREQUENCY      3072000

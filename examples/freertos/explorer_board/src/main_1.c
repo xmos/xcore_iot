@@ -41,9 +41,6 @@ chanend_t other_tile_c;
 uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #endif
 
-#define I2C_MASTER_RPC_PORT 9
-#define I2C_MASTER_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
-
 void loopback(void *arg)
 {
     int32_t sample_buf[MIC_DUAL_FRAME_SIZE][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS];
@@ -139,11 +136,14 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
     }
 }
 
-void main_tile1(chanend_t c)
+void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile1_init(c, intertile_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx);
+    board_tile1_init(c0, intertile_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx);
+    (void) c1;
+    (void) c2;
+    (void) c3;
 
-    other_tile_c = c;
+    other_tile_c = c0;
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",

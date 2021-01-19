@@ -67,9 +67,6 @@ uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #endif
 #endif
 
-#define I2C_MASTER_RPC_PORT 9
-#define I2C_MASTER_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
-
 void vApplicationDaemonTaskStartup( void )
 {
     uint32_t dac_configured;
@@ -108,7 +105,7 @@ void vApplicationDaemonTaskStartup( void )
 
         /* Create MQTT demo*/
         mqtt_demo_create( appconfMQTT_TASK_PRIORITY );
-        
+
         /* Create UDP CLI */
         vStartUDPCommandInterpreterTask( portTASK_STACK_DEPTH(vUDPCommandInterpreterTask), appconfCLI_UDP_PORT, appconfCLI_TASK_PRIORITY );
 
@@ -137,11 +134,14 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
 }
 
 
-void main_tile0(chanend_t c)
+void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile0_init(c, intertile_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
+    (void) c0;
+    board_tile0_init(c1, intertile_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
+    (void) c2;
+    (void) c3;
 
-    other_tile_c = c;
+    other_tile_c = c1;
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
