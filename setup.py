@@ -11,7 +11,7 @@ LIB_XCORE_INTERPRETERS = [
 EXCLUDES = ["*tests", "*tests.*", "python_bindings", "xcore_firmware"]
 
 INSTALL_REQUIRES = [
-    "numpy==1.19.2",
+    "numpy==1.18.5",
     "portalocker==2.0.0",
     "typing-extensions==3.7.4",
 ]
