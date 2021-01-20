@@ -4,8 +4,11 @@
 #define APP_CONF_H_
 
 /* Intertile communication defines */
-#define I2C_MASTER_RPC_PORT 9
+#define I2C_MASTER_RPC_PORT 10
 #define I2C_MASTER_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
+
+#define GPIO_RPC_PORT 11
+#define GPIO_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
 #define appconfAUDIO_CLOCK_FREQUENCY    24576000
 #define appconfPDM_CLOCK_FREQUENCY      3072000
@@ -13,7 +16,7 @@
 /* Audio Pipeline defines */
 #define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN   	42
 #define appconfMIC_FRAME_LENGTH                	256
-#define appconfPRINT_AUDIO_FRAME_POWER         	0
+// #define appconfPRINT_AUDIO_FRAME_POWER         	1
 
 /* Queue to TCP defines */
 #define appconfQUEUE_TO_TCP_PORT                54321

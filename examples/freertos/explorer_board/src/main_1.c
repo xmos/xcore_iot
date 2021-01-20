@@ -20,6 +20,7 @@
 /* App headers */
 #include "app_conf.h"
 #include "board_init.h"
+#include "gpio_ctrl.h"
 #include "example_pipeline/example_pipeline.h"
 #include "mem_analysis.h"
 
@@ -29,11 +30,13 @@ static rtos_mic_array_t mic_array_ctx_s;
 static rtos_i2c_master_t i2c_master_ctx_s;
 static rtos_i2s_master_t i2s_master_ctx_s;
 static rtos_intertile_t intertile_ctx_s;
+static rtos_gpio_t gpio_ctx_s;
 
 static rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_i2c_master_t *i2c_master_ctx = &i2c_master_ctx_s;
 static rtos_i2s_master_t *i2s_master_ctx = &i2s_master_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
+static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 
 chanend_t other_tile_c;
 
@@ -41,39 +44,13 @@ chanend_t other_tile_c;
 uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #endif
 
-void loopback(void *arg)
-{
-    int32_t sample_buf[MIC_DUAL_FRAME_SIZE][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS];
-
-    for (;;) {
-        rtos_mic_array_rx(
-                mic_array_ctx,
-                sample_buf,
-                MIC_DUAL_FRAME_SIZE,
-                portMAX_DELAY);
-
-        for (int i = 0; i < MIC_DUAL_FRAME_SIZE; i++) {
-            for (int j = 0; j < MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS; j++) {
-                sample_buf[i][j] *= 40;
-            }
-        }
-
-        rtos_i2s_master_tx(
-                i2s_master_ctx,
-                &sample_buf[0][0],
-                MIC_DUAL_FRAME_SIZE);
-    }
-}
-
 void vApplicationDaemonTaskStartup( void )
 {
     uint32_t dac_configured;
     rtos_intertile_start(intertile_ctx);
 
     rtos_i2c_master_rpc_config(i2c_master_ctx, I2C_MASTER_RPC_PORT, I2C_MASTER_RPC_HOST_TASK_PRIORITY);
-
-    /* Create audio pipeline */
-    // audio_pipeline_create( appconfAUDIO_PIPELINE_TASK_PRIORITY );
+    rtos_gpio_rpc_config(gpio_ctx, GPIO_RPC_PORT, GPIO_RPC_HOST_TASK_PRIORITY);
 
     /* Create heap analysis task */
     mem_analysis_create( "heap" );
@@ -120,6 +97,10 @@ void vApplicationDaemonTaskStartup( void )
             1.2 * MIC_DUAL_FRAME_SIZE,
             configMAX_PRIORITIES-1);
 
+    /* Create the gpio control task */
+    gpio_ctrl_create(gpio_ctx, appconfGPIO_TASK_PRIORITY);
+
+    /* Create audio pipeline */
     example_pipeline_init(mic_array_ctx, i2s_master_ctx);
 
     vTaskDelete(NULL);
@@ -138,7 +119,7 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
 
 void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile1_init(c0, intertile_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx);
+    board_tile1_init(c0, intertile_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, gpio_ctx);
     (void) c1;
     (void) c2;
     (void) c3;

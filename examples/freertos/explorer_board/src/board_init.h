@@ -11,8 +11,6 @@
 #include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
 #include "drivers/rtos/gpio/api/rtos_gpio.h"
 
-// #define I2C_RPC_ENABLED 1
-
 void board_tile0_init(
         chanend_t tile1,
         rtos_intertile_t *intertile1_ctx,
@@ -27,6 +25,7 @@ void board_tile1_init(
         rtos_intertile_t *intertile1_ctx,
         rtos_mic_array_t *mic_array_ctx,
         rtos_i2s_master_t *i2s_master_ctx,
-        rtos_i2c_master_t *i2c_master_ctx);
+        rtos_i2c_master_t *i2c_master_ctx,
+        rtos_gpio_t *gpio_ctx);
 
 #endif /* BOARD_INIT_H_ */

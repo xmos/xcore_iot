@@ -73,6 +73,7 @@ static void set_app_pll(void)
 static rtos_driver_rpc_t i2c_rpc_config;
 static rtos_driver_rpc_t mic_rpc_config;
 static rtos_driver_rpc_t i2s_rpc_config;
+static rtos_driver_rpc_t gpio_rpc_config;
 
 void board_tile0_init(
         chanend_t tile1,
@@ -85,6 +86,9 @@ void board_tile0_init(
 {
     rtos_intertile_init(intertile1_ctx, tile1);
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
+
+    rtos_gpio_init(
+            gpio_ctx);
 
     rtos_i2c_master_init(
             i2c_master_ctx,
@@ -145,12 +149,15 @@ void board_tile0_init(
             256, /* page size is 256 bytes */
             16384); /* the flash has 16384 pages */
 
-    rtos_gpio_init(
-            gpio_ctx);
-
     rtos_i2c_master_rpc_host_init(
             i2c_master_ctx,
             &i2c_rpc_config,
+            client_intertile_ctx,
+            1);
+
+    rtos_gpio_rpc_host_init(
+            gpio_ctx,
+            &gpio_rpc_config,
             client_intertile_ctx,
             1);
 }
@@ -160,7 +167,8 @@ void board_tile1_init(
         rtos_intertile_t *intertile1_ctx,
         rtos_mic_array_t *mic_array_ctx,
         rtos_i2s_master_t *i2s_master_ctx,
-        rtos_i2c_master_t *i2c_master_ctx)
+        rtos_i2c_master_t *i2c_master_ctx,
+        rtos_gpio_t *gpio_ctx)
 {
     port_t p_rst_shared = port_init(PORT_CODEC_RST_N, PORT_OUTPUT, PORT_UNBUFFERED);
     port_out(p_rst_shared, 0xF);
@@ -214,5 +222,10 @@ void board_tile1_init(
     rtos_i2c_master_rpc_client_init(
             i2c_master_ctx,
             &i2c_rpc_config,
+            intertile1_ctx);
+
+    rtos_gpio_rpc_client_init(
+            gpio_ctx,
+            &gpio_rpc_config,
             intertile1_ctx);
 }

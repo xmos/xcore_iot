@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
 
 #ifndef SRC_EXAMPLE_PIPELINE_H_
 #define SRC_EXAMPLE_PIPELINE_H_
@@ -12,5 +12,8 @@
 void example_pipeline_init(
         rtos_mic_array_t *mic_array_ctx,
         rtos_i2s_master_t *i2s_master_ctx);
+
+BaseType_t audiopipeline_get_stage1_gain( void );
+BaseType_t audiopipeline_set_stage1_gain( BaseType_t xNewGain );
 
 #endif /* SRC_EXAMPLE_PIPELINE_H_ */
