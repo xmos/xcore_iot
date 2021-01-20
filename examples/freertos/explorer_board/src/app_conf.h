@@ -3,22 +3,31 @@
 #ifndef APP_CONF_H_
 #define APP_CONF_H_
 
-/* Intertile communication defines */
+/* Intertile Communication Configuration */
 #define I2C_MASTER_RPC_PORT 10
 #define I2C_MASTER_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
 #define GPIO_RPC_PORT 11
 #define GPIO_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
+/* Network Demo Configuration */
+#define appconfSOFT_AP_SSID         "xcore.ai"
+#define appconfSOFT_AP_PASSWORD     ""
+
+#define appconfRUN_PING_TEST_HOST   1
+#define appconfPING_TEST_HOST       "google.com"
+
+
 #define appconfAUDIO_CLOCK_FREQUENCY    24576000
 #define appconfPDM_CLOCK_FREQUENCY      3072000
 
-/* Audio Pipeline defines */
+/* Audio Pipeline Configuration */
 #define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN   	42
 #define appconfMIC_FRAME_LENGTH                	256
-// #define appconfPRINT_AUDIO_FRAME_POWER         	1
+#define appconfPRINT_AUDIO_FRAME_POWER         	0
 
-/* Queue to TCP defines */
+
+/* Queue to TCP Configuration */
 #define appconfQUEUE_TO_TCP_PORT                54321
 #define appconfTCP_TO_QUEUE_PORT                12345
 
@@ -29,25 +38,25 @@
 #define appconfNETWORK_CONNECT_RETRY_INTERVAL_MS	2000
 #define appconfNETWORK_CONNECT_RETRY_LIMIT          2
 
-/* CLI defines */
+/* CLI Configuration */
 #define appconfCLI_UDP_PORT                     5432
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE       128
 
-/* Thruput test defines */
+/* Thruput Test Configuration */
 #define appconfTHRUPUT_TEST_PORT            	10000
 #define DEBUG_PRINT_ENABLE_THRUPUT_TEST         1
 
-/* GPIO defines */
+/* GPIO Configuration */
 #define appconfGPIO_VOLUME_RAPID_FIRE_MS       	100
 
-/* Echo demo defines */
+/* Echo Demo Configuration */
 #define appconfECHO_IP_ADDR_OCTET_0    	10
 #define appconfECHO_IP_ADDR_OCTET_1    	0
 #define appconfECHO_IP_ADDR_OCTET_2    	0
 #define appconfECHO_IP_ADDR_OCTET_3    	253
 #define appconfECHO_PORT				25565
 
-/* MQTT demo defines */
+/* MQTT Demo Configuration */
 #define appconfMQTT_SERVER_IP_ADDR_OCTET_0    	10
 #define appconfMQTT_SERVER_IP_ADDR_OCTET_1    	0
 #define appconfMQTT_SERVER_IP_ADDR_OCTET_2    	0

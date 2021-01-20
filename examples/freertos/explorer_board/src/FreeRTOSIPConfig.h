@@ -36,7 +36,6 @@
 #ifndef FREERTOS_IP_CONFIG_H
 #define FREERTOS_IP_CONFIG_H
 
-#define ipconfigUSE_ETHERNET 0
 #define ipconfigUSE_WIFI     1
 
 #if ipconfigUSE_WIFI

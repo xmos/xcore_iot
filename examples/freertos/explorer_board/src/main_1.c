@@ -53,7 +53,7 @@ void vApplicationDaemonTaskStartup( void )
     rtos_gpio_rpc_config(gpio_ctx, GPIO_RPC_PORT, GPIO_RPC_HOST_TASK_PRIORITY);
 
     /* Create heap analysis task */
-    mem_analysis_create( "heap" );
+    // mem_analysis_create( "heap" );
 
     int dac_init(rtos_i2c_master_t *i2c_ctx);
 

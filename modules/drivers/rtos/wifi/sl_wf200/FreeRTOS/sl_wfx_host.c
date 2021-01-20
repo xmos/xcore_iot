@@ -13,9 +13,6 @@
 #include "event_groups.h"
 #include "semphr.h"
 
-//#include "FreeRTOS_IP.h"
-//#include "NetworkBufferManagement.h"
-
 #define printf rtos_printf
 
 #define SL_WFX_EVENT_MAX_SIZE   512
@@ -79,10 +76,7 @@ void sl_wfx_reset_request_callback(void)
     sl_wfx_disconnect_callback((uint8_t *) "\x00\x00\x00\x00\x00\x00", WFM_DISCONNECTED_REASON_UNSPECIFIED);
 }
 
-#define const /* workaround a compiler bug that causes relocation
-                 errors when using large arrays marked as const */
 #include "sl_wfx_wf200_C0.h"
-#undef const
 
 __attribute__((weak))
 uint32_t sl_wfx_app_fw_size(void)

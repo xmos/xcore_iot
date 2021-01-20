@@ -9,18 +9,18 @@ endif()
 set(USE_WIFI_MANAGER TRUE)
 set(USE_DHCPD TRUE)
 set(USE_FATFS TRUE)
-set(USE_HTTP_PARSER TRUE)
-set(USE_JSON_PARSER TRUE)
-set(USE_MQTT TRUE)
-set(USE_SNTPD TRUE)
-set(USE_TLS_SUPPORT TRUE)
+# set(USE_HTTP_PARSER TRUE)
+# set(USE_JSON_PARSER TRUE)
+# set(USE_MQTT TRUE)
+# set(USE_SNTPD TRUE)
+# set(USE_TLS_SUPPORT TRUE)
 
 ## Import XMOS configurations
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(explorer_board)
-set(PROJECT_VERSION 0.5.0)
+set(PROJECT_VERSION 0.6.0)
 
 ## Enable languages for project
 enable_language(XC CXX C ASM)
@@ -49,6 +49,7 @@ set(APP_SOURCES
     "src/example_pipeline/example_pipeline.c"
     "src/example_pipeline/dac_init.c"
     "src/gpio_ctrl/gpio_ctrl.c"
+    "src/network_demos/network_setup.c"
     # "src/NetworkManager/network.c"
     # "src/queue_to_i2s/queue_to_i2s.c"
     # "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
@@ -69,6 +70,7 @@ set(APP_INCLUDES
     # "src/audio_hw_config"
     # "src/audio_pipeline"
     "src/gpio_ctrl"
+    "src/network_demos"
     # "src/NetworkManager"
     # "src/queue_to_i2s"
     # "src/queue_to_tcp_stream"
@@ -85,11 +87,12 @@ set(APP_INCLUDES
 add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
     DEBUG_PRINT_ENABLE_IOT_WIFI=1
+    DEBUG_PRINT_ENABLE_WIFI_CONN_MGR=1
     MIC_DUAL_ENABLED=1
-    MQTT_TASK=1
+    # MQTT_TASK=1
     DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
     SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\)
-    MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
+    # MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
 )

@@ -14,11 +14,6 @@
 #include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
 #include "drivers/rtos/gpio/api/rtos_gpio.h"
 
-/* FreeRTOS Plus TCP headers */
-//#include "FreeRTOS_IP.h"
-//#include "FreeRTOS_IP_Private.h"
-//#include "NetworkBufferManagement.h"
-
 void sl_wfx_host_task_rx_notify(BaseType_t *xYieldRequired);
 void sl_wfx_host_task_stop(void);
 void sl_wfx_host_task_start(void);

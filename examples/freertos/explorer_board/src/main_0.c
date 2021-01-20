@@ -12,13 +12,13 @@
 #include "FreeRTOS_DHCP.h"
 
 /* Library headers */
-#include "drivers/rtos/intertile/FreeRTOS/rtos_intertile.h"
-#include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
+#include "drivers/rtos/gpio/api/rtos_gpio.h"
 #include "drivers/rtos/i2c/FreeRTOS/rtos_i2c_master.h"
 #include "drivers/rtos/i2s/FreeRTOS/rtos_i2s_master.h"
-#include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
+#include "drivers/rtos/intertile/FreeRTOS/rtos_intertile.h"
+#include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
 #include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
-#include "drivers/rtos/gpio/api/rtos_gpio.h"
+#include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -26,14 +26,15 @@
 // #include "network.h"
 // #include "UDPCommandInterpreter.h"
 // #include "thruput_test.h"
-#include "sntpd.h"
+// #include "sntpd.h"
 #include "fs_support.h"
 // #include "tls_echo_demo.h"
 // #include "tls_echo_server.h"
-#include "tls_support.h"
+// #include "tls_support.h"
 // #include "http_demo.h"
 // #include "mqtt_demo_client.h"
 #include "mem_analysis.h"
+#include "network_setup.h"
 
 #if ON_TILE(0)
 
@@ -85,8 +86,17 @@ void vApplicationDaemonTaskStartup( void )
     /* Initialize filesystem  */
     rtos_fatfs_init(qspi_flash_ctx);
 
+    /* Initialize WiFi */
+    wifi_start(wifi_device_ctx, gpio_ctx);
 
     #if 0
+
+    /* Create the thruput test */
+    thruput_test_create( appconfTHRUPUT_TEST_TASK_PRIORITY );
+
+    // /* Create SNTPD */
+    sntp_create( appconfSNTPD_TASK_PRIORITY );
+
     /* Initialize TLS  */
 	tls_platform_init();
 
@@ -105,18 +115,10 @@ void vApplicationDaemonTaskStartup( void )
     /* Create UDP CLI */
     vStartUDPCommandInterpreterTask( portTASK_STACK_DEPTH(vUDPCommandInterpreterTask), appconfCLI_UDP_PORT, appconfCLI_TASK_PRIORITY );
 
-    /* Create the thruput test */
-    thruput_test_create( appconfTHRUPUT_TEST_TASK_PRIORITY );
-
-    /* Initialize WiFi */
-    initalize_wifi();
-
-    /* Create SNTPD */
-    sntp_create( appconfSNTPD_TASK_PRIORITY );
     #endif
 
     /* Create heap analysis task */
-    mem_analysis_create( "heap" );
+    // mem_analysis_create( "heap" );
 
     vTaskDelete(NULL);
 }
