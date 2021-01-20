@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #include "rtos_support.h"
 
@@ -28,3 +28,10 @@ void rtos_locks_initialize(void)
         xassert(rtos_locks[i] != 0);
     }
 }
+
+/*
+ * Ensure that these normally inline functions exist
+ * when compiler optimizations are disabled.
+ */
+extern inline int rtos_lock_acquire(int lock_id);
+extern inline int rtos_lock_release(int lock_id);

@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #include <xcore/triggerable.h>
 #include "rtos_support.h"
@@ -140,6 +140,9 @@ void rtos_irq( int core_id, int source_id )
             else
             {
                 xassert(0);
+                /* If assertions are disabled, setting this to 0
+                 * here should cause a resource exception below. */
+                source_chanend = 0;
             }
 
             /* just ensure the pending flag is set before the channel send. */
