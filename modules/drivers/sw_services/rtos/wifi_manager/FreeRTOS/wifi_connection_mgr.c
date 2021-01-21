@@ -627,6 +627,7 @@ static void wifi_conn_mgr(void *arg)
         /*
          * TODO: Get rid of the magic number timeout
          */
+
         if (xTaskNotifyWait(0x00000000,
                             0xFFFFFFFF,
                             &bits,
@@ -674,7 +675,7 @@ static void wifi_conn_mgr(void *arg)
                             mode = event_callback(WIFI_CONN_MGR_EVENT_SOFT_AP_STOPPED, soft_ap_ssid, soft_ap_ssid, soft_ap_password);
                             if (mode != WIFI_CONN_MGR_MODE_SOFT_AP) {
 #if USE_DHCPD
-                                dhcpd_stop(16);
+                                dhcpd_stop();
 #endif
 
                                 /*
