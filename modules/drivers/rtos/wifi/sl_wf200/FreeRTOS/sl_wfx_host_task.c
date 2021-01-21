@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
 
 #include <string.h>
 
@@ -18,6 +18,15 @@
 static TaskHandle_t receive_task_handle;
 SemaphoreHandle_t s_xDriverSemaphore = NULL;
 EventGroupHandle_t sl_wfx_event_group = NULL;
+
+#if (configTASK_NOTIFICATION_ARRAY_ENTRIES <= 1)
+#error configTASK_NOTIFICATION_ARRAY_ENTRIES must be greater than 1 to use the sl_wfx_host
+#endif
+
+typedef enum sl_wfx_host_receive_task_notify_index_t {
+    /* 0 is reserved for streambuffer/message buffer use */
+    eNOTIFY_SL_WFX_HOST_BUS_IRQ_BM = 1,  ///<< Notification to receive frame
+} sl_wfx_host_receive_task_notify_index_t;
 
 static sl_status_t sl_wfx_host_receive_frames(void)
 {
@@ -44,10 +53,11 @@ static void sl_wfx_host_receive_task(void *arg)
 
     for (;;) {
         /* Wait for an interrupt from WF200 */
-        ret = xTaskNotifyWaitIndexed(1, 0x00000000,
-                              0xFFFFFFFF,
-                              &bits,
-                              ticks_to_wait);
+        ret = xTaskNotifyWaitIndexed(eNOTIFY_SL_WFX_HOST_BUS_IRQ_BM,
+                                     0x00000000,
+                                     0xFFFFFFFF,
+                                     &bits,
+                                     ticks_to_wait);
 
         if (ret == pdFAIL && ticks_to_wait != portMAX_DELAY) {
             /*
@@ -106,7 +116,7 @@ void sl_wfx_host_task_rx_notify(BaseType_t *xYieldRequired)
     int state = taskENTER_CRITICAL_FROM_ISR();
     if (receive_task_handle != NULL) {
         xEventGroupSetBitsFromISR(sl_wfx_event_group, SL_WFX_INTERRUPT, xYieldRequired);
-        xTaskNotifyIndexedFromISR(receive_task_handle, 1, SL_WFX_HOST_BUS_IRQ_BM, eSetBits, xYieldRequired);
+        xTaskNotifyIndexedFromISR(receive_task_handle, eNOTIFY_SL_WFX_HOST_BUS_IRQ_BM, SL_WFX_HOST_BUS_IRQ_BM, eSetBits, xYieldRequired);
     }
     taskEXIT_CRITICAL_FROM_ISR(state);
 }
