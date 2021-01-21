@@ -47,6 +47,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sl_wfx.h"
 #include "sl_wfx_host.h"
 
+/********************************************
+ * These options are no longer supported. The code that used to
+ * support these options is being left in place for the future if
+ * support for these is ever added back in.
+ ********************************************/
+#if ipconfigZERO_COPY_RX_DRIVER != 0
+#error The WF200 WiFi FreeRTOS driver does not support the ipconfigZERO_COPY_RX_DRIVER option
+#endif
+
+#if ipconfigZERO_COPY_TX_DRIVER != 0
+#error The WF200 WiFi FreeRTOS driver does not support the ipconfigZERO_COPY_TX_DRIVER option
+#endif
+/********************************************/
+
+
 /* FreeRTOS_IP_Private.h mistakenly only declares this when
  * ipconfigZERO_COPY_TX_DRIVER is not 0. */
 #if ipconfigZERO_COPY_RX_DRIVER != 0
