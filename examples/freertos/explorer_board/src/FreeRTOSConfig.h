@@ -17,7 +17,7 @@ your application. */
 #define configCPU_CLOCK_HZ                      100000000
 
 #if ON_TILE(0)
-#define configNUM_CORES                         5
+#define configNUM_CORES                         2
 #endif
 #if ON_TILE(1)
 #define configNUM_CORES                         5
@@ -33,6 +33,7 @@ your application. */
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
+#define configTASK_NOTIFICATION_ARRAY_ENTRIES   2
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             1
 #define configUSE_COUNTING_SEMAPHORES           1
@@ -46,18 +47,19 @@ your application. */
 #define configSTACK_DEPTH_TYPE                  uint32_t
 #define configMESSAGE_BUFFER_LENGTH_TYPE        size_t
 
+
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
 
 #if ON_TILE(0)
-#define configTOTAL_HEAP_SIZE                   512*1024
+#define configTOTAL_HEAP_SIZE                   256*1024
 #endif
 #if ON_TILE(1)
 #define configTOTAL_HEAP_SIZE                   128*1024
 #endif
 
-#define configAPPLICATION_ALLOCATED_HEAP        1
+#define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     0

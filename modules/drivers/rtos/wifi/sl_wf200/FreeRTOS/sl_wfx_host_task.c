@@ -44,8 +44,7 @@ static void sl_wfx_host_receive_task(void *arg)
 
     for (;;) {
         /* Wait for an interrupt from WF200 */
-
-        ret = xTaskNotifyWait(0x00000000,
+        ret = xTaskNotifyWaitIndexed(1, 0x00000000,
                               0xFFFFFFFF,
                               &bits,
                               ticks_to_wait);
@@ -107,7 +106,7 @@ void sl_wfx_host_task_rx_notify(BaseType_t *xYieldRequired)
     int state = taskENTER_CRITICAL_FROM_ISR();
     if (receive_task_handle != NULL) {
         xEventGroupSetBitsFromISR(sl_wfx_event_group, SL_WFX_INTERRUPT, xYieldRequired);
-        xTaskNotifyFromISR(receive_task_handle, SL_WFX_HOST_BUS_IRQ_BM, eSetBits, xYieldRequired);
+        xTaskNotifyIndexedFromISR(receive_task_handle, 1, SL_WFX_HOST_BUS_IRQ_BM, eSetBits, xYieldRequired);
     }
     taskEXIT_CRITICAL_FROM_ISR(state);
 }

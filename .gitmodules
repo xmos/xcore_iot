@@ -58,3 +58,6 @@
 	path = modules/rtos/FreeRTOS/FreeRTOS-Plus-TCP
 	url = git@github.com:xmos/FreeRTOS-Plus-TCP.git
 	branch = main
+[submodule "modules/drivers/rtos/wifi/sl_wf200/thirdparty/wfx-firmware"]
+	path = modules/drivers/rtos/wifi/sl_wf200/thirdparty/wfx-firmware
+	url = git@github.com:SiliconLabs/wfx-firmware.git

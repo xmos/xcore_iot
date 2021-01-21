@@ -25,8 +25,8 @@
 #include "board_init.h"
 // #include "network.h"
 // #include "UDPCommandInterpreter.h"
-// #include "thruput_test.h"
-// #include "sntpd.h"
+#include "thruput_test.h"
+#include "sntpd.h"
 #include "fs_support.h"
 // #include "tls_echo_demo.h"
 // #include "tls_echo_server.h"
@@ -89,13 +89,13 @@ void vApplicationDaemonTaskStartup( void )
     /* Initialize WiFi */
     wifi_start(wifi_device_ctx, gpio_ctx);
 
-    #if 0
-
     /* Create the thruput test */
     thruput_test_create( appconfTHRUPUT_TEST_TASK_PRIORITY );
 
-    // /* Create SNTPD */
+    /* Create SNTPD */
     sntp_create( appconfSNTPD_TASK_PRIORITY );
+
+    #if 0
 
     /* Initialize TLS  */
 	tls_platform_init();
@@ -141,7 +141,7 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                 "vApplicationDaemonTaskStartup",
                 RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
                 NULL,
-                1,
+                configMAX_PRIORITIES-1,
                 NULL);
 
     rtos_printf("start scheduler on tile 0\n");

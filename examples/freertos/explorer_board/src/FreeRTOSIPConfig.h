@@ -105,8 +105,8 @@ then set ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM to 1 to prevent the software
 stack repeating the checksum calculations. */
 #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM   1
 
-#define ipconfigZERO_COPY_RX_DRIVER 1
-#define ipconfigZERO_COPY_TX_DRIVER 1
+#define ipconfigZERO_COPY_RX_DRIVER 0
+#define ipconfigZERO_COPY_TX_DRIVER 0
 
 #define ipconfigSUPPORT_SIGNALS					1
 //#define ipconfigSOCKET_HAS_USER_SEMAPHORE 		1

@@ -12,7 +12,7 @@ set(USE_FATFS TRUE)
 # set(USE_HTTP_PARSER TRUE)
 # set(USE_JSON_PARSER TRUE)
 # set(USE_MQTT TRUE)
-# set(USE_SNTPD TRUE)
+set(USE_SNTPD TRUE)
 # set(USE_TLS_SUPPORT TRUE)
 
 ## Import XMOS configurations
@@ -54,7 +54,7 @@ set(APP_SOURCES
     # "src/queue_to_i2s/queue_to_i2s.c"
     # "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
     # "src/tcp_stream_to_queue/tcp_stream_to_queue.c"
-    # "src/thruput_test/thruput_test.c"
+    "src/thruput_test/thruput_test.c"
     # "src/udp_cli/CLI-commands.c"
     # "src/udp_cli/FreeRTOS_CLI.c"
     # "src/udp_cli/UDPCommandServer.c"
@@ -75,7 +75,7 @@ set(APP_INCLUDES
     # "src/queue_to_i2s"
     # "src/queue_to_tcp_stream"
     # "src/tcp_stream_to_queue"
-    # "src/thruput_test"
+    "src/thruput_test"
     # "src/udp_cli"
     # "src/tls_echo_demo"
     # "src/tls_echo_server"

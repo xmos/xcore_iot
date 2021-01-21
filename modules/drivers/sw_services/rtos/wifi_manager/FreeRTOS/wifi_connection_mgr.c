@@ -695,5 +695,10 @@ static void wifi_conn_mgr(void *arg)
 
 void wifi_conn_mgr_start(void)
 {
-    xTaskCreate(wifi_conn_mgr, "wifi_conn_mgr", portTASK_STACK_DEPTH(wifi_conn_mgr), NULL, 15, &wifi_conn_mgr_task_handle);
+    xTaskCreate((TaskFunction_t)wifi_conn_mgr,
+                "wifi_conn_mgr",
+                portTASK_STACK_DEPTH(wifi_conn_mgr),
+                NULL,
+                configMAX_PRIORITIES-3,
+                &wifi_conn_mgr_task_handle);
 }
