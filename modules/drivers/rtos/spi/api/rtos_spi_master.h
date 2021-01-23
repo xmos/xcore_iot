@@ -10,13 +10,9 @@
  * @{
  */
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "queue.h"
-
 #include "spi.h"
 
+#include "drivers/rtos/osal/api/rtos_osal.h"
 #include "drivers/rtos/rpc/api/rtos_driver_rpc.h"
 
 /**
@@ -52,10 +48,10 @@ struct rtos_spi_master_struct {
     spi_master_t ctx;
 
     unsigned op_task_priority;
-    /* BEGIN RTOS SPECIFIC MEMBERS. */
-    TaskHandle_t op_task;
-    QueueHandle_t xfer_req_queue;
-    SemaphoreHandle_t lock;
+    rtos_osal_thread_t op_task;
+    rtos_osal_queue_t xfer_req_queue;
+    rtos_osal_semaphore_t data_ready;
+    rtos_osal_mutex_t lock;
 };
 
 /**

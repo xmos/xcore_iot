@@ -5,7 +5,7 @@
 #include <xcore/assert.h>
 #include <xcore/interrupt.h>
 
-#include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
+#include "drivers/rtos/spi/api/rtos_spi_master.h"
 
 #define SPI_OP_START 0
 #define SPI_OP_XFER  1
@@ -19,7 +19,7 @@ typedef struct {
     uint8_t *data_in;
     size_t len;
     unsigned priority;
-    TaskHandle_t requesting_task;
+    //TaskHandle_t requesting_task;
 } spi_xfer_req_t;
 
 static void spi_xfer_thread(rtos_spi_master_t *ctx)
@@ -28,12 +28,12 @@ static void spi_xfer_thread(rtos_spi_master_t *ctx)
     unsigned current_priority = ctx->op_task_priority;
 
     for (;;) {
-        xQueueReceive(ctx->xfer_req_queue, &req, portMAX_DELAY);
+        rtos_osal_queue_receive(&ctx->xfer_req_queue, &req, RTOS_OSAL_WAIT_FOREVER);
 
         switch (req.op) {
         case SPI_OP_START:
             if (current_priority != req.priority) {
-                vTaskPrioritySet(ctx->op_task, req.priority);
+                rtos_osal_thread_priority_set(&ctx->op_task, req.priority);
                 current_priority = req.priority;
             }
 
@@ -56,9 +56,10 @@ static void spi_xfer_thread(rtos_spi_master_t *ctx)
             interrupt_unmask_all();
 
             if (req.data_in != NULL) {
-                xTaskNotify(req.requesting_task, 0, eNoAction);
+                //xTaskNotify(req.requesting_task, 0, eNoAction);
+                rtos_osal_semaphore_put(&ctx->data_ready);
             } else {
-                vPortFree(req.data_out);
+                rtos_osal_free(req.data_out);
             }
             break;
 
@@ -70,7 +71,7 @@ static void spi_xfer_thread(rtos_spi_master_t *ctx)
             spi_master_end_transaction(&req.ctx->dev_ctx);
 
             if (current_priority != ctx->op_task_priority) {
-                vTaskPrioritySet(ctx->op_task, ctx->op_task_priority);
+                rtos_osal_thread_priority_set(&ctx->op_task, ctx->op_task_priority);
                 current_priority = ctx->op_task_priority;
             }
             break;
@@ -82,13 +83,13 @@ __attribute__((fptrgroup("rtos_spi_master_transaction_start_fptr_grp")))
 static void spi_master_local_transaction_start(
         rtos_spi_master_device_t *ctx)
 {
-    xSemaphoreTakeRecursive(ctx->bus_ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->bus_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
 
     spi_xfer_req_t req;
     req.op = SPI_OP_START;
     req.ctx = ctx;
-    req.priority = uxTaskPriorityGet(NULL);
-    xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
+    rtos_osal_thread_priority_get(NULL, &req.priority);
+    rtos_osal_queue_send(&ctx->bus_ctx->xfer_req_queue, &req, RTOS_OSAL_WAIT_FOREVER);
 }
 
 __attribute__((fptrgroup("rtos_spi_master_transfer_fptr_grp")))
@@ -107,7 +108,7 @@ static void spi_master_local_transfer(
 
     if (data_in != NULL) {
         req.data_out = data_out;
-        req.requesting_task = xTaskGetCurrentTaskHandle();
+        //req.requesting_task = xTaskGetCurrentTaskHandle();
     } else {
         /*
          * TODO: Consider a zero copy option? Caller would
@@ -117,19 +118,15 @@ static void spi_master_local_transfer(
          * for example if this tx only call is followed by
          * an rx.
          */
-        req.data_out = pvPortMalloc(len);
+        req.data_out = rtos_osal_malloc(len);
         memcpy(req.data_out, data_out, len);
-        req.requesting_task = NULL;
+        //req.requesting_task = NULL;
     }
 
-    xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
+    rtos_osal_queue_send(&ctx->bus_ctx->xfer_req_queue, &req, RTOS_OSAL_WAIT_FOREVER);
 
     if (data_in != NULL) {
-        xTaskNotifyWait(
-                0x00000000UL,    /* Don't clear notification bits on entry */
-                0xFFFFFFFFUL,    /* Reset full notification value on exit */
-                NULL,          /* Pass out notification value into value */
-                portMAX_DELAY ); /* Wait indefinitely until next notification */
+        rtos_osal_semaphore_get(&ctx->bus_ctx->data_ready, RTOS_OSAL_WAIT_FOREVER);
     }
 }
 
@@ -141,7 +138,7 @@ static void spi_master_local_delay_before_next_transfer(
     spi_xfer_req_t req;
     req.op = SPI_OP_DELAY;
     req.len = delay_ticks;
-    xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
+    rtos_osal_queue_send(&ctx->bus_ctx->xfer_req_queue, &req, RTOS_OSAL_WAIT_FOREVER);
 }
 
 __attribute__((fptrgroup("rtos_spi_master_transaction_end_fptr_grp")))
@@ -151,27 +148,27 @@ static void spi_master_local_transaction_end(
     spi_xfer_req_t req;
     req.op = SPI_OP_END;
     req.ctx = ctx;
-    xQueueSend(ctx->bus_ctx->xfer_req_queue, &req, portMAX_DELAY);
+    rtos_osal_queue_send(&ctx->bus_ctx->xfer_req_queue, &req, RTOS_OSAL_WAIT_FOREVER);
 
-    xSemaphoreGiveRecursive(ctx->bus_ctx->lock);
+    rtos_osal_mutex_put(&ctx->bus_ctx->lock);
 }
 
 void rtos_spi_master_start(
         rtos_spi_master_t *spi_master_ctx,
         unsigned priority)
 {
-    spi_master_ctx->lock = xSemaphoreCreateRecursiveMutex();
-
-    spi_master_ctx->xfer_req_queue = xQueueCreate(2, sizeof(spi_xfer_req_t));
+    rtos_osal_mutex_create(&spi_master_ctx->lock, "spi_master_lock", RTOS_OSAL_RECURSIVE);
+    rtos_osal_queue_create(&spi_master_ctx->xfer_req_queue, "spi_req_queue", 2, sizeof(spi_xfer_req_t));
+    rtos_osal_semaphore_create(&spi_master_ctx->data_ready, "spi_dr_sem", 1, 0);
 
     spi_master_ctx->op_task_priority = priority;
-    xTaskCreate(
-                (TaskFunction_t) spi_xfer_thread,
-                "spi_xfer_thread",
-                RTOS_THREAD_STACK_SIZE(spi_xfer_thread),
-                spi_master_ctx,
-                priority,
-                &spi_master_ctx->op_task);
+    rtos_osal_thread_create(
+            &spi_master_ctx->op_task,
+            "spi_xfer_thread",
+            (rtos_osal_entry_function_t) spi_xfer_thread,
+            spi_master_ctx,
+            RTOS_THREAD_STACK_SIZE(spi_xfer_thread),
+            priority);
 
     if (spi_master_ctx->rpc_config != NULL && spi_master_ctx->rpc_config->rpc_host_start != NULL) {
         spi_master_ctx->rpc_config->rpc_host_start(spi_master_ctx->rpc_config);

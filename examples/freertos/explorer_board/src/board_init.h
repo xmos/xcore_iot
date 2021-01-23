@@ -5,9 +5,9 @@
 
 #include "drivers/rtos/intertile/FreeRTOS/rtos_intertile.h"
 #include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
-#include "drivers/rtos/i2c/FreeRTOS/rtos_i2c_master.h"
+#include "drivers/rtos/i2c/api/rtos_i2c_master.h"
 #include "drivers/rtos/i2s/FreeRTOS/rtos_i2s_master.h"
-#include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
+#include "drivers/rtos/spi/api/rtos_spi_master.h"
 #include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
 #include "drivers/rtos/gpio/api/rtos_gpio.h"
 

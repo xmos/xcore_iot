@@ -17,6 +17,9 @@
 #define RTOS_OSAL_AND        RTOS_OSAL_PORT_AND
 #define RTOS_OSAL_AND_CLEAR  RTOS_OSAL_PORT_AND_CLEAR
 
+#define RTOS_OSAL_NOT_RECURSIVE 0
+#define RTOS_OSAL_RECURSIVE     1
+
 /*
  * Return statuses
  */
