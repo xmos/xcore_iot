@@ -3,13 +3,9 @@
 #include <string.h>
 #include <xcore/assert.h>
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-
 #include "drivers/rtos/rpc/api/rtos_rpc.h"
 
-#include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
+#include "drivers/rtos/qspi_flash/api/rtos_qspi_flash.h"
 
 enum {
     fcode_lock,
@@ -33,7 +29,7 @@ static void qspi_flash_remote_lock(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_lock, rpc_param_desc,
@@ -58,7 +54,7 @@ static void qspi_flash_remote_unlock(
             host_address->intertile_ctx, host_address->port, fcode_unlock, rpc_param_desc,
             &host_ctx_ptr);
 
-    xSemaphoreGiveRecursive(ctx->mutex);
+    rtos_osal_mutex_put(&ctx->mutex);
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_read_fptr_grp")))
@@ -81,13 +77,13 @@ static void qspi_flash_remote_read(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_read, rpc_param_desc,
             &host_ctx_ptr, data, &address, &len);
 
-    xSemaphoreGiveRecursive(ctx->mutex);
+    rtos_osal_mutex_put(&ctx->mutex);
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_write_fptr_grp")))
@@ -110,13 +106,13 @@ static void qspi_flash_remote_write(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_write, rpc_param_desc,
             &host_ctx_ptr, data, &address, &len);
 
-    xSemaphoreGiveRecursive(ctx->mutex);
+    rtos_osal_mutex_put(&ctx->mutex);
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_erase_fptr_grp")))
@@ -137,13 +133,13 @@ static void qspi_flash_remote_erase(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_erase, rpc_param_desc,
             &host_ctx_ptr, &address, &len);
 
-    xSemaphoreGiveRecursive(ctx->mutex);
+    rtos_osal_mutex_put(&ctx->mutex);
 }
 
 static int qspi_flash_lock_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
@@ -197,7 +193,7 @@ static int qspi_flash_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             rpc_msg,
             &ctx, &data, &address, &len);
 
-    data = pvPortMalloc(len);
+    data = rtos_osal_malloc(len);
 
     rtos_qspi_flash_read(ctx, data, address, len);
 
@@ -205,7 +201,7 @@ static int qspi_flash_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             resp_msg, rpc_msg,
             ctx, data, address, len);
 
-    vPortFree(data);
+    rtos_osal_free(data);
 
     return msg_length;
 }
@@ -264,7 +260,7 @@ static void qspi_flash_rpc_thread(rtos_intertile_address_t *client_address)
 
     for (;;) {
         /* receive RPC request message from client */
-        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &req_msg, portMAX_DELAY);
+        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &req_msg, RTOS_OSAL_WAIT_FOREVER);
 
         rpc_request_parse(&rpc_msg, req_msg);
 
@@ -286,11 +282,11 @@ static void qspi_flash_rpc_thread(rtos_intertile_address_t *client_address)
             break;
         }
 
-        vPortFree(req_msg);
+        rtos_osal_free(req_msg);
 
         /* send RPC response message to client */
         rtos_intertile_tx(intertile_ctx, intertile_port, resp_msg, msg_length);
-        vPortFree(resp_msg);
+        rtos_osal_free(resp_msg);
     }
 }
 
@@ -306,13 +302,13 @@ static void qspi_flash_rpc_start(
 
         xassert(client_address->port >= 0);
 
-        xTaskCreate(
-                    (TaskFunction_t) qspi_flash_rpc_thread,
-                    "qspi_flash_rpc_thread",
-                    RTOS_THREAD_STACK_SIZE(qspi_flash_rpc_thread),
-                    client_address,
-                    rpc_config->host_task_priority,
-                    NULL);
+        rtos_osal_thread_create(
+                NULL,
+                "qspi_flash_rpc_thread",
+                (rtos_osal_entry_function_t) qspi_flash_rpc_thread,
+                client_address,
+                RTOS_THREAD_STACK_SIZE(qspi_flash_rpc_thread),
+                rpc_config->host_task_priority);
     }
 }
 
@@ -327,7 +323,7 @@ void rtos_qspi_flash_rpc_config(
         /* This is a client */
         rpc_config->host_address.port = intertile_port;
 
-        qspi_flash_ctx->mutex = xSemaphoreCreateMutex();
+        rtos_osal_mutex_create(&qspi_flash_ctx->mutex, "qspi_lock", RTOS_OSAL_NOT_RECURSIVE);
 
     } else {
         for (int i = 0; i < rpc_config->remote_client_count; i++) {

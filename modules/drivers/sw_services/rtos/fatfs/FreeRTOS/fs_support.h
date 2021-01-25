@@ -5,7 +5,7 @@
 
 #include "ff.h"
 
-#include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
+#include "drivers/rtos/qspi_flash/api/rtos_qspi_flash.h"
 
 /**
  * Open a file

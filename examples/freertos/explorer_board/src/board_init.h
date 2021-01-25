@@ -8,7 +8,7 @@
 #include "drivers/rtos/i2c/api/rtos_i2c_master.h"
 #include "drivers/rtos/i2s/FreeRTOS/rtos_i2s_master.h"
 #include "drivers/rtos/spi/api/rtos_spi_master.h"
-#include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
+#include "drivers/rtos/qspi_flash/api/rtos_qspi_flash.h"
 #include "drivers/rtos/gpio/api/rtos_gpio.h"
 
 void board_tile0_init(

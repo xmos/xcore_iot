@@ -7,7 +7,7 @@
 #include <xcore/assert.h>
 #include <xcore/interrupt.h>
 
-#include "drivers/rtos/qspi_flash/FreeRTOS/rtos_qspi_flash.h"
+#include "drivers/rtos/qspi_flash/api/rtos_qspi_flash.h"
 
 #define FLASH_OP_READ  0
 #define FLASH_OP_WRITE 1
@@ -213,7 +213,6 @@ typedef struct {
     unsigned address;
     size_t len;
     unsigned priority;
-    TaskHandle_t requesting_task;
 } qspi_flash_op_req_t;
 
 static void enable_quad_mode(rtos_qspi_flash_t *ctx)
@@ -251,22 +250,22 @@ static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
     enable_quad_mode(ctx);
 
     for (;;) {
-        xQueueReceive(ctx->op_queue, &op, portMAX_DELAY);
+        rtos_osal_queue_receive(&ctx->op_queue, &op, RTOS_OSAL_WAIT_FOREVER);
 
         /*
          * Inherit the priority of the task that requested this
          * operation.
          */
-        vTaskPrioritySet(ctx->op_task, op.priority);
+        rtos_osal_thread_priority_set(&ctx->op_task, op.priority);
 
         switch (op.op) {
         case FLASH_OP_READ:
             read_op(ctx, op.data, op.address, op.len);
-            xTaskNotify(op.requesting_task, 0, eNoAction);
+            rtos_osal_semaphore_put(&ctx->data_ready);
             break;
         case FLASH_OP_WRITE:
             write_op(ctx, op.data, op.address, op.len);
-            vPortFree(op.data);
+            rtos_osal_free(op.data);
             break;
         case FLASH_OP_ERASE:
             erase_op(ctx, op.address, op.len);
@@ -277,7 +276,7 @@ static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
         /*
          * Reset back to the priority set by rtos_qspi_flash_start().
          */
-        vTaskPrioritySet(ctx->op_task, ctx->op_task_priority);
+        rtos_osal_thread_priority_set(&ctx->op_task, ctx->op_task_priority);
     }
 }
 
@@ -285,26 +284,26 @@ static void request(
         rtos_qspi_flash_t *ctx,
         qspi_flash_op_req_t *op)
 {
-    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
 
-    op->priority = uxTaskPriorityGet(NULL);
-    xQueueSend(ctx->op_queue, op, portMAX_DELAY);
+    rtos_osal_thread_priority_get(NULL, &op->priority);
+    rtos_osal_queue_send(&ctx->op_queue, op, RTOS_OSAL_WAIT_FOREVER);
 
-    xSemaphoreGiveRecursive(ctx->mutex);
+    rtos_osal_mutex_put(&ctx->mutex);
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_lock_fptr_grp")))
 static void qspi_flash_local_lock(
         rtos_qspi_flash_t *ctx)
 {
-    xSemaphoreTakeRecursive(ctx->mutex, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_unlock_fptr_grp")))
 static void qspi_flash_local_unlock(
         rtos_qspi_flash_t *ctx)
 {
-    xSemaphoreGiveRecursive(ctx->mutex);
+    rtos_osal_mutex_put(&ctx->mutex);
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_read_fptr_grp")))
@@ -321,15 +320,9 @@ static void qspi_flash_local_read(
             .len = len
     };
 
-    op.requesting_task = xTaskGetCurrentTaskHandle();
-
     request(ctx, &op);
 
-    xTaskNotifyWait(
-            0x00000000UL,    /* Don't clear notification bits on entry */
-            0xFFFFFFFFUL,    /* Reset full notification value on exit */
-            NULL,            /* Don't need the notification value */
-            portMAX_DELAY ); /* Wait indefinitely until the notification */
+    rtos_osal_semaphore_get(&ctx->data_ready, RTOS_OSAL_WAIT_FOREVER);
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_write_fptr_grp")))
@@ -345,7 +338,7 @@ static void qspi_flash_local_write(
             .len = len
     };
 
-    op.data = pvPortMalloc(len);
+    op.data = rtos_osal_malloc(len);
     memcpy(op.data, data, len);
 
     request(ctx, &op);
@@ -370,18 +363,18 @@ void rtos_qspi_flash_start(
         rtos_qspi_flash_t *ctx,
         unsigned priority)
 {
-    ctx->mutex = xSemaphoreCreateRecursiveMutex();
-
-    ctx->op_queue = xQueueCreate(2, sizeof(qspi_flash_op_req_t));
+    rtos_osal_mutex_create(&ctx->mutex, "qspi_lock", RTOS_OSAL_RECURSIVE);
+    rtos_osal_queue_create(&ctx->op_queue, "qspi_req_queue", 2, sizeof(qspi_flash_op_req_t));
+    rtos_osal_semaphore_create(&ctx->data_ready, "qspi_dr_sem", 1, 0);
 
     ctx->op_task_priority = priority;
-    xTaskCreate(
-                (TaskFunction_t) qspi_flash_op_thread,
-                "qspi_flash_op_thread",
-                RTOS_THREAD_STACK_SIZE(qspi_flash_op_thread),
-                ctx,
-                priority,
-                &ctx->op_task);
+    rtos_osal_thread_create(
+            &ctx->op_task,
+            "qspi_flash_op_thread",
+            (rtos_osal_entry_function_t) qspi_flash_op_thread,
+            ctx,
+            RTOS_THREAD_STACK_SIZE(qspi_flash_op_thread),
+            priority);
 
     if (ctx->rpc_config != NULL && ctx->rpc_config->rpc_host_start != NULL) {
         ctx->rpc_config->rpc_host_start(ctx->rpc_config);

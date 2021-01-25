@@ -19,7 +19,6 @@ typedef struct {
     uint8_t *data_in;
     size_t len;
     unsigned priority;
-    //TaskHandle_t requesting_task;
 } spi_xfer_req_t;
 
 static void spi_xfer_thread(rtos_spi_master_t *ctx)
@@ -56,7 +55,6 @@ static void spi_xfer_thread(rtos_spi_master_t *ctx)
             interrupt_unmask_all();
 
             if (req.data_in != NULL) {
-                //xTaskNotify(req.requesting_task, 0, eNoAction);
                 rtos_osal_semaphore_put(&ctx->data_ready);
             } else {
                 rtos_osal_free(req.data_out);
@@ -108,7 +106,6 @@ static void spi_master_local_transfer(
 
     if (data_in != NULL) {
         req.data_out = data_out;
-        //req.requesting_task = xTaskGetCurrentTaskHandle();
     } else {
         /*
          * TODO: Consider a zero copy option? Caller would
@@ -120,7 +117,6 @@ static void spi_master_local_transfer(
          */
         req.data_out = rtos_osal_malloc(len);
         memcpy(req.data_out, data_out, len);
-        //req.requesting_task = NULL;
     }
 
     rtos_osal_queue_send(&ctx->bus_ctx->xfer_req_queue, &req, RTOS_OSAL_WAIT_FOREVER);
