@@ -2,7 +2,7 @@
 
 #include "drivers/rtos/rpc/api/rtos_rpc.h"
 
-#include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
+#include "drivers/rtos/mic_array/api/rtos_mic_array.h"
 
 __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_remote_rx(
@@ -52,7 +52,7 @@ static int mic_array_rx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
     /* Instead allocate a buffer with the length parameter
     before calling, as this is what would be done by
     the client. */
-    sample_buf = pvPortMalloc(frame_count * sizeof(sample_buf[0]));
+    sample_buf = rtos_osal_malloc(frame_count * sizeof(sample_buf[0]));
 
     ret = rtos_mic_array_rx(mic_array_ctx, sample_buf, frame_count, timeout);
 
@@ -63,7 +63,7 @@ static int mic_array_rx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
     /* The data from buffer has been copied into the response
     message. Since buffer was allocated on the heap, free
     it now. */
-    vPortFree(sample_buf);
+    rtos_osal_free(sample_buf);
 
     return msg_length;
 }
@@ -79,7 +79,7 @@ static void mic_array_rpc_thread(rtos_intertile_address_t *client_address)
 
     for (;;) {
         /* receive RPC request message from client */
-        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &req_msg, portMAX_DELAY);
+        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &req_msg, RTOS_OSAL_WAIT_FOREVER);
 
         rpc_request_parse(&rpc_msg, req_msg);
 
@@ -87,11 +87,11 @@ static void mic_array_rpc_thread(rtos_intertile_address_t *client_address)
 
         msg_length = mic_array_rx_rpc_host(&rpc_msg, &resp_msg);
 
-        vPortFree(req_msg);
+        rtos_osal_free(req_msg);
 
         /* send RPC response message to client */
         rtos_intertile_tx(intertile_ctx, intertile_port, resp_msg, msg_length);
-        vPortFree(resp_msg);
+        rtos_osal_free(resp_msg);
     }
 }
 
@@ -107,13 +107,13 @@ static void mic_array_rpc_start(
 
         xassert(client_address->port >= 0);
 
-        xTaskCreate(
-                    (TaskFunction_t) mic_array_rpc_thread,
-                    "mic_array_rpc_thread",
-                    RTOS_THREAD_STACK_SIZE(mic_array_rpc_thread),
-                    client_address,
-                    rpc_config->host_task_priority,
-                    NULL);
+        rtos_osal_thread_create(
+                NULL,
+                "mic_array_rpc_thread",
+                (rtos_osal_entry_function_t) mic_array_rpc_thread,
+                client_address,
+                RTOS_THREAD_STACK_SIZE(mic_array_rpc_thread),
+                rpc_config->host_task_priority);
     }
 }
 

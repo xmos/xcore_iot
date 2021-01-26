@@ -3,7 +3,7 @@
 #ifndef SRC_EXAMPLE_PIPELINE_H_
 #define SRC_EXAMPLE_PIPELINE_H_
 
-#include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
+#include "drivers/rtos/mic_array/api/rtos_mic_array.h"
 #include "drivers/rtos/i2s/api/rtos_i2s_master.h"
 
 #define EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE 48000

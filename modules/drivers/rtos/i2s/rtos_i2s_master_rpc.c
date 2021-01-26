@@ -65,7 +65,7 @@ static void i2s_rpc_thread(rtos_intertile_address_t *client_address)
 
     for (;;) {
         /* receive RPC request message from client */
-        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &req_msg, portMAX_DELAY);
+        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &req_msg, RTOS_OSAL_WAIT_FOREVER);
 
         rpc_request_parse(&rpc_msg, req_msg);
 
@@ -73,11 +73,11 @@ static void i2s_rpc_thread(rtos_intertile_address_t *client_address)
 
         msg_length = i2s_master_tx_rpc_host(&rpc_msg, &resp_msg);
 
-        vPortFree(req_msg);
+        rtos_osal_free(req_msg);
 
         /* send RPC response message to client */
         rtos_intertile_tx(intertile_ctx, intertile_port, resp_msg, msg_length);
-        vPortFree(resp_msg);
+        rtos_osal_free(resp_msg);
     }
 }
 
@@ -93,13 +93,13 @@ static void i2s_master_rpc_start(
 
         xassert(client_address->port >= 0);
 
-        xTaskCreate(
-                    (TaskFunction_t) i2s_rpc_thread,
-                    "i2s_rpc_thread",
-                    RTOS_THREAD_STACK_SIZE(i2s_rpc_thread),
-                    client_address,
-                    rpc_config->host_task_priority,
-                    NULL);
+        rtos_osal_thread_create(
+                NULL,
+                "i2s_rpc_thread",
+                (rtos_osal_entry_function_t) i2s_rpc_thread,
+                client_address,
+                RTOS_THREAD_STACK_SIZE(i2s_rpc_thread),
+                rpc_config->host_task_priority);
     }
 }
 

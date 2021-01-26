@@ -55,7 +55,6 @@ struct rtos_i2s_master_struct{
         volatile size_t total_written;
         volatile size_t total_read;
         volatile size_t required_free_count;
-        volatile size_t required_available_count;
     } send_buffer;
 };
 

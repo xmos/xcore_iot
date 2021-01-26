@@ -16,7 +16,7 @@
 #include "drivers/rtos/i2c/api/rtos_i2c_master.h"
 #include "drivers/rtos/i2s/api/rtos_i2s_master.h"
 #include "drivers/rtos/intertile/api/rtos_intertile.h"
-#include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
+#include "drivers/rtos/mic_array/api/rtos_mic_array.h"
 #include "drivers/rtos/qspi_flash/api/rtos_qspi_flash.h"
 #include "drivers/rtos/spi/api/rtos_spi_master.h"
 

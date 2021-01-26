@@ -62,7 +62,8 @@ static void i2s_send(rtos_i2s_master_t *ctx, size_t num_out, int32_t *i2s_sample
     }
 
     if (ctx->send_buffer.required_free_count > 0) {
-        size_t words_free = ctx->send_buffer.buf_size - (words_available - num_out);
+        words_available = ctx->send_buffer.total_written - ctx->send_buffer.total_read;
+        size_t words_free = ctx->send_buffer.buf_size - words_available;
 
         if (words_free >= ctx->send_buffer.required_free_count) {
             ctx->send_buffer.required_free_count = 0;
@@ -81,8 +82,9 @@ static void i2s_master_thread(rtos_i2s_master_t *ctx)
             ctx
     };
 
-    /* Exclude from core 0 */
+    /* Ensure the I2S thread is never preempted */
     rtos_osal_thread_preemption_disable(NULL);
+    /* And exclude it from core 0 where the system tick interrupt runs */
     rtos_osal_thread_core_exclusion_set(NULL, (1 << 0));
 
     rtos_printf("I2S on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
@@ -159,8 +161,8 @@ void rtos_i2s_master_start(
     memset(&i2s_master_ctx->send_buffer, 0, sizeof(i2s_master_ctx->send_buffer));
     i2s_master_ctx->send_buffer.buf_size = buffer_size * (2 * i2s_master_ctx->num_out);
     i2s_master_ctx->send_buffer.buf = rtos_osal_malloc(i2s_master_ctx->send_buffer.buf_size * sizeof(int32_t));
-
     rtos_osal_semaphore_create(&i2s_master_ctx->send_sem, "i2s_send_sem", 1, 0);
+
     rtos_osal_thread_create(
             NULL,
             "i2s_master_thread",

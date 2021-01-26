@@ -1,11 +1,15 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
-#include <xs1.h>
+#include <string.h>
+
+#include <xcore/assert.h>
 #include <xcore/triggerable.h>
 
 #include "rtos_interrupt.h"
 
-#include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
+#include "drivers/rtos/mic_array/api/rtos_mic_array.h"
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 static void mic_array_thread(rtos_mic_array_t *ctx)
 {
@@ -18,9 +22,10 @@ static void mic_array_thread(rtos_mic_array_t *ctx)
     chanend_t *ref_audio_ends = NULL;
 #endif
 
-    /* Exclude from core 0 */
-    vTaskPreemptionDisable(NULL);
-    vTaskCoreExclusionSet(NULL, (1 << 0));
+    /* Ensure the mic array thread is never preempted */
+    rtos_osal_thread_preemption_disable(NULL);
+    /* And exclude it from core 0 where the system tick interrupt runs */
+    rtos_osal_thread_core_exclusion_set(NULL, (1 << 0));
 
     rtos_printf("PDM mics on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
     mic_dual_pdm_rx_decimate(
@@ -35,23 +40,37 @@ static void mic_array_thread(rtos_mic_array_t *ctx)
 DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
 {
     rtos_mic_array_t *ctx = arg;
-    int32_t *mic_sample_block;
-    BaseType_t yield_required = pdFALSE;
+    size_t words_remaining = MIC_DUAL_FRAME_SIZE * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+    size_t words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
+    size_t words_free = ctx->recv_buffer.buf_size - words_available;
+    int32_t *mic_sample_block = (int32_t *) s_chan_in_word(ctx->c_2x_pdm_mic.end_b);
 
-    mic_sample_block = (int32_t *) s_chan_in_word(ctx->c_2x_pdm_mic.end_b);
+    if (words_remaining <= words_free) {
+        while (words_remaining) {
+            size_t words_to_copy = MIN(words_remaining, ctx->recv_buffer.buf_size - ctx->recv_buffer.write_index);
+            memcpy(&ctx->recv_buffer.buf[ctx->recv_buffer.write_index], mic_sample_block, words_to_copy * sizeof(int32_t));
+            ctx->recv_buffer.write_index += words_to_copy;
 
-    if (xStreamBufferSpacesAvailable(ctx->audio_stream_buffer) >= MIC_DUAL_FRAME_SIZE * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS) * sizeof(int32_t)) {
-        size_t len;
+            mic_sample_block += words_to_copy;
+            words_remaining -= words_to_copy;
 
-        len = xStreamBufferSendFromISR(ctx->audio_stream_buffer,
-                                       mic_sample_block,
-                                       MIC_DUAL_FRAME_SIZE * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS) * sizeof(int32_t),
-                                       &yield_required);
-    } else {
-        //rtos_printf("mic samples lost\n");
+            if (ctx->recv_buffer.write_index >= ctx->recv_buffer.buf_size) {
+                ctx->recv_buffer.write_index = 0;
+            }
+        }
+
+        RTOS_MEMORY_BARRIER();
+        ctx->recv_buffer.total_written += MIC_DUAL_FRAME_SIZE * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
     }
 
-    portEND_SWITCHING_ISR(yield_required);
+    if (ctx->recv_buffer.required_available_count > 0) {
+        words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
+
+        if (words_available >= ctx->recv_buffer.required_available_count) {
+            ctx->recv_buffer.required_available_count = 0;
+            rtos_osal_semaphore_put(&ctx->recv_sem);
+        }
+    }
 }
 
 void rtos_mic_array_interrupt_init(rtos_mic_array_t *mic_array_ctx)
@@ -62,16 +81,55 @@ void rtos_mic_array_interrupt_init(rtos_mic_array_t *mic_array_ctx)
 
 __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_local_rx(
-        rtos_mic_array_t *mic_array_ctx,
+        rtos_mic_array_t *ctx,
         int32_t sample_buf[][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS],
         size_t frame_count,
         unsigned timeout)
 {
-    size_t bytes_recvd;
+    size_t frames_recvd = 0;
+    size_t words_remaining = frame_count * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+    int32_t *sample_buf_ptr = (int32_t *) sample_buf;
 
-    bytes_recvd = xStreamBufferReceive(mic_array_ctx->audio_stream_buffer, sample_buf, frame_count * sizeof(sample_buf[0]), timeout);
+    xassert(words_remaining <= ctx->recv_buffer.buf_size);
+    if (words_remaining > ctx->recv_buffer.buf_size) {
+        return frames_recvd;
+    }
 
-    return bytes_recvd / sizeof(sample_buf[0]);
+    if (!ctx->recv_blocked) {
+        size_t words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
+        if (words_remaining > words_available) {
+            ctx->recv_buffer.required_available_count = words_remaining;
+            ctx->recv_blocked = 1;
+        }
+    }
+
+    if (ctx->recv_blocked) {
+        if (rtos_osal_semaphore_get(&ctx->recv_sem, timeout) == RTOS_OSAL_SUCCESS) {
+            ctx->recv_blocked = 0;
+        }
+    }
+
+    if (!ctx->recv_blocked) {
+        while (words_remaining) {
+            size_t words_to_copy = MIN(words_remaining, ctx->recv_buffer.buf_size - ctx->recv_buffer.read_index);
+            memcpy(sample_buf_ptr, &ctx->recv_buffer.buf[ctx->recv_buffer.read_index], words_to_copy * sizeof(int32_t));
+            ctx->recv_buffer.read_index += words_to_copy;
+
+            sample_buf_ptr += words_to_copy;
+            words_remaining -= words_to_copy;
+
+            if (ctx->recv_buffer.read_index >= ctx->recv_buffer.buf_size) {
+                ctx->recv_buffer.read_index = 0;
+            }
+        }
+
+        RTOS_MEMORY_BARRIER();
+        ctx->recv_buffer.total_read += frame_count * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+
+        frames_recvd = frame_count;
+    }
+
+    return frames_recvd;
 }
 
 void rtos_mic_array_start(
@@ -83,19 +141,22 @@ void rtos_mic_array_start(
         unsigned priority)
 {
     xassert(buffer_size >= MIC_DUAL_FRAME_SIZE);
-    mic_array_ctx->audio_stream_buffer = xStreamBufferCreate(buffer_size * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS) * sizeof(int32_t), sizeof(int32_t));
+    memset(&mic_array_ctx->recv_buffer, 0, sizeof(mic_array_ctx->recv_buffer));
+    mic_array_ctx->recv_buffer.buf_size = buffer_size * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+    mic_array_ctx->recv_buffer.buf = rtos_osal_malloc(mic_array_ctx->recv_buffer.buf_size * sizeof(int32_t));
+    rtos_osal_semaphore_create(&mic_array_ctx->recv_sem, "mic_recv_sem", 1, 0);
 
     mic_array_ctx->decimation_factor = decimation_factor;
     mic_array_ctx->third_stage_coefs = third_stage_coefs;
     mic_array_ctx->fir_gain_compensation = fir_gain_compensation;
 
-    xTaskCreate(
-                (TaskFunction_t) mic_array_thread,
-                "mic_array_thread",
-                RTOS_THREAD_STACK_SIZE(mic_array_thread),
-                mic_array_ctx,
-                priority,
-                NULL);
+    rtos_osal_thread_create(
+            NULL,
+            "mic_array_thread",
+            (rtos_osal_entry_function_t) mic_array_thread,
+            mic_array_ctx,
+            RTOS_THREAD_STACK_SIZE(mic_array_thread),
+            priority);
 
     if (mic_array_ctx->rpc_config != NULL && mic_array_ctx->rpc_config->rpc_host_start != NULL) {
         mic_array_ctx->rpc_config->rpc_host_start(mic_array_ctx->rpc_config);
