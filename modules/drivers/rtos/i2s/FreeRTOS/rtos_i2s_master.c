@@ -3,8 +3,28 @@
 #include <string.h>
 
 #include <xcore/assert.h>
+#include <xcore/triggerable.h>
+
+#include "rtos_interrupt.h"
 
 #include "drivers/rtos/i2s/FreeRTOS/rtos_i2s_master.h"
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+#define ISR_RESUME_SEND 1
+#define ISR_RESUME_RECV 2
+
+DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_i2s_master_isr, arg)
+{
+    rtos_i2s_master_t *ctx = arg;
+    uint32_t isr_action;
+
+    isr_action = s_chan_in_word(ctx->c_i2s_isr.end_b);
+
+    if (isr_action == ISR_RESUME_SEND) {
+        rtos_osal_semaphore_put(&ctx->send_sem);
+    }
+}
 
 I2S_CALLBACK_ATTR
 static void i2s_init(rtos_i2s_master_t *ctx, i2s_config_t *i2s_config)
@@ -29,13 +49,25 @@ static void i2s_receive(rtos_i2s_master_t *ctx, size_t num_in, const int32_t *sa
 I2S_CALLBACK_ATTR
 static void i2s_send(rtos_i2s_master_t *ctx, size_t num_out, int32_t *i2s_sample_buf)
 {
-    /* The timeout here really need to be zero, or else there are timing problems
-     * This also calls vTaskSuspendAll() with the default sbRECEIVE_COMPLETED() macro,
-     * which causes timing problems when there is too much activity on the other cores.
-     * This probably should use a custom non-RTOS FIFO. */
+    size_t words_available = ctx->send_buffer.total_written - ctx->send_buffer.total_read;
 
-    if (xStreamBufferBytesAvailable(ctx->audio_stream_buffer) >= num_out * sizeof(int32_t)) {
-        (void) xStreamBufferReceive(ctx->audio_stream_buffer, i2s_sample_buf, num_out * sizeof(int32_t), 0);
+    if (words_available >= num_out) {
+        memcpy(i2s_sample_buf, &ctx->send_buffer.buf[ctx->send_buffer.read_index], num_out * sizeof(int32_t));
+        ctx->send_buffer.read_index += num_out;
+        if (ctx->send_buffer.read_index >= ctx->send_buffer.buf_size) {
+            ctx->send_buffer.read_index = 0;
+        }
+        RTOS_MEMORY_BARRIER();
+        ctx->send_buffer.total_read += num_out;
+    }
+
+    if (ctx->send_buffer.required_free_count > 0) {
+        size_t words_free = ctx->send_buffer.buf_size - (words_available - num_out);
+
+        if (words_free >= ctx->send_buffer.required_free_count) {
+            ctx->send_buffer.required_free_count = 0;
+            s_chan_out_word(ctx->c_i2s_isr.end_a, ISR_RESUME_SEND);
+        }
     }
 }
 
@@ -67,15 +99,51 @@ static void i2s_master_thread(rtos_i2s_master_t *ctx)
 }
 
 __attribute__((fptrgroup("rtos_i2s_master_tx_fptr_grp")))
-static size_t i2s_master_local_tx(rtos_i2s_master_t *ctx, int32_t *i2s_sample_buf, size_t frame_count)
+static size_t i2s_master_local_tx(rtos_i2s_master_t *ctx, int32_t *i2s_sample_buf, size_t frame_count, unsigned timeout)
 {
-    size_t bytes_sent;
+    size_t frames_sent = 0;
+    size_t words_remaining = frame_count * (2 * ctx->num_out);
 
-    while (xStreamBufferSpacesAvailable(ctx->audio_stream_buffer) < frame_count * (2 * ctx->num_out) * sizeof(int32_t));
+    xassert(words_remaining <= ctx->send_buffer.buf_size);
+    if (words_remaining > ctx->send_buffer.buf_size) {
+        return frames_sent;
+    }
 
-    bytes_sent = xStreamBufferSend(ctx->audio_stream_buffer, i2s_sample_buf, frame_count * (2 * ctx->num_out) * sizeof(int32_t), 0);
+    if (!ctx->send_blocked) {
+        size_t words_free = ctx->send_buffer.buf_size - (ctx->send_buffer.total_written - ctx->send_buffer.total_read);
+        if (words_remaining > words_free) {
+            ctx->send_buffer.required_free_count = words_remaining;
+            ctx->send_blocked = 1;
+        }
+    }
 
-    return bytes_sent / (2 * ctx->num_out * sizeof(int32_t));
+    if (ctx->send_blocked) {
+        if (rtos_osal_semaphore_get(&ctx->send_sem, timeout) == RTOS_OSAL_SUCCESS) {
+            ctx->send_blocked = 0;
+        }
+    }
+
+    if (!ctx->send_blocked) {
+        while (words_remaining) {
+            size_t words_to_copy = MIN(words_remaining, ctx->send_buffer.buf_size - ctx->send_buffer.write_index);
+            memcpy(&ctx->send_buffer.buf[ctx->send_buffer.write_index], i2s_sample_buf, words_to_copy * sizeof(int32_t));
+            ctx->send_buffer.write_index += words_to_copy;
+
+            i2s_sample_buf += words_to_copy;
+            words_remaining -= words_to_copy;
+
+            if (ctx->send_buffer.write_index >= ctx->send_buffer.buf_size) {
+                ctx->send_buffer.write_index = 0;
+            }
+        }
+
+        RTOS_MEMORY_BARRIER();
+        ctx->send_buffer.total_written += frame_count * (2 * ctx->num_out);
+
+        frames_sent = frame_count;
+    }
+
+    return frames_sent;
 }
 
 void rtos_i2s_master_start(
@@ -87,8 +155,12 @@ void rtos_i2s_master_start(
 {
     i2s_master_ctx->mclk_bclk_ratio = mclk_bclk_ratio;
     i2s_master_ctx->mode = mode;
-    i2s_master_ctx->audio_stream_buffer = xStreamBufferCreate(buffer_size * (2 * i2s_master_ctx->num_out) * sizeof(int32_t), 1);
 
+    memset(&i2s_master_ctx->send_buffer, 0, sizeof(i2s_master_ctx->send_buffer));
+    i2s_master_ctx->send_buffer.buf_size = buffer_size * (2 * i2s_master_ctx->num_out);
+    i2s_master_ctx->send_buffer.buf = rtos_osal_malloc(i2s_master_ctx->send_buffer.buf_size * sizeof(int32_t));
+
+    rtos_osal_semaphore_create(&i2s_master_ctx->send_sem, "i2s_send_sem", 1, 0);
     xTaskCreate((TaskFunction_t) i2s_master_thread,
                 "i2s_master_thread",
                 RTOS_THREAD_STACK_SIZE(i2s_master_thread),
@@ -99,6 +171,12 @@ void rtos_i2s_master_start(
     if (i2s_master_ctx->rpc_config != NULL && i2s_master_ctx->rpc_config->rpc_host_start != NULL) {
         i2s_master_ctx->rpc_config->rpc_host_start(i2s_master_ctx->rpc_config);
     }
+}
+
+void rtos_i2s_master_interrupt_init(rtos_i2s_master_t *i2s_master_ctx)
+{
+    triggerable_setup_interrupt_callback(i2s_master_ctx->c_i2s_isr.end_b, i2s_master_ctx, RTOS_INTERRUPT_CALLBACK(rtos_i2s_master_isr));
+    triggerable_enable_trigger(i2s_master_ctx->c_i2s_isr.end_b);
 }
 
 void rtos_i2s_master_init(
@@ -125,6 +203,8 @@ void rtos_i2s_master_init(
     i2s_master_ctx-> p_lrclk = p_lrclk;
     i2s_master_ctx->p_mclk = p_mclk;
     i2s_master_ctx-> bclk = bclk;
+
+    i2s_master_ctx->c_i2s_isr = s_chan_alloc();
 
     i2s_master_ctx->rpc_config = NULL;
     i2s_master_ctx->tx = i2s_master_local_tx;

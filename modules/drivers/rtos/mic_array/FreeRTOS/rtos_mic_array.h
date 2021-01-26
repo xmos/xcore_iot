@@ -80,8 +80,8 @@ struct rtos_mic_array_struct {
  * \param frame_count    The number of frames to receive from the buffer.
  *                       This must be less than or equal to the size of the
  *                       buffer specified to rtos_mic_array_start().
- * \param timeout        The amount of time to wait before frames become
- *                       available.
+ * \param timeout        The amount of time to wait before the requested number
+ *                       of frames becomes available.
  *
  * \returns              The number of frames actually received into \p sample_buf.
  */

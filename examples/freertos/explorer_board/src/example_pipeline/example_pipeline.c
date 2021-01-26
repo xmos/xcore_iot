@@ -102,7 +102,8 @@ int example_pipeline_output(void *audio_frame, void *data)
     rtos_i2s_master_tx(
             i2s_master_ctx,
             audio_frame,
-            EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH);
+            EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
+            portMAX_DELAY);
 
     vPortFree(audio_frame);
 

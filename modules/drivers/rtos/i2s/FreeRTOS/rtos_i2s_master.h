@@ -10,14 +10,11 @@
  * @{
  */
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "stream_buffer.h"
-
 #include <xcore/clock.h>
 #include <xcore/port.h>
 #include "i2s.h"
 
+#include "drivers/rtos/osal/api/rtos_osal.h"
 #include "drivers/rtos/rpc/api/rtos_driver_rpc.h"
 
 /**
@@ -34,7 +31,7 @@ struct rtos_i2s_master_struct{
     rtos_driver_rpc_t *rpc_config;
 
     __attribute__((fptrgroup("rtos_i2s_master_tx_fptr_grp")))
-    size_t (*tx)(rtos_i2s_master_t *, int32_t *, size_t);
+    size_t (*tx)(rtos_i2s_master_t *, int32_t *, size_t, unsigned);
 
     unsigned mclk_bclk_ratio;
     i2s_mode_t mode;
@@ -47,8 +44,29 @@ struct rtos_i2s_master_struct{
     port_t p_mclk;
     xclock_t bclk;
 
-    /* BEGIN RTOS SPECIFIC MEMBERS. */
-    StreamBufferHandle_t audio_stream_buffer;
+    streaming_channel_t c_i2s_isr;
+    rtos_osal_semaphore_t send_sem;
+    int send_blocked;
+    struct {
+        int32_t *buf;
+        size_t buf_size;
+        size_t write_index;
+        size_t read_index;
+        volatile size_t total_written;
+        volatile size_t total_read;
+        volatile size_t required_free_count;
+        volatile size_t required_available_count;
+    } send_buffer;
+
+
+//    #define num_out 1
+//    #define buffer_size 256
+//    uint8_t isr_tx_buf[buffer_size * (2 * num_out) * sizeof(int32_t)];
+//    #undef num_out
+//    #undef buffer_size
+//    size_t isr_tx_buf_index;
+//    /* BEGIN RTOS SPECIFIC MEMBERS. */
+//    StreamBufferHandle_t audio_stream_buffer;
 };
 
 #include "drivers/rtos/i2s/api/rtos_i2s_master_rpc.h"
@@ -74,15 +92,19 @@ struct rtos_i2s_master_struct{
  * \param frame_count    The number of frames to transmit out from the buffer.
  *                       This must be less than or equal to the size of the
  *                       output buffer specified to rtos_i2s_master_start().
+ * \param timeout        The amount of time to wait before there is enough
+ *                       space in the send buffer to accept the frames to be
+ *                       transmitted.
  *
  * \returns              The number of frames actually stored into the buffer.
  */
 inline size_t rtos_i2s_master_tx(
         rtos_i2s_master_t *ctx,
         int32_t *i2s_sample_buf,
-        size_t frame_count)
+        size_t frame_count,
+        unsigned timeout)
 {
-    return ctx->tx(ctx, i2s_sample_buf, frame_count);
+    return ctx->tx(ctx, i2s_sample_buf, frame_count, timeout);
 }
 
 /**@}*/
@@ -131,6 +153,8 @@ void rtos_i2s_master_start(
         i2s_mode_t mode,
         size_t buffer_size,
         unsigned priority);
+
+void rtos_i2s_master_interrupt_init(rtos_i2s_master_t *i2s_master_ctx);
 
 /**
  * Initializes an RTOS I2S master driver instance.
