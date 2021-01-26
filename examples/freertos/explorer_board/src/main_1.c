@@ -68,14 +68,7 @@ void vApplicationDaemonTaskStartup( void )
     if (!dac_configured) {
         vTaskDelete(NULL);
     }
-    /*
-     * FIXME: It is necessary that these two tasks run on cores that are uninterrupted.
-     * Therefore they must not run on core 0. It is currently difficult to guarantee this
-     * as there is no support for core affinity.
-     *
-     * Setting I2C_TILE to 0 so that this task does not block above and remains on core 0
-     * here will, however, ensure that these two tasks run on the two highest cores.
-     */
+
     const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
             appconfPDM_CLOCK_FREQUENCY,
             EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE);
@@ -114,6 +107,10 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
 
     case 0:
         rtos_mic_array_interrupt_init(mic_array_ctx);
+        break;
+    case 1:
+        rtos_i2s_master_interrupt_init(i2s_master_ctx);
+        break;
     }
 }
 
