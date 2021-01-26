@@ -696,7 +696,7 @@ static void wifi_conn_mgr(void *arg)
 
 #if __has_include("app_conf.h")
 #include "app_conf.h"
-#warning hello
+
 void wifi_conn_mgr_start(void)
 {
     xTaskCreate((TaskFunction_t)wifi_conn_mgr,
@@ -707,7 +707,6 @@ void wifi_conn_mgr_start(void)
                 &wifi_conn_mgr_task_handle);
 }
 #else
-#warning goodbye
 void wifi_conn_mgr_start(void)
 {
     xTaskCreate((TaskFunction_t)wifi_conn_mgr,
