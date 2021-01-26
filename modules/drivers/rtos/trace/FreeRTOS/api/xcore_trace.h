@@ -3,9 +3,7 @@
 #ifndef XCORE_TRACE_H_
 #define XCORE_TRACE_H_
 
-#if __xcore_trace_config_h_exists__
 #include "xcore_trace_config.h"
-#endif
 
 #include <xscope.h>
 

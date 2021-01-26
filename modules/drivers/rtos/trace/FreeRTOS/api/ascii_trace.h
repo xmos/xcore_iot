@@ -33,8 +33,6 @@ void traceFreeRTOS_to_xscope(char* fmt, ...);
 				portRESTORE_INTERRUPTS(ulState);				\
 			} while(0)
 
-
-
 /*
  * Formatting is as follows:
  * traceOUTPUT( "%d:%d:%d:%d,...\n", calling tile, calling core, traceID, runtime, [ additional args ] );
@@ -187,13 +185,13 @@ typedef enum
 #define traceTASK_RESUME( pxTaskToResume )				traceOUTPUT( "%d:%d:%d:%d,%s\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_RESUME, pxTaskToResume->pcTaskName )
 #define traceTASK_RESUME_FROM_ISR( pxTaskToResume )		traceOUTPUT( "%d:%d:%d:%d,%s\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_RESUME_FROM_ISR, pxTaskToResume->pcTaskName )
 #define traceTASK_INCREMENT_TICK( xTickCount )			traceOUTPUT( "%d:%d:%d:%d,%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_INCREMENT_TICK, xTickCount )
-#define traceTASK_NOTIFY_TAKE_BLOCK()					traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_TAKE_BLOCK )
-#define traceTASK_NOTIFY_TAKE()							traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_TAKE )
-#define traceTASK_NOTIFY_WAIT_BLOCK()					traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_WAIT_BLOCK )
-#define traceTASK_NOTIFY_WAIT()							traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_WAIT )
-#define traceTASK_NOTIFY()								traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY )
-#define traceTASK_NOTIFY_FROM_ISR()						traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_FROM_ISR )
-#define traceTASK_NOTIFY_GIVE_FROM_ISR()				traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_GIVE_FROM_ISR )
+#define traceTASK_NOTIFY_TAKE_BLOCK( uxIndexToWait )	traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_TAKE_BLOCK )
+#define traceTASK_NOTIFY_TAKE( uxIndexToWait )			traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_TAKE )
+#define traceTASK_NOTIFY_WAIT_BLOCK( uxIndexToWait )    traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_WAIT_BLOCK )
+#define traceTASK_NOTIFY_WAIT( uxIndexToWait )          traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_WAIT )
+#define traceTASK_NOTIFY( uxIndexToNotify )				traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY )
+#define traceTASK_NOTIFY_FROM_ISR( uxIndexToNotify )    traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_FROM_ISR )
+#define traceTASK_NOTIFY_GIVE_FROM_ISR( uxIndexToNotify ) traceOUTPUT( "%d:%d:%d:%d\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_NOTIFY_GIVE_FROM_ISR )
 #define traceTASK_SWITCHED_OUT()						traceOUTPUT( "%d:%d:%d:%d,%s\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_SWITCHED_OUT, pxCurrentTCB->pcTaskName )
 #define traceTASK_SWITCHED_IN()							traceOUTPUT( "%d:%d:%d:%d,%s\n", asciitraceGET_TILE_ID(), asciitraceGET_CORE_ID(), xscope_gettime(), etraceTASK_SWITCHED_IN, pxCurrentTCB->pcTaskName )
 #define traceTASK_PRIORITY_DISINHERIT( pxTCBOfMutexHolder, uxOriginalPriority )						\
