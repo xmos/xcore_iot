@@ -44,6 +44,7 @@ set(APP_SOURCES
     "src/rpc_test/rpc_test.c"
     "src/gpio_test/gpio_test.c"
     "src/wifi_test/wifi_test.c"
+    "src/swmem_test/swmem_test.c"
 )
 
 set(APP_INCLUDES
