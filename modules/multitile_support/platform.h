@@ -8,6 +8,6 @@
 #define _clock_defined
 #endif
 
-#include_next "platform.h"
+#include_next <platform.h>
 
 #endif /* MULTITILE_SUPPORT_PLATFORM_H */
