@@ -57,16 +57,6 @@ struct rtos_i2s_master_struct{
         volatile size_t required_free_count;
         volatile size_t required_available_count;
     } send_buffer;
-
-
-//    #define num_out 1
-//    #define buffer_size 256
-//    uint8_t isr_tx_buf[buffer_size * (2 * num_out) * sizeof(int32_t)];
-//    #undef num_out
-//    #undef buffer_size
-//    size_t isr_tx_buf_index;
-//    /* BEGIN RTOS SPECIFIC MEMBERS. */
-//    StreamBufferHandle_t audio_stream_buffer;
 };
 
 #include "drivers/rtos/i2s/api/rtos_i2s_master_rpc.h"
@@ -154,6 +144,14 @@ void rtos_i2s_master_start(
         size_t buffer_size,
         unsigned priority);
 
+/**
+ * Initializes the I2S master driver's interrupt and ISR. Must be called on the core
+ * that will process the interrupts, prior to calling rtos_i2s_master_start().
+ * It is recommended that the core the ISR runs on is not the same as the core that
+ * runs the I2S master task started by rtos_i2s_master_start().
+ *
+ * \param i2s_master_ctx A pointer to the I2S master driver instance for which to initialize interrupts.
+ */
 void rtos_i2s_master_interrupt_init(rtos_i2s_master_t *i2s_master_ctx);
 
 /**

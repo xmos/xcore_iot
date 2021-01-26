@@ -7,7 +7,7 @@
 
 #include "rtos_interrupt.h"
 
-#include "drivers/rtos/i2s/FreeRTOS/rtos_i2s_master.h"
+#include "drivers/rtos/i2s/api/rtos_i2s_master.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -82,8 +82,8 @@ static void i2s_master_thread(rtos_i2s_master_t *ctx)
     };
 
     /* Exclude from core 0 */
-    vTaskPreemptionDisable(NULL);
-    vTaskCoreExclusionSet(NULL, (1 << 0));
+    rtos_osal_thread_preemption_disable(NULL);
+    rtos_osal_thread_core_exclusion_set(NULL, (1 << 0));
 
     rtos_printf("I2S on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
     i2s_master(
@@ -161,12 +161,13 @@ void rtos_i2s_master_start(
     i2s_master_ctx->send_buffer.buf = rtos_osal_malloc(i2s_master_ctx->send_buffer.buf_size * sizeof(int32_t));
 
     rtos_osal_semaphore_create(&i2s_master_ctx->send_sem, "i2s_send_sem", 1, 0);
-    xTaskCreate((TaskFunction_t) i2s_master_thread,
-                "i2s_master_thread",
-                RTOS_THREAD_STACK_SIZE(i2s_master_thread),
-                i2s_master_ctx,
-                priority,
-                NULL);
+    rtos_osal_thread_create(
+            NULL,
+            "i2s_master_thread",
+            (rtos_osal_entry_function_t) i2s_master_thread,
+            i2s_master_ctx,
+            RTOS_THREAD_STACK_SIZE(i2s_master_thread),
+            priority);
 
     if (i2s_master_ctx->rpc_config != NULL && i2s_master_ctx->rpc_config->rpc_host_start != NULL) {
         i2s_master_ctx->rpc_config->rpc_host_start(i2s_master_ctx->rpc_config);
