@@ -17,7 +17,7 @@ your application. */
 #define configCPU_CLOCK_HZ                      100000000
 
 #if ON_TILE(0)
-#define configNUM_CORES                         2
+#define configNUM_CORES                         5
 #endif
 #if ON_TILE(1)
 #define configNUM_CORES                         5
@@ -53,7 +53,7 @@ your application. */
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
 
 #if ON_TILE(0)
-#define configTOTAL_HEAP_SIZE                   256*1024
+#define configTOTAL_HEAP_SIZE                   192*1024
 #endif
 #if ON_TILE(1)
 #define configTOTAL_HEAP_SIZE                   128*1024
@@ -64,7 +64,7 @@ your application. */
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     0
 #define configUSE_TICK_HOOK                     0
-#define configCHECK_FOR_STACK_OVERFLOW          0
+#define configCHECK_FOR_STACK_OVERFLOW          1
 #define configUSE_MALLOC_FAILED_HOOK            1
 #define configUSE_DAEMON_TASK_STARTUP_HOOK      0
 #define configUSE_CORE_INIT_HOOK                1
@@ -97,7 +97,7 @@ your application. */
 
 /* Define to enable debug prints from tasks.c */
 #if ON_TILE(0)
-#define configTASKS_DEBUG 0
+#define configTASKS_DEBUG 1
 #endif
 #if ON_TILE(1)
 #define configTASKS_DEBUG 0
@@ -127,6 +127,6 @@ your application. */
 #define INCLUDE_xQueueGetMutexHolder            1
 
 /* A header file that defines trace macro can be included here. */
-//#include "xcore_trace.h"
+// #include "xcore_trace.h"
 
 #endif /* FREERTOS_CONFIG_H */

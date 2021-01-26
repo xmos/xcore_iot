@@ -239,6 +239,6 @@ void wifi_start(rtos_spi_master_device_t *wifi_device_ctx, rtos_gpio_t *gpio_ctx
                 "wifi_setup_task",
                 RTOS_THREAD_STACK_SIZE(wifi_setup_task),
                 &wifi_devs,
-                configMAX_PRIORITIES/2 - 1,
+                appconfWIFI_SETUP_TASK_PRIORITY,
                 NULL);
 }

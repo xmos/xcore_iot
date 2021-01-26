@@ -213,5 +213,3 @@ Socket_t xSocket = FREERTOS_INVALID_SOCKET;
 
 	return xSocket;
 }
-
-

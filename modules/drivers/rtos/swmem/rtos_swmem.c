@@ -39,7 +39,7 @@ void rtos_swmem_read_request(unsigned offset, uint32_t *buf)
 __attribute__((weak))
 void rtos_swmem_write_request(unsigned offset, uint32_t dirty_mask, const uint32_t *buf)
 {
-    uint8_t *byte_buf = (uint8_t *) buf;
+    // uint8_t *byte_buf = (uint8_t *) buf;
 
     rtos_printf("SwMem write request for offset 0x%08x. dirty_mask: %08x\n", offset, dirty_mask);
     for (int i = 0; i < sizeof(uint32_t) * SWMEM_FILL_SIZE_WORDS; i++) {

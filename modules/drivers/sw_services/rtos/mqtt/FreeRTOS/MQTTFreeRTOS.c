@@ -28,7 +28,7 @@
 #include "mbedtls_support.h"
 
 
-#define MQTT_TASK_STACK_SIZE	( configSTACK_DEPTH_TYPE )( 256 * 5 )
+#define MQTT_TASK_STACK_SIZE	( configSTACK_DEPTH_TYPE )( 420 )
 
 
 int ThreadStart( Thread* thread, void (*fn)(void*), void* arg )
@@ -76,9 +76,7 @@ void TimerCountdown( Timer* timer, unsigned int timeout )
 int TimerLeftMS( Timer* timer )
 {
 	xTaskCheckForTimeOut( &timer->xTimeOut, &timer->xTicksToWait ); /* updates xTicksToWait to the number left */
-	return ( timer->xTicksToWait < 0 )
-		   ? ( 0 )
-		   : ( timer->xTicksToWait * portTICK_PERIOD_MS );
+	return ( timer->xTicksToWait * portTICK_PERIOD_MS );
 }
 
 
@@ -196,7 +194,7 @@ int NetworkConnect( Network* n, char* addr, int port )
 {
 	struct freertos_sockaddr sAddr;
 	int retVal = -1;
-	uint32_t ipAddress;
+	uint32_t ipAddress = 0;
 
 	do
 	{
@@ -231,7 +229,6 @@ int NetworkConnectIP( Network* n, uint32_t addr, int port )
 {
 	struct freertos_sockaddr sAddr;
 	int retVal = -1;
-	uint32_t ipAddress;
 
 	sAddr.sin_port = FreeRTOS_htons( port );
 	sAddr.sin_addr = addr;
@@ -254,4 +251,3 @@ int NetworkConnectIP( Network* n, uint32_t addr, int port )
 
 	return retVal;
 }
-

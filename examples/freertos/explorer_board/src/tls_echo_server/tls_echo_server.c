@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -10,7 +10,6 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "soc.h"
 #include "tls_support.h"
 #include "mbedtls/ssl.h"
 #include "mbedtls/entropy.h"
@@ -20,9 +19,6 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/debug.h"
-
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
 
 /* App headers */
 #include "tls_echo_server.h"

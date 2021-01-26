@@ -9,11 +9,12 @@ endif()
 set(USE_WIFI_MANAGER TRUE)
 set(USE_DHCPD TRUE)
 set(USE_FATFS TRUE)
-# set(USE_HTTP_PARSER TRUE)
-# set(USE_JSON_PARSER TRUE)
-# set(USE_MQTT TRUE)
+set(USE_HTTP_PARSER TRUE)
+set(USE_JSON_PARSER TRUE)
+set(USE_MQTT TRUE)
 set(USE_SNTPD TRUE)
-# set(USE_TLS_SUPPORT TRUE)
+set(USE_TLS_SUPPORT TRUE)
+set(USE_TRACE FALSE)
 
 ## Import XMOS configurations
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
@@ -33,9 +34,9 @@ set(APP_COMPILER_FLAGS
     "-fxscope"
     "-lquadspi"
     "-mcmodel=large"
-    "-Wxcore-fptrgroup"
+    "-Wno-xcore-fptrgroup"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/bitstream_src/${BOARD}/${BOARD}.xn"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
 )
 
 set(APP_SOURCES
@@ -43,44 +44,35 @@ set(APP_SOURCES
     "src/main_0.c"
     "src/main_1.c"
     "src/board_init.c"
-
-    # "src/audio_hw_config/audio_hw_config.c"
     "src/audio_pipeline/audio_pipeline.c"
     "src/example_pipeline/example_pipeline.c"
     "src/example_pipeline/dac_init.c"
     "src/gpio_ctrl/gpio_ctrl.c"
     "src/network_demos/network_setup.c"
-    # "src/NetworkManager/network.c"
-    # "src/queue_to_i2s/queue_to_i2s.c"
-    # "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
-    # "src/tcp_stream_to_queue/tcp_stream_to_queue.c"
+    "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
     "src/thruput_test/thruput_test.c"
-    # "src/udp_cli/CLI-commands.c"
-    # "src/udp_cli/FreeRTOS_CLI.c"
-    # "src/udp_cli/UDPCommandServer.c"
-    # "src/tls_echo_demo/tls_echo_demo.c"
-    # "src/tls_echo_server/tls_echo_server.c"
-    # "src/http_demo/http_demo.c"
-    # "src/mqtt_demo/mqtt_demo_client.c"
+    "src/udp_cli/cli_rpc.c"
+    "src/udp_cli/CLI-commands.c"
+    "src/udp_cli/FreeRTOS_CLI.c"
+    "src/udp_cli/UDPCommandServer.c"
+    "src/tls_echo_demo/tls_echo_demo.c"
+    "src/tls_echo_server/tls_echo_server.c"
+    "src/http_demo/http_demo.c"
+    "src/mqtt_demo/mqtt_demo_client.c"
     "src/mem_analysis/mem_analysis.c"
 )
 
 set(APP_INCLUDES
     "src"
-    # "src/audio_hw_config"
-    # "src/audio_pipeline"
     "src/gpio_ctrl"
     "src/network_demos"
-    # "src/NetworkManager"
-    # "src/queue_to_i2s"
-    # "src/queue_to_tcp_stream"
-    # "src/tcp_stream_to_queue"
+    "src/queue_to_tcp_stream"
     "src/thruput_test"
-    # "src/udp_cli"
-    # "src/tls_echo_demo"
-    # "src/tls_echo_server"
-    # "src/http_demo"
-    # "src/mqtt_demo"
+    "src/udp_cli"
+    "src/tls_echo_demo"
+    "src/tls_echo_server"
+    "src/http_demo"
+    "src/mqtt_demo"
     "src/mem_analysis"
 )
 
@@ -88,11 +80,12 @@ add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
     DEBUG_PRINT_ENABLE_IOT_WIFI=1
     DEBUG_PRINT_ENABLE_WIFI_CONN_MGR=1
+    DEBUG_PRINT_ENABLE_MQTT_DEMO_CLIENT=1
     MIC_DUAL_ENABLED=1
-    # MQTT_TASK=1
+    MQTT_TASK=1
     DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
     SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\)
-    # MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
+    MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
 )

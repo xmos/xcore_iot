@@ -1,4 +1,4 @@
-// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2021, XMOS Ltd, All rights reserved
 
 #define DEBUG_UNIT QUEUE_TO_TCP
 #include "app_conf.h"
@@ -12,25 +12,18 @@
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 
-/* Library headers */
-#include "soc.h"
-
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
-
 /* App headers */
 #include "queue_to_tcp_stream.h"
-
 
 static void queue_to_tcp_sender(void *arg)
 {
 	queue_to_tcp_handle_t handle = ( queue_to_tcp_handle_t ) arg;
-    Socket_t xConnectedSocket = handle->socket ;
+    Socket_t xConnectedSocket = handle->socket;
     size_t data_length = handle->data_length;
-    BaseType_t xSent;
+    BaseType_t xSent = 0;
 
+    int32_t *data = NULL;
     for (;;) {
-        int32_t *data;
 
         xQueueReceive( handle->queue, &data, portMAX_DELAY );
 
@@ -39,7 +32,7 @@ static void queue_to_tcp_sender(void *arg)
 							   data_length,
 							   0);
 
-		if( xSent != data_length )
+		if( xSent != data_length)
 		{
 			handle->connected = pdFALSE;
 

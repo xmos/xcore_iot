@@ -10,6 +10,12 @@
 #define GPIO_RPC_PORT 11
 #define GPIO_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
+#define INTERTILE_AUDIOPIPELINE_PORT 12
+#define INTERTILE_AUDIOPIPELINE_TASK_PRIORITY (configMAX_PRIORITIES-2)
+
+#define CLI_RPC_PROCESS_COMMAND_PORT 13
+#define CLI_RPC_PROCESS_COMMAND_TASK_PRIORITY (configMAX_PRIORITIES/2)
+
 /* Network Demo Configuration */
 #define appconfSOFT_AP_SSID         "xcore.ai"
 #define appconfSOFT_AP_PASSWORD     ""
@@ -17,15 +23,13 @@
 #define appconfRUN_PING_TEST_HOST   1
 #define appconfPING_TEST_HOST       "google.com"
 
-
-#define appconfAUDIO_CLOCK_FREQUENCY    24576000
-#define appconfPDM_CLOCK_FREQUENCY      3072000
-
 /* Audio Pipeline Configuration */
-#define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN   	42
-#define appconfMIC_FRAME_LENGTH                	256
-#define appconfPRINT_AUDIO_FRAME_POWER         	0
-
+#define appconfAUDIO_CLOCK_FREQUENCY            24576000
+#define appconfPDM_CLOCK_FREQUENCY              3072000
+#define appconfPIPELINE_AUDIO_SAMPLE_RATE       48000
+#define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN    42
+#define appconfAUDIO_FRAME_LENGTH            	256
+#define appconfPRINT_AUDIO_FRAME_POWER          0
 
 /* Queue to TCP Configuration */
 #define appconfQUEUE_TO_TCP_PORT                54321
@@ -64,17 +68,18 @@
 #define appconfMQTT_PORT						8883
 
 /* Task Priorities */
-#define appconfMQTT_TASK_PRIORITY    			( configMAX_PRIORITIES - 3 )
-#define appconfHTTP_TASK_PRIORITY    			( configMAX_PRIORITIES - 3 )
-#define appconfTLS_ECHO_TASK_PRIORITY    		( configMAX_PRIORITIES - 3 )
-#define appconfTLS_ECHO_SERVER_PRIORITY    		( configMAX_PRIORITIES - 3 )
-#define appconfAUDIO_PIPELINE_TASK_PRIORITY    	( configMAX_PRIORITIES - 3 )
-#define appconfTCP_TO_QUEUE_TASK_PRIORITY    	( configMAX_PRIORITIES - 3 )
-#define appconfQUEUE_TO_TCP_TASK_PRIORITY      	( configMAX_PRIORITIES - 2 )
-#define appconfQUEUE_TO_I2S_TASK_PRIORITY      	( configMAX_PRIORITIES - 2 )
-#define appconfCLI_TASK_PRIORITY               	( configMAX_PRIORITIES - 3 )
+#define appconfMQTT_TASK_PRIORITY    			( configMAX_PRIORITIES - 7 )
+#define appconfHTTP_TASK_PRIORITY    			( configMAX_PRIORITIES - 8 )
+#define appconfTLS_ECHO_TASK_PRIORITY    		( configMAX_PRIORITIES - 8 )
+#define appconfTLS_ECHO_SERVER_PRIORITY    		( configMAX_PRIORITIES - 8 )
+#define appconfAUDIO_PIPELINE_TASK_PRIORITY    	( configMAX_PRIORITIES - 4 )
+#define appconfQUEUE_TO_TCP_TASK_PRIORITY      	( configMAX_PRIORITIES - 3 )
+#define appconfCLI_TASK_PRIORITY               	( configMAX_PRIORITIES - 5 )
 #define appconfTHRUPUT_TEST_TASK_PRIORITY      	( configMAX_PRIORITIES - 3 )
 #define appconfGPIO_TASK_PRIORITY              	( configMAX_PRIORITIES - 2 )
 #define appconfSNTPD_TASK_PRIORITY				( configMAX_PRIORITIES - 5 )
+#define appconfMEM_ANALYSIS_TASK_PRIORITY		( configMAX_PRIORITIES - 1 )
+#define appconfWIFI_SETUP_TASK_PRIORITY		    ( configMAX_PRIORITIES/2 - 1 )
+#define appconfWIFI_CONN_MNGR_TASK_PRIORITY     ( configMAX_PRIORITIES - 3 )
 
 #endif /* APP_CONF_H_ */

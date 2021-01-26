@@ -23,18 +23,20 @@
 /* App headers */
 #include "app_conf.h"
 #include "board_init.h"
-// #include "network.h"
-// #include "UDPCommandInterpreter.h"
+#include "UDPCommandInterpreter.h"
 #include "thruput_test.h"
 #include "sntpd.h"
 #include "fs_support.h"
-// #include "tls_echo_demo.h"
-// #include "tls_echo_server.h"
-// #include "tls_support.h"
-// #include "http_demo.h"
-// #include "mqtt_demo_client.h"
+#include "tls_echo_demo.h"
+#include "tls_echo_server.h"
+#include "tls_support.h"
+#include "http_demo.h"
+#include "mqtt_demo_client.h"
 #include "mem_analysis.h"
 #include "network_setup.h"
+
+#include "queue_to_tcp_stream.h"
+#include "example_pipeline/example_pipeline.h"
 
 #if ON_TILE(0)
 
@@ -89,16 +91,21 @@ void vApplicationDaemonTaskStartup( void )
     /* Initialize WiFi */
     wifi_start(wifi_device_ctx, gpio_ctx);
 
+    /* Create intertile audio frame receiver */
+    intertile_pipeline_to_tcp_create( intertile_ctx, INTERTILE_AUDIOPIPELINE_PORT, INTERTILE_AUDIOPIPELINE_TASK_PRIORITY );
+
+    /* Initialize TLS  */
+	tls_platform_init();
+
     /* Create the thruput test */
     thruput_test_create( appconfTHRUPUT_TEST_TASK_PRIORITY );
 
     /* Create SNTPD */
     sntp_create( appconfSNTPD_TASK_PRIORITY );
 
-    #if 0
-
-    /* Initialize TLS  */
-	tls_platform_init();
+    /* Create UDP CLI */
+    vStartUDPCommandInterpreterTask( portTASK_STACK_DEPTH( vUDPCommandInterpreterTask ), appconfCLI_UDP_PORT, appconfCLI_TASK_PRIORITY );
+    vInitializeUDPIntertile( intertile_ctx, CLI_RPC_PROCESS_COMMAND_PORT );
 
     /* Create TLS echo demo */
 	tls_echo_demo_create( appconfTLS_ECHO_TASK_PRIORITY );
@@ -110,15 +117,10 @@ void vApplicationDaemonTaskStartup( void )
 	http_demo_create( appconfHTTP_TASK_PRIORITY );
 
     /* Create MQTT demo*/
-    mqtt_demo_create( appconfMQTT_TASK_PRIORITY );
-
-    /* Create UDP CLI */
-    vStartUDPCommandInterpreterTask( portTASK_STACK_DEPTH(vUDPCommandInterpreterTask), appconfCLI_UDP_PORT, appconfCLI_TASK_PRIORITY );
-
-    #endif
+    mqtt_demo_create( gpio_ctx, appconfMQTT_TASK_PRIORITY );
 
     /* Create heap analysis task */
-    // mem_analysis_create( "heap" );
+    mem_analysis_create( "heap" );
 
     vTaskDelete(NULL);
 }
@@ -139,7 +141,7 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
-                RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
+                configMINIMAL_STACK_SIZE*6,
                 NULL,
                 configMAX_PRIORITIES-1,
                 NULL);

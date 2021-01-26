@@ -71,8 +71,6 @@ static void set_app_pll(void)
 }
 
 static rtos_driver_rpc_t i2c_rpc_config;
-static rtos_driver_rpc_t mic_rpc_config;
-static rtos_driver_rpc_t i2s_rpc_config;
 static rtos_driver_rpc_t gpio_rpc_config;
 
 void board_tile0_init(
@@ -197,7 +195,6 @@ void board_tile1_init(
     set_app_pll();
 
     rtos_intertile_init(intertile1_ctx, tile0);
-    rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
 
     rtos_mic_array_init(
             mic_array_ctx,

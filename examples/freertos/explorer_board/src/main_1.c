@@ -55,6 +55,8 @@ void vApplicationDaemonTaskStartup( void )
     /* Create heap analysis task */
     // mem_analysis_create( "heap" );
 
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
     int dac_init(rtos_i2c_master_t *i2c_ctx);
 
     if (dac_init(i2c_master_ctx) == 0) {
@@ -78,7 +80,7 @@ void vApplicationDaemonTaskStartup( void )
      */
     const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
             appconfPDM_CLOCK_FREQUENCY,
-            EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE);
+            appconfPIPELINE_AUDIO_SAMPLE_RATE);
 
     rtos_printf("Starting mic array driver\n");
     rtos_mic_array_start(
@@ -92,7 +94,7 @@ void vApplicationDaemonTaskStartup( void )
     rtos_printf("Starting i2s driver\n");
     rtos_i2s_master_start(
             i2s_master_ctx,
-            rtos_i2s_master_mclk_bclk_ratio(appconfAUDIO_CLOCK_FREQUENCY, EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE),
+            rtos_i2s_master_mclk_bclk_ratio(appconfAUDIO_CLOCK_FREQUENCY, appconfPIPELINE_AUDIO_SAMPLE_RATE),
             I2S_MODE_I2S,
             1.2 * MIC_DUAL_FRAME_SIZE,
             configMAX_PRIORITIES-1);
@@ -101,7 +103,8 @@ void vApplicationDaemonTaskStartup( void )
     gpio_ctrl_create(gpio_ctx, appconfGPIO_TASK_PRIORITY);
 
     /* Create audio pipeline */
-    example_pipeline_init(mic_array_ctx, i2s_master_ctx);
+    example_pipeline_init(mic_array_ctx, i2s_master_ctx, intertile_ctx, INTERTILE_AUDIOPIPELINE_PORT);
+    remote_cli_gain_init(intertile_ctx, CLI_RPC_PROCESS_COMMAND_PORT, CLI_RPC_PROCESS_COMMAND_TASK_PRIORITY);
 
     vTaskDelete(NULL);
 }

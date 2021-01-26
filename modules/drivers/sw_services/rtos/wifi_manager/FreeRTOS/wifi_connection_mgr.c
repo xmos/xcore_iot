@@ -693,6 +693,20 @@ static void wifi_conn_mgr(void *arg)
     }
 }
 
+#if __has_include("app_conf.h")
+#include "app_conf.h"
+#warning hello
+void wifi_conn_mgr_start(void)
+{
+    xTaskCreate((TaskFunction_t)wifi_conn_mgr,
+                "wifi_conn_mgr",
+                portTASK_STACK_DEPTH(wifi_conn_mgr),
+                NULL,
+                appconfWIFI_CONN_MNGR_TASK_PRIORITY,
+                &wifi_conn_mgr_task_handle);
+}
+#else
+#warning goodbye
 void wifi_conn_mgr_start(void)
 {
     xTaskCreate((TaskFunction_t)wifi_conn_mgr,
@@ -702,3 +716,4 @@ void wifi_conn_mgr_start(void)
                 configMAX_PRIORITIES-3,
                 &wifi_conn_mgr_task_handle);
 }
+#endif /* __has_include("app_conf.h") */

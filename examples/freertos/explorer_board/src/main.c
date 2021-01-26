@@ -16,8 +16,14 @@
 /* App headers */
 #include "app_conf.h"
 
-void vApplicationMallocFailedHook(void)
+void vApplicationMallocFailedHook( void )
 {
     rtos_printf("Malloc Failed on tile %d!\n", THIS_XCORE_TILE);
+    for(;;);
+}
+
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char* pcTaskName )
+{
+    rtos_printf("\n****************************\nStack OF %d %s!\n****************************\\n", THIS_XCORE_TILE, pcTaskName);
     for(;;);
 }
