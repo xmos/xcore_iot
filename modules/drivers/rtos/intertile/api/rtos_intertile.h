@@ -22,13 +22,10 @@
  * @{
  */
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "event_groups.h"
-#include "semphr.h"
-
 #include <xcore/channel.h>
 #include <xcore/channel_transaction.h>
+
+#include "drivers/rtos/osal/api/rtos_osal.h"
 
 /**
  * Struct representing an RTOS intertile driver instance.
@@ -38,8 +35,8 @@
 typedef struct {
     chanend_t c;
 
-    SemaphoreHandle_t lock;
-    EventGroupHandle_t event_group;
+    rtos_osal_mutex_t lock;
+    rtos_osal_event_group_t event_group;
 } rtos_intertile_t;
 
 /**
@@ -78,6 +75,9 @@ void rtos_intertile_tx(
 
 /**
  * Receives data from an intertile link.
+ *
+ * \note the buffer returned via \p msg must be freed by the
+ * application using rtos_osal_free().
  *
  * \param ctx     A pointer to the intertile driver instance to use.
  * \param port    The number of the port to listen for data on. Only

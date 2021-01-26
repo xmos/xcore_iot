@@ -3,8 +3,8 @@
 #ifndef SRC_EXAMPLE_PIPELINE_H_
 #define SRC_EXAMPLE_PIPELINE_H_
 
-#include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
-#include "drivers/rtos/i2s/FreeRTOS/rtos_i2s_master.h"
+#include "drivers/rtos/mic_array/api/rtos_mic_array.h"
+#include "drivers/rtos/i2s/api/rtos_i2s_master.h"
 
 enum {
     GET_GAIN_VAL = 1,

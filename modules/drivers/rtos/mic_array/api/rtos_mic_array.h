@@ -10,15 +10,12 @@
  * @{
  */
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "stream_buffer.h"
-
 #include <xcore/channel.h>
 #include <xcore/clock.h>
 #include <xcore/port.h>
 #include "mic_array.h"
 
+#include "drivers/rtos/osal/api/rtos_osal.h"
 #include "drivers/rtos/rpc/api/rtos_driver_rpc.h"
 
 /**
@@ -55,8 +52,17 @@ struct rtos_mic_array_struct {
     mic_dual_third_stage_coef_t *third_stage_coefs;
     int fir_gain_compensation;
 
-    /* BEGIN RTOS SPECIFIC MEMBERS. */
-    StreamBufferHandle_t audio_stream_buffer;
+    rtos_osal_semaphore_t recv_sem;
+    int recv_blocked;
+    struct {
+        int32_t *buf;
+        size_t buf_size;
+        size_t write_index;
+        size_t read_index;
+        volatile size_t total_written;
+        volatile size_t total_read;
+        volatile size_t required_available_count;
+    } recv_buffer;
 };
 
 #include "drivers/rtos/mic_array/api/rtos_mic_array_rpc.h"
@@ -75,23 +81,23 @@ struct rtos_mic_array_struct {
  *
  * This function will block until new frames are available.
  *
- * \param mic_array_ctx  A pointer to the mic array driver instance to use.
+ * \param ctx            A pointer to the mic array driver instance to use.
  * \param sample_buf     A buffer to copy the received sample frames into.
  * \param frame_count    The number of frames to receive from the buffer.
  *                       This must be less than or equal to the size of the
  *                       buffer specified to rtos_mic_array_start().
- * \param timeout        The amount of time to wait before frames become
- *                       available.
+ * \param timeout        The amount of time to wait before the requested number
+ *                       of frames becomes available.
  *
  * \returns              The number of frames actually received into \p sample_buf.
  */
 inline size_t rtos_mic_array_rx(
-        rtos_mic_array_t *mic_array_ctx,
+        rtos_mic_array_t *ctx,
         int32_t sample_buf[][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS],
         size_t frame_count,
         unsigned timeout)
 {
-    return mic_array_ctx->rx(mic_array_ctx, sample_buf, frame_count, timeout);
+    return ctx->rx(ctx, sample_buf, frame_count, timeout);
 }
 
 /**@}*/

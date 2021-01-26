@@ -17,6 +17,9 @@
 #define RTOS_OSAL_AND        RTOS_OSAL_PORT_AND
 #define RTOS_OSAL_AND_CLEAR  RTOS_OSAL_PORT_AND_CLEAR
 
+#define RTOS_OSAL_NOT_RECURSIVE 0
+#define RTOS_OSAL_RECURSIVE     1
+
 /*
  * Return statuses
  */
@@ -61,9 +64,28 @@ rtos_osal_status_t rtos_osal_thread_delete(rtos_osal_thread_t *thread);
  */
 typedef struct rtos_osal_mutex_struct rtos_osal_mutex_t;
 rtos_osal_status_t rtos_osal_mutex_create(rtos_osal_mutex_t *mutex, char *name, int recursive);
-rtos_osal_status_t rtos_osal_mutex_get(rtos_osal_mutex_t *mutex, unsigned timeout);
 rtos_osal_status_t rtos_osal_mutex_put(rtos_osal_mutex_t *mutex);
+rtos_osal_status_t rtos_osal_mutex_get(rtos_osal_mutex_t *mutex, unsigned timeout);
 rtos_osal_status_t rtos_osal_mutex_delete(rtos_osal_mutex_t *mutex);
+
+/*
+ * Semaphores
+ */
+typedef struct rtos_osal_semaphore_struct rtos_osal_semaphore_t;
+rtos_osal_status_t rtos_osal_semaphore_create(rtos_osal_semaphore_t *semaphore, char *name, unsigned max_count, unsigned initial_count);
+rtos_osal_status_t rtos_osal_semaphore_put(rtos_osal_semaphore_t *semaphore);
+rtos_osal_status_t rtos_osal_semaphore_get(rtos_osal_semaphore_t *semaphore, unsigned timeout);
+rtos_osal_status_t rtos_osal_semaphore_delete(rtos_osal_semaphore_t *semaphore);
+
+/*
+ * Queues
+ */
+typedef struct rtos_osal_queue_struct rtos_osal_queue_t;
+rtos_osal_status_t rtos_osal_queue_create(rtos_osal_queue_t *queue, char *name, size_t queue_length, size_t item_word_size);
+rtos_osal_status_t rtos_osal_queue_send(rtos_osal_queue_t *queue, const void *item, unsigned timeout);
+rtos_osal_status_t rtos_osal_queue_receive(rtos_osal_queue_t *queue, void *item, unsigned timeout);
+rtos_osal_status_t rtos_osal_queue_delete(rtos_osal_queue_t *queue);
+
 
 /*
  * Event groups

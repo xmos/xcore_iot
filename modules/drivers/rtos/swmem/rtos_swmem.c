@@ -30,23 +30,16 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(sw_mem_evict_isr, arg)
 __attribute__((weak))
 void rtos_swmem_read_request(unsigned offset, uint32_t *buf)
 {
-    rtos_printf("SwMem fill request for offset 0x%08x\n", offset);
-    for (int i = 0; i < SWMEM_FILL_SIZE_WORDS; i++) {
-        buf[i] = i;
-    }
+    (void) offset;
+    (void) buf;
 }
 
 __attribute__((weak))
 void rtos_swmem_write_request(unsigned offset, uint32_t dirty_mask, const uint32_t *buf)
 {
-    // uint8_t *byte_buf = (uint8_t *) buf;
-
-    rtos_printf("SwMem write request for offset 0x%08x. dirty_mask: %08x\n", offset, dirty_mask);
-    for (int i = 0; i < sizeof(uint32_t) * SWMEM_FILL_SIZE_WORDS; i++) {
-        if (dirty_mask & (1 << i)) {
-            //rtos_printf("Byte %d dirty: %02x\n", i, byte_buf[i]);
-        }
-    }
+    (void) offset;
+    (void) dirty_mask;
+    (void) buf;
 }
 
 static void rtos_swmem_thread(void *arg)

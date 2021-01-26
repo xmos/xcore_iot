@@ -9,6 +9,7 @@
 #include "queue.h"
 
 #include "rtos_printf.h"
+
 #include <xcore/channel.h>
 
 #include "example_pipeline/example_pipeline.h"
@@ -18,6 +19,7 @@
 #define GPIO_TEST 1
 #define WIFI_TEST 1
 #define QSPI_TEST 0
+#define SW_MEM_TEST 1
 
 #if WIFI_TEST && QSPI_TEST
 #error Cannot test the QSPI when the WIFI test is enabled
@@ -44,6 +46,10 @@
 #if WIFI_TEST
 #include "wifi_test/wifi_test.h"
 #include "fs_support.h"
+#endif
+
+#if SW_MEM_TEST
+#include "swmem_test/swmem_test.h"
 #endif
 
 #include "board_init.h"
@@ -76,31 +82,6 @@ void vApplicationMallocFailedHook(void)
     for(;;);
 }
 
-void loopback(void *arg)
-{
-    int32_t sample_buf[MIC_DUAL_FRAME_SIZE][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS];
-
-    for (;;) {
-        rtos_mic_array_rx(
-                mic_array_ctx,
-                sample_buf,
-                MIC_DUAL_FRAME_SIZE,
-                portMAX_DELAY);
-
-        for (int i = 0; i < MIC_DUAL_FRAME_SIZE; i++) {
-            for (int j = 0; j < MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS; j++) {
-                sample_buf[i][j] *= 40;
-            }
-        }
-
-        rtos_i2s_master_tx(
-                i2s_master_ctx,
-                &sample_buf[0][0],
-                MIC_DUAL_FRAME_SIZE);
-    }
-}
-
-
 void vApplicationCoreInitHook(BaseType_t xCoreID)
 {
 #if ON_TILE(0)
@@ -114,6 +95,10 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
 
     case 0:
         rtos_mic_array_interrupt_init(mic_array_ctx);
+        break;
+    case 1:
+        rtos_i2s_master_interrupt_init(i2s_master_ctx);
+        break;
     }
 
 #endif
@@ -142,6 +127,10 @@ void vApplicationDaemonTaskStartup(void *arg)
     uint32_t dac_configured;
 
     rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE, portGET_CORE_ID());
+
+#if SW_MEM_TEST && ON_TILE(SWMEM_TILE)
+    swmem_test_run();
+#endif
 
     rtos_intertile_start(
             intertile_ctx);
@@ -210,14 +199,6 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     #if ON_TILE(1)
     {
-        /*
-         * FIXME: It is necessary that these two tasks run on cores that are uninterrupted.
-         * Therefore they must not run on core 0. It is currently difficult to guarantee this
-         * as there is no support for core affinity.
-         *
-         * Setting I2C_TILE to 0 so that this task does not block above and remains on core 0
-         * here will, however, ensure that these two tasks run on the two highest cores.
-         */
         const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
                 PDM_CLOCK_FREQUENCY,
                 EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE);
@@ -308,6 +289,10 @@ void vApplicationDaemonTaskStartup(void *arg)
 #if ON_TILE(0)
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
+#if SW_MEM_TEST && ON_TILE(SWMEM_TILE)
+    swmem_test_init();
+#endif
+
     (void) c0;
     board_tile0_init(c1, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
     (void) c2;
@@ -332,6 +317,10 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 #if ON_TILE(1)
 void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
+#if SW_MEM_TEST && ON_TILE(SWMEM_TILE)
+    swmem_test_init();
+#endif
+
     board_tile1_init(c0, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
     (void) c1;
     (void) c2;

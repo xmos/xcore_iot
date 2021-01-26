@@ -5,12 +5,6 @@
 your application. */
 #include "platform.h"
 
-/*
- * TODO remove this. Just a hack to prevent the i2s task from calling vTaskSuspendAll(). Not a good solution.
- * the i2s task should probably not be using a FreeRTOS stream buffer.
- */
-#define sbRECEIVE_COMPLETED( pxStreamBuffer )
-
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 0
@@ -33,6 +27,7 @@ your application. */
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
+#define configTASK_NOTIFICATION_ARRAY_ENTRIES   2
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             1
 #define configUSE_COUNTING_SEMAPHORES           1

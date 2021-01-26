@@ -2,7 +2,7 @@
 
 #include "drivers/rtos/rpc/api/rtos_rpc.h"
 
-#include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
+#include "drivers/rtos/spi/api/rtos_spi_master.h"
 
 enum {
     fcode_transaction_start,
@@ -26,7 +26,7 @@ static void spi_master_remote_transaction_start(
             RPC_PARAM_LIST_END
     };
 
-    xSemaphoreTake(bus_ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&bus_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_transaction_start, rpc_param_desc,
@@ -100,7 +100,7 @@ static void spi_master_remote_transaction_end(
             host_address->intertile_ctx, host_address->port, fcode_transaction_end, rpc_param_desc,
             &host_dev_ctx_ptr);
 
-    xSemaphoreGive(bus_ctx->lock);
+    rtos_osal_mutex_put(&bus_ctx->lock);
 }
 
 static int spi_transaction_start_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
@@ -136,7 +136,7 @@ static int spi_transfer_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             &dev_ctx, &data_out, &data_in, &len);
 
     if (data_in != NULL) {
-        data_in = pvPortMalloc(len);
+        data_in = rtos_osal_malloc(len);
     }
 
     rtos_spi_master_transfer(dev_ctx, data_out, data_in, len);
@@ -145,7 +145,7 @@ static int spi_transfer_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             resp_msg, rpc_msg,
             dev_ctx, data_out, data_in, len);
 
-    vPortFree(data_in);
+    rtos_osal_free(data_in);
 
     return msg_length;
 }
@@ -219,11 +219,11 @@ static void spi_master_rpc_thread(rtos_intertile_address_t *client_address)
             break;
         }
 
-        vPortFree(req_msg);
+        rtos_osal_free(req_msg);
 
         /* send RPC response message to client */
         rtos_intertile_tx(intertile_ctx, intertile_port, resp_msg, msg_length);
-        vPortFree(resp_msg);
+        rtos_osal_free(resp_msg);
     }
 }
 
@@ -239,13 +239,13 @@ static void spi_master_rpc_start(
 
         xassert(client_address->port >= 0);
 
-        xTaskCreate(
-                    (TaskFunction_t) spi_master_rpc_thread,
-                    "spi_master_rpc_thread",
-                    RTOS_THREAD_STACK_SIZE(spi_master_rpc_thread),
-                    client_address,
-                    rpc_config->host_task_priority,
-                    NULL);
+        rtos_osal_thread_create(
+                NULL,
+                "spi_master_rpc_thread",
+                (rtos_osal_entry_function_t) spi_master_rpc_thread,
+                client_address,
+                RTOS_THREAD_STACK_SIZE(spi_master_rpc_thread),
+                rpc_config->host_task_priority);
     }
 }
 
@@ -260,7 +260,7 @@ void rtos_spi_master_rpc_config(
         /* This is a client */
         rpc_config->host_address.port = intertile_port;
 
-        spi_master_ctx->lock = xSemaphoreCreateMutex();
+        rtos_osal_mutex_create(&spi_master_ctx->lock, "spi_master_lock", RTOS_OSAL_NOT_RECURSIVE);
 
     } else {
         for (int i = 0; i < rpc_config->remote_client_count; i++) {

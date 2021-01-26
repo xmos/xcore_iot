@@ -6,7 +6,7 @@
 #include "FreeRTOS.h"
 #include "event_groups.h"
 
-#include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
+#include "drivers/rtos/spi/api/rtos_spi_master.h"
 #include "drivers/rtos/gpio/api/rtos_gpio.h"
 
 /**

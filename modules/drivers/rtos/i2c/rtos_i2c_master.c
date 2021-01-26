@@ -4,7 +4,7 @@
 #include "task.h"
 #include "semphr.h"
 
-#include "drivers/rtos/i2c/FreeRTOS/rtos_i2c_master.h"
+#include "drivers/rtos/i2c/api/rtos_i2c_master.h"
 
 __attribute__((fptrgroup("rtos_i2c_master_write_fptr_grp")))
 static i2c_res_t i2c_master_local_write(
@@ -17,7 +17,7 @@ static i2c_res_t i2c_master_local_write(
 {
     i2c_res_t res;
 
-    xSemaphoreTakeRecursive(ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
 
     res = i2c_master_write(
                            &ctx->ctx,
@@ -27,7 +27,7 @@ static i2c_res_t i2c_master_local_write(
                            num_bytes_sent,
                            send_stop_bit);
 
-    xSemaphoreGiveRecursive(ctx->lock);
+    rtos_osal_mutex_put(&ctx->lock);
 
     return res;
 }
@@ -42,7 +42,7 @@ static i2c_res_t i2c_master_local_read(
 {
     i2c_res_t res;
 
-    xSemaphoreTakeRecursive(ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
 
     res = i2c_master_read(
                           &ctx->ctx,
@@ -51,7 +51,7 @@ static i2c_res_t i2c_master_local_read(
                           n,
                           send_stop_bit);
 
-    xSemaphoreGiveRecursive(ctx->lock);
+    rtos_osal_mutex_put(&ctx->lock);
 
     return res;
 }
@@ -60,9 +60,9 @@ __attribute__((fptrgroup("rtos_i2c_master_stop_bit_send_fptr_grp")))
 static void i2c_master_local_stop_bit_send(
         rtos_i2c_master_t *ctx)
 {
-    xSemaphoreTakeRecursive(ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     i2c_master_stop_bit_send(&ctx->ctx);
-    xSemaphoreGiveRecursive(ctx->lock);
+    rtos_osal_mutex_put(&ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_i2c_master_reg_write_fptr_grp")))
@@ -108,7 +108,7 @@ static i2c_regop_res_t  i2c_master_local_reg_read(
     i2c_res_t res;
     size_t num_bytes_sent = 0;
 
-    xSemaphoreTakeRecursive(ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
 
     res = i2c_master_local_write(ctx, device_addr, &reg_addr, 1, &num_bytes_sent, 0);
 
@@ -132,7 +132,7 @@ static i2c_regop_res_t  i2c_master_local_reg_read(
         }
     }
 
-    xSemaphoreGiveRecursive(ctx->lock);
+    rtos_osal_mutex_put(&ctx->lock);
 
     return reg_res;
 }
@@ -140,7 +140,7 @@ static i2c_regop_res_t  i2c_master_local_reg_read(
 void rtos_i2c_master_start(
         rtos_i2c_master_t *i2c_master_ctx)
 {
-    i2c_master_ctx->lock = xSemaphoreCreateRecursiveMutex();
+    rtos_osal_mutex_create(&i2c_master_ctx->lock, "i2c_master_lock", RTOS_OSAL_RECURSIVE);
 
     if (i2c_master_ctx->rpc_config != NULL && i2c_master_ctx->rpc_config->rpc_host_start != NULL) {
         i2c_master_ctx->rpc_config->rpc_host_start(i2c_master_ctx->rpc_config);

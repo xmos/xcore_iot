@@ -15,11 +15,8 @@
 #include "audio_pipeline/audio_pipeline.h"
 #include "example_pipeline/example_pipeline.h"
 
-
 #include "rtos_interrupt.h"
-
 #include "queue_to_tcp_stream.h"
-
 #include "drivers/rtos/rpc/api/rtos_rpc.h"
 
 #define FRAME_NUM_CHANS 2
@@ -121,7 +118,8 @@ int example_pipeline_output(void *audio_frame, void *data)
     rtos_i2s_master_tx(
             i2s_master_ctx,
             audio_frame,
-            appconfAUDIO_FRAME_LENGTH);
+            appconfAUDIO_FRAME_LENGTH,
+            portMAX_DELAY);
 
     vPortFree(audio_frame);
 

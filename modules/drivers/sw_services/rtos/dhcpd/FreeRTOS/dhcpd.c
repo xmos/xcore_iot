@@ -1292,7 +1292,7 @@ void dhcpd_start(unsigned priority)
     dhcpd_lock_release();
 }
 
-void dhcpd_stop()
+void dhcpd_stop(void)
 {
     if (dhcpd_socket != -1) {
         rtos_printf("dhcpd stopping\n");

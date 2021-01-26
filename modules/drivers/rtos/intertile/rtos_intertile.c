@@ -6,12 +6,11 @@
 
 #include "rtos_interrupt.h"
 
-#include "drivers/rtos/intertile/FreeRTOS/rtos_intertile.h"
+#include "drivers/rtos/intertile/api/rtos_intertile.h"
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_intertile_isr, arg)
 {
     rtos_intertile_t *ctx = arg;
-    BaseType_t yield_required = pdFALSE;
     uint8_t port;
 
     triggerable_disable_trigger(ctx->c);
@@ -19,12 +18,10 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_intertile_isr, arg)
     port = s_chan_in_byte(ctx->c);
 
     /* wake up the task waiting to receive on this port */
-    if (xEventGroupSetBitsFromISR(ctx->event_group, (1 << port), &yield_required) == pdFAIL) {
+    if (rtos_osal_event_group_set_bits(&ctx->event_group, (1 << port)) != RTOS_OSAL_SUCCESS) {
         /* This shouldn't fail */
         xassert(0);
     }
-
-    portEND_SWITCHING_ISR(yield_required);
 }
 
 void rtos_intertile_tx(
@@ -33,13 +30,13 @@ void rtos_intertile_tx(
         void *msg,
         uint32_t len)
 {
-    xSemaphoreTake(ctx->lock, portMAX_DELAY);
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_PORT_WAIT_FOREVER);
 
     s_chan_out_byte(ctx->c, port); //to the ISR
     s_chan_out_word(ctx->c, len);
     s_chan_out_buf_byte(ctx->c, msg, len);
 
-    xSemaphoreGive(ctx->lock);
+    rtos_osal_mutex_put(&ctx->lock);
 }
 
 uint32_t rtos_intertile_rx(
@@ -49,16 +46,17 @@ uint32_t rtos_intertile_rx(
         unsigned timeout)
 {
     uint32_t len;
+    uint32_t flags;
 
-    xEventGroupWaitBits(ctx->event_group,
+    rtos_osal_event_group_get_bits(&ctx->event_group,
                         (1 << port),
-                        pdTRUE,
-                        pdTRUE,
-                        timeout);
+                        RTOS_OSAL_OR_CLEAR,
+                        &flags,
+                        RTOS_OSAL_PORT_WAIT_FOREVER);
 
     len = s_chan_in_word(ctx->c);
 
-    *msg = pvPortMalloc(len);
+    *msg = rtos_osal_malloc(len);
     xassert(*msg != NULL);
 
     s_chan_in_buf_byte(ctx->c, *msg, len);
@@ -71,8 +69,8 @@ uint32_t rtos_intertile_rx(
 void rtos_intertile_start(
         rtos_intertile_t *intertile_ctx)
 {
-    intertile_ctx->lock = xSemaphoreCreateMutex();
-    intertile_ctx->event_group = xEventGroupCreate();
+    rtos_osal_mutex_create(&intertile_ctx->lock, "intertile_mutex", RTOS_OSAL_NOT_RECURSIVE);
+    rtos_osal_event_group_create(&intertile_ctx->event_group, "intertile_group");
 
     triggerable_setup_interrupt_callback(intertile_ctx->c, intertile_ctx, RTOS_INTERRUPT_CALLBACK(rtos_intertile_isr));
     triggerable_enable_trigger(intertile_ctx->c);

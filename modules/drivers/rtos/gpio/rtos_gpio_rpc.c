@@ -405,7 +405,7 @@ void rtos_gpio_rpc_config(
         /* This is a client */
         rpc_config->host_address.port = intertile_port;
 
-        rtos_osal_mutex_create(&gpio_ctx->lock, "gpio_rpc_lock", 0);
+        rtos_osal_mutex_create(&gpio_ctx->lock, "gpio_rpc_lock", RTOS_OSAL_NOT_RECURSIVE);
     } else {
         for (int i = 0; i < rpc_config->remote_client_count; i++) {
             rpc_config->client_address[i].port = intertile_port;

@@ -10,13 +10,9 @@
  * @{
  */
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "queue.h"
-
 #include "qspi_flash.h"
 
+#include "drivers/rtos/osal/api/rtos_osal.h"
 #include "drivers/rtos/rpc/api/rtos_driver_rpc.h"
 
 /**
@@ -57,10 +53,10 @@ struct rtos_qspi_flash_struct {
     uint32_t page_address_mask;
 
     unsigned op_task_priority;
-    /* BEGIN RTOS SPECIFIC MEMBERS. */
-    TaskHandle_t op_task;
-    QueueHandle_t op_queue;
-    SemaphoreHandle_t mutex;
+    rtos_osal_thread_t op_task;
+    rtos_osal_queue_t op_queue;
+    rtos_osal_semaphore_t data_ready;
+    rtos_osal_mutex_t mutex;
 };
 
 #include "drivers/rtos/qspi_flash/api/rtos_qspi_flash_rpc.h"

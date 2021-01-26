@@ -122,7 +122,7 @@ void dhcpd_start(unsigned priority);
 /**
  * Stops the DHCP server.
  */
-void dhcpd_stop();
+void dhcpd_stop(void);
 
 
 #endif /* DHCPD_H_ */

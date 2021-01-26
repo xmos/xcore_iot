@@ -1,6 +1,6 @@
 // Copyright (c) 2021, XMOS Ltd, All rights reserved
 
-#include "platform.h"
+#include <platform.h>
 
 #include <xcore/chanend.h>
 

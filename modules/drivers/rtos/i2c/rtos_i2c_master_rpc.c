@@ -2,7 +2,7 @@
 
 #include "drivers/rtos/rpc/api/rtos_rpc.h"
 
-#include "drivers/rtos/i2c/FreeRTOS/rtos_i2c_master.h"
+#include "drivers/rtos/i2c/api/rtos_i2c_master.h"
 
 enum {
     fcode_write,
@@ -193,7 +193,7 @@ static int i2c_master_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             rpc_msg,
             &i2c_master_ctx, &device_addr, &buf, &n, &send_stop_bit, &ret);
 
-    buf = pvPortMalloc(n);
+    buf = rtos_osal_malloc(n);
 
     ret = rtos_i2c_master_read(i2c_master_ctx, device_addr, buf, n, send_stop_bit);
 
@@ -201,7 +201,7 @@ static int i2c_master_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             resp_msg, rpc_msg,
             i2c_master_ctx, device_addr, buf, n, send_stop_bit, ret);
 
-    vPortFree(buf);
+    rtos_osal_free(buf);
 
     return msg_length;
 }
@@ -304,11 +304,11 @@ static void i2c_master_rpc_thread(rtos_intertile_address_t *client_address)
             break;
         }
 
-        vPortFree(req_msg);
+        rtos_osal_free(req_msg);
 
         /* send RPC response message to client */
         rtos_intertile_tx(intertile_ctx, intertile_port, resp_msg, msg_length);
-        vPortFree(resp_msg);
+        rtos_osal_free(resp_msg);
     }
 }
 
@@ -324,13 +324,13 @@ static void i2c_master_rpc_start(
 
         xassert(client_address->port >= 0);
 
-        xTaskCreate(
-                    (TaskFunction_t) i2c_master_rpc_thread,
-                    "i2c_master_rpc_thread",
-                    RTOS_THREAD_STACK_SIZE(i2c_master_rpc_thread),
-                    client_address,
-                    rpc_config->host_task_priority,
-                    NULL);
+        rtos_osal_thread_create(
+                NULL,
+                "i2c_master_rpc_thread",
+                (rtos_osal_entry_function_t) i2c_master_rpc_thread,
+                client_address,
+                RTOS_THREAD_STACK_SIZE(i2c_master_rpc_thread),
+                rpc_config->host_task_priority);
     }
 }
 

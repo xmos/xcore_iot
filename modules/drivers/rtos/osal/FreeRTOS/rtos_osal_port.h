@@ -34,6 +34,14 @@ struct rtos_osal_mutex_struct {
     int recursive;
 };
 
+struct rtos_osal_semaphore_struct {
+    SemaphoreHandle_t semaphore;
+};
+
+struct rtos_osal_queue_struct {
+    QueueHandle_t queue;
+};
+
 struct rtos_osal_event_group_struct {
     EventGroupHandle_t group;
 };

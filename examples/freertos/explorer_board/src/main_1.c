@@ -12,10 +12,10 @@
 #include "FreeRTOS_DHCP.h"
 
 /* Library headers */
-#include "drivers/rtos/intertile/FreeRTOS/rtos_intertile.h"
-#include "drivers/rtos/mic_array/FreeRTOS/rtos_mic_array.h"
-#include "drivers/rtos/i2c/FreeRTOS/rtos_i2c_master.h"
-#include "drivers/rtos/i2s/FreeRTOS/rtos_i2s_master.h"
+#include "drivers/rtos/intertile/api/rtos_intertile.h"
+#include "drivers/rtos/mic_array/api/rtos_mic_array.h"
+#include "drivers/rtos/i2c/api/rtos_i2c_master.h"
+#include "drivers/rtos/i2s/api/rtos_i2s_master.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -70,14 +70,7 @@ void vApplicationDaemonTaskStartup( void )
     if (!dac_configured) {
         vTaskDelete(NULL);
     }
-    /*
-     * FIXME: It is necessary that these two tasks run on cores that are uninterrupted.
-     * Therefore they must not run on core 0. It is currently difficult to guarantee this
-     * as there is no support for core affinity.
-     *
-     * Setting I2C_TILE to 0 so that this task does not block above and remains on core 0
-     * here will, however, ensure that these two tasks run on the two highest cores.
-     */
+
     const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
             appconfPDM_CLOCK_FREQUENCY,
             appconfPIPELINE_AUDIO_SAMPLE_RATE);
@@ -117,6 +110,10 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
 
     case 0:
         rtos_mic_array_interrupt_init(mic_array_ctx);
+        break;
+    case 1:
+        rtos_i2s_master_interrupt_init(i2s_master_ctx);
+        break;
     }
 }
 

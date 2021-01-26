@@ -11,7 +11,7 @@
 #include "semphr.h"
 
 /* driver headers */
-#include "drivers/rtos/spi/FreeRTOS/rtos_spi_master.h"
+#include "drivers/rtos/spi/api/rtos_spi_master.h"
 #include "drivers/rtos/gpio/api/rtos_gpio.h"
 
 void sl_wfx_host_task_rx_notify(BaseType_t *xYieldRequired);

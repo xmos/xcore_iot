@@ -10,11 +10,9 @@
  * @{
  */
 
-#include "FreeRTOS.h"
-#include "semphr.h"
-
 #include "i2c.h"
 
+#include "drivers/rtos/osal/api/rtos_osal.h"
 #include "drivers/rtos/rpc/api/rtos_driver_rpc.h"
 
 /**
@@ -47,8 +45,7 @@ struct rtos_i2c_master_struct {
 
     i2c_master_t ctx;
 
-    /* BEGIN RTOS SPECIFIC MEMBERS. */
-    SemaphoreHandle_t lock;
+    rtos_osal_mutex_t lock;
 };
 
 #include "drivers/rtos/i2c/api/rtos_i2c_master_rpc.h"
