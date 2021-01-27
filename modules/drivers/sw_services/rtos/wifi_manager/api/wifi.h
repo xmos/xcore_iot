@@ -130,7 +130,11 @@ int wifi_conn_mgr_stop_soft_ap(int wifi_profiles_updated);
  * function.
  *
  * It can also start a soft AP if requested by the application.
+ *
+ * \param manager_priority The priority to use for the WiFi manager task.
+ * \param dhcpd_priority   The priority to use for the DHCP server, if it
+ *                         is started.
  */
-void wifi_conn_mgr_start(void);
+void wifi_conn_mgr_start(unsigned manager_priority, unsigned dhcpd_priority);
 
 #endif /* WIFI_H_ */

@@ -196,7 +196,7 @@ static void wifi_test_task(wifi_test_devs_t *wifi_devs)
                     ucDNSServerAddress,
                     ucMACAddress);
 
-    wifi_conn_mgr_start();
+    wifi_conn_mgr_start(configMAX_PRIORITIES - 3, configMAX_PRIORITIES / 2);
 
     vTaskDelete(NULL);
 }

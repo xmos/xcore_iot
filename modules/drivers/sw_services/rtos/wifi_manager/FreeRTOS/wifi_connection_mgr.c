@@ -493,7 +493,11 @@ static void wifi_conn_mgr(void *arg)
     char soft_ap_ssid[wificonfigMAX_SSID_LEN + 1];
     char soft_ap_password[wificonfigMAX_PASSPHRASE_LEN + 1];
 
+#if USE_DHCPD
+    unsigned dhcpd_priority = (unsigned) arg;
+#else
     (void) arg;
+#endif
 
     while (WIFI_On() != eWiFiSuccess) {
         vTaskDelay(pdMS_TO_TICKS(100));
@@ -617,7 +621,7 @@ static void wifi_conn_mgr(void *arg)
                 }
 #if USE_DHCPD
                 /* note: It's safe to call this if the DHCP server is already started. */
-                dhcpd_start(16);
+                dhcpd_start(dhcpd_priority);
 #endif
 
                 event_callback(WIFI_CONN_MGR_EVENT_SOFT_AP_STARTED, soft_ap_ssid, NULL, NULL);
@@ -694,26 +698,13 @@ static void wifi_conn_mgr(void *arg)
     }
 }
 
-#if __has_include("app_conf.h")
-#include "app_conf.h"
-
-void wifi_conn_mgr_start(void)
+void wifi_conn_mgr_start(unsigned manager_priority, unsigned dhcpd_priority)
 {
-    xTaskCreate((TaskFunction_t)wifi_conn_mgr,
-                "wifi_conn_mgr",
-                portTASK_STACK_DEPTH(wifi_conn_mgr),
-                NULL,
-                appconfWIFI_CONN_MNGR_TASK_PRIORITY,
-                &wifi_conn_mgr_task_handle);
+    xTaskCreate(
+            (TaskFunction_t) wifi_conn_mgr,
+            "wifi_conn_mgr",
+            portTASK_STACK_DEPTH(wifi_conn_mgr),
+            (void *) dhcpd_priority,
+            manager_priority,
+            &wifi_conn_mgr_task_handle);
 }
-#else
-void wifi_conn_mgr_start(void)
-{
-    xTaskCreate((TaskFunction_t)wifi_conn_mgr,
-                "wifi_conn_mgr",
-                portTASK_STACK_DEPTH(wifi_conn_mgr),
-                NULL,
-                configMAX_PRIORITIES-3,
-                &wifi_conn_mgr_task_handle);
-}
-#endif /* __has_include("app_conf.h") */

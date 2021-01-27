@@ -12,6 +12,7 @@
 static swmem_fill_t swmem_fill_res;
 static swmem_evict_t swmem_evict_res;
 
+static bool started;
 static rtos_osal_event_group_t swmem_event_group;
 
 
@@ -97,33 +98,37 @@ static void rtos_swmem_thread(void *arg)
 
 void rtos_swmem_start(unsigned priority)
 {
-    rtos_osal_event_group_create(&swmem_event_group, "swmem_event_group");;
+    if (!started) {
+        rtos_osal_event_group_create(&swmem_event_group, "swmem_event_group");;
 
-    rtos_osal_thread_create(
-            NULL,
-            "rtos_swmem_thread",
-            (rtos_osal_entry_function_t) rtos_swmem_thread,
-            NULL,
-            RTOS_THREAD_STACK_SIZE(rtos_swmem_thread),
-            priority);
+        rtos_osal_thread_create(
+                NULL,
+                "rtos_swmem_thread",
+                (rtos_osal_entry_function_t) rtos_swmem_thread,
+                NULL,
+                RTOS_THREAD_STACK_SIZE(rtos_swmem_thread),
+                priority);
 
-    if (swmem_fill_res != 0) {
-        triggerable_setup_interrupt_callback(swmem_fill_res, NULL, RTOS_INTERRUPT_CALLBACK(sw_mem_fill_isr));
-        triggerable_enable_trigger(swmem_fill_res);
-    }
-    if (swmem_evict_res != 0) {
-        triggerable_setup_interrupt_callback(swmem_evict_res, NULL, RTOS_INTERRUPT_CALLBACK(sw_mem_evict_isr));
-        triggerable_enable_trigger(swmem_evict_res);
+        if (swmem_fill_res != 0) {
+            triggerable_setup_interrupt_callback(swmem_fill_res, NULL, RTOS_INTERRUPT_CALLBACK(sw_mem_fill_isr));
+            triggerable_enable_trigger(swmem_fill_res);
+        }
+        if (swmem_evict_res != 0) {
+            triggerable_setup_interrupt_callback(swmem_evict_res, NULL, RTOS_INTERRUPT_CALLBACK(sw_mem_evict_isr));
+            triggerable_enable_trigger(swmem_evict_res);
+        }
+
+        started = true;
     }
 }
 
 void rtos_swmem_init(uint32_t init_flags)
 {
-    if (init_flags & RTOS_SWMEM_READ_FLAG) {
+    if ((init_flags & RTOS_SWMEM_READ_FLAG) && swmem_fill_res == 0) {
         swmem_fill_res = swmem_fill_get();
     }
 
-    if (init_flags & RTOS_SWMEM_WRITE_FLAG) {
+    if ((init_flags & RTOS_SWMEM_WRITE_FLAG) && swmem_evict_res == 0) {
         swmem_evict_res = swmem_evict_get();
     }
 }

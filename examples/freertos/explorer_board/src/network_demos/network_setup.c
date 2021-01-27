@@ -223,7 +223,7 @@ static void wifi_setup_task(wifi_devices_t *wifi_devs)
                     ucMACAddress);
 
     rtos_printf("Start WiFi connection manager\n");
-    wifi_conn_mgr_start();
+    wifi_conn_mgr_start(appconfWIFI_CONN_MNGR_TASK_PRIORITY, appconfWIFI_DHCP_SERVER_TASK_PRIORITY);
 
     vTaskDelete(NULL);
 }

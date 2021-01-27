@@ -81,5 +81,6 @@
 #define appconfMEM_ANALYSIS_TASK_PRIORITY		( configMAX_PRIORITIES - 1 )
 #define appconfWIFI_SETUP_TASK_PRIORITY		    ( configMAX_PRIORITIES/2 - 1 )
 #define appconfWIFI_CONN_MNGR_TASK_PRIORITY     ( configMAX_PRIORITIES - 3 )
+#define appconfWIFI_DHCP_SERVER_TASK_PRIORITY   ( configMAX_PRIORITIES - 3 )
 
 #endif /* APP_CONF_H_ */
