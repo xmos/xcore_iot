@@ -112,6 +112,7 @@ static void tls_echo_receiver( void *arg )
 		mbedtls_x509_crt_free( &cert );
 		mbedtls_pk_free( &prvkey );
 		mbedtls_ssl_config_free( &ssl_conf );
+    	vPortFree( handle );
 	    vTaskDelete( NULL );
 	}
 
@@ -132,6 +133,7 @@ static void tls_echo_receiver( void *arg )
 		mbedtls_x509_crt_free( &cert );
 		mbedtls_pk_free( &prvkey );
 		mbedtls_ssl_config_free( &ssl_conf );
+    	vPortFree( handle );
 	    vTaskDelete( NULL );
 	}
 
@@ -267,6 +269,7 @@ static void tls_echo_receiver( void *arg )
 	mbedtls_ssl_config_free( &ssl_conf );
 
 	vPortFree( recv_buf );
+	vPortFree( handle );
 
     vTaskDelete( NULL );
 }
