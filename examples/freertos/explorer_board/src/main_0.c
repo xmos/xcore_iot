@@ -143,7 +143,7 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                 "vApplicationDaemonTaskStartup",
                 configMINIMAL_STACK_SIZE*6,
                 NULL,
-                configMAX_PRIORITIES-1,
+                appconfSTARTUP_TASK_PRIORITY,
                 NULL);
 
     rtos_printf("start scheduler on tile 0\n");

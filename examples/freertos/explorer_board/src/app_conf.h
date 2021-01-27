@@ -68,6 +68,7 @@
 #define appconfMQTT_PORT						8883
 
 /* Task Priorities */
+#define appconfSTARTUP_TASK_PRIORITY            ( configMAX_PRIORITIES - 1 )
 #define appconfMQTT_TASK_PRIORITY    			( configMAX_PRIORITIES - 7 )
 #define appconfHTTP_TASK_PRIORITY    			( configMAX_PRIORITIES - 8 )
 #define appconfTLS_ECHO_TASK_PRIORITY    		( configMAX_PRIORITIES - 8 )
