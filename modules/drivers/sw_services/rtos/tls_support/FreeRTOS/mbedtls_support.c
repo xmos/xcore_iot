@@ -1,8 +1,7 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #define DEBUG_UNIT MBEDTLS_SUPPORT
 #include <string.h>
-#include <time.h>
 
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -16,7 +15,6 @@
 #include "mbedtls/platform_util.h"
 #include "mbedtls/platform_time.h"
 #include "mbedtls/threading.h"
-#include "threading_alt.h"
 
 /* Library headers */
 #include "random.h"
@@ -39,32 +37,6 @@ int tls_platform_ready( void )
 	return platform_ready;
 }
 
-struct tm *mbedtls_platform_gmtime_r( const mbedtls_time_t *tt,
-                                      struct tm *tm_buf )
-{
-	struct tm *info;
-	rtos_time_t now;
-
-	now = rtos_time_get();
-
-	info = gmtime( (time_t * )(&now.seconds) );
-	debug_printf( "mbed gmtime: %d/%d/%02d %2d:%02d:%02d\n",
-				 (int)info->tm_mday,
-				 (int)info->tm_mon + 1,
-				 (int)info->tm_year + 1900,
-				 (int)info->tm_hour,
-				 (int)info->tm_min,
-				 (int)info->tm_sec) ;
-	return info;
-}
-
-mbedtls_time_t mbedtls_platform_time( mbedtls_time_t* time)
-{
-	rtos_time_t now;
-	now = rtos_time_get();
-	return ( mbedtls_time_t ) now.seconds;
-}
-
 #ifdef MBEDTLS_DEBUG_C
 void default_mbedtls_debug( void *ctx, int level,
 							const char *file, int line,
@@ -77,7 +49,7 @@ void default_mbedtls_debug( void *ctx, int level,
         if( *p == '/' || *p == '\\' )
             basename = p + 1;
 
-    debug_printf( "%s:%04d: |%d| %s", basename, line, level, str );
+    rtos_printf( "%s:%04d: |%d| %s", basename, line, level, str );
 }
 #endif
 
@@ -110,20 +82,6 @@ int mbedtls_hardware_poll( void* data, unsigned char* output, size_t len, size_t
 	}
 
 	return retval;
-}
-
-void* freertos_calloc( size_t n, size_t size )
-{
-	void* ptr;
-
-	ptr = pvPortMalloc( n * size );
-
-	if( ptr != NULL )
-	{
-		memset( ptr, 0, n * size );
-	}
-
-	return ptr;
 }
 
 static void freertos_mutex_init( mbedtls_threading_mutex_t* mutex )
@@ -206,7 +164,7 @@ void tls_platform_init( void )
         configASSERT(0); /* mbedtls_ctr_drbg_seed failed */
     }
 
-    mbedtls_platform_set_time( mbedtls_platform_time );
+    //mbedtls_platform_set_time( mbedtls_platform_time );
 
     platform_ready = 1;
 }
@@ -253,7 +211,7 @@ int get_cert( mbedtls_x509_crt* cert, const char* filepath )
 
 		if( get_file( filepath, &prvfile, &prvfile_len ) == pdFAIL )
 		{
-			debug_printf("Get cert file failed\n");
+			rtos_printf("Get cert file failed\n");
 			break;
 		}
 
@@ -267,14 +225,14 @@ int get_cert( mbedtls_x509_crt* cert, const char* filepath )
 			data[ prvfile_len ] = 0x00;
 
 			result = f_read( &prvfile, data, prvfile_len, &bytes_read );
-			debug_printf("cert %d bytes\n%s\n", prvfile_len, data);
+			rtos_printf("cert %d bytes\n%s\n", prvfile_len, data);
 
 			if( bytes_read == prvfile_len )
 			{
 				int ret;
 				if( ( ret = mbedtls_x509_crt_parse( cert, ( const unsigned char* ) data, prvfile_len + 1 ) ) < 0 )
 				{
-					debug_printf("failed mbedtls_x509_crt_parse ret:-0x%x\n", ( unsigned int )-ret );
+					rtos_printf("failed mbedtls_x509_crt_parse ret:-0x%x\n", ( unsigned int )-ret );
 				}
 				else
 				{
@@ -283,7 +241,7 @@ int get_cert( mbedtls_x509_crt* cert, const char* filepath )
 			}
 			else
 			{
-				debug_printf("failed to read cert file\n");
+				rtos_printf("failed to read cert file\n");
 			}
 			mbedtls_platform_zeroize( data, prvfile_len );
 			vPortFree( data );
@@ -292,7 +250,7 @@ int get_cert( mbedtls_x509_crt* cert, const char* filepath )
 		}
 		else
 		{
-			debug_printf("failed to allocate buffer for cert\n");
+			rtos_printf("failed to allocate buffer for cert\n");
 		}
 
 		f_close( &prvfile );
@@ -320,7 +278,7 @@ int get_key( mbedtls_pk_context* key, const char* filepath )
 
 		if( get_file( filepath, &prvfile, &prvfile_len ) == pdFAIL )
 		{
-			debug_printf("Get key file failed\n");
+			rtos_printf("Get key file failed\n");
 			break;
 		}
 
@@ -335,14 +293,14 @@ int get_key( mbedtls_pk_context* key, const char* filepath )
 			data[ prvfile_len ] = 0x00;
 
 			result = f_read( &prvfile, data, prvfile_len, &bytes_read );
-			debug_printf("key %d bytes\n%s\n", prvfile_len, data);
+			rtos_printf("key %d bytes\n%s\n", prvfile_len, data);
 
 			if( bytes_read == prvfile_len )
 			{
 				int ret;
 				if( ( ret = mbedtls_pk_parse_key( key, ( const unsigned char* ) data, prvfile_len + 1, NULL, 0 ) ) < 0 )
 				{
-					debug_printf("failed mbedtls_pk_parse_key ret:-0x%x\n", ( unsigned int )-ret );
+					rtos_printf("failed mbedtls_pk_parse_key ret:-0x%x\n", ( unsigned int )-ret );
 				}
 				else
 				{
@@ -351,7 +309,7 @@ int get_key( mbedtls_pk_context* key, const char* filepath )
 			}
 			else
 			{
-				debug_printf("failed to read key file\n");
+				rtos_printf("failed to read key file\n");
 			}
 			mbedtls_platform_zeroize( data, prvfile_len );
 			vPortFree( data );
@@ -360,7 +318,7 @@ int get_key( mbedtls_pk_context* key, const char* filepath )
 		}
 		else
 		{
-			debug_printf("failed to allocate buffer for key\n");
+			rtos_printf("failed to allocate buffer for key\n");
 		}
 
 		f_close( &prvfile );

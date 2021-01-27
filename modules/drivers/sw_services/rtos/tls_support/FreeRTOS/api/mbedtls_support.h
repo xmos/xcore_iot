@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #ifndef FREERTOS_TLS_SUPPORT_H_
 #define FREERTOS_TLS_SUPPORT_H_
@@ -7,6 +7,10 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
+
+/* FreeRTOS Plus headers */
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_Sockets.h"
 
 /**
  * Context required for sending and receiving in the
@@ -124,22 +128,6 @@ int get_device_cert( mbedtls_x509_crt* cert );
  * 				  pdFAIL on failure
  */
 int get_device_prvkey( mbedtls_pk_context* prvkey );
-
-/**
- * Calloc in FreeRTOS
- *
- * \param[in]     n		     	 Number of objects
- * \param[in]     size    		 Size of each object
- *
- * \returns       return pointer to region of n*size bytes, initialized to all 0x00
- */
-void* freertos_calloc( size_t n, size_t size );
-
-/**
- * Configure platform memory macros
- */
-#define MBEDTLS_PLATFORM_FREE_MACRO vPortFree
-#define MBEDTLS_PLATFORM_CALLOC_MACRO freertos_calloc
 
 #define DRBG_SEED_STRING_DEFAULT "XCOREAI"
 

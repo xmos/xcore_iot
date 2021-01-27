@@ -206,6 +206,7 @@ if(${USE_${THIS_LIB}})
 
 	set(${THIS_LIB}_SOURCES
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/mbedtls_support.c"
+        "${${THIS_LIB}_DIR}/thirdparty/port/mbedtls/mbedtls_xcore_platform.c"
         "${${THIS_LIB}_DIR}/thirdparty/mbedtls/library/aes.c"
         "${${THIS_LIB}_DIR}/thirdparty/mbedtls/library/aesni.c"
         "${${THIS_LIB}_DIR}/thirdparty/mbedtls/library/arc4.c"
@@ -293,18 +294,17 @@ if(${USE_${THIS_LIB}})
 
 	set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/api"
-        "${${THIS_LIB}_DIR}/thirdparty/mbedtls/include"
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
+        "${${THIS_LIB}_DIR}/thirdparty/mbedtls/include"
+        "${${THIS_LIB}_DIR}/thirdparty/port/mbedtls"
 	)
 
     if(NOT ${USE_CUSTOM_MBEDTLS_CONFIG})
-        list(APPEND ${THIS_LIB}_INCLUDES "${${THIS_LIB}_DIR}/thirdparty/port/mbedtls")
-
         add_compile_definitions(
-            MBEDTLS_CONFIG_FILE=\"mbedtls_config.h\"
+            MBEDTLS_CONFIG_FILE=\"mbedtls_xcore_default_config.h\"
         )
 
-        message(WARNING "${COLOR_YELLOW}Using example mbedtls configuration.\nTo use a different configuration, enable cmake option USE_CUSTOM_MBEDTLS_CONFIG, provide an mbedtls_config.h file with options required for your application, and add compiler definition MBEDTLS_CONFIG_FILE=\\\"path_to_your_file/mbedtls_config.h\\\"${COLOR_RESET}")
+        message(WARNING "${COLOR_YELLOW}Using default XCore mbed TLS configuration.\nTo use a different configuration, enable cmake option USE_CUSTOM_MBEDTLS_CONFIG, provide an mbedtls_config.h file with options required for your application, and add compiler definition MBEDTLS_CONFIG_FILE=\\\"path_to_your_file/mbedtls_config.h\\\"${COLOR_RESET}")
     endif()
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()

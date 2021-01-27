@@ -126,6 +126,7 @@ static void mqtt_demo_connect( void* arg )
 	struct freertos_sockaddr sAddr;
 	int recv_timeout = pdMS_TO_TICKS( 5000 );
 	int send_timeout = pdMS_TO_TICKS( 5000 );
+	int ret;
 
 	/* TODO make these args */
 	sAddr.sin_port = FreeRTOS_htons( appconfMQTT_PORT );
@@ -164,17 +165,18 @@ static void mqtt_demo_connect( void* arg )
 
 	mbedtls_ssl_config_init( ssl_conf );
 
-	if( mbedtls_ssl_config_defaults( ssl_conf,
+	if( (ret = mbedtls_ssl_config_defaults( ssl_conf,
 									 MBEDTLS_SSL_IS_CLIENT,
 									 MBEDTLS_SSL_TRANSPORT_STREAM,
-									 MBEDTLS_SSL_PRESET_DEFAULT )
-			!= 0 )
+									 MBEDTLS_SSL_PRESET_DEFAULT )) != 0 )
 	{
+		rtos_printf("mbedtls_ssl_config_defaults() -> %04x\n", -ret);
 		configASSERT(0); /* Failed to initialize ssl conf with defaults */
 	}
 
-	if( mbedtls_ssl_conf_own_cert( ssl_conf, cert, prvkey ) != 0 )
+	if( (ret = mbedtls_ssl_conf_own_cert( ssl_conf, cert, prvkey )) != 0 )
 	{
+		rtos_printf("mbedtls_ssl_conf_own_cert() -> %04x\n", -ret);
 		configASSERT(0); /* Failed to initialize ssl conf with device cert and key */
 	}
 
@@ -193,13 +195,15 @@ static void mqtt_demo_connect( void* arg )
 	{
 		mbedtls_ssl_init( ssl_ctx );
 
-		if( mbedtls_ssl_setup( ssl_ctx, ssl_conf ) != 0 )
+		if( (ret = mbedtls_ssl_setup( ssl_ctx, ssl_conf )) != 0 )
 		{
+			rtos_printf("mbedtls_ssl_setup() -> %04x\n", -ret);
 			configASSERT(0); /* Failed to initialize ssl context */
 		}
 
-		if( ( mbedtls_ssl_set_hostname( ssl_ctx, HOSTNAME ) ) != 0 )
+		if( (ret = mbedtls_ssl_set_hostname( ssl_ctx, HOSTNAME )) != 0 )
 		{
+			rtos_printf("mbedtls_ssl_set_hostname() -> %04x\n", -ret);
 			configASSERT( 0 ); /* set hostname failed */
 		}
 
@@ -215,6 +219,9 @@ static void mqtt_demo_connect( void* arg )
 								  FREERTOS_IPPROTO_TCP );
 
 		/* Check the socket was created. */
+		if (socket == FREERTOS_INVALID_SOCKET) {
+			rtos_printf("FREERTOS_INVALID_SOCKET\n");
+		}
 		configASSERT( socket != FREERTOS_INVALID_SOCKET );
 
 		/* Set time outs */

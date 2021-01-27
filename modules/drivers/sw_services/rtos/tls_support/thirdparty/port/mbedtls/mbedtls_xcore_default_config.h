@@ -1,34 +1,14 @@
-/*
- * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
-/* This file configures the mbed TLS library built with this SDK. */
+/* This file provides a default configuration for the mbed TLS library for XCore */
 
-#ifndef IOT_CONFIG_MBEDTLS_H_
-#define IOT_CONFIG_MBEDTLS_H_
+#ifndef MBEDTLS_XCORE_DEFAULT_CONFIG_H
+#define MBEDTLS_XCORE_DEFAULT_CONFIG_H
 
 /* System support for assembly and time. */
 #define MBEDTLS_HAVE_ASM
 #define MBEDTLS_HAVE_TIME
 #define MBEDTLS_HAVE_TIME_DATE
-#define MBEDTLS_PLATFORM_TIME_ALT
 #define MBEDTLS_PLATFORM_GMTIME_R_ALT
 
 /* Remove deprecated functions to prevent their use. */
@@ -139,7 +119,95 @@
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
 #define MBEDTLS_NO_PLATFORM_ENTROPY
 
+/**
+ * mbed TLS platform macros for XCore
+ * @{
+ */
+
+/**
+ * This ensures that the real <time.h> is never included,
+ * which causes problems on XCore as another system header
+ * can redefine clock.
+ */
+#define _TIME_H_
+
+/**
+ * Since the real <time.h> doesn't get included, this struct
+ * must be defined.
+ */
+struct tm
+{
+  int   tm_sec;
+  int   tm_min;
+  int   tm_hour;
+  int   tm_mday;
+  int   tm_mon;
+  int   tm_year;
+  int   tm_wday;
+  int   tm_yday;
+  int   tm_isdst;
+};
+
+/**
+ * Since the real <time.h> doesn't get included, time_t
+ * does not get defined. mbed TLS does not use time_t
+ * directly, but rather mbedtls_time. When this macro
+ * is defined, mbedtls_time is typedef'd to it rather
+ * than to time_t.
+ */
+#define MBEDTLS_PLATFORM_TIME_TYPE_MACRO long
+
+/**
+ * When this macro is defined, mbedtls_time is defined
+ * to it, rather than to the "real" time function in
+ * time.h.
+ */
+#define MBEDTLS_PLATFORM_TIME_MACRO mbedtls_platform_time
+
+/**
+ * Tells mbed TLS not to use various standard functions
+ * found in the standard C library. This allows us to
+ * provide our own versions.
+ */
+#define MBEDTLS_PLATFORM_NO_STD_FUNCTIONS
+
+/**
+ * When the standard C library functions are not used, this
+ * sets the include file to include to find the prototypes
+ * for our versions.
+ */
+#define MBEDTLS_PLATFORM_STD_MEM_HDR <mbedtls_xcore_platform.h>
+
+/**
+ * Tells mbed TLS to use the FreeRTOS free function
+ * vPortFree().
+ */
+#define MBEDTLS_PLATFORM_FREE_MACRO vPortFree
+
+/**
+ * Tells mbed TLS to use our version of calloc, freertos_calloc(),
+ * which is a wrapper around pvPortMalloc() and mbedtls_platform_zeroize().
+ */
+#define MBEDTLS_PLATFORM_CALLOC_MACRO freertos_calloc
+
+/**
+ * We do not support fprintf, so remove it completely.
+ */
+#define MBEDTLS_PLATFORM_FPRINTF_MACRO()
+
+/**
+ * Tell mbed TLS to use rtos_printf() instead of printf.
+ */
+#define MBEDTLS_PLATFORM_PRINTF_MACRO     rtos_printf
+
+/**
+ * Tell mbed TLS to use rtos_snprintf() instead of snprintf.
+ */
+#define MBEDTLS_PLATFORM_SNPRINTF_MACRO   rtos_snprintf
+
+/**@}*/
+
 /* Validate mbed TLS configuration. */
 #include "mbedtls/check_config.h"
 
-#endif
+#endif /* MBEDTLS_XCORE_DEFAULT_CONFIG_H */
