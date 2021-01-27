@@ -178,7 +178,7 @@ sl_status_t sl_wfx_host_set_wake_up_pin(uint8_t state)
          * sl_wfx_host_wait_for_wake_up() may wait for it to
          * be set by the ISR.
          */
-        xEventGroupClearBits(sl_wfx_event_group, SL_WFX_INTERRUPT);
+        xEventGroupClearBits(sl_wfx_event_group, SL_WFX_WAKEUP);
     } else {
         rtos_printf("going to sleep\n");
     }
@@ -191,9 +191,9 @@ sl_status_t sl_wfx_host_wait_for_wake_up(void)
 {
     EventBits_t bits;
 
-    bits = xEventGroupWaitBits(sl_wfx_event_group, SL_WFX_INTERRUPT, pdTRUE, pdTRUE, pdMS_TO_TICKS(3));
+    bits = xEventGroupWaitBits(sl_wfx_event_group, SL_WFX_WAKEUP, pdTRUE, pdTRUE, pdMS_TO_TICKS(3));
 
-    if (bits & SL_WFX_INTERRUPT) {
+    if (bits & SL_WFX_WAKEUP) {
         rtos_printf("woke up\n");
     } else {
         rtos_printf("did not wake\n");

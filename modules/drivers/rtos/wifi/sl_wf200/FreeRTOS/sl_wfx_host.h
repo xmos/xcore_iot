@@ -33,15 +33,17 @@
  * @{
  * Wi-Fi events
  */
-#define SL_WFX_INTERRUPT     ( 1 << 0 )
-#define SL_WFX_CONNECT       ( 1 << 1 )
-#define SL_WFX_DISCONNECT    ( 1 << 2 )
-#define SL_WFX_START_AP      ( 1 << 3 )
-#define SL_WFX_STOP_AP       ( 1 << 4 )
-#define SL_WFX_SCAN_COMPLETE ( 1 << 5 )
-#define SL_WFX_CONNECT_FAIL  ( 1 << 6 )
-#define SL_WFX_START_AP_FAIL ( 1 << 7 )
-#define SL_WFX_INITIALIZED   ( 1 << 8 )
+#define SL_WFX_INTERRUPT     ( 1 << 0  )
+#define SL_WFX_CONNECT       ( 1 << 1  )
+#define SL_WFX_DISCONNECT    ( 1 << 2  )
+#define SL_WFX_START_AP      ( 1 << 3  )
+#define SL_WFX_STOP_AP       ( 1 << 4  )
+#define SL_WFX_SCAN_COMPLETE ( 1 << 5  )
+#define SL_WFX_CONNECT_FAIL  ( 1 << 6  )
+#define SL_WFX_START_AP_FAIL ( 1 << 7  )
+#define SL_WFX_INITIALIZED   ( 1 << 8  )
+#define SL_WFX_DEINITIALIZED ( 1 << 9  )
+#define SL_WFX_WAKEUP        ( 1 << 10 )
 /**@}*/
 
 extern EventGroupHandle_t sl_wfx_event_group;
