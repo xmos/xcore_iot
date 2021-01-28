@@ -243,7 +243,7 @@ not set to 1 then only FreeRTOS_indet_addr_quick() is available. */
 are available to the IP stack.  The total number of network buffers is limited
 to ensure the total amount of RAM that can be consumed by the IP stack is capped
 to a pre-determinable value. */
-#define ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS		24*2
+#define ipconfigNUM_NETWORK_BUFFER_DESCRIPTORS		8*2
 
 /* A FreeRTOS queue is used to send events from application tasks to the IP
 stack.  ipconfigEVENT_QUEUE_LENGTH sets the maximum number of events that can
@@ -343,10 +343,10 @@ simultaneously, one could define TCP_WIN_SEG_COUNT as 120. */
 
 /* Each TCP socket has a circular buffers for Rx and Tx, which have a fixed
 maximum size.  Define the size of Rx buffer for TCP sockets. */
-#define ipconfigTCP_RX_BUFFER_LENGTH			( 32 * ipconfigTCP_MSS )
+#define ipconfigTCP_RX_BUFFER_LENGTH			( 4 * ipconfigTCP_MSS )
 
 /* Define the size of Tx buffer for TCP sockets. */
-#define ipconfigTCP_TX_BUFFER_LENGTH			( 6 * ipconfigTCP_MSS )
+#define ipconfigTCP_TX_BUFFER_LENGTH			( 4 * ipconfigTCP_MSS )
 
 /* Limit the amount of TCP segments sent out at a time per socket.
 The default of 8 makes it very difficult for more than one output
