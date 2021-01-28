@@ -206,7 +206,7 @@ if(${USE_${THIS_LIB}})
 
 	set(${THIS_LIB}_SOURCES
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/mbedtls_support.c"
-        "${${THIS_LIB}_DIR}/thirdparty/port/mbedtls/mbedtls_xcore_platform.c"
+        "${${THIS_LIB}_DIR}/thirdparty/port/mbedtls/${RTOS_CMAKE_RTOS}/mbedtls_xcore_platform.c"
         "${${THIS_LIB}_DIR}/thirdparty/mbedtls/library/aes.c"
         "${${THIS_LIB}_DIR}/thirdparty/mbedtls/library/aesni.c"
         "${${THIS_LIB}_DIR}/thirdparty/mbedtls/library/arc4.c"
@@ -296,7 +296,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/api"
         "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
         "${${THIS_LIB}_DIR}/thirdparty/mbedtls/include"
-        "${${THIS_LIB}_DIR}/thirdparty/port/mbedtls"
+        "${${THIS_LIB}_DIR}/thirdparty/port/mbedtls/${RTOS_CMAKE_RTOS}"
 	)
 
     if(NOT ${USE_CUSTOM_MBEDTLS_CONFIG})
