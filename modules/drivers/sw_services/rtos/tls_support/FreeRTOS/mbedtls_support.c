@@ -164,8 +164,6 @@ void tls_platform_init( void )
         configASSERT(0); /* mbedtls_ctr_drbg_seed failed */
     }
 
-    //mbedtls_platform_set_time( mbedtls_platform_time );
-
     platform_ready = 1;
 }
 
