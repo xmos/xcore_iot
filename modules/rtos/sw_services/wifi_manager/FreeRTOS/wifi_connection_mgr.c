@@ -324,9 +324,9 @@ static int connect_to_network(ap_info_t *ap)
 {
     int ret = -1;
     int i;
+    const WIFINetworkProfile_t *network_profile = ap->associated_profile;
 
-    if (ap->connect_failed < MAX_CONNECTION_ATTEMPTS) {
-        const WIFINetworkProfile_t *network_profile = ap->associated_profile;
+    if (network_profile != NULL && ap->connect_failed < MAX_CONNECTION_ATTEMPTS) {
         WIFINetworkParams_t network_params;
         size_t tmp_len;
         WIFIReturnCode_t connected = eWiFiFailure;
@@ -542,7 +542,7 @@ static void wifi_conn_mgr(void *arg)
             if (poor_signal) {
                 for (i = 0; i < scan_list.ap_cache_count; i++) {
                     ap = scan_list.sorted_aps[i];
-                    if (ap != connected_ap && ap->connect_failed < MAX_CONNECTION_ATTEMPTS && ap->stable && ap->rssi > connected_ap->rssi + 10) {
+                    if (ap != connected_ap && ap->connect_failed < MAX_CONNECTION_ATTEMPTS && ap->associated_profile != NULL && ap->stable && ap->rssi > connected_ap->rssi + 10) {
                         rtos_printf("%s:%d is a better AP, connect to it\n", ap->associated_profile->cSSID, ap->channel);
                         perform_connection = 1;
                         initiate_disconnect = 1;
