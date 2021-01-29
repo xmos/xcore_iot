@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.14)
 # Paths
 #**********************
 
-set(MODEL_RUNNER_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/drivers/sw_services/model_runner")
+set(MODEL_RUNNER_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/model_runner")
 
 set(AI_TOOLS_ROOT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
 
@@ -142,4 +142,8 @@ set(MODEL_RUNNER_INCLUDES
   ${LIB_NN_INCLUDE_DIR}
 )
 
+list(REMOVE_DUPLICATES MODEL_RUNNER_SOURCES)
+list(REMOVE_DUPLICATES MODEL_RUNNER_INCLUDES)
 
+# suppress unused variables warnings for now
+set_source_files_properties(${MODEL_RUNNER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-unused-variable)

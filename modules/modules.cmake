@@ -11,6 +11,7 @@ set(LIB_LOGGING_DIR "${MODULES_DIR}/lib_logging")
 set(LIB_RANDOM_DIR "${MODULES_DIR}/lib_random")
 set(LIB_XS3_MATH_DIR "${MODULES_DIR}/lib_xs3_math")
 set(LEGACY_COMPAT_DIR "${MODULES_DIR}/legacy_compat")
+set(MODEL_RUNNER_DIR "${MODULES_DIR}/model_runner")
 
 #**********************
 # Options
@@ -21,6 +22,7 @@ option(USE_LIB_LOGGING "Enable to include lib_logging" TRUE)
 option(USE_LIB_RANDOM "Enable to include lib_random" TRUE)
 option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not used
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
+option(USE_MODEL_RUNNER "Enable to model runner" TRUE)
 
 #********************************
 # Gather multitile support sources
@@ -171,6 +173,16 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather model runner sources
+#********************************
+set(THIS_LIB MODEL_RUNNER)
+if(${USE_${THIS_LIB}})
+    include("${MODEL_RUNNER_DIR}/model_runner.cmake")
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
@@ -181,6 +193,7 @@ set(MODULES_SOURCES
     ${LIB_RANDOM_SOURCES}
     ${LIB_XS3_MATH_SOURCES}
     ${LEGACY_COMPAT_SOURCES}
+    ${MODEL_RUNNER_SOURCES}
 )
 
 set(MODULES_INCLUDES
@@ -191,6 +204,7 @@ set(MODULES_INCLUDES
     ${LIB_XS3_MATH_INCLUDES}
     ${LEGACY_COMPAT_INCLUDES}
     ${MODULES_DIR}
+    ${MODEL_RUNNER_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES MODULES_SOURCES)

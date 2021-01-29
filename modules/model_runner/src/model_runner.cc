@@ -1,6 +1,6 @@
 // Copyright (c) 2020, XMOS Ltd, All rights reserved
 
-#include "drivers/sw_services/model_runner/api/model_runner.h"
+#include "model_runner/api/model_runner.h"
 
 #include <ctime>
 extern "C" {

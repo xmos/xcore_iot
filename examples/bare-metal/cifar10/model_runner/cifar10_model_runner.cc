@@ -3,7 +3,7 @@
 
 #include "cifar10_model_runner.h"
 
-#include "drivers/sw_services/model_runner/api/model_runner_profiler.h"
+#include "model_runner/api/model_runner_profiler.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_ops.h"
 
