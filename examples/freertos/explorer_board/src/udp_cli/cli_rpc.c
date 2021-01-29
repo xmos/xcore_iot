@@ -7,7 +7,7 @@
 #include "FreeRTOS.h"
 
 #include "example_pipeline/example_pipeline.h"
-#include "drivers/rtos/rpc/api/rtos_rpc.h"
+#include "rtos/drivers/rpc/api/rtos_rpc.h"
 
 static rtos_intertile_address_t adr;
 static rtos_intertile_address_t* intertile_addr = &adr;

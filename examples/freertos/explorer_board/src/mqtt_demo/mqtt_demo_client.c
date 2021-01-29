@@ -13,7 +13,7 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "drivers/rtos/gpio/api/rtos_gpio.h"
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
 #include "tls_support.h"
 #include "MQTTClient.h"
 

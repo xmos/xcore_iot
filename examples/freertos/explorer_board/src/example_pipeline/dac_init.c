@@ -4,7 +4,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "drivers/rtos/i2c/api/rtos_i2c_master.h"
+#include "rtos/drivers/i2c/api/rtos_i2c_master.h"
 
 /* Header for the DAC chip registers and i2c address */
 #include "example_pipeline/DAC3204.h"

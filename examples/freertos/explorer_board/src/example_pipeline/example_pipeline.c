@@ -17,7 +17,7 @@
 
 #include "rtos_interrupt.h"
 #include "queue_to_tcp_stream.h"
-#include "drivers/rtos/rpc/api/rtos_rpc.h"
+#include "rtos/drivers/rpc/api/rtos_rpc.h"
 
 #define FRAME_NUM_CHANS 2
 

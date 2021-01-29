@@ -54,7 +54,7 @@ commands. */
 /* App includes */
 #include "udp_cli/CLI-commands.h"
 #include "example_pipeline/example_pipeline.h"
-#include "drivers/rtos/intertile/api/rtos_intertile.h"
+#include "rtos/drivers/intertile/api/rtos_intertile.h"
 
 #ifndef  configINCLUDE_TRACE_RELATED_CLI_COMMANDS
 	#define configINCLUDE_TRACE_RELATED_CLI_COMMANDS 0

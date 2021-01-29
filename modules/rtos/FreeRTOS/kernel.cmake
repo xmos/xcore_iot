@@ -6,27 +6,6 @@ cmake_minimum_required(VERSION 3.14)
 set(FREERTOS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Kernel")
 set(FREERTOS_SMP_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel")
 
-set(RTOS_SUPPORT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/rtos_support")
-
-include("$ENV{XMOS_AIOT_SDK_PATH}/modules/modules.cmake")
-#********************************
-# Gather RTOS support sources
-#********************************
-set(THIS_LIB RTOS_SUPPORT)
-set(${THIS_LIB}_FLAGS "-Os")
-
-file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${RTOS_SUPPORT_DIR}/src/*.c")
-
-set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
-
-set(${THIS_LIB}_INCLUDES
-    "${RTOS_SUPPORT_DIR}/api"
-    "${RTOS_SUPPORT_DIR}/src"
-)
-
-message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
-unset(THIS_LIB)
-
 #********************************
 # Gather FreeRTOS sources
 #********************************
@@ -122,14 +101,10 @@ unset(THIS_LIB)
 #**********************
 set(KERNEL_SOURCES
     ${FREERTOS_SOURCES}
-    ${RTOS_SUPPORT_SOURCES}
-    ${LIB_XASSERT_SOURCES}
 )
 
 set(KERNEL_INCLUDES
     ${FREERTOS_INCLUDES}
-    ${RTOS_SUPPORT_INCLUDES}
-    ${LIB_XASSERT_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES KERNEL_SOURCES)

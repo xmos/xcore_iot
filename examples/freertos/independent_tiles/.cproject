@@ -3,19 +3,15 @@
     	
     <storageModule moduleId="org.eclipse.cdt.core.settings">
         		
-        <cconfiguration id="com.xmos.cdt.toolchain.88660124">
+        <cconfiguration id="cdt.managedbuild.toolchain.gnu.cross.base.949206749">
             			
-            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.xmos.cdt.toolchain.88660124" moduleId="org.eclipse.cdt.core.settings" name="Default">
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.cross.base.949206749" moduleId="org.eclipse.cdt.core.settings" name="Default">
                 				
                 <externalSettings/>
                 				
                 <extensions>
                     					
-                    <extension id="com.xmos.cdt.core.XEBinaryParser" point="org.eclipse.cdt.core.BinaryParser"/>
-                    					
-                    <extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-                    					
-                    <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
                     					
                     <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
                     					
@@ -23,13 +19,9 @@
                     					
                     <extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
                     					
-                    <extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-                    					
-                    <extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-                    					
                     <extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
                     					
-                    <extension id="org.eclipse.cdt.autotools.core.ErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
                     				
                 </extensions>
                 			
@@ -37,33 +29,57 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactName="app_freertos_independent_tiles" buildProperties="" description="" id="com.xmos.cdt.toolchain.88660124" name="Default" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="org.eclipse.cdt.build.core.emptycfg">
+                <configuration buildProperties="" description="" id="cdt.managedbuild.toolchain.gnu.cross.base.949206749" name="Default" optionalBuildProperties="" parent="org.eclipse.cdt.build.core.emptycfg">
                     					
-                    <folderInfo id="com.xmos.cdt.toolchain.88660124.1354204302" name="/" resourcePath="">
+                    <folderInfo id="cdt.managedbuild.toolchain.gnu.cross.base.949206749.1411218017" name="/" resourcePath="">
                         						
-                        <toolChain id="com.xmos.cdt.toolchain.1276604324" name="com.xmos.cdt.toolchain">
+                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1387277319" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
                             							
-                            <targetPlatform archList="all" binaryParser="com.xmos.cdt.core.XEBinaryParser;org.eclipse.cdt.core.GNU_ELF" id="com.xmos.cdt.core.platform.1952507627" isAbstract="false" osList="linux,win32,macosx"/>
+                            <option id="cdt.managedbuild.option.gnu.cross.prefix.1853268749" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
                             							
-                            <builder arguments="-j" buildPath="${workspace_loc:/app_freertos_independent_tiles}" command="make" id="com.xmos.cdt.builder.base.1851841395" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false">
+                            <option id="cdt.managedbuild.option.gnu.cross.path.1337158480" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
+                            							
+                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.718668282" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+                            							
+                            <builder id="cdt.managedbuild.builder.gnu.cross.506338406" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.981760241" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
                                 								
-                                <outputEntries>
-                                    									
-                                    <entry flags="VALUE_WORKSPACE_PATH" kind="outputPath" name="bin"/>
-                                    								
-                                </outputEntries>
+                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2001471365" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
-                            </builder>
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1293824334" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.776865517" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1011907257" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.2122513955" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.669586626" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+                                    									
+                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+                                    									
+                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
+                                    								
+                                </inputType>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.959863372" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.1831051403" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1400811205" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+                                							
+                            </tool>
                             						
                         </toolChain>
                         					
                     </folderInfo>
-                    					
-                    <sourceEntries>
-                        						
-                        <entry excluding=".build*" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-                        					
-                    </sourceEntries>
                     				
                 </configuration>
                 			
@@ -77,7 +93,7 @@
     	
     <storageModule moduleId="cdtBuildSystem" version="4.0.0">
         		
-        <project id="app_freertos_independent_tiles.null.874294591" name="app_freertos_independent_tiles"/>
+        <project id="app_bitstreamless.null.735028534" name="app_bitstreamless"/>
         	
     </storageModule>
     	
@@ -89,56 +105,8 @@
     	
     <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
     	
-    <storageModule moduleId="refreshScope" versionNumber="2">
-        		
-        <configuration configurationName="Default">
-            			
-            <resource resourceType="PROJECT" workspacePath="/app_freertos_independent_tiles"/>
-            		
-        </configuration>
-        	
-    </storageModule>
+    <storageModule moduleId="refreshScope"/>
     	
-    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
-    	
-    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
-        		
-        <buildTargets>
-            			
-            <target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                				
-                <buildCommand>make</buildCommand>
-                				
-                <buildArguments>-j</buildArguments>
-                				
-                <buildTarget>all</buildTarget>
-                				
-                <stopOnError>true</stopOnError>
-                				
-                <useDefaultCommand>true</useDefaultCommand>
-                				
-                <runAllBuilders>true</runAllBuilders>
-                			
-            </target>
-            			
-            <target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-                				
-                <buildCommand>make</buildCommand>
-                				
-                <buildArguments>-j</buildArguments>
-                				
-                <buildTarget>clean</buildTarget>
-                				
-                <stopOnError>true</stopOnError>
-                				
-                <useDefaultCommand>true</useDefaultCommand>
-                				
-                <runAllBuilders>true</runAllBuilders>
-                			
-            </target>
-            		
-        </buildTargets>
-        	
-    </storageModule>
+    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
     
 </cproject>

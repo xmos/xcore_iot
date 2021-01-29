@@ -38,23 +38,28 @@ set(MODULES_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
 #********************************
 # Gather various sources
 #********************************
-include("${MODULES_DIR}/drivers/drivers.cmake")
-include("$ENV{XMOS_AIOT_SDK_PATH}/modules/modules.cmake")
+include("${MODULES_DIR}/hil/hil.cmake")
+include("${MODULES_DIR}/rtos/rtos.cmake")
+include("${MODULES_DIR}/thirdparty/thirdparty.cmake")
+include("${MODULES_DIR}/modules.cmake")
 
 #**********************
 # set user variables
 #**********************
 set(XMOS_RTOS_PLATFORM_SOURCES
-    ${DRIVERS_SOURCES}
+    ${HIL_SOURCES}
+    ${RTOS_SOURCES}
     ${MODULES_SOURCES}
-    ${DRIVERS_NETWORKING_SOURCES}
+    ${RTOS_NETWORKING_SOURCES}
+    ${THIRDPARTY_SOURCES}
 )
 
 set(XMOS_RTOS_PLATFORM_INCLUDES
-    ${DRIVERS_INCLUDES}
+    ${HIL_INCLUDES}
+    ${RTOS_INCLUDES}
     ${MODULES_INCLUDES}
-    ${MODULES_DIR}
-    ${DRIVERS_NETWORKING_INCLUDES}
+    ${RTOS_NETWORKING_INCLUDES}
+    ${THIRDPARTY_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES XMOS_RTOS_PLATFORM_SOURCES)

@@ -30,7 +30,7 @@
 
 void vStartUDPCommandInterpreterTask( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPriority );
 
-#include "drivers/rtos/intertile/api/rtos_intertile.h"
+#include "rtos/drivers/intertile/api/rtos_intertile.h"
 
 void vInitializeUDPIntertile( rtos_intertile_t *host_intertile_ctx, unsigned intertile_port );
 

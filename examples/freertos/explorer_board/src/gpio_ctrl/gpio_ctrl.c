@@ -10,7 +10,7 @@
 #include "timers.h"
 
 /* Library headers */
-#include "drivers/rtos/gpio/api/rtos_gpio.h"
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
 
 /* App headers */
 #include "app_conf.h"
