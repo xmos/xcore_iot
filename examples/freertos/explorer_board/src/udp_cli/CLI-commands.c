@@ -52,13 +52,22 @@ commands. */
 #include "FreeRTOS_Sockets.h"
 
 /* App includes */
-#include "CLI-commands.h"
-#include "audio_pipeline.h"
+#include "udp_cli/CLI-commands.h"
+#include "example_pipeline/example_pipeline.h"
+#include "rtos/drivers/intertile/api/rtos_intertile.h"
 
 #ifndef  configINCLUDE_TRACE_RELATED_CLI_COMMANDS
 	#define configINCLUDE_TRACE_RELATED_CLI_COMMANDS 0
 #endif
 
+static rtos_intertile_t *intertile_ctx = NULL;
+static unsigned intertile_port = 0;
+
+void vInitializeUDPIntertile( rtos_intertile_t *host_intertile_ctx, unsigned port )
+{
+    intertile_ctx = host_intertile_ctx;
+    intertile_port = port;
+}
 
 /*
  * Implements the run-time-stats command.
@@ -89,16 +98,6 @@ portCLI_CALLBACK_FUNCTION_PROTO(prvGetMicGain, pcWriteBuffer, xWriteBufferLen , 
  * Implements the set mic gain command.
  */
 portCLI_CALLBACK_FUNCTION_PROTO(prvSetMicGain, pcWriteBuffer, xWriteBufferLen , pcCommandString);
-
-/*
- * Implements the get audio pipeline stage 2 input queue command.
- */
-portCLI_CALLBACK_FUNCTION_PROTO(prvGetAP2Input, pcWriteBuffer, xWriteBufferLen , pcCommandString);
-
-/*
- * Implements the set audio pipeline stage 2 input queue command.
- */
-portCLI_CALLBACK_FUNCTION_PROTO(prvSetAP2Input, pcWriteBuffer, xWriteBufferLen , pcCommandString);
 
 /*
  * Defines a command that prints out IP address information.
@@ -144,22 +143,6 @@ static const CLI_Command_Definition_t xGetMicGain =
     "mic-gain",
     "mic-gain:\r\n Gets the current mic gain value\r\n\r\n",
     prvGetMicGain,
-    0
-};
-
-static const CLI_Command_Definition_t xSetStage2Input =
-{
-    "ap2-input-set",
-    "ap2-input-set <param1>:\r\n Sets stage 2 input to given value. 0=input queue 1=tcp queue\r\n\r\n",
-    prvSetAP2Input,
-    1
-};
-
-static const CLI_Command_Definition_t xGetStage2Input =
-{
-    "ap2-input-get",
-    "ap2-input-get:\r\n Gets the current stage 2 input value\r\n\r\n",
-	prvGetAP2Input,
     0
 };
 
@@ -256,8 +239,6 @@ void vRegisterCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xIPConfig );
     FreeRTOS_CLIRegisterCommand( &xGetMicGain );
     FreeRTOS_CLIRegisterCommand( &xSetMicGain );
-    FreeRTOS_CLIRegisterCommand( &xGetStage2Input );
-    FreeRTOS_CLIRegisterCommand( &xSetStage2Input );
 
 	#if ipconfigSUPPORT_OUTGOING_PINGS == 1
 	{
@@ -288,8 +269,8 @@ BaseType_t xSpacePadding;
 	pcWriteBuffer += strlen( pcWriteBuffer );
 
 	/* Pad the string "task" with however many bytes necessary to make it the
-	length of a task name.  Minus three for the null terminator and half the 
-	number of characters in	"Task" so the column lines up with the centre of 
+	length of a task name.  Minus three for the null terminator and half the
+	number of characters in	"Task" so the column lines up with the centre of
 	the heading. */
 	for( xSpacePadding = strlen( "Task" ); xSpacePadding < ( configMAX_TASK_NAME_LEN - 3 ); xSpacePadding++ )
 	{
@@ -326,8 +307,8 @@ BaseType_t xSpacePadding;
 	pcWriteBuffer += strlen( pcWriteBuffer );
 
 	/* Pad the string "task" with however many bytes necessary to make it the
-	length of a task name.  Minus three for the null terminator and half the 
-	number of characters in	"Task" so the column lines up with the centre of 
+	length of a task name.  Minus three for the null terminator and half the
+	number of characters in	"Task" so the column lines up with the centre of
 	the heading. */
 	for( xSpacePadding = strlen( "Task" ); xSpacePadding < ( configMAX_TASK_NAME_LEN - 3 ); xSpacePadding++ )
 	{
@@ -421,6 +402,7 @@ const char *pcParameter;
 BaseType_t xParameterStringLength, xReturn;
 static BaseType_t lParameterNumber = 0;
 
+int32_t val;
     /* Remove compile time warnings about unused parameters, and check the
     write buffer is not NULL.  NOTE - for simplicity, this example assumes the
     write buffer length is adequate, so does not check for buffer overflows. */
@@ -455,7 +437,11 @@ static BaseType_t lParameterNumber = 0;
         /* Sanity check something was returned. */
         configASSERT( pcParameter );
 
-        audiopipeline_set_stage1_gain(atoi(pcParameter));
+        val = SET_GAIN_VAL;
+        rtos_intertile_tx(intertile_ctx, intertile_port, &val, sizeof(int32_t));
+
+        val = atoi(pcParameter);
+        rtos_intertile_tx(intertile_ctx, intertile_port, &val, sizeof(int32_t));
 
         /* Return the parameter string. */
         memset( pcWriteBuffer, 0x00, xWriteBufferLen );
@@ -463,12 +449,11 @@ static BaseType_t lParameterNumber = 0;
         strncat( pcWriteBuffer, pcParameter, xParameterStringLength );
         strncat( pcWriteBuffer, "\r\n", strlen( "\r\n" ) );
 
-        if( lParameterNumber == 1L )
-        {
-            /* If this is the only parameters */
-            xReturn = pdFALSE;
-            lParameterNumber = 0L;
-        }
+    	/* No more data to return. */
+    	xReturn = pdFALSE;
+
+    	/* Start over the next time this command is executed. */
+    	lParameterNumber = 0;
     }
 
     return xReturn;
@@ -480,6 +465,10 @@ portCLI_CALLBACK_FUNCTION( prvGetMicGain, pcWriteBuffer, xWriteBufferLen, pcComm
 BaseType_t xReturn;
 BaseType_t xCurQueue;
 
+int msg_length;
+int32_t *msg;
+int32_t val;
+
     /* Remove compile time warnings about unused parameters, and check the
     write buffer is not NULL.  NOTE - for simplicity, this example assumes the
     write buffer length is adequate, so does not check for buffer overflows. */
@@ -487,90 +476,14 @@ BaseType_t xCurQueue;
     ( void ) xWriteBufferLen;
     configASSERT( pcWriteBuffer );
 
-    xCurQueue = audiopipeline_get_stage1_gain();
+    val = GET_GAIN_VAL;
+    rtos_intertile_tx(intertile_ctx, intertile_port, &val, sizeof(int32_t));
+
+    msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **)&msg, portMAX_DELAY);
+
+    xCurQueue = ( msg_length == sizeof(int32_t) ) ? *msg : 0;
 
     sprintf( pcWriteBuffer, "\r\nMic Gain: %d", (int)xCurQueue );
-    xReturn = pdFALSE;
-
-    return xReturn;
-}
-/*-----------------------------------------------------------*/
-
-portCLI_CALLBACK_FUNCTION_PROTO(prvSetAP2Input, pcWriteBuffer, xWriteBufferLen , pcCommandString)
-{
-const char *pcParameter;
-BaseType_t xParameterStringLength, xReturn;
-static BaseType_t lParameterNumber = 0;
-
-    /* Remove compile time warnings about unused parameters, and check the
-    write buffer is not NULL.  NOTE - for simplicity, this example assumes the
-    write buffer length is adequate, so does not check for buffer overflows. */
-    ( void ) pcCommandString;
-    ( void ) xWriteBufferLen;
-    configASSERT( pcWriteBuffer );
-
-    if( lParameterNumber == 0 )
-    {
-        /* The first time the function is called after the command has been
-        entered just a header string is returned. */
-        sprintf( pcWriteBuffer, "Set input to:\r\n" );
-
-        /* Next time the function is called the first parameter will be echoed
-        back. */
-        lParameterNumber = 1L;
-
-        /* There is more data to be returned as no parameters have been echoed
-        back yet. */
-        xReturn = pdPASS;
-    }
-    else
-    {
-        /* Obtain the parameter string. */
-        pcParameter = FreeRTOS_CLIGetParameter
-                        (
-                            pcCommandString,        /* The command string itself. */
-                            lParameterNumber,       /* Return the next parameter. */
-                            &xParameterStringLength /* Store the parameter string length. */
-                        );
-
-        /* Sanity check something was returned. */
-        configASSERT( pcParameter );
-
-        audiopipeline_set_stage2_input(atoi(pcParameter));
-
-        /* Return the parameter string. */
-        memset( pcWriteBuffer, 0x00, xWriteBufferLen );
-        sprintf( pcWriteBuffer, "%d: ", ( int ) lParameterNumber );
-        strncat( pcWriteBuffer, pcParameter, xParameterStringLength );
-        strncat( pcWriteBuffer, "\r\n", strlen( "\r\n" ) );
-
-        if( lParameterNumber == 1L )
-        {
-            /* If this is the only parameters */
-            xReturn = pdFALSE;
-            lParameterNumber = 0L;
-        }
-    }
-
-    return xReturn;
-}
-/*-----------------------------------------------------------*/
-
-portCLI_CALLBACK_FUNCTION_PROTO(prvGetAP2Input, pcWriteBuffer, xWriteBufferLen , pcCommandString)
-{
-BaseType_t xReturn;
-BaseType_t xCurrentGain;
-
-    /* Remove compile time warnings about unused parameters, and check the
-    write buffer is not NULL.  NOTE - for simplicity, this example assumes the
-    write buffer length is adequate, so does not check for buffer overflows. */
-    ( void ) pcCommandString;
-    ( void ) xWriteBufferLen;
-    configASSERT( pcWriteBuffer );
-
-    xCurrentGain = audiopipeline_get_stage2_input();
-
-    sprintf( pcWriteBuffer, "\r\nInput Queue: %d", (int)xCurrentGain );
     xReturn = pdFALSE;
 
     return xReturn;

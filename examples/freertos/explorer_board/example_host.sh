@@ -6,6 +6,7 @@ function trace_help() {
     echo "--playto / -p IP FILENAME : Send raw signed int 32, 16kHz audio"
     echo "--udpcli  / -u IP : Connect to CLI"
     echo "--thruput / -t IP : Run the throughput test"
+    echo "--http / -ht IP : Send a generic GET request"
     echo "--tlsechosrv / -e : Run an echo server with TLS"
     echo "--tlsechocli / -c : Connect to an echo server with TLS"
     return
@@ -31,12 +32,15 @@ then
     elif [ "$1" == "--tlsechocli" ] || [ "$1" == "-c" ]
     then
         ncat $2 7777 --ssl --ssl-cert ./filesystem_support/board_server_certs/client.pem --ssl-key ./filesystem_support/board_server_certs/client.key
+    elif [ "$1" == "--http" ] || [ "$1" == "-ht" ]
+    then
+        echo "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc $2 80
     fi
 elif [ $# == 3 ]
 then
     if [ "$1" == "--ncaplay" ] || [ "$1" == "-n" ]
     then
-        ncat --recv-only $2 54321 | aplay --format=S32_LE --rate=$3 --file-type=raw --buffer-size=14000
+        ncat --recv-only $2 54321 | aplay  --format=S32_LE --rate=$3 --file-type=raw --buffer-size=14000
     elif [ "$1" == "--playto" ] || [ "$1" == "-p" ]
     then
         cat $3 | ncat $2 12345

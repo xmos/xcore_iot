@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -10,7 +10,6 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "soc.h"
 #include "tls_support.h"
 #include "mbedtls/ssl.h"
 #include "mbedtls/entropy.h"
@@ -20,9 +19,6 @@
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/debug.h"
-
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
 
 /* App headers */
 #include "tls_echo_demo.h"
@@ -69,8 +65,7 @@ static void tls_echo_receiver( void *arg )
 	Socket_t socket;
 	int tmpval;
 
-    struct freertos_sockaddr xClient, xBindAddress;
-    socklen_t xSize = sizeof( xClient );
+    struct freertos_sockaddr xBindAddress;
 
     /* Set the listening port */
     xBindAddress.sin_addr = FreeRTOS_inet_addr_quick( appconfECHO_IP_ADDR_OCTET_0,
@@ -106,7 +101,6 @@ static void tls_echo_receiver( void *arg )
 	mbedtls_debug_set_threshold(1);
 #endif
 
-	// todo test MBEDTLS_SSL_IS_CLIENT MBEDTLS_SSL_IS_SERVER
 	if( ( tmpval = mbedtls_ssl_config_defaults( &ssl_conf,
 												MBEDTLS_SSL_IS_CLIENT,
 												MBEDTLS_SSL_TRANSPORT_STREAM,
@@ -118,6 +112,7 @@ static void tls_echo_receiver( void *arg )
 		mbedtls_x509_crt_free( &cert );
 		mbedtls_pk_free( &prvkey );
 		mbedtls_ssl_config_free( &ssl_conf );
+    	vPortFree( handle );
 	    vTaskDelete( NULL );
 	}
 
@@ -126,7 +121,7 @@ static void tls_echo_receiver( void *arg )
 	mbedtls_ssl_conf_rng( &ssl_conf, mbedtls_ctr_drbg_random, drbg_ptr );
 
 	unsigned char buf[] = "HELLO WORLD\n";
-	unsigned int len = strlen( buf );
+	unsigned int len = strlen( (char*)buf );
 
 	unsigned char *recv_buf;
 	unsigned int recv_len = len;
@@ -138,6 +133,7 @@ static void tls_echo_receiver( void *arg )
 		mbedtls_x509_crt_free( &cert );
 		mbedtls_pk_free( &prvkey );
 		mbedtls_ssl_config_free( &ssl_conf );
+    	vPortFree( handle );
 	    vTaskDelete( NULL );
 	}
 
@@ -207,7 +203,7 @@ static void tls_echo_receiver( void *arg )
 					int exit = 0;
 					do
 					{
-						while( ( tmpval = mbedtls_ssl_write( &ssl_ctx, &buf, len ) ) <= 0 )
+						while( ( tmpval = mbedtls_ssl_write( &ssl_ctx, (unsigned char *)&buf, len ) ) <= 0 )
 						{
 							if( tmpval != MBEDTLS_ERR_SSL_WANT_READ && tmpval != MBEDTLS_ERR_SSL_WANT_WRITE )
 							{
@@ -273,6 +269,7 @@ static void tls_echo_receiver( void *arg )
 	mbedtls_ssl_config_free( &ssl_conf );
 
 	vPortFree( recv_buf );
+	vPortFree( handle );
 
     vTaskDelete( NULL );
 }
@@ -304,7 +301,7 @@ static void tls_echo( void *arg )
     handle->rx_timeout = pdMS_TO_TICKS( 5000 );
     handle->tx_timeout = pdMS_TO_TICKS( 5000 );
 
-	xTaskCreate( tls_echo_receiver, "echo", 950, ( void * ) handle, uxTaskPriorityGet( NULL ), NULL );
+	xTaskCreate( tls_echo_receiver, "echo", 950+1000, ( void * ) handle, uxTaskPriorityGet( NULL ), NULL );
 
 #if 0
     for( ;; )

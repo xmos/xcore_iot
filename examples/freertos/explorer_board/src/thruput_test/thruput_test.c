@@ -12,7 +12,6 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "soc.h"
 
 /* App headers */
 #include "thruput_test.h"
@@ -156,11 +155,21 @@ static void vthruput_test( void *arg )
         xConnectedSocket = FreeRTOS_accept( xListeningSocket, &xClient, &xSize );
         configASSERT( xConnectedSocket != FREERTOS_INVALID_SOCKET );
 
-        xTaskCreate( thruput_test_sender, "thruput_test_sender", portTASK_STACK_DEPTH(thruput_test_sender), ( void * ) xConnectedSocket, uxTaskPriorityGet( NULL ), NULL );
+        xTaskCreate((TaskFunction_t) thruput_test_sender,
+                    "thruput_test_sender",
+                    portTASK_STACK_DEPTH(thruput_test_sender),
+                    (void*) xConnectedSocket,
+                    uxTaskPriorityGet( NULL ),
+                    NULL );
     }
 }
 
 void thruput_test_create( UBaseType_t priority )
 {
-    xTaskCreate( vthruput_test, "thruput_test", portTASK_STACK_DEPTH(vthruput_test), NULL, priority, NULL );
+    xTaskCreate((TaskFunction_t)vthruput_test,
+                "thruput_test",
+                portTASK_STACK_DEPTH(vthruput_test),
+                NULL,
+                priority,
+                NULL );
 }

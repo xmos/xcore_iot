@@ -1,4 +1,4 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright (c) 2019-2021, XMOS Ltd, All rights reserved
 
 #ifndef CLI_COMMANDS_H_
 #define CLI_COMMANDS_H_

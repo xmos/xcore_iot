@@ -1,4 +1,7 @@
-// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
+
+/* System headers */
+#include <platform.h>
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -7,29 +10,23 @@
 #include "timers.h"
 
 /* Library headers */
-#include "soc.h"
-#include "rtos_support.h"
-
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
-#include "gpio_driver.h"
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
 
 /* App headers */
 #include "app_conf.h"
-#include "audio_pipeline.h"
+#include "example_pipeline/example_pipeline.h"
 
-static QueueHandle_t gpio_event_q;
-static TaskHandle_t gpio_handler_task;
-static TimerHandle_t volume_up_timer;
-static TimerHandle_t volume_down_timer;
-
-GPIO_ISR_CALLBACK_FUNCTION( gpio_dev_callback, device, source_id )
+RTOS_GPIO_ISR_CALLBACK_ATTR
+static void button_callback(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_t port_id, uint32_t value)
 {
+    TaskHandle_t task = app_data;
     BaseType_t xYieldRequired = pdFALSE;
 
-    xTaskNotifyFromISR( gpio_handler_task, source_id, eSetBits, &xYieldRequired );
+    value = (~value) & 0x3;
 
-    return xYieldRequired;
+    xTaskNotifyFromISR(task, value, eSetValueWithOverwrite, &xYieldRequired);
+
+    portYIELD_FROM_ISR(xYieldRequired);
 }
 
 static void volume_up( void )
@@ -41,6 +38,7 @@ static void volume_up( void )
         gain++;
     }
     audiopipeline_set_stage1_gain( gain );
+    rtos_printf("volume up\n");
 }
 
 static void volume_down( void )
@@ -52,6 +50,7 @@ static void volume_down( void )
         gain--;
     }
     audiopipeline_set_stage1_gain( gain );
+    rtos_printf("volume down\n");
 }
 
 void vVolumeUpCallback( TimerHandle_t pxTimer )
@@ -64,15 +63,27 @@ void vVolumeDownCallback( TimerHandle_t pxTimer )
     volume_down();
 }
 
-void gpio_ctrl_t0(void *arg)
+void gpio_ctrl(rtos_gpio_t *gpio_ctx)
 {
-    soc_peripheral_t dev = arg;
-    uint32_t mabs_buttons;
-    uint32_t buttonA, buttonB, buttonC, buttonD;
     uint32_t status;
-    BaseType_t gain = 0;
-    BaseType_t saved_gain = 0;
+    uint32_t buttons_val;
+    uint32_t buttonA;
+    uint32_t buttonB;
+    TimerHandle_t volume_up_timer;
+    TimerHandle_t volume_down_timer;
 
+    const rtos_gpio_port_id_t button_port = rtos_gpio_port(PORT_BUTTONS);
+    const rtos_gpio_port_id_t led_port = rtos_gpio_port(PORT_LEDS);
+    rtos_printf("enable led port %d\n", button_port);
+    rtos_gpio_port_enable(gpio_ctx, led_port);
+    rtos_printf("enable button port %d\n", led_port);
+    rtos_gpio_port_enable(gpio_ctx, button_port);
+
+    rtos_printf("enable button isr\n");
+    rtos_gpio_isr_callback_set(gpio_ctx, button_port, button_callback, xTaskGetCurrentTaskHandle());
+    rtos_gpio_interrupt_enable(gpio_ctx, button_port);
+
+    rtos_printf("enable button timers\n");
     volume_up_timer = xTimerCreate(
                             "vol_up",
                             pdMS_TO_TICKS(appconfGPIO_VOLUME_RAPID_FIRE_MS),
@@ -87,16 +98,6 @@ void gpio_ctrl_t0(void *arg)
                             NULL,
                             vVolumeDownCallback);
 
-    /* Initialize LED outputs */
-    gpio_init(dev, gpio_4C);
-
-    /* Initialize button inputs */
-    gpio_init(dev, gpio_4D);	// Buttons on 0 and 1
-
-    /* Enable interrupts on buttons */
-    gpio_irq_setup_callback(dev, gpio_4D, gpio_dev_callback);
-    gpio_irq_enable(dev, gpio_4D);
-
     for (;;) {
         xTaskNotifyWait(
                 0x00000000UL,    /* Don't clear notification bits on entry */
@@ -104,21 +105,19 @@ void gpio_ctrl_t0(void *arg)
                 &status,         /* Pass out notification value into status */
                 portMAX_DELAY ); /* Wait indefinitely until next notification */
 
-        mabs_buttons = gpio_read( dev, status );
-        buttonA = ( mabs_buttons >> 0 ) & 0x01;
-        buttonB = ( mabs_buttons >> 1 ) & 0x01;
+        buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
+        buttonA = ( buttons_val >> 0 ) & 0x01;
+        buttonB = ( buttons_val >> 1 ) & 0x01;
 
         /* Turn on LEDS based on buttons */
-        gpio_write_pin(dev, gpio_4C, 0, buttonA);
-        gpio_write_pin(dev, gpio_4C, 1, buttonA);
-        gpio_write_pin(dev, gpio_4C, 2, buttonB);
-        gpio_write_pin(dev, gpio_4C, 3, buttonB);
+        rtos_gpio_port_out(gpio_ctx, led_port, buttons_val);
 
         /* Adjust volume based on LEDs */
         if( buttonA == 0 )   /* Up */
         {
             xTimerStart( volume_up_timer, 0 );
             volume_up();
+            rtos_printf("volume up start\n");
         }
         else
         {
@@ -129,6 +128,7 @@ void gpio_ctrl_t0(void *arg)
         {
             xTimerStart( volume_down_timer, 0 );
             volume_down();
+            rtos_printf("volume down start\n");
         }
         else
         {
@@ -137,15 +137,12 @@ void gpio_ctrl_t0(void *arg)
     }
 }
 
-void gpio_ctrl_create( UBaseType_t priority )
+void gpio_ctrl_create(rtos_gpio_t *gpio_ctx, UBaseType_t priority)
 {
-    soc_peripheral_t dev;
-
-    gpio_event_q = xQueueCreate(2, sizeof(void *));
-
-    dev = gpio_driver_init(
-            BITSTREAM_GPIO_DEVICE_A,        /* Initializing GPIO device A */
-            0);                             /* This device's interrupts should happen on core 0 */
-
-    xTaskCreate(gpio_ctrl_t0, "t0_gpio_ctrl", portTASK_STACK_DEPTH(gpio_ctrl_t0), dev, priority, &gpio_handler_task);
+    xTaskCreate((TaskFunction_t) gpio_ctrl,
+                "gpio_ctrl",
+                portTASK_STACK_DEPTH(gpio_ctrl),
+                gpio_ctx,
+                priority,
+                NULL);
 }

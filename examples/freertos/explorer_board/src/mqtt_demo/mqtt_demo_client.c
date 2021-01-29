@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
 
 #define DEBUG_UNIT MQTT_DEMO_CLIENT
 #include "app_conf.h"
@@ -13,21 +13,21 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "soc.h"
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
 #include "tls_support.h"
 #include "MQTTClient.h"
-
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
-#include "gpio_driver.h"
 
 /* App headers */
 #include "mqtt_demo_client.h"
 
-
-#define MQTT_DEMO_CONNECT_STACK_SIZE 		800
+#define MQTT_DEMO_CONNECT_STACK_SIZE 		1500
+#define MQTT_DEMO_CONNECTION_STACK_SIZE 	1200
 
 const char* HOSTNAME = "localhost";
+
+static rtos_gpio_port_id_t led_port = 0;
+static rtos_gpio_t* gpio = NULL;
+static uint32_t val = 0;
 
 typedef struct net_conn_args
 {
@@ -36,17 +36,14 @@ typedef struct net_conn_args
 	TaskHandle_t connection_task;
 } net_conn_args_t;
 
-static soc_peripheral_t dev;
-static uint32_t val;
-
 void messageArrived(MessageData* data)
 {
-	val ^= 1;
-	gpio_write_pin(dev, gpio_4C, 0, val);
+    val ^= 1;
+    rtos_gpio_port_out(gpio, led_port, val);
+
 	debug_printf("Message arrived on topic %.*s: %.*s\n", data->topicName->lenstring.len, data->topicName->lenstring.data,
 		data->message->payloadlen, data->message->payload);
 }
-
 
 static void mqtt_handler( void* arg )
 {
@@ -55,10 +52,7 @@ static void mqtt_handler( void* arg )
 	Network network;
 	unsigned char sendbuf[1024], readbuf[1024];
 	int retval = 0;
-	int	count = 0;
 	MQTTPacket_connectData connectData = MQTTPacket_connectData_initializer;
-	dev = bitstream_gpio_devices[ BITSTREAM_GPIO_DEVICE_A ];
-	val = 0;
 
 	TaskHandle_t caller = args->connection_task;
 
@@ -128,11 +122,11 @@ static void mqtt_demo_connect( void* arg )
 {
 	( void ) arg;
 	TaskHandle_t handler_task;
-	int retval = 0;
 	int tmpval = 0;
 	struct freertos_sockaddr sAddr;
 	int recv_timeout = pdMS_TO_TICKS( 5000 );
 	int send_timeout = pdMS_TO_TICKS( 5000 );
+	int ret;
 
 	/* TODO make these args */
 	sAddr.sin_port = FreeRTOS_htons( appconfMQTT_PORT );
@@ -147,6 +141,11 @@ static void mqtt_demo_connect( void* arg )
 	mbedtls_x509_crt* cert = pvPortMalloc( sizeof( mbedtls_x509_crt ) );
 	mbedtls_pk_context* prvkey = pvPortMalloc( sizeof( mbedtls_pk_context ) );
 	mbedtls_x509_crt* ca = pvPortMalloc( sizeof( mbedtls_x509_crt ) );
+
+	while( FreeRTOS_IsNetworkUp() == pdFALSE )
+	{
+		vTaskDelay( pdMS_TO_TICKS( 100 ) );
+	}
 
 	while( tls_platform_ready() == 0 )
 	{
@@ -166,17 +165,18 @@ static void mqtt_demo_connect( void* arg )
 
 	mbedtls_ssl_config_init( ssl_conf );
 
-	if( mbedtls_ssl_config_defaults( ssl_conf,
+	if( (ret = mbedtls_ssl_config_defaults( ssl_conf,
 									 MBEDTLS_SSL_IS_CLIENT,
 									 MBEDTLS_SSL_TRANSPORT_STREAM,
-									 MBEDTLS_SSL_PRESET_DEFAULT )
-			!= 0 )
+									 MBEDTLS_SSL_PRESET_DEFAULT )) != 0 )
 	{
+		rtos_printf("mbedtls_ssl_config_defaults() -> %04x\n", -ret);
 		configASSERT(0); /* Failed to initialize ssl conf with defaults */
 	}
 
-	if( mbedtls_ssl_conf_own_cert( ssl_conf, cert, prvkey ) != 0 )
+	if( (ret = mbedtls_ssl_conf_own_cert( ssl_conf, cert, prvkey )) != 0 )
 	{
+		rtos_printf("mbedtls_ssl_conf_own_cert() -> %04x\n", -ret);
 		configASSERT(0); /* Failed to initialize ssl conf with device cert and key */
 	}
 
@@ -195,13 +195,15 @@ static void mqtt_demo_connect( void* arg )
 	{
 		mbedtls_ssl_init( ssl_ctx );
 
-		if( mbedtls_ssl_setup( ssl_ctx, ssl_conf ) != 0 )
+		if( (ret = mbedtls_ssl_setup( ssl_ctx, ssl_conf )) != 0 )
 		{
+			rtos_printf("mbedtls_ssl_setup() -> %04x\n", -ret);
 			configASSERT(0); /* Failed to initialize ssl context */
 		}
 
-		if( ( mbedtls_ssl_set_hostname( ssl_ctx, HOSTNAME ) ) != 0 )
+		if( (ret = mbedtls_ssl_set_hostname( ssl_ctx, HOSTNAME )) != 0 )
 		{
+			rtos_printf("mbedtls_ssl_set_hostname() -> %04x\n", -ret);
 			configASSERT( 0 ); /* set hostname failed */
 		}
 
@@ -217,6 +219,9 @@ static void mqtt_demo_connect( void* arg )
 								  FREERTOS_IPPROTO_TCP );
 
 		/* Check the socket was created. */
+		if (socket == FREERTOS_INVALID_SOCKET) {
+			rtos_printf("FREERTOS_INVALID_SOCKET\n");
+		}
 		configASSERT( socket != FREERTOS_INVALID_SOCKET );
 
 		/* Set time outs */
@@ -259,7 +264,14 @@ static void mqtt_demo_connect( void* arg )
 				handler_args->ssl_ctx = ssl_ctx;
 				handler_args->connection_task = xTaskGetCurrentTaskHandle();
 
-				xTaskCreate( mqtt_handler, "mqtt", ( 1200 ), ( void * ) handler_args, uxTaskPriorityGet( NULL ) + 1, &handler_task );
+				xTaskCreate( mqtt_handler,
+                    "mqtt",
+                    ( MQTT_DEMO_CONNECTION_STACK_SIZE ),
+                    ( void * ) handler_args,
+                    (uxTaskPriorityGet( NULL ) >= ( configMAX_PRIORITIES - 1 ) )
+                            ? ( configMAX_PRIORITIES - 1)
+                            : ( uxTaskPriorityGet( NULL ) + 1 ),
+                    &handler_task );
 
 				vTaskSuspend( NULL );
 				vPortFree( handler_args );
@@ -290,7 +302,15 @@ static void mqtt_demo_connect( void* arg )
 	vPortFree( ca );
 }
 
-void mqtt_demo_create( UBaseType_t priority )
+void mqtt_demo_create( rtos_gpio_t *gpio_ctx, UBaseType_t priority )
 {
-    xTaskCreate( mqtt_demo_connect, "mqtt_demo", MQTT_DEMO_CONNECT_STACK_SIZE, ( void * ) NULL, priority, NULL );
+    if( gpio_ctx != NULL )
+    {
+        rtos_gpio_port_enable(gpio_ctx, led_port);
+        gpio = gpio_ctx;
+
+        led_port = rtos_gpio_port(PORT_LEDS);
+
+        xTaskCreate( mqtt_demo_connect, "mqtt_demo", MQTT_DEMO_CONNECT_STACK_SIZE, ( void * ) NULL, priority, NULL );
+    }
 }

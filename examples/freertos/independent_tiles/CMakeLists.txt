@@ -5,55 +5,74 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
+## Specify configuration
+set(USE_WIFI_MANAGER TRUE)
+set(USE_DHCPD TRUE)
+set(USE_FATFS TRUE)
+
 ## Import XMOS configurations
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_utils.cmake")
-set(XMOS_APP_MODULES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(independent_tiles)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
-enable_language(CXX XC C ASM)
+enable_language(XC CXX C ASM)
 
-## Set XMOS application variables
 set(APP_COMPILER_FLAGS
-        "-Os"
-        "-g"
-        "-report"
-        "-fxscope"
-        "-Wxcore-fptrgroup"
-        "-DDEBUG_PRINT_ENABLE=1"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
-set(APP_XC_SRCS
-        ""
-    )
-set(APP_CXX_SRCS
-        ""
+    "-Os"
+    "-g"
+    "-report"
+    "-fxscope"
+    "-lquadspi"
+    "-mcmodel=large"
+    "-Wno-xcore-fptrgroup"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
 )
-set(APP_C_SRCS
-        "src/main.c"
-        "src/intertile_ctrl/intertile_ctrl.c"
-        "src/rpc/rpc_test.c"
-    )
-set(APP_ASM_SRCS
-        ""
-    )
+
+set(APP_SOURCES
+    "src/main.c"
+    "src/board_init.c"
+
+    "src/audio_pipeline/audio_pipeline.c"
+    "src/example_pipeline/dac_init.c"
+    "src/example_pipeline/example_pipeline.c"
+
+    "src/intertile_stress_test/intertile_stress_test.c"
+    "src/rpc_test/rpc_test.c"
+    "src/gpio_test/gpio_test.c"
+    "src/wifi_test/wifi_test.c"
+    "src/swmem_test/swmem_test.c"
+)
+
 set(APP_INCLUDES
-        "src"
-        "src/intertile_ctrl"
-        "src/rpc"
-    )
-set(APP_DEPENDENT_MODULES
-        "lib_soc(>=0.5.0)"
-    )
+    "src"
+)
 
-set(USE_FREERTOS_SMP False)
+add_compile_definitions(
+    DEBUG_PRINT_ENABLE=1
+    DEBUG_PRINT_ENABLE_IOT_WIFI=1
+    SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\)
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
+)
 
-## Add lib_soc devices
-set(LIB_SOC_INTERTILE ${FULL})
-set(LIB_SOC_SW_PIPE_MGR True)
-set(LIB_SOC_SW_RPC True)
+if(DEFINED THIS_XCORE_TILE)
+    set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
+    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
 
-## Register the application
-XMOS_REGISTER_APP()
+    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
+else()
+    set(TARGET_NAME "${PROJECT_NAME}.xe")
+endif()
+
+add_executable(${TARGET_NAME})
+
+target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
+target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
+
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})

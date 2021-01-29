@@ -1,4 +1,4 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -10,7 +10,6 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "soc.h"
 #include "tls_support.h"
 #include "mbedtls/ssl.h"
 #include "mbedtls/entropy.h"
@@ -21,14 +20,10 @@
 #include "mbedtls/pk.h"
 #include "mbedtls/debug.h"
 
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
-
 /* App headers */
 #include "app_conf.h"
 #include "http_demo.h"
 #include "http_parser.h"
-
 
 
 typedef struct http_parser_cb
@@ -151,16 +146,16 @@ void http_parser_thread( void *arg )
 
 	http_parser_settings *settings = pvPortMalloc( sizeof( http_parser_settings ) );
 	http_parser_settings_init(settings);
-	settings->on_url = url_callback;
-	settings->on_message_begin = msg_callback;
-	settings->on_status = status_callback;
-	settings->on_header_field = hdr_field_callback;
-	settings->on_header_value = hdr_val_callback;
-	settings->on_headers_complete = hdr_complete_callback;
-	settings->on_body = body_callback;
-	settings->on_message_complete = msg_complete_callback;
-	settings->on_chunk_header = chunk_callback;
-	settings->on_chunk_complete = chunk_complete_callback;
+	settings->on_url = (http_data_cb)url_callback;
+	settings->on_message_begin = (http_cb)msg_callback;
+	settings->on_status = (http_data_cb)status_callback;
+	settings->on_header_field = (http_data_cb)hdr_field_callback;
+	settings->on_header_value = (http_data_cb)hdr_val_callback;
+	settings->on_headers_complete = (http_cb)hdr_complete_callback;
+	settings->on_body = (http_data_cb)body_callback;
+	settings->on_message_complete = (http_cb)msg_complete_callback;
+	settings->on_chunk_header = (http_cb)chunk_callback;
+	settings->on_chunk_complete = (http_cb)chunk_complete_callback;
 
 	data = pvPortMalloc( sizeof(int8_t) * data_length );
 	memset( data, 0x00, sizeof(int8_t) * data_length );
