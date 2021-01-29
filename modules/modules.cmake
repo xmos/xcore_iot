@@ -22,7 +22,7 @@ option(USE_LIB_LOGGING "Enable to include lib_logging" TRUE)
 option(USE_LIB_RANDOM "Enable to include lib_random" TRUE)
 option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not used
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
-option(USE_MODEL_RUNNER "Enable to model runner" TRUE)
+option(USE_MODEL_RUNNER "Enable to model runner" FALSE)
 
 #********************************
 # Gather multitile support sources
