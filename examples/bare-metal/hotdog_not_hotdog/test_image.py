@@ -15,13 +15,13 @@ CHUCK_SIZE = 128
 BATCH_RUN = 0  # Set to 1 if this script is run as part of a batch job
 
 IMAGE_SHAPE = (128, 128)
-INPUT_SHAPE = IMAGE_SHAPE+(3,)
+INPUT_SHAPE = IMAGE_SHAPE + (3,)
 INPUT_SCALE = 0.003921568859368563
 INPUT_ZERO_POINT = -128
 NORM_SCALE = 127.5
 NORM_SHIFT = 1
 
-OUTPUT_SCALE = 1/256
+OUTPUT_SCALE = 1 / 256
 OUTPUT_ZERO_POINT = -128
 
 OBJECT_CLASSES = [
@@ -74,7 +74,8 @@ class Endpoint(object):
             ctypes.c_uint(len(data) + 1), ctypes.c_char_p(data)
         )
 
-from tflite2xcore.utils import quantize, dequantize   
+
+from tflite2xcore.utils import quantize, dequantize
 
 ep = Endpoint()
 raw_img = None
@@ -85,16 +86,16 @@ try:
     else:
         image_file_path = sys.argv[1]
         print("Connnected")
-        print("Running inference on image "+image_file_path)
+        print("Running inference on image " + image_file_path)
         # Some png files have RGBA format. convert to RGB to be on the safe side
-        img = Image.open(image_file_path).convert('RGB')
+        img = Image.open(image_file_path).convert("RGB")
         img = img.resize(IMAGE_SHAPE)
-             
+
         img_array = np.array(img).astype(np.float32)
         # Normalize to range 0..1. Needed for quantize function
         img_array = (img_array - img_array.min()) / img_array.ptp()
 
-        img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)   
+        img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)
         raw_img = img_array.flatten().tobytes()
 
         for i in range(0, len(raw_img), CHUCK_SIZE):
@@ -109,19 +110,6 @@ except KeyboardInterrupt:
 
 ep.disconnect()
 print("\n".join(ep.lines))
-
-def accumulate_times(lines):
-    import sys
-    import re
-
-    total_us = 0
-    for line in lines:
-       m = re.search('(\d+) microseconds', line)
-       if(m != None):
-         total_us += int(m.group(1))
-    return total_us
-    
-inference_time_us = accumulate_times(ep.lines)
 
 
 if raw_img is not None:
@@ -138,13 +126,12 @@ if raw_img is not None:
     print()
     prob = (max_value - OUTPUT_ZERO_POINT) * OUTPUT_SCALE * 100.0
     print(OBJECT_CLASSES[max_value_index], f"{prob:0.2f}%")
-    print("Time taken for inference: {} microseconds".format(inference_time_us))
 
     np_img = np.frombuffer(raw_img, dtype=np.int8).reshape(INPUT_SHAPE)
     np_img = np.round(
         (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
     ).astype(np.uint8)
     if not BATCH_RUN:
-      # Show the image how it was processed by the model  
-      pyplot.imshow(np_img)
-      pyplot.show()
+        # Show the image how it was processed by the model
+        pyplot.imshow(np_img)
+        pyplot.show()

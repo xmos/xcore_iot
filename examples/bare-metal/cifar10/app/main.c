@@ -4,9 +4,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "cifar10_model.h"
-#include "inference_engine.h"
+#include "cifar10_model_data.h"
+#include "cifar10_model_runner.h"
 #include "xcore_device_memory.h"
 
 #if defined(USE_SWMEM)
@@ -18,10 +19,11 @@ __attribute__((aligned(8))) static char swmem_handler_stack[1024];
          // memory
 static unsigned char tensor_arena[TENSOR_ARENA_SIZE];
 
-static size_t input_size;
-static int8_t *input_buffer;
+static model_runner_t model_runner_ctx_s;
+static model_runner_t *model_runner_ctx = &model_runner_ctx_s;
 
-static size_t output_size;
+static int8_t *input_buffer;
+static size_t input_size;
 static int8_t *output_buffer;
 
 static int argmax(const int8_t *A, const int N) {
@@ -63,9 +65,15 @@ int main(int argc, char *argv[]) {
             stack_base(swmem_handler_stack, stack_words + 2));
 #endif
 
-  // setup runtime
-  initialize(cifar10_model, tensor_arena, TENSOR_ARENA_SIZE, &input_buffer,
-             &input_size, &output_buffer, &output_size);
+  // initialize model runner global state
+  model_runner_init(tensor_arena, TENSOR_ARENA_SIZE);
+
+  // setup model runner
+  cifar10_model_runner_create(model_runner_ctx, NULL);
+  model_runner_allocate(model_runner_ctx, cifar10_model_data);
+  input_buffer = model_runner_input_buffer_get(model_runner_ctx);
+  input_size = model_runner_input_size_get(model_runner_ctx);
+  output_buffer = model_runner_output_buffer_get(model_runner_ctx);
 
   if (argc > 1) {
     printf("Input filename = %s\n", argv[1]);
@@ -78,7 +86,9 @@ int main(int argc, char *argv[]) {
 
   // Run inference, and report any error
   printf("Running inference...\n");
-  invoke();
+  model_runner_invoke(model_runner_ctx);
+
+  model_runner_profiler_summary_print(model_runner_ctx);
 
   char classification[12] = {0};
   int m = argmax(output_buffer, 10);

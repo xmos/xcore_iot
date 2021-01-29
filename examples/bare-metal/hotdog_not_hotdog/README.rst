@@ -46,7 +46,7 @@ Running with hardware
 
 .. code-block:: console
 
-    $ xrun --io --xscope --xscope-port localhost:10234 bin/hotdog_not_hotdog.xe
+    $ xrun --xscope --xscope-port localhost:10234 bin/hotdog_not_hotdog.xe
 
 Running with simulator
 

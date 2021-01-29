@@ -1,10 +1,14 @@
-[submodule "dependencies/lib_dsp"]
+[submodule "lib_dsp"]
 	path = modules/lib_dsp
 	url = git@github.com:xmos/lib_dsp.git
-[submodule "dependencies/lib_otpinfo"]
+[submodule "lib_xs3_math"]
+	path = modules/lib_xs3_math
+	url = git@github.com:xmos/lib_xs3_math.git
+	shallow = true
+[submodule "lib_otpinfo"]
 	path = modules/lib_otpinfo
 	url = git@github.com:xmos/lib_otpinfo.git
-[submodule "dependencies/lib_random"]
+[submodule "lib_random"]
 	path = modules/lib_random
 	url = git@github.com:xmos/lib_random.git
 [submodule "lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver"]
@@ -13,24 +17,26 @@
 [submodule "lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware"]
 	path = modules/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware
 	url = git@github.com:SiliconLabs/wfx-firmware.git
-[submodule "thirdparty/mbedtls"]
+[submodule "mbedtls"]
 	path = modules/rtos/sw_services/tls_support/thirdparty/mbedtls
 	url = git@github.com:ARMmbed/mbedtls.git
-[submodule "thirdparty/paho.mqtt.embedded-c"]
+	shallow = true
+[submodule "paho.mqtt.embedded-c"]
 	path = modules/rtos/sw_services/mqtt/thirdparty/paho.mqtt.embedded-c
 	url = git@github.com:eclipse/paho.mqtt.embedded-c.git
-[submodule "thirdparty/http-parser"]
+	shallow = true
+[submodule "http-parser"]
 	path = modules/rtos/sw_services/http/thirdparty/http-parser
 	url = git@github.com:nodejs/http-parser.git
+	shallow = true
 [submodule "lib_soc/src/sw_services/json/jsmn"]
 	path = modules/rtos/sw_services/json/thirdparty/jsmn
 	url = git@github.com:zserge/jsmn.git
-[submodule "tools/ai_tools"]
+	shallow = true
+[submodule "ai_tools"]
 	path = tools/ai_tools
 	url = git@github.com:xmos/ai_tools.git
-[submodule "modules/lib_xs3_math"]
-	path = modules/lib_xs3_math
-	url = git@github.com:xmos/lib_xs3_math.git
+	shallow = true
 [submodule "modules/drivers/hil/lib_i2c"]
 	path = modules/hil/lib_i2c
 	url = git@github.com:xmos/lib_i2c.git

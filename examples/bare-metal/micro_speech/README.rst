@@ -35,7 +35,7 @@ Run the following command:
 
 .. code-block:: console
 
-    $ xrun --io bin/micro_speech.xe
+    $ xrun --io bin/XCORE-AI-EXPLORER/micro_speech.xe
 
 You should notice console output, which will update based on the model result.
 
@@ -59,7 +59,7 @@ Run the following command:
 
 .. code-block:: console
 
-    $ xrun --io bin/micro_speech_test.xe
+    $ xrun --io bin/XCORE-AI-EXPLORER/micro_speech_test.xe
 
 You should notice console output
 

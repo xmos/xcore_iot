@@ -9,6 +9,7 @@ extern "C" {
 void initialize(unsigned char **input, int *input_size, unsigned char **output,
                 int *output_size);
 void invoke();
+void print_profiler_summary();
 
 #ifdef __cplusplus
 };
