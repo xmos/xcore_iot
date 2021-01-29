@@ -11,12 +11,6 @@
 [submodule "lib_random"]
 	path = modules/lib_random
 	url = git@github.com:xmos/lib_random.git
-[submodule "lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver"]
-	path = modules/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-fullMAC-driver
-	url = git@github.com:SiliconLabs/wfx-fullMAC-driver.git
-[submodule "lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware"]
-	path = modules/lib_soc/src/peripherals/bsp/wf200_driver/thirdparty/wfx-firmware
-	url = git@github.com:SiliconLabs/wfx-firmware.git
 [submodule "mbedtls"]
 	path = modules/rtos/sw_services/tls_support/thirdparty/mbedtls
 	url = git@github.com:ARMmbed/mbedtls.git
@@ -29,7 +23,7 @@
 	path = modules/rtos/sw_services/http/thirdparty/http-parser
 	url = git@github.com:nodejs/http-parser.git
 	shallow = true
-[submodule "lib_soc/src/sw_services/json/jsmn"]
+[submodule "jsmn"]
 	path = modules/rtos/sw_services/json/thirdparty/jsmn
 	url = git@github.com:zserge/jsmn.git
 	shallow = true
@@ -37,33 +31,33 @@
 	path = tools/ai_tools
 	url = git@github.com:xmos/ai_tools.git
 	shallow = true
-[submodule "modules/drivers/hil/lib_i2c"]
+[submodule "lib_i2c"]
 	path = modules/hil/lib_i2c
 	url = git@github.com:xmos/lib_i2c.git
-[submodule "modules/drivers/hil/lib_i2s"]
+[submodule "lib_i2s"]
 	path = modules/hil/lib_i2s
 	url = git@github.com:xmos/lib_i2s.git
-[submodule "modules/drivers/hil/lib_mic_array"]
+[submodule "lib_mic_array"]
 	path = modules/hil/lib_mic_array
 	url = git@github.com:xmos/lib_mic_array.git
-[submodule "modules/drivers/hil/lib_spi"]
+[submodule "lib_spi"]
 	path = modules/hil/lib_spi
 	url = git@github.com:xmos/lib_spi.git
-[submodule "modules/drivers/rtos/wifi/SL_WF200/wfx-fullMAC-driver"]
+[submodule "wfx-fullMAC-driver"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-fullMAC-driver
 	url = git@github.com:SiliconLabs/wfx-fullMAC-driver.git
-[submodule "modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel"]
+[submodule "FreeRTOS-SMP-Kernel"]
 	path = modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel
 	url = git@github.com:xmos/FreeRTOS-Kernel.git
 	branch = feature/xcore-smp
-[submodule "modules/rtos/FreeRTOS/FreeRTOS-Kernel"]
+[submodule "FreeRTOS-Kernel"]
 	path = modules/rtos/FreeRTOS/FreeRTOS-Kernel
 	url = git@github.com:xmos/FreeRTOS-Kernel.git
 	branch = feature/xcore
-[submodule "modules/rtos/FreeRTOS/FreeRTOS-Plus-TCP"]
+[submodule "FreeRTOS-Plus-TCP"]
 	path = modules/rtos/FreeRTOS/FreeRTOS-Plus-TCP
 	url = git@github.com:xmos/FreeRTOS-Plus-TCP.git
 	branch = main
-[submodule "modules/drivers/rtos/wifi/sl_wf200/thirdparty/wfx-firmware"]
+[submodule "wfx-firmware"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware
 	url = git@github.com:SiliconLabs/wfx-firmware.git
