@@ -8,9 +8,13 @@
 
 struct model_runner_struct {
   void *hInterpreter;
+  __attribute__((fptrgroup("model_runner_resolver_get_fptr_grp")))
   void (*resolver_get_fun)(void **);
+  __attribute__((fptrgroup("model_runner_profiler_get_fptr_grp")))
   void (*profiler_get_fun)(void **);
+  __attribute__((fptrgroup("model_runner_profiler_reset_fptr_grp")))
   void (*profiler_reset_fun)(void);
+  __attribute__((fptrgroup("model_runner_profiler_times_get_fptr_grp")))
   void (*profiler_times_get_fun)(uint32_t *, const uint32_t **);
 };
 

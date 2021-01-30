@@ -1,6 +1,7 @@
-EXECUTABLE = bin/independent_tiles.xe
-EXECUTABLE_T0 = bin/tile0/independent_tiles_0.xe
-EXECUTABLE_T1 = bin/tile1/independent_tiles_1.xe
+PROJECT_NAME = independent_tiles
+EXECUTABLE = bin/${PROJECT_NAME}.xe
+EXECUTABLE_T0 = bin/tile0/${PROJECT_NAME}_0.xe
+EXECUTABLE_T1 = bin/tile1/${PROJECT_NAME}_1.xe
 BOARD ?= XCORE-AI-EXPLORER
 
 .PHONY: all clean distclean run .FORCE

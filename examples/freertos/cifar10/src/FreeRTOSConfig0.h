@@ -97,7 +97,7 @@ your application. */
 
 /* Define to enable debug prints from tasks.c */
 #if ON_TILE(0)
-#define configTASKS_DEBUG 0
+#define configTASKS_DEBUG 1
 #endif
 #if ON_TILE(1)
 #define configTASKS_DEBUG 0

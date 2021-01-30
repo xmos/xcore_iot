@@ -12,6 +12,7 @@ set(LIB_RANDOM_DIR "${MODULES_DIR}/lib_random")
 set(LIB_XS3_MATH_DIR "${MODULES_DIR}/lib_xs3_math")
 set(LEGACY_COMPAT_DIR "${MODULES_DIR}/legacy_compat")
 set(MODEL_RUNNER_DIR "${MODULES_DIR}/model_runner")
+set(TENSORFLOW_SUPPORT_DIR "${MODULES_DIR}/tensorflow_support")
 
 #**********************
 # Options
@@ -22,7 +23,8 @@ option(USE_LIB_LOGGING "Enable to include lib_logging" TRUE)
 option(USE_LIB_RANDOM "Enable to include lib_random" TRUE)
 option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not used
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
-option(USE_MODEL_RUNNER "Enable to model runner" FALSE)
+option(USE_MODEL_RUNNER "Enable to include model runner" FALSE)
+option(USE_TENSORFLOW_SUPPORT "Enable to include TensorFlow support" FALSE)
 
 #********************************
 # Gather multitile support sources
@@ -183,6 +185,20 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather TensorFlow support sources
+#********************************
+set(THIS_LIB TENSORFLOW_SUPPORT)
+if(${USE_${THIS_LIB}})
+    set(${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/qspi_flash/xcore_device_memory.c")
+
+    set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/qspi_flash"
+    )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
@@ -194,6 +210,7 @@ set(MODULES_SOURCES
     ${LIB_XS3_MATH_SOURCES}
     ${LEGACY_COMPAT_SOURCES}
     ${MODEL_RUNNER_SOURCES}
+    ${TENSORFLOW_SUPPORT_SOURCES}
 )
 
 set(MODULES_INCLUDES
@@ -205,6 +222,7 @@ set(MODULES_INCLUDES
     ${LEGACY_COMPAT_INCLUDES}
     ${MODULES_DIR}
     ${MODEL_RUNNER_INCLUDES}
+    ${TENSORFLOW_SUPPORT_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES MODULES_SOURCES)

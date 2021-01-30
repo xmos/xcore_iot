@@ -1,4 +1,4 @@
-PROJECT_NAME = explorer_board
+PROJECT_NAME = cifar10
 EXECUTABLE = bin/${PROJECT_NAME}.xe
 EXECUTABLE_T0 = bin/tile0/${PROJECT_NAME}_0.xe
 EXECUTABLE_T1 = bin/tile1/${PROJECT_NAME}_1.xe
