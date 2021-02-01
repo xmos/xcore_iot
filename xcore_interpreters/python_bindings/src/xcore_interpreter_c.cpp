@@ -1,4 +1,5 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
+// XMOS Public License: Version 1
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_extended_interpreter.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_ops.h"

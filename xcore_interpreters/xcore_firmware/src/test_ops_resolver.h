@@ -1,5 +1,5 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
-
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
+// XMOS Public License: Version 1
 #ifndef TEST_OPS_RESOLVER_H_
 #define TEST_OPS_RESOLVER_H_
 
