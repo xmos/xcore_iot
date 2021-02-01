@@ -1,0 +1,37 @@
+# Editor cruft
+**/.vscode/
+
+# Python cruft
+**/*.pyc
+**/__pycache__/*
+.venv/*
+**/.ipynb_checkpoints/*
+**/*.egg-info/*
+**/*.eggs/*
+Pipfile.lock
+
+# Build cruft
+**/.lock*
+**/build*/
+**/.build/
+_build
+**/dist/
+**/bin/
+*.o
+*.so*
+*.dylib
+
+# Test cruft
+**/.pytest_cache/*
+**/*_junit.xml
+
+# macOS cruft
+.DS_Store
+
+# Misc cruft
+**/*.local.*
+
+# tmp files
+*~
+*.*~
+*log*

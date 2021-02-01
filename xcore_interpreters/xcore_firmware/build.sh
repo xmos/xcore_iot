@@ -19,9 +19,9 @@ echo "****************************"
 if [ $clobber = 'true' ]
 then
     rm -rf build
-    mkdir build
 fi
 
+mkdir -p build
 cd build
 cmake ../
 make install

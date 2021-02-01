@@ -1,0 +1,20 @@
+[submodule "lib_nn"]
+	path = lib_nn
+	url = git@github.com:xmos/lib_nn.git
+	ignore = dirty
+[submodule "flatbuffers"]
+	path = flatbuffers
+	url = git@github.com:google/flatbuffers.git
+	ignore = dirty
+[submodule "gemmlowp"]
+	path = gemmlowp
+	url = git@github.com:google/gemmlowp.git
+	ignore = dirty
+[submodule "ruy"]
+	path = ruy
+	url = git@github.com:google/ruy.git
+	ignore = dirty
+[submodule "tensorflow"]
+	path = tensorflow
+	url = git@github.com:xmos/tensorflow.git
+	ignore = dirty
