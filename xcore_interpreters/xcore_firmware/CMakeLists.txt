@@ -55,7 +55,7 @@ set_target_properties(xcore_interpreter_cmdline PROPERTIES OUTPUT_NAME xcore_int
 #**********************
 # targets
 #**********************
-include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/xcore_interpreter.cmake")
+include("${PROJECT_SOURCE_DIR}/../../ai_deployment_framework.cmake")
 
 set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/main.xc" PROPERTIES LANGUAGE C)
 

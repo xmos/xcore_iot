@@ -4,18 +4,16 @@ cmake_minimum_required(VERSION 3.14)
 # Paths
 #**********************
 
-set(AI_TOOLS_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../..")
+set(GEMMLOWP_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/gemmlowp")
+set(RUY_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/ruy")
+set(FLATBUFFERS_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/flatbuffers/include")
+set(FLATBUFFERS_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/flatbuffers/src")
+set(TENSORFLOW_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/tensorflow")
+set(TENSORFLOW_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/tensorflow")
 
-set(GEMMLOWP_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/gemmlowp")
-set(RUY_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/ruy")
-set(FLATBUFFERS_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/flatbuffers/include")
-set(FLATBUFFERS_SOURCE_DIR "${AI_TOOLS_ROOT_DIR}/flatbuffers/src")
-set(TENSORFLOW_SOURCE_DIR "${AI_TOOLS_ROOT_DIR}/tensorflow")
-set(TENSORFLOW_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/tensorflow")
-
-set(LIB_NN_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/lib_nn")
-set(LIB_NN_ALT_INCLUDE_DIR "${AI_TOOLS_ROOT_DIR}/lib_nn/lib_nn/api")
-set(LIB_NN_SOURCE_DIR "${AI_TOOLS_ROOT_DIR}/lib_nn")
+set(LIB_NN_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/lib_nn")
+set(LIB_NN_ALT_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/lib_nn/lib_nn/api")
+set(LIB_NN_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/lib_nn")
 
 #********************************
 # TensorFlow Lite Micro sources
