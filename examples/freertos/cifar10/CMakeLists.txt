@@ -47,19 +47,18 @@ set(APP_INCLUDES
 
 add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
-    MIC_DUAL_ENABLED=1
     TF_LITE_STATIC_MEMORY=1
-    # TF_LITE_STRIP_ERROR_STRINGS=1  # causes build issues???
-    # NDEBUG=1  # causes build issues???
     XCORE=1
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
 )
 
 # if(${USE_SWMEM})
-#   add_compile_definitions(-DUSE_SWMEM -DUSE_QSPI_SWMEM_DEV=1)
+    # message("Added swmem")
+    # add_compile_definitions(USE_SWMEM=1)
 # elseif(${USE_EXTMEM})
-  # add_compile_definitions(USE_EXTMEM=1)
+    # message("Added extemem")
+    # add_compile_definitions(USE_EXTMEM=1)
 # endif()
 
 ## Set any additional flags only for C++

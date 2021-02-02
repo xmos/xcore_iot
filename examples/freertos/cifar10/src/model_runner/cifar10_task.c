@@ -80,36 +80,36 @@ static void cifar10_task_app(void *args)
                                                   (void**) &output_tensor,
                                                   portMAX_DELAY);
 
-            switch (argmax(output_tensor, 10)) {
+            switch (argmax((int8_t*)output_tensor, 10)) {
             case 0:
-                snprintf(classification, 9, "Airplane");
+                rtos_snprintf(classification, 9, "Airplane");
                 break;
             case 1:
-                snprintf(classification, 11, "Automobile");
+                rtos_snprintf(classification, 11, "Automobile");
                 break;
             case 2:
-                snprintf(classification, 5, "Bird");
+                rtos_snprintf(classification, 5, "Bird");
                 break;
             case 3:
-                snprintf(classification, 4, "Cat");
+                rtos_snprintf(classification, 4, "Cat");
                 break;
             case 4:
-                snprintf(classification, 5, "Deer");
+                rtos_snprintf(classification, 5, "Deer");
                 break;
             case 5:
-                snprintf(classification, 4, "Dog");
+                rtos_snprintf(classification, 4, "Dog");
                 break;
             case 6:
-                snprintf(classification, 5, "Frog");
+                rtos_snprintf(classification, 5, "Frog");
                 break;
             case 7:
-                snprintf(classification, 6, "Horse");
+                rtos_snprintf(classification, 6, "Horse");
                 break;
             case 8:
-                snprintf(classification, 5, "Ship");
+                rtos_snprintf(classification, 5, "Ship");
                 break;
             case 9:
-                snprintf(classification, 6, "Truck");
+                rtos_snprintf(classification, 6, "Truck");
                 break;
             default:
                 break;
@@ -192,7 +192,7 @@ void cifar10_model_runner_task_create(
 {
     xTaskCreate((TaskFunction_t) cifar10_task_runner,
                 "cifar10",
-                1000,
+                5000,
                 intertile_addr,
                 priority,
                 NULL);
