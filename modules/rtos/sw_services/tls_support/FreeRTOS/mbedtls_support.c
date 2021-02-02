@@ -19,6 +19,7 @@
 /* Library headers */
 #include "random.h"
 #include "tls_support.h"
+#include "fs_support.h"
 #include "ff.h"
 
 #ifndef MBEDTLS_PLATFORM_MEMORY
@@ -187,7 +188,7 @@ int tls_recv( void* ctx, unsigned char* buf, size_t len)
 }
 
 
-extern int get_file(const char* filename, FIL* outfile, unsigned int* len );
+extern int rtos_ff_get_file(const char* filename, FIL* outfile, unsigned int* len );
 
 
 int get_cert( mbedtls_x509_crt* cert, const char* filepath )
@@ -207,7 +208,7 @@ int get_cert( mbedtls_x509_crt* cert, const char* filepath )
 			break;
 		}
 
-		if( get_file( filepath, &prvfile, &prvfile_len ) == pdFAIL )
+		if( rtos_ff_get_file( filepath, &prvfile, &prvfile_len ) == pdFAIL )
 		{
 			rtos_printf("Get cert file failed\n");
 			break;
@@ -274,7 +275,7 @@ int get_key( mbedtls_pk_context* key, const char* filepath )
 			break;
 		}
 
-		if( get_file( filepath, &prvfile, &prvfile_len ) == pdFAIL )
+		if( rtos_ff_get_file( filepath, &prvfile, &prvfile_len ) == pdFAIL )
 		{
 			rtos_printf("Get key file failed\n");
 			break;

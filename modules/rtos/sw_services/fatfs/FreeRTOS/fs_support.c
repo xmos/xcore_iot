@@ -32,7 +32,7 @@ rtos_qspi_flash_t *ff_qspi_flash_ctx;
 #define FS_SUP_FREE			free
 #endif
 
-int get_file(const char* filename, FIL* outfile, unsigned int* len )
+int rtos_ff_get_file(const char* filename, FIL* outfile, unsigned int* len )
 {
 	int retval = FS_SUP_FAIL;
 

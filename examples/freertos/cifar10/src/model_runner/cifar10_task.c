@@ -56,7 +56,7 @@ static void cifar10_task_app(void *args)
     {
         for( int i=0; i<( sizeof( test_input_files )/sizeof( test_input_files[0] ) ); i++ )
         {
-            if( get_file(test_input_files[i], &current_file, &file_size ) == 0 )
+            if( rtos_ff_get_file(test_input_files[i], &current_file, &file_size ) == 0 )
             {
                 rtos_printf("Failed to load file %s\n", test_input_files[i]);
                 continue;

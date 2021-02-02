@@ -17,7 +17,7 @@
  * \returns       FS_SUP_SUCCESS on success
  * 				  FS_SUP_FAIL otherwise
  */
-int ff_get_file(const char* filename, FIL* outfile, unsigned int* len );
+int rtos_ff_get_file(const char* filename, FIL* outfile, unsigned int* len );
 
 /**
  *  Initialize and mount file system
