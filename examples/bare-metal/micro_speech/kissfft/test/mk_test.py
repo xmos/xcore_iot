@@ -1,5 +1,3 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
 #!/usr/bin/env python
 
 import FFT
