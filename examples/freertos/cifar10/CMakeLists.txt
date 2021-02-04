@@ -53,13 +53,11 @@ add_compile_definitions(
     PLATFORM_USES_TILE_1=1
 )
 
-# if(${USE_SWMEM})
-    # message("Added swmem")
-    # add_compile_definitions(USE_SWMEM=1)
-# elseif(${USE_EXTMEM})
-    # message("Added extemem")
-    # add_compile_definitions(USE_EXTMEM=1)
-# endif()
+if(${USE_SWMEM})
+    add_compile_definitions(USE_SWMEM=1)
+elseif(${USE_EXTMEM})
+    add_compile_definitions(USE_EXTMEM=1)
+endif()
 
 ## Set any additional flags only for C++
 set(CMAKE_CXX_FLAGS  "-std=c++11")

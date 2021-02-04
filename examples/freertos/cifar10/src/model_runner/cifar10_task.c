@@ -4,6 +4,8 @@
 #include <platform.h>
 #include <xs1.h>
 
+#include "FreeRTOS.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -16,6 +18,11 @@
 #include "cifar10_model_data.h"
 #include "cifar10_model_runner.h"
 #include "model_runner/api/model_runner.h"
+
+typedef struct model_runner_args {
+    QueueHandle_t input_queue;
+    rtos_intertile_address_t *intertile_addr;
+} model_runner_args_t;
 
 #define TENSOR_ARENA_SIZE 58000
 
@@ -118,15 +125,33 @@ static void cifar10_task_app(void *args)
             rtos_printf("Classification of file %s is %s\n", test_input_files[i], classification);
             vPortFree(output_tensor);
         }
-        rtos_printf("All files complete.  Repeating in 5 seconds...");
+        rtos_printf("All files complete.  Repeating in 5 seconds...\n");
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
 
+static void cifar10_runner_rx(void *args)
+{
+    model_runner_args_t * targs = (model_runner_args_t*)args;
+    QueueHandle_t q = targs->input_queue;
+    rtos_intertile_address_t *adr = targs->intertile_addr;
+    uint8_t *input_tensor;
+    int input_tensor_len;
+
+    while(1) {
+        input_tensor_len = rtos_intertile_rx(adr->intertile_ctx,
+                                             adr->port,
+                                             (void**) &input_tensor,
+                                             portMAX_DELAY);
+        xQueueSend(q, &input_tensor, portMAX_DELAY);
+    }
+}
 
 static void cifar10_task_runner(void *args)
 {
-    rtos_intertile_address_t *adr = (rtos_intertile_address_t*)args;
+    model_runner_args_t * targs = (model_runner_args_t*)args;
+    QueueHandle_t q = targs->input_queue;
+    rtos_intertile_address_t *adr = targs->intertile_addr;
     size_t req_size = 0;
     uint8_t *interpreter_buf = NULL;
     int8_t *input_buffer = NULL;
@@ -136,7 +161,6 @@ static void cifar10_task_runner(void *args)
     model_runner_t *model_runner_ctx = NULL;
     uint8_t *tensor_arena = NULL;
     uint8_t *input_tensor;
-    int input_tensor_len;
 
     tensor_arena = pvPortMalloc(TENSOR_ARENA_SIZE);
 
@@ -147,7 +171,17 @@ static void cifar10_task_runner(void *args)
     model_runner_ctx = pvPortMalloc(sizeof(model_runner_t));
 
     cifar10_model_runner_create(model_runner_ctx, interpreter_buf);
-    model_runner_allocate(model_runner_ctx, cifar10_model_data);
+    if (model_runner_allocate(model_runner_ctx, cifar10_model_data) != 0)
+    {
+        rtos_printf("Invalid model provided!\n");
+
+        vPortFree(tensor_arena);
+        vPortFree(interpreter_buf);
+        vPortFree(model_runner_ctx);
+
+        vTaskDelete(NULL);
+    }
+
     input_buffer = model_runner_input_buffer_get(model_runner_ctx);
     input_size = model_runner_input_size_get(model_runner_ctx);
     output_buffer = model_runner_output_buffer_get(model_runner_ctx);
@@ -155,17 +189,14 @@ static void cifar10_task_runner(void *args)
 
     while(1)
     {
-        input_tensor_len = rtos_intertile_rx(adr->intertile_ctx,
-                                              adr->port,
-                                              (void**) &input_tensor,
-                                              portMAX_DELAY);
+        rtos_printf("Wait for input tensor...\n");
+        xQueueReceive(q, &input_tensor, portMAX_DELAY);
 
         memcpy(input_buffer, input_tensor, input_size);
         vPortFree(input_tensor);
-        printf("Running inference...\n");
 
+        rtos_printf("Running inference...\n");
         model_runner_invoke(model_runner_ctx);
-
         model_runner_profiler_summary_print(model_runner_ctx);
 
         rtos_intertile_tx(adr->intertile_ctx,
@@ -191,10 +222,26 @@ void cifar10_model_runner_task_create(
         rtos_intertile_address_t *intertile_addr,
         unsigned priority)
 {
+    model_runner_args_t *args = pvPortMalloc(sizeof(model_runner_args_t));
+    QueueHandle_t input_queue = xQueueCreate(1, sizeof(int32_t*));
+
+    configASSERT(args);
+    configASSERT(input_queue);
+
+    args->input_queue = input_queue;
+    args->intertile_addr = intertile_addr;
+
     xTaskCreate((TaskFunction_t) cifar10_task_runner,
                 "cifar10",
-                5000,
-                intertile_addr,
+                500,
+                args,
                 priority,
+                NULL);
+
+    xTaskCreate((TaskFunction_t) cifar10_runner_rx,
+                "cifar10_rx",
+                RTOS_THREAD_STACK_SIZE(cifar10_runner_rx),
+                args,
+                priority-1,
                 NULL);
 }

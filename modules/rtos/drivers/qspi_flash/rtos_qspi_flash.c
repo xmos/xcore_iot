@@ -43,7 +43,7 @@ static void read_op(
         memset(&data[len], 0xFF, original_len - len);
     }
 
-    rtos_printf("Read %d words from flash at address 0x%x\n", len, address);
+    rtos_printf("Read %d bytes from flash at address 0x%x\n", len, address);
 
     interrupt_mask_all();
     qspi_flash_read(qspi_flash_ctx, data, address, len);
