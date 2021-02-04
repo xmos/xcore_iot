@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# Copyright (c) 2018-2019, XMOS Ltd, All rights reserved
+# Copyright 2018 XMOS LIMITED. This Software is subject to the terms of the 
+# XMOS Public License: Version 1
 
 import tensorflow as tf
 import numpy as np

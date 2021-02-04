@@ -1,4 +1,5 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #ifndef MICROSPEECH_XCORE_SUPPORT_H_
 #define MICROSPEECH_XCORE_SUPPORT_H_

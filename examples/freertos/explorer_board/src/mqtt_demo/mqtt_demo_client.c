@@ -1,4 +1,5 @@
-// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #define DEBUG_UNIT MQTT_DEMO_CLIENT
 #include "app_conf.h"

@@ -1,5 +1,5 @@
-// Copyright (c) 2021, XMOS Ltd, All rights reserved
-#include "tensorflow/lite/micro/kernels/xcore/xcore_dispatcher.h"
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
+// XMOS Public License: Version 1
 #include "xcore_device_memory.h"
 
 #include <stddef.h>
@@ -22,37 +22,32 @@
 
 static rtos_qspi_flash_t *qspi_flash_ctx = NULL;
 
-void rtos_swmem_read_request(unsigned offset, uint32_t *buf)
-{
-    if(qspi_flash_ctx != NULL) {
-        rtos_qspi_flash_read(qspi_flash_ctx,
-                             (uint8_t *)buf,
-                             (unsigned)offset,
-                             WORDS_TO_BYTES(SWMEM_FILL_SIZE_WORDS));
-    }
+void rtos_swmem_read_request(unsigned offset, uint32_t *buf) {
+  if (qspi_flash_ctx != NULL) {
+    rtos_qspi_flash_read(qspi_flash_ctx, (uint8_t *)buf, (unsigned)offset,
+                         WORDS_TO_BYTES(SWMEM_FILL_SIZE_WORDS));
+  }
 }
 
 void swmem_setup(rtos_qspi_flash_t *ctx, unsigned swmem_task_priority) {
-    qspi_flash_ctx = ctx;
-    rtos_swmem_init(RTOS_SWMEM_READ_FLAG);
-    rtos_swmem_start(swmem_task_priority);
+  qspi_flash_ctx = ctx;
+  rtos_swmem_init(RTOS_SWMEM_READ_FLAG);
+  rtos_swmem_start(swmem_task_priority);
 }
 #endif /* USE_SWMEM */
 
 void memload(void *dest, void *src, size_t size) {
 #if USE_SWMEM
-    if (IS_SWMEM(src)) {
-        if(qspi_flash_ctx != NULL) {
-            rtos_qspi_flash_read(qspi_flash_ctx,
-                                 (uint8_t *)dest,
-                                 (unsigned)(src - XS1_SWMEM_BASE),
-                                 size);
-        }
-    } else
-#endif /* USE_SWMEM */
-    if (IS_EXTMEM(src)) {
-        memcpy(dest, src, size);
+  if (IS_SWMEM(src)) {
+    if (qspi_flash_ctx != NULL) {
+      rtos_qspi_flash_read(qspi_flash_ctx, (uint8_t *)dest,
+                           (unsigned)(src - XS1_SWMEM_BASE), size);
     }
+  } else
+#endif /* USE_SWMEM */
+      if (IS_EXTMEM(src)) {
+    memcpy(dest, src, size);
+  }
 }
 
 #endif  // XCORE
