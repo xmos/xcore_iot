@@ -5,77 +5,86 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
+## Specify configuration
+set(USE_WIFI_MANAGER TRUE)
+set(USE_DHCPD TRUE)
+set(USE_FATFS TRUE)
+set(USE_HTTP_PARSER TRUE)
+set(USE_JSON_PARSER TRUE)
+set(USE_MQTT TRUE)
+set(USE_SNTPD TRUE)
+set(USE_TLS_SUPPORT TRUE)
+
 ## Import XMOS configurations
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_utils.cmake")
-set(XMOS_APP_MODULES_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(iot_aws)
-set(PROJECT_VERSION 0.5.0)
+set(PROJECT_VERSION 0.6.0)
 
 ## Enable languages for project
 enable_language(CXX XC C ASM)
 
 ## Set XMOS application variables
 set(APP_COMPILER_FLAGS
-        "-Os"
-        "-g"
-        "-report"
-        "-fxscope"
-        "-DMQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h"
-        "-DMQTT_TASK=1"
-        "-Wxcore-fptrgroup"
-        "-DDEBUG_PRINT_ENABLE=1"
-        "-DDEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1"
-        "-DSL_WFX_DEFAULT_REQUEST_TIMEOUT_MS=500"
-        "-DMBEDTLS_CONFIG_FILE=\"mbedtls_config.h\""
-        #"-DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_user_config.h\"" # User config applied after default XMOS config
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope")
-set(APP_XC_SRCS
-        ""
-    )
-set(APP_CXX_SRCS
-        ""
+    "-Os"
+    "-g"
+    "-report"
+    "-fxscope"
+    "-lquadspi"
+    "-mcmodel=large"
+    "-Wno-xcore-fptrgroup"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
+    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
 )
-set(APP_C_SRCS
-        "src/main.c"
-        "src/NetworkManager/network.c"
-        "src/mqtt_demo/mqtt_demo_client.c"
-        "src/mem_analysis/mem_analysis.c"
-    )
-set(APP_ASM_SRCS
-        ""
-    )
+set(APP_SOURCES
+    "src/main.c"
+    "src/board_init.c"
+    "src/network_demos/network_setup.c"
+    "src/mqtt_demo/mqtt_demo_client.c"
+    "src/mem_analysis/mem_analysis.c"
+)
+
 set(APP_INCLUDES
-        "src"
-        "src/NetworkManager"
-        "src/mqtt_demo"
-        "src/mem_analysis"
-    )
-set(APP_DEPENDENT_MODULES
-        "FreeRTOS-Plus-TCP(>=10.2.1)"
-    )
+    "src"
+    "src/network_demos"
+    "src/mqtt_demo"
+    "src/mem_analysis"
+)
+
+add_compile_definitions(
+    DEBUG_PRINT_ENABLE=1
+    DEBUG_PRINT_ENABLE_IOT_WIFI=1
+    DEBUG_PRINT_ENABLE_WIFI_CONN_MGR=1
+    DEBUG_PRINT_ENABLE_MQTT_DEMO_CLIENT=1
+    MIC_DUAL_ENABLED=1
+    MQTT_TASK=1
+    DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
+    MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
+)
 
 if(${VERBOSE})
-    list(APPEND APP_COMPILER_FLAGS "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT)")
+    add_compile_definitions(SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\))
 else()
-    list(APPEND APP_COMPILER_FLAGS "-DSL_WFX_DEBUG_MASK=(SL_WFX_DEBUG_ERROR)")
+    add_compile_definitions(SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR\))
 endif()
 
-set(USE_FREERTOS_SMP True)
+if(DEFINED THIS_XCORE_TILE)
+    set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
+    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
 
-## Add lib_soc devices
-set(LIB_SOC_GPIO ${FULL})
-set(LIB_SOC_SPIMASTER ${FULL})
-set(LIB_SOC_QSPI_FLASH ${FULL})
-set(LIB_SOC_WFM200 ${BSP_ONLY})
-set(LIB_SOC_SW_WIFI True)
-set(LIB_SOC_SW_DHCPD True)
-set(LIB_SOC_SW_SNTPD True)
-set(LIB_SOC_SW_FATFS True)
-set(LIB_SOC_SW_TLS_SUPPORT True)
-set(LIB_SOC_SW_MQTT True)
-set(LIB_SOC_SW_JSON True)
+    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
+else()
+    set(TARGET_NAME "${PROJECT_NAME}.xe")
+endif()
 
-## Register the application
-XMOS_REGISTER_APP()
+add_executable(${TARGET_NAME})
+
+target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
+target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
+
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})

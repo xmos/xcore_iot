@@ -3,21 +3,37 @@
 
 /* Here is a good place to include header files that are required across
 your application. */
-#include "xassert.h"
+#include "platform.h"
+
+/*
+ * TODO remove this. Just a hack to prevent the i2s task from calling vTaskSuspendAll(). Not a good solution.
+ * the i2s task should probably not be using a FreeRTOS stream buffer.
+ */
+#define sbRECEIVE_COMPLETED( pxStreamBuffer )
 
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 0
 #define configCPU_CLOCK_HZ                      100000000
-#define configNUM_CORES                         1
+
+#if ON_TILE(0)
+#define configNUM_CORES                         5
+#endif
+#if ON_TILE(1)
+#define configNUM_CORES                         5
+#endif
+
 #define configTICK_RATE_HZ                      1000
 #define configMAX_PRIORITIES                    32
 #define configRUN_MULTIPLE_PRIORITIES           1
+#define configUSE_TASK_PREEMPTION_DISABLE       1
+#define configUSE_CORE_EXCLUSION                1
 #define configMINIMAL_STACK_SIZE                ( configSTACK_DEPTH_TYPE ) 256
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_TASK_NOTIFICATIONS            1
+#define configTASK_NOTIFICATION_ARRAY_ENTRIES   2
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             1
 #define configUSE_COUNTING_SEMAPHORES           1
@@ -31,18 +47,27 @@ your application. */
 #define configSTACK_DEPTH_TYPE                  uint32_t
 #define configMESSAGE_BUFFER_LENGTH_TYPE        size_t
 
+
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE                   1024*1024
-#define configAPPLICATION_ALLOCATED_HEAP        1
+
+#if ON_TILE(0)
+#define configTOTAL_HEAP_SIZE                   224*1024
+#endif
+#if ON_TILE(1)
+#define configTOTAL_HEAP_SIZE                   128*1024
+#endif
+
+#define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     0
 #define configUSE_TICK_HOOK                     0
-#define configCHECK_FOR_STACK_OVERFLOW          0
+#define configCHECK_FOR_STACK_OVERFLOW          1
 #define configUSE_MALLOC_FAILED_HOOK            1
-#define configUSE_DAEMON_TASK_STARTUP_HOOK      1
+#define configUSE_DAEMON_TASK_STARTUP_HOOK      0
+#define configUSE_CORE_INIT_HOOK                1
 
 /* Run time and task stats gathering related definitions. */
 #define configGENERATE_RUN_TIME_STATS           1
@@ -71,7 +96,12 @@ your application. */
 #define configUSE_DEBUG_SPRINTF 1
 
 /* Define to enable debug prints from tasks.c */
+#if ON_TILE(0)
 #define configTASKS_DEBUG 0
+#endif
+#if ON_TILE(1)
+#define configTASKS_DEBUG 0
+#endif
 
 /* FreeRTOS MPU specific definitions. */
 #define configINCLUDE_APPLICATION_DEFINED_PRIVILEGED_FUNCTIONS 0
@@ -97,6 +127,6 @@ your application. */
 #define INCLUDE_xQueueGetMutexHolder            1
 
 /* A header file that defines trace macro can be included here. */
-//#include "xcore_trace.h"
+// #include "xcore_trace.h"
 
 #endif /* FREERTOS_CONFIG_H */
