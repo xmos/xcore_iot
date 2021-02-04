@@ -15,7 +15,7 @@ static resolver_t *resolver = nullptr;
 
 static profiler_t *profiler = nullptr;
 
-__attribute__((fptrgroup("model_runner_function")))
+__attribute__((fptrgroup("model_runner_resolver_get_fptr_grp")))
 void {{name}}_resolver_get(void **v_resolver)
 {
   // Set up op resolver
@@ -36,7 +36,7 @@ void {{name}}_resolver_get(void **v_resolver)
   *v_resolver = static_cast<void *>(resolver);
 }
 
-__attribute__((fptrgroup("model_runner_function")))
+__attribute__((fptrgroup("model_runner_profiler_get_fptr_grp")))
 void {{name}}_profiler_get(void **v_profiler) {
 #ifndef NDEBUG
   if (profiler == nullptr) {
@@ -50,7 +50,7 @@ void {{name}}_profiler_get(void **v_profiler) {
   *v_profiler = static_cast<void *>(profiler);
 }
 
-__attribute__((fptrgroup("model_runner_function")))
+__attribute__((fptrgroup("model_runner_profiler_reset_fptr_grp")))
 void {{name}}_profiler_reset() {
   if (profiler) {
     profiler->Reset();
@@ -59,7 +59,7 @@ void {{name}}_profiler_reset() {
 
 #ifndef NDEBUG
 
-__attribute__((fptrgroup("model_runner_function")))
+__attribute__((fptrgroup("model_runner_profiler_times_get_fptr_grp")))
 void {{name}}_profiler_times_get(uint32_t *count, const uint32_t **times) {
   if (profiler) {
     *count = profiler->GetNumTimes();
@@ -70,7 +70,7 @@ void {{name}}_profiler_times_get(uint32_t *count, const uint32_t **times) {
 #endif
 
 //********************************
-// Create a cifar10 model runner.
+// Create a {{name}} model runner.
 //********************************
 void {{name}}_model_runner_create(model_runner_t *ctx, void *buffer) {
   ctx->hInterpreter = buffer;
