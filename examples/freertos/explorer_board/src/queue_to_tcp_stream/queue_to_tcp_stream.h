@@ -1,4 +1,5 @@
-// Copyright (c) 2019-2020, XMOS Ltd, All rights reserved
+// Copyright 2019 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #ifndef QUEUE_TO_TCP_STREAM_H_
 #define QUEUE_TO_TCP_STREAM_H_

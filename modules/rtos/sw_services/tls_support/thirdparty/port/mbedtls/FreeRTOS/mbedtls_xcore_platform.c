@@ -1,4 +1,5 @@
-// Copyright (c) 2021, XMOS Ltd, All rights reserved
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #include <mbedtls/platform.h>
 #include <mbedtls/platform_util.h> /* For mbedtls_platform_zeroize() */
