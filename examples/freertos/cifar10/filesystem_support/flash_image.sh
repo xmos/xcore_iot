@@ -22,10 +22,10 @@ then
         echo "Create filesystem..."
         ./create_fs.sh
         pushd ./
-        cd ../bin/$2
+        cd ../bin/tile1
         echo "Extract swmem..."
-        xobjdump --strip cifar10.xe
-        xobjdump --split cifar10.xb
+        xobjdump --strip cifar10_1.xe
+        xobjdump --split cifar10_1.xb
         cp image_n0c1.swmem ../../filesystem_support
         popd
         echo "Combine filesystem and swmem..."

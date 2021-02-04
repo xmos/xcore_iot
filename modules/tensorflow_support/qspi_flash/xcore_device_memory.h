@@ -33,12 +33,7 @@ extern "C" {
   (((uintptr_t)a >= 0x40000000) && (((uintptr_t)a <= 0x80000000)))
 
 #ifdef USE_SWMEM
-#ifndef USE_QSPI_SWMEM_DEV
 void swmem_setup();
-#else
-#include <xcore/chanend.h>
-void swmem_setup(chanend_t ctrl_swmem_c);
-#endif  // USE_QSPI_SWMEM_DEV
 #endif  // USE_SWMEM
 
 void swmem_handler(void *ignored);

@@ -1,4 +1,5 @@
 // Copyright (c) 2021, XMOS Ltd, All rights reserved
+#include "tensorflow/lite/micro/kernels/xcore/xcore_dispatcher.h"
 #include "xcore_device_memory.h"
 
 #include <stddef.h>
@@ -23,14 +24,11 @@ static rtos_qspi_flash_t *qspi_flash_ctx = NULL;
 
 void rtos_swmem_read_request(unsigned offset, uint32_t *buf)
 {
-    rtos_printf("SwMem fill request for offset 0x%08x\n", offset);
     if(qspi_flash_ctx != NULL) {
-        rtos_printf("read %d\n", rtos_core_id_get());
         rtos_qspi_flash_read(qspi_flash_ctx,
                              (uint8_t *)buf,
                              (unsigned)offset,
                              WORDS_TO_BYTES(SWMEM_FILL_SIZE_WORDS));
-        rtos_printf("read done\n");
     }
 }
 
@@ -47,7 +45,7 @@ void memload(void *dest, void *src, size_t size) {
         if(qspi_flash_ctx != NULL) {
             rtos_qspi_flash_read(qspi_flash_ctx,
                                  (uint8_t *)dest,
-                                 (unsigned)size,
+                                 (unsigned)(src - XS1_SWMEM_BASE),
                                  size);
         }
     } else
