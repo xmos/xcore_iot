@@ -18,7 +18,6 @@ then
         xflash --quad-spi-clock 50MHz --factory ../bin/cifar10.xe --boot-partition-size 0x100000 --data ./fat.fs
     elif [ "$1" == "--fs_swmem" ] || [ "$1" == "-s" ]
     then
-        echo "NOT YET TESTED!"
         echo "Create filesystem..."
         ./create_fs.sh
         pushd ./
@@ -32,7 +31,7 @@ then
         cat fat.fs | dd of=image_n0c1.swmem bs=1 seek=1048576 conv=notrunc
 
         echo "Flash device..."
-        xflash --write-all image_n0c1.swmem --target-file ../XCORE-AI-EXPLORER.xn
+        xflash --write-all image_n0c1.swmem --target-file ../$TARGET.xn
         echo "Done"
     else
         help
