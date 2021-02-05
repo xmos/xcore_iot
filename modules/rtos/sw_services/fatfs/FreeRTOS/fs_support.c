@@ -1,4 +1,5 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #include <xcore/assert.h>
 
@@ -32,7 +33,7 @@ rtos_qspi_flash_t *ff_qspi_flash_ctx;
 #define FS_SUP_FREE			free
 #endif
 
-int get_file(const char* filename, FIL* outfile, unsigned int* len )
+int rtos_ff_get_file(const char* filename, FIL* outfile, unsigned int* len )
 {
 	int retval = FS_SUP_FAIL;
 

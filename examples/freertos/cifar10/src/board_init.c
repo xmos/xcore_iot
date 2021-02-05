@@ -1,4 +1,5 @@
-// Copyright (c) 2021, XMOS Ltd, All rights reserved
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #include <platform.h>
 #include <xs1.h>
@@ -8,12 +9,15 @@
 #include "board_init.h"
 #include "app_conf.h"
 
+static rtos_driver_rpc_t qspi_flash_rpc_config;
+
 void board_tile0_init(
         chanend_t tile1,
         rtos_intertile_t *intertile_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx)
 {
     rtos_intertile_init(intertile_ctx, tile1);
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
 
     rtos_qspi_flash_init(
             qspi_flash_ctx,
@@ -45,11 +49,23 @@ void board_tile0_init(
 
             256, /* page size is 256 bytes */
             16384); /* the flash has 16384 pages */
+
+    rtos_qspi_flash_rpc_host_init(
+            qspi_flash_ctx,
+            &qspi_flash_rpc_config,
+            client_intertile_ctx,
+            1);
 }
 
 void board_tile1_init(
         chanend_t tile0,
-        rtos_intertile_t *intertile_ctx)
+        rtos_intertile_t *intertile_ctx,
+        rtos_qspi_flash_t *qspi_flash_ctx)
 {
     rtos_intertile_init(intertile_ctx, tile0);
+
+    rtos_qspi_flash_rpc_client_init(
+            qspi_flash_ctx,
+            &qspi_flash_rpc_config,
+            intertile_ctx);
 }

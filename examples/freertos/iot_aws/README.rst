@@ -174,10 +174,7 @@ In this section, we will configure the demo software to connect to the proper MQ
 
 .. code-block:: console
 
-    $ mkdir build
-    $ cd build
-    $ cmake ../ -DBOARD=XCORE-AI-EXPLORER
-    $ make -j
+    $ make
 
 This will create the ``iot_aws.xe`` binary in the bin folder.
 
@@ -194,10 +191,10 @@ To run the demo navigate to the bin folder and use the command:
 
 .. code-block:: console
 
-    $ xrun XCORE-AI-EXPLORER/iot_aws.xe
+    $ xrun iot_aws.xe
 
 For debug output use:
 
 .. code-block:: console
 
-    $ xrun --xscope XCORE-AI-EXPLORER/iot_aws.xe
+    $ xrun --xscope iot_aws.xe

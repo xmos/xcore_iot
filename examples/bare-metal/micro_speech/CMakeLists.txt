@@ -29,15 +29,11 @@ set(KISS_FFT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/kissfft")
 
 set(RTOS_SUPPORT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
 
-set(LIB_DSP_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/lib_dsp/api")
-set(LIB_LOGGING_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_logging/lib_logging/lib_logging/api")
-set(LIB_MIC_ARRAY_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_mic_array/lib_mic_array/lib_mic_array/api")
-set(LIB_XASSERT_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_xassert/lib_xassert/lib_xassert/api")
+set(LIB_DSP_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/api")
+set(LIB_MIC_ARRAY_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/hil/lib_mic_array/lib_mic_array/api")
 
-set(LIB_DSP_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp")
-set(LIB_LOGGING_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_logging/lib_logging")
-set(LIB_MIC_ARRAY_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_mic_array/lib_mic_array")
-set(LIB_XASSERT_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_xassert/lib_xassert")
+set(LIB_DSP_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/src")
+set(LIB_MIC_ARRAY_SOURCE_DIR "${RTOS_SUPPORT_DIR}/hil/lib_mic_array")
 
 #**********************
 # Build flags
@@ -66,6 +62,7 @@ ${BOARD_FLAG}
 "-DMIC_DUAL_ENABLED=1"
 "-Os"
 )
+
 target_link_options(micro_speech PRIVATE ${BUILD_FLAGS} -lquadspi)
 set_target_properties(micro_speech PROPERTIES OUTPUT_NAME micro_speech.xe)
 target_compile_options(micro_speech PRIVATE ${BUILD_FLAGS})
@@ -113,24 +110,17 @@ set(LIB_DSP_SOURCES
 #**********************
 # lib_logging sources
 #**********************
-set(LIB_LOGGING_SOURCES
-  "${LIB_LOGGING_SOURCE_DIR}/lib_logging/src/debug_printf.c"
-)
+#set(LIB_LOGGING_SOURCES
+#  "${LIB_LOGGING_SOURCE_DIR}/lib_logging/src/debug_printf.c"
+#)
 
 #**********************
 # lib_mic_array sources
 #**********************
 set(LIB_MIC_ARRAY_SOURCES
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/mic_array_dual.xc"
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs_dual.xc"
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs.xc"
-)
-
-#**********************
-# lib_xassert sources
-#**********************
-set(LIB_XASSERT_SOURCES
-  "${LIB_XASSERT_SOURCE_DIR}/lib_xassert/src/xassert.xc"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/mic_array_dual.c"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs_dual.c"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs.c"
 )
 
 #**********************
@@ -185,9 +175,7 @@ target_sources(micro_speech
   PRIVATE ${KISS_FFT_SOURCES}
   PRIVATE ${MICRO_FEATURES_SOURCES}
   PRIVATE ${LIB_DSP_SOURCES}
-  PRIVATE ${LIB_LOGGING_SOURCES}
   PRIVATE ${LIB_MIC_ARRAY_SOURCES}
-  PRIVATE ${LIB_XASSERT_SOURCES}
   PRIVATE ${APP_SOURCES}
 )
 
@@ -201,9 +189,7 @@ set(COMMON_TARGET_INCLUDES
   ${XCORE_INTERPRETER_INCLUDE_DIRS}
   ${KISS_FFT_INCLUDE_DIR}
   ${LIB_DSP_INCLUDE_DIR}
-  ${LIB_LOGGING_INCLUDE_DIR}
   ${LIB_MIC_ARRAY_INCLUDE_DIR}
-  ${LIB_XASSERT_INCLUDE_DIR}
   "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib"

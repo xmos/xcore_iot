@@ -1,4 +1,5 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #ifndef SOC_CONF_H_
 #define SOC_CONF_H_

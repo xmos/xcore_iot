@@ -1,4 +1,5 @@
-// Copyright (c) 2020-2021, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #define DEBUG_UNIT MQTT_DEMO_CLIENT
 #include "app_conf.h"
@@ -306,10 +307,9 @@ void mqtt_demo_create( rtos_gpio_t *gpio_ctx, UBaseType_t priority )
 {
     if( gpio_ctx != NULL )
     {
+        led_port = rtos_gpio_port(PORT_LEDS);
         rtos_gpio_port_enable(gpio_ctx, led_port);
         gpio = gpio_ctx;
-
-        led_port = rtos_gpio_port(PORT_LEDS);
 
         xTaskCreate( mqtt_demo_connect, "mqtt_demo", MQTT_DEMO_CONNECT_STACK_SIZE, ( void * ) NULL, priority, NULL );
     }

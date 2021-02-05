@@ -190,10 +190,10 @@ unset(THIS_LIB)
 #********************************
 set(THIS_LIB TENSORFLOW_SUPPORT)
 if(${USE_${THIS_LIB}})
-    set(${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/qspi_flash/xcore_device_memory.c")
+    set(${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/rtos/xcore_device_memory.c")
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/qspi_flash"
+        "${${THIS_LIB}_DIR}/rtos"
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()

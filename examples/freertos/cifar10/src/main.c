@@ -1,4 +1,5 @@
-// Copyright (c) 2021, XMOS Ltd, All rights reserved
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 /* System headers */
 #include <platform.h>
@@ -24,12 +25,15 @@ static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 static rtos_intertile_address_t cifar10_addr_s;
 static rtos_intertile_address_t *cifar10_addr = &cifar10_addr_s;
 
-#if ON_TILE(0)
 static rtos_qspi_flash_t qspi_flash_ctx_s;
 static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
-#endif
 
-chanend_t other_tile_c;
+#if USE_SWMEM
+#if ON_TILE(1)
+#include "rtos/drivers/swmem/api/rtos_swmem.h"
+#include "xcore_device_memory.h"
+#endif
+#endif
 
 void vApplicationMallocFailedHook( void )
 {
@@ -61,6 +65,8 @@ void vApplicationDaemonTaskStartup(void *arg)
     rtos_intertile_start(
             intertile_ctx);
 
+    rtos_qspi_flash_rpc_config(qspi_flash_ctx, QSPI_RPC_PORT, QSPI_RPC_HOST_TASK_PRIORITY);
+
     cifar10_addr->intertile_ctx = intertile_ctx;
     cifar10_addr->port = CIFAR10_PORT;
 
@@ -78,6 +84,10 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     #if ON_TILE(1)
     {
+#if USE_SWMEM
+        rtos_printf("Starting swmem task\n");
+        swmem_setup(qspi_flash_ctx, appconfSWMEM_TASK_PRIORITY);
+#endif
         rtos_printf("Starting model runner task\n");
         cifar10_model_runner_task_create(cifar10_addr, appconfCIFAR10_TASK_PRIORITY);
     }
@@ -86,7 +96,6 @@ void vApplicationDaemonTaskStartup(void *arg)
     vTaskDelete(NULL);
 }
 
-
 #if ON_TILE(0)
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
@@ -94,8 +103,6 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     board_tile0_init(c1, intertile_ctx, qspi_flash_ctx);
     (void) c2;
     (void) c3;
-
-    other_tile_c = c1;
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
@@ -126,12 +133,10 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 #if ON_TILE(1)
 void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile1_init(c0, intertile_ctx);
+    board_tile1_init(c0, intertile_ctx, qspi_flash_ctx);
     (void) c1;
     (void) c2;
     (void) c3;
-
-    other_tile_c = c0;
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",

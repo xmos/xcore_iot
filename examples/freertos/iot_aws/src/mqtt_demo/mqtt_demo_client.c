@@ -1,4 +1,5 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #define DEBUG_UNIT MQTT_DEMO_CLIENT
 #include <string.h>
@@ -13,13 +14,9 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "soc.h"
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
 #include "tls_support.h"
 #include "MQTTClient.h"
-
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
-#include "gpio_driver.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -31,8 +28,8 @@
 #include "mbedtls/debug.h"
 #endif
 
-#define MQTT_DEMO_CONNECT_STACK_SIZE 		2000
-#define MQTT_DEMO_HANDLER_STACK_SIZE 		1200
+#define MQTT_DEMO_CONNECT_STACK_SIZE 		2400
+#define MQTT_DEMO_HANDLER_STACK_SIZE 		1600
 #define MQTT_RECONNECT_DELAY_MS				1000
 #define MQTT_RECONNECT_DELAY_STEP_MS		1000
 #define MQTT_RECONNECT_DELAY_MAX_MS		   15000
@@ -48,7 +45,8 @@ typedef struct net_conn_args
 	TaskHandle_t connection_task;
 } net_conn_args_t;
 
-static soc_peripheral_t dev;
+static rtos_gpio_t* gpio = NULL;
+static rtos_gpio_port_id_t led_port = 0;
 static uint32_t val;
 
 #define MAX_TOKENS 10
@@ -115,7 +113,7 @@ void messageArrived(MessageData* data)
 		}
 	}
 
-	gpio_write(dev, gpio_4C, val);
+    rtos_gpio_port_out(gpio, led_port, val);
 
 	debug_printf("Message arrived on topic %.*s: %.*s\n", data->topicName->lenstring.len, data->topicName->lenstring.data,
 		data->message->payloadlen, data->message->payload);
@@ -131,11 +129,9 @@ static void mqtt_handler( void* arg )
 	int retval = 0;
 
 	MQTTPacket_connectData connectData = MQTTPacket_connectData_initializer;
-	dev = bitstream_gpio_devices[ BITSTREAM_GPIO_DEVICE_A ];
 
-    gpio_init(dev, gpio_4C);
 	val = 0x00;
-	gpio_write(dev, gpio_4C, val);
+    rtos_gpio_port_out(gpio, led_port, val);
 
 	TaskHandle_t caller = args->connection_task;
 
@@ -400,7 +396,15 @@ static void mqtt_demo_connect( void* arg )
 	vPortFree( ca );
 }
 
-void mqtt_demo_create( UBaseType_t priority )
+void mqtt_demo_create( rtos_gpio_t *gpio_ctx, UBaseType_t priority )
 {
-    xTaskCreate( mqtt_demo_connect, "mqtt_demo", MQTT_DEMO_CONNECT_STACK_SIZE, ( void * ) NULL, priority, NULL );
+    if( gpio_ctx != NULL )
+    {
+        led_port = rtos_gpio_port(PORT_LEDS);
+
+        rtos_gpio_port_enable(gpio_ctx, led_port);
+        gpio = gpio_ctx;
+
+        xTaskCreate( mqtt_demo_connect, "mqtt_demo", MQTT_DEMO_CONNECT_STACK_SIZE, ( void * ) NULL, priority, NULL );
+    }
 }

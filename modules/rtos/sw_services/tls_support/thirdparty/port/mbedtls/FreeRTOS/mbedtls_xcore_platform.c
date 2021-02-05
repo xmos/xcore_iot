@@ -1,4 +1,5 @@
-// Copyright (c) 2021, XMOS Ltd, All rights reserved
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #include <mbedtls/platform.h>
 #include <mbedtls/platform_util.h> /* For mbedtls_platform_zeroize() */
@@ -27,13 +28,13 @@ struct tm *mbedtls_platform_gmtime_r(
 
     info =  gmtime_r(tt, tm_buf);
 
-    rtos_printf( "mbed gmtime: %d/%d/%02d %2d:%02d:%02d\n",
-                 (int)info->tm_mday,
-                 (int)info->tm_mon + 1,
-                 (int)info->tm_year + 1900,
-                 (int)info->tm_hour,
-                 (int)info->tm_min,
-                 (int)info->tm_sec);
+    // rtos_printf( "mbed gmtime: %d/%d/%02d %2d:%02d:%02d\n",
+    //              (int)info->tm_mday,
+    //              (int)info->tm_mon + 1,
+    //              (int)info->tm_year + 1900,
+    //              (int)info->tm_hour,
+    //              (int)info->tm_min,
+    //              (int)info->tm_sec);
 
     return info;
 }

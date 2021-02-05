@@ -3,6 +3,8 @@ EXECUTABLE = bin/${PROJECT_NAME}.xe
 EXECUTABLE_T0 = bin/tile0/${PROJECT_NAME}_0.xe
 EXECUTABLE_T1 = bin/tile1/${PROJECT_NAME}_1.xe
 BOARD ?= XCORE-AI-EXPLORER
+USE_SWMEM ?= 0
+USE_EXTMEM ?= 0
 
 .PHONY: all clean distclean run .FORCE
 .FORCE:
@@ -19,10 +21,10 @@ distclean:
 	rm -rf bin
 
 build/tile0/Makefile:
-	cmake -B build/tile0 -DTHIS_XCORE_TILE=0 -DBOARD=$(BOARD)
+	cmake -B build/tile0 -DTHIS_XCORE_TILE=0 -DBOARD=$(BOARD) -DUSE_SWMEM=${USE_SWMEM} -DUSE_EXTMEM=${USE_EXTMEM}
 
 build/tile1/Makefile:
-	cmake -B build/tile1 -DTHIS_XCORE_TILE=1 -DBOARD=$(BOARD)
+	cmake -B build/tile1 -DTHIS_XCORE_TILE=1 -DBOARD=$(BOARD) -DUSE_SWMEM=${USE_SWMEM} -DUSE_EXTMEM=${USE_EXTMEM}
 
 $(EXECUTABLE_T0): build/tile0/Makefile .FORCE
 	make -C build/tile0

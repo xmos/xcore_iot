@@ -1,4 +1,5 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #ifndef SRC_EXAMPLE_PIPELINE_H_
 #define SRC_EXAMPLE_PIPELINE_H_

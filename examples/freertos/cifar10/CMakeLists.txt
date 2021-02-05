@@ -47,20 +47,17 @@ set(APP_INCLUDES
 
 add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
-    MIC_DUAL_ENABLED=1
     TF_LITE_STATIC_MEMORY=1
-    # TF_LITE_STRIP_ERROR_STRINGS=1  # causes build issues???
-    # NDEBUG=1  # causes build issues???
     XCORE=1
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
 )
 
-# if(${USE_SWMEM})
-#   add_compile_definitions(-DUSE_SWMEM -DUSE_QSPI_SWMEM_DEV=1)
-# elseif(${USE_EXTMEM})
-  # add_compile_definitions(USE_EXTMEM=1)
-# endif()
+if(${USE_SWMEM})
+    add_compile_definitions(USE_SWMEM=1)
+elseif(${USE_EXTMEM})
+    add_compile_definitions(USE_EXTMEM=1)
+endif()
 
 ## Set any additional flags only for C++
 set(CMAKE_CXX_FLAGS  "-std=c++11")
@@ -77,8 +74,8 @@ endif()
 
 add_executable(${TARGET_NAME})
 
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
+target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
+target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})

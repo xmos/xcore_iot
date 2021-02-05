@@ -1,4 +1,5 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #ifndef FS_SUPPORT_H_
 #define FS_SUPPORT_H_
@@ -17,7 +18,7 @@
  * \returns       FS_SUP_SUCCESS on success
  * 				  FS_SUP_FAIL otherwise
  */
-int ff_get_file(const char* filename, FIL* outfile, unsigned int* len );
+int rtos_ff_get_file(const char* filename, FIL* outfile, unsigned int* len );
 
 /**
  *  Initialize and mount file system

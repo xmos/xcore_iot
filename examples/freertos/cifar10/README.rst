@@ -32,73 +32,69 @@ For background information on the CIFAR-10 dataset, please read `Learning Multip
 Supported Boards
 ****************
 
-This example is supported on the XCORE-AI-EXPLORER board and the AiOT Board (OSPREY-BOARD). 
+This example is supported on the XCORE-AI-EXPLORER board.
 Set the $TARGET environment variable to the board that you are using. For example:
 
 .. code-block:: console
 
-    $ export TARGET=OSPREY-BOARD
+    $ export TARGET=XCORE-AI-EXPLORER
 
 The build and run commands shown below will then pick up the correct target automatically.
-Please note: The external DDR memory options are only available on the XCORE-AI-EXPLORER board. 
-
+Please note: The external DDR memory options are only available on the XCORE-AI-EXPLORER board.
 
 *********************
 Building the firmware
 *********************
 
-Make a directory for the build.
-
-.. code-block:: console
-
-    $ mkdir build
-    $ cd build
-
 Using SRAM memory
 =================
 
-Run cmake:
+Run make:
 
 .. code-block:: console
 
-    $ cmake ../ -DBOARD=$TARGET
-    $ make
-
-Using external flash memory
-===========================
-
-To building with the model stored in flash, replace the call to cmake above with the following:
-
-.. code-block:: console
-
-    $ cmake ../ -DBOARD=$TARGET -DUSE_SWMEM=1
-    $ make
-
-To flash the model and example images, run the following commands:
-
-.. code-block:: console
-
-    $ cd filesystem_support
-    $ ./flash_image.sh -s $TARGET
-
-Using external DDR memory
-=========================
-
-If your board supports LPDDR, you may also place your neural network in the external DDR memory.  Currently, only the Explorer Board supports LPDDR. 
-
-To building with the model stored in LPDDR, replace the call to cmake above with the following:
-
-.. code-block:: console
-
-    $ cmake ../ -DBOARD=XCORE-AI-EXPLORER -DUSE_EXTMEM=1
-    $ make
+    $ make BOARD=$TARGET
 
 To flash the example images, run the following commands:
 
 .. code-block:: console
 
     $ cd filesystem_support
-    $ ./flash_image.sh -f XCORE-AI-EXPLORER
+    $ ./flash_image.sh -f
+
+Using external flash memory
+===========================
+
+To building with the model stored in flash, replace the call to make above with the following:
+
+.. code-block:: console
+
+    $ make BOARD=$TARGET USE_SWMEM=1
+
+To flash the model and example images, run the following commands:
+
+.. code-block:: console
+
+    $ cd filesystem_support
+    $ ./flash_image.sh -s
+
+Using external DDR memory
+=========================
+
+If your board supports LPDDR, you may also place your neural network in the external DDR memory.  Currently, only the Explorer Board supports LPDDR.
+
+To building with the model stored in LPDDR, replace the call to cmake above with the following:
+
+.. code-block:: console
+
+    $ make BOARD=$TARGET USE_EXTMEM=1
+
+To flash the example images, run the following commands:
+
+.. code-block:: console
+
+    $ cd filesystem_support
+    $ ./flash_image.sh -f
 
 Running the firmware
 ====================
@@ -107,7 +103,7 @@ Running with hardware.
 
 .. code-block:: console
 
-    $ xrun --xscope bin/$TARGET/cifar10.xe
+    $ xrun --xscope bin/cifar10.xe
 
 ********************
 Optimizing the model

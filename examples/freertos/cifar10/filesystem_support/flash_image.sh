@@ -18,21 +18,20 @@ then
         xflash --quad-spi-clock 50MHz --factory ../bin/cifar10.xe --boot-partition-size 0x100000 --data ./fat.fs
     elif [ "$1" == "--fs_swmem" ] || [ "$1" == "-s" ]
     then
-        echo "NOT YET TESTED!"
         echo "Create filesystem..."
         ./create_fs.sh
         pushd ./
-        cd ../bin/$2
+        cd ../bin/tile1
         echo "Extract swmem..."
-        xobjdump --strip cifar10.xe
-        xobjdump --split cifar10.xb
+        xobjdump --strip cifar10_1.xe
+        xobjdump --split cifar10_1.xb
         cp image_n0c1.swmem ../../filesystem_support
         popd
         echo "Combine filesystem and swmem..."
         cat fat.fs | dd of=image_n0c1.swmem bs=1 seek=1048576 conv=notrunc
 
         echo "Flash device..."
-        xflash --write-all image_n0c1.swmem --target-file ../XCORE-AI-EXPLORER.xn
+        xflash --write-all image_n0c1.swmem --target-file ../$TARGET.xn
         echo "Done"
     else
         help
