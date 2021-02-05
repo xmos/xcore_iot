@@ -1,4 +1,5 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the
+// XMOS Public License: Version 1
 #include "xcore_device_memory.h"
 
 #include <stddef.h>
@@ -70,7 +71,7 @@ void memload(void *dest, void *src, size_t size) {
                     (unsigned int *)dest, BYTES_TO_WORDS(size));
   } else
 #endif /* USE_SWMEM */
-  if (IS_EXTMEM(src)) {
+      if (IS_EXTMEM(src)) {
     memcpy(dest, src, size);
   }
 }

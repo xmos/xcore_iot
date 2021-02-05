@@ -1,4 +1,5 @@
-// Copyright (c) 2019, XMOS Ltd, All rights reserved
+// Copyright 2019 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #ifndef RTOS_CORES_H_
 #define RTOS_CORES_H_

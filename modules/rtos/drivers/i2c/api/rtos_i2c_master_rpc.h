@@ -1,4 +1,5 @@
-// Copyright (c) 2021, XMOS Ltd, All rights reserved
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #ifndef RTOS_I2C_MASTER_RPC_H_
 #define RTOS_I2C_MASTER_RPC_H_

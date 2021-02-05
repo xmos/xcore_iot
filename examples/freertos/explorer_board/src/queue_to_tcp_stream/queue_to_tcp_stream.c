@@ -1,4 +1,5 @@
-// Copyright (c) 2019-2021, XMOS Ltd, All rights reserved
+// Copyright 2019 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
 
 #define DEBUG_UNIT QUEUE_TO_TCP
 #include "app_conf.h"
