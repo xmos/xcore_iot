@@ -1,9 +1,12 @@
-// Copyright (c) 2020, XMOS Ltd, All rights reserved
+// Copyright (c) 2021, XMOS Ltd, All rights reserved
 
 #ifndef APP_CONF_H_
 
+#define PERSON_DETECT_PORT 13
+
 /* Task Priorities */
+#define appconfSTARTUP_TASK_PRIORITY            ( configMAX_PRIORITIES - 1 )
+#define appconfPERSON_DETECT_TASK_PRIORITY      ( configMAX_PRIORITIES - 2 )
 #define appconfSPI_CAMERA_TASK_PRIORITY    		( configMAX_PRIORITIES - 3 )
-#define appconfQUEUE_TO_AI_TASK_PRIORITY    	( configMAX_PRIORITIES - 2 )
 
 #endif /* APP_CONF_H_ */

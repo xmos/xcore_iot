@@ -6,12 +6,8 @@
 #include "queue.h"
 
 /* Library headers */
-#include "soc.h"
-
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
-#include "i2c_driver.h"
-#include "spi_master_driver.h"
+#include "rtos/drivers/i2c/api/rtos_i2c_master.h"
+#include "rtos/drivers/spi/api/rtos_spi_master.h"
 
 /* App headers */
 #include "ov2640.h"
@@ -20,8 +16,8 @@
 typedef struct {
     uint8_t initialized;
     uint8_t device_addr;
-    soc_peripheral_t spi_dev;
-    soc_peripheral_t i2c_dev;
+    rtos_spi_master_device_t *spi_dev;
+    rtos_i2c_master_t *i2c_dev;
 } ov2640_host_t;
 
 #define DELAY_MS( ms )  vTaskDelay( pdMS_TO_TICKS( ms ) )
@@ -34,7 +30,7 @@ static i2c_regop_res_t ov2640_i2c_write_reg( uint8_t reg, uint8_t val )
 
     if( ov2640_host_ctx.i2c_dev != NULL )
     {
-        retval = i2c_driver_write_reg( ov2640_host_ctx.i2c_dev, ov2640_host_ctx.device_addr, reg, val );
+        retval = rtos_i2c_master_reg_write( ov2640_host_ctx.i2c_dev, ov2640_host_ctx.device_addr, reg, val );
     }
 
     return retval;
@@ -42,15 +38,11 @@ static i2c_regop_res_t ov2640_i2c_write_reg( uint8_t reg, uint8_t val )
 
 static uint8_t ov2640_i2c_read_reg( uint8_t reg, uint8_t *val, i2c_regop_res_t *res )
 {
-    uint8_t retval = 0;
+    i2c_regop_res_t retval = 0;
 
     if( ov2640_host_ctx.i2c_dev != NULL )
     {
-        *val = i2c_driver_read_reg( ov2640_host_ctx.i2c_dev, ov2640_host_ctx.device_addr, reg, res );
-        if( *res == I2C_REGOP_SUCCESS )
-        {
-            retval = 1;
-        }
+        retval = rtos_i2c_master_reg_read( ov2640_host_ctx.i2c_dev, ov2640_host_ctx.device_addr, reg, val );
     }
 
     return retval;
@@ -62,7 +54,9 @@ static void ov2640_spi_write( uint8_t addr, uint8_t val )
     tx_buf[0] = addr | 0x80;
     tx_buf[1] = val;
 
-    spi_transaction( ov2640_host_ctx.spi_dev, NULL, 0, &tx_buf[0], 2 );
+    rtos_spi_master_transaction_start(ov2640_host_ctx.spi_dev);
+    rtos_spi_master_transfer( ov2640_host_ctx.spi_dev, (uint8_t*)tx_buf, NULL, 2 );
+    rtos_spi_master_transaction_end(ov2640_host_ctx.spi_dev);
 }
 
 uint8_t ov2640_spi_read( uint8_t addr )
@@ -74,7 +68,9 @@ uint8_t ov2640_spi_read( uint8_t addr )
     tx_buf[0] = addr & 0x7F;
     tx_buf[1] = 0x00;
 
-    spi_transaction( ov2640_host_ctx.spi_dev, &rx_buf[0], 2, &tx_buf[0], 2 );
+    rtos_spi_master_transaction_start(ov2640_host_ctx.spi_dev);
+    rtos_spi_master_transfer( ov2640_host_ctx.spi_dev, (uint8_t*)tx_buf, (uint8_t*)rx_buf, 2 );
+    rtos_spi_master_transaction_end(ov2640_host_ctx.spi_dev);
 
     retval = rx_buf[1];
 
@@ -83,7 +79,11 @@ uint8_t ov2640_spi_read( uint8_t addr )
 
 void ov2640_spi_read_buf( uint8_t* rx_buf, int32_t rx_size, uint8_t* tx_buf, int32_t tx_size )
 {
-    spi_transaction( ov2640_host_ctx.spi_dev, rx_buf, rx_size, tx_buf, tx_size );
+    configASSERT(tx_size < rx_size);
+    rtos_spi_master_transaction_start(ov2640_host_ctx.spi_dev);
+    rtos_spi_master_transfer( ov2640_host_ctx.spi_dev, tx_buf, rx_buf, tx_size );
+    rtos_spi_master_transfer( ov2640_host_ctx.spi_dev, NULL, rx_buf+tx_size, rx_size-tx_size );
+    rtos_spi_master_transaction_end(ov2640_host_ctx.spi_dev);
 }
 
 static void ov2640_spi_clear_bit( uint8_t addr, uint8_t bit )
@@ -218,7 +218,8 @@ uint32_t ov2640_read_fifo_length()
     return ( ( ( len3 << 16 ) | ( len2 << 8 ) | len1 ) & 0x07fffff );
 }
 
-int32_t ov2640_init( int32_t spi_dev_id, int32_t i2c_dev_id )
+
+int32_t ov2640_init( rtos_spi_master_device_t* spi_dev, rtos_i2c_master_t* i2c_dev )
 {
     int32_t retval = pdFALSE;
     i2c_regop_res_t regop_res;
@@ -232,24 +233,9 @@ int32_t ov2640_init( int32_t spi_dev_id, int32_t i2c_dev_id )
             break;
         }
 
-        ov2640_host_ctx.spi_dev = spi_master_driver_init(
-                                   spi_dev_id,
-                                   3*2, /* 6 DMA buffers */
-                                   0,/* This device's interrupts should happen on core 0 */
-                                   0,
-                                   NULL );
-
-        /* Camera supports 8 MHz max */
-        spi_master_device_init( ov2640_host_ctx.spi_dev,
-                                0, 0, /* mode 0 */
-                                8,    /* 100 MHz / (8*2) / 2 = 3.125 MHz SPI clock */
-                                3,    /* 3 nanosecond cs to data minimum time */
-                                0,    /* no inter-byte setup delay required */
-                                0 );  /* no last clock to cs delay required */
-
-
         ov2640_host_ctx.device_addr = OV2640_I2C_ADDR;
-        ov2640_host_ctx.i2c_dev = i2c_driver_init( i2c_dev_id );
+        ov2640_host_ctx.i2c_dev = i2c_dev;
+        ov2640_host_ctx.spi_dev = spi_dev;
 
         //Reset the CPLD
         ov2640_spi_write(0x07, 0x80);

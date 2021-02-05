@@ -39,19 +39,25 @@ SCL         TP18 : SCL_IOL
 Building the firmware
 *********************
 
-Make a directory for the build.
+Using SRAM memory
+=================
+
+Run make:
 
 .. code-block:: console
 
-    $ mkdir build
-    $ cd build
-
-Run cmake:
-
-.. code-block:: console
-
-    $ cmake ../ -DBOARD=XCORE-AI-EXPLORER
     $ make
+
+Using external DDR memory
+=========================
+
+If your board supports LPDDR, you may also place your neural network in the external DDR memory.  Currently, only the Explorer Board supports LPDDR.
+
+To build with the model stored in LPDDR, replace the call to make above with the following:
+
+.. code-block:: console
+
+    $ make USE_EXTMEM=1
 
 Running the firmware
 ====================
@@ -62,13 +68,13 @@ Running with GPIO only:
 
 .. code-block:: console
 
-    $ xrun --xscope ../bin/XCORE-AI-EXPLORER/person_detection.xe
+    $ xrun --xscope ../bin/person_detection.xe
 
 Running with GPIO and host:
 
 .. code-block:: console
 
-    $ xrun --xscope --xscope-port localhost:10234 ../bin/XCORE-AI-EXPLORER/person_detection.xe
+    $ xrun --xscope --xscope-port localhost:10234 ../bin/person_detection.xe
 
 In a second terminal:
 
