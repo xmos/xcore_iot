@@ -30,10 +30,10 @@ set(KISS_FFT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/kissfft")
 set(RTOS_SUPPORT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
 
 set(LIB_DSP_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/api")
-set(LIB_MIC_ARRAY_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/hil/lib_mic_array/lib_mic_array/api")
+set(LIB_MIC_ARRAY_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/legacy_compat/lib_mic_array/lib_mic_array/api")
 
 set(LIB_DSP_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/src")
-set(LIB_MIC_ARRAY_SOURCE_DIR "${RTOS_SUPPORT_DIR}/hil/lib_mic_array")
+set(LIB_MIC_ARRAY_SOURCE_DIR "${RTOS_SUPPORT_DIR}/legacy_compat/lib_mic_array")
 
 #**********************
 # Build flags
@@ -108,19 +108,12 @@ set(LIB_DSP_SOURCES
 )
 
 #**********************
-# lib_logging sources
-#**********************
-#set(LIB_LOGGING_SOURCES
-#  "${LIB_LOGGING_SOURCE_DIR}/lib_logging/src/debug_printf.c"
-#)
-
-#**********************
 # lib_mic_array sources
 #**********************
 set(LIB_MIC_ARRAY_SOURCES
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/mic_array_dual.c"
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs_dual.c"
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs.c"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/mic_array_dual.xc"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs_dual.xc"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs.xc"
 )
 
 #**********************
