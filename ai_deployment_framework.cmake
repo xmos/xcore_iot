@@ -23,6 +23,7 @@ set(TENSORFLOW_LITE_RUNTIME_SOURCES_C
   )
 
 set(TENSORFLOW_LITE_RUNTIME_SOURCES_CXX
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/util.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/error_reporter.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/flatbuffer_conversions.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/op_resolver.cc"
