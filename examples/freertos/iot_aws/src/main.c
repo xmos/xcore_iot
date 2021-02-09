@@ -4,13 +4,12 @@
 /* System headers */
 #include <platform.h>
 #include <xs1.h>
->>>>>>> develop
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
-#include "FreeRTOS_DHCP.h"
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
+#include "FreeRTOS_DHCP.h"
 #include "queue.h"
 
 /* Library headers */
