@@ -58,7 +58,7 @@ pipeline {
                 }
                 stage("Patch toolchain") {
                     steps {
-                        sh "patch -N /XMOS/xTIMEcomposer/15.0.4/target/include/xcore/thread.h -i local_thread_mode_get_bits.patch"
+                        sh "patch -N /XMOS/tools/15.0.4/XMOS/xTIMEcomposer/15.0.4/target/include/xcore/thread.h -i local_thread_mode_get_bits.patch"
                     }
                 }
                 stage("Update all packages") {
