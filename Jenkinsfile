@@ -56,6 +56,11 @@ pipeline {
                         sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
                     }
                 }
+                stage("Patch toolchain") {
+                    steps {
+                        sh "patch -N /XMOS/xTIMEcomposer/15.0.4/target/include/xcore/thread.h -i local_thread_mode_get_bits.patch"
+                    }
+                }
                 stage("Update all packages") {
                     // Roll all conda packages forward beyond their pinned versions
                     when { expression { return params.UPDATE_ALL } }
