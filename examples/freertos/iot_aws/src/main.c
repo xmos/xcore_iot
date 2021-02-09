@@ -7,10 +7,10 @@
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
+#include "queue.h"
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 #include "FreeRTOS_DHCP.h"
-#include "queue.h"
 
 /* Library headers */
 #include "rtos/drivers/gpio/api/rtos_gpio.h"
