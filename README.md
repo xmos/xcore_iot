@@ -10,7 +10,7 @@ Installation
 
 Some dependent libraries are included as git submodules. These can be obtained by cloning this repository with the following command:
 
-    $ git clone git@github.com:xmos/ai_deployment_framework.git
+    $ git clone git@github.com:xmos/adf.git
     $ git submodule update --init
 
 Install at least version 15 of the XMOS tools from your preferred location and activate it by sourcing `SetEnv` in the installation root.
@@ -30,7 +30,7 @@ Virtual Environment
 
 It is recommended that you install the virtual environment in the repo's directory:
 
-    $ cd ai_deployment_framework
+    $ cd adf
     $ conda env create -p ./adf_venv -f environment.yml
 
 Activate the environment by specifying the path:
@@ -47,12 +47,12 @@ Docker Image
 The Dockerfile provided is used in the CI system but can serve as a guide to system setup.
 Installation of the XMOS tools requires connection to our network.
 
-    $ docker build -t xmos/ai_deployment_framework .
+    $ docker build -t xmos/adf .
     $ docker run -it \
         -v $(pwd):/ws \
         -u $(id -u):$(id -g)  \
         -w /ws  \
-        xmos/ai_deployment_framework \
+        xmos/adf \
         bash -l
 
 

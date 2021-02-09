@@ -276,6 +276,10 @@ class XCOREDeviceEndpoint(object):
     def port(self):
         return self._port
 
+    @property
+    def error(self):
+        return self._error
+
     def on_print(self, timestamp, data):
         msg = data.decode("utf-8").rstrip()
         if msg.startswith("Failed to allocate tail memory"):
@@ -583,6 +587,11 @@ class XCOREDeviceServer(object):
                     for cached_device in cached_devices:
                         if endpoint.port == cached_device["xscope_port"]:
                             endpoint.disconnect()
+                            if endpoint.error:
+                                # the device was lft in an error state so reset it
+                                cached_device = XCOREDeviceServer._reset_device_use(
+                                    cached_device
+                                )
                             cached_device["in_use"] = False
                             logging.debug(f"Released device: {cached_device}")
 
