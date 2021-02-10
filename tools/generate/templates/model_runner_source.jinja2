@@ -1,0 +1,81 @@
+// This is a TensorFlow Lite model runner interface that has been
+// generated using the generate_model_runner tool.
+
+#include "{{header_file}}"
+
+#include "model_runner/api/model_runner_profiler.h"
+#include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
+#include "tensorflow/lite/micro/kernels/xcore/xcore_ops.h"
+
+typedef tflite::MicroMutableOpResolver<{{builtin_operators|length + custom_operators|length}}> resolver_t;
+typedef xcore::ModelRunnerProfiler<{{layer_count}}> profiler_t;
+
+static resolver_t resolver_s;
+static resolver_t *resolver = nullptr;
+
+static profiler_t *profiler = nullptr;
+
+__attribute__((fptrgroup("model_runner_resolver_get_fptr_grp")))
+void {{name}}_resolver_get(void **v_resolver)
+{
+  // Set up op resolver
+  //   This pulls in all the operation implementations we need.
+  if (resolver == nullptr) {
+    resolver = &resolver_s;
+    {%- for builtin_operator in builtin_operators %}
+    resolver->Add{{builtin_operator}}();
+    {%- endfor %}
+    {%- for custom_operator in custom_operators %}
+    resolver->AddCustom(tflite::ops::micro::xcore::{{custom_operator[0]}}, tflite::ops::micro::xcore::{{custom_operator[1]}}());
+    {%- endfor %}
+    {%- for unknown_operator in unknown_operators %}
+    // Unable to generate registration code for {{unknown_operator}}
+    {%- endfor %}
+  }
+
+  *v_resolver = static_cast<void *>(resolver);
+}
+
+__attribute__((fptrgroup("model_runner_profiler_get_fptr_grp")))
+void {{name}}_profiler_get(void **v_profiler) {
+#ifndef NDEBUG
+  if (profiler == nullptr) {
+    // Set up profiling
+    static profiler_t profiler_s;
+
+    profiler = &profiler_s;
+  }
+#endif
+
+  *v_profiler = static_cast<void *>(profiler);
+}
+
+__attribute__((fptrgroup("model_runner_profiler_reset_fptr_grp")))
+void {{name}}_profiler_reset() {
+  if (profiler) {
+    profiler->Reset();
+  }
+}
+
+#ifndef NDEBUG
+
+__attribute__((fptrgroup("model_runner_profiler_times_get_fptr_grp")))
+void {{name}}_profiler_times_get(uint32_t *count, const uint32_t **times) {
+  if (profiler) {
+    *count = profiler->GetNumTimes();
+    *times = profiler->GetTimes();
+  }
+}
+
+#endif
+
+//********************************
+// Create a {{name}} model runner.
+//********************************
+void {{name}}_model_runner_create(model_runner_t *ctx, void *buffer) {
+  ctx->hInterpreter = buffer;
+  ctx->resolver_get_fun = &{{name}}_resolver_get;
+  ctx->profiler_get_fun = &{{name}}_profiler_get;
+  ctx->profiler_reset_fun = &{{name}}_profiler_reset;
+  ctx->profiler_times_get_fun = &{{name}}_profiler_times_get;
+}
