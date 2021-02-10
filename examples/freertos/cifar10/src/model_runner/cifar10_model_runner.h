@@ -4,7 +4,7 @@
 #ifndef CIFAR10_MODEL_RUNNER_H_
 #define CIFAR10_MODEL_RUNNER_H_
 
-#include "model_runner/api/model_runner.h"
+#include "model_runner.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,8 +14,8 @@ extern "C" {
  *
  * @param[out] ctx      Model runner context
  * @param[in]  buffer   Buffer for interpreter.  If NULL, will be allocated with
- *                      malloc.  The caller is responsible for freeing the mamory
- *                      if needed.  To determine the size at run time call:
+ *                      malloc.  The caller is responsible for freeing the
+ * mamory if needed.  To determine the size at run time call:
  *
  *       size_t size = model_runner_buffer_size_get();
  */
