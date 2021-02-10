@@ -24,12 +24,14 @@ Installation
 Cloning the SDK
 ===============
 
-Clone the AIoT SDK repository with the following command:
+Clone the AIoT SDK repository with the following commands:
 
 .. code-block:: console
 
-    $ git clone --recurse-submodules https://github.com/xmos/aiot_sdk.git
-
+    $ git clone https://github.com/xmos/aiot_sdk.git
+    $ cd aiot_sdk
+    $ git submodule update --init --recursive modules
+    
 Set up Environment Variable
 ===========================
 

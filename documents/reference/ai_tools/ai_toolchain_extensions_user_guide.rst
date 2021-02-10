@@ -92,7 +92,7 @@ Activate the environment
 
 .. code-block:: console
 
-    $ conda activate xcore_env
+    $ conda activate xmos_env
 
 .. note:: You may need to specify the fully-qualified path to your environment.
 
