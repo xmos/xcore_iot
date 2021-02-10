@@ -15,15 +15,13 @@ set(LIB_NN_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/lib_nn")
 set(LIB_NN_ALT_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/lib_nn/lib_nn/api")
 set(LIB_NN_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/lib_nn")
 
+set(MODEL_RUNNER_DIR "${CMAKE_CURRENT_LIST_DIR}/model_runner")
+
 #********************************
 # TensorFlow Lite Micro sources
 #********************************
-set(TENSORFLOW_LITE_RUNTIME_SOURCES_C
+set(TENSORFLOW_LITE_RUNTIME_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/c/common.c"
-  )
-
-set(TENSORFLOW_LITE_RUNTIME_SOURCES_CXX
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/util.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/error_reporter.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/flatbuffer_conversions.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/op_resolver.cc"
@@ -49,24 +47,24 @@ set(TENSORFLOW_LITE_RUNTIME_SOURCES_CXX
   )
 
 if (X86)
-  set(TENSORFLOW_LITE_RUNTIME_SOURCES_CXX
-    ${TENSORFLOW_LITE_RUNTIME_SOURCES_CXX}
+  set(TENSORFLOW_LITE_RUNTIME_SOURCES
+    ${TENSORFLOW_LITE_RUNTIME_SOURCES}
     "${FLATBUFFERS_SOURCE_DIR}/util.cpp"
     "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/debug_log.cc"
     "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/micro_time.cc"
     )
-else (X86)
-  set(TENSORFLOW_LITE_RUNTIME_SOURCES_CXX
-    ${TENSORFLOW_LITE_RUNTIME_SOURCES_CXX}
+else ()
+  set(TENSORFLOW_LITE_RUNTIME_SOURCES
+    ${TENSORFLOW_LITE_RUNTIME_SOURCES}
     "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/xcore/debug_log.cc"
     "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/xcore/micro_time.cc"
     )
-endif (X86)
+endif ()
 
 #*************************************************
 # TensorFlow Lite Micro reference kernel sources
 #*************************************************
-set(TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES_CXX
+set(TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/activations.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/add.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/arg_min_max.cc"
@@ -112,7 +110,7 @@ set(TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES_CXX
 #*************************************************
 # TensorFlow Lite Micro xcore kernel sources
 #*************************************************
-set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES_CXX
+set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_profiler.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_interpreter.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/xcore/xcore_planning.cc"
@@ -136,39 +134,28 @@ set(TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES_CXX
 file(GLOB_RECURSE LIB_NN_SOURCES_C "${LIB_NN_SOURCE_DIR}/lib_nn/src/*.c")
 file(GLOB_RECURSE LIB_NN_SOURCES_ASM "${LIB_NN_SOURCE_DIR}/lib_nn/src/asm/*.S")
 
-
-#**********************
-# set user variables
-#**********************
-
-set(XCORE_INTERPRETER_SOURCES_C
-    ${TENSORFLOW_LITE_RUNTIME_SOURCES_C}
-    ${LIB_NN_SOURCES_C}
-)
-set(XCORE_INTERPRETER_SOURCES_CXX
-    ${TENSORFLOW_LITE_RUNTIME_SOURCES_CXX}
-    ${TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES_CXX}
-    ${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES_CXX}
-)
-
-set(XCORE_INTERPRETER_SOURCES_ASM
-    ${LIB_NN_SOURCES_ASM}
-)
+#**************************************
+# set XCORE_INTERPRETER user variables
+#**************************************
 
 if (X86)
   set(XCORE_INTERPRETER_SOURCES
-      ${XCORE_INTERPRETER_SOURCES_C}
-      ${XCORE_INTERPRETER_SOURCES_CXX}
+      ${LIB_NN_SOURCES_C}
+      ${TENSORFLOW_LITE_RUNTIME_SOURCES}
+      ${TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES}
+      ${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES}
   )
-else (X86)
+else ()
   set(XCORE_INTERPRETER_SOURCES
-      ${XCORE_INTERPRETER_SOURCES_C}
-      ${XCORE_INTERPRETER_SOURCES_CXX}
-      ${XCORE_INTERPRETER_SOURCES_ASM}
+    ${LIB_NN_SOURCES_C}
+    ${TENSORFLOW_LITE_RUNTIME_SOURCES}
+    ${TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES}
+    ${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES}
+    ${LIB_NN_SOURCES_ASM}
   )
-endif (X86)
+endif ()
 
-set(XCORE_INTERPRETER_INCLUDE_DIRS
+set(XCORE_INTERPRETER_INCLUDES
   ${FLATBUFFERS_INCLUDE_DIR}
   ${GEMMLOWP_INCLUDE_DIR}
   ${RUY_INCLUDE_DIR}
@@ -177,4 +164,44 @@ set(XCORE_INTERPRETER_INCLUDE_DIRS
   ${LIB_NN_INCLUDE_DIR}
 )
 
+list(REMOVE_DUPLICATES XCORE_INTERPRETER_SOURCES)
+list(REMOVE_DUPLICATES XCORE_INTERPRETER_INCLUDES)
+
+#**************************************
+# set MODEL_RUNNER user variables
+#**************************************
+
+set(MODEL_RUNNER_SOURCES
+    ${TENSORFLOW_LITE_RUNTIME_SOURCES}
+    ${TENSORFLOW_LITE_REFERENCE_OPERATOR_SOURCES}
+    ${TENSORFLOW_LITE_XCORE_OPERATOR_SOURCES}
+    ${LIB_NN_SOURCES_C}
+    ${LIB_NN_SOURCES_ASM}
+    "${MODEL_RUNNER_DIR}/src/model_runner.cc"
+)
+
+set(MODEL_RUNNER_INCLUDES
+  ${FLATBUFFERS_INCLUDE_DIR}
+  ${GEMMLOWP_INCLUDE_DIR}
+  ${RUY_INCLUDE_DIR}
+  ${TENSORFLOW_INCLUDE_DIR}
+  ${LIB_NN_ALT_INCLUDE_DIR}
+  ${LIB_NN_INCLUDE_DIR}
+  "${MODEL_RUNNER_DIR}/api"
+)
+
+list(REMOVE_DUPLICATES MODEL_RUNNER_SOURCES)
+list(REMOVE_DUPLICATES MODEL_RUNNER_INCLUDES)
+
+#***************************
+# set source file properties
+#***************************
+
+# suppress unused variables warnings for now
+set_source_files_properties(${XCORE_INTERPRETER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
+set_source_files_properties(${MODEL_RUNNER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
+
+# suppress fptrgroup warnings for now
+set_source_files_properties(${XCORE_INTERPRETER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-xcore-fptrgroup)
+set_source_files_properties(${MODEL_RUNNER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-xcore-fptrgroup)
 

@@ -1,0 +1,28 @@
+// This is a TensorFlow Lite model runner interface that has been
+// generated using the generate_model_runner tool.
+
+#ifndef {{include_guard}}
+#define {{include_guard}}
+
+#include "model_runner.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** Create a {{name}} model runner.
+ *
+ * @param[out] ctx      Model runner context
+ * @param[in]  buffer   Buffer for interpreter.  If NULL, will be allocated with
+ *                      malloc.  The caller is responsible for freeing the memory
+ *                      if needed.  To determine the size at run time call:
+ *
+ *       size_t size = model_runner_buffer_size_get();
+ */
+void {{name}}_model_runner_create(model_runner_t *ctx, void *buffer);
+
+#ifdef __cplusplus
+};
+#endif
+
+#endif  // {{include_guard}}
