@@ -1,7 +1,7 @@
-// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
-#include "model_runner/api/model_runner.h"
+#include "model_runner.h"
 
 #include <ctime>
 extern "C" {

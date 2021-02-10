@@ -43,7 +43,7 @@ target_sources(libxcore_interpreters
 )
 
 target_include_directories(libxcore_interpreters
-  PRIVATE ${XCORE_INTERPRETER_INCLUDE_DIRS}
+  PRIVATE ${XCORE_INTERPRETER_INCLUDES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 

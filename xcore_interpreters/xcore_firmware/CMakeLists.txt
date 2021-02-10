@@ -75,12 +75,12 @@ target_sources(xcore_interpreter_cmdline
 )
 
 target_include_directories(xcore_interpreter_xscope
-  PRIVATE ${XCORE_INTERPRETER_INCLUDE_DIRS}
+  PRIVATE ${XCORE_INTERPRETER_INCLUDES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
 target_include_directories(xcore_interpreter_cmdline
-  PRIVATE ${XCORE_INTERPRETER_INCLUDE_DIRS}
+  PRIVATE ${XCORE_INTERPRETER_INCLUDES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
