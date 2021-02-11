@@ -65,3 +65,8 @@
 	path = modules/hil/lib_xud
 	url = git@github.com:xmos/lib_xud.git
 	branch = DEV/XS3
+[submodule "tinyusb"]
+	path = modules/rtos/sw_services/usb/thirdparty/tinyusb
+	url = git@github.com:hathach/tinyusb.git
+	shallow = true
+	fetchRecurseSubmodules = false
