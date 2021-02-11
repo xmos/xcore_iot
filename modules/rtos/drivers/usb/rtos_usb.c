@@ -169,8 +169,10 @@ XUD_Result_t rtos_usb_endpoint_transfer_start(rtos_usb_t *ctx,
         res = xud_data_get_start(ctx->ep[ep_num][dir], buffer);
     }
 
-    //rtos_printf("Enable trigger on %d %d\n", ep_num, dir);
-    triggerable_enable_trigger(ctx->c_ep[ep_num][dir]);
+    if (res == XUD_RES_OKAY) {
+        //rtos_printf("Enable trigger on %d %d\n", ep_num, dir);
+        triggerable_enable_trigger(ctx->c_ep[ep_num][dir]);
+    }
 
     return res;
 }
