@@ -9,7 +9,7 @@ LIB_XCORE_INTERPRETERS = [
     "libs/macos/libxcore_interpreters.1.0.1.dylib",
 ]
 
-EXCLUDES = ["*tests", "*tests.*", "python_bindings", "xcore_firmware"]
+EXCLUDES = ["*tests", "*tests.*", "cmake", "python_bindings", "xcore_firmware"]
 
 INSTALL_REQUIRES = [
     "numpy==1.19.5",
