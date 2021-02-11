@@ -18,18 +18,18 @@ device are available to authorised parties on `www.xmos.ai <https://www.xmos.ai/
 Installation
 ------------
 
-Some dependent components are included as git submodules. These can be obtained by cloning this repository with the following command:
+Some dependent components are included as git submodules. These can be obtained by cloning this repository with the following commands:
 
 .. code-block:: console
 
-    $ git clone --recurse-submodules https://github.com/xmos/aiot_sdk.git
+    $ git clone https://github.com/xmos/aiot_sdk.git
+    $ cd aiot_sdk
+    $ git submodule update --init --recursive modules
 
 Documentation
 -------------
 
-See the `Getting Started Guide <https://github.com/xmos/aiot_sdk/blob/develop/documents/getting_started_guide.rst>`_ for instructions on installing and using the AI Toolchain Extensions.
-
-We have created an application template for a new FreeRTOS application.  See `rtos_app_template <https://github.com/xmos/rtos_app_template>`_.  And, we have created and documented an example application using this template.  See `freertos_app_example <https://github.com/xmos/freertos_app_example>`_
+See the `Getting Started Guide <https://github.com/xmos/aiot_sdk/blob/develop/documents/quick_start/getting-started.rst>`_ for instructions on installing and using the AI Toolchain Extensions.
 
 Contributing
 ------------

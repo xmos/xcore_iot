@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
+set(AIOT_SDK_PATH $ENV{XMOS_AIOT_SDK_PATH})
+
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -16,12 +18,8 @@ endif()
 project(hello_world VERSION 1.0.0 )
 
 enable_language(CXX C ASM)
-
-#**********************
-# Paths
-#**********************
-
-set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #**********************
 # Build flags
@@ -51,14 +49,14 @@ target_compile_options(hello_world PRIVATE ${BUILD_FLAGS})
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
+  "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
+set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
 
 #**********************
 # APP sources
 #**********************
-include("${AI_TOOLS_DIR}/utils/cmake/xcore_interpreter.cmake")
+include("${AIOT_SDK_PATH}/modules/adf/ai_deployment_framework.cmake")
 
 set(APP_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/main.cc"
@@ -86,7 +84,7 @@ target_sources(hello_world
 
 target_include_directories(hello_world
   PRIVATE ${ADDITIONAL_INCLUDE_DIR}
-  PRIVATE ${XCORE_INTERPRETER_INCLUDE_DIRS}
+  PRIVATE ${XCORE_INTERPRETER_INCLUDES}
   PRIVATE "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world"
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
 )

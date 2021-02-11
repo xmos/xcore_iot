@@ -27,7 +27,7 @@ done
 #*************************************************
 # Build bare-metal XCORE-AI-EXPLORER only examples
 #*************************************************
-BOARD=XCORE-AI-EXPLORER
+board=XCORE-AI-EXPLORER
 declare -a bare_metal_examples=(
     "cifar10"
     "hello_world"
@@ -37,7 +37,7 @@ declare -a bare_metal_examples=(
 
 for example in ${bare_metal_examples[@]}; do
     echo '******************************************************'
-    echo '* Building' ${example} 'for' ${BOARD}
+    echo '* Building' ${example} 'for' ${board}
     echo '******************************************************'
     (cd examples/bare-metal/${example}; rm -rf build)
     (cd examples/bare-metal/${example}; mkdir -p build)
@@ -56,19 +56,7 @@ for board in ${boards[@]}; do
         echo '******************************************************'
         echo '* Building' ${example} 'for' ${board}
         echo '******************************************************'
-        (cd examples/freertos/${example}; rm -rf build_${board})
-        (cd examples/freertos/${example}; mkdir -p build_${board})
-        (cd examples/freertos/${example}/build_${board}; cmake ../ -DBOARD=${board}; make)
-    done
-
-    declare -a freertos_make_examples=(
-        "independent_tiles"
-        )
-
-    for example in ${freertos_make_examples[@]}; do
-        echo '******************************************************'
-        echo '* Building' ${example} 'for' ${board}
-        echo '******************************************************'
+        (cd examples/freertos/${example}; make distclean BOARD=${board})
         (cd examples/freertos/${example}; make BOARD=${board})
     done
 done
@@ -76,19 +64,19 @@ done
 #***********************************************
 # Build FreeRTOS XCORE-AI-EXPLORER only examples
 #***********************************************
-BOARD=XCORE-AI-EXPLORER
+board=XCORE-AI-EXPLORER
 
 declare -a freertos_examples=(
     "explorer_board"
     "iot_aws"
     "person_detection"
+    "independent_tiles"
     )
 
 for example in ${freertos_examples[@]}; do
     echo '******************************************************'
-    echo '* Building' ${example} 'for' ${BOARD}
+    echo '* Building' ${example} 'for' ${board}
     echo '******************************************************'
-    (cd examples/freertos/${example}; rm -rf build)
-    (cd examples/freertos/${example}; mkdir -p build)
-    (cd examples/freertos/${example}/build; cmake ../ -DBOARD=${BOARD}; make)
+    (cd examples/freertos/${example}; make distclean BOARD=${board})
+    (cd examples/freertos/${example}; make BOARD=${board})
 done

@@ -1,0 +1,11 @@
+--- /XMOS/xTIMEcomposer/15.0.4/target/include/xcore/thread.h	2020-12-16 08:07:58.000000000 -0500
++++ /XMOS/xTIMEcomposer/15.0.4/target/include/xcore/thread.h	2021-02-09 13:26:49.887268470 -0500
+@@ -306,7 +306,7 @@
+  */
+ _XCORE_INLINE thread_mode_t local_thread_mode_get_bits(void) _XCORE_NOTHROW
+ {
+-  return __xcore_get_local_thread_mode_bits();
++  return (thread_mode_t) __xcore_get_local_thread_mode_bits();
+ }
+ 
+ /** \brief Clear bits in the current thread's mode
