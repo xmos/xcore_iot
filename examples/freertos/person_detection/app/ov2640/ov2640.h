@@ -44,7 +44,10 @@
 #define ARDUCAM_BURST_FIFO_READ			0x3C
 #define ARDUCAM_SINGLE_FIFO_READ		0x3D
 
-int32_t ov2640_init( int32_t spi_dev_id, int32_t i2c_dev_id );
+#include "rtos/drivers/spi/api/rtos_spi_master.h"
+#include "rtos/drivers/i2c/api/rtos_i2c_master.h"
+
+int32_t ov2640_init( rtos_spi_master_device_t* spi_dev, rtos_i2c_master_t* i2c_dev );
 int32_t ov2640_configure();
 
 void ov2640_flush_fifo();

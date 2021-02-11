@@ -1,28 +1,12 @@
-
 // This is a TensorFlow Lite model file that has been converted into a C data
-// array using the tensorflow.lite.util.convert_bytes_to_c_source() function.
-// This form is useful for compiling into a binary for devices that don't have a
-// file system.
+// array using the convert_tflite_to_c_source() tool.
 
-
-// We need to keep the data array aligned on some architectures.
-#ifdef __has_attribute
-#define HAVE_ATTRIBUTE(x) __has_attribute(x)
-#else
-#define HAVE_ATTRIBUTE(x) 0
-#endif
-#if HAVE_ATTRIBUTE(aligned) || (defined(__GNUC__) && !defined(__clang__))
-#define DATA_ALIGN_ATTRIBUTE __attribute__((aligned(4)))
-#else
-#define DATA_ALIGN_ATTRIBUTE
-#endif
-
-#ifdef USE_SWMEM
+#if( USE_SWMEM == 1)
 __attribute__((section(".SwMem_data")))
-#elif USE_EXTMEM
+#elif( USE_EXTMEM == 1)
 __attribute__((section(".ExtMem_data")))
 #endif
-unsigned char person_detect_model[] DATA_ALIGN_ATTRIBUTE = {
+unsigned char person_detect_model_data[] __attribute__((aligned(4))) = {
     0x20, 0x00, 0x00, 0x00, 0x54, 0x46, 0x4c, 0x33, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x12, 0x00, 0x1c, 0x00, 0x18, 0x00, 0x14, 0x00, 0x10, 0x00, 0x0c, 0x00,
     0x08, 0x00, 0x00, 0x00, 0x04, 0x00, 0x12, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00,

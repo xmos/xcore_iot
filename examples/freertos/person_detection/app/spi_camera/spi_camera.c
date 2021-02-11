@@ -9,17 +9,12 @@
 #include "queue.h"
 
 /* Library headers */
-#include "soc.h"
-
-/* BSP/bitstream headers */
-#include "bitstream_devices.h"
-#include "i2c_driver.h"
-#include "spi_master_driver.h"
+#include "rtos/drivers/i2c/api/rtos_i2c_master.h"
+#include "rtos/drivers/spi/api/rtos_spi_master.h"
 
 /* App headers */
 #include "spi_camera.h"
 #include "ov2640.h"
-#include "ai_driver.h"
 #include "app_conf.h"
 
 static void camera_task( void *arg )
@@ -45,7 +40,7 @@ static void camera_task( void *arg )
         }
 
         debug_printf("arducam buffer has %d bytes ready\n", ov2640_read_fifo_length());
-
+        
         ov2640_spi_read_buf( img_buf, IMAGE_BUF_SIZE, &tx_buf, 1 );
 
         debug_printf("Arducam -> FreeRTOS done\n");
@@ -61,11 +56,11 @@ static void camera_task( void *arg )
     }
 }
 
-static int32_t setup()
+static int32_t setup(rtos_spi_master_device_t* spi_dev, rtos_i2c_master_t* i2c_dev)
 {
     int32_t retval = pdFALSE;
 
-    retval = ov2640_init( BITSTREAM_SPI_DEVICE_A, BITSTREAM_I2C_DEVICE_A );
+    retval = ov2640_init( spi_dev, i2c_dev );
 
     if( retval == pdTRUE )
     {
@@ -75,12 +70,12 @@ static int32_t setup()
     return retval;
 }
 
-int32_t create_spi_camera_to_queue( UBaseType_t priority, QueueHandle_t q_output )
+int32_t create_spi_camera_to_queue( rtos_spi_master_device_t* spi_dev, rtos_i2c_master_t* i2c_dev, UBaseType_t priority, QueueHandle_t q_output )
 {
     int32_t retval = pdFALSE;
 
     /* Setup camera */
-    if( setup() == pdTRUE )
+    if( setup(spi_dev, i2c_dev) == pdTRUE )
     {
         /* Create camera task to take images and feed them to queue */
         xTaskCreate( camera_task, "camera", portTASK_STACK_DEPTH( camera_task ), q_output , priority, NULL );

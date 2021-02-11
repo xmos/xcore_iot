@@ -65,7 +65,7 @@ To flash the example images, run the following commands:
 Using external flash memory
 ===========================
 
-To building with the model stored in flash, replace the call to make above with the following:
+To build with the model stored in flash, replace the call to make above with the following:
 
 .. code-block:: console
 
@@ -83,7 +83,7 @@ Using external DDR memory
 
 If your board supports LPDDR, you may also place your neural network in the external DDR memory.  Currently, only the Explorer Board supports LPDDR.
 
-To building with the model stored in LPDDR, replace the call to cmake above with the following:
+To build with the model stored in LPDDR, replace the call to make above with the following:
 
 .. code-block:: console
 

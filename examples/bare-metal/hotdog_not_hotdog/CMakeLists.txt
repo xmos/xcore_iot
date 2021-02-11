@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
+set(AIOT_SDK_PATH $ENV{XMOS_AIOT_SDK_PATH})
+
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -17,12 +19,6 @@ endif()
 project(hotdog_not_hotdog VERSION 1.0.0)
 
 enable_language(CXX XC C ASM)
-
-#**********************
-# Paths
-#**********************
-
-set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
 
 #**********************
 # Build flags
@@ -57,14 +53,14 @@ target_compile_options(hotdog_not_hotdog PRIVATE ${BUILD_FLAGS})
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
+  "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
+set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
 
 #**********************
 # APP sources
 #**********************
-include("${AI_TOOLS_DIR}/utils/cmake/xcore_interpreter.cmake")
+include("${AIOT_SDK_PATH}/modules/adf/ai_deployment_framework.cmake")
 
 set(INFERENCE_ENGINE_SOURCE_DIR
   "${PROJECT_SOURCE_DIR}/inference_engine/src"
@@ -77,7 +73,7 @@ set(INFERENCE_ENGINE_SOURCES
 )
 
 set(INFERENCE_ENGINE_INCLUDE_DIRS
-  ${XCORE_INTERPRETER_INCLUDE_DIRS}
+  ${XCORE_INTERPRETER_INCLUDES}
   ${INFERENCE_ENGINE_SOURCE_DIR}
 )
 

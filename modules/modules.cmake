@@ -11,7 +11,7 @@ set(LIB_LOGGING_DIR "${MODULES_DIR}/lib_logging")
 set(LIB_RANDOM_DIR "${MODULES_DIR}/lib_random")
 set(LIB_XS3_MATH_DIR "${MODULES_DIR}/lib_xs3_math")
 set(LEGACY_COMPAT_DIR "${MODULES_DIR}/legacy_compat")
-set(MODEL_RUNNER_DIR "${MODULES_DIR}/model_runner")
+set(ADF_DIR "${MODULES_DIR}/adf")
 set(TENSORFLOW_SUPPORT_DIR "${MODULES_DIR}/tensorflow_support")
 
 #**********************
@@ -23,7 +23,7 @@ option(USE_LIB_LOGGING "Enable to include lib_logging" TRUE)
 option(USE_LIB_RANDOM "Enable to include lib_random" TRUE)
 option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not used
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
-option(USE_MODEL_RUNNER "Enable to include model runner" FALSE)
+option(USE_ADF "Enable to include AI deployment framework" FALSE)
 option(USE_TENSORFLOW_SUPPORT "Enable to include TensorFlow support" FALSE)
 
 #********************************
@@ -143,20 +143,31 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_FLAGS "-Os")
 
     string(TOLOWER ${THIS_LIB} THIS_PATH)
-    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.xc")
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/arch/xcore/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/arch/xcore/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_ADD_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/arch/xcore/*/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ADD_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/arch/xcore/*/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_BFP_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/bfp/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_BFP_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/bfp/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_VECT_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/vect/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_VECT_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/vect/*.S")
 
     set(${THIS_LIB}_SOURCES
-        ${${THIS_LIB}_XC_SOURCES}
         ${${THIS_LIB}_C_SOURCES}
         ${${THIS_LIB}_ASM_SOURCES}
+        ${${THIS_LIB}_ADD_C_SOURCES}
+        ${${THIS_LIB}_ADD_ASM_SOURCES}
+        ${${THIS_LIB}_BFP_C_SOURCES}
+        ${${THIS_LIB}_BFP_ASM_SOURCES}
+        ${${THIS_LIB}_VECT_C_SOURCES}
+        ${${THIS_LIB}_VECT_ASM_SOURCES}
     )
 
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
+        "${${THIS_LIB}_DIR}/${THIS_PATH}/src"
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
@@ -176,11 +187,11 @@ endif()
 unset(THIS_LIB)
 
 #********************************
-# Gather model runner sources
+# Gather ADF sources
 #********************************
-set(THIS_LIB MODEL_RUNNER)
+set(THIS_LIB ADF)
 if(${USE_${THIS_LIB}})
-    include("${MODEL_RUNNER_DIR}/model_runner.cmake")
+    include("${ADF_DIR}/ai_deployment_framework.cmake")
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)

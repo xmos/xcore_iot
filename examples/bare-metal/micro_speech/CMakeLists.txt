@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
+set(AIOT_SDK_PATH $ENV{XMOS_AIOT_SDK_PATH})
+
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -21,19 +23,15 @@ enable_language(CXX XC C ASM)
 # Paths
 #**********************
 
-set(AI_TOOLS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/tools/ai_tools")
-
-set(TENSORFLOW_SOURCE_DIR "${AI_TOOLS_DIR}/third_party/tensorflow")
-
 set(KISS_FFT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/kissfft")
 
-set(RTOS_SUPPORT_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
+set(RTOS_SUPPORT_DIR "${AIOT_SDK_PATH}/modules")
 
 set(LIB_DSP_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/api")
-set(LIB_MIC_ARRAY_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/hil/lib_mic_array/lib_mic_array/api")
+set(LIB_MIC_ARRAY_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/legacy_compat/lib_mic_array/lib_mic_array/api")
 
 set(LIB_DSP_SOURCE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/src")
-set(LIB_MIC_ARRAY_SOURCE_DIR "${RTOS_SUPPORT_DIR}/hil/lib_mic_array")
+set(LIB_MIC_ARRAY_SOURCE_DIR "${RTOS_SUPPORT_DIR}/legacy_compat/lib_mic_array")
 
 #**********************
 # Build flags
@@ -82,6 +80,9 @@ set(KISS_FFT_SOURCES
 #**********************
 # micro_features sources
 #**********************
+
+include("${AIOT_SDK_PATH}/modules/adf/ai_deployment_framework.cmake")
+
 set(MICRO_FEATURES_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc"
@@ -108,33 +109,25 @@ set(LIB_DSP_SOURCES
 )
 
 #**********************
-# lib_logging sources
-#**********************
-#set(LIB_LOGGING_SOURCES
-#  "${LIB_LOGGING_SOURCE_DIR}/lib_logging/src/debug_printf.c"
-#)
-
-#**********************
 # lib_mic_array sources
 #**********************
 set(LIB_MIC_ARRAY_SOURCES
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/mic_array_dual.c"
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs_dual.c"
-  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs.c"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/mic_array_dual.xc"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs_dual.xc"
+  "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir/fir_coefs.xc"
 )
 
 #**********************
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
+  "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
+set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
 
 #**********************
 # APP sources
 #**********************
-include("${AI_TOOLS_DIR}/utils/cmake/xcore_interpreter.cmake")
 
 set(APP_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/feature_provider.cc"
@@ -186,7 +179,7 @@ target_sources(micro_speech_test
 
 set(COMMON_TARGET_INCLUDES
   ${ADDITIONAL_INCLUDE_DIR}
-  ${XCORE_INTERPRETER_INCLUDE_DIRS}
+  ${XCORE_INTERPRETER_INCLUDES}
   ${KISS_FFT_INCLUDE_DIR}
   ${LIB_DSP_INCLUDE_DIR}
   ${LIB_MIC_ARRAY_INCLUDE_DIR}

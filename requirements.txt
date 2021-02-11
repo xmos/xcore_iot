@@ -1,3 +1,4 @@
 Jinja2 == 2.11.2
--e tools/ai_tools/xcore_interpreters
+-e modules/adf/xcore_interpreters
 -e tools/ai_tools/tflite2xcore
+#git+https://github.com/xmos/ai_tools.git@5efc662e2bf7f955e8e66579a369517926e3e2c0#subdirectory=tflite2xcore
