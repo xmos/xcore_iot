@@ -26,6 +26,8 @@ set(USE_RTOS_QSPI_FLASH_DRIVER FALSE)
 set(USE_RTOS_TRACE_DRIVER TRUE)
 set(USE_RTOS_WIFI_DRIVER FALSE)
 
+set(USE_TINYUSB TRUE)
+
 ## Import XMOS configurations
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
@@ -60,6 +62,8 @@ set(APP_INCLUDES
 )
 
 add_compile_definitions(
+    TUSB_OPT_DEVICE_ENABLED=1
+    CFG_TUSB_OS=OPT_OS_FREERTOS
     DEBUG_PRINT_ENABLE=1
     XUD_CORE_CLOCK=700
     PLATFORM_USES_TILE_0=1

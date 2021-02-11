@@ -1,4 +1,5 @@
-// Copyright (c) 2021, XMOS Ltd, All rights reserved
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
+// XMOS Public License: Version 1
 
 /* System headers */
 #include <stdbool.h>
@@ -15,6 +16,8 @@
 #include "rtos_usb.h"
 #include <xcore/triggerable.h>
 #include "rtos_interrupt.h"
+
+#include "tusb.h"
 
 /* App headers */
 
@@ -72,6 +75,38 @@ void endpoint_1(rtos_usb_t *ctx)
     }
 }
 
+/* Device mounted callback */
+void tud_mount_cb(void)
+{
+    rtos_printf("mounted\n");
+}
+
+/* Device unmounted callback */
+void tud_umount_cb(void)
+{
+    rtos_printf("unmounted\n");
+}
+
+/* Device suspended callback */
+void tud_suspend_cb(bool remote_wakeup_en)
+{
+    (void)remote_wakeup_en;
+    rtos_printf("suspended\n");
+}
+
+/* Device resumed callback */
+void tud_resume_cb(void)
+{
+    rtos_printf("resumed\n");
+}
+
+/* DFU detached callback */
+void tud_dfu_runtime_reboot_to_dfu_cb(void)
+{
+    rtos_printf("dfu detached\n");
+}
+
+
 void vApplicationDaemonTaskStartup(void *arg)
 {
     /* Endpoint type tables - informs XUD what the transfer types for each Endpoint in use and also
@@ -104,6 +139,9 @@ void vApplicationDaemonTaskStartup(void *arg)
             &usb_ctx,
             RTOS_THREAD_STACK_SIZE(endpoint_1),
             configMAX_PRIORITIES / 2);
+
+    tusb_init();
+    tud_task();
 
     vTaskDelete(NULL);
 }

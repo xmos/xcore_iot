@@ -1,9 +1,6 @@
-/*
- * endpoint0.c
- *
- *  Created on: Feb 8, 2021
- *      Author: mbruno
- */
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
+// XMOS Public License: Version 1
+
 #include <string.h>
 
 #include "rtos_usb.h"

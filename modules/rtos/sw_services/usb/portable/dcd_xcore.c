@@ -45,7 +45,9 @@ static void reset_ep(uint8_t ep_addr, bool in_isr)
     tusb_speed_t tu_speed;
 
     uint8_t const epnum = tu_edpt_number(ep_addr);
-    uint8_t const dir   = tu_edpt_dir(ep_addr);
+    uint8_t const rhport = 0;
+
+    uint8_t dir = tu_edpt_dir(ep_addr);
 
     XUD_ep one = usb_ctx.ep[epnum][dir];
     XUD_ep *two = NULL;
@@ -231,4 +233,3 @@ void dcd_edpt_clear_stall (uint8_t rhport, uint8_t ep_addr)
 
   XUD_ClearStallByAddr(ep_addr);
 }
-
