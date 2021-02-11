@@ -22,6 +22,7 @@ set(MODEL_RUNNER_DIR "${CMAKE_CURRENT_LIST_DIR}/model_runner")
 #********************************
 set(TENSORFLOW_LITE_RUNTIME_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/c/common.c"
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/util.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/error_reporter.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/flatbuffer_conversions.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/core/api/op_resolver.cc"
@@ -197,11 +198,8 @@ list(REMOVE_DUPLICATES MODEL_RUNNER_INCLUDES)
 # set source file properties
 #***************************
 
-# suppress unused variables warnings for now
-set_source_files_properties(${XCORE_INTERPRETER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
-set_source_files_properties(${MODEL_RUNNER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
-
 # suppress fptrgroup warnings for now
-set_source_files_properties(${XCORE_INTERPRETER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-xcore-fptrgroup)
-set_source_files_properties(${MODEL_RUNNER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-xcore-fptrgroup)
-
+if (NOT X86)
+  set_source_files_properties(${XCORE_INTERPRETER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-xcore-fptrgroup)
+  set_source_files_properties(${MODEL_RUNNER_SOURCES} PROPERTIES COMPILE_FLAGS -Wno-xcore-fptrgroup)
+endif ()
