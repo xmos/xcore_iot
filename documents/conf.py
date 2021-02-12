@@ -1,4 +1,4 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the
 # XMOS Public License: Version 1
 # -*- coding: utf-8 -*-
 #
@@ -21,7 +21,7 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 # -- Project information -----------------------------------------------------
 
 project = u"AIoT Software Development Kit"
-copyright = u"2020, XMOS"
+copyright = u"2021, XMOS"
 
 release = "1.x.x"
 
@@ -48,7 +48,7 @@ templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.rst"]
+exclude_patterns = ["_build", "_download", "Thumbs.db", ".DS_Store", "README.rst"]
 
 todo_include_todos = True
 

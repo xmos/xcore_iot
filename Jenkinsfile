@@ -71,7 +71,7 @@ pipeline {
                 stage("Build examples") {
                     steps {
                         sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                              . activate ./aiot_sdk_venv && bash build_examples.sh"""
+                              . activate ./aiot_sdk_venv && bash test/build_examples.sh"""
                     }
                 }
                 stage("Install") {

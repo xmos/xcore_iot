@@ -124,4 +124,4 @@ The following command will generate a C source file that contains the TensorFlow
 
 .. code-block:: console
 
-    $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/cifar10_model.h --source inference_engine/src/cifar10_model.c --variable-name cifar10_model
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/cifar10_model.h --source inference_engine/src/cifar10_model.c --variable-name cifar10_model

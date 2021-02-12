@@ -115,7 +115,7 @@ The following command will generate source files for a model runner as well as t
 
 .. code-block:: console
 
-    $ python $XMOS_AIOT_SDK_PATH/tools/generate/generate_model_runner.py --input model/model_xcore.tflite --output model_runner --name cifar10
+    $ generate_model_runner.py --input model/model_xcore.tflite --output model_runner --name cifar10
 
 Converting flatbuffer to source file
 ====================================
@@ -124,4 +124,4 @@ If you do not want to regenerate the model runner, the following command will ge
 
 .. code-block:: console
 
-    $ python $XMOS_AIOT_SDK_PATH/tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/src/cifar10_model_data.h --source model_runner/src/cifar10_model_data.c --variable-name cifar10
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/src/cifar10_model_data.h --source model_runner/src/cifar10_model_data.c --variable-name cifar10
