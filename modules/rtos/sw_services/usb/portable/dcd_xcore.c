@@ -138,6 +138,7 @@ void dcd_disconnect(uint8_t rhport)
     (void) rhport;
 }
 
+RTOS_USB_ISR_CALLBACK_ATTR
 void dcd_xcore_int_handler(rtos_usb_t *ctx,
                            void *app_data,
                            uint32_t ep_address,
