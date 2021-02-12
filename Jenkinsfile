@@ -76,7 +76,7 @@ pipeline {
                 }
                 stage("Install") {
                     steps {
-                        sh """. activate ./aiot_sdk_venv && bash install_tools.sh"""
+                        sh """. activate ./aiot_sdk_venv && bash install.sh"""
                     }
                 }
                 stage("Test") {
