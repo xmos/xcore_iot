@@ -33,10 +33,13 @@ set(BUILD_FLAGS
   "${CMAKE_CURRENT_SOURCE_DIR}/config.xscope"
   "-target=XCORE-AI-EXPLORER"
   "-mcmodel=large"
+  "-report"
   "-Wno-xcore-fptrgroup"
   "-Wno-unknown-pragmas"
-  "-report"
+  "-fno-rtti"
+  "-fno-exceptions"
   "-DXCORE"
+  "-DTF_LITE_STATIC_MEMORY"
   "-Os"
 )
 
