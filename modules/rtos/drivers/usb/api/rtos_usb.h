@@ -39,9 +39,10 @@ typedef struct rtos_usb_struct rtos_usb_t;
  * \param ep_address    The address of the USB endpoint that the transfer
  *                      has completed on.
  * \param xfer_len      The length of the data transferred.
+ * \param is_setup      True if this is a setup packet. False otherwise.
  * \param res           The result of the transfer. See XUD_Result_t.
  */
-typedef void (*rtos_usb_isr_cb_t)(rtos_usb_t *ctx, void *app_data, uint32_t ep_address, size_t xfer_len, XUD_Result_t res);
+typedef void (*rtos_usb_isr_cb_t)(rtos_usb_t *ctx, void *app_data, uint32_t ep_address, size_t xfer_len, int is_setup, XUD_Result_t res);
 
 typedef struct {
     rtos_usb_t *usb_ctx;
@@ -95,6 +96,7 @@ void usb_simple_isr_cb(rtos_usb_t *ctx,
                        void *app_data,
                        uint32_t ep_address,
                        size_t xfer_len,
+                       int is_setup,
                        XUD_Result_t res);
 
 void rtos_usb_start(

@@ -49,7 +49,8 @@ static inline unsigned ep_event_flag(const int ep_num,
 static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
                                          const int ep_num,
                                          const int dir,
-                                         size_t *len)
+                                         size_t *len,
+                                         int *is_setup)
 {
     XUD_Result_t res = XUD_RES_ERR;
 
@@ -57,17 +58,16 @@ static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
 
     if (dir == RTOS_USB_IN_EP) {
         res = xud_data_set_finish(ctx->c_ep[ep_num][dir], ctx->ep[ep_num][dir]);
+        *is_setup = 0;
         *len = ctx->ep_xfer_info[ep_num][dir].len;
     } else {
-        int is_setup;
-
-        res = xud_data_get_check(ctx->c_ep[ep_num][dir], ctx->ep[ep_num][dir], len, &is_setup);
+        res = xud_data_get_check(ctx->c_ep[ep_num][dir], ctx->ep[ep_num][dir], len, is_setup);
 
         xassert(*len <= ctx->ep_xfer_info[ep_num][dir].len);
         ctx->ep_xfer_info[ep_num][dir].len = *len;
 
         if (res == XUD_RES_OKAY) {
-            if (is_setup) {
+            if (*is_setup) {
                 res = xud_setup_data_get_finish(ctx->ep[ep_num][dir]);
             } else {
                 res = xud_data_get_finish(ctx->ep[ep_num][dir]);
@@ -91,11 +91,12 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_isr, arg)
     triggerable_disable_trigger(ctx->c_ep[ep_num][dir]);
 
     if (ctx->ep[ep_num][dir] != 0) {
-        res = ep_transfer_complete(ctx, ep_num, dir, &xfer_len);
+        int is_setup;
+        res = ep_transfer_complete(ctx, ep_num, dir, &xfer_len, &is_setup);
         ep_xfer_info->res = (int32_t) res;
 
         if (ctx->isr_cb != NULL) {
-            ctx->isr_cb(ctx, ctx->isr_app_data, ep_xfer_info->ep_address, xfer_len, res);
+            ctx->isr_cb(ctx, ctx->isr_app_data, ep_xfer_info->ep_address, xfer_len, is_setup, res);
         }
     } else {
         ctx->ep[ep_num][dir] = XUD_InitEp(ctx->c_ep[ep_num][dir]);
@@ -203,11 +204,13 @@ void usb_simple_isr_cb(rtos_usb_t *ctx,
                        void *app_data,
                        uint32_t ep_address,
                        size_t xfer_len,
+                       int is_setup,
                        XUD_Result_t res)
 {
     (void) app_data;
     (void) xfer_len;
     (void) res;
+    (void) is_setup;
 
     rtos_osal_event_group_set_bits(&ctx->event_group,
                                    ep_event_flag(endpoint_num(ep_address),

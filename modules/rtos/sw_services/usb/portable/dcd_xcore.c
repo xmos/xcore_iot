@@ -17,6 +17,7 @@ static void prepare_setup(bool in_isr)
 {
     XUD_Result_t res;
 
+    rtos_printf("preparing for setup packet\n");
     res = rtos_usb_endpoint_transfer_start(&usb_ctx, 0x00, (uint8_t *) setup_packet, sizeof(tusb_control_request_t));
 
     xassert(res == XUD_RES_OKAY);
@@ -45,8 +46,6 @@ static void reset_ep(uint8_t ep_addr, bool in_isr)
     tusb_speed_t tu_speed;
 
     uint8_t const epnum = tu_edpt_number(ep_addr);
-    uint8_t const rhport = 0;
-
     uint8_t dir = tu_edpt_dir(ep_addr);
 
     XUD_ep one = usb_ctx.ep[epnum][dir];
@@ -63,7 +62,7 @@ static void reset_ep(uint8_t ep_addr, bool in_isr)
 
     prepare_setup(in_isr);
 
-    dcd_event_bus_reset(rhport, tu_speed, in_isr);
+    dcd_event_bus_reset(0, tu_speed, in_isr);
 }
 
 /*------------------------------------------------------------------*/
@@ -112,7 +111,14 @@ void dcd_set_address(uint8_t rhport,
                      uint8_t dev_addr)
 {
     (void) rhport;
-    XUD_SetDevAddr(dev_addr);
+
+    rtos_printf("Asked to set device address to %d. Will after ZLP status.\n", dev_addr);
+
+    // Respond with ZLP status
+    dcd_edpt_xfer(rhport, 0x80, NULL, 0);
+
+    // DCD can only set address after status for this request is complete.
+    // Do it in dcd_edpt0_status_complete().
 }
 
 // Wake up host
@@ -143,22 +149,30 @@ void dcd_xcore_int_handler(rtos_usb_t *ctx,
                            void *app_data,
                            uint32_t ep_address,
                            size_t xfer_len,
+                           int is_setup,
                            XUD_Result_t res)
 {
-    xfer_result_t tu_result;
-
-    if (res == XUD_RES_OKAY) {
-        tu_result = XFER_RESULT_SUCCESS;
-    } else {
-        tu_result = XFER_RESULT_FAILED;
-        xfer_len = 0;
-    }
-
     if (res == XUD_RES_RST) {
+        rtos_printf("Reset received on %02x\n", ep_address);
         reset_ep(ep_address, true);
     }
 
-    dcd_event_xfer_complete(0, ep_address, xfer_len, tu_result, true);
+    if (is_setup) {
+        rtos_printf("Setup packet of %d bytes received on %02x\n", xfer_len, ep_address);
+        dcd_event_setup_received(0, (uint8_t *) setup_packet, true);
+    } else {
+        xfer_result_t tu_result;
+
+        if (res == XUD_RES_OKAY) {
+            rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
+            tu_result = XFER_RESULT_SUCCESS;
+        } else {
+            tu_result = XFER_RESULT_FAILED;
+            xfer_len = 0;
+        }
+
+        dcd_event_xfer_complete(0, ep_address, xfer_len, tu_result, true);
+    }
 }
 
 //--------------------------------------------------------------------+
@@ -167,12 +181,21 @@ void dcd_xcore_int_handler(rtos_usb_t *ctx,
 
 // Invoked when a control transfer's status stage is complete.
 // May help DCD to prepare for next control transfer, this API is optional.
-void dcd_edpt0_status_complete(uint8_t rhport, tusb_control_request_t const *request)
+void dcd_edpt0_status_complete(uint8_t rhport,
+                               tusb_control_request_t const *request)
 {
-  (void) rhport;
-  (void) request;
+    (void) rhport;
 
-  prepare_setup(false);
+    if (request->bmRequestType_bit.recipient == TUSB_REQ_RCPT_DEVICE &&
+            request->bmRequestType_bit.type == TUSB_REQ_TYPE_STANDARD &&
+            request->bRequest == TUSB_REQ_SET_ADDRESS) {
+
+        const unsigned dev_addr = request->wValue;
+        rtos_printf("Setting device address to %d now\n", dev_addr);
+        XUD_SetDevAddr(dev_addr);
+    }
+
+    prepare_setup(false);
 }
 
 // Configure endpoint's registers according to descriptor
@@ -207,12 +230,15 @@ bool dcd_edpt_xfer(uint8_t rhport,
     XUD_Result_t res;
     static uint32_t dummy_zlp_word;
 
+    rtos_printf("xfer of %d bytes requested on %02x\n", total_bytes, ep_addr);
+
     if (buffer == NULL) {
         if (total_bytes == 0) {
             /*
              * lib_xud crashes if a NULL buffer is provided when
              * transferring a zero length buffer.
              */
+            rtos_printf("transferring ZLP on %02x\n", ep_addr);
             buffer = (uint8_t *) &dummy_zlp_word;
         }
     }

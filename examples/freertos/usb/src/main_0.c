@@ -20,12 +20,13 @@
 #include "tusb.h"
 /* App headers */
 
-#if ON_TILE(0)
+
 // temporary
 void dcd_xcore_int_handler(rtos_usb_t *ctx,
                            void *app_data,
                            uint32_t ep_address,
                            size_t xfer_len,
+                           int is_setup,
                            XUD_Result_t res);
 
 rtos_usb_t usb_ctx;
@@ -128,27 +129,28 @@ void vApplicationDaemonTaskStartup(void *arg)
                    XUD_PWR_BUS,
                    configMAX_PRIORITIES - 1);
 
-    rtos_osal_thread_create(
-            NULL,
-            "endpoint_0",
-            (rtos_osal_entry_function_t) endpoint_0,
-            &usb_ctx,
-            RTOS_THREAD_STACK_SIZE(endpoint_0),
-            configMAX_PRIORITIES / 2);
-
-    rtos_osal_thread_create(
-            NULL,
-            "endpoint_1",
-            (rtos_osal_entry_function_t) endpoint_1,
-            &usb_ctx,
-            RTOS_THREAD_STACK_SIZE(endpoint_1),
-            configMAX_PRIORITIES / 2);
+//    rtos_osal_thread_create(
+//            NULL,
+//            "endpoint_0",
+//            (rtos_osal_entry_function_t) endpoint_0,
+//            &usb_ctx,
+//            RTOS_THREAD_STACK_SIZE(endpoint_0),
+//            configMAX_PRIORITIES / 2);
+//
+//    rtos_osal_thread_create(
+//            NULL,
+//            "endpoint_1",
+//            (rtos_osal_entry_function_t) endpoint_1,
+//            &usb_ctx,
+//            RTOS_THREAD_STACK_SIZE(endpoint_1),
+//            configMAX_PRIORITIES / 2);
 
     usb_manager_start(configMAX_PRIORITIES-2);
 
     vTaskDelete(NULL);
 }
 
+#if ON_TILE(0)
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
     (void) c0;
