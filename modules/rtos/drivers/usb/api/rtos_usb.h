@@ -78,6 +78,9 @@ int rtos_usb_endpoint_ready(rtos_usb_t *ctx,
                             uint32_t endpoint_addr,
                             unsigned timeout);
 
+XUD_Result_t rtos_usb_all_endpoints_ready(rtos_usb_t *ctx,
+                                          unsigned timeout);
+
 XUD_Result_t rtos_usb_endpoint_transfer_start(rtos_usb_t *ctx,
                                               uint32_t endpoint_addr,
                                               uint8_t *buffer,

@@ -105,8 +105,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_isr, arg)
 }
 
 static int endpoint_wait(rtos_usb_t *ctx,
-                          const int ep_num,
-                          const int dir,
+                          const uint32_t ep_flags,
                           unsigned timeout)
 {
     rtos_osal_status_t status;
@@ -114,8 +113,8 @@ static int endpoint_wait(rtos_usb_t *ctx,
 
     status = rtos_osal_event_group_get_bits(
             &ctx->event_group,
-            ep_event_flag(ep_num, dir),
-            RTOS_OSAL_OR_CLEAR,
+            ep_flags,
+            RTOS_OSAL_AND_CLEAR,
             &flags,
             timeout);
 
@@ -143,7 +142,29 @@ XUD_Result_t rtos_usb_endpoint_ready(rtos_usb_t *ctx,
     const int ep_num = endpoint_num(endpoint_addr);
     const int dir = endpoint_dir(endpoint_addr);
 
-    if (endpoint_wait(ctx, ep_num, dir, timeout) == 0) {
+    if (endpoint_wait(ctx, ep_event_flag(ep_num, dir), timeout) == 0) {
+        return XUD_RES_OKAY;
+    } else {
+        return XUD_RES_ERR;
+    }
+}
+
+XUD_Result_t rtos_usb_all_endpoints_ready(rtos_usb_t *ctx,
+                                          unsigned timeout)
+{
+    int i;
+    uint32_t endpoint_flags = 0;
+
+    for (i = 0; i < ctx->endpoint_count; i++) {
+        if (ctx->c_ep[i][RTOS_USB_OUT_EP] != 0) {
+            endpoint_flags |= ep_event_flag(i, RTOS_USB_OUT_EP);
+        }
+        if (ctx->c_ep[i][RTOS_USB_IN_EP] != 0) {
+            endpoint_flags |= ep_event_flag(i, RTOS_USB_IN_EP);
+        }
+    }
+
+    if (endpoint_wait(ctx, endpoint_flags, timeout) == 0) {
         return XUD_RES_OKAY;
     } else {
         return XUD_RES_ERR;
@@ -204,7 +225,7 @@ XUD_Result_t rtos_usb_endpoint_transfer_complete(rtos_usb_t *ctx,
     const int ep_num = endpoint_num(endpoint_addr);
     const int dir = endpoint_dir(endpoint_addr);
 
-    if (endpoint_wait(ctx, ep_num, dir, timeout) == 0) {
+    if (endpoint_wait(ctx, ep_event_flag(ep_num, dir), timeout) == 0) {
         if (len != NULL) {
             *len = ctx->ep_xfer_info[ep_num][dir].len;
         }

@@ -73,7 +73,23 @@ static void reset_ep(uint8_t ep_addr, bool in_isr)
 // Initialize controller to device mode
 void dcd_init(uint8_t rhport)
 {
+    /*
+     * Is there any way that rtos_usb_start() could be called
+     * here, so that the application doesn't have to call it
+     * directly?
+     *
+     * It might/should be possible to parse the descriptors provided
+     * by the application, returned by one or both of
+     * tud_descriptor_configuration_cb() and tud_descriptor_device_cb(),
+     * and then provide the correct arguments to rtos_usb_start() based
+     * on these.
+     */
+    //rtos_usb_start(...);
+
+    rtos_usb_all_endpoints_ready(&usb_ctx, RTOS_OSAL_WAIT_FOREVER);
+
     prepare_setup(false);
+
     (void) rhport;
 }
 
@@ -166,10 +182,6 @@ bool dcd_edpt_open(uint8_t rhport,
 
     XUD_ResetEpStateByAddr(ep_desc->bEndpointAddress);
 
-    /*
-     * Call rtos_usb_endpoint_ready() here?
-     */
-
     return true;
 }
 
@@ -200,7 +212,7 @@ bool dcd_edpt_xfer(uint8_t rhport,
              * lib_xud crashes if a NULL buffer is provided when
              * transferring a zero length buffer.
              */
-            buffer = &dummy_zlp_word;
+            buffer = (uint8_t *) &dummy_zlp_word;
         }
     }
 
