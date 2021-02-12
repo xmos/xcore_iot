@@ -329,6 +329,7 @@ if(${USE_${THIS_LIB}})
                              ${COMMON_SOURCES}
                              ${DEVICE_SOURCES}
                              ${HOST_SOURCES}
+                             "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/usb_support.c"
                              "${${THIS_LIB}_DIR}/portable/dcd_xcore.c")
 
     if(${${THIS_LIB}_FLAGS})
@@ -338,6 +339,7 @@ if(${USE_${THIS_LIB}})
 	set(${THIS_LIB}_INCLUDES
 	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src"
 	    "${${THIS_LIB}_DIR}/portable"
+	    "${${THIS_LIB}_DIR}/api"
 	)
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()

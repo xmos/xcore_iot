@@ -11,17 +11,22 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-
 /* Library headers */
 #include "rtos_usb.h"
 #include <xcore/triggerable.h>
 #include "rtos_interrupt.h"
+#include "usb_support.h"
 
 #include "tusb.h"
-
 /* App headers */
 
-
+#if ON_TILE(0)
+// temporary
+void dcd_xcore_int_handler(rtos_usb_t *ctx,
+                           void *app_data,
+                           uint32_t ep_address,
+                           size_t xfer_len,
+                           XUD_Result_t res);
 
 rtos_usb_t usb_ctx;
 
@@ -60,7 +65,7 @@ void endpoint_1(rtos_usb_t *ctx)
         }
 
         /* Send the buffer off to the host.  Note this will return when complete */
-        rtos_printf("Transfer on ep1... ");
+        rtos_printf("Transfer on ep1...\n");
         res = rtos_usb_endpoint_transfer_start(ctx, 0x81, g_reportBuffer, 4);
         if (res == XUD_RES_OKAY) {
             res = rtos_usb_endpoint_transfer_complete(ctx, 0x81, NULL, RTOS_OSAL_WAIT_FOREVER);
@@ -106,7 +111,6 @@ void tud_dfu_runtime_reboot_to_dfu_cb(void)
     rtos_printf("dfu detached\n");
 }
 
-
 void vApplicationDaemonTaskStartup(void *arg)
 {
     /* Endpoint type tables - informs XUD what the transfer types for each Endpoint in use and also
@@ -116,7 +120,7 @@ void vApplicationDaemonTaskStartup(void *arg)
     XUD_EpType epTypeTableIn[2] =   {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE, XUD_EPTYPE_INT};
 
     rtos_usb_start(&usb_ctx,
-                   usb_simple_isr_cb, NULL,
+                   dcd_xcore_int_handler, NULL,
                    2,
                    epTypeTableOut,
                    epTypeTableIn,
@@ -140,18 +144,11 @@ void vApplicationDaemonTaskStartup(void *arg)
             RTOS_THREAD_STACK_SIZE(endpoint_1),
             configMAX_PRIORITIES / 2);
 
-    tusb_init();
-    tud_task();
+    usb_manager_start(configMAX_PRIORITIES-2);
 
     vTaskDelete(NULL);
 }
 
-void vApplicationCoreInitHook(BaseType_t xCoreID)
-{
-    rtos_printf("Initializing tile 0, core %d on core %d\n", xCoreID, portGET_CORE_ID());
-}
-
-#if ON_TILE(0)
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
     (void) c0;

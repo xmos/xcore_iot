@@ -61,10 +61,20 @@ set(APP_INCLUDES
     "src/usb"
 )
 
+set(DFU_RUNTIME True)
+
+if(DFU_RUNTIME)
+    list(APPEND APP_SOURCES "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/sw_services/usb/thirdparty/tinyusb/examples/device/dfu_runtime/src/usb_descriptors.c")
+
+    add_compile_definitions(DFU_RUNTIME=1)
+endif()
+
 add_compile_definitions(
     CFG_TUSB_OS=OPT_OS_CUSTOM
+
     CFG_TUSB_DEBUG_PRINTF=rtos_printf
     CFG_TUSB_DEBUG=2
+
     DEBUG_PRINT_ENABLE=1
     XUD_CORE_CLOCK=700
     PLATFORM_USES_TILE_0=1
