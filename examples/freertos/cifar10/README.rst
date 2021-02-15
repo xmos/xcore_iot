@@ -40,7 +40,10 @@ Set the $TARGET environment variable to the board that you are using. For exampl
     $ export TARGET=XCORE-AI-EXPLORER
 
 The build and run commands shown below will then pick up the correct target automatically.
-Please note: The external DDR memory options are only available on the XCORE-AI-EXPLORER board.
+
+.. note::
+
+The external DDR memory options are only available on the XCORE-AI-EXPLORER board.
 
 *********************
 Building the firmware
@@ -116,6 +119,15 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 .. code-block:: console
 
     $ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
+
+Generating the model runner
+===========================
+
+The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
+
+.. code-block:: console
+
+    $ generate_model_runner.py --input model/model_xcore.tflite --output src/model_runner --name cifar10
 
 Converting flatbuffer to source file
 ====================================
