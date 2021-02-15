@@ -29,8 +29,6 @@ void dcd_xcore_int_handler(rtos_usb_t *ctx,
                            int is_setup,
                            XUD_Result_t res);
 
-rtos_usb_t usb_ctx;
-
 void endpoint_0(rtos_usb_t *ctx);
 
 uint8_t g_reportBuffer[4] = {0, 0, 0, 0};
@@ -117,17 +115,17 @@ void vApplicationDaemonTaskStartup(void *arg)
     /* Endpoint type tables - informs XUD what the transfer types for each Endpoint in use and also
      * if the endpoint wishes to be informed of USB bus resets
      */
-    XUD_EpType epTypeTableOut[2] = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE, XUD_EPTYPE_DIS};
-    XUD_EpType epTypeTableIn[2] =   {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE, XUD_EPTYPE_INT};
-
-    rtos_usb_start(&usb_ctx,
-                   dcd_xcore_int_handler, NULL,
-                   2,
-                   epTypeTableOut,
-                   epTypeTableIn,
-                   XUD_SPEED_FS,
-                   XUD_PWR_BUS,
-                   configMAX_PRIORITIES - 1);
+//    XUD_EpType epTypeTableOut[2] = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE, XUD_EPTYPE_DIS};
+//    XUD_EpType epTypeTableIn[2] =   {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE, XUD_EPTYPE_INT};
+//
+//    rtos_usb_start(&usb_ctx,
+//                   dcd_xcore_int_handler, NULL,
+//                   2,
+//                   epTypeTableOut,
+//                   epTypeTableIn,
+//                   XUD_SPEED_HS,
+//                   XUD_PWR_BUS,
+//                   configMAX_PRIORITIES - 1);
 
 //    rtos_osal_thread_create(
 //            NULL,

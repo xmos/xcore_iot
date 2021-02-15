@@ -6,10 +6,11 @@
 
 #include "tusb_option.h"
 
+#include "device/usbd.h"
 #include "device/dcd.h"
 
 
-extern rtos_usb_t usb_ctx;
+static rtos_usb_t usb_ctx;
 
 static uint32_t setup_packet[sizeof(tusb_control_request_t) / sizeof(uint32_t) + 1];
 
@@ -65,25 +66,161 @@ static void reset_ep(uint8_t ep_addr, bool in_isr)
     dcd_event_bus_reset(0, tu_speed, in_isr);
 }
 
+RTOS_USB_ISR_CALLBACK_ATTR
+static void dcd_xcore_int_handler(rtos_usb_t *ctx,
+                                  void *app_data,
+                                  uint32_t ep_address,
+                                  size_t xfer_len,
+                                  int is_setup,
+                                  XUD_Result_t res)
+{
+    if (res == XUD_RES_RST) {
+        rtos_printf("Reset received on %02x\n", ep_address);
+        reset_ep(ep_address, true);
+    }
+
+    if (is_setup) {
+        rtos_printf("Setup packet of %d bytes received on %02x\n", xfer_len, ep_address);
+        dcd_event_setup_received(0, (uint8_t *) setup_packet, true);
+    } else {
+        xfer_result_t tu_result;
+
+        if (res == XUD_RES_OKAY) {
+            rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
+            tu_result = XFER_RESULT_SUCCESS;
+        } else {
+            tu_result = XFER_RESULT_FAILED;
+            xfer_len = 0;
+        }
+
+        dcd_event_xfer_complete(0, ep_address, xfer_len, tu_result, true);
+    }
+}
+
 /*------------------------------------------------------------------*/
 /* Device API
  *------------------------------------------------------------------*/
 
+/*
+ * Builds the endpoint tables required by lib XUD from
+ * the first configuration descriptor provided by the
+ * application.
+ *
+ * FIXME:
+ * This is not compatible with multiple configurations.
+ * lib_xud would need to first be stopped and then restarted to
+ * load a different configuration.
+ */
+static int cfg_desc_parse(XUD_EpType *epTypeTableOut, XUD_EpType *epTypeTableIn, XUD_PwrConfig *pwr)
+{
+
+    const uint8_t *desc_buf;
+    const tusb_desc_configuration_t *cfg_desc;
+    size_t cur_index = 0;
+    size_t total_length;
+    uint8_t desc_len;
+    int max_epnum = 0;
+
+    desc_buf = tud_descriptor_configuration_cb(0);
+
+    cfg_desc = (tusb_desc_configuration_t *) desc_buf;
+
+    desc_len = cfg_desc->bLength;
+    total_length = cfg_desc->wTotalLength;
+
+    xassert(desc_len >= sizeof(tusb_desc_configuration_t));
+    xassert(cfg_desc->bDescriptorType == TUSB_DESC_CONFIGURATION);
+
+    if (cfg_desc->bmAttributes & TUSB_DESC_CONFIG_ATT_SELF_POWERED) {
+        *pwr = XUD_PWR_SELF;
+    } else {
+        *pwr = XUD_PWR_BUS;
+    }
+
+    cur_index += desc_len;
+    desc_buf += desc_len;
+
+    /*
+     * Iterate though each descriptor in the configuration.
+     * Get the transfer type and direction from each endpoint
+     * descriptor and populate the tables required by lib_xud
+     * accordingly.
+     */
+    while (cur_index < total_length) {
+        const tusb_desc_endpoint_t *dev_desc;
+        dev_desc = (tusb_desc_endpoint_t *) desc_buf;
+        desc_len = dev_desc->bLength;
+        if (cur_index + desc_len <= total_length) {
+            if (dev_desc->bDescriptorType == TUSB_DESC_ENDPOINT && desc_len >= sizeof(tusb_desc_endpoint_t)) {
+                uint8_t epnum = tu_edpt_number(dev_desc->bEndpointAddress);
+                uint8_t dir   = tu_edpt_dir(dev_desc->bEndpointAddress);
+                tusb_xfer_type_t type = dev_desc->bmAttributes.xfer;
+                XUD_EpTransferType xud_type = XUD_EPTYPE_DIS;
+
+                xassert(epnum < RTOS_USB_ENDPOINT_COUNT_MAX);
+
+                if (epnum > max_epnum) {
+                    max_epnum = epnum;
+                }
+
+                switch (type) {
+                case TUSB_XFER_CONTROL:
+                    xud_type = XUD_EPTYPE_CTL;
+                    break;
+                case TUSB_XFER_ISOCHRONOUS:
+                    xud_type = XUD_EPTYPE_ISO;
+                    break;
+                case TUSB_XFER_BULK:
+                    xud_type = XUD_EPTYPE_BUL;
+                    break;
+                case TUSB_XFER_INTERRUPT:
+                    xud_type = XUD_EPTYPE_INT;
+                    break;
+                }
+
+                if (dir == TUSB_DIR_IN) {
+                    rtos_printf("Input endpoint %d with type %d\n", epnum, xud_type);
+                    epTypeTableIn[epnum] = xud_type;
+                } else {
+                    rtos_printf("Output endpoint %d with type %d\n", epnum, xud_type);
+                    epTypeTableOut[epnum] = xud_type;
+                }
+            }
+        }
+
+        cur_index += desc_len;
+        desc_buf += desc_len;
+    }
+
+    return max_epnum + 1;
+}
+
 // Initialize controller to device mode
 void dcd_init(uint8_t rhport)
 {
-    /*
-     * Is there any way that rtos_usb_start() could be called
-     * here, so that the application doesn't have to call it
-     * directly?
-     *
-     * It might/should be possible to parse the descriptors provided
-     * by the application, returned by one or both of
-     * tud_descriptor_configuration_cb() and tud_descriptor_device_cb(),
-     * and then provide the correct arguments to rtos_usb_start() based
-     * on these.
-     */
-    //rtos_usb_start(...);
+    int i;
+    size_t endpoint_count;
+    XUD_PwrConfig pwr;
+
+    XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX] = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
+    XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX]  = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
+
+    for (i = 1; i < RTOS_USB_ENDPOINT_COUNT_MAX; i++) {
+        epTypeTableOut[i] = XUD_EPTYPE_DIS;
+        epTypeTableIn[i] = XUD_EPTYPE_DIS;
+    }
+
+    endpoint_count = cfg_desc_parse(epTypeTableOut, epTypeTableIn, &pwr);
+    rtos_printf("Endpoint count is %d\n", endpoint_count);
+
+    rtos_usb_start(&usb_ctx,
+                   dcd_xcore_int_handler, NULL,
+                   endpoint_count,
+                   epTypeTableOut,
+                   epTypeTableIn,
+                   XUD_SPEED_HS, /* TODO: configurable? */
+                   pwr,
+                   configMAX_PRIORITIES - 1); /* TODO: configurable? */
 
     rtos_usb_all_endpoints_ready(&usb_ctx, RTOS_OSAL_WAIT_FOREVER);
 
@@ -142,37 +279,6 @@ void dcd_disconnect(uint8_t rhport)
     /* This function appears to be unused by the stack or any example */
     /* Only called by tud_disconnect() which is not called by anything */
     (void) rhport;
-}
-
-RTOS_USB_ISR_CALLBACK_ATTR
-void dcd_xcore_int_handler(rtos_usb_t *ctx,
-                           void *app_data,
-                           uint32_t ep_address,
-                           size_t xfer_len,
-                           int is_setup,
-                           XUD_Result_t res)
-{
-    if (res == XUD_RES_RST) {
-        rtos_printf("Reset received on %02x\n", ep_address);
-        reset_ep(ep_address, true);
-    }
-
-    if (is_setup) {
-        rtos_printf("Setup packet of %d bytes received on %02x\n", xfer_len, ep_address);
-        dcd_event_setup_received(0, (uint8_t *) setup_packet, true);
-    } else {
-        xfer_result_t tu_result;
-
-        if (res == XUD_RES_OKAY) {
-            rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
-            tu_result = XFER_RESULT_SUCCESS;
-        } else {
-            tu_result = XFER_RESULT_FAILED;
-            xfer_len = 0;
-        }
-
-        dcd_event_xfer_complete(0, ep_address, xfer_len, tu_result, true);
-    }
 }
 
 //--------------------------------------------------------------------+
