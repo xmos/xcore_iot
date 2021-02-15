@@ -1,6 +1,8 @@
 // Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
+#define DEBUG_UNIT RTOS_USB
+
 #include <string.h>
 #include <xcore/triggerable.h>
 #include "rtos_interrupt.h"

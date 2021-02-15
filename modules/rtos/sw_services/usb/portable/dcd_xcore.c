@@ -1,14 +1,12 @@
 // Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
-#include <stdbool.h>
-#include <rtos/drivers/usb/api/rtos_usb.h>
-
-#include "tusb_option.h"
-
-#include "device/usbd.h"
 #include "device/dcd.h"
+#include "device/usbd.h" /* For tud_descriptor_configuration_cb() */
 
+#define DEBUG_UNIT TUSB_DCD
+
+#include <rtos/drivers/usb/api/rtos_usb.h>
 
 static rtos_usb_t usb_ctx;
 
@@ -22,6 +20,11 @@ static void prepare_setup(bool in_isr)
     res = rtos_usb_endpoint_transfer_start(&usb_ctx, 0x00, (uint8_t *) setup_packet, sizeof(tusb_control_request_t));
 
     xassert(res == XUD_RES_OKAY);
+
+    /*
+     * Calling reset_ep() here would result in recursion.
+     * TODO: Is there a way to handle this case?
+     */
 //    if (res == XUD_RES_RST) {
 //        reset_ep(0x00, in_isr);
 //    }
@@ -93,6 +96,9 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
             xfer_len = 0;
         }
 
+        /*
+         * TODO: Should this be called when res is XUD_RES_RST?
+         */
         dcd_event_xfer_complete(0, ep_address, xfer_len, tu_result, true);
     }
 }
@@ -110,6 +116,9 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
  * This is not compatible with multiple configurations.
  * lib_xud would need to first be stopped and then restarted to
  * load a different configuration.
+ *
+ * More than one configuration is almost never used, so this is
+ * not really an issue.
  */
 static int cfg_desc_parse(XUD_EpType *epTypeTableOut, XUD_EpType *epTypeTableIn, XUD_PwrConfig *pwr)
 {
@@ -147,14 +156,14 @@ static int cfg_desc_parse(XUD_EpType *epTypeTableOut, XUD_EpType *epTypeTableIn,
      * accordingly.
      */
     while (cur_index < total_length) {
-        const tusb_desc_endpoint_t *dev_desc;
-        dev_desc = (tusb_desc_endpoint_t *) desc_buf;
-        desc_len = dev_desc->bLength;
+        const tusb_desc_endpoint_t *ep_desc;
+        ep_desc = (tusb_desc_endpoint_t *) desc_buf;
+        desc_len = ep_desc->bLength;
         if (cur_index + desc_len <= total_length) {
-            if (dev_desc->bDescriptorType == TUSB_DESC_ENDPOINT && desc_len >= sizeof(tusb_desc_endpoint_t)) {
-                uint8_t epnum = tu_edpt_number(dev_desc->bEndpointAddress);
-                uint8_t dir   = tu_edpt_dir(dev_desc->bEndpointAddress);
-                tusb_xfer_type_t type = dev_desc->bmAttributes.xfer;
+            if (ep_desc->bDescriptorType == TUSB_DESC_ENDPOINT && desc_len >= sizeof(tusb_desc_endpoint_t)) {
+                uint8_t epnum = tu_edpt_number(ep_desc->bEndpointAddress);
+                uint8_t dir   = tu_edpt_dir(ep_desc->bEndpointAddress);
+                tusb_xfer_type_t type = ep_desc->bmAttributes.xfer;
                 XUD_EpTransferType xud_type = XUD_EPTYPE_DIS;
 
                 xassert(epnum < RTOS_USB_ENDPOINT_COUNT_MAX);
@@ -179,10 +188,10 @@ static int cfg_desc_parse(XUD_EpType *epTypeTableOut, XUD_EpType *epTypeTableIn,
                 }
 
                 if (dir == TUSB_DIR_IN) {
-                    rtos_printf("Input endpoint %d with type %d\n", epnum, xud_type);
+                    rtos_printf("Enabling input endpoint %d with type %d\n", epnum, xud_type);
                     epTypeTableIn[epnum] = xud_type;
                 } else {
-                    rtos_printf("Output endpoint %d with type %d\n", epnum, xud_type);
+                    rtos_printf("Enabling output endpoint %d with type %d\n", epnum, xud_type);
                     epTypeTableOut[epnum] = xud_type;
                 }
             }
