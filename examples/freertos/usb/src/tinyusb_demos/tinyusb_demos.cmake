@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 3.14)
 set(TINYUSB_DEMO_PATH "${CMAKE_SOURCE_DIR}/src/tinyusb_demos")
 
 set(AUDIO_TEST_PATH "${TINYUSB_DEMO_PATH}/audio_test/src")
-set(BOARD_TEST_PATH "${TINYUSB_DEMO_PATH}/board_test/src")
 set(CDC_DUAL_PORTS_TEST_PATH "${TINYUSB_DEMO_PATH}/cdc_dual_ports/src")
 set(CDC_MSC_TEST_PATH "${TINYUSB_DEMO_PATH}/cdc_msc/src")
 set(CDC_MSC_FREERTOS_TEST_PATH "${TINYUSB_DEMO_PATH}/cdc_msc_freertos/src")
@@ -26,7 +25,6 @@ set(WEBUSB_SERIAL "${TINYUSB_DEMO_PATH}/webusb_serial/src")
 # Options
 #**********************
 option(USE_TINYUSB_DEMO_AUDIO_TEST                  "Enable to use TinyUSB demo" FALSE)
-option(USE_TINYUSB_DEMO_BOARD_TEST                  "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_CDC_MSC_TEST                "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_CDC_MSC_FREERTOS_TEST       "Enable to use TinyUSB demo" FALSE)
@@ -45,19 +43,6 @@ option(USE_TINYUSB_DEMO_WEBUSB_SERIAL               "Enable to use TinyUSB demo"
 
 if(USE_TINYUSB_DEMO_AUDIO_TEST)
     set(DEMO_PATH ${AUDIO_TEST_PATH})
-
-    set(TINYUSB_DEMO_SOURCES
-        "${DEMO_PATH}/demo_main.c"
-        "${DEMO_PATH}/usb_descriptors.c"
-    )
-
-    set(TINYUSB_DEMO_INCLUDES
-        ${DEMO_PATH}
-    )
-endif()
-
-if(USE_TINYUSB_DEMO_BOARD_TEST)
-    set(DEMO_PATH ${BOARD_TEST_PATH})
 
     set(TINYUSB_DEMO_SOURCES
         "${DEMO_PATH}/demo_main.c"

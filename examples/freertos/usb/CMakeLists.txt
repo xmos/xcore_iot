@@ -80,7 +80,6 @@ add_compile_definitions(
 
 ## Select demo
 set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
-set(USE_TINYUSB_DEMO_BOARD_TEST                  FALSE)
 set(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         FALSE)
 set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
 set(USE_TINYUSB_DEMO_CDC_MSC_FREERTOS_TEST       FALSE)
