@@ -14,7 +14,9 @@ import jinja2
 
 def get_template(filename):
     jinja_env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(searchpath=Path(__file__).parent / "templates")
+        loader=jinja2.FileSystemLoader(
+            searchpath=str(Path(__file__).parent / "templates")
+        )
     )
 
     return jinja_env.get_template(filename)
