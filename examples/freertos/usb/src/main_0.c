@@ -132,10 +132,10 @@ void vApplicationDaemonTaskStartup(void *arg)
     rtos_gpio_start(gpio_ctx);
 
     rtos_printf("Starting QSPI flash driver\n");
-    rtos_qspi_flash_start(qspi_flash_ctx, configMAX_PRIORITIES-1);
+    rtos_qspi_flash_start(qspi_flash_ctx, appconfRTOS_QSPI_FLASH_TASK_PRIORITY);
 
-    usb_manager_start(configMAX_PRIORITIES-2);
-    create_tinyusb_demo(gpio_ctx, configMAX_PRIORITIES-3);
+    usb_manager_start(appconfUSB_MANAGER_TASK_PRIORITY);
+    create_tinyusb_demo(gpio_ctx, appconfTINYUSB_DEMO_TASK_PRIORITY);
 
     vTaskDelete(NULL);
 }
