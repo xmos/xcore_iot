@@ -43,7 +43,7 @@ The build and run commands shown below will then pick up the correct target auto
 
 .. note::
 
-The external DDR memory options are only available on the XCORE-AI-EXPLORER board.
+    The external DDR memory options are only available on the XCORE-AI-EXPLORER board.
 
 *********************
 Building the firmware
