@@ -5,21 +5,33 @@
 #include <stdbool.h>
 #include <platform.h>
 #include <xs1.h>
-
+#include <xcore/triggerable.h>
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
 
 /* Library headers */
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "rtos/drivers/intertile/api/rtos_intertile.h"
+#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
+
+/* App headers */
+#include "app_conf.h"
+#include "board_init.h"
+#include "demo_main.h"
 #include "rtos_usb.h"
-#include <xcore/triggerable.h>
 #include "rtos_interrupt.h"
 #include "usb_support.h"
 
-#include "tusb.h"
-/* App headers */
+#if ON_TILE(0)
+static rtos_qspi_flash_t qspi_flash_ctx_s;
+static rtos_gpio_t gpio_ctx_s;
+static rtos_intertile_t intertile_ctx_s;
 
+static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
+static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
+static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 
 // temporary
 void dcd_xcore_int_handler(rtos_usb_t *ctx,
@@ -79,37 +91,6 @@ void endpoint_1(rtos_usb_t *ctx)
     }
 }
 
-/* Device mounted callback */
-void tud_mount_cb(void)
-{
-    rtos_printf("mounted\n");
-}
-
-/* Device unmounted callback */
-void tud_umount_cb(void)
-{
-    rtos_printf("unmounted\n");
-}
-
-/* Device suspended callback */
-void tud_suspend_cb(bool remote_wakeup_en)
-{
-    (void)remote_wakeup_en;
-    rtos_printf("suspended\n");
-}
-
-/* Device resumed callback */
-void tud_resume_cb(void)
-{
-    rtos_printf("resumed\n");
-}
-
-/* DFU detached callback */
-void tud_dfu_runtime_reboot_to_dfu_cb(void)
-{
-    rtos_printf("dfu detached\n");
-}
-
 void vApplicationDaemonTaskStartup(void *arg)
 {
     /* Endpoint type tables - informs XUD what the transfer types for each Endpoint in use and also
@@ -143,16 +124,26 @@ void vApplicationDaemonTaskStartup(void *arg)
 //            RTOS_THREAD_STACK_SIZE(endpoint_1),
 //            configMAX_PRIORITIES / 2);
 
+    rtos_printf("Starting intertile driver\n");
+    rtos_intertile_start(intertile_ctx);
+
+    /* Initialize drivers  */
+    rtos_printf("Starting GPIO driver\n");
+    rtos_gpio_start(gpio_ctx);
+
+    rtos_printf("Starting QSPI flash driver\n");
+    rtos_qspi_flash_start(qspi_flash_ctx, configMAX_PRIORITIES-1);
+
     usb_manager_start(configMAX_PRIORITIES-2);
+    create_tinyusb_demo(gpio_ctx, configMAX_PRIORITIES-3);
 
     vTaskDelete(NULL);
 }
 
-#if ON_TILE(0)
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
     (void) c0;
-    (void) c1;
+    board_tile0_init(c1, intertile_ctx, qspi_flash_ctx, gpio_ctx);
     (void) c2;
     (void) c3;
 
@@ -161,7 +152,7 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                 "vApplicationDaemonTaskStartup",
 				RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
                 NULL,
-				configMAX_PRIORITIES-1,
+				appconfSTARTUP_TASK_PRIORITY,
                 NULL);
 
     rtos_printf("Start scheduler on tile 0\n");
