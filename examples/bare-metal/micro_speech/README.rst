@@ -4,6 +4,29 @@ Micro Speech
 
 This example application is the `micro_speech <https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/micro/examples/micro_speech>`__ example from TensorFlow Lite for Microcontrollers.
 
+****************
+Supported Boards
+****************
+
+This example is supported on the XCORE-AI-EXPLORER and OSPREY-BOARD boards.
+Set the $TARGET environment variable to the board that you are using. For example:
+
+.. code-block:: console
+
+    $ export TARGET=XCORE-AI-EXPLORER
+
+or 
+
+.. code-block:: console
+
+    $ export TARGET=OSPREY-BOARD
+
+The build and run commands shown below will then pick up the correct target automatically.
+
+.. note::
+
+    The external DDR memory options are only available on the XCORE-AI-EXPLORER board.
+
 *********************
 Building the firmware
 *********************
@@ -19,7 +42,7 @@ Run cmake.
 
 .. code-block:: console
 
-    $ cmake ../
+    $ cmake ../ -DBOARD=$TARGET
     $ make
 
 To install, run:
@@ -35,7 +58,7 @@ Run the following command:
 
 .. code-block:: console
 
-    $ xrun --io bin/XCORE-AI-EXPLORER/micro_speech.xe
+    $ xrun --io bin/$TARGET/micro_speech.xe
 
 You should notice console output, which will update based on the model result.
 
@@ -59,7 +82,7 @@ Run the following command:
 
 .. code-block:: console
 
-    $ xrun --io bin/XCORE-AI-EXPLORER/micro_speech_test.xe
+    $ xrun --io bin/$TARGET/micro_speech_test.xe
 
 You should notice console output
 
@@ -92,7 +115,7 @@ The following command will generate a C source file that contains the TensorFlow
 
 .. code-block:: console
 
-    $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model.h --source model.c --variable-name g_model --include-guard TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MODEL_H_
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model.h --source model.c --variable-name g_model --include-guard TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MODEL_H_
 
 ******************
 Training the model

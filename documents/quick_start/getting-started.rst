@@ -39,4 +39,31 @@ Set up Environment Variable
 
     $ export XMOS_AIOT_SDK_PATH=<path to>/aiot_sdk
 
-You can also add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set in a new terminal window.
+You can also add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.
+
+Set up Virtual Environment
+==========================
+
+To install, follow these steps:
+
+**Step 1. Create a Conda environment**
+
+.. code-block:: console
+
+    $ conda create --prefix xmos_env python=3.6
+
+Activate the environment
+
+.. code-block:: console
+
+    $ conda activate xmos_env
+
+.. note:: You may need to specify the fully-qualified path to your environment.
+
+**Step 2. Install**
+
+The following command will install all libraries and Python modules.
+
+.. code-block:: console
+
+    $ ./install.sh

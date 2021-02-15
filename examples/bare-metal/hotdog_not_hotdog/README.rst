@@ -87,4 +87,4 @@ The following unix command will generate a C source file that contains the Tenso
 
 .. code-block:: console
 
-    $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/hotdog_not_hotdog.h --source inference_engine/src/hotdog_not_hotdog.c --variable-name hotdog_not_hotdog_model
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/hotdog_not_hotdog.h --source inference_engine/src/hotdog_not_hotdog.c --variable-name hotdog_not_hotdog_model

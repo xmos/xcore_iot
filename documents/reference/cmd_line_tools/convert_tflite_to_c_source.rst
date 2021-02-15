@@ -1,4 +1,4 @@
- .. _convert_tflite_to_c_source-manpage-label:
+ .. _convert_tflite_to_c_source-manpage:
 
 .. program:: convert_tflite_to_c_source.py
 
