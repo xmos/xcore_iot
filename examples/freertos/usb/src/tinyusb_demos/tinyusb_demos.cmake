@@ -13,7 +13,6 @@ set(CDC_MSC_FREERTOS_TEST_PATH "${TINYUSB_DEMO_PATH}/cdc_msc_freertos/src")
 set(DFU_RUNTIME_TEST_PATH "${TINYUSB_DEMO_PATH}/dfu_runtime/src")
 set(DYNAMIC_CONFIGURATION_TEST_PATH "${TINYUSB_DEMO_PATH}/dynamic_configuration/src")
 set(HID_COMPOSITE_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_composite/src")
-set(HID_COMPOSITE_FREERTOS_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_composite_freertos/src")
 set(HID_GENERIC_INOUT_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_generic_inout/src")
 set(HID_MULTIPLE_INTERFACE_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_multiple_interface/src")
 set(MIDI_TEST_PATH "${TINYUSB_DEMO_PATH}/midi_test/src")
@@ -34,7 +33,6 @@ option(USE_TINYUSB_DEMO_CDC_MSC_FREERTOS_TEST       "Enable to use TinyUSB demo"
 option(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_DYNAMIC_CONFIGURATION_TEST  "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          "Enable to use TinyUSB demo" FALSE)
-option(USE_TINYUSB_DEMO_HID_COMPOSITE_FREERTOS_TEST "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_HID_GENERIC_INOUT_TEST      "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_MIDI_TEST                   "Enable to use TinyUSB demo" FALSE)
@@ -138,19 +136,6 @@ endif()
 
 if(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST)
     set(DEMO_PATH ${HID_COMPOSITE_TEST_PATH})
-
-    set(TINYUSB_DEMO_SOURCES
-        "${DEMO_PATH}/demo_main.c"
-        "${DEMO_PATH}/usb_descriptors.c"
-    )
-
-    set(TINYUSB_DEMO_INCLUDES
-        ${DEMO_PATH}
-    )
-endif()
-
-if(USE_TINYUSB_DEMO_HID_COMPOSITE_FREERTOS_TEST)
-    set(DEMO_PATH ${HID_COMPOSITE_FREERTOS_TEST_PATH})
 
     set(TINYUSB_DEMO_SOURCES
         "${DEMO_PATH}/demo_main.c"
