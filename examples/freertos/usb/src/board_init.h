@@ -16,6 +16,7 @@ void board_tile0_init(
 
 void board_tile1_init(
         chanend_t tile0,
-        rtos_intertile_t *intertile1_ctx);
+        rtos_intertile_t *intertile1_ctx,
+        rtos_gpio_t *gpio_ctx);
 
 #endif /* BOARD_INIT_H_ */

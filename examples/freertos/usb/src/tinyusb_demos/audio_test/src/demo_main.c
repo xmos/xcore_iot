@@ -27,7 +27,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bsp/board.h"
+#include "FreeRTOS.h"
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "demo_main.h"
 #include "tusb.h"
 
 //--------------------------------------------------------------------+
@@ -45,7 +47,11 @@ enum  {
   BLINK_SUSPENDED = 2500,
 };
 
-static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
+static TimerHandle_t blinky_timer_ctx = NULL;
+static rtos_gpio_t *gpio_ctx = NULL;
+static rtos_gpio_port_id_t button_port = 0;
+static rtos_gpio_port_id_t led_port = 0;
+static uint32_t led_val = 0;
 
 // Audio controls
 // Current states
@@ -62,35 +68,6 @@ audio_control_range_4_n_t(1) sampleFreqRng; 						// Sample frequency range stat
 uint16_t test_buffer_audio[CFG_TUD_AUDIO_TX_FIFO_SIZE/2];
 uint16_t startVal = 0;
 
-void led_blinking_task(void);
-void audio_task(void);
-
-/*------------- MAIN -------------*/
-int main(void)
-{
-  board_init();
-
-  tusb_init();
-
-  // Init values
-  sampFreq = 44100;
-  clkValid = 1;
-
-  sampleFreqRng.wNumSubRanges = 1;
-  sampleFreqRng.subrange[0].bMin = 44100;
-  sampleFreqRng.subrange[0].bMax = 44100;
-  sampleFreqRng.subrange[0].bRes = 0;
-
-  while (1)
-  {
-    tud_task(); // tinyusb device task
-    led_blinking_task();
-    audio_task();
-  }
-
-
-  return 0;
-}
 
 //--------------------------------------------------------------------+
 // Device callbacks
@@ -99,13 +76,13 @@ int main(void)
 // Invoked when device is mounted
 void tud_mount_cb(void)
 {
-  blink_interval_ms = BLINK_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void)
 {
-  blink_interval_ms = BLINK_NOT_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_NOT_MOUNTED), 0);
 }
 
 // Invoked when usb bus is suspended
@@ -113,14 +90,14 @@ void tud_umount_cb(void)
 // Within 7ms, device must draw an average of current less than 2.5 mA from bus
 void tud_suspend_cb(bool remote_wakeup_en)
 {
-  (void) remote_wakeup_en;
-  blink_interval_ms = BLINK_SUSPENDED;
+    (void) remote_wakeup_en;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_SUSPENDED), 0);
 }
 
 // Invoked when usb bus is resumed
 void tud_resume_cb(void)
 {
-  blink_interval_ms = BLINK_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
 }
 
 //--------------------------------------------------------------------+
@@ -348,6 +325,7 @@ bool tud_audio_get_req_entity_cb(uint8_t rhport, tusb_control_request_t const * 
 	    return tud_control_xfer(rhport, p_request, &sampFreq, sizeof(sampFreq));
 	  case AUDIO_CS_REQ_RANGE:
 	    TU_LOG2("    Get Sample Freq. range\r\n");
+	    //((tusb_control_request_t *)p_request)->wLength = 14;
 	    return tud_control_xfer(rhport, p_request, &sampleFreqRng, sizeof(sampleFreqRng));
 
 	    // Unknown/Unsupported control
@@ -405,18 +383,73 @@ bool tud_audio_set_itf_close_EP_cb(uint8_t rhport, tusb_control_request_t const 
   return true;
 }
 
-//--------------------------------------------------------------------+
-// BLINKING TASK
-//--------------------------------------------------------------------+
-void led_blinking_task(void)
+void led_blinky_cb(TimerHandle_t xTimer)
 {
-  static uint32_t start_ms = 0;
-  static bool led_state = false;
+    (void) xTimer;
+    led_val ^= 1;
 
-  // Blink every interval ms
-  if ( board_millis() - start_ms < blink_interval_ms) return; // not enough time
-  start_ms += blink_interval_ms;
+#if OSPREY_BOARD
+#define RED         ~(1<<6)
+#define GREEN       ~(1<<7)
+    if(led_val) {
+        rtos_gpio_port_out(gpio_ctx, led_port, RED);
+    } else {
+        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
+    }
+#elif XCOREAI_EXPLORER
+    rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+#elif XCORE200_MIC_ARRAY
+    rtos_gpio_port_out(gpio_ctx, led_port, led_val << 2);
+#else
+#error No valid board was specified
+#endif
+}
 
-  board_led_write(led_state);
-  led_state = 1 - led_state; // toggle
+void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
+{
+    if (gpio_ctx == NULL) {
+        gpio_ctx = ctx;
+
+#if XCORE200_MIC_ARRAY
+        led_port = rtos_gpio_port(PORT_LED10_TO_12);
+#else
+        led_port = rtos_gpio_port(PORT_LEDS);
+#endif
+        rtos_gpio_port_enable(gpio_ctx, led_port);
+        rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+
+        // Init values
+        sampFreq = 44100;
+        clkValid = 1;
+
+        sampleFreqRng.wNumSubRanges = 1;
+        sampleFreqRng.subrange[0].bMin = 44100;
+        sampleFreqRng.subrange[0].bMax = 44100;
+        sampleFreqRng.subrange[0].bRes = 0;
+
+#if OSPREY_BOARD
+        button_port = rtos_gpio_port(PORT_BUTTON);
+#elif XCOREAI_EXPLORER
+        button_port = rtos_gpio_port(PORT_BUTTONS);
+#elif XCORE200_MIC_ARRAY
+        button_port = rtos_gpio_port(PORT_BUT_A_TO_D);
+#else
+#error No valid board was specified
+#endif
+        rtos_gpio_port_enable(gpio_ctx, button_port);
+
+        blinky_timer_ctx = xTimerCreate("blinky",
+                                        pdMS_TO_TICKS(BLINK_NOT_MOUNTED),
+                                        pdTRUE,
+                                        NULL,
+                                        led_blinky_cb);
+        xTimerStart(blinky_timer_ctx, 0);
+
+//        xTaskCreate((TaskFunction_t) audio_task,
+//                    "audio_task",
+//                    portTASK_STACK_DEPTH(audio_task),
+//                    NULL,
+//                    priority,
+//                    NULL);
+    }
 }

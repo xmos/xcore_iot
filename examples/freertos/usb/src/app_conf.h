@@ -10,4 +10,8 @@
 #define appconfUSB_MANAGER_TASK_PRIORITY        ( configMAX_PRIORITIES - 2 )
 #define appconfTINYUSB_DEMO_TASK_PRIORITY       ( configMAX_PRIORITIES - 3 )
 
+#define appconfGPIO_RPC_HOST_TASK_PRIORITY      ( configMAX_PRIORITIES - 1 )
+
+#define appconfGPIO_RPC_PORT                    5
+
 #endif /* APP_CONF_H_ */

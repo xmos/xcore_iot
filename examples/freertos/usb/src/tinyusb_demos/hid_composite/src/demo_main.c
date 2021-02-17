@@ -161,7 +161,7 @@ void hid_task(void* args)
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(10));
 
-        uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
+        uint32_t buttons_val = 0;//rtos_gpio_port_in(gpio_ctx, button_port);
 
         // Remote wakeup
         if ( tud_suspended() && buttons_val )
@@ -235,6 +235,9 @@ void led_blinky_cb(TimerHandle_t xTimer)
     }
 #elif XCOREAI_EXPLORER
     rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+#elif XCORE200_MIC_ARRAY
+    //rtos_gpio_port_out(gpio_ctx, led_port, led_val << 2);
+    rtos_printf("blink\n");
 #else
 #error No valid board was specified
 #endif
@@ -245,7 +248,11 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
     if (gpio_ctx == NULL) {
         gpio_ctx = ctx;
 
+#if XCORE200_MIC_ARRAY
+        led_port = rtos_gpio_port(PORT_LED10_TO_12);
+#else
         led_port = rtos_gpio_port(PORT_LEDS);
+#endif
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
@@ -253,6 +260,8 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
         button_port = rtos_gpio_port(PORT_BUTTON);
 #elif XCOREAI_EXPLORER
         button_port = rtos_gpio_port(PORT_BUTTONS);
+#elif XCORE200_MIC_ARRAY
+        button_port = rtos_gpio_port(PORT_BUT_A_TO_D);
 #else
 #error No valid board was specified
 #endif

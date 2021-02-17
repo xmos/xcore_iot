@@ -1,13 +1,15 @@
 // Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
-#define DEBUG_UNIT RTOS_USB
+//#define DEBUG_UNIT RTOS_USB
 
 #include <string.h>
 #include <xcore/triggerable.h>
 #include "rtos_interrupt.h"
 #include "rtos_usb.h"
 #include "xud_xfer_data.h"
+
+#define XUD_DEV_XS3 1
 
 int XUD_Main(chanend_t c_epOut[],
              int noEpOut,
@@ -16,8 +18,14 @@ int XUD_Main(chanend_t c_epOut[],
              chanend_t c_sof,
              XUD_EpType epTypeTableOut[],
              XUD_EpType epTypeTableIn[],
+#if !XUD_DEV_XS3
+             unsigned a, unsigned b, unsigned c,
+#endif
              XUD_BusSpeed_t desiredSpeed,
              XUD_PwrConfig pwrConfig);
+
+#define SETSR(c) asm volatile("setsr %0" : : "n"(c));
+#define CLRSR(c) asm volatile("clrsr %0" : : "n"(c));
 
 static void usb_xud_thread(rtos_usb_t *ctx)
 {
@@ -26,10 +34,20 @@ static void usb_xud_thread(rtos_usb_t *ctx)
     /* And exclude it from core 0 where the system tick interrupt runs */
     rtos_osal_thread_core_exclusion_set(NULL, (1 << 0));
 
+    rtos_interrupt_mask_all();
+    /* TODO:
+     * Disable the interrupt on the FreeRTOS intercore chanend.
+     * Disabling preemption above should ensure that under normal
+     * conditions it is not interrupted, but there are some cases
+     * where it might be. If that were to happen, I believe it would
+     * crash since KEDI will be off.
+     */
+
+    CLRSR(XS1_SR_KEDI_MASK);
+
     while (1) {
         rtos_printf("Starting XUD_Main() with %d out and %d in\n", ctx->endpoint_out_count, ctx->endpoint_in_count);
 
-        rtos_interrupt_mask_all();
         XUD_Main(ctx->c_ep_out_xud,
                  ctx->endpoint_out_count,
                  ctx->c_ep_in_xud,
@@ -37,9 +55,26 @@ static void usb_xud_thread(rtos_usb_t *ctx)
                  0/*ctx->c_sof_xud*/,
                  ctx->endpoint_out_type,
                  ctx->endpoint_in_type,
+#if !XUD_DEV_XS3
+                 0, 0, -1,
+#endif
                  ctx->speed,
                  ctx->power_source);
+
+        /*
+         * TODO: Check to see if the application is stopping
+         * the driver instance. If so, break out of the loop.
+         */
     }
+
+    SETSR(XS1_SR_KEDI_MASK);
+
+    /* TODO:
+     * Re-enable the interrupt on the intercore chanend.
+     */
+
+    rtos_interrupt_unmask_all();
+    vTaskDelete(NULL);
 }
 
 static inline unsigned ep_event_flag(const int ep_num,
@@ -64,6 +99,10 @@ static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
         *len = ctx->ep_xfer_info[ep_num][dir].len;
     } else {
         res = xud_data_get_check(ctx->c_ep[ep_num][dir], ctx->ep[ep_num][dir], len, is_setup);
+
+        if (*len > ctx->ep_xfer_info[ep_num][dir].len) {
+            rtos_printf("Length of %d bytes transferred on ep %d direction %d. Should have been <= %d\n", *len, ep_num, dir, ctx->ep_xfer_info[ep_num][dir].len);
+        }
 
         xassert(*len <= ctx->ep_xfer_info[ep_num][dir].len);
         ctx->ep_xfer_info[ep_num][dir].len = *len;
@@ -90,7 +129,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_isr, arg)
     XUD_Result_t res;
 
     //rtos_printf("Disable trigger on %d %d\n", ep_num, dir);
-    triggerable_disable_trigger(ctx->c_ep[ep_num][dir]);
+//    triggerable_disable_trigger(ctx->c_ep[ep_num][dir]);
 
     if (ctx->ep[ep_num][dir] != 0) {
         int is_setup;
@@ -195,7 +234,7 @@ XUD_Result_t rtos_usb_endpoint_transfer_start(rtos_usb_t *ctx,
 
     if (res == XUD_RES_OKAY) {
         //rtos_printf("Enable trigger on %d %d\n", ep_num, dir);
-        triggerable_enable_trigger(ctx->c_ep[ep_num][dir]);
+//        triggerable_enable_trigger(ctx->c_ep[ep_num][dir]);
     }
 
     return res;

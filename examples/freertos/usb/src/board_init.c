@@ -9,6 +9,8 @@
 #include "board_init.h"
 #include "app_conf.h"
 
+static rtos_driver_rpc_t gpio_rpc_config;
+
 void board_tile0_init(
         chanend_t tile1,
         rtos_intertile_t *intertile1_ctx,
@@ -16,9 +18,16 @@ void board_tile0_init(
         rtos_gpio_t *gpio_ctx)
 {
     rtos_intertile_init(intertile1_ctx, tile1);
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
 
     rtos_gpio_init(
             gpio_ctx);
+
+    rtos_gpio_rpc_host_init(
+            gpio_ctx,
+            &gpio_rpc_config,
+            client_intertile_ctx,
+            1);
 
     rtos_qspi_flash_init(
             qspi_flash_ctx,
@@ -54,7 +63,13 @@ void board_tile0_init(
 
 void board_tile1_init(
         chanend_t tile0,
-        rtos_intertile_t *intertile1_ctx)
+        rtos_intertile_t *intertile1_ctx,
+        rtos_gpio_t *gpio_ctx)
 {
     rtos_intertile_init(intertile1_ctx, tile0);
+
+    rtos_gpio_rpc_client_init(
+            gpio_ctx,
+            &gpio_rpc_config,
+            intertile1_ctx);
 }

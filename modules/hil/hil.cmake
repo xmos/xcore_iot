@@ -187,6 +187,7 @@ if(${USE_${THIS_LIB}})
     list(REMOVE_ITEM ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/included/XUD_Token_Setup_DI.S")
     list(REMOVE_ITEM ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/included/XUD_Token_SOF.S")
     list(REMOVE_ITEM ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_CrcAddrCheck.S")
+    list(REMOVE_ITEM ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_G_Crc.S") # Not in XS3 branch
     list(REMOVE_ITEM ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_TokenJmp.S")
 
     set(${THIS_LIB}_SOURCES
@@ -201,10 +202,12 @@ if(${USE_${THIS_LIB}})
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_Main.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue")
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/user/client/XUD_SetDevAddr.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue")
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_DeviceAttach.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue -Wno-return-type")
+    set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_PhyResetUser.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue") # Not in XS3 branch
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_Support.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue")
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_IOLoopCall.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue")
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_PowerSig.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue -Wno-return-type")
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_TestMode.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue")
+    set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_GetDone.c PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue") # Not in XS3 branch
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_SetCrcTableAddr.c PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -mno-dual-issue")
     set_source_files_properties(${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/XUD_HAL.xc PROPERTIES COMPILE_FLAGS "${${THIS_LIB}_FLAGS} -Wno-return-type")
 

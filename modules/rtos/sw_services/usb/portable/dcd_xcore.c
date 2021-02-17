@@ -4,7 +4,7 @@
 #include "device/dcd.h"
 #include "device/usbd.h" /* For tud_descriptor_configuration_cb() */
 
-#define DEBUG_UNIT TUSB_DCD
+//#define DEBUG_UNIT TUSB_DCD
 
 #include <rtos/drivers/usb/api/rtos_usb.h>
 
@@ -91,6 +91,10 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
         if (res == XUD_RES_OKAY) {
             rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
             tu_result = XFER_RESULT_SUCCESS;
+
+            if (xfer_len == 0 && tu_edpt_number(ep_address) == 0) {
+                prepare_setup(true);
+            }
         } else {
             tu_result = XFER_RESULT_FAILED;
             xfer_len = 0;
@@ -310,7 +314,7 @@ void dcd_edpt0_status_complete(uint8_t rhport,
         XUD_SetDevAddr(dev_addr);
     }
 
-    prepare_setup(false);
+//    prepare_setup(false);
 }
 
 // Configure endpoint's registers according to descriptor
@@ -330,10 +334,12 @@ void dcd_edpt_close(uint8_t rhport,
     /*
      * Not sure what this should do.
      *
-     * If this is called and then dcd_edpt_open() is called again,
-     * then this may have to set the endpoint bit in the event group
-     * if dcd_edpt_open() calls rtos_usb_endpoint_ready().
+     * What happens if a transfer was previously scheduled and
+     * has not yet completed? Especially if this is an OUT
+     * endpoint? Should this transfer somehow be canceled?
+     * Does the interrupt need to be disabled?
      */
+    XUD_ResetEpStateByAddr(ep_addr);
 }
 
 // Submit a transfer, When complete dcd_event_xfer_complete() is invoked to notify the stack
