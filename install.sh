@@ -10,8 +10,7 @@ else
     echo "*****************************"
     echo "* Updating tools submodules *"
     echo "*****************************"
-    #(cd ${AI_TOOLS_DIR}; git submodule update --init --recursive) 
-    (cd ${AI_TOOLS_DIR}; git submodule update --init utils/adf/flatbuffers) 
+    (cd ${AI_TOOLS_DIR}; git submodule update --init --recursive)
 
     echo "****************************"
     echo "* Building libtflite2xcore *"
@@ -38,16 +37,9 @@ else
     echo "* Updating PATH environment variable *"
     echo "**************************************"
     # setup conda to source the SetEnv on activate
-    #cd $CONDA_PREFIX
     mkdir -p ${CONDA_PREFIX}/etc/conda/activate.d
     touch ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
-#    echo "PATH=${XMOS_AIOT_SDK_PATH}/modules/adf/tools/generate:${PATH}" > ./etc/conda/activate.d/env_vars.sh
     echo "source ${INSTALL_DIR}/SetEnv" > ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
-    #cd ..
     # source the SetEnv so the env is setup now
     source ${INSTALL_DIR}/SetEnv
-    #echo ""
-    #echo "Deactivate and activate your environment to complete the install:"
-    #echo "$ conda deactivate"
-    #echo "$ conda activate ${CONDA_PREFIX}"
 fi
