@@ -50,7 +50,7 @@ void model_runner_tensor_bytes_get(int index, void **bytes, size_t *size) {
 ModelRunnerStatus model_runner_invoke() {
   // reset the profiler
   if (profiler) {
-    profiler->Reset();
+    profiler->ClearEvents();
   }
 
   // Run inference, and report any error
@@ -124,8 +124,8 @@ ModelRunnerStatus model_runner_init(uint8_t *model_content,
 
 void model_runner_profiler_times_get(uint32_t *count, const uint32_t **times) {
   if (profiler) {
-    *count = profiler->GetNumTimes();
-    *times = profiler->GetTimes();
+    *count = profiler->GetNumEvents();
+    *times = profiler->GetEventDurations();
   } else {
     *count = 0;
     *times = static_cast<uint32_t *>(nullptr);
