@@ -4,6 +4,7 @@ set -e
 if [ -z ${XMOS_AIOT_SDK_PATH} ]; then
 	echo "XMOS_AIOT_SDK_PATH must be set before running this script."
 else
+    INSTALL_DIR=${XMOS_AIOT_SDK_PATH}/tools/install
     AI_TOOLS_DIR=${XMOS_AIOT_SDK_PATH}/tools/ai_tools
 
     echo "*****************************"
@@ -30,18 +31,15 @@ else
     echo "**********************************"
     echo "* Installing Python requirements *"
     echo "**********************************"
-    pip install -r requirements.txt
+    pip install -r ${INSTALL_DIR}/requirements.txt
 
     echo "**************************************"
     echo "* Updating PATH environment variable *"
     echo "**************************************"
-    cd $CONDA_PREFIX
-    mkdir -p ./etc/conda/activate.d
-    touch ./etc/conda/activate.d/env_vars.sh
-    echo "PATH=${XMOS_AIOT_SDK_PATH}/modules/adf/tools/generate:${PATH}" > ./etc/conda/activate.d/env_vars.sh
-    cd ..
-    echo ""
-    echo "Deactivate and activate your environment to complete the install:"
-    echo "$ conda deactivate"
-    echo "$ conda activate ${CONDA_PREFIX}"
+    # setup conda to source the SetEnv on activate
+    mkdir -p ${CONDA_PREFIX}/etc/conda/activate.d
+    touch ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
+    echo "source ${INSTALL_DIR}/SetEnv" > ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
+    # source the SetEnv so the env is setup now
+    source ${INSTALL_DIR}/SetEnv
 fi
