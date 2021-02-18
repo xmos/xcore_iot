@@ -72,6 +72,7 @@ if(USE_TINYUSB_DEMO_CDC_MSC_TEST)
 
     set(TINYUSB_DEMO_SOURCES
         "${DEMO_PATH}/demo_main.c"
+        "${DEMO_PATH}/msc_disk.c"
         "${DEMO_PATH}/usb_descriptors.c"
     )
 
@@ -176,6 +177,7 @@ if(USE_TINYUSB_DEMO_MSC_DUAL_LUN)
 
     set(TINYUSB_DEMO_SOURCES
         "${DEMO_PATH}/demo_main.c"
+        "${DEMO_PATH}/msc_disk_dual.c"
         "${DEMO_PATH}/usb_descriptors.c"
     )
 
