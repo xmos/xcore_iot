@@ -55,6 +55,13 @@ rtos_osal_status_t rtos_osal_thread_core_exclusion_set(rtos_osal_thread_t *threa
     return RTOS_OSAL_SUCCESS;
 }
 
+rtos_osal_status_t rtos_osal_thread_core_exclusion_get(rtos_osal_thread_t *thread, uint32_t *core_map)
+{
+    core_map = vTaskCoreExclusionGet(thread_handle(thread));
+
+    return RTOS_OSAL_SUCCESS;
+}
+
 rtos_osal_status_t rtos_osal_thread_preemption_disable(rtos_osal_thread_t *thread)
 {
     vTaskPreemptionDisable(thread_handle(thread));

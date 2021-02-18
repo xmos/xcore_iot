@@ -45,27 +45,20 @@ static void usb_xud_thread(rtos_usb_t *ctx)
 
     CLRSR(XS1_SR_KEDI_MASK);
 
-    while (1) {
-        rtos_printf("Starting XUD_Main() with %d out and %d in\n", ctx->endpoint_out_count, ctx->endpoint_in_count);
+    rtos_printf("Starting XUD_Main() with %d endpoints\n", ctx->endpoint_count);
 
-        XUD_Main(ctx->c_ep_out_xud,
-                 ctx->endpoint_out_count,
-                 ctx->c_ep_in_xud,
-                 ctx->endpoint_in_count,
-                 0/*ctx->c_sof_xud*/,
-                 ctx->endpoint_out_type,
-                 ctx->endpoint_in_type,
+    XUD_Main(ctx->c_ep_out_xud,
+             ctx->endpoint_count,
+             ctx->c_ep_in_xud,
+             ctx->endpoint_count,
+             0/*ctx->c_sof_xud*/,
+             ctx->endpoint_out_type,
+             ctx->endpoint_in_type,
 #if !XUD_DEV_XS3
-                 0, 0, -1,
+             0, 0, -1,
 #endif
-                 ctx->speed,
-                 ctx->power_source);
-
-        /*
-         * TODO: Check to see if the application is stopping
-         * the driver instance. If so, break out of the loop.
-         */
-    }
+             ctx->speed,
+             ctx->power_source);
 
     SETSR(XS1_SR_KEDI_MASK);
 
@@ -300,6 +293,7 @@ void rtos_usb_start(
 {
     int i;
     channel_t tmp_chan;
+    uint32_t core_exclude_map;
 
     xassert(endpoint_count <= RTOS_USB_ENDPOINT_COUNT_MAX);
 
@@ -315,14 +309,23 @@ void rtos_usb_start(
 
     rtos_osal_event_group_create(&ctx->event_group, "usb_ev_grp");
 
+    /*
+     * Force the channel interrupts to be enabled on core 0,
+     * where XUD_Main() is excluded from. If XUD_Main() ended up
+     * running on the core where these interrupts are enabled, this
+     * would be a problem.
+     */
+    rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
+    rtos_osal_thread_core_exclusion_set(NULL, ~(1 << 0));
+
     for (i = 0; i < endpoint_count; i++) {
 
+        ctx->endpoint_out_type[i] = endpoint_out_type[i];
         if (endpoint_out_type[i] != XUD_EPTYPE_DIS) {
-            int out_i = ctx->endpoint_out_count++;
+
             tmp_chan = chan_alloc();
-            ctx->c_ep_out_xud[out_i] = tmp_chan.end_a;
+            ctx->c_ep_out_xud[i] = tmp_chan.end_a;
             ctx->c_ep[i][RTOS_USB_OUT_EP] = tmp_chan.end_b;
-            ctx->endpoint_out_type[out_i] = endpoint_out_type[i];
 
             ctx->ep_xfer_info[i][RTOS_USB_OUT_EP].dir = RTOS_USB_OUT_EP;
             ctx->ep_xfer_info[i][RTOS_USB_OUT_EP].ep_num = i;
@@ -331,12 +334,13 @@ void rtos_usb_start(
             triggerable_setup_interrupt_callback(ctx->c_ep[i][RTOS_USB_OUT_EP], &ctx->ep_xfer_info[i][RTOS_USB_OUT_EP], RTOS_INTERRUPT_CALLBACK(usb_isr));
             triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_OUT_EP]);
         }
+
+        ctx->endpoint_in_type[i] = endpoint_in_type[i];
         if (endpoint_in_type[i] != XUD_EPTYPE_DIS) {
-            int in_i = ctx->endpoint_in_count++;
+
             tmp_chan = chan_alloc();
-            ctx->c_ep_in_xud[in_i] = tmp_chan.end_a;
+            ctx->c_ep_in_xud[i] = tmp_chan.end_a;
             ctx->c_ep[i][RTOS_USB_IN_EP] = tmp_chan.end_b;
-            ctx->endpoint_in_type[in_i] = endpoint_in_type[i];
 
             ctx->ep_xfer_info[i][RTOS_USB_IN_EP].dir = RTOS_USB_IN_EP;
             ctx->ep_xfer_info[i][RTOS_USB_IN_EP].ep_num = i;
@@ -350,6 +354,9 @@ void rtos_usb_start(
     tmp_chan = chan_alloc();
     ctx->c_sof_xud = tmp_chan.end_a;
     ctx->c_sof = tmp_chan.end_b;
+
+    /* Restore the core exclusion map for this thread */
+    rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
 
     rtos_osal_thread_create(
             NULL,

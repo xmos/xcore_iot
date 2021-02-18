@@ -55,8 +55,6 @@ typedef struct {
 
 struct rtos_usb_struct {
     size_t endpoint_count;
-    size_t endpoint_out_count;
-    size_t endpoint_in_count;
     chanend_t c_ep_out_xud[RTOS_USB_ENDPOINT_COUNT_MAX];
     chanend_t c_ep_in_xud[RTOS_USB_ENDPOINT_COUNT_MAX];
     chanend_t c_sof_xud;
