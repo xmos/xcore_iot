@@ -161,7 +161,8 @@ void hid_task(void* args)
     while (1) {
         vTaskDelay(pdMS_TO_TICKS(10));
 
-        uint32_t buttons_val = 0;//rtos_gpio_port_in(gpio_ctx, button_port);
+        uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
+        buttons_val = (~buttons_val) & 0x1;
 
         // Remote wakeup
         if ( tud_suspended() && buttons_val )
@@ -190,8 +191,10 @@ void tud_hid_report_complete_cb(uint8_t itf, uint8_t const* report, uint8_t len)
 
     if (next_report_id < REPORT_ID_COUNT)
     {
-        // send_hid_report(next_report_id, board_button_read());
-        send_hid_report(next_report_id, 0);
+        uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
+        buttons_val = (~buttons_val) & 0x1;
+
+        send_hid_report(next_report_id, buttons_val);
     }
 }
 
