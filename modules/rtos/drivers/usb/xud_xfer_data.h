@@ -29,6 +29,7 @@ static inline XUD_Result_t xud_data_get_check(chanend_t c, XUD_ep ep, unsigned *
 {
     int32_t word_len;
     int8_t tail_bitlen;
+    int32_t byte_len;
     unsigned int *ep_struct = (unsigned int *) ep;
 
     /* Test if there is a RESET */
@@ -69,12 +70,14 @@ static inline XUD_Result_t xud_data_get_check(chanend_t c, XUD_ep ep, unsigned *
         }
     }
 
-    if (tail_bitlen < 0) {
+    byte_len = (4 * word_len) + (tail_bitlen / 8);
+
+    if (byte_len >= 0) {
+        *length = byte_len;
+        return XUD_RES_OKAY;
+    } else {
         *length = 0;
         return XUD_RES_ERR;
-    } else {
-        *length = (4 * word_len) + (8 * tail_bitlen);
-        return XUD_RES_OKAY;
     }
 }
 

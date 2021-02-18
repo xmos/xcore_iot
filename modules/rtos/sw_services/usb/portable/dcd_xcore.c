@@ -96,6 +96,7 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
                 prepare_setup(true);
             }
         } else {
+            rtos_printf("xfer on %02x failed with status %d\n", ep_address, res);
             tu_result = XFER_RESULT_FAILED;
             xfer_len = 0;
         }

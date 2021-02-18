@@ -110,9 +110,17 @@ static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
         if (res == XUD_RES_OKAY) {
             if (*is_setup) {
                 res = xud_setup_data_get_finish(ctx->ep[ep_num][dir]);
+                if (res == XUD_RES_ERR) {
+                    rtos_printf("USB XFER ERROR from xud_setup_data_get_finish()!\n");
+                }
             } else {
                 res = xud_data_get_finish(ctx->ep[ep_num][dir]);
+                if (res == XUD_RES_ERR) {
+                    rtos_printf("USB XFER ERROR from xud_data_get_finish()!\n");
+                }
             }
+        } else if (res == XUD_RES_ERR) {
+            rtos_printf("USB XFER ERROR from xud_data_get_check()!\n");
         }
     }
 
