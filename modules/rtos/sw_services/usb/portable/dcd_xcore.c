@@ -4,7 +4,7 @@
 #include "device/dcd.h"
 #include "device/usbd.h" /* For tud_descriptor_configuration_cb() */
 
-//#define DEBUG_UNIT TUSB_DCD
+#define DEBUG_UNIT TUSB_DCD
 
 #include <rtos/drivers/usb/api/rtos_usb.h>
 
