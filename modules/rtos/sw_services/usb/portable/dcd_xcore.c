@@ -10,14 +10,17 @@
 
 static rtos_usb_t usb_ctx;
 
-static uint32_t setup_packet[sizeof(tusb_control_request_t) / sizeof(uint32_t) + 1];
+static struct setup_packet_struct {
+    tusb_control_request_t req;
+    uint32_t pad; /* just in case the transfer writes a CRC */
+} setup_packet;
 
 static void prepare_setup(bool in_isr)
 {
     XUD_Result_t res;
 
     rtos_printf("preparing for setup packet\n");
-    res = rtos_usb_endpoint_transfer_start(&usb_ctx, 0x00, (uint8_t *) setup_packet, sizeof(tusb_control_request_t));
+    res = rtos_usb_endpoint_transfer_start(&usb_ctx, 0x00, (uint8_t *) &setup_packet, sizeof(tusb_control_request_t));
 
     xassert(res == XUD_RES_OKAY);
 
@@ -84,7 +87,7 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
 
     if (is_setup) {
         rtos_printf("Setup packet of %d bytes received on %02x\n", xfer_len, ep_address);
-        dcd_event_setup_received(0, (uint8_t *) setup_packet, true);
+        dcd_event_setup_received(0, (uint8_t *) &setup_packet, true);
     } else {
         xfer_result_t tu_result;
 
@@ -92,7 +95,17 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
             rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
             tu_result = XFER_RESULT_SUCCESS;
 
-            if (xfer_len == 0 && tu_edpt_number(ep_address) == 0) {
+            if (xfer_len == 0 && ep_address == 0x00) {
+                /*
+                 * A ZLP has presumably been received on the output endpoint 0.
+                 * Ensure lib_xud is ready for the next setup packet. Hopefully
+                 * it does not come in prior to setting this up.
+                 *
+                 * TODO:
+                 * Ideally this buffer would be prepared prior to receiving the ZLP,
+                 * but it doesn't appear that this is currently possible to do
+                 * with lib_xud. This is under investigation.
+                 */
                 prepare_setup(true);
             }
         } else {
@@ -314,8 +327,6 @@ void dcd_edpt0_status_complete(uint8_t rhport,
         rtos_printf("Setting device address to %d now\n", dev_addr);
         XUD_SetDevAddr(dev_addr);
     }
-
-//    prepare_setup(false);
 }
 
 // Configure endpoint's registers according to descriptor
@@ -366,6 +377,26 @@ bool dcd_edpt_xfer(uint8_t rhport,
     }
 
     xassert(buffer != NULL);
+
+    /*
+     * If this is requesting the transfer of a ZLP status, then ensure that
+     * a buffer is ready for the next setup packet, as it may be transferred
+     * immediately following completion of this transfer.
+     */
+    if (tu_edpt_number(ep_addr) == 0 && total_bytes == 0 && tu_edpt_dir(ep_addr) != setup_packet.req.bmRequestType_bit.direction) {
+        if (ep_addr == 0x80) {
+            /*
+             * TODO: Ideally this would be prepared regardless of
+             * the data phase direction. But it doesn't appear to be
+             * possible to prepare lib_xud with a buffer for the next
+             * setup packet prior to preparing it for receipt of a ZLP
+             * status from the host.
+             * See related TODO in dcd_xcore_int_handler(). This is
+             * currently under investigation.
+             */
+            prepare_setup(false);
+        }
+    }
 
     res = rtos_usb_endpoint_transfer_start(&usb_ctx, ep_addr, buffer, total_bytes);
     if (res == XUD_RES_OKAY) {
