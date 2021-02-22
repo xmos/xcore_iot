@@ -28,7 +28,9 @@
 #include <string.h>
 
 #include "FreeRTOS.h"
+#include "stream_buffer.h"
 #include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "rtos/drivers/mic_array/api/rtos_mic_array.h"
 #include "demo_main.h"
 #include "tusb.h"
 
@@ -65,9 +67,8 @@ audio_control_range_2_n_t(1) volumeRng[CFG_TUD_AUDIO_N_CHANNELS_TX+1]; 			// Vol
 audio_control_range_4_n_t(1) sampleFreqRng; 						// Sample frequency range state
 
 // Audio test data
-uint16_t test_buffer_audio[CFG_TUD_AUDIO_TX_FIFO_SIZE/2];
-uint16_t startVal = 0;
-
+static bool interface_open = false;
+static StreamBufferHandle_t sample_stream_buf;
 
 //--------------------------------------------------------------------+
 // Device callbacks
@@ -104,10 +105,43 @@ void tud_resume_cb(void)
 // AUDIO Task
 //--------------------------------------------------------------------+
 
-void audio_task(void)
+void audio_task(void *arg)
 {
-  // Yet to be filled - e.g. put meas data into TX FIFOs etc.
-  asm("nop");
+    int tmp = 0;
+    rtos_mic_array_t *mic_array_ctx = (rtos_mic_array_t*) arg;
+
+    int32_t mic_samples[256][MIC_DUAL_NUM_CHANNELS];
+    int16_t *samples_to_buffer = (int16_t *) mic_samples;
+
+    while (!tusb_inited()) {
+        vTaskDelay(10);
+    }
+
+    for (;;) {
+
+        rtos_mic_array_rx(
+                mic_array_ctx,
+                mic_samples,
+                256,
+                portMAX_DELAY);
+
+        if (interface_open) {
+            for (int i = 0; i < 256; i++) {
+                samples_to_buffer[i] = mic_samples[i][0] >> 16;
+            }
+
+            if (xStreamBufferSend(sample_stream_buf, samples_to_buffer, 256 * 2, 0) != 256 * 2) {
+                rtos_printf("lost mic samples\n");
+            }
+    #if TEST_SEND_FAST
+            if (tmp++ == 100) {
+                int16_t extra_sample = 0x7FFF;
+                xStreamBufferSend(sample_stream_buf, &extra_sample, 2, 0);
+                tmp = 0;
+            }
+    #endif
+        }
+    }
 }
 
 //--------------------------------------------------------------------+
@@ -353,7 +387,35 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, u
   (void) ep_in;
   (void) cur_alt_setting;
 
-  tud_audio_write ((uint8_t *)test_buffer_audio, CFG_TUD_AUDIO_TX_FIFO_SIZE);
+  uint8_t buf[CFG_TUD_AUDIO_EPSIZE_IN];
+  size_t tx_byte_count;
+  size_t bytes_available;
+
+  interface_open = true;
+
+  if (xStreamBufferIsFull(sample_stream_buf)) {
+      xStreamBufferReset(sample_stream_buf);
+      return true;
+  }
+
+  bytes_available = xStreamBufferBytesAvailable(sample_stream_buf);
+
+  if (bytes_available > (256 + 8) * CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX*CFG_TUD_AUDIO_N_CHANNELS_TX) {
+      tx_byte_count = CFG_TUD_AUDIO_EPSIZE_IN;
+      rtos_printf("Will send more samples to prevent an overflow (%u bytes in buffer)\n", bytes_available);
+  } else {
+      tx_byte_count = 6*2;
+  }
+
+  bytes_available = xStreamBufferReceive(sample_stream_buf, buf, tx_byte_count, 0);
+
+  if (bytes_available < 6 * 2) {
+      rtos_printf("Only sending %u samples\n", bytes_available / 2);
+  } else if (bytes_available > 6 * 2) {
+      rtos_printf("Sending %u samples\n", bytes_available / 2);
+  }
+
+  tud_audio_write(buf, bytes_available);
 
   return true;
 }
@@ -366,19 +428,31 @@ bool tud_audio_tx_done_post_load_cb(uint8_t rhport, uint16_t n_bytes_copied, uin
   (void) ep_in;
   (void) cur_alt_setting;
 
-  for (size_t cnt = 0; cnt < CFG_TUD_AUDIO_TX_FIFO_SIZE/2; cnt++)
-  {
-    test_buffer_audio[cnt] = startVal++;
-  }
-
   return true;
+}
+
+bool tud_audio_set_itf_cb(uint8_t rhport, tusb_control_request_t const * p_request)
+{
+    (void) rhport;
+    (void) p_request;
+
+    xassert(!interface_open);
+
+    rtos_printf("Mic interface opened\n");
+
+    xStreamBufferReset(sample_stream_buf);
+
+    return true;
 }
 
 bool tud_audio_set_itf_close_EP_cb(uint8_t rhport, tusb_control_request_t const * p_request)
 {
   (void) rhport;
   (void) p_request;
-  startVal = 0;
+
+  interface_open = false;
+
+  rtos_printf("Mic interface closed\n");
 
   return true;
 }
@@ -419,12 +493,12 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
         // Init values
-        sampFreq = 44100;
+        sampFreq = 48000;
         clkValid = 1;
 
         sampleFreqRng.wNumSubRanges = 1;
-        sampleFreqRng.subrange[0].bMin = 44100;
-        sampleFreqRng.subrange[0].bMax = 44100;
+        sampleFreqRng.subrange[0].bMin = 48000;
+        sampleFreqRng.subrange[0].bMax = 48000;
         sampleFreqRng.subrange[0].bRes = 0;
 
 #if OSPREY_BOARD
@@ -445,11 +519,14 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
                                         led_blinky_cb);
         xTimerStart(blinky_timer_ctx, 0);
 
-//        xTaskCreate((TaskFunction_t) audio_task,
-//                    "audio_task",
-//                    portTASK_STACK_DEPTH(audio_task),
-//                    NULL,
-//                    priority,
-//                    NULL);
+        sample_stream_buf = xStreamBufferCreate(1.5 * 256 * 2, 6 * 2);
+
+        extern rtos_mic_array_t *mic_array_ctx;
+        xTaskCreate((TaskFunction_t) audio_task,
+                    "audio_task",
+                    portTASK_STACK_DEPTH(audio_task),
+                    mic_array_ctx,
+                    priority,
+                    NULL);
     }
 }

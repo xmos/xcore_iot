@@ -27,19 +27,24 @@
 
 static rtos_qspi_flash_t qspi_flash_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
+static rtos_mic_array_t mic_array_ctx_s;
 static rtos_intertile_t intertile_ctx_s;
 
 static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
 static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
+rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 
 #if ON_TILE(0)
 void vApplicationDaemonTaskStartup(void *arg)
 {
+    rtos_printf("vApplicationDaemonTaskStartup() on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
+
     rtos_printf("Starting intertile driver\n");
     rtos_intertile_start(intertile_ctx);
 
     rtos_gpio_rpc_config(gpio_ctx, appconfGPIO_RPC_PORT, appconfGPIO_RPC_HOST_TASK_PRIORITY);
+    rtos_mic_array_rpc_config(mic_array_ctx, appconfMIC_ARRAY_RPC_PORT, appconfMIC_ARRAY_RPC_HOST_TASK_PRIORITY);
 
     /* Initialize drivers  */
     rtos_printf("Starting GPIO driver\n");
@@ -56,8 +61,10 @@ void vApplicationDaemonTaskStartup(void *arg)
 
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
+    TaskHandle_t startup_task;
+
     (void) c0;
-    board_tile0_init(c1, intertile_ctx, qspi_flash_ctx, gpio_ctx);
+    board_tile0_init(c1, intertile_ctx, qspi_flash_ctx, gpio_ctx, mic_array_ctx);
     (void) c2;
     (void) c3;
 
@@ -67,7 +74,14 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 				RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
                 NULL,
 				appconfSTARTUP_TASK_PRIORITY,
-                NULL);
+                &startup_task);
+
+    /*
+     * Force the startup task to be on core 0. Any interrupts that it
+     * starts will therefore be enabled on core 0 and will not conflict
+     * with the XUD task.
+     */
+    vTaskCoreExclusionSet(startup_task, ~(1 << 0));
 
     rtos_printf("Start scheduler on tile 0\n");
     vTaskStartScheduler();

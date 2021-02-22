@@ -41,6 +41,14 @@ static void usb_xud_thread(rtos_usb_t *ctx)
      * conditions it is not interrupted, but there are some cases
      * where it might be. If that were to happen, I believe it would
      * crash since KEDI will be off.
+     *
+     * IMPORTANT:
+     * The application currently needs to take care that it does not
+     * have any interrupts enabled on any cores other than core 0
+     * before this point. If this thread ends up on a core that has
+     * any interrupts enabled, this will result in some very strange
+     * crashes.
+     * TODO: This needs to be handled better.
      */
 
     CLRSR(XS1_SR_KEDI_MASK);

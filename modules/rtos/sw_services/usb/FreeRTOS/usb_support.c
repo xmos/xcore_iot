@@ -9,7 +9,7 @@
 #include "usb_support.h"
 #include "tusb.h"
 
-#define USB_TASK_STACK_SIZE 500
+#define USB_TASK_STACK_SIZE 1000
 
 void usb_task(void* args)
 {
