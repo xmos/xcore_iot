@@ -245,7 +245,7 @@ void dcd_init(uint8_t rhport)
                    endpoint_count,
                    epTypeTableOut,
                    epTypeTableIn,
-                   XUD_SPEED_HS, /* TODO: configurable? */
+                   BOARD_DEVICE_RHPORT_SPEED == OPT_MODE_HIGH_SPEED ? XUD_SPEED_HS : XUD_SPEED_FS,
                    pwr,
                    configMAX_PRIORITIES - 1); /* TODO: configurable? */
 
@@ -415,6 +415,7 @@ void dcd_edpt_stall (uint8_t rhport, uint8_t ep_addr)
 {
   (void) rhport;
 
+  prepare_setup(false);
   XUD_SetStallByAddr(ep_addr);
 }
 
