@@ -102,8 +102,13 @@ extern "C" {
 #define CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX			2
 
 // EP and buffer size - for isochronous EP´s, the buffer and EP size are equal (different sizes would not make sense)
-#define CFG_TUD_AUDIO_EPSIZE_IN                                       (6+1)*CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX*CFG_TUD_AUDIO_N_CHANNELS_TX    // 48 Samples (48 kHz) x 2 Bytes/Sample x 1 Channels
-#define CFG_TUD_AUDIO_TX_FIFO_SIZE                                    (6+1)*CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX*CFG_TUD_AUDIO_N_CHANNELS_TX    // 48 Samples (48 kHz) x 2 Bytes/Sample (1/2 word)
+#define SAMPLES_PER_FRAME_NOMINAL (BOARD_DEVICE_RHPORT_SPEED == OPT_MODE_FULL_SPEED ? 48 : (48 / 8))
+
+#define BYTES_PER_FRAME_NOMINAL                     ((SAMPLES_PER_FRAME_NOMINAL)*CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX*CFG_TUD_AUDIO_N_CHANNELS_TX)
+#define BYTES_PER_FRAME_EXTRA                       ((SAMPLES_PER_FRAME_NOMINAL+1)*CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX*CFG_TUD_AUDIO_N_CHANNELS_TX)
+
+#define CFG_TUD_AUDIO_EPSIZE_IN                     BYTES_PER_FRAME_EXTRA
+#define CFG_TUD_AUDIO_TX_FIFO_SIZE                  BYTES_PER_FRAME_EXTRA
 
 // Number of Standard AS Interface Descriptors (4.9.1) defined per audio function - this is required to be able to remember the current alternate settings of these interfaces - We restrict us here to have a constant number for all audio functions (which means this has to be the maximum number of AS interfaces an audio function has and a second audio function with less AS interfaces just wastes a few bytes)
 #define CFG_TUD_AUDIO_N_AS_INT 			          1
