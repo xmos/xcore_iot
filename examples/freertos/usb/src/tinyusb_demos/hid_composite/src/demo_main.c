@@ -162,7 +162,11 @@ void hid_task(void* args)
         vTaskDelay(pdMS_TO_TICKS(10));
 
         uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
+#if OSPREY_BOARD
+        buttons_val = (~buttons_val) & 0x4;
+#elif XCOREAI_EXPLORER
         buttons_val = (~buttons_val) & 0x1;
+#endif
 
         // Remote wakeup
         if ( tud_suspended() && buttons_val )
@@ -192,7 +196,11 @@ void tud_hid_report_complete_cb(uint8_t itf, uint8_t const* report, uint8_t len)
     if (next_report_id < REPORT_ID_COUNT)
     {
         uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
+#if OSPREY_BOARD
+        buttons_val = (~buttons_val) & 0x4;
+#elif XCOREAI_EXPLORER
         buttons_val = (~buttons_val) & 0x1;
+#endif
 
         send_hid_report(next_report_id, buttons_val);
     }
