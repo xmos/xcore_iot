@@ -96,7 +96,7 @@ void board_tile0_init(
 
     rtos_qspi_flash_init(
             qspi_flash_ctx,
-            XS1_CLKBLK_2,
+            XS1_CLKBLK_1,
             PORT_SQI_CS,
             PORT_SQI_SCLK,
             PORT_SQI_SIO,
@@ -137,9 +137,6 @@ void board_tile1_init(
         rtos_gpio_t *gpio_ctx,
         rtos_mic_array_t *mic_array_ctx)
 {
-    port_t p_rst_shared = port_init(PORT_CODEC_RST_N, PORT_OUTPUT, PORT_UNBUFFERED);
-    port_out(p_rst_shared, 0xF);
-
     /* Clock blocks for PDM mics */
     xclock_t pdmclk = clock_init(XS1_CLKBLK_1);
     xclock_t pdmclk2 = clock_init(XS1_CLKBLK_2);
