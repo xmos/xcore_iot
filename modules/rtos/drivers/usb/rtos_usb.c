@@ -9,8 +9,6 @@
 #include "rtos_usb.h"
 #include "xud_xfer_data.h"
 
-#define XUD_DEV_XS3 1
-
 int XUD_Main(chanend_t c_epOut[],
              int noEpOut,
              chanend_t c_epIn[],

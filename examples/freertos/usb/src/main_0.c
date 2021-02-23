@@ -24,6 +24,7 @@
 #include "rtos_interrupt.h"
 #include "usb_support.h"
 
+#if ON_TILE(0)
 
 static rtos_qspi_flash_t qspi_flash_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
@@ -35,7 +36,6 @@ static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 
-#if ON_TILE(0)
 void vApplicationDaemonTaskStartup(void *arg)
 {
     rtos_printf("vApplicationDaemonTaskStartup() on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
@@ -44,7 +44,9 @@ void vApplicationDaemonTaskStartup(void *arg)
     rtos_intertile_start(intertile_ctx);
 
     rtos_gpio_rpc_config(gpio_ctx, appconfGPIO_RPC_PORT, appconfGPIO_RPC_HOST_TASK_PRIORITY);
+#if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_mic_array_rpc_config(mic_array_ctx, appconfMIC_ARRAY_RPC_PORT, appconfMIC_ARRAY_RPC_HOST_TASK_PRIORITY);
+#endif
 
     /* Initialize drivers  */
     rtos_printf("Starting GPIO driver\n");
@@ -53,8 +55,10 @@ void vApplicationDaemonTaskStartup(void *arg)
     rtos_printf("Starting QSPI flash driver\n");
     rtos_qspi_flash_start(qspi_flash_ctx, appconfRTOS_QSPI_FLASH_TASK_PRIORITY);
 
+#if ON_TILE(USB_TILE_NO)
     create_tinyusb_demo(gpio_ctx, appconfTINYUSB_DEMO_TASK_PRIORITY);
     usb_manager_start(appconfUSB_MANAGER_TASK_PRIORITY);
+#endif
 
     vTaskDelete(NULL);
 }

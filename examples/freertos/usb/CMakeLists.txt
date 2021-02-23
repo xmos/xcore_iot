@@ -63,6 +63,12 @@ set(APP_INCLUDES
     "src/usb"
 )
 
+if(${BOARD} STREQUAL "XCORE200-MIC-ARRAY")
+    set(SYSCLK_FREQ 500)
+else()
+    set(SYSCLK_FREQ 700)
+endif()
+
 add_compile_definitions(
     CFG_TUSB_MCU=OPT_MCU_NONE
     CFG_TUSB_OS=OPT_OS_CUSTOM
@@ -76,18 +82,15 @@ add_compile_definitions(
     #CFG_TUSB_DEBUG=2
 
     DEBUG_PRINT_ENABLE=1
-    XUD_CORE_CLOCK=700
-#    XUD_CORE_CLOCK=500
-#    XUD_SERIES_SUPPORT=XUD_X200_SERIES
-#    USB_TILE=tile[1]
+    XUD_CORE_CLOCK=${SYSCLK_FREQ}
 
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
 )
 
 ## Select demo
-set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
-set(USE_TINYUSB_DEMO_AUDIO_TEST                  TRUE)
+set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          TRUE)
+set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
 
 ## In progress
 set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)

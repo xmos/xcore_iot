@@ -44,6 +44,7 @@ static xclock_t clock_init(xclock_t c)
     return c;
 }
 
+#if OSPREY_BOARD || XCOREAI_EXPLORER
 static void set_app_pll(void)
 {
     unsigned tileid = get_local_tile_id();
@@ -71,6 +72,7 @@ static void set_app_pll(void)
     write_sswitch_reg(tileid, XS1_SSWITCH_SS_APP_PLL_FRAC_N_DIVIDER_NUM, APP_PLL_FRAC_0);
     write_sswitch_reg(tileid, XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM, APP_PLL_DIV_0);
 }
+#endif
 
 static rtos_driver_rpc_t gpio_rpc_config;
 static rtos_driver_rpc_t mic_rpc_config;
@@ -125,10 +127,12 @@ void board_tile0_init(
             256, /* page size is 256 bytes */
             16384); /* the flash has 16384 pages */
 
+#if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_mic_array_rpc_client_init(
             mic_array_ctx,
             &mic_rpc_config,
             intertile1_ctx);
+#endif
 }
 
 void board_tile1_init(
@@ -137,6 +141,7 @@ void board_tile1_init(
         rtos_gpio_t *gpio_ctx,
         rtos_mic_array_t *mic_array_ctx)
 {
+#if OSPREY_BOARD || XCOREAI_EXPLORER
     /* Clock blocks for PDM mics */
     xclock_t pdmclk = clock_init(XS1_CLKBLK_1);
     xclock_t pdmclk2 = clock_init(XS1_CLKBLK_2);
@@ -149,10 +154,12 @@ void board_tile1_init(
     port_t p_pdm_mics = port_init(PORT_PDM_DATA, PORT_INPUT,  PORT_BUFFERED, 32);
 
     set_app_pll();
+#endif
 
     rtos_intertile_init(intertile1_ctx, tile0);
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
 
+#if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_mic_array_init(
             mic_array_ctx,
             pdmclk,
@@ -161,15 +168,18 @@ void board_tile1_init(
             p_mclk,
             p_pdm_clk,
             p_pdm_mics);
+#endif
 
     rtos_gpio_rpc_client_init(
             gpio_ctx,
             &gpio_rpc_config,
             intertile1_ctx);
 
+#if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_mic_array_rpc_host_init(
             mic_array_ctx,
             &mic_rpc_config,
             client_intertile_ctx,
             1);
+#endif
 }

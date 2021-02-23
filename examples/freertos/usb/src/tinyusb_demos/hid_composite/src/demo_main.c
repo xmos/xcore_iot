@@ -23,12 +23,11 @@ enum  {
     BLINK_SUSPENDED = 2500,
 };
 
-static TimerHandle_t blinky_timer_ctx = NULL;
 static rtos_gpio_t *gpio_ctx = NULL;
 static rtos_gpio_port_id_t button_port = 0;
 static rtos_gpio_port_id_t led_port = 0;
 static uint32_t led_val = 0;
-static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
+static uint32_t blink_interval_ms;
 
 //--------------------------------------------------------------------+
 // Device callbacks
@@ -37,13 +36,13 @@ static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 // Invoked when device is mounted
 void tud_mount_cb(void)
 {
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
+    blink_interval_ms = BLINK_MOUNTED;
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void)
 {
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_NOT_MOUNTED), 0);
+    blink_interval_ms = BLINK_NOT_MOUNTED;
 }
 
 // Invoked when usb bus is suspended
@@ -52,13 +51,13 @@ void tud_umount_cb(void)
 void tud_suspend_cb(bool remote_wakeup_en)
 {
     (void) remote_wakeup_en;
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_SUSPENDED), 0);
+    blink_interval_ms = BLINK_SUSPENDED;
 }
 
 // Invoked when usb bus is resumed
 void tud_resume_cb(void)
 {
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
+    blink_interval_ms = BLINK_MOUNTED;
 }
 
 //--------------------------------------------------------------------+
@@ -164,7 +163,7 @@ void hid_task(void* args)
         uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
 #if OSPREY_BOARD
         buttons_val = (~buttons_val) & 0x4;
-#elif XCOREAI_EXPLORER
+#elif XCOREAI_EXPLORER || XCORE200_MIC_ARRAY
         buttons_val = (~buttons_val) & 0x1;
 #endif
 
@@ -198,7 +197,7 @@ void tud_hid_report_complete_cb(uint8_t itf, uint8_t const* report, uint8_t len)
         uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
 #if OSPREY_BOARD
         buttons_val = (~buttons_val) & 0x4;
-#elif XCOREAI_EXPLORER
+#elif XCOREAI_EXPLORER || XCORE200_MIC_ARRAY
         buttons_val = (~buttons_val) & 0x1;
 #endif
 
@@ -231,27 +230,36 @@ void tud_hid_set_report_cb(uint8_t report_id, hid_report_type_t report_type, uin
     (void) bufsize;
 }
 
-void led_blinky_cb(TimerHandle_t xTimer)
+void led_blinky_task(void *args)
 {
-    (void) xTimer;
-    led_val ^= 1;
+    (void) args;
+
+    TickType_t last_wake_time;
+    const TickType_t blink_freq = 10;
+
+    last_wake_time = xTaskGetTickCount();
+
+    for (;;) {
+        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(blink_interval_ms));
+
+        led_val ^= 1;
 
 #if OSPREY_BOARD
-#define RED         ~(1<<6)
-#define GREEN       ~(1<<7)
-    if(led_val) {
-        rtos_gpio_port_out(gpio_ctx, led_port, RED);
-    } else {
-        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
-    }
-#elif XCOREAI_EXPLORER
-    rtos_gpio_port_out(gpio_ctx, led_port, led_val);
-#elif XCORE200_MIC_ARRAY
-    //rtos_gpio_port_out(gpio_ctx, led_port, led_val << 2);
-    rtos_printf("blink\n");
-#else
+    #define RED         ~(1<<6)
+    #define GREEN       ~(1<<7)
+        if(led_val) {
+            rtos_gpio_port_out(gpio_ctx, led_port, RED);
+        } else {
+            rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
+        }
+    #elif XCOREAI_EXPLORER
+        rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+    #elif XCORE200_MIC_ARRAY
+        rtos_gpio_port_out(gpio_ctx, led_port, led_val << 2);
+    #else
 #error No valid board was specified
 #endif
+    }
 }
 
 void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
@@ -278,12 +286,13 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
 #endif
         rtos_gpio_port_enable(gpio_ctx, button_port);
 
-        blinky_timer_ctx = xTimerCreate("blinky",
-                                        pdMS_TO_TICKS(blink_interval_ms),
-                                        pdTRUE,
-                                        NULL,
-                                        led_blinky_cb);
-        xTimerStart(blinky_timer_ctx, 0);
+        blink_interval_ms = BLINK_NOT_MOUNTED;
+        xTaskCreate((TaskFunction_t) led_blinky_task,
+                    "led_blinky_task",
+                    portTASK_STACK_DEPTH(led_blinky_task),
+                    NULL,
+                    configMAX_PRIORITIES - 1,
+                    NULL);
 
         xTaskCreate((TaskFunction_t) hid_task,
                     "hid_task",

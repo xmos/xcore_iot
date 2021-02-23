@@ -8,6 +8,8 @@
 #include <xcore/assert.h>
 #include <xud.h>
 
+#define XUD_DEV_XS3 1
+
 static inline XUD_Result_t xud_data_get_start(XUD_ep ep, uint8_t *buffer)
 {
     int chan_array_ptr;
@@ -97,22 +99,38 @@ static inline XUD_Result_t xud_data_set_start(XUD_ep ep, uint8_t *buffer, int le
         return XUD_RES_RST;
     }
 
+#if XUD_DEV_XS3
     /* Tail length is in bits */
     tailLength = (8 * len) & 0x1F;
+#endif
 
     wordLength = len / sizeof(uint32_t);
 
+#if XUD_DEV_XS3
     /* Tail length must not be 0 */
     if ((tailLength == 0) && (wordLength != 0)) {
         wordLength--;
         tailLength = 32;
     }
+#else
+    wordLength *= sizeof(uint32_t);
+    tailLength = (32 * len) & 0x7F;
+    asm ("ldw %0, %1[0]":"=r"(chan_array_ptr):"r"(ep));
+#endif
 
+#if XUD_DEV_XS3
     /* Get end off buffer address */
     asm ("add %0, %1, %2":"=r"(tmp):"r"(buffer),"r"(wordLength << 2));
 
     /* Produce negative offset from end of buffer */
     asm ("neg %0, %1":"=r"(tmp2):"r"(wordLength));
+#else
+    /* Get end off buffer address */
+    asm ("add %0, %1, %2":"=r"(tmp):"r"(buffer),"r"(wordLength));
+
+    /* Produce negative offset from end of buffer */
+    asm ("neg %0, %1":"=r"(tmp2):"r"(len>>2));
+#endif
 
     /* Store neg index */
     asm ("stw %0, %1[6]"::"r"(tmp2),"r"(ep));
@@ -124,7 +142,9 @@ static inline XUD_Result_t xud_data_set_start(XUD_ep ep, uint8_t *buffer, int le
     asm ("stw %0, %1[7]"::"r"(tailLength),"r"(ep));
 
     /* Finally, mark ready */
+#if XUD_DEV_XS3
     asm ("ldw %0, %1[0]":"=r"(chan_array_ptr):"r"(ep));
+#endif
     asm ("stw %0, %1[0]"::"r"(ep),"r"(chan_array_ptr));
 
     return XUD_RES_OKAY;
