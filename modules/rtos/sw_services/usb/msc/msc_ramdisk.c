@@ -52,6 +52,7 @@ int32_t ram_disk_scsi_command(disk_desc_t *disk_ctx, uint8_t lun, uint8_t *buffe
     rtos_printf("ram_disk default scsi command callback\n");
     uint16_t resplen = 0;
 
+#if (CFG_TUD_MSC == 1)
     switch (scsi_cmd[0]) {
         case SCSI_CMD_PREVENT_ALLOW_MEDIUM_REMOVAL:
         case SCSI_CMD_START_STOP_UNIT:
@@ -66,6 +67,7 @@ int32_t ram_disk_scsi_command(disk_desc_t *disk_ctx, uint8_t lun, uint8_t *buffe
             resplen = -1;
             break;
     }
+#endif /* CFG_TUD_MSC */
 
     return resplen;
 }
