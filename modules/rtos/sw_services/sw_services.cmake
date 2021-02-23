@@ -330,16 +330,26 @@ if(${USE_${THIS_LIB}})
                              ${DEVICE_SOURCES}
                              ${HOST_SOURCES}
                              "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/usb_support.c"
+                             "${${THIS_LIB}_DIR}/msc/msc_disk_manager.c"
+                             "${${THIS_LIB}_DIR}/msc/msc_ramdisk.c"
                              "${${THIS_LIB}_DIR}/portable/dcd_xcore.c")
+    if(USE_FATFS)
+        list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/msc/msc_fatfsdisk.c")
+    endif()
+
+    if(USE_RTOS_QSPI_FLASH_DRIVER)
+        list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/msc/msc_flashdisk.c")
+    endif()
 
     if(${${THIS_LIB}_FLAGS})
     	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
     endif()
 
 	set(${THIS_LIB}_INCLUDES
-	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src"
+        "${${THIS_LIB}_DIR}/api"
+	    "${${THIS_LIB}_DIR}/msc"
 	    "${${THIS_LIB}_DIR}/portable"
-	    "${${THIS_LIB}_DIR}/api"
+	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src"
 	)
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()

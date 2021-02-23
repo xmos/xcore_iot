@@ -23,6 +23,7 @@
 #include "rtos_usb.h"
 #include "rtos_interrupt.h"
 #include "usb_support.h"
+#include "fs_support.h"
 
 #if ON_TILE(0)
 
@@ -56,6 +57,13 @@ void vApplicationDaemonTaskStartup(void *arg)
     rtos_qspi_flash_start(qspi_flash_ctx, appconfRTOS_QSPI_FLASH_TASK_PRIORITY);
 
 #if ON_TILE(USB_TILE_NO)
+    rtos_printf("Starting filesystem\n");
+    rtos_fatfs_init(qspi_flash_ctx);        // TODO add rpc qspi flash when not on the same tile
+
+#ifdef MSC_MAX_DISKS        // temporary
+    create_tinyusb_disks(qspi_flash_ctx);
+#endif
+
     create_tinyusb_demo(gpio_ctx, appconfTINYUSB_DEMO_TASK_PRIORITY);
     usb_manager_start(appconfUSB_MANAGER_TASK_PRIORITY);
 #endif

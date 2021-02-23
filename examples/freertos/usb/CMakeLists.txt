@@ -26,6 +26,7 @@ set(USE_RTOS_QSPI_FLASH_DRIVER TRUE)
 set(USE_RTOS_TRACE_DRIVER TRUE)
 set(USE_RTOS_WIFI_DRIVER FALSE)
 
+set(USE_FATFS TRUE)
 set(USE_TINYUSB TRUE)
 
 ## Import XMOS configurations
@@ -74,12 +75,11 @@ add_compile_definitions(
     CFG_TUSB_OS=OPT_OS_CUSTOM
     BOARD_DEVICE_RHPORT_NUM=0
     BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED
-    CFG_TUSB_ALT_BIT_PACKING_ALIGNMENT=1
     CFG_TUD_EP_MAX=12  ## RTOS_USB_ENDPOINT_COUNT_MAX
-    CFG_TUD_TASK_QUEUE_SZ=30
+    CFG_TUD_TASK_QUEUE_SZ=8
 
     CFG_TUSB_DEBUG_PRINTF=rtos_printf
-    #CFG_TUSB_DEBUG=2
+    CFG_TUSB_DEBUG=0
 
     DEBUG_PRINT_ENABLE=1
     XUD_CORE_CLOCK=${SYSCLK_FREQ}
@@ -89,15 +89,17 @@ add_compile_definitions(
 )
 
 ## Select demo
-set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          TRUE)
-set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
+set(XMOS_TINYUSB_DEMO                            FALSE)
+set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
+set(USE_TINYUSB_DEMO_AUDIO_TEST                  TRUE)
+set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE)
+set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
 
 ## In progress
-set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
-set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE)
 set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
 
 ## TODO
+set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
 set(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         FALSE)
 set(USE_TINYUSB_DEMO_CDC_MSC_FREERTOS_TEST       FALSE)
 set(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            FALSE)
@@ -109,7 +111,22 @@ set(USE_TINYUSB_DEMO_NET_LWIP_WEBSERVER          FALSE)
 set(USE_TINYUSB_DEMO_USBTMC                      FALSE)
 set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               FALSE)
 
-include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
+if(XMOS_TINYUSB_DEMO)
+    set(DEMO_SOURCES
+        "src/xmos_demo/demo_main.c"
+        "src/xmos_demo/msc_disk_dual.c"
+        "src/xmos_demo/usb_descriptors.c"
+    )
+    set(DEMO_INCLUDES
+        "src/xmos_demo"
+    )
+    add_compile_definitions(MSC_MAX_DISKS=2)
+else()
+    include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
+
+    set(DEMO_SOURCES ${TINYUSB_DEMO_SOURCES})
+    set(DEMO_INCLUDES ${TINYUSB_DEMO_INCLUDES})
+endif()
 
 ## Create targets
 if(DEFINED THIS_XCORE_TILE)
@@ -129,14 +146,14 @@ target_sources(
     PRIVATE
         ${APP_SOURCES}
         ${XMOS_RTOS_PLATFORM_SOURCES}
-        ${TINYUSB_DEMO_SOURCES}
+        ${DEMO_SOURCES}
     )
 target_include_directories(
     ${TARGET_NAME}
     PRIVATE
         ${APP_INCLUDES}
         ${XMOS_RTOS_PLATFORM_INCLUDES}
-        ${TINYUSB_DEMO_INCLUDES}
+        ${DEMO_INCLUDES}
     )
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
