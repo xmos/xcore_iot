@@ -30,12 +30,6 @@ static const model_t *model = nullptr;
 // static buffer for interpreter_t class allocation
 uint8_t interpreter_buffer[sizeof(interpreter_t)];
 
-void memload(void *dest, void *src, size_t size) {
-  // printf("memload dest=%d   src=%d   size=%d\n", (long)dest, (long)src,
-  // size);
-  memcpy(dest, src, size);
-}
-
 void model_runner_tensor_bytes_get(int index, void **bytes, size_t *size) {
   TfLiteTensor *tensor = interpreter->tensor(index);
   if (tensor != nullptr) {
