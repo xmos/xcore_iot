@@ -409,6 +409,7 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, u
       tx_byte_count = BYTES_PER_FRAME_NOMINAL;
   }
 
+  /* TODO: Should ensure that a multiple of CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX is received here */
   bytes_available = xStreamBufferReceive(sample_stream_buf, buf, tx_byte_count, 0);
 
 #if 0

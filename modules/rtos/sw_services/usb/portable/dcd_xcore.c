@@ -245,7 +245,7 @@ void dcd_init(uint8_t rhport)
                    endpoint_count,
                    epTypeTableOut,
                    epTypeTableIn,
-                   BOARD_DEVICE_RHPORT_SPEED == OPT_MODE_HIGH_SPEED ? XUD_SPEED_HS : XUD_SPEED_FS,
+                   (CFG_TUSB_RHPORT0_MODE & OPT_MODE_HIGH_SPEED) ? XUD_SPEED_HS : XUD_SPEED_FS,
                    pwr,
                    configMAX_PRIORITIES - 1); /* TODO: configurable? */
 

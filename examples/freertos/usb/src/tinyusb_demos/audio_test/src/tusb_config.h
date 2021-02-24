@@ -39,11 +39,7 @@ extern "C" {
 #error CFG_TUSB_MCU must be defined
 #endif
 
-#if CFG_TUSB_MCU == OPT_MCU_LPC43XX || CFG_TUSB_MCU == OPT_MCU_LPC18XX || CFG_TUSB_MCU == OPT_MCU_MIMXRT10XX
-#define CFG_TUSB_RHPORT0_MODE       (OPT_MODE_DEVICE | OPT_MODE_HIGH_SPEED)
-#else
-#define CFG_TUSB_RHPORT0_MODE       OPT_MODE_DEVICE
-#endif
+#define CFG_TUSB_RHPORT0_MODE      (OPT_MODE_DEVICE | BOARD_DEVICE_RHPORT_SPEED)
 
 #ifndef CFG_TUSB_OS
 #define CFG_TUSB_OS                 OPT_OS_NONE
@@ -92,7 +88,7 @@ extern "C" {
 //--------------------------------------------------------------------
 
 // Audio format type
-#define CFG_TUD_AUDIO_USE_TX_FIFO 				1
+#define CFG_TUD_AUDIO_USE_TX_FIFO 			    	1
 #define CFG_TUD_AUDIO_FORMAT_TYPE_TX 				AUDIO_FORMAT_TYPE_I
 #define CFG_TUD_AUDIO_FORMAT_TYPE_RX 				AUDIO_FORMAT_TYPE_UNDEFINED
 
@@ -101,11 +97,12 @@ extern "C" {
 #define CFG_TUD_AUDIO_N_CHANNELS_TX 				1
 #define CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX			2
 
-// EP and buffer size - for isochronous EP´s, the buffer and EP size are equal (different sizes would not make sense)
-#define SAMPLES_PER_FRAME_NOMINAL (BOARD_DEVICE_RHPORT_SPEED == OPT_MODE_FULL_SPEED ? 48 : (48 / 8))
+// EP and buffer sized
+#define SAMPLES_PER_FRAME_NOMINAL                   (48000 / 1000)
+#define SAMPLES_PER_FRAME_EXTRA                     (SAMPLES_PER_FRAME_NOMINAL + 2)
 
-#define BYTES_PER_FRAME_NOMINAL                     ((SAMPLES_PER_FRAME_NOMINAL)*CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX*CFG_TUD_AUDIO_N_CHANNELS_TX)
-#define BYTES_PER_FRAME_EXTRA                       ((SAMPLES_PER_FRAME_NOMINAL+1)*CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX*CFG_TUD_AUDIO_N_CHANNELS_TX)
+#define BYTES_PER_FRAME_NOMINAL                     (SAMPLES_PER_FRAME_NOMINAL * CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX)
+#define BYTES_PER_FRAME_EXTRA                       (SAMPLES_PER_FRAME_EXTRA   * CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX)
 
 #define CFG_TUD_AUDIO_EPSIZE_IN                     BYTES_PER_FRAME_EXTRA
 #define CFG_TUD_AUDIO_TX_FIFO_SIZE                  BYTES_PER_FRAME_EXTRA

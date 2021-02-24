@@ -48,10 +48,16 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="usb.null.735028534" name="usb"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.cross.base.949206749;cdt.managedbuild.toolchain.gnu.cross.base.949206749.1411218017;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1293824334;cdt.managedbuild.tool.gnu.cpp.compiler.input.776865517">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.cross.base.949206749;cdt.managedbuild.toolchain.gnu.cross.base.949206749.1411218017;cdt.managedbuild.tool.gnu.cross.c.compiler.981760241;cdt.managedbuild.tool.gnu.c.compiler.input.2001471365">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>
