@@ -94,9 +94,9 @@ set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
 set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
 
 ## In progress
+set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
+set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE)
 set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
-set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE) # broken build wise
-set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE) # broken build wise
 
 ## TODO
 set(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         FALSE)

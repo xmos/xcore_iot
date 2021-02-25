@@ -68,11 +68,13 @@ bool add_disk(uint32_t lun,
     return retval;
 }
 
+__attribute__((weak))
 uint8_t tud_msc_get_maxlun_cb(void)
 {
     return (uint8_t)(MSC_MAX_DISKS);
 }
 
+__attribute__((weak))
 void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor_id[8], uint8_t product_id[16], uint8_t product_rev[4])
 {
     if (lun < MSC_MAX_DISKS) {
@@ -96,6 +98,7 @@ void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor_id[8], uint8_t product_id[16
     }
 }
 
+__attribute__((weak))
 bool tud_msc_test_unit_ready_cb(uint8_t lun)
 {
     bool retval = false;
@@ -119,6 +122,7 @@ bool tud_msc_test_unit_ready_cb(uint8_t lun)
     return retval;
 }
 
+__attribute__((weak))
 void tud_msc_capacity_cb(uint8_t lun, uint32_t* block_count, uint16_t* block_size)
 {
     if (lun < MSC_MAX_DISKS) {
@@ -139,6 +143,7 @@ void tud_msc_capacity_cb(uint8_t lun, uint32_t* block_count, uint16_t* block_siz
     }
 }
 
+__attribute__((weak))
 bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, bool load_eject)
 {
     bool retval = true;
@@ -162,6 +167,7 @@ bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, boo
     return retval;
 }
 
+__attribute__((weak))
 int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buffer, uint32_t bufsize)
 {
     int32_t retval = 0;
@@ -185,6 +191,7 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buff
     return retval;
 }
 
+__attribute__((weak))
 int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* buffer, uint32_t bufsize)
 {
     int32_t retval = 0;
@@ -208,6 +215,7 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* 
     return retval;
 }
 
+__attribute__((weak))
 int32_t tud_msc_scsi_cb (uint8_t lun, uint8_t const scsi_cmd[16], void* buffer, uint16_t bufsize)
 {
     int32_t retval = 0;
