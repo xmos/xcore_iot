@@ -96,4 +96,11 @@ int32_t ram_disk_read(disk_desc_t *disk_ctx, uint8_t *buffer, uint32_t lba, uint
 int32_t ram_disk_write(disk_desc_t *disk_ctx, const uint8_t *buffer, uint32_t lba, uint32_t offset, uint32_t bufsize);
 int32_t ram_disk_scsi_command(disk_desc_t *disk_ctx, uint8_t lun, uint8_t *buffer, const uint8_t *scsi_cmd, uint16_t bufsize);
 
+bool qspi_flash_disk_init(disk_desc_t *disk_ctx);
+bool qspi_flash_disk_ready(disk_desc_t *disk_ctx);
+bool qspi_flash_disk_start_stop(disk_desc_t *disk_ctx, uint8_t power_condition, bool start, bool load_eject);
+int32_t qspi_flash_disk_read(disk_desc_t *disk_ctx, uint8_t *buffer, uint32_t lba, uint32_t offset, uint32_t bufsize);
+int32_t qspi_flash_disk_write(disk_desc_t *disk_ctx, const uint8_t *buffer, uint32_t lba, uint32_t offset, uint32_t bufsize);
+int32_t qspi_flash_disk_scsi_command(disk_desc_t *disk_ctx, uint8_t lun, uint8_t *buffer, const uint8_t *scsi_cmd, uint16_t bufsize);
+
 #endif  // MSC_DISK_MANAGER_H_

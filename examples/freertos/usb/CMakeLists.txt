@@ -92,11 +92,11 @@ add_compile_definitions(
 set(XMOS_TINYUSB_DEMO                            TRUE)
 set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
 set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
-set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE)
-set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
 
 ## In progress
 set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
+set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE) # broken build wise
+set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE) # broken build wise
 
 ## TODO
 set(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         FALSE)
@@ -119,7 +119,7 @@ if(XMOS_TINYUSB_DEMO)
     set(DEMO_INCLUDES
         "src/xmos_demo"
     )
-    add_compile_definitions(MSC_MAX_DISKS=1)
+    add_compile_definitions(MSC_MAX_DISKS=2)
 else()
     include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
 

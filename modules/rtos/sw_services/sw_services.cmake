@@ -333,9 +333,6 @@ if(${USE_${THIS_LIB}})
                              "${${THIS_LIB}_DIR}/msc/msc_disk_manager.c"
                              "${${THIS_LIB}_DIR}/msc/msc_ramdisk.c"
                              "${${THIS_LIB}_DIR}/portable/dcd_xcore.c")
-    if(USE_FATFS)
-        list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/msc/msc_fatfsdisk.c")
-    endif()
 
     if(USE_RTOS_QSPI_FLASH_DRIVER)
         list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/msc/msc_flashdisk.c")

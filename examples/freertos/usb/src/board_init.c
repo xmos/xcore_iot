@@ -98,6 +98,38 @@ void board_tile0_init(
 
     rtos_qspi_flash_init(
             qspi_flash_ctx,
+
+#if OSPREY_BOARD
+            XS1_CLKBLK_1,
+            PORT_SQI_CS,
+            PORT_SQI_SCLK,
+            PORT_SQI_SIO,
+
+            /** Derive QSPI clock from the 700 MHz xcore clock **/
+            qspi_io_source_clock_xcore,
+
+            /** Full speed clock configuration **/
+            5, // 700 MHz / (2*5) -> 70 MHz,
+            1,
+            qspi_io_sample_edge_rising,
+            0,
+            /** SPI read clock configuration **/
+            12, // 700 MHz / (2*12) -> ~29 MHz
+            0,
+            qspi_io_sample_edge_falling,
+            0,
+
+            2, /* Enable quad page programming */
+            QSPI_IO_BYTE_TO_MOSI(0x32), /* The quad page program command */
+
+            QSPI_IO_BYTE_TO_MOSI(0x35), /* The quad enable register read command */
+            QSPI_IO_BYTE_TO_MOSI(0x31), /* The quad enable register write command */
+            0x02, /* quad_enable_bitmask */
+
+            256, /* page size is 256 bytes */
+            32768); /* the flash has 32768 pages */
+#endif
+#if XCOREAI_EXPLORER
             XS1_CLKBLK_1,
             PORT_SQI_CS,
             PORT_SQI_SCLK,
@@ -125,7 +157,8 @@ void board_tile0_init(
             0x40,                        /* quad_enable_bitmask */
 
             256, /* page size is 256 bytes */
-            16384); /* the flash has 16384 pages */
+            16384); /* the flash has 32768 pages */
+#endif
 
 #if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_mic_array_rpc_client_init(
