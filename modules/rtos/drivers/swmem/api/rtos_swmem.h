@@ -4,6 +4,13 @@
 #ifndef RTOS_SWMEM_H_
 #define RTOS_SWMEM_H_
 
+/**
+ * \defgroup rtos_swmem_driver
+ *
+ * The public API for using the RTOS software memory driver.
+ * @{
+ */
+
 #include "rtos/drivers/osal/api/rtos_osal.h"
 
 /**
@@ -66,5 +73,7 @@ void rtos_swmem_start(unsigned priority);
  *                   - RTOS_SWMEM_WRITE_FLAG enables swmem writes.
  */
 void rtos_swmem_init(uint32_t init_flags);
+
+/**@}*/
 
 #endif /* RTOS_SWMEM_H_ */

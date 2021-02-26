@@ -41,7 +41,11 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.ifconfig",
     "sphinx.ext.githubpages",
+    "breathe",
 ]
+
+# Breathe Configuration
+breathe_default_project = "AIoTSDK"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
