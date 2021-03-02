@@ -216,7 +216,6 @@ class XCOREInterpreter:
         self._is_allocated = False
         self._op_states = []
 
-    def __enter__(self) -> "XCOREInterpreter":
         self.obj = lib.new_interpreter()
         status = lib.initialize(
             self.obj,
@@ -227,10 +226,10 @@ class XCOREInterpreter:
         if XCOREInterpreterStatus(status) is XCOREInterpreterStatus.ERROR:
             raise RuntimeError("Unable to initialize interpreter")
 
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
-        lib.delete_interpreter(self.obj)
+    def close(self) -> None:
+        if self.obj:
+            lib.delete_interpreter(self.obj)
+            self.obj = None
 
     def _verify_allocated(self) -> None:
         if not self._is_allocated:
@@ -259,86 +258,9 @@ class XCOREInterpreter:
         self._is_allocated = True
         self._check_status(lib.allocate_tensors(self.obj))
 
-    def invoke(
-        self,
-        *,
-        preinvoke_callback=None,
-        postinvoke_callback=None,
-        capture_op_states=False,
-    ):
-        if capture_op_states:
-            # NOTE: the original callbacks are ignored
-            self._op_states = []
-            cb_pre = make_op_state_capture_callback(self._op_states, outputs=False)
-            cb_post = make_op_state_capture_callback(self._op_states, inputs=False)
-            return self.invoke(preinvoke_callback=cb_pre, postinvoke_callback=cb_post)
-
-        INVOKE_CALLBACK_FUNC = ctypes.CFUNCTYPE(ctypes.c_void_p, ctypes.c_int)
-
-        def make_operator_details(operator_index):
-            # get the dimensions of the operator inputs and outputs
-            inputs_size = ctypes.c_size_t()
-            outputs_size = ctypes.c_size_t()
-            self._check_status(
-                lib.get_operator_details_buffer_sizes(
-                    self.obj,
-                    operator_index,
-                    ctypes.byref(inputs_size),
-                    ctypes.byref(outputs_size),
-                )
-            )
-
-            # get the inputs and outputs tensor indices
-            operator_name_max_len = 1024
-            operator_name = ctypes.create_string_buffer(operator_name_max_len)
-            operator_version = ctypes.c_int()
-            operator_inputs = (ctypes.c_int * inputs_size.value)()
-            operator_outputs = (ctypes.c_int * outputs_size.value)()
-            self._check_status(
-                lib.get_operator_details(
-                    self.obj,
-                    operator_index,
-                    operator_name,
-                    operator_name_max_len,
-                    ctypes.byref(operator_version),
-                    operator_inputs,
-                    operator_outputs,
-                )
-            )
-
-            # get the details
-            tensor_details = self.get_tensor_details()
-            return {
-                "index": operator_index,
-                "name": operator_name.value.decode("utf-8"),
-                "version": operator_version.value,
-                "inputs": [
-                    tensor_details[input_index] for input_index in operator_inputs
-                ],
-                "outputs": [
-                    tensor_details[output_index] for output_index in operator_outputs
-                ],
-            }
-
-        def preinvoke_callback_hook(operator_index):
-            preinvoke_callback(self, make_operator_details(operator_index))
-
-        def postinvoke_callback_hook(operator_index):
-            postinvoke_callback(self, make_operator_details(operator_index))
-
+    def invoke(self):
         self._verify_allocated()
-
-        if preinvoke_callback:
-            preinvoke_hook = INVOKE_CALLBACK_FUNC(preinvoke_callback_hook)
-        else:
-            preinvoke_hook = None
-
-        if postinvoke_callback:
-            postinvoke_hook = INVOKE_CALLBACK_FUNC(postinvoke_callback_hook)
-        else:
-            postinvoke_hook = None
-
-        self._check_status(lib.invoke(self.obj, preinvoke_hook, postinvoke_hook))
+        self._check_status(lib.invoke(self.obj, None, None))
 
     def set_tensor(self, tensor_index, value):
         self._verify_allocated()
