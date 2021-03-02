@@ -45,10 +45,10 @@ pipeline {
                                   recursiveSubmodules: true],
                                  [$class: 'CleanCheckout']],
                     userRemoteConfigs: [[credentialsId: 'xmos-bot',
-                                         url: 'git@github.com:xmos/ai_deployment_framework']]
+                                         url: 'git@github.com:xmos/aif']]
                 ])
                 // create venv
-                sh "conda env create -q -p adf_venv -f environment.yml"
+                sh "conda env create -q -p aif_venv -f environment.yml"
                 // Install xmos tools version
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
             }
@@ -57,7 +57,7 @@ pipeline {
             // Roll all conda packages forward beyond their pinned versions
             when { expression { return params.UPDATE_ALL } }
             steps {
-                sh "conda update --all -y -q -p adf_venv"
+                sh "conda update --all -y -q -p aif_venv"
             }
         }
         stage("Build/Test") {
@@ -65,7 +65,7 @@ pipeline {
             steps {
                 // below is how we can activate the tools
                 sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                      . activate ./adf_venv &&
+                      . activate ./aif_venv &&
                       make ci"""
                 // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
                 // This step collects these files for display in Jenkins UI

@@ -1,16 +1,17 @@
-AI Deployment Framework
-=======================
+AI Integration Framework
+========================
 
 Summary
 -------
 
+A collection of components to support integrating of the TensorFlow Lite for Microcontrollers XCore port into applications. This framework enables developers to focus on their application, rather than worrying about integrating the TensorFlow Lite for Microcontrollers runtime.
 
 Installation
 ------------
 
 Some dependent libraries are included as git submodules. These can be obtained by cloning this repository with the following command:
 
-    $ git clone git@github.com:xmos/adf.git
+    $ git clone git@github.com:xmos/aif.git
     $ git submodule update --init
 
 Install at least version 15 of the XMOS tools from your preferred location and activate it by sourcing `SetEnv` in the installation root.
@@ -30,16 +31,16 @@ Virtual Environment
 
 It is recommended that you install the virtual environment in the repo's directory:
 
-    $ cd adf
-    $ conda env create -p ./adf_venv -f environment.yml
+    $ cd aif
+    $ conda env create -p ./aif_venv -f environment.yml
 
 Activate the environment by specifying the path:
 
-    $ conda activate adf_venv/
+    $ conda activate aif_venv/
 
 To remove the environment, deactivate and run:
 
-    $ conda remove -p adf_venv/ --all
+    $ conda remove -p aif_venv/ --all
 
 Docker Image
 ------------
@@ -47,12 +48,12 @@ Docker Image
 The Dockerfile provided is used in the CI system but can serve as a guide to system setup.
 Installation of the XMOS tools requires connection to our network.
 
-    $ docker build -t xmos/adf .
+    $ docker build -t xmos/aif .
     $ docker run -it \
         -v $(pwd):/ws \
         -u $(id -u):$(id -g)  \
         -w /ws  \
-        xmos/adf \
+        xmos/aif \
         bash -l
 
 
@@ -66,10 +67,10 @@ For a persistent container:
 then inside the container
 
     # setup environment
-    $ conda env create -p adf_venv -f environment.yml
+    $ conda env create -p aif_venv -f environment.yml
     $ /XMOS/get_tools.py 15.0.1
     # activate tools (each new shell)
-    $ conda activate ./adf_venv
+    $ conda activate ./aif_venv
     $ module load tools/15.0.1
     # do build
     $ make ci
