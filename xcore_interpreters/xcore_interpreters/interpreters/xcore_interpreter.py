@@ -216,7 +216,7 @@ class XCOREInterpreter:
         self._is_allocated = False
         self._op_states = []
 
-    def __enter__(self) -> None:
+    def __enter__(self) -> "XCOREInterpreter":
         self.obj = lib.new_interpreter()
         status = lib.initialize(
             self.obj,

@@ -20,10 +20,12 @@ class XCOREDeviceInterpreter(XCOREInterpreter):
         model_content=None,
         max_tensor_arena_size=MAX_DEVICE_TENSOR_ARENA_SIZE,
     ) -> None:
+        super().__init__(model_path, model_content, max_tensor_arena_size)
+
         # verify model content size is not too large
-        if len(model_content) > MAX_DEVICE_MODEL_CONTENT_SIZE:
+        if len(self._model_content) > MAX_DEVICE_MODEL_CONTENT_SIZE:
             raise ModelSizeError(
-                f"model_content too large: {len(model_content)} "
+                f"model_content too large: {len(self._model_content)} "
                 f"> {MAX_DEVICE_MODEL_CONTENT_SIZE} bytes"
             )
 
@@ -34,12 +36,10 @@ class XCOREDeviceInterpreter(XCOREInterpreter):
                 f"> {MAX_DEVICE_TENSOR_ARENA_SIZE} bytes"
             )
 
-        super().__init__(model_path, model_content, max_tensor_arena_size)
-
         self._endpoint = None
         self._set_model = False
 
-    def __enter__(self) -> None:
+    def __enter__(self) -> "XCOREDeviceInterpreter":
         super().__enter__()
         self._endpoint = XCOREDeviceServer.acquire()
 
