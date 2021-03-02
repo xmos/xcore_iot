@@ -286,6 +286,30 @@ XUD_Result_t rtos_usb_endpoint_transfer_complete(rtos_usb_t *ctx,
     }
 }
 
+XUD_BusSpeed_t rtos_usb_endpoint_reset(rtos_usb_t *ctx,
+                                       uint32_t endpoint_addr)
+{
+    uint8_t const epnum = endpoint_num(endpoint_addr);
+    uint8_t dir = endpoint_dir(endpoint_addr);
+
+    XUD_ep one = ctx->ep[epnum][dir];
+    XUD_ep *two = NULL;
+
+    dir = dir ? 0 : 1;
+
+    if (ctx->ep[epnum][dir] != 0) {
+        two = &ctx->ep[epnum][dir];
+    }
+
+    if (one == 0) {
+        xassert(two != NULL);
+        one = *two;
+        two = NULL;
+    }
+
+    return XUD_ResetEndpoint(one, two);
+}
+
 void rtos_usb_start(
         rtos_usb_t *ctx,
         rtos_usb_isr_cb_t isr_cb,

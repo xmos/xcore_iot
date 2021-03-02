@@ -52,19 +52,7 @@ static void reset_ep(uint8_t ep_addr, bool in_isr)
     XUD_BusSpeed_t xud_speed;
     tusb_speed_t tu_speed;
 
-    uint8_t const epnum = tu_edpt_number(ep_addr);
-    uint8_t dir = tu_edpt_dir(ep_addr);
-
-    XUD_ep one = usb_ctx.ep[epnum][dir];
-    XUD_ep *two = NULL;
-
-    dir = dir ? 0 : 1;
-
-    if (usb_ctx.ep[epnum][dir] != 0) {
-        two = &usb_ctx.ep[epnum][dir];
-    }
-
-    xud_speed = XUD_ResetEndpoint(one, two);
+    xud_speed = rtos_usb_endpoint_reset(&usb_ctx, ep_addr);
     tu_speed = xud_to_tu_speed(xud_speed);
 
     prepare_setup(in_isr);
@@ -325,7 +313,7 @@ void dcd_edpt0_status_complete(uint8_t rhport,
 
         const unsigned dev_addr = request->wValue;
         rtos_printf("Setting device address to %d now\n", dev_addr);
-        XUD_SetDevAddr(dev_addr);
+        rtos_usb_device_address_set(&usb_ctx, dev_addr);
     }
 }
 
@@ -335,7 +323,7 @@ bool dcd_edpt_open(uint8_t rhport,
 {
     (void) rhport;
 
-    XUD_ResetEpStateByAddr(ep_desc->bEndpointAddress);
+    rtos_usb_endpoint_state_reset(&usb_ctx, ep_desc->bEndpointAddress);
 
     return true;
 }
@@ -351,7 +339,7 @@ void dcd_edpt_close(uint8_t rhport,
      * endpoint? Should this transfer somehow be canceled?
      * Does the interrupt need to be disabled?
      */
-    XUD_ResetEpStateByAddr(ep_addr);
+    rtos_usb_endpoint_state_reset(&usb_ctx, ep_addr);
 }
 
 // Submit a transfer, When complete dcd_event_xfer_complete() is invoked to notify the stack
@@ -416,7 +404,7 @@ void dcd_edpt_stall (uint8_t rhport, uint8_t ep_addr)
   (void) rhport;
 
   prepare_setup(false);
-  XUD_SetStallByAddr(ep_addr);
+  rtos_usb_endpoint_stall_set(&usb_ctx, ep_addr);
 }
 
 // clear stall, data toggle is also reset to DATA0
@@ -424,5 +412,5 @@ void dcd_edpt_clear_stall (uint8_t rhport, uint8_t ep_addr)
 {
   (void) rhport;
 
-  XUD_ClearStallByAddr(ep_addr);
+  rtos_usb_endpoint_stall_clear(&usb_ctx, ep_addr);
 }
