@@ -17,7 +17,6 @@ else:
 libxcore_interpreters = ctypes.cdll.LoadLibrary(lib_path)
 
 from .interpreters import XCOREInterpreter
-from .interpreters import XCOREDeviceInterpreter
 
 from .interpreters import (
     InterpreterError,
@@ -27,5 +26,4 @@ from .interpreters import (
     GetTensorError,
     ModelSizeError,
     ArenaSizeError,
-    DeviceTimeoutError,
 )

@@ -9,11 +9,10 @@ LIB_XCORE_INTERPRETERS = [
     "libs/macos/libxcore_interpreters.1.0.1.dylib",
 ]
 
-EXCLUDES = ["*tests", "*tests.*", "cmake", "python_bindings", "xcore_firmware"]
+EXCLUDES = ["*tests", "*tests.*", "cmake", "host_library", "xcore_firmware"]
 
 INSTALL_REQUIRES = [
     "numpy==1.19.5",
-    "portalocker==2.0.0",
     "typing-extensions==3.7.4",
 ]
 
