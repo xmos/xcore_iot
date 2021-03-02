@@ -9,7 +9,7 @@ CLOBBER_FLAG := '-c'
 
 .PHONY: xcore_interpreters_build
 xcore_interpreters_build:
-	cd xcore_interpreters/python_bindings && bash build.sh $(CLOBBER_FLAG)
+	cd xcore_interpreters/host_library && bash build.sh $(CLOBBER_FLAG)
 	cd xcore_interpreters/xcore_firmware && bash build.sh $(CLOBBER_FLAG)
 
 .PHONY: xcore_interpreters_unit_test
