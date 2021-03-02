@@ -2,7 +2,7 @@
 Intertile RTOS Driver
 #####################
 
-This driver allows for communication between AMP RTOS instances running on different XCORE tiles.
+This driver allows for communication between AMP RTOS instances running on different XCore tiles.
 
 ******************
 Initialization API

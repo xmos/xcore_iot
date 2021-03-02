@@ -101,7 +101,7 @@ To help ease development of XCore applications using an SMP RTOS, XMOS provides 
     - SPI
     - USB
  - XCore features
-    - Inter-tile channel communication
+    - Intertile channel communication
     - Software defined memory (xcore.ai only)
  - External parts
     - Silicon Labs WF200 series WiFi transceiver
@@ -130,13 +130,13 @@ These services are all found in the AIoT SDK under the path `modules/rtos/sw_ser
 RTOS Application Design
 ***********************
 
-A fully functional example application that demonstrates usage of a majority of the available drivers can be found in the AIoT SDK under the path `examples/freertos/independent_tiles <https://github.com/xmos/aiot_sdk/tree/develop/examples/freertos/independent_tiles>`_ In addition to being a reference for how to use most of the drivers, it also serves as one example for how to structure an SMP RTOS application for XCore.
+A fully functional example application that demonstrates usage of a majority of the available drivers can be found in the AIoT SDK under the path `examples/freertos/independent_tiles <https://github.com/xmos/aiot_sdk/tree/develop/examples/freertos/independent_tiles>`_. In addition to being a reference for how to use most of the drivers, it also serves as one example for how to structure an SMP RTOS application for XCore.
 
 This example application runs two instances of SMP FreeRTOS, one on each of the processor's two tiles. Because each tile has its own memory which is not shared between them, this can be viewed as a single asymmetric multiprocessing (AMP) system that comprises two SMP systems. A FreeRTOS thread that is created on one tile will never be scheduled to run on the other tile. Similarly, an RTOS object that is created on tile tile, such as a queue, can only be accessed by threads and ISRs that run on that tile and never by code running on the other tile.
 
-That said, the example application is programmed and built as a single coherent application, which will be familiar to programmers who have previously programmed for the XCore in XC. Data that must be shared between threads running on different tiles is sent via a channel using the RTOS inter-tile driver, which under the hood uses a streaming channel between the tiles.
+That said, the example application is programmed and built as a single coherent application, which will be familiar to programmers who have previously programmed for the XCore in XC. Data that must be shared between threads running on different tiles is sent via a channel using the RTOS intertile driver, which under the hood uses a streaming channel between the tiles.
 
-Most of the I/O interface drivers in fact provide a mechanism to share driver instances between tiles that utilizes this inter-tile driver. For those familiar with XC, this can be viewed as a C alternative to XC interfaces.
+Most of the I/O interface drivers in fact provide a mechanism to share driver instances between tiles that utilizes this intertile driver. For those familiar with XC, this can be viewed as a C alternative to XC interfaces.
 
 For example, a SPI interface might be available on tile 0. Normally, initialization code that runs on tile 0 sets this interface up and then starts the driver. Without any further initialization, code that runs on tile 1 will be unable to access this interface directly, due both to not having direct access to tile 0's memory, as well as not having direct access to tile 0's ports. The drivers, however, provide some additional initialization functions that can be used by the application to share the instance on tile 0 with tile 1. After this initialization is done, code running on tile 1 may use the instance with the same driver API as tile 0, almost as if it was actually running on tile 0.
 

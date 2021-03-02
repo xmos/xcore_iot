@@ -4,12 +4,12 @@
 |I2S| Master RTOS Driver
 ########################
 
-This driver can be used to instantiate and control an |I2S| master I/O interface on XCORE in an RTOS application.
+This driver can be used to instantiate and control an |I2S| master I/O interface on XCore in an RTOS application.
 
 ******************
 Initialization API
 ******************
-The following structures and functions are used to initialize and start an |I2S| driver instance
+The following structures and functions are used to initialize and start an |I2S| driver instance.
 
 .. doxygengroup:: rtos_i2s_master_driver
    :content-only:
@@ -18,7 +18,7 @@ The following structures and functions are used to initialize and start an |I2S|
 Core API
 ********
 
-The following functions are the core |I2S| driver functions that are used after it has been initialized and started
+The following functions are the core |I2S| driver functions that are used after it has been initialized and started.
 
 .. doxygengroup:: rtos_i2s_master_driver_core
    :content-only:
@@ -27,7 +27,7 @@ The following functions are the core |I2S| driver functions that are used after 
 RPC Initialization API
 **********************
 
-The following functions may be used to share a |I2S| driver instance with other XCORE tiles. Tiles that the
+The following functions may be used to share a |I2S| driver instance with other XCore tiles. Tiles that the
 driver instance is shared with may call any of the core functions listed above.
 
 .. doxygengroup:: rtos_i2s_master_driver_rpc
