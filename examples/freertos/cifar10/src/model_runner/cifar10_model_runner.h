@@ -14,8 +14,8 @@ extern "C" {
  *
  * @param[out] ctx      Model runner context
  * @param[in]  buffer   Buffer for interpreter.  If NULL, will be allocated with
- *                      malloc.  The caller is responsible for freeing the
- * mamory if needed.  To determine the size at run time call:
+ *                      malloc.  The caller is responsible for freeing the memory
+ *                      if needed.  To determine the size at run time call:
  *
  *       size_t size = model_runner_buffer_size_get();
  */

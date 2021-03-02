@@ -4,7 +4,7 @@ Copyrights and Licenses
 Software Copyrights
 -------------------
 
-All original source code in this repository is Copyright (C) 2019-2020 XMOS Ltd and is licensed under the `XMOS License <../LICENSE.txt>`_.
+All original source code in this repository is Copyright (C) 2019-2021 XMOS Ltd and is licensed under the `XMOS License <../LICENSE.txt>`_.
 
 Additional third party copyrighted code is included under the following licenses:
 

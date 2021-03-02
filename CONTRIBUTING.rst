@@ -6,7 +6,7 @@ Contributing
 Contribution Guidelines and Standards
 *************************************
 
-Before sending your pull request, make sure your changes are consistent with these guidelines and are consistent with the coding style used in this ai_tools repository.
+Before sending your pull request, make sure your changes are consistent with these guidelines and are consistent with the coding style used in this aiot_sdk repository.
 
 **************************************************
 General Guidelines and Philosophy For Contribution
@@ -27,26 +27,31 @@ For convenience, the default workspace settings file under `.vscode/` enables fo
 C, XC and ASM coding style
 **************************
 
-Changes to C, XC or ASM should be consistent with the style of existing C, XC and ASM code.
+Changes to C, C++ or ASM should be consistent with the style of existing C, C++ and ASM code.
 
-****************
-C++ coding style
-****************
+`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ is used for formatting code.  In most circumstances, the default settings are safe to use.  However, you will need to configure so includes are not sorting.
 
-Changes to C++ code should conform to `Google C++ Style Guide <https://google.github.io/styleguide/cppguide.html>`_.
+*******************************
+Development Virtual Environment
+*******************************
 
-Use `clang-tidy` to check your C/C++ changes. To install `clang-tidy` on ubuntu:16.04, do:
+It is recommended that you install the virtual environment in the repo's directory:
+
+.. code-block:: console
+
+    conda env create -p ./aiot_sdk_venv -f environment.yml
+
+Activate the environment by specifying the path:
 
 .. code-block:: console
 
-    $ apt-get install -y clang-tidy
+    conda activate aiot_sdk_venv/
 
-You can check a C/C++ file by doing:
+To remove the environment, deactivate and run:
 
 .. code-block:: console
-    
-    $ clang-format <my_cc_file> --style#google > /tmp/my_cc_file.cc
-    $ diff <my_cc_file> /tmp/my_cc_file.cc
+
+    conda remove -p aiot_sdk_venv/ --all
 
 *****************
 Building Examples
@@ -64,7 +69,7 @@ A script is provided to build all the example applications.  Run this script wit
 
 .. code-block:: console
 
-    $ ./build_examples.sh
+    $ bash test/build_examples.sh
 
 *************
 Running Tests
@@ -74,7 +79,7 @@ A script is provided to run all the tests on a connected xcore.ai device.  Run t
 
 .. code-block:: console
 
-    $ ./run_tests.sh
+    $ bash test/run_tests.sh
 
 ****************
 Development Tips

@@ -59,7 +59,7 @@ The following command will generate a C source file that contains the TensorFlow
 
 .. code-block:: console
 
-    $ python ../../../tools/generate/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model.h --source model.c --variable-name g_model --include-guard TENSORFLOW_LITE_MICRO_EXAMPLES_HELLO_WORLD_MODEL_H_
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model.h --source model.c --variable-name g_model --include-guard TENSORFLOW_LITE_MICRO_EXAMPLES_HELLO_WORLD_MODEL_H_
 
 ******************
 Training the model

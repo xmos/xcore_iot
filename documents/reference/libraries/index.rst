@@ -2,9 +2,16 @@
 Libraries
 #########
 
-.. toctree::
-   :maxdepth: 2
+***
+I/O
+***
 
-   io/index
-   optimized/index
+*********
+Optimized
+*********
+
+.. toctree::
+   :maxdepth: 1
+
+   optimized/lib_xs3_math
 

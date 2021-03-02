@@ -1,0 +1,6 @@
+#!/bin/bash
+
+SCRIPT_PATH=$PWD
+
+# Add mode generation scripts to PATH
+export PATH=$XMOS_AIOT_SDK_PATH/modules/adf/tools/generate:${PATH}
