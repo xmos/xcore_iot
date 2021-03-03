@@ -33,8 +33,8 @@ class ModelRunnerProfiler : public tflite::MicroProfiler {
     }
   }
 
-  uint32_t const* GetEventDurations();
-  uint32_t GetNumEvents();
+  uint32_t const* GetEventDurations() {return event_durations_;}
+  uint32_t GetNumEvents() {return event_count_;}
 
  private:
   uint32_t event_start_time_;
