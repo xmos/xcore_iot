@@ -67,7 +67,8 @@ pipeline {
         stage("Build documentation") {
             steps {
                 dir('documents') {
-                    sh '. activate ../aiot_sdk_venv && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
+                    //sh '. activate ../aiot_sdk_venv && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
+                    sh '. activate ../aiot_sdk_venv && make clean html'
                     dir('_build') {
                         archiveArtifacts artifacts: 'html/**/*', fingerprint: false
                         sh 'tar -czf docs_sdk.tgz html'
