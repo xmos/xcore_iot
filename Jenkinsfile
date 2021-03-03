@@ -89,8 +89,7 @@ pipeline {
         stage("Build documentation") {
             steps {
                 dir('documents') {
-                    //sh '. activate ../sdk_venv && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
-                    sh '. activate ../sdk_venv && make clean html'
+                    sh '. activate ../sdk_venv && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
                     dir('_build') {
                         archiveArtifacts artifacts: 'html/**/*', fingerprint: false
                         sh 'tar -czf docs_sdk.tgz html'

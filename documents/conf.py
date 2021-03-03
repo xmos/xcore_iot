@@ -45,6 +45,7 @@ extensions = [
 ]
 
 # Breathe Configuration
+breathe_projects = {"AIoTSDK": "doxygen/xml/"}
 breathe_default_project = "AIoTSDK"
 
 # Add any paths that contain templates here, relative to this directory.

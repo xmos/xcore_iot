@@ -10,5 +10,4 @@ References
    cmd_line_tools/index
    libraries/index
    rtos_drivers/index
-   hardware
    contributing

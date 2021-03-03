@@ -95,4 +95,4 @@ Open ``<output .html file>`` in your browser to inspect the model.
 Model Deployment
 ================
 
-The :ref:`AI Deployment Framework User Guide <ai_deployment_framework_user_guide>` provides information on deploying your optimized model to XCORE.
+The :ref:`AI Deployment Framework User Guide <ai_framework_user_guide>` provides information on deploying your optimized model to XCORE.
