@@ -64,28 +64,6 @@ pipeline {
                 sh "conda update --all -y -q -p aiot_sdk_venv"
             }
         }
-        stage("Build examples") {
-            steps {
-                sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                        . activate ./aiot_sdk_venv && bash test/build_examples.sh"""
-            }
-        }
-        stage("Install") {
-            steps {
-                sh """. activate ./aiot_sdk_venv && bash install.sh"""
-            }
-        }
-        stage("Test") {
-            steps {
-                // run unit tests
-                sh """. activate ./aiot_sdk_venv && cd test && pytest -v --junitxml tests_junit.xml"""
-                // run notebook tests
-                sh """. activate ./aiot_sdk_venv && cd test && bash test_notebooks.sh"""
-                // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
-                // This step collects these files for display in Jenkins UI
-                junit "**/*_junit.xml"
-            }
-        }
         stage("Build documentation") {
             steps {
                 dir('documents') {
