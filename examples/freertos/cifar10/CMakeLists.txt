@@ -7,7 +7,7 @@ endif()
 
 ## Specify configuration
 set(USE_FATFS TRUE)
-set(USE_ADF TRUE)
+set(USE_AIF TRUE)
 set(USE_TENSORFLOW_SUPPORT TRUE)
 
 ## Import XMOS configurations

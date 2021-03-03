@@ -6,7 +6,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Specify configuration
-set(USE_ADF TRUE)
+set(USE_AIF TRUE)
 set(USE_TENSORFLOW_SUPPORT TRUE)
 
 ## Import XMOS configurations

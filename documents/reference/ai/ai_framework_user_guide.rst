@@ -1,8 +1,8 @@
-.. _ai_deployment_framework_user_guide:
+.. _ai_framework_user_guide:
 
-##################################
-AI Deployment Framework User Guide
-##################################
+#######################
+AI Framework User Guide
+#######################
 
 ************
 Introduction

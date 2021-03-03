@@ -47,7 +47,7 @@ pipeline {
                                         url: 'git@github.com:xmos/aiot_sdk']]
                 ])
                 // create venv
-                sh "conda env create -q -p aiot_sdk_venv -f environment.yml"
+                sh "conda env create -q -p sdk_venv -f environment.yml"
                 // Install xmos tools version
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
             }
@@ -61,14 +61,36 @@ pipeline {
             // Roll all conda packages forward beyond their pinned versions
             when { expression { return params.UPDATE_ALL } }
             steps {
-                sh "conda update --all -y -q -p aiot_sdk_venv"
+                sh "conda update --all -y -q -p sdk_venv"
+            }
+        }
+        stage("Build examples") {
+            steps {
+                sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
+                        . activate ./sdk_venv && bash test/build_examples.sh"""
+            }
+        }
+        stage("Install") {
+            steps {
+                sh """. activate ./sdk_venv && bash install.sh"""
+            }
+        }
+        stage("Test") {
+            steps {
+                // run unit tests
+                sh """. activate ./sdk_venv && cd test && pytest -v --junitxml tests_junit.xml"""
+                // run notebook tests
+                sh """. activate ./sdk_venv && cd test && bash test_notebooks.sh"""
+                // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
+                // This step collects these files for display in Jenkins UI
+                junit "**/*_junit.xml"
             }
         }
         stage("Build documentation") {
             steps {
                 dir('documents') {
-                    //sh '. activate ../aiot_sdk_venv && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
-                    sh '. activate ../aiot_sdk_venv && make clean html'
+                    //sh '. activate ../sdk_venv && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
+                    sh '. activate ../sdk_venv && make clean html'
                     dir('_build') {
                         archiveArtifacts artifacts: 'html/**/*', fingerprint: false
                         sh 'tar -czf docs_sdk.tgz html'
