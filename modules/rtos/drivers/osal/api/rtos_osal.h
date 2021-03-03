@@ -55,6 +55,7 @@ rtos_osal_status_t rtos_osal_thread_create(
         size_t stack_word_size,
         unsigned int priority);
 rtos_osal_status_t rtos_osal_thread_core_exclusion_set(rtos_osal_thread_t *thread, uint32_t core_map);
+rtos_osal_status_t rtos_osal_thread_core_exclusion_get(rtos_osal_thread_t *thread, uint32_t *core_map);
 rtos_osal_status_t rtos_osal_thread_preemption_disable(rtos_osal_thread_t *thread);
 rtos_osal_status_t rtos_osal_thread_priority_set(rtos_osal_thread_t *thread, unsigned int priority);
 rtos_osal_status_t rtos_osal_thread_priority_get(rtos_osal_thread_t *thread, unsigned int *priority);

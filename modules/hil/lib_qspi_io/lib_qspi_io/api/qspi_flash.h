@@ -43,9 +43,11 @@ typedef struct {
 	int custom_clock_setup;
 
 	/**
-	 * If set to true, then qspi_flash_write() will use all four SIO lines
-	 * to send the address and data. Otherwise, the address and data will
-	 * only be sent out on SIO0 (MOSI).
+	 * If set to 1, then qspi_flash_write() will use all four SIO lines
+	 * to send out the address and data. If set greater than 1, then qspi_flash_write()
+	 * will send the address out on only SIO0 (MOSI) and the data out on all four SIO
+	 * lines. Otherwise, if false then both the address and data will be sent
+	 * out on only SIO0 (MOSI).
 	 */
 	int quad_page_program_enable;
 

@@ -13,6 +13,7 @@ set(RTOS_INTERTILE_DRIVER_DIR "${DRIVERS_DIR}/intertile")
 set(RTOS_MIC_ARRAY_DRIVER_DIR "${DRIVERS_DIR}/mic_array")
 set(RTOS_RPC_DRIVER_DIR "${DRIVERS_DIR}/rpc")
 set(RTOS_SPI_DRIVER_DIR "${DRIVERS_DIR}/spi")
+set(RTOS_USB_DRIVER_DIR "${DRIVERS_DIR}/usb")
 set(RTOS_SWMEM_DRIVER_DIR "${DRIVERS_DIR}/swmem")
 set(RTOS_QSPI_FLASH_DRIVER_DIR "${DRIVERS_DIR}/qspi_flash")
 set(RTOS_TRACE_DRIVER_DIR "${DRIVERS_DIR}/trace")
@@ -28,6 +29,7 @@ option(USE_RTOS_INTERTILE_DRIVER "Enable to include RTOS intertile communication
 option(USE_RTOS_MIC_ARRAY_DRIVER "Enable to include RTOS microphone array driver" TRUE)
 option(USE_RTOS_RPC_DRIVER "Enable to include RTOS intertile remote procedure call driver" TRUE)
 option(USE_RTOS_SPI_DRIVER "Enable to include RTOS SPI driver" TRUE)
+option(USE_RTOS_USB_DRIVER "Enable to include RTOS USB driver" FALSE)
 option(USE_RTOS_SWMEM_DRIVER "Enable to include RTOS SWMem driver" TRUE)
 option(USE_RTOS_QSPI_FLASH_DRIVER "Enable to include RTOS QSPI flash driver" TRUE)
 option(USE_RTOS_TRACE_DRIVER "Enable to include RTOS trace driver" TRUE)
@@ -160,7 +162,7 @@ endif()
 unset(THIS_LIB)
 
 #********************************
-# Gather spi sources
+# Gather SPI sources
 #********************************
 set(THIS_LIB RTOS_SPI_DRIVER)
 if(${USE_${THIS_LIB}})
@@ -171,7 +173,31 @@ if(${USE_${THIS_LIB}})
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
+        "${${THIS_LIB}_DIR}/api"
+    )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
+#********************************
+# Gather USB sources
+#********************************
+set(THIS_LIB RTOS_USB_DRIVER)
+if(${USE_${THIS_LIB}})
+    set(${THIS_LIB}_FLAGS "-Os")
+
+    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/*.S")
+    
+    set(${THIS_LIB}_SOURCES
+        ${${THIS_LIB}_C_SOURCES}
+        ${${THIS_LIB}_ASM_SOURCES}
+    )
+
+    set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+    set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/api"
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
@@ -189,7 +215,7 @@ if(${USE_${THIS_LIB}})
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
+        "${${THIS_LIB}_DIR}/api"
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
@@ -207,7 +233,7 @@ if(${USE_${THIS_LIB}})
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/api"
+        "${${THIS_LIB}_DIR}/api"
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
@@ -287,6 +313,7 @@ set(DRIVERS_RTOS_SOURCES
     ${RTOS_MIC_ARRAY_DRIVER_SOURCES}
     ${RTOS_RPC_DRIVER_SOURCES}
     ${RTOS_SPI_DRIVER_SOURCES}
+    ${RTOS_USB_DRIVER_SOURCES}
     ${RTOS_SWMEM_DRIVER_SOURCES}
     ${RTOS_QSPI_FLASH_DRIVER_SOURCES}
     ${RTOS_TRACE_DRIVER_SOURCES}
@@ -301,6 +328,7 @@ set(DRIVERS_RTOS_INCLUDES
     ${RTOS_MIC_ARRAY_DRIVER_INCLUDES}
     ${RTOS_RPC_DRIVER_INCLUDES}
     ${RTOS_SPI_DRIVER_INCLUDES}
+    ${RTOS_USB_DRIVER_INCLUDES}
     ${RTOS_SWMEM_DRIVER_INCLUDES}
     ${RTOS_QSPI_FLASH_DRIVER_INCLUDES}
     ${RTOS_TRACE_DRIVER_INCLUDES}

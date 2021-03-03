@@ -13,6 +13,7 @@ set(JSON_PARSER_DIR "${SW_SERVICES_DIR}/json")
 set(MQTT_DIR "${SW_SERVICES_DIR}/mqtt")
 set(SNTPD_DIR "${SW_SERVICES_DIR}/sntpd")
 set(TLS_SUPPORT_DIR "${SW_SERVICES_DIR}/tls_support")
+set(TINYUSB_DIR "${SW_SERVICES_DIR}/usb")
 
 #**********************
 # Options
@@ -26,6 +27,7 @@ option(USE_MQTT "Enable to use MQTT" FALSE)
 option(USE_SNTPD "Enable to use SNTPD" FALSE)
 option(USE_TLS_SUPPORT "Enable to use TLS support" FALSE)
 option(USE_CUSTOM_MBEDTLS_CONFIG "Enable to use provide an alternate mbedtls_config.h" FALSE)
+option(USE_TINYUSB "Enable to use TinyUSB" FALSE)
 
 #********************************
 # Gather wifi manager sources
@@ -310,17 +312,59 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather TinyUSB sources
+#********************************
+set(THIS_LIB TINYUSB)
+if(${USE_${THIS_LIB}})
+	set(${THIS_LIB}_FLAGS "")
+
+    file(GLOB_RECURSE ROOT_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src/tusb.c")
+    file(GLOB_RECURSE CLASS_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src/class/*/*.c")
+    file(GLOB_RECURSE COMMON_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src/common/*.c")
+    file(GLOB_RECURSE DEVICE_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src/device/*.c")
+
+    set(${THIS_LIB}_SOURCES  ${ROOT_SOURCES}
+                             ${CLASS_SOURCES}
+                             ${COMMON_SOURCES}
+                             ${DEVICE_SOURCES}
+                             ${HOST_SOURCES}
+                             "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/usb_support.c"
+                             "${${THIS_LIB}_DIR}/msc/msc_disk_manager.c"
+                             "${${THIS_LIB}_DIR}/msc/msc_ramdisk.c"
+                             "${${THIS_LIB}_DIR}/portable/dcd_xcore.c")
+
+    if(USE_RTOS_QSPI_FLASH_DRIVER)
+        list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/msc/msc_flashdisk.c")
+    endif()
+
+    if(${${THIS_LIB}_FLAGS})
+    	set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
+
+	set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/api"
+	    "${${THIS_LIB}_DIR}/msc"
+	    "${${THIS_LIB}_DIR}/portable"
+	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src"
+	)
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
 set(SW_SERVICES_SOURCES
     ${FATFS_SOURCES}
     ${JSON_PARSER_SOURCES}
+    ${TINYUSB_SOURCES}
 )
 
 set(SW_SERVICES_INCLUDES
     ${FATFS_INCLUDES}
     ${JSON_PARSER_INCLUDES}
+    ${TINYUSB_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES SW_SERVICES_SOURCES)
