@@ -15,6 +15,7 @@ I/O
    mic_array
    qspi_flash
    spi
+   usb
 
 *****
 XCORE
