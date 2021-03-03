@@ -97,8 +97,8 @@ void print_profiler_summary() {
   uint32_t total = 0;
 
   if (profiler) {
-    count = profiler->GetNumTimes();
-    times = profiler->GetTimes();
+    count = profiler->GetNumEvents();
+    times = profiler->GetEventDurations();
   }
 
   for (size_t i = 0; i < interpreter->operators_size(); ++i) {
