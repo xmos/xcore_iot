@@ -22,6 +22,7 @@ dependencies:
   - pytest-xdist=1.30.0
   - Sphinx=3.5.1
   - pip:
+    - breathe==4.27.0
     - furo==2021.2.28b28
     - setuptools_scm==4.1.2
     - sphinx-autobuild==2020.9.1
