@@ -314,16 +314,21 @@ inline void qspi_flash_write_i(qspi_flash_ctx_t *ctx,
 	xassert(status_reg & QSPI_FLASH_STATUS_REG_WEL_BM);
 #endif
 
-	if (ctx->quad_page_program_enable) {
-		pp_cmd = ctx->quad_page_program_cmd;
-		cycles = 8 + /* 8 cycles each for command */
-	             6 + /* 6 cycles for address */
-	             2 * len; /* 2 cycles per byte */
+	if (!ctx->quad_page_program_enable) {
+        pp_cmd = PAGE_PROGRAM_COMMAND;
+        cycles = 8  +  /* 8 cycles each for command */
+                 24 +  /* 24 cycles for address */
+                 8 * len; /* 8 cycles per byte */
+	} else if (ctx->quad_page_program_enable == 1) {
+        pp_cmd = ctx->quad_page_program_cmd;
+        cycles = 8 +   /* 8 cycles each for command */
+                 6 +   /* 6 cycles for address */
+                 2 * len; /* 2 cycles per byte */
 	} else {
-		pp_cmd = PAGE_PROGRAM_COMMAND;
-		cycles = 8  +  /* 8 cycles each for command */
-	             24 +  /* 24 cycles for address */
-	             8 * len; /* 8 cycles per byte */
+        pp_cmd = ctx->quad_page_program_cmd;
+        cycles = 8  +  /* 8 cycles each for command */
+                 24 +  /* 24 cycles for address */
+                 2 * len; /* 2 cycles per byte */
 	}
 
 	/*
@@ -335,12 +340,15 @@ inline void qspi_flash_write_i(qspi_flash_ctx_t *ctx,
 	address_bytes = (uint8_t *) &address;
 
 	qspi_io_start_transaction(qspi_io_ctx, pp_cmd, cycles, qspi_io_full_speed);
-	if (ctx->quad_page_program_enable) {
-		qspi_io_bytes_out(qspi_io_ctx, qspi_io_transfer_normal, address_bytes, 3);
-		qspi_io_bytes_out(qspi_io_ctx, transfer_mode, data, len);
+	if (!ctx->quad_page_program_enable) {
+        qspi_io_mosi_out(qspi_io_ctx, qspi_io_transfer_normal, address_bytes, 3);
+        qspi_io_mosi_out(qspi_io_ctx, transfer_mode, data, len);
+	} else if (ctx->quad_page_program_enable == 1) {
+        qspi_io_bytes_out(qspi_io_ctx, qspi_io_transfer_normal, address_bytes, 3);
+        qspi_io_bytes_out(qspi_io_ctx, transfer_mode, data, len);
 	} else {
-		qspi_io_mosi_out(qspi_io_ctx, qspi_io_transfer_normal, address_bytes, 3);
-		qspi_io_mosi_out(qspi_io_ctx, transfer_mode, data, len);
+	    qspi_io_mosi_out(qspi_io_ctx, qspi_io_transfer_normal, address_bytes, 3);
+	    qspi_io_bytes_out(qspi_io_ctx, transfer_mode, data, len);
 	}
 	qspi_io_end_transaction(qspi_io_ctx);
 }
