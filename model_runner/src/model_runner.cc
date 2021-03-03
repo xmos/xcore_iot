@@ -21,7 +21,7 @@ typedef tflite::MicroAllocator micro_allocator_t;
 typedef tflite::SimpleMemoryAllocator simple_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::MicroOpResolver micro_op_resolver_t;
-typedef tflite::Profiler tflite_profiler_t;
+typedef tflite::MicroProfiler tflite_profiler_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
 
 // static variables
