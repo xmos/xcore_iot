@@ -6,6 +6,7 @@ channels:
   - defaults
 dependencies:
   - cmake=3.14.0
+  - doxygen=1.9.1
   - ipython=7.8.0
   - jupyter=1.0.0
   - jupyter_client=5.3.3
