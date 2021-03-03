@@ -45,21 +45,22 @@ New Features
 Two new APIs have been added to FreeRTOS to support SMP and XCore. Similar capability is also found in other RTOSes that support SMP.
 
 - The first allows a FreeRTOS thread to be excluded from any number of cores. This is done with a core exclusion mask. This supports various scenarios.
-   - One common scenario is having a task that fully utilizes the XCore architecture and requires deterministic execution. Most FreeRTOS applications, however, require a `timer interrupt that runs periodically <https://www.freertos.org/implementation/a00011.html>`_, typically once every 1 or 10 milliseconds. The XCore SMP FreeRTOS port always places this timer interrupt on core 0. When execution of this interrupt's service routine breaks the timing assumption made by tasks that require deterministic execution, and it is not feasible to disable interrupts around its critical sections, then it can make sense to exclude these tasks from core 0.
 
-   - Another scenario is when there are two or more "legacy" threads written with the assumption that they are running in a single core environment. It is common to find that the higher priority threads will often not enter a critical section when modifying data structures shared with lower priority threads, as it is not possible for the lower priority threads to preempt the higher priority threads. While this is still true in an SMP environment, it is possible that the lower priority thread can run simultaneously in another core. Therefore, additional protection must be added (see the discussion above about this). When it is not possible to modify the code to add this protection, for example when the functions are part of a third party library, then it can make sense to lock all of these threads to a single core, ensuring that they do not run simultaneously.
+  - One common scenario is having a task that fully utilizes the XCore architecture and requires deterministic execution. Most FreeRTOS applications, however, require a `timer interrupt that runs periodically <https://www.freertos.org/implementation/a00011.html>`_, typically once every 1 or 10 milliseconds. The XCore SMP FreeRTOS port always places this timer interrupt on core 0. When execution of this interrupt's service routine breaks the timing assumption made by tasks that require deterministic execution, and it is not feasible to disable interrupts around its critical sections, then it can make sense to exclude these tasks from core 0.
+
+  - Another scenario is when there are two or more "legacy" threads written with the assumption that they are running in a single core environment. It is common to find that the higher priority threads will often not enter a critical section when modifying data structures shared with lower priority threads, as it is not possible for the lower priority threads to preempt the higher priority threads. While this is still true in an SMP environment, it is possible that the lower priority thread can run simultaneously in another core. Therefore, additional protection must be added (see the discussion above about this). When it is not possible to modify the code to add this protection, for example when the functions are part of a third party library, then it can make sense to lock all of these threads to a single core, ensuring that they do not run simultaneously.
 
   The two new functions to support this are:
 
   .. code-block:: C
 
-     void vTaskCoreExclusionSet( const TaskHandle_t xTask, UBaseType_t uxCoreExclude )
+    void vTaskCoreExclusionSet( const TaskHandle_t xTask, UBaseType_t uxCoreExclude )
 
   This function sets the specified thread's core exclusion mask. Each bit position represents the corresponding core number, supporting up to 32 cores. Subsequent to the call, the task will be prevented from running on any core whose corresponding bit in the mask is set to 1.
 
   .. code-block:: C
 
-     UBaseType_t vTaskCoreExclusionGet( const TaskHandle_t xTask )
+    UBaseType_t vTaskCoreExclusionGet( const TaskHandle_t xTask )
 
   This function returns the specified thread's current core exclusion mask.
 
@@ -71,13 +72,13 @@ Two new APIs have been added to FreeRTOS to support SMP and XCore. Similar capab
 
   .. code-block:: C
 
-     void vTaskPreemptionDisable( const TaskHandle_t xTask )
+    void vTaskPreemptionDisable( const TaskHandle_t xTask )
 
   This function disables preemption for the specified thread.
 
   .. code-block:: C
 
-     void vTaskPreemptionEnable( const TaskHandle_t xTask )
+    void vTaskPreemptionEnable( const TaskHandle_t xTask )
 
   This function enables preemption for the specified thread.
 
@@ -93,18 +94,23 @@ XCore RTOS Drivers
 To help ease development of XCore applications using an SMP RTOS, XMOS provides several SMP RTOS compatible drivers. These include, but are not necessarily limited to:
 
 - Common I/O interfaces
-   - GPIO
-   - |I2C|
-   - |I2S|
-   - PDM microphones
-   - QSPI flash
-   - SPI
-   - USB
+
+  - GPIO
+  - |I2C|
+  - |I2S|
+  - PDM microphones
+  - QSPI flash
+  - SPI
+  - USB
+
 - XCore features
-   - Intertile channel communication
-   - Software defined memory (xcore.ai only)
+
+  - Intertile channel communication
+  - Software defined memory (xcore.ai only)
+
 - External parts
-   - Silicon Labs WF200 series WiFi transceiver
+
+  - Silicon Labs WF200 series WiFi transceiver
 
 These drivers are all found in the AIoT SDK under the path `modules/rtos/drivers <https://github.com/xmos/aiot_sdk/tree/develop/modules/rtos/drivers>`_.
 
@@ -192,13 +198,13 @@ By simply running:
 
 .. code-block:: console
 
-    $ make -j
+  $ make -j
 
 in the example application directories, all the steps necessary to build the entire application are taken, and a single binary that includes both tiles will be found under the bin directory. If the XCore board is connected to the computer via an xTag, running:
 
 .. code-block:: console
 
-    $ make run
+  $ make run
 
 will run it on the board with xscope enabled so that all debug output from the application will be routed to the terminal.
 
