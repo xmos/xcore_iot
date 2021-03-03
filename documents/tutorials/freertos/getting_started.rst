@@ -208,4 +208,8 @@ in the example application directories, all the steps necessary to build the ent
 
 will run it on the board with xscope enabled so that all debug output from the application will be routed to the terminal.
 
+**********
+References
+**********
+
 .. [1] This is not necessarily core 0 as returned by get_logical_core_id() found in xs1.h. SMP FreeRTOS maintains its own core ID numbering for the cores that it resides on. For the SMP RTOS core ID value, use rtos_core_id_get() instead.
