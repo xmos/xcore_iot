@@ -16,9 +16,9 @@ With all of this in mind, a symmetric multiprocessing (SMP) real time operating 
 
 The remainder of this document assumes familiarity with real time operating systems in general. Familiarity with FreeRTOS specifically should not be required, but will be helpful. For current up to date documentation on FreeRTOS see the following links on the `FreeRTOS website <https://www.freertos.org/>`_.
 
- - `Overview <https://www.freertos.org/RTOS.html>`_
- - `Developer Documentation <https://www.freertos.org/features.html>`_
- - `API <https://www.freertos.org/a00106.html>`_
+- `Overview <https://www.freertos.org/RTOS.html>`_
+- `Developer Documentation <https://www.freertos.org/features.html>`_
+- `API <https://www.freertos.org/a00106.html>`_
 
 ************
 SMP FreeRTOS
@@ -44,10 +44,10 @@ New Features
 
 Two new APIs have been added to FreeRTOS to support SMP and XCore. Similar capability is also found in other RTOSes that support SMP.
 
-* The first allows a FreeRTOS thread to be excluded from any number of cores. This is done with a core exclusion mask. This supports various scenarios.
-   * One common scenario is having a task that fully utilizes the XCore architecture and requires deterministic execution. Most FreeRTOS applications, however, require a `timer interrupt that runs periodically <https://www.freertos.org/implementation/a00011.html>`_, typically once every 1 or 10 milliseconds. The XCore SMP FreeRTOS port always places this timer interrupt on core 0. When execution of this interrupt's service routine breaks the timing assumption made by tasks that require deterministic execution, and it is not feasible to disable interrupts around its critical sections, then it can make sense to exclude these tasks from core 0.
+- The first allows a FreeRTOS thread to be excluded from any number of cores. This is done with a core exclusion mask. This supports various scenarios.
+   - One common scenario is having a task that fully utilizes the XCore architecture and requires deterministic execution. Most FreeRTOS applications, however, require a `timer interrupt that runs periodically <https://www.freertos.org/implementation/a00011.html>`_, typically once every 1 or 10 milliseconds. The XCore SMP FreeRTOS port always places this timer interrupt on core 0. When execution of this interrupt's service routine breaks the timing assumption made by tasks that require deterministic execution, and it is not feasible to disable interrupts around its critical sections, then it can make sense to exclude these tasks from core 0.
 
-   * Another scenario is when there are two or more "legacy" threads written with the assumption that they are running in a single core environment. It is common to find that the higher priority threads will often not enter a critical section when modifying data structures shared with lower priority threads, as it is not possible for the lower priority threads to preempt the higher priority threads. While this is still true in an SMP environment, it is possible that the lower priority thread can run simultaneously in another core. Therefore, additional protection must be added (see the discussion above about this). When it is not possible to modify the code to add this protection, for example when the functions are part of a third party library, then it can make sense to lock all of these threads to a single core, ensuring that they do not run simultaneously.
+   - Another scenario is when there are two or more "legacy" threads written with the assumption that they are running in a single core environment. It is common to find that the higher priority threads will often not enter a critical section when modifying data structures shared with lower priority threads, as it is not possible for the lower priority threads to preempt the higher priority threads. While this is still true in an SMP environment, it is possible that the lower priority thread can run simultaneously in another core. Therefore, additional protection must be added (see the discussion above about this). When it is not possible to modify the code to add this protection, for example when the functions are part of a third party library, then it can make sense to lock all of these threads to a single core, ensuring that they do not run simultaneously.
 
   The two new functions to support this are:
 
@@ -63,7 +63,7 @@ Two new APIs have been added to FreeRTOS to support SMP and XCore. Similar capab
 
   This function returns the specified thread's current core exclusion mask.
 
-* The second new feature allows preemption to be disabled at runtime on a per thread basis. Global preemption may still be disabled at compile time with the configuration option configUSE_TASK_PREEMPTION_DISABLE.
+- The second new feature allows preemption to be disabled at runtime on a per thread basis. Global preemption may still be disabled at compile time with the configuration option configUSE_TASK_PREEMPTION_DISABLE.
 
   This allows threads to ensure that they are never preempted by another lower or same priority task. This can be useful for tasks that require deterministic execution but that do not necessarily need to be run at the highest priority level. For example, a thread that spends much of the time blocked in a waiting state, but once woken up and running must not be interrupted. Disabling interrupts within these tasks may also be required, but by additionally disabling preemption the scheduler will not even attempt to preempt it, ensuring that other threads continue running as they should.
 
@@ -92,19 +92,19 @@ XCore RTOS Drivers
 
 To help ease development of XCore applications using an SMP RTOS, XMOS provides several SMP RTOS compatible drivers. These include, but are not necessarily limited to:
 
- - Common I/O interfaces
-    - GPIO
-    - |I2C|
-    - |I2S|
-    - PDM microphones
-    - QSPI flash
-    - SPI
-    - USB
- - XCore features
-    - Intertile channel communication
-    - Software defined memory (xcore.ai only)
- - External parts
-    - Silicon Labs WF200 series WiFi transceiver
+- Common I/O interfaces
+   - GPIO
+   - |I2C|
+   - |I2S|
+   - PDM microphones
+   - QSPI flash
+   - SPI
+   - USB
+- XCore features
+   - Intertile channel communication
+   - Software defined memory (xcore.ai only)
+- External parts
+   - Silicon Labs WF200 series WiFi transceiver
 
 These drivers are all found in the AIoT SDK under the path `modules/rtos/drivers <https://github.com/xmos/aiot_sdk/tree/develop/modules/rtos/drivers>`_.
 
@@ -114,15 +114,15 @@ It is worth noting that these drivers utilize a lightweight RTOS abstraction lay
 
 XMOS also includes some higher level RTOS compatible software services, some of which the aforementioned drivers. These include, but are not necessarily limited to:
 
- - DHCP server
- - FAT filesystem
- - HTTP parser
- - JSON parser
- - MQTT
- - SNTP client
- - TLS
- - USB stack
- - WiFi connection manager
+- DHCP server
+- FAT filesystem
+- HTTP parser
+- JSON parser
+- MQTT
+- SNTP client
+- TLS
+- USB stack
+- WiFi connection manager
 
 These services are all found in the AIoT SDK under the path `modules/rtos/sw_services <https://github.com/xmos/aiot_sdk/tree/develop/modules/rtos/sw_services>`_.
 
