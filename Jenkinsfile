@@ -22,11 +22,10 @@ pipeline {
         //buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
     }
-        
+    environment {
+        XMOS_AIOT_SDK_PATH = "${env.WORKSPACE}"
+    }
     stages {
-        environment {
-            XMOS_AIOT_SDK_PATH = "${env.WORKSPACE}"
-        }
         stage("Setup") {
             // Clone and install build dependencies
             steps {
@@ -99,10 +98,10 @@ pipeline {
                 }
             }
         }
-        post {
-            cleanup {
-                cleanWs()
-            }
+    }
+    post {
+        cleanup {
+            cleanWs()
         }
     }
 }
