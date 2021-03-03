@@ -1,7 +1,11 @@
 @Library('xmos_jenkins_shared_library@v0.14.2') _
 getApproval()
 pipeline {
-    agent none
+    agent {
+        dockerfile {
+            args ""
+        }
+    }
     parameters { // Available to modify on the job page within Jenkins if starting a build
         string( // use to try different tools versions
             name: 'TOOLS_VERSION',
@@ -21,11 +25,6 @@ pipeline {
         
     stages {
         stage("Build Software") {
-            agent {
-                dockerfile {
-                    args ""
-                }
-            }
             environment {
                 XMOS_AIOT_SDK_PATH = "${env.WORKSPACE}"
             }
@@ -91,24 +90,15 @@ pipeline {
                     }
                 }
             }
-            post {
-                cleanup {
-                    cleanWs()
-                }
-            }
-        }
-        stage("Build documentation") {
-            agent {
-                docker {
-                    image 'sphinxdoc/sphinx-latexpdf'
-                }
-            }
-            steps {
-                dir('documents') {
-                    sh 'make html latexpdf'
-                    dir('_build') {
-                        archiveArtifacts artifacts: 'html/**/*', fingerprint: false
-                        archiveArtifacts artifacts: 'latex/aiotsoftwaredevelopmentkit.pdf', fingerprint: false
+            stage("Build documentation") {
+                steps {
+                    dir('documents') {
+                        sh 'make clean linkcheck html SPHINXOPTS=”-W --keep-going”'
+                        dir('_build') {
+                            archiveArtifacts artifacts: 'html/**/*', fingerprint: false
+                            sh 'tar -czf docs_sdk.tgz html'
+                            archiveArtifacts artifacts: 'docs_sdk.tgz', fingerprint: true
+                        }
                     }
                 }
             }

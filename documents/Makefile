@@ -26,3 +26,6 @@ $(DOXYGEN_OUTPUT_DIR)/index.xml: Doxyfile
 %: Makefile $(DOXYGEN_OUTPUT_DIR)/index.xml
 	$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+livehtml:
+	sphinx-autobuild --host 0.0.0.0 "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+

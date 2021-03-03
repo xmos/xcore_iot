@@ -39,8 +39,8 @@ StandaloneHTMLBuilder.supported_image_types = [
 
 extensions = [
     "sphinx.ext.todo",
-    "sphinx.ext.ifconfig",
-    "sphinx.ext.githubpages",
+    "sphinx_copybutton",
+    "sphinx_inline_tabs",
     "breathe",
 ]
 
@@ -61,5 +61,18 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "furo"
-html_logo = "images/xmos_logo.png"
+html_logo = "images/sdk_logo.png"
 
+html_theme_options = {
+    "sidebar_hide_name": True,
+}
+
+# Add any paths that contain custom static files (such as style sheets) here,
+# relative to this directory. They are copied after the builtin static files,
+# so a file named "default.css" will overwrite the builtin "default.css".
+# html_static_path = ['_static']
+
+# -- Options for sphinx_copybutton -------------------------------------------
+
+copybutton_prompt_text = r"\$ |\(gdb\) "
+copybutton_prompt_is_regexp = True
