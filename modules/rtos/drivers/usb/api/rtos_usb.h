@@ -24,10 +24,10 @@
 #define RTOS_USB_ENDPOINT_COUNT_MAX 12
 
 
-/*
- * These are used to index into the first index of many of the
- * RTOS USB driver's endpoint arrays.
+/**
  * @{
+ * This is used to index into the second dimension of many of the
+ * RTOS USB driver's endpoint arrays.
  */
 #define RTOS_USB_OUT_EP 0
 #define RTOS_USB_IN_EP  1
@@ -109,8 +109,8 @@ struct rtos_usb_struct {
 };
 
 /**
- * Checks to see if a particular endpoint is ready to use. This only needs
- * to be checked once after starting the USB driver instance.
+ * Checks to see if a particular endpoint is ready to use. This should only
+ * be checked once after starting the USB driver instance.
  *
  * \param ctx           A pointer to the USB driver instance to use.
  * \param endpoint_addr The address of the endpoint to check.
@@ -125,8 +125,8 @@ int rtos_usb_endpoint_ready(rtos_usb_t *ctx,
                             unsigned timeout);
 
 /**
- * Checks to see if all endpoints are ready to use. This only needs
- * to be checked once after starting the USB driver instance.
+ * Checks to see if all endpoints are ready to use. This should only
+ * be checked once after starting the USB driver instance.
  *
  * \param ctx           A pointer to the USB driver instance to use.
  * \param timeout       The maximum amount of time to wait for all endpoints to
@@ -303,11 +303,11 @@ void usb_simple_isr_cb(rtos_usb_t *ctx,
  *                          application uses EP0_IN, EP0_OUT, EP1_IN, EP2_IN, EP2_OUT, EP3_OUT, then the
  *                          endpoint count specified here should be 4 (endpoint 0 through endpoint 3)
  *                          regardless of the lack of EP1_OUT and EP3_IN. If these two endpoints were used,
- *                          the count would still be 4.
- *                          \note if for whatever reason, the application needs to use a particular endpoint
+ *                          the count would still be 4.\n
+ *                          If for whatever reason, the application needs to use a particular endpoint
  *                          number, say only EP6 in addition to EP0, then the count here needs to be 7, even
  *                          though endpoints 1 through 5 are unused. All unused endpoints must be marked as
- *                          unused in the two endpoint type lists \p endpoint_out_type and \p endpoint_in_type.
+ *                          disabled in the two endpoint type lists \p endpoint_out_type and \p endpoint_in_type.
  * \param endpoint_out_type A list of the endpoint types for each output endpoint. Index 0 represents the type
  *                          for EP0_OUT, and so on. See XUD_EpType in lib_xud. If the endpoint is unused, it must
  *                          be set to XUD_EPTYPE_DIS.

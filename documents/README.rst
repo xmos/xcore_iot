@@ -4,14 +4,40 @@ Building Documentation
 Prerequisites
 -------------
 
-Python Modules
-^^^^^^^^^^^^^^
+Doxygen
+^^^^^^^^
 
-Install `Sphynx <https://www.sphinx-doc.org/en/master/>`_.
+Install `Doxygen <https://www.doxygen.nl/index.html>`_.
+
+Installation will depend on your operating system.
+
+On Debian based systems run:
 
 .. code-block:: console
 
-    $ pip install Sphynx
+    $ sudo apt install doxygen
+
+On Fedora run:
+
+.. code-block:: console
+
+    $ sudo dnf install doxygen
+
+
+Python Modules
+^^^^^^^^^^^^^^
+
+Install `Sphinx <https://www.sphinx-doc.org/en/master/>`_.
+
+.. code-block:: console
+
+    $ pip install -U Sphinx
+
+Install `Breathe <https://breathe.readthedocs.io/en/latest/>`_.
+
+.. code-block:: console
+
+    $ pip install -U breathe
 
 Building
 --------

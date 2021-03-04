@@ -11,7 +11,7 @@ set(LIB_LOGGING_DIR "${MODULES_DIR}/lib_logging")
 set(LIB_RANDOM_DIR "${MODULES_DIR}/lib_random")
 set(LIB_XS3_MATH_DIR "${MODULES_DIR}/lib_xs3_math")
 set(LEGACY_COMPAT_DIR "${MODULES_DIR}/legacy_compat")
-set(ADF_DIR "${MODULES_DIR}/adf")
+set(AIF_DIR "${MODULES_DIR}/aif")
 set(TENSORFLOW_SUPPORT_DIR "${MODULES_DIR}/tensorflow_support")
 
 #**********************
@@ -23,7 +23,7 @@ option(USE_LIB_LOGGING "Enable to include lib_logging" TRUE)
 option(USE_LIB_RANDOM "Enable to include lib_random" TRUE)
 option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not used
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
-option(USE_ADF "Enable to include AI deployment framework" FALSE)
+option(USE_AIF "Enable to include AI framework" FALSE)
 option(USE_TENSORFLOW_SUPPORT "Enable to include TensorFlow support" FALSE)
 
 #********************************
@@ -187,11 +187,11 @@ endif()
 unset(THIS_LIB)
 
 #********************************
-# Gather ADF sources
+# Gather AIF sources
 #********************************
-set(THIS_LIB ADF)
+set(THIS_LIB AIF)
 if(${USE_${THIS_LIB}})
-    include("${ADF_DIR}/ai_deployment_framework.cmake")
+    include("${AIF_DIR}/ai_framework.cmake")
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)

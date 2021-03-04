@@ -65,7 +65,7 @@ set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_fla
 #**********************
 # APP sources
 #**********************
-include("${AIOT_SDK_PATH}/modules/adf/ai_deployment_framework.cmake")
+include("${AIOT_SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(APP_SOURCES
   "${PROJECT_SOURCE_DIR}/model_runner/cifar10_model_data.c"

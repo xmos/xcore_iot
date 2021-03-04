@@ -55,7 +55,7 @@ person_detect_profiler_get(void **v_profiler) {
 __attribute__((fptrgroup("model_runner_profiler_reset_fptr_grp"))) static void
 person_detect_profiler_reset() {
   if (profiler) {
-    profiler->Reset();
+    profiler->ClearEvents();
   }
 }
 
@@ -65,8 +65,8 @@ __attribute__((
     fptrgroup("model_runner_profiler_times_get_fptr_grp"))) static void
 person_detect_profiler_times_get(uint32_t *count, const uint32_t **times) {
   if (profiler) {
-    *count = profiler->GetNumTimes();
-    *times = profiler->GetTimes();
+    *count = profiler->GetNumEvents();
+    *times = profiler->GetEventDurations();
   }
 }
 

@@ -81,7 +81,7 @@ set(KISS_FFT_SOURCES
 # micro_features sources
 #**********************
 
-include("${AIOT_SDK_PATH}/modules/adf/ai_deployment_framework.cmake")
+include("${AIOT_SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(MICRO_FEATURES_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
@@ -148,6 +148,7 @@ set(APP_SOURCES
 # Test sources
 #*************************************************
 set(TEST_SOURCES
+  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/system_setup.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/no_micro_features_data.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/yes_micro_features_data.cc"
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.cc"

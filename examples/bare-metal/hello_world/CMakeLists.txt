@@ -56,7 +56,7 @@ set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_fla
 #**********************
 # APP sources
 #**********************
-include("${AIOT_SDK_PATH}/modules/adf/ai_deployment_framework.cmake")
+include("${AIOT_SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(APP_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/main.cc"

@@ -19,12 +19,12 @@ else
     (cd ${LIB_FLEXBUFFERS_DIR}; mkdir -p build)
     (cd ${LIB_FLEXBUFFERS_DIR}/build; cmake ../ ; make install)
 
-    ADF_DIR=${XMOS_AIOT_SDK_PATH}/modules/adf
+    AIF_DIR=${XMOS_AIOT_SDK_PATH}/modules/aif
 
     echo "*******************************"
     echo "* Building xcore_interpreters *"
     echo "******************************"
-    XCORE_INTERPRETERS_DIR=${ADF_DIR}/xcore_interpreters/python_bindings
+    XCORE_INTERPRETERS_DIR=${AIF_DIR}/xcore_interpreters/host_library
     (cd ${XCORE_INTERPRETERS_DIR}; mkdir -p build)
     (cd ${XCORE_INTERPRETERS_DIR}/build; cmake ../ ; make install)
 
