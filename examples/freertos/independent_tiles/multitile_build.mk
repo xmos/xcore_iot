@@ -11,7 +11,7 @@ TILE_OUTPUT_DIR = $(OUTPUT_DIR)/tile$(1)
 TILE_MAKE = $(call TILE_BUILD_DIR,$(1))/Makefile
 
 # The XE file per tile. These all get merged into one ultimate XE file.
-TILE_EXECUTABLE = $(call TILE_OUTPUT_DIR,$(1))/$(PROJECT_NAME).xe
+TILE_EXECUTABLE = $(call TILE_OUTPUT_DIR,$(1))/a.xe
 
 # Simply add to this list to support more than 4 tiles
 TILES = 0 1 2 3
@@ -62,7 +62,7 @@ $(EXECUTABLE): $(TILE_DEPS)
 
 # Creates each tile's Makefile by running CMake for a specific tile.
 $(call TILE_MAKE,%):
-	cmake -B $(call TILE_BUILD_DIR,$*) -DTHIS_XCORE_TILE=$* -DBOARD=$(BOARD) $(CMAKE_ARGS)
+	cmake -B $(call TILE_BUILD_DIR,$*) -DMULTITILE_BUILD=1 -DTHIS_XCORE_TILE=$* -DBOARD=$(BOARD) -DOUTPUT_DIR=$(OUTPUT_DIR) $(CMAKE_ARGS)
 
 # Creates each tile's XE file by running make in the specific tile's build directory.
 $(call TILE_EXECUTABLE,%): $(call TILE_MAKE,%) .FORCE
