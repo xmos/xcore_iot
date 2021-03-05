@@ -10,7 +10,8 @@ set(USE_WIFI_MANAGER TRUE)
 set(USE_DHCPD TRUE)
 set(USE_FATFS TRUE)
 
-## Import XMOS configurations
+## Import XMOS RTOS platform configuration.
+## Must be done after setting the configuration options.
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
@@ -25,7 +26,6 @@ set(APP_COMPILER_FLAGS
     "-g"
     "-report"
     "-fxscope"
-    "-lquadspi"
     "-mcmodel=large"
     "-Wno-xcore-fptrgroup"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
@@ -58,17 +58,6 @@ add_compile_definitions(
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
 )
-
-### COULD THIS PART BE HANDLED BY SOME COMMON MULTITILE BUILD .cmake FILE? ###
-if(DEFINED THIS_XCORE_TILE)
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
-    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-
-    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
-else()
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
-endif()
 
 add_executable(${TARGET_NAME})
 
