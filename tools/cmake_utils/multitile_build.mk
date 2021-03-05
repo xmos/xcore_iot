@@ -1,3 +1,20 @@
+# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+# XMOS Public License: Version 1
+#
+# This helper makefile creates a recipe for a multitile XCORE application's .xe binary,
+# where the .elf for each tile is independently built and then merged into a single
+# .xe file. This allows for conditional compilation per tile by checking the
+# THIS_XCORE_TILE preprocessor macro.
+#
+# This requires that the application have a single CMakeLists.txt file that defines the
+# project and that each tile be built from the same body of source code.
+# cmake will be run once per tile into separate build directories, and each of these
+# cmake projects will then be built. The resulting .xe files from each are combined into
+# a single .xe at the output location specified by EXECUTABLE.
+#
+# TODO: Usage instructions. See example usage in the independent_tiles example app for now.
+#
+
 PLATFORM_USES_TILE_0 ?= 1
 XE_BASE_TILE ?= 0
 
