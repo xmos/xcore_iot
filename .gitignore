@@ -4,7 +4,7 @@
 # Python cruft
 **/*.pyc
 **/__pycache__/*
-.venv/*
+**/aif_venv/*
 **/.ipynb_checkpoints/*
 **/*.egg-info/*
 **/*.eggs/*

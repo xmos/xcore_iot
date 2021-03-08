@@ -1,5 +1,5 @@
-AI Integration Framework
-========================
+XMOS AI Integration Framework
+=============================
 
 Summary
 -------
