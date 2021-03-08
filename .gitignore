@@ -11,10 +11,10 @@
 Pipfile.lock
 
 # Build cruft
-**/.lock*
 **/build*/
 **/.build/
 _build
+**/infr*/
 **/dist/
 **/bin/
 *.o
