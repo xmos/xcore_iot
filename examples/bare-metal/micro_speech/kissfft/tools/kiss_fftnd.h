@@ -1,5 +1,5 @@
-#ifndef KISS_FFTND_H
-#define KISS_FFTND_H
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 
 #include "kiss_fft.h"
 

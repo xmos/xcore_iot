@@ -1,5 +1,5 @@
-/*----------------------------------------------------------------------------/
-/  FatFs - Generic FAT Filesystem module  R0.14                               /
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 /-----------------------------------------------------------------------------/
 /
 / Copyright (C) 2019, ChaN, all right reserved.

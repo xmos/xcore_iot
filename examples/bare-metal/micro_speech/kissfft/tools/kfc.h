@@ -1,5 +1,5 @@
-#ifndef KFC_H
-#define KFC_H
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 #include "kiss_fft.h"
 
 #ifdef __cplusplus

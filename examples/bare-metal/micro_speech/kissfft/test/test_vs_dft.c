@@ -1,5 +1,5 @@
-#include "kiss_fft.h"
-
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 
 void check(kiss_fft_cpx  * in,kiss_fft_cpx  * out,int nfft,int isinverse)
 {

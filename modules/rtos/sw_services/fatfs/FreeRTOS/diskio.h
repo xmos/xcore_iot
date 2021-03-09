@@ -1,5 +1,5 @@
-/*-----------------------------------------------------------------------/
-/  Low level disk interface modlue include file   (C)ChaN, 2019          /
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 /-----------------------------------------------------------------------*/
 
 #ifndef _DISKIO_DEFINED

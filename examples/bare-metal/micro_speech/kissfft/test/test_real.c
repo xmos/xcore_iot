@@ -1,5 +1,5 @@
-#include "kiss_fftr.h"
-#include "_kiss_fft_guts.h"
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 #include <sys/times.h>
 #include <time.h>
 #include <unistd.h>

@@ -1,5 +1,5 @@
-/* 
- * The MIT License (MIT)
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
  *
  * Copyright (c) 2020 Ha Thach (tinyusb.org)
  * Copyright (c) 2020 Jerzy Kasenberg

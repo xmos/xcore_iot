@@ -1,5 +1,5 @@
-/* this program is in the public domain 
-   A program that helps the authors of the fine fftw library benchmark kiss 
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 */
 
 #include "bench-user.h"

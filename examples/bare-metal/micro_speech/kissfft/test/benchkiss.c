@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 #include <sys/times.h>
 #include <unistd.h>
 #include "kiss_fft.h"

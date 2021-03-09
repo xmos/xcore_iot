@@ -1,5 +1,5 @@
-/*
- * tusb_config.h
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
  *
  *  Created on: Oct 28, 2019
  *      Author: Sylvain Munaut

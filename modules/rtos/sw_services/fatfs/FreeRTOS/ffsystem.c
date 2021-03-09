@@ -1,5 +1,5 @@
-/*------------------------------------------------------------------------*/
-/* Sample Code of OS Dependent Functions for FatFs                        */
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 /* (C)ChaN, 2018                                                          */
 /*------------------------------------------------------------------------*/
 

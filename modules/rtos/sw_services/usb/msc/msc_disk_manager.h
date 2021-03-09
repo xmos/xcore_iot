@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
-// XMOS Public License: Version 1
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 
 #ifndef MSC_DISK_MANAGER_H_
 #define MSC_DISK_MANAGER_H_
