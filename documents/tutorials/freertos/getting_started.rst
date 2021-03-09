@@ -174,7 +174,7 @@ When this function is compiled for tile I2C_TILE, only the first block is includ
 
 I2C_TILE is defined at the top of the file. Because the |I2C| driver instance is shared between the two tiles, it may in fact be set to either zero or one, providing a demonstration of the way that drivers instances may be shared between tiles.
 
-The AIoT SDK provides a single XC file that provides the main() function. This provided main() function calls main_tile0() through main_tile3, depending on the number of tiles that the application requires and the number of tiles provided by the target XCore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
+The AIoT SDK provides a single XC file that provides the main() function. This provided main() function calls main_tile0() through main_tile3(), depending on the number of tiles that the application requires and the number of tiles provided by the target XCore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
 
 The example application provides both main_tile0() and main_tile1(). Each one calls an initialization function that initializes all the drivers for the interfaces specific to its tile. These functions also call the initialization functions to share these driver instances between the tiles. These initialization functions are found in the board_init.c source file.
 
