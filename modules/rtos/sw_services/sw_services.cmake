@@ -8,7 +8,8 @@ set(SW_SERVICES_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/sw_services")
 set(WIFI_MANAGER_DIR "${SW_SERVICES_DIR}/wifi_manager")
 set(DHCPD_DIR "${SW_SERVICES_DIR}/dhcpd")
 set(FATFS_DIR "${SW_SERVICES_DIR}/fatfs")
-set(HTTP_PARSER_DIR "${SW_SERVICES_DIR}/http")
+set(HTTP_CORE_DIR "${SW_SERVICES_DIR}/http")
+set(HTTP_PARSER_DIR "${HTTP_CORE_DIR}/thirdparty/coreHTTP/source/dependency/3rdparty")
 set(JSON_PARSER_DIR "${SW_SERVICES_DIR}/json")
 set(MQTT_DIR "${SW_SERVICES_DIR}/mqtt")
 set(SNTPD_DIR "${SW_SERVICES_DIR}/sntpd")
@@ -21,6 +22,7 @@ set(TINYUSB_DIR "${SW_SERVICES_DIR}/usb")
 option(USE_WIFI_MANAGER "Enable to use wifi manager" FALSE)
 option(USE_DHCPD "Enable to use DHCP" FALSE)
 option(USE_FATFS "Enable to use FATFS filesystem" FALSE)
+option(USE_HTTP_CORE "Enable to use HTTP client and parser" FALSE)
 option(USE_HTTP_PARSER "Enable to use HTTP parser" FALSE)
 option(USE_JSON_PARSER "Enable to use JSON parser" FALSE)
 option(USE_MQTT "Enable to use MQTT" FALSE)
@@ -105,20 +107,47 @@ endif()
 unset(THIS_LIB)
 
 #********************************
-# Gather HTTP parser sources
+# Gather HTTP core sources
 #********************************
-set(THIS_LIB HTTP_PARSER)
+set(THIS_LIB HTTP_CORE)
 if(${USE_${THIS_LIB}})
 	set(${THIS_LIB}_FLAGS "")
 
-	set(${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/thirdparty/http-parser/http_parser.c")
+	set(${THIS_LIB}_SOURCES
+        "${${THIS_LIB}_DIR}/thirdparty/coreHTTP/source/core_http_client.c"
+    )
 
     if(${${THIS_LIB}_FLAGS})
        set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
     endif()
 
 	set(${THIS_LIB}_INCLUDES
-	    "${${THIS_LIB}_DIR}/thirdparty/http-parser"
+	    "${${THIS_LIB}_DIR}/thirdparty/coreHTTP/source"
+	    "${${THIS_LIB}_DIR}/thirdparty/coreHTTP/source/include"
+	    "${${THIS_LIB}_DIR}/thirdparty/coreHTTP/source/interface"
+	)
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+
+    # Force HTTP_PARSER on if it is not already
+    set(USE_HTTP_PARSER TRUE)
+endif()
+unset(THIS_LIB)
+
+#********************************
+# Gather HTTP parser sources
+#********************************
+set(THIS_LIB HTTP_PARSER)
+if(${USE_${THIS_LIB}})
+	set(${THIS_LIB}_FLAGS "")
+
+	set(${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/http_parser/http_parser.c")
+
+    if(${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
+
+	set(${THIS_LIB}_INCLUDES
+	    "${${THIS_LIB}_DIR}/http_parser"
 	)
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
@@ -373,6 +402,7 @@ list(REMOVE_DUPLICATES SW_SERVICES_INCLUDES)
 set(SW_SERVICES_NETWORKING_SOURCES
     ${WIFI_MANAGER_SOURCES}
     ${DHCPD_SOURCES}
+    ${HTTP_CORE_SOURCES}
     ${HTTP_PARSER_SOURCES}
     ${MQTT_SOURCES}
     ${SNTPD_SOURCES}
@@ -382,6 +412,7 @@ set(SW_SERVICES_NETWORKING_SOURCES
 set(SW_SERVICES_NETWORKING_INCLUDES
     ${WIFI_MANAGER_INCLUDES}
     ${DHCPD_INCLUDES}
+    ${HTTP_CORE_INCLUDES}
     ${HTTP_PARSER_INCLUDES}
     ${MQTT_INCLUDES}
     ${SNTPD_INCLUDES}

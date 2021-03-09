@@ -89,9 +89,10 @@ add_compile_definitions(
 )
 
 ## Select demo
-set(XMOS_TINYUSB_DEMO                            TRUE)
+set(XMOS_TINYUSB_DEMO                            FALSE)
 set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
 set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
+set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               TRUE)
 
 ## In progress
 set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
@@ -108,7 +109,6 @@ set(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST FALSE)
 set(USE_TINYUSB_DEMO_MIDI_TEST                   FALSE)
 set(USE_TINYUSB_DEMO_NET_LWIP_WEBSERVER          FALSE)
 set(USE_TINYUSB_DEMO_USBTMC                      FALSE)
-set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               FALSE)
 
 if(XMOS_TINYUSB_DEMO)
     set(DEMO_SOURCES

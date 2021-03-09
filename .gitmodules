@@ -19,10 +19,6 @@
 	path = modules/rtos/sw_services/mqtt/thirdparty/paho.mqtt.embedded-c
 	url = git@github.com:eclipse/paho.mqtt.embedded-c.git
 	shallow = true
-[submodule "http-parser"]
-	path = modules/rtos/sw_services/http/thirdparty/http-parser
-	url = git@github.com:nodejs/http-parser.git
-	shallow = true
 [submodule "jsmn"]
 	path = modules/rtos/sw_services/json/thirdparty/jsmn
 	url = git@github.com:zserge/jsmn.git
@@ -76,3 +72,6 @@
 [submodule "modules/aif"]
 	path = modules/aif
 	url = git@github.com:xmos/aif.git
+[submodule "coreHTTP"]
+	path = modules/rtos/sw_services/http/thirdparty/coreHTTP
+	url = git@github.com:FreeRTOS/coreHTTP.git
