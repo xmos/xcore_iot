@@ -1,5 +1,5 @@
-// This is a TensorFlow Lite model runner interface that has been
-// generated using the generate_model_runner tool.
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 
 #include "cifar10_model_runner.h"
 

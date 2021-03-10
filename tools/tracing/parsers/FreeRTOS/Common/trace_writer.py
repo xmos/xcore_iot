@@ -1,7 +1,8 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
 
 import re
+
 
 class trace_writer(object):
     def __init__(self, filename):

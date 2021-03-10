@@ -1,5 +1,5 @@
-
-// This is a TensorFlow Lite model file that has been converted into a C data
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 // array using the convert_tflite_to_c_source() tool.
 
 #ifndef MOBILENET_V1_MODEL_H_

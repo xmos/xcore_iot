@@ -1,5 +1,5 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
 
 import re
 
@@ -10,23 +10,24 @@ regex_header = "\$(\w+)\s(.+\s*)*\$end$"
 regex_enddefs = "\$enddefinitions\s(.+\s*)*\$end$"
 regex_record = "#(\d+)\s\$comment\sl(\d+) (\w+) (\d)\s\$end$"
 
+
 class trace_parser:
     def __init__(self):
         self.Timescale = None
         self.ProbeList = []
         self.HeaderList = []
         self.ParsedList = []
-        self.Lines = 0;
-        self.Records = 0;
+        self.Lines = 0
+        self.Records = 0
 
     def parse_file(self, infile, verbose=False):
         f = open(infile, "r")
 
         cur = ""
 
-        while(1):
+        while 1:
             line = f.readline()
-            if(len(line) == 0):
+            if len(line) == 0:
                 print("Parse complete, only header data found")
                 return
 
@@ -47,9 +48,9 @@ class trace_parser:
                 # print(p.group(2))   # payload
                 cur = ""
 
-        while(1):
+        while 1:
             line = f.readline()
-            if(len(line) == 0):
+            if len(line) == 0:
                 print("Parse complete")
                 return
 
