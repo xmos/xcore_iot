@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+/*
+Copyright (c) 2003-2010, Mark Borgerding
 
 All rights reserved.
 

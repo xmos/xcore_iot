@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/times.h>
 #include <sys/types.h>
 #include <unistd.h>

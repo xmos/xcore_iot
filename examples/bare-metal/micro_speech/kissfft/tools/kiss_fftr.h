@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+#ifndef KISS_FTR_H
+#define KISS_FTR_H
 
 #include "kiss_fft.h"
 #ifdef __cplusplus
