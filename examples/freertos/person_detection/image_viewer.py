@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-#
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
 import sys
 import os
 import ctypes
@@ -116,20 +115,22 @@ class PersonDetectionEndpoint(object):
     def disconnect(self):
         self.lib_xscope.xscope_ep_disconnect()
 
+
 def update(i, ep, im):
     if ep.result_ready():
         img, res = ep.get_frame()
-        title_str = 'Person:' + str(res[0]) + ' Not Person:' + str(res[1])
-        if(res[0] > res[1]):
-            res_color = 'green'
+        title_str = "Person:" + str(res[0]) + " Not Person:" + str(res[1])
+        if res[0] > res[1]:
+            res_color = "green"
         else:
-            res_color = 'red'
+            res_color = "red"
 
         # set imshow outline
         for spine in im.axes.spines.values():
             spine.set_edgecolor(res_color)
         plt.title(title_str, fontsize=14, color=res_color)
         im.set_data(img)
+
 
 if __name__ == "__main__":
     print("Person detection starting...")
@@ -142,7 +143,7 @@ if __name__ == "__main__":
     ax = fig.add_subplot(1, 1, 1)
     plt.title("Waiting for data", fontsize=14)
     dft_img = np.zeros(shape=(96, 96))
-    im = ax.imshow(dft_img, cmap='gray', vmin=0, vmax=255)
+    im = ax.imshow(dft_img, cmap="gray", vmin=0, vmax=255)
     im.axes.get_xaxis().set_visible(False)
     im.axes.get_yaxis().set_visible(False)
 

@@ -1,5 +1,5 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
 
 import re
 
@@ -9,6 +9,7 @@ from Common.decoded_record import decoded_record
 from Common.arg_decoder import decode_args
 
 regex_payload = "(\d+)(?::{1})(\d+)(?::{1})(\d+)(?:(?:,{1})(.*))*"
+
 
 class trace_processor(trace_processor):
     def __init__(self, record_list, filter_args):
@@ -35,11 +36,13 @@ class trace_processor(trace_processor):
                 d_core = core
                 d_trace = trace_map[int(trace)]
                 d_hwtick = hwtick
-                d_args = decode_args(int(trace),args)
+                d_args = decode_args(int(trace), args)
 
                 # print("Core:{0}    Trace:{1}    HWTick:{2}    Args:{3}".format(d_core, d_trace, d_hwtick, d_args))
-                if( self.filter_args[d_trace] ):
-                    self.decoded_list.append(decoded_record(d_core, d_trace, d_hwtick, d_args))
+                if self.filter_args[d_trace]:
+                    self.decoded_list.append(
+                        decoded_record(d_core, d_trace, d_hwtick, d_args)
+                    )
 
     def process(self, verbose=False):
         for each in self.record_list:
@@ -48,7 +51,8 @@ class trace_processor(trace_processor):
         return
 
     def sort_by_tick(self, verbose=False):
-        self.decoded_list = sorted(self.decoded_list, key = lambda i: int(i.hwtick))
+        self.decoded_list = sorted(self.decoded_list, key=lambda i: int(i.hwtick))
+
 
 trace_map = [
     "USER_MSG",
@@ -140,5 +144,5 @@ trace_map = [
     "STREAM_BUFFER_RECEIVE_FAILED",
     "STREAM_BUFFER_RECEIVE_FROM_ISR",
     "INCREASE_TICK_COUNT",
-    "TOTAL_TRACE_COUNT"
+    "TOTAL_TRACE_COUNT",
 ]

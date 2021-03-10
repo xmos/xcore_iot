@@ -1,5 +1,6 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
+
 
 class trace_processor(object):
     def __init__(self, record_list):

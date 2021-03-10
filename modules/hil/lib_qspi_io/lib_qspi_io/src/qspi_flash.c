@@ -1,5 +1,5 @@
-// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-// XMOS Public License: Version 1
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public License: Version 1.
 
 #include "qspi_flash.h"
 #if QSPI_FLASH_SANITY_CHECKS

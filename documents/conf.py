@@ -1,5 +1,6 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
+
 # -*- coding: utf-8 -*-
 #
 # Programming Guide documentation build configuration file, created by

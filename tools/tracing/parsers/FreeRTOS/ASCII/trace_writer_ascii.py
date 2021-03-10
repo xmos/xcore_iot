@@ -1,10 +1,11 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
 
 import re
 import binascii
 
 from Common.trace_writer import trace_writer
+
 
 class trace_writer(trace_writer):
     def __init__(self, filename):

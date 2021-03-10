@@ -1,5 +1,6 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
+
 
 class decoded_record:
     def __init__(self, core, trace, hwtick, args):
@@ -9,4 +10,6 @@ class decoded_record:
         self.args = args
 
     def __str__(self):
-        return "Core:{0}  Trace:{1}  HWTick:{2}  Args:{3}".format(self.core, self.trace, self.hwtick, self.args)
+        return "Core:{0}  Trace:{1}  HWTick:{2}  Args:{3}".format(
+            self.core, self.trace, self.hwtick, self.args
+        )
