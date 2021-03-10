@@ -1,5 +1,5 @@
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
-# XMOS Public License: Version 1
+# Copyright 2020 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public License: Version 1.
 import argparse
 import re
 import json
@@ -12,19 +12,29 @@ from ASCII.trace_writer_ascii import trace_writer
 # example run
 # python trace_to_ascii.py tracefile.txt -output_file=out.txt -config_file=trace_show.json
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("trace_file", help="Input trace file")
 
-    parser.add_argument("-output_file", default="trace_output", help="Output trace file")
-    parser.add_argument("-config_file", default="trace_show.json", help="Defines traces to be filtered")
+    parser.add_argument(
+        "-output_file", default="trace_output", help="Output trace file"
+    )
+    parser.add_argument(
+        "-config_file", default="trace_show.json", help="Defines traces to be filtered"
+    )
     parser.add_argument("-cores", default=8, type=int, help="Number of FreeRTOS cores")
-    parser.add_argument("--singleout", action="store_true", help="Generate single output file with all cores")
+    parser.add_argument(
+        "--singleout",
+        action="store_true",
+        help="Generate single output file with all cores",
+    )
 
     parser.parse_args()
     args = parser.parse_args()
 
     return args
+
 
 def main(trace_file, outfile, filter_args, cores, singleout):
     print("Loading trace: {0}\n".format(trace_file))
@@ -40,7 +50,7 @@ def main(trace_file, outfile, filter_args, cores, singleout):
     processor.decode()
     processor.sort_by_tick()
 
-    if(singleout):
+    if singleout:
         writer = trace_writer(outfile)
         for each in processor.decoded_list:
             writer.write(each)
@@ -49,11 +59,12 @@ def main(trace_file, outfile, filter_args, cores, singleout):
         for core in range(cores):
             writer = trace_writer(outfile + "_" + str(core))
             for each in processor.decoded_list:
-                if(int(each.core) == core):
+                if int(each.core) == core:
                     writer.write(each)
             writer.cleanup()
 
     print("Trace processing complete\n")
+
 
 def json_to_dict(config_file):
     """ Convert the content of the given JSON file into a dictionary
@@ -67,10 +78,11 @@ def json_to_dict(config_file):
     with open(config_file, "r") as f:
         input_str = f.read()
         # Remove '//' comments
-        json_str = re.sub(r'//.*\n', '\n', input_str)
+        json_str = re.sub(r"//.*\n", "\n", input_str)
         datastore = json.loads(json_str)
         f.close()
     return datastore
+
 
 if __name__ == "__main__":
     args = parse_arguments()
