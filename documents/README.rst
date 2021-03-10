@@ -42,12 +42,17 @@ Install `Breathe <https://breathe.readthedocs.io/en/latest/>`_.
 Building
 --------
 
+To build:
+
 .. code-block:: console
 
     $ make html
 
-Building
---------
+To build with link checking:
+
+.. code-block:: console
+
+    $ make clean linkcheck html SPHINXOPTS="-W --keep-going"
 
 The following command will start a server at http://127.0.0.1:8000 and start watching for changes in the current directory.  When a change is detected, the documentation is rebuilt and any open browser windows are reloaded automatically. KeyboardInterrupt (ctrl+c) will stop the server.
 
