@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+#ifndef FREERTOS_CONFIG_H
+#define FREERTOS_CONFIG_H
 
 /* Here is a good place to include header files that are required across
 your application. */

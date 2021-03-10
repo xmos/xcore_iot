@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+/*------------------------------------------------------------------------*/
+/* Unicode handling functions for FatFs R0.13+                            */
 /*------------------------------------------------------------------------*/
 /* This module will occupy a huge memory in the .const section when the    /
 /  FatFs is configured for LFN with DBCS. If the system has any Unicode    /

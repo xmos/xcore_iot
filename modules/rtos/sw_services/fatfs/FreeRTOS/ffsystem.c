@@ -1,5 +1,9 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
+
+
+/*------------------------------------------------------------------------*/
+/* Sample Code of OS Dependent Functions for FatFs                        */
 /* (C)ChaN, 2018                                                          */
 /*------------------------------------------------------------------------*/
 

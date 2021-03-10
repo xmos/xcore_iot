@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+
+/* AUTOMATICALLY GENERATED -- DO NOT EDIT BY HAND */
 /*
  * Copyright 2018, Silicon Laboratories Inc.  All rights reserved.
  *

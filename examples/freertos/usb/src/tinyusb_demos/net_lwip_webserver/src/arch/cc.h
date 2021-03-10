@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+/*
+ * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
  * All rights reserved. 
  * 
  * Redistribution and use in source and binary forms, with or without modification, 

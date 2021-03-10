@@ -1,5 +1,8 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// XMOS Public License: Version 1
+
+/*-----------------------------------------------------------------------/
+/  Low level disk interface modlue include file   (C)ChaN, 2019          /
 /-----------------------------------------------------------------------*/
 
 #ifndef _DISKIO_DEFINED
