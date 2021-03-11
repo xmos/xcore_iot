@@ -1,5 +1,5 @@
 // Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public License: Version 1.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #ifndef _rtos_printf_h_
 #define _rtos_printf_h_
