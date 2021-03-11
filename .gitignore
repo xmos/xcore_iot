@@ -4,17 +4,17 @@
 # Python cruft
 **/*.pyc
 **/__pycache__/*
-.venv/*
+**/aif_venv/*
 **/.ipynb_checkpoints/*
 **/*.egg-info/*
 **/*.eggs/*
 Pipfile.lock
 
 # Build cruft
-**/.lock*
 **/build*/
 **/.build/
 _build
+**/infr*/
 **/dist/
 **/bin/
 *.o

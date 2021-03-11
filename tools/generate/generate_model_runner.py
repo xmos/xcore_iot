@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-#
-# Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the
-# XMOS Public License: Version 1
+# Copyright 2021 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public Licence: Version 1.
 from __future__ import print_function
 
 import argparse
