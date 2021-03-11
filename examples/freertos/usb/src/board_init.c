@@ -95,7 +95,7 @@ void board_tile0_init(
             &gpio_rpc_config,
             client_intertile_ctx,
             1);
-
+#if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_qspi_flash_init(
             qspi_flash_ctx,
 
@@ -159,7 +159,7 @@ void board_tile0_init(
             256, /* page size is 256 bytes */
             16384); /* the flash has 32768 pages */
 #endif
-
+#endif
 #if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_mic_array_rpc_client_init(
             mic_array_ctx,

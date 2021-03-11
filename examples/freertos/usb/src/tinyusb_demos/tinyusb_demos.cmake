@@ -218,6 +218,7 @@ if(USE_TINYUSB_DEMO_USBTMC)
     set(TINYUSB_DEMO_SOURCES
         "${DEMO_PATH}/demo_main.c"
         "${DEMO_PATH}/usb_descriptors.c"
+        "${DEMO_PATH}/usbtmc_app.c"
     )
 
     set(TINYUSB_DEMO_INCLUDES
