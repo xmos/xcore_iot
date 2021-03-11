@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #ifndef XCORE_DEVICE_MEMORY_H_
 #define XCORE_DEVICE_MEMORY_H_
