@@ -226,6 +226,12 @@ class XCOREInterpreter:
         if XCOREInterpreterStatus(status) is XCOREInterpreterStatus.ERROR:
             raise RuntimeError("Unable to initialize interpreter")
 
+    def __enter__(self) -> "XCOREInterpreter":
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
+        self.close()
+
     def close(self) -> None:
         if self.obj:
             lib.delete_interpreter(self.obj)
