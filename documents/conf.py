@@ -23,8 +23,10 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 
 project = u"AIoT Software Development Kit"
 copyright = u"2021, XMOS"
+author = "XMOS"
 
-release = "1.x.x"
+# The full version, including alpha/beta/rc tags
+release = "1.0.x"
 
 # -- General configuration ---------------------------------------------------
 
@@ -56,15 +58,13 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 exclude_patterns = ["_build", "_download", "Thumbs.db", ".DS_Store", "README.rst"]
 
-todo_include_todos = True
-
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "furo"
-html_logo = "images/sdk_logo.png"
 
+html_logo = "images/sdk_logo.png"
 html_theme_options = {
     "sidebar_hide_name": True,
 }

@@ -10,7 +10,7 @@ else
     echo "*****************************"
     echo "* Updating tools submodules *"
     echo "*****************************"
-    (cd ${AI_TOOLS_DIR}; git submodule update --init --recursive)
+    (git submodule update --init --recursive ${AI_TOOLS_DIR})
 
     echo "****************************"
     echo "* Building libtflite2xcore *"
