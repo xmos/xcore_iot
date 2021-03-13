@@ -8,7 +8,7 @@ assignees: keithm-xmos
 ---
 
 **System information**
- - OS: [e.g. iOS]
+ - OS: [e.g. Mac, Linux, Windows]
  - XCore board [e.g. Explorer, Osprey]
  - SDK version tag or commit SHA
 
