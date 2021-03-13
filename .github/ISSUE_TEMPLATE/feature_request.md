@@ -1,11 +1,13 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest a new feature for the SDK
 title: ''
 labels: type:enhancement
 assignees: keithm-xmos
 
 ---
+
+Thank you for submitting an SDK feature request. Please provide as much information you can.
 
 **Describe the feature**
 
