@@ -16,4 +16,4 @@ Thank you for submitting an SDK documentation issue. Please provide as much info
 
 **Describe the documentation issue**
 
-**Other information** 
+**Other information**
