@@ -7,14 +7,14 @@
 #include "tensorflow/lite/micro/kernels/xcore/xcore_profiler.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/version.h"
-#include "test_ops_resolver.h"
+#include "xcore_all_ops_resolver.h"
 
 // shorthand typedefs
 typedef tflite::MicroAllocator micro_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
 typedef tflite::micro::xcore::XCoreProfiler profiler_t;
-typedef tflite::TestOpsResolver resolver_t;
+typedef tflite::XCoreAllOpsResolver resolver_t;
 typedef tflite::Model model_t;
 
 // static variables

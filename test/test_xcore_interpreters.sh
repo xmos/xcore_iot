@@ -11,7 +11,7 @@ eval "$(conda shell.bash hook)"
 conda activate ${TEMP_ENV}
 
 # install xcore_interpreters package
-pip install -e .
+pip install -e ../xcore_interpreters
 
 # test package import
 python -c "import xcore_interpreters"
