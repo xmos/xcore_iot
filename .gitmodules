@@ -72,3 +72,7 @@
 [submodule "modules/aif"]
 	path = modules/aif
 	url = git@github.com:xmos/aif.git
+[submodule "lib_xud"]
+	path = modules/hil/lib_xud
+	url = git@github.com:xmos/lib_xud.git
+	branch = DEV/XS3
