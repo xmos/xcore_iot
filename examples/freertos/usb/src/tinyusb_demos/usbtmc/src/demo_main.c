@@ -35,12 +35,12 @@
 
  /* Blink pattern
   * - 250 ms  : device not mounted
-  * - 1000 ms : device mounted
+  * - 0 ms : device mounted
   * - 2500 ms : device is suspended
   */
 enum  {
     BLINK_NOT_MOUNTED = 250,
-    BLINK_MOUNTED = 1000,
+    BLINK_MOUNTED = 0,
     BLINK_SUSPENDED = 2500,
 };
 
@@ -105,7 +105,7 @@ void set_led_state() {
     #elif XCOREAI_EXPLORER
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
     #else
-    // #error No valid board was specified
+    #error No valid board was specified
     #endif
 }
 
@@ -128,25 +128,25 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
     if (gpio_ctx == NULL) {
         gpio_ctx = ctx;
 
-        // led_port = rtos_gpio_port(PORT_LEDS);
-        // rtos_gpio_port_enable(gpio_ctx, led_port);
-        // rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+        led_port = rtos_gpio_port(PORT_LEDS);
+        rtos_gpio_port_enable(gpio_ctx, led_port);
+        rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
 #if OSPREY_BOARD
         button_port = rtos_gpio_port(PORT_BUTTON);
 #elif XCOREAI_EXPLORER
         button_port = rtos_gpio_port(PORT_BUTTONS);
 #else
-// #error No valid board was specified
+#error No valid board was specified
 #endif
-        // rtos_gpio_port_enable(gpio_ctx, button_port);
+        rtos_gpio_port_enable(gpio_ctx, button_port);
 
-        // blinky_timer_ctx = xTimerCreate("blinky",
-        //                                 pdMS_TO_TICKS(blink_interval_ms),
-        //                                 pdTRUE,
-        //                                 NULL,
-        //                                 led_blinky_cb);
-        // xTimerStart(blinky_timer_ctx, 0);
+        blinky_timer_ctx = xTimerCreate("blinky",
+                                        pdMS_TO_TICKS(blink_interval_ms),
+                                        pdTRUE,
+                                        NULL,
+                                        led_blinky_cb);
+        xTimerStart(blinky_timer_ctx, 0);
 
         xTaskCreate((TaskFunction_t) usbtmc_app_task,
                     "usbtmc_app_task",
