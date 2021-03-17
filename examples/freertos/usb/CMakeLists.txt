@@ -93,11 +93,12 @@ set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
 set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
 set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               FALSE)
 set(USE_TINYUSB_DEMO_MIDI_TEST                   FALSE)
-set(USE_TINYUSB_DEMO_USBTMC                      TRUE)
-
-## In progress
+set(USE_TINYUSB_DEMO_USBTMC                      FALSE)
 set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
 set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE)
+
+## In progress
+set(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            TRUE)
 set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
 
 ## On Hold
@@ -105,8 +106,6 @@ set(USE_TINYUSB_DEMO_NET_LWIP_WEBSERVER          FALSE)
 
 ## TODO
 set(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         FALSE)
-set(USE_TINYUSB_DEMO_CDC_MSC_FREERTOS_TEST       FALSE)
-set(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            FALSE)
 set(USE_TINYUSB_DEMO_DYNAMIC_CONFIGURATION_TEST  FALSE)
 set(USE_TINYUSB_DEMO_HID_GENERIC_INOUT_TEST      FALSE)
 set(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST FALSE)
@@ -121,6 +120,7 @@ if(XMOS_TINYUSB_DEMO)
         "src/xmos_demo"
     )
     add_compile_definitions(MSC_MAX_DISKS=2)
+    set(USE_DISK_MANAGER_TUSB                   TRUE)
 else()
     include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
 

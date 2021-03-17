@@ -52,6 +52,7 @@ void vApplicationDaemonTaskStartup(void *arg)
     /* Initialize drivers  */
     rtos_printf("Starting GPIO driver\n");
     rtos_gpio_start(gpio_ctx);
+
 #if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_printf("Starting QSPI flash driver\n");
     rtos_qspi_flash_start(qspi_flash_ctx, appconfRTOS_QSPI_FLASH_TASK_PRIORITY);

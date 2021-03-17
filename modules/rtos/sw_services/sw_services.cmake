@@ -30,6 +30,7 @@ option(USE_SNTPD "Enable to use SNTPD" FALSE)
 option(USE_TLS_SUPPORT "Enable to use TLS support" FALSE)
 option(USE_CUSTOM_MBEDTLS_CONFIG "Enable to use provide an alternate mbedtls_config.h" FALSE)
 option(USE_TINYUSB "Enable to use TinyUSB" FALSE)
+option(USE_DISK_MANAGER_TUSB "Enable to use RAM and Flash disk manager" FALSE)
 
 #********************************
 # Gather wifi manager sources
@@ -359,12 +360,14 @@ if(${USE_${THIS_LIB}})
                              ${DEVICE_SOURCES}
                              ${HOST_SOURCES}
                              "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/usb_support.c"
-                             "${${THIS_LIB}_DIR}/msc/msc_disk_manager.c"
-                             "${${THIS_LIB}_DIR}/msc/msc_ramdisk.c"
-                             "${${THIS_LIB}_DIR}/portable/dcd_xcore.c")
-
-    if(USE_RTOS_QSPI_FLASH_DRIVER)
-        list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/msc/msc_flashdisk.c")
+                             "${${THIS_LIB}_DIR}/portable/dcd_xcore.c"
+                         )
+    if(${USE_DISK_MANAGER_TUSB})
+        list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/msc/msc_disk_manager.c"
+                                        "${${THIS_LIB}_DIR}/msc/msc_ramdisk.c")
+        if(USE_RTOS_QSPI_FLASH_DRIVER)
+            list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/msc/msc_flashdisk.c")
+        endif()
     endif()
 
     if(${${THIS_LIB}_FLAGS})
