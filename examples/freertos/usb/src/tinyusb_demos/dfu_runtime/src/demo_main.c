@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)
@@ -40,12 +40,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bsp/board.h"
+#include "FreeRTOS.h"
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "demo_main.h"
 #include "tusb.h"
-
-//--------------------------------------------------------------------+
-// MACRO CONSTANT TYPEDEF PROTYPES
-//--------------------------------------------------------------------+
 
 /* Blink pattern
  * - 1000 ms : device should reboot
@@ -54,31 +52,17 @@
  * - 2500 ms : device is suspended
  */
 enum  {
-  BLINK_DFU_MODE = 100,
-  BLINK_NOT_MOUNTED = 250,
-  BLINK_MOUNTED = 1000,
-  BLINK_SUSPENDED = 2500,
+    BLINK_DFU_MODE = 100,
+    BLINK_NOT_MOUNTED = 250,
+    BLINK_MOUNTED = 1000,
+    BLINK_SUSPENDED = 2500,
 };
 
+static TimerHandle_t blinky_timer_ctx = NULL;
+static rtos_gpio_t *gpio_ctx = NULL;
+static rtos_gpio_port_id_t led_port = 0;
+static uint32_t led_val = 0;
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
-
-void led_blinking_task(void);
-
-/*------------- MAIN -------------*/
-int main(void)
-{
-  board_init();
-
-  tusb_init();
-
-  while (1)
-  {
-    tud_task(); // tinyusb device task
-    led_blinking_task();
-  }
-
-  return 0;
-}
 
 //--------------------------------------------------------------------+
 // Device callbacks
@@ -87,13 +71,13 @@ int main(void)
 // Invoked when device is mounted
 void tud_mount_cb(void)
 {
-  blink_interval_ms = BLINK_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void)
 {
-  blink_interval_ms = BLINK_NOT_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_NOT_MOUNTED), 0);
 }
 
 // Invoked when usb bus is suspended
@@ -101,35 +85,60 @@ void tud_umount_cb(void)
 // Within 7ms, device must draw an average of current less than 2.5 mA from bus
 void tud_suspend_cb(bool remote_wakeup_en)
 {
-  (void) remote_wakeup_en;
-  blink_interval_ms = BLINK_SUSPENDED;
+    (void) remote_wakeup_en;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_SUSPENDED), 0);
 }
 
 // Invoked when usb bus is resumed
 void tud_resume_cb(void)
 {
-  blink_interval_ms = BLINK_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
 }
 
 // Invoked on DFU_DETACH request to reboot to the bootloader
 void tud_dfu_runtime_reboot_to_dfu_cb(void)
 {
-  blink_interval_ms = BLINK_DFU_MODE;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_DFU_MODE), 0);
 }
 
 //--------------------------------------------------------------------+
-// BLINKING TASK + Indicator pulse
+// BLINKING TASK
 //--------------------------------------------------------------------+
 
-void led_blinking_task(void)
+void led_blinky_cb(TimerHandle_t xTimer)
 {
-  static uint32_t start_ms = 0;
-  static bool led_state = false;
+    (void) xTimer;
+    led_val ^= 1;
 
-  // Blink every interval ms
-  if ( board_millis() - start_ms < blink_interval_ms) return; // not enough time
-  start_ms += blink_interval_ms;
+#if OSPREY_BOARD
+#define RED         ~(1<<6)
+#define GREEN       ~(1<<7)
+    if(led_val) {
+        rtos_gpio_port_out(gpio_ctx, led_port, RED);
+    } else {
+        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
+    }
+#elif XCOREAI_EXPLORER
+    rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+#else
+#error No valid board was specified
+#endif
+}
 
-  board_led_write(led_state);
-  led_state = 1 - led_state; // toggle
+void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
+{
+    if (gpio_ctx == NULL) {
+        gpio_ctx = ctx;
+
+        led_port = rtos_gpio_port(PORT_LEDS);
+        rtos_gpio_port_enable(gpio_ctx, led_port);
+        rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+
+        blinky_timer_ctx = xTimerCreate("blinky",
+                                        pdMS_TO_TICKS(blink_interval_ms),
+                                        pdTRUE,
+                                        NULL,
+                                        led_blinky_cb);
+        xTimerStart(blinky_timer_ctx, 0);
+    }
 }
