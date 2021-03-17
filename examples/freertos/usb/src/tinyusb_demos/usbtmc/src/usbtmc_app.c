@@ -30,11 +30,6 @@
 #include "tusb.h"
 #include "demo_main.h"
 
-static inline uint32_t board_millis(void)
-{
-  return ( ( ((uint64_t) xTaskGetTickCount()) * 1000) / configTICK_RATE_HZ );
-}
-
 #if (CFG_TUD_USBTMC_ENABLE_488)
 static usbtmc_response_capabilities_488_t const
 #else
@@ -141,7 +136,6 @@ bool tud_usbtmc_msgBulkOut_start_cb(usbtmc_msg_request_dev_dep_out const * msgHe
 bool tud_usbtmc_msg_data_cb(void *data, size_t len, bool transfer_complete)
 {
   // If transfer isn't finished, we just ignore it (for now)
-  rtos_printf("here\n");
 
   if(len + buffer_len < sizeof(buffer))
   {
@@ -195,7 +189,6 @@ bool tud_usbtmc_msgBulkIn_request_cb(usbtmc_msg_request_dev_dep_in const * reque
   rspMsg.header.bTag = request->header.bTag,
   rspMsg.header.bTagInverse = request->header.bTagInverse;
   msgReqLen = request->TransferSize;
-rtos_printf("MSG_IN_DATA: Requested!\r\n");
 #ifdef xDEBUG
   uart_tx_str_sync("MSG_IN_DATA: Requested!\r\n");
 #endif
@@ -217,91 +210,44 @@ rtos_printf("MSG_IN_DATA: Requested!\r\n");
   // Always return true indicating not to stall the EP.
   return true;
 }
-#include "FreeRTOS.h"
+
 void usbtmc_app_task_iter(void) {
-#if 0
-  switch(queryState) {
-  case 0:
-    break;
-  case 1:
-    queryDelayStart = board_millis();
-    queryState = 2;
-    break;
-  case 2:
-    if( (board_millis() - queryDelayStart) > resp_delay) {
-      queryDelayStart = board_millis();
-      queryState=3;
-      status |= 0x10u; // MAV
-      status |= 0x40u; // SRQ
+    switch(queryState) {
+    case 0:
+        break;
+    case 1:
+        queryState = 2;
+        vTaskDelay(pdMS_TO_TICKS(resp_delay));
+        // fallthrough
+    case 2:
+        queryState=3;
+        status |= 0x10u; // MAV
+        status |= 0x40u; // SRQ
+        // fallthrough
+    case 3:
+        vTaskDelay(pdMS_TO_TICKS(resp_delay));
+        queryState = 4;
+        // fallthrough
+    case 4: // time to transmit;
+        if(bulkInStarted && (buffer_tx_ix == 0)) {
+        if(idnQuery)
+        {
+            tud_usbtmc_transmit_dev_msg_data(idn,  tu_min32(sizeof(idn)-1,msgReqLen),true,false);
+            queryState = 0;
+            bulkInStarted = 0;
+        }
+        else
+        {
+            buffer_tx_ix = tu_min32(buffer_len,msgReqLen);
+            tud_usbtmc_transmit_dev_msg_data(buffer, buffer_tx_ix, buffer_tx_ix == buffer_len, false);
+        }
+        // MAV is cleared in the transfer complete callback.
+        }
+        break;
+    default:
+        TU_ASSERT(false,);
     }
-    break;
-  case 3:
-    if( (board_millis() - queryDelayStart) > resp_delay) {
-      queryState = 4;
-    }
-    break;
-  case 4: // time to transmit;
-    if(bulkInStarted && (buffer_tx_ix == 0)) {
-      if(idnQuery)
-      {
-        tud_usbtmc_transmit_dev_msg_data(idn,  tu_min32(sizeof(idn)-1,msgReqLen),true,false);
-        queryState = 0;
-        bulkInStarted = 0;
-      }
-      else
-      {
-        buffer_tx_ix = tu_min32(buffer_len,msgReqLen);
-        tud_usbtmc_transmit_dev_msg_data(buffer, buffer_tx_ix, buffer_tx_ix == buffer_len, false);
-      }
-      // MAV is cleared in the transfer complete callback.
-    }
-    break;
-  default:
-    TU_ASSERT(false,);
     return;
-  }
-#else
-
-while(1) {
-  switch(queryState) {
-  case 0:
-    break;
-  case 1:
-    queryState = 2;
-    vTaskDelay(pdMS_TO_TICKS(resp_delay));
-    // fallthrough
-  case 2:
-    queryState=3;
-    status |= 0x10u; // MAV
-    status |= 0x40u; // SRQ
-    // fallthrough
-  case 3:
-    vTaskDelay(pdMS_TO_TICKS(resp_delay));
-    queryState = 4;
-    // fallthrough
-  case 4: // time to transmit;
-    if(bulkInStarted && (buffer_tx_ix == 0)) {
-      if(idnQuery)
-      {
-        tud_usbtmc_transmit_dev_msg_data(idn,  tu_min32(sizeof(idn)-1,msgReqLen),true,false);
-        queryState = 0;
-        bulkInStarted = 0;
-      }
-      else
-      {
-        buffer_tx_ix = tu_min32(buffer_len,msgReqLen);
-        tud_usbtmc_transmit_dev_msg_data(buffer, buffer_tx_ix, buffer_tx_ix == buffer_len, false);
-      }
-      // MAV is cleared in the transfer complete callback.
-    }
-    break;
-  default:
-    TU_ASSERT(false,);
-    return;
-  }
-}
-
-#endif
 }
 
 bool tud_usbtmc_initiate_clear_cb(uint8_t *tmcResult)

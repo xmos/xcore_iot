@@ -40,7 +40,7 @@
   */
 enum  {
     BLINK_NOT_MOUNTED = 250,
-    BLINK_MOUNTED = 0,
+    BLINK_MOUNTED = 1000,
     BLINK_SUSPENDED = 2500,
 };
 
@@ -58,13 +58,17 @@ static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 // Invoked when device is mounted
 void tud_mount_cb(void)
 {
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
+    if (blinky_timer_ctx != NULL) {
+        xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
+    }
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void)
 {
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_NOT_MOUNTED), 0);
+    if (blinky_timer_ctx != NULL) {
+        xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_NOT_MOUNTED), 0);
+    }
 }
 
 // Invoked when usb bus is suspended
@@ -73,20 +77,24 @@ void tud_umount_cb(void)
 void tud_suspend_cb(bool remote_wakeup_en)
 {
     (void) remote_wakeup_en;
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_SUSPENDED), 0);
+    if (blinky_timer_ctx != NULL) {
+        xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_SUSPENDED), 0);
+    }
 }
 
 // Invoked when usb bus is resumed
 void tud_resume_cb(void)
 {
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
+    if (blinky_timer_ctx != NULL) {
+        xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
+    }
 }
 
 void usbtmc_app_task(void)
 {
     while(1) {
         usbtmc_app_task_iter();
-        // vTaskDelay(pdMS_TO_TICKS(1));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
@@ -146,6 +154,7 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
                                         pdTRUE,
                                         NULL,
                                         led_blinky_cb);
+        configASSERT(blinky_timer_ctx);
         xTimerStart(blinky_timer_ctx, 0);
 
         xTaskCreate((TaskFunction_t) usbtmc_app_task,
