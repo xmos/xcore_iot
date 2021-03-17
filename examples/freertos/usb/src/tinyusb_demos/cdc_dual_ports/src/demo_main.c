@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)
@@ -26,29 +26,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 
-#include "bsp/board.h"
+#include "FreeRTOS.h"
+#include "demo_main.h"
 #include "tusb.h"
-
-//------------- prototypes -------------//
-static void cdc_task(void);
-
-/*------------- MAIN -------------*/
-int main(void)
-{
-  board_init();
-
-  tusb_init();
-
-  while (1)
-  {
-    tud_task(); // tinyusb device task
-    cdc_task();
-  }
-
-  return 0;
-}
 
 // echo to either Serial0 or Serial1
 // with Serial0 as all lower case, Serial1 as all upper case
@@ -77,26 +58,42 @@ static void echo_serial_port(uint8_t itf, uint8_t buf[], uint32_t count)
 //--------------------------------------------------------------------+
 // USB CDC
 //--------------------------------------------------------------------+
-static void cdc_task(void)
+static void cdc_task(void *arg)
 {
-  uint8_t itf;
+    uint8_t itf = *((uint8_t *)arg);
 
-  for (itf = 0; itf < CFG_TUD_CDC; itf++)
-  {
-    // connected() check for DTR bit
-    // Most but not all terminal client set this when making connection
-    if ( tud_cdc_n_connected(itf) )
-    {
-      if ( tud_cdc_n_available(itf) )
-      {
-        uint8_t buf[64];
+    while(1) {
+        // connected() check for DTR bit
+        // Most but not all terminal client set this when making connection
+        if ( tud_cdc_n_connected(itf) )
+        {
+            if ( tud_cdc_n_available(itf) )
+            {
+                uint8_t buf[64];
 
-        uint32_t count = tud_cdc_n_read(itf, buf, sizeof(buf));
+                uint32_t count = tud_cdc_n_read(itf, buf, sizeof(buf));
 
-        // echo back to both serial ports
-        echo_serial_port(0, buf, count);
-        echo_serial_port(1, buf, count);
-      }
+                // echo back to both serial ports
+                echo_serial_port(0, buf, count);
+                echo_serial_port(1, buf, count);
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
-  }
+    vPortFree(arg); // Should never get here
+}
+
+void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
+{
+    for (uint8_t itf = 0; itf < CFG_TUD_CDC; itf++)
+    {
+        uint8_t *itf_num = pvPortMalloc(sizeof(uint8_t*));
+        *itf_num = itf;
+        xTaskCreate((TaskFunction_t) cdc_task,
+                    "cdc_task",
+                    portTASK_STACK_DEPTH(cdc_task),
+                    itf_num,
+                    priority,
+                    NULL);
+    }
 }
