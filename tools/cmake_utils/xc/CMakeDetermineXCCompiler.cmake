@@ -1,0 +1,16 @@
+if(DEFINED XMOS_TOOLS_PATH)
+    set(CMAKE_XC_COMPILER "${XMOS_TOOLS_PATH}/xcc")
+else()
+    set(CMAKE_XC_COMPILER  "$ENV{XMOS_TOOL_PATH}/bin/xcc")
+endif()
+mark_as_advanced(CMAKE_XC_COMPILER)
+
+set(CMAKE_XC_SOURCE_FILE_EXTENSIONS xc;XC CACHE INTERNAL "")
+set(CMAKE_XC_OUTPUT_EXTENSION .obj CACHE INTERNAL "")
+set(CMAKE_XC_COMPILER_ENV_VAR "XC" CACHE INTERNAL "")
+set(CMAKE_XC_LINKER_PREFERENCE 99 CACHE INTERNAL "")
+set(CMAKE_XC_LINKER_PREFERENCE_PROPAGATES 1 CACHE INTERNAL "")
+
+# Configure variables set in this file for fast reload later on
+configure_file(${CMAKE_CURRENT_LIST_DIR}/CMakeXCCompiler.cmake.in
+               ${CMAKE_PLATFORM_INFO_DIR}/CMakeXCCompiler.cmake)

@@ -1,0 +1,75 @@
+[submodule "lib_dsp"]
+	path = modules/lib_dsp
+	url = git@github.com:xmos/lib_dsp.git
+[submodule "lib_xs3_math"]
+	path = modules/lib_xs3_math
+	url = git@github.com:xmos/lib_xs3_math.git
+	shallow = true
+[submodule "lib_otpinfo"]
+	path = modules/lib_otpinfo
+	url = git@github.com:xmos/lib_otpinfo.git
+[submodule "lib_random"]
+	path = modules/lib_random
+	url = git@github.com:xmos/lib_random.git
+[submodule "mbedtls"]
+	path = modules/rtos/sw_services/tls_support/thirdparty/mbedtls
+	url = git@github.com:ARMmbed/mbedtls.git
+	shallow = true
+[submodule "paho.mqtt.embedded-c"]
+	path = modules/rtos/sw_services/mqtt/thirdparty/paho.mqtt.embedded-c
+	url = git@github.com:eclipse/paho.mqtt.embedded-c.git
+	shallow = true
+[submodule "http-parser"]
+	path = modules/rtos/sw_services/http/thirdparty/http-parser
+	url = git@github.com:nodejs/http-parser.git
+	shallow = true
+[submodule "jsmn"]
+	path = modules/rtos/sw_services/json/thirdparty/jsmn
+	url = git@github.com:zserge/jsmn.git
+	shallow = true
+[submodule "ai_tools"]
+	path = tools/ai_tools
+	url = git@github.com:xmos/ai_tools.git
+	shallow = true
+[submodule "lib_i2c"]
+	path = modules/hil/lib_i2c
+	url = git@github.com:xmos/lib_i2c.git
+[submodule "lib_i2s"]
+	path = modules/hil/lib_i2s
+	url = git@github.com:xmos/lib_i2s.git
+[submodule "lib_mic_array"]
+	path = modules/hil/lib_mic_array
+	url = git@github.com:xmos/lib_mic_array.git
+[submodule "lib_spi"]
+	path = modules/hil/lib_spi
+	url = git@github.com:xmos/lib_spi.git
+[submodule "wfx-fullMAC-driver"]
+	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-fullMAC-driver
+	url = git@github.com:SiliconLabs/wfx-fullMAC-driver.git
+[submodule "FreeRTOS-SMP-Kernel"]
+	path = modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel
+	url = git@github.com:xmos/FreeRTOS-Kernel.git
+	branch = feature/xcore-smp
+[submodule "FreeRTOS-Kernel"]
+	path = modules/rtos/FreeRTOS/FreeRTOS-Kernel
+	url = git@github.com:xmos/FreeRTOS-Kernel.git
+	branch = feature/xcore
+[submodule "FreeRTOS-Plus-TCP"]
+	path = modules/rtos/FreeRTOS/FreeRTOS-Plus-TCP
+	url = git@github.com:xmos/FreeRTOS-Plus-TCP.git
+	branch = main
+[submodule "wfx-firmware"]
+	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware
+	url = git@github.com:SiliconLabs/wfx-firmware.git
+[submodule "tinyusb"]
+	path = modules/rtos/sw_services/usb/thirdparty/tinyusb
+	url = git@github.com:hathach/tinyusb.git
+	shallow = true
+	fetchRecurseSubmodules = false
+[submodule "modules/legacy_compat/lib_mic_array"]
+	path = modules/legacy_compat/lib_mic_array
+	url = git@github.com:xmos/lib_mic_array.git
+[submodule "lib_xud"]
+	path = modules/hil/lib_xud
+	url = git@github.com:xmos/lib_xud.git
+	branch = DEV/XS3

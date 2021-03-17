@@ -1,0 +1,46 @@
+# Editor cruft
+**/.vscode/
+
+# Python cruft
+**/*.pyc
+**/__pycache__/*
+**/.ipynb_checkpoints/*
+sdk_venv/*
+
+# Build & debug cruft
+**/.build*/*
+**/bin/*
+*.o
+*.xe
+*.vcd
+*.s
+*.xi
+*.i
+*.a
+*.xmt
+**/_build/
+**/build_*/
+**/run_*.log
+**/doxygen/*
+**/pdf/*
+**/html/*
+**/.settings/*
+.metadata
+**/test_results.csv
+**/.venv/**
+.metadata
+
+# Test cruft
+**/.pytest_cache/*
+**/*_junit.xml
+
+# waf build cruft
+.lock-waf_*
+.waf-*/
+build/
+
+# systemview debug cruft
+*.SVDAT
+
+# macOS cruft
+.DS_Store
