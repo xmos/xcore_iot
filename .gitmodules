@@ -73,3 +73,18 @@
 	path = modules/hil/lib_xud
 	url = git@github.com:xmos/lib_xud.git
 	branch = DEV/XS3
+[submodule "modules/aif/lib_nn"]
+	path = modules/aif/lib_nn
+	url = git@github.com:xmos/lib_nn.git
+[submodule "modules/aif/flatbuffers"]
+	path = modules/aif/flatbuffers
+	url = git@github.com:google/flatbuffers.git
+[submodule "modules/aif/gemmlowp"]
+	path = modules/aif/gemmlowp
+	url = git@github.com:google/gemmlowp.git
+[submodule "modules/aif/ruy"]
+	path = modules/aif/ruy
+	url = git@github.com:google/ruy.git
+[submodule "modules/aif/tensorflow"]
+	path = modules/aif/tensorflow
+	url = git@github.com:xmos/tensorflow.git
