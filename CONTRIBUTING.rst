@@ -6,7 +6,7 @@ Contributing
 Contribution Guidelines and Standards
 *************************************
 
-Before sending your pull request, make sure your changes are consistent with these guidelines and are consistent with the coding style used in this aiot_sdk repository.
+Before sending your pull request, make sure your changes are consistent with these guidelines and are consistent with the coding style used in this xcore_sdk repository.
 
 **************************************************
 General Guidelines and Philosophy For Contribution
@@ -39,19 +39,19 @@ It is recommended that you install the virtual environment in the repo's directo
 
 .. code-block:: console
 
-    conda env create -p ./aiot_sdk_venv -f environment.yml
+    conda env create -p ./xcore_sdk_venv -f environment.yml
 
 Activate the environment by specifying the path:
 
 .. code-block:: console
 
-    conda activate aiot_sdk_venv/
+    conda activate xcore_sdk_venv/
 
 To remove the environment, deactivate and run:
 
 .. code-block:: console
 
-    conda remove -p aiot_sdk_venv/ --all
+    conda remove -p xcore_sdk_venv/ --all
 
 *****************
 Building Examples
@@ -61,7 +61,7 @@ To build the examples, the `XMOS_AIOT_SDK_PATH` environment variable must be set
 
 .. code-block:: console
 
-    $ export XMOS_AIOT_SDK_PATH#<path to>/aiot_sdk
+    $ export XMOS_AIOT_SDK_PATH#<path to>/xcore_sdk
 
 You can also add this export command to your `.profile` or `.bash_profile` script. This way the environment variable will be set in a new terminal window.
 
@@ -95,4 +95,4 @@ Due to some large submodules, cloning the repository can take a few minutes.  Th
 
 .. code-block:: console
 
-    $ git clone --recurse-submodules --depth 1 --shallow-submodules https://github.com/xmos/aiot_sdk.git
+    $ git clone --recurse-submodules --depth 1 --shallow-submodules https://github.com/xmos/xcore_sdk.git

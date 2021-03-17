@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/xmos_toolchain.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/../../../../tools/cmake_utils/xmos_toolchain.cmake")
 
 project(xcore_all_ops_firmware VERSION 1.0.0)
 

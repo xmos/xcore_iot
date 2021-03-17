@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(AIOT_SDK_PATH $ENV{XMOS_AIOT_SDK_PATH})
-
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/xmos_toolchain.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/../../../../tools/cmake_utils/xmos_toolchain.cmake")
 
 project(xcore_model_firmware VERSION 1.0.0)
 
@@ -61,10 +59,12 @@ include("${PROJECT_SOURCE_DIR}/../../ai_framework.cmake")
 #**********************
 # Additional support sources
 #**********************
+set(QSPI_FLASH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tensorflow_support/qspi_flash")
+
 set(ADDITIONAL_C_SOURCES
-  "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
+  "${QSPI_FLASH_DIR}/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
+set(ADDITIONAL_INCLUDE_DIR "${QSPI_FLASH_DIR}")
 
 target_sources(xcore_model_firmware
   PRIVATE ${XCORE_INTERPRETER_SOURCES}

@@ -9,7 +9,7 @@ LIB_XCORE_INTERPRETERS = [
     "libs/macos/libxcore_interpreters.1.0.1.dylib",
 ]
 
-EXCLUDES = ["*tests", "*tests.*", "cmake", "host_library", "xcore_firmware"]
+EXCLUDES = ["*tests", "*tests.*", "host_library"]
 
 INSTALL_REQUIRES = [
     "numpy==1.19.5",
@@ -27,10 +27,4 @@ setuptools.setup(
     description="XMOS TensorFlow Lite model interpreters.",
     license="LICENSE.txt",
     keywords="xmos xcore",
-    use_scm_version={
-        "root": "..",
-        "relative_to": __file__,
-        "version_scheme": "post-release",
-    },
-    setup_requires=["setuptools_scm"],
 )
