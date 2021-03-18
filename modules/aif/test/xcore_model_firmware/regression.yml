@@ -1,0 +1,44 @@
+- model: cifar10
+  par: 1
+  arena_size:
+    SRAM: 44400
+    EXTMEM: 57424
+  code_size:
+    tile_0: 59408
+  benchmark:
+    SRAM: 7294
+    EXTMEM: 7870
+    SWMEM: 16410
+- model: cifar10
+  par: 5
+  arena_size:
+    SRAM: 44704
+    EXTMEM: 57728
+  code_size:
+    tile_0: 59408
+  benchmark:
+    SRAM: 2309
+    EXTMEM: 2888
+    SWMEM: TBD
+- model: vww_96
+  par: 1
+  arena_size:
+    SRAM: 88368
+    EXTMEM: 92688
+  code_size:
+    tile_0: 59012
+  benchmark:
+    SRAM: 17035
+    EXTMEM: 19426
+    SWMEM: TBD
+- model: vww_96
+  par: 5
+  arena_size:
+    SRAM: 89520
+    EXTMEM: 93840
+  code_size:
+    tile_0: 59012
+  benchmark:
+    SRAM: 8401
+    EXTMEM: 10774
+    SWMEM: TBD

@@ -43,6 +43,12 @@ set(BUILD_FLAGS
   "-Os"
 )
 
+if (${USE_SWMEM})
+  add_definitions(-DUSE_SWMEM)
+elseif (${USE_EXTMEM})
+  add_definitions(-DUSE_EXTMEM)
+endif ()
+
 add_executable(xcore_model_firmware)
 
 target_compile_options(xcore_model_firmware PRIVATE ${BUILD_FLAGS})
