@@ -4,13 +4,17 @@
 # Python cruft
 **/*.pyc
 **/__pycache__/*
+**/*.egg-info/*
+**/*.eggs/*
 **/.ipynb_checkpoints/*
-sdk_venv/*
+*sdk_venv/*
 
 # Build & debug cruft
 **/.build*/*
 **/bin/*
 *.o
+*.so*
+*.dylib
 *.xe
 *.vcd
 *.s

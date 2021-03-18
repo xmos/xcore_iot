@@ -1,0 +1,12 @@
+// This is a TensorFlow Lite model file that has been converted into a C data
+// array using the convert_tflite_to_c_source() tool.
+
+#if( USE_SWMEM == 1)
+__attribute__((section(".SwMem_data")))
+#elif( USE_EXTMEM == 1)
+__attribute__((section(".ExtMem_data")))
+#endif
+const unsigned char {{array_name}}_model_data[] __attribute__((aligned(4))) = {
+{{array_values}}};
+
+const int {{array_name}}_model_data_len = {{array_length}};
