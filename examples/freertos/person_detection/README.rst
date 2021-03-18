@@ -95,7 +95,31 @@ Once the host script connects to the xscope server the image and associated outp
 Optimizing the model
 ********************
 
-If the model is retrained, you will need to optimize it for xcore.ai.  Refer to the documentation in ai_tools/doc for information on this process.
+Unoptimized and optimized models are included with the example.
+
+First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
+
+.. code-block:: console
+
+    $ xformer.py --analyze -par 5 model/person_detect_quant.tflite model/person_detect_xcore.tflite
+
+Generating the model runner
+===========================
+
+The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
+
+.. code-block:: console
+
+    $ generate_model_runner.py --input model/person_detect_xcore.tflite --output src/model_runner --name person_detect
+
+Converting flatbuffer to source file
+====================================
+
+If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
+
+.. code-block:: console
+
+    $ convert_tflite_to_c_source.py --input model/person_detect_xcore.tflite --header src/model_runner/person_detect_model.h --source src/model_runner/person_detect_model.c --variable-name person_detect
 
 ******************
 Training the model
