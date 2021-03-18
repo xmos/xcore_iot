@@ -9,7 +9,6 @@ set(AUDIO_TEST_PATH "${TINYUSB_DEMO_PATH}/audio_test/src")
 set(CDC_DUAL_PORTS_TEST_PATH "${TINYUSB_DEMO_PATH}/cdc_dual_ports/src")
 set(CDC_MSC_TEST_PATH "${TINYUSB_DEMO_PATH}/cdc_msc/src")
 set(DFU_RUNTIME_TEST_PATH "${TINYUSB_DEMO_PATH}/dfu_runtime/src")
-set(DYNAMIC_CONFIGURATION_TEST_PATH "${TINYUSB_DEMO_PATH}/dynamic_configuration/src")
 set(HID_COMPOSITE_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_composite/src")
 set(HID_GENERIC_INOUT_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_generic_inout/src")
 set(HID_MULTIPLE_INTERFACE_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_multiple_interface/src")
@@ -27,7 +26,6 @@ option(USE_TINYUSB_DEMO_AUDIO_TEST                  "Enable to use TinyUSB demo"
 option(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_CDC_MSC_TEST                "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            "Enable to use TinyUSB demo" FALSE)
-option(USE_TINYUSB_DEMO_DYNAMIC_CONFIGURATION_TEST  "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_HID_GENERIC_INOUT_TEST      "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST "Enable to use TinyUSB demo" FALSE)
@@ -81,19 +79,6 @@ endif()
 
 if(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST)
     set(DEMO_PATH ${DFU_RUNTIME_TEST_PATH})
-
-    set(TINYUSB_DEMO_SOURCES
-        "${DEMO_PATH}/demo_main.c"
-        "${DEMO_PATH}/usb_descriptors.c"
-    )
-
-    set(TINYUSB_DEMO_INCLUDES
-        ${DEMO_PATH}
-    )
-endif()
-
-if(USE_TINYUSB_DEMO_DYNAMIC_CONFIGURATION_TEST)
-    set(DEMO_PATH ${DYNAMIC_CONFIGURATION_TEST_PATH})
 
     set(TINYUSB_DEMO_SOURCES
         "${DEMO_PATH}/demo_main.c"
