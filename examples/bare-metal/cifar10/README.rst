@@ -104,10 +104,6 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
     $ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
 
 
-********************
-Optimizing the model
-********************
-
 Generating the model runner
 ===========================
 
@@ -124,4 +120,4 @@ If you do not want to regenerate the model runner, the following command will ge
 
 .. code-block:: console
 
-    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/src/cifar10_model_data.h --source model_runner/src/cifar10_model_data.c --variable-name cifar10
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/cifar10_model_data.h --source model_runner/cifar10_model_data.c --variable-name cifar10

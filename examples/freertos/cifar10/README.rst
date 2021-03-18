@@ -132,8 +132,8 @@ The following command will generate source files for a model runner as well as t
 Converting flatbuffer to source file
 ====================================
 
-The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
+If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
 
 .. code-block:: console
 
-    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/cifar10_model.h --source inference_engine/src/cifar10_model.c --variable-name cifar10_model
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/cifar10_model_data.h --source model_runner/cifar10_model_data.c --variable-name cifar10

@@ -94,29 +94,6 @@ You should notice console output
     1/1 tests passed
     ~~~ALL TESTS PASSED~~~
 
-********************
-Optimizing the model
-********************
-
-If the model is retrained, you will need to optimize it for xcore.ai.
-
-First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
-
-.. code-block:: console
-
-    $ xformer.py --analyze model/model_quant.tflite model/model_xcore.tflite
-
-**NOTE: Due to a limitation, the micro_speech model is left unoptimized.  This limitation will be eliminated by a pending software enhancement.**
-
-Converting flatbuffer to source file
-====================================
-
-The following command will generate a C source file that contains the TensorFlow Lite model as a character array:
-
-.. code-block:: console
-
-    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model.h --source model.c --variable-name g_model --include-guard TENSORFLOW_LITE_MICRO_EXAMPLES_MICRO_SPEECH_MODEL_H_
-
 ******************
 Training the model
 ******************
