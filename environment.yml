@@ -24,6 +24,7 @@ dependencies:
   - pip:
     - breathe==4.27.0
     - furo==2021.2.28b28
+    - PyYAML==5.3.1
     - setuptools_scm==4.1.2
     - sphinx-autobuild==2020.9.1
     - sphinx-copybutton==0.3.1
