@@ -1,5 +1,5 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public Licence: Version 1.
+// This is a TensorFlow Lite model runner interface that has been
+// generated using the generate_model_runner tool.
 
 #include "cifar10_model_runner.h"
 
@@ -22,11 +22,11 @@ void cifar10_resolver_get(void **v_resolver)
   //   This pulls in all the operation implementations we need.
   if (resolver == nullptr) {
     resolver = &resolver_s;
-    resolver->AddSoftmax();
     resolver->AddPad();
-    resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
+    resolver->AddSoftmax();
     resolver->AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode, tflite::ops::micro::xcore::Register_FullyConnected_8());
     resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Deep());
+    resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
     resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Shallow());
   }
 

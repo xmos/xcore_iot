@@ -46,7 +46,7 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  model = tflite::GetModel(hotdog_not_hotdog_model);
+  model = tflite::GetModel(hotdog_not_hotdog_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(reporter,
                          "Model provided is schema version %d not equal "
