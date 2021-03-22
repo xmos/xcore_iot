@@ -77,11 +77,15 @@ pipeline {
         }
         stage("Test") {
             steps {
+                // ***************************************************************************
+                // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
+                // ***************************************************************************
+                // run xcore interpreter tests
+                sh """. activate ./sdk_venv && pytest -v modules/aif/xcore_interpreters/xcore_interpreters/tests --junitxml xcore_interpreters_junit.xml"""
                 // run unit tests
-                sh """. activate ./sdk_venv && cd test && pytest -v --junitxml tests_junit.xml"""
+                sh """. activate ./sdk_venv && pytest -v test --junitxml test_junit.xml"""
                 // run notebook tests
                 sh """. activate ./sdk_venv && cd test && bash test_notebooks.sh"""
-                // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
                 // This step collects these files for display in Jenkins UI
                 junit "**/*_junit.xml"
             }

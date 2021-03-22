@@ -1,23 +1,12 @@
-# Model Inference application
+# All Ops Firmware Regression Test
 
-This application will run inference on a TensorFlow Lite for Microcontrollers
-model (.tflite) and input tensors provided by the XCOREDeviceInterpreter.
+The `xcore_all_ops_firmware` application is designed to regression test the code size of a minimal application built with all builtin and custom operators.
 
-## xCORE
+NOTE: This test is not currently automated!
 
-Building all targets for xCORE
+To run the regression, run the following commands:
 
-    > mkdir build
-    > cd build
-    > cmake ../
-    > make
+    $ cmake -B build
+    $ cmake --build build
 
-## x86
-
-Building x86 host target
-
-    > mkdir build
-    > cd build
-    > cmake ../ -DX86=ON
-    > make
-
+Manually compare the code size reported by the build to the expected code size in `regression.yml`.
