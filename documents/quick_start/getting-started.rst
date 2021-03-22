@@ -57,7 +57,7 @@ To install, follow these steps:
 
 .. code-block:: console
 
-    $ conda create --prefix xmos_env python=3.9
+    $ conda create --prefix xmos_env python=3.8
 
 .. _sdk-activate-virtual-environment-label:
 

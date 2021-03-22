@@ -7,25 +7,25 @@ channels:
 dependencies:
   - cmake=3.14.0
   - doxygen=1.9.1
-  - ipython=7.8.0
+  - ipython=7.21.0
   - jupyter=1.0.0
-  - jupyter_client=5.3.3
-  - jupyter_console=6.0.0
-  - jupyter_core=4.5.0
+  - jupyter_client=6.1.2
+  - jupyter_console=6.3.0
+  - jupyter_core=4.7.1
   - make=4.2.1
   - nbval=0.9.6
-  - ncurses=6.1
-  - pip=19.2.3
-  - python=3.9.2
-  - pytest=5.2.0
-  - pytest-forked=1.1.3
-  - pytest-xdist=1.30.0
-  - Sphinx=3.5.1
+  - ncurses=6.2
+  - pip=21.0.1
+  - python=3.8.5
+  - pytest=6.2.0
+  - pytest-forked=1.3.0
+  - pytest-xdist=2.2.0
+  - Sphinx=3.5.3
   - pip:
     - breathe==4.27.0
     - furo==2021.2.28b28
-    - PyYAML==5.3.1
-    - setuptools_scm==4.1.2
+    - PyYAML==5.4.1
+    - setuptools_scm==6.0.1
     - sphinx-autobuild==2020.9.1
     - sphinx-copybutton==0.3.1
     - sphinx-inline-tabs==2020.10.19b4
