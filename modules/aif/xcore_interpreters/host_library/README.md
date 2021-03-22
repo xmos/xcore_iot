@@ -1,6 +1,6 @@
 # XCORE Interpreter Python Bindings
 
-This project contains Python bindigs for the XCOREInterpreter class.
+This project contains Python bindings for the XCOREInterpreter class.
 
 ## Building
 
