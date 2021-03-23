@@ -61,8 +61,8 @@ pipeline {
         }
         stage("Build examples") {
             steps {
-                sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                        . activate ./sdk_venv && bash test/build_examples.sh"""
+                sh """. /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION}/SetEnv &&
+                      . activate ./sdk_venv && bash test/build_examples.sh"""
             }
         }
         stage("Install") {
