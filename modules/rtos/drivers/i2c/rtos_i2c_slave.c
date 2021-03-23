@@ -79,7 +79,6 @@ static i2c_slave_ack_t i2c_master_sent_data(rtos_i2c_slave_t *ctx, uint8_t data)
 static void i2c_stop_bit(rtos_i2c_slave_t *ctx)
 {
     xfer_complete_check(ctx);
-    vTaskDelay(250);
 }
 
 static int i2c_shutdown(rtos_i2c_slave_t *ctx) {
