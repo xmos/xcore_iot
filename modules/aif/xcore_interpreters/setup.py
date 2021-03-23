@@ -19,7 +19,7 @@ INSTALL_REQUIRES = [
 setuptools.setup(
     name="xcore_interpreters",
     packages=setuptools.find_packages(exclude=EXCLUDES),
-    python_requires=">=3.6.8",
+    python_requires=">=3.8",
     install_requires=INSTALL_REQUIRES,
     package_data={"": LIB_XCORE_INTERPRETERS},
     author="XMOS",
