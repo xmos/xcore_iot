@@ -61,7 +61,7 @@ pipeline {
         }
         stage("Build examples") {
             steps {
-                sh """. /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION}/SetEnv &&
+                sh """. /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/${params.TOOLS_VERSION}/SetEnv &&
                       . activate ./sdk_venv && bash test/build_examples.sh"""
             }
         }
