@@ -9,7 +9,7 @@ pipeline {
     parameters { // Available to modify on the job page within Jenkins if starting a build
         string( // use to try different tools versions
             name: 'TOOLS_VERSION',
-            defaultValue: '15.0.4',
+            defaultValue: '15.0.5',
             description: 'The tools version to build with (check /projects/tools/ReleasesTools/)'
         )
         booleanParam( // use to check results of rolling all conda deps forward
@@ -52,11 +52,6 @@ pipeline {
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
             }
         }
-        stage("Patch toolchain") {
-            steps {
-                sh "patch -N /XMOS/tools/15.0.4/XMOS/xTIMEcomposer/15.0.4/target/include/xcore/thread.h -i local_thread_mode_get_bits.patch"
-            }
-        }
         stage("Update environment") {
             // Roll all conda packages forward beyond their pinned versions
             when { expression { return params.UPDATE_ALL } }
@@ -66,8 +61,8 @@ pipeline {
         }
         stage("Build examples") {
             steps {
-                sh """pushd /XMOS/tools/${params.TOOLS_VERSION}/XMOS/xTIMEcomposer/${params.TOOLS_VERSION} && . SetEnv && popd &&
-                        . activate ./sdk_venv && bash test/build_examples.sh"""
+                sh """. /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/${params.TOOLS_VERSION}/SetEnv &&
+                      . activate ./sdk_venv && bash test/build_examples.sh"""
             }
         }
         stage("Install") {

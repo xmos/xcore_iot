@@ -32,6 +32,7 @@ else
     echo "* Installing Python requirements *"
     echo "**********************************"
     pip install -r ${INSTALL_DIR}/requirements.txt
+    pip install --no-deps -e tools/ai_tools/tflite2xcore
 
     echo "**************************************"
     echo "* Updating PATH environment variable *"
