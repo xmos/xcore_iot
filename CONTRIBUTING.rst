@@ -39,7 +39,7 @@ It is recommended that you install the virtual environment in the repo's directo
 
 .. code-block:: console
 
-    conda env create -p ./xcore_sdk_venv -f environment.yml
+    conda env create -p ./xcore_sdk_venv -f tools/develop/environment.yml
 
 Activate the environment by specifying the path:
 
