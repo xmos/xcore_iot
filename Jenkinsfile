@@ -3,6 +3,8 @@ getApproval()
 pipeline {
     agent {
         dockerfile {
+            filename 'Dockerfile'
+            dir 'tools/ci'
             args ""
         }
     }
@@ -47,7 +49,7 @@ pipeline {
                                         url: 'git@github.com:xmos/aiot_sdk']]
                 ])
                 // create venv
-                sh "conda env create -q -p sdk_venv -f environment.yml"
+                sh "conda env create -q -p sdk_venv -f tools/develop/environment.yml"
                 // Install xmos tools version
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
             }
