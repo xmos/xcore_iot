@@ -56,9 +56,11 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
   }
 
   // This pulls in all the operation implementations we need.
-  static tflite::MicroMutableOpResolver<7> resolver;
-  resolver.AddSoftmax();
+  static tflite::MicroMutableOpResolver<9> resolver;
+  resolver.AddDequantize();
   resolver.AddPad();
+  resolver.AddSoftmax();
+  resolver.AddQuantize();
   resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode,
                      tflite::ops::micro::xcore::Register_Conv2D_Shallow());
   resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_Depthwise_OpCode,

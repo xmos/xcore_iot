@@ -77,14 +77,20 @@ class Endpoint(object):
         self.lib_xscope.xscope_ep_disconnect()
 
     def publish(self, data):
-        self.ready = False
-
         return self.lib_xscope.xscope_ep_request_upload(
             ctypes.c_uint(len(data) + 1), ctypes.c_char_p(data)
         )
 
+    def send_blob(self, blob):
+        CHUNK_SIZE = 128
+        SLEEP_DURATION = 0.02
 
-from tflite2xcore.utils import quantize, dequantize
+        self.ready = False
+
+        for i in range(0, len(blob), CHUNK_SIZE):
+            self.publish(blob[i : i + CHUNK_SIZE])
+            time.sleep(SLEEP_DURATION)
+
 
 ep = Endpoint()
 raw_img = None
@@ -95,7 +101,7 @@ try:
     else:
         image_file_path = sys.argv[1]
         print("Connnected")
-        print("Running inference on image " + image_file_path)
+        print("Sending image to device: " + image_file_path)
         # Some png files have RGBA format. convert to RGB to be on the safe side
         img = Image.open(image_file_path).convert("RGB")
         img = img.resize(IMAGE_SHAPE)
@@ -105,11 +111,10 @@ try:
         # Normalize to range 0..1. Needed for quantize function
         img_array = (img_array - img_array.min()) / img_array.ptp()
 
-        img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)
         raw_img = img_array.flatten().tobytes()
 
-        for i in range(0, len(raw_img), CHUCK_SIZE):
-            retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
+        ep.send_blob(raw_img)
+        print("Running inference on image: " + image_file_path)
 
         while not ep.ready:
             pass
@@ -129,18 +134,15 @@ if raw_img is not None:
         if line.startswith("Output index"):
             fields = line.split(",")
             index = int(fields[0].split("=")[1])
-            value = int(fields[1].split("=")[1])
+            value = float(fields[1].split("=")[1])
             if value >= max_value:
                 max_value = value
                 max_value_index = index
     print()
-    prob = (max_value - OUTPUT_ZERO_POINT) * OUTPUT_SCALE * 100.0
-    print(OBJECT_CLASSES[max_value_index], f"{prob:0.2f}%")
+    print(OBJECT_CLASSES[max_value_index], f"{max_value:0.2f}%")
 
-    np_img = np.frombuffer(raw_img, dtype=np.int8).reshape(INPUT_SHAPE)
-    np_img = np.round(
-        (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
-    ).astype(np.uint8)
+    np_img = np.frombuffer(raw_img, dtype=np.float32).reshape(INPUT_SHAPE)
+
     if not BATCH_RUN:
         # Show the image how it was processed by the model
         pyplot.imshow(np_img)

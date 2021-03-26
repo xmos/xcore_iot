@@ -12,8 +12,10 @@ static int output_size;
 static unsigned char *output_buffer;
 
 void print_output() {
-  for (int i = 0; i < output_size; i++) {
-    printf("Output index=%u, value=%i\n", i, (signed char)output_buffer[i]);
+  float *dequant_buffer = (float *)output_buffer;
+
+  for (int i = 0; i < output_size / sizeof(float); i++) {
+    printf("Output index=%d, value=%0.2f\n", i, dequant_buffer[i]);
   }
   printf("DONE!\n");
 }
