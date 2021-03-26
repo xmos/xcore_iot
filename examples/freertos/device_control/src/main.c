@@ -8,6 +8,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "device_control.h"
+
 #include "rtos_printf.h"
 
 #include "board_init.h"
@@ -39,16 +41,21 @@ void rtos_i2c_slave_rx_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, 
         rtos_printf("%02x ", data[i]);
     }
     rtos_printf("\n");
+
+    if (len >= 3) {
+        device_control_request(data[0],
+                               data[1],
+                               data[2]);
+
+        device_control_payload_transfer(&data[3], len - 3, CONTROL_HOST_TO_DEVICE);
+    }
 }
 
-static uint8_t i2c_tx_data[8] = {1,2,3,4,5,6,7,8};
 RTOS_I2C_SLAVE_CALLBACK_ATTR
 size_t rtos_i2c_slave_tx_start_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data)
 {
-    rtos_printf("I2C read started - delay 1 second\n");
-    vTaskDelay(20);
+    device_control_payload_transfer(*data, RTOS_I2C_SLAVE_BUF_LEN, CONTROL_DEVICE_TO_HOST);
     rtos_printf("I2C read started\n");
-    *data = i2c_tx_data;
     return 8;
 }
 

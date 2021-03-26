@@ -20,8 +20,8 @@
  * The maximum number of bytes that a the RTOS I2C slave driver can receive from a master
  * in a single write transaction.
  */
-#ifndef RTOS_I2C_SLAVE_MAX_WRITE_LEN
-#define RTOS_I2C_SLAVE_MAX_WRITE_LEN 256
+#ifndef RTOS_I2C_SLAVE_BUF_LEN
+#define RTOS_I2C_SLAVE_BUF_LEN 256
 #endif
 
 /**
@@ -54,13 +54,16 @@ typedef void (*rtos_i2c_slave_rx_cb_t)(rtos_i2c_slave_t *ctx, void *app_data, ui
  * Function pointer type for application provided RTOS I2C slave transmit start callback functions.
  *
  * These callback functions are called when an I2C slave driver instance needs to transmit data to
- * a master device. This callback must provide a buffer to transmit and its length.
+ * a master device. This callback must provide the data to transmit and the length.
  *
  * \param ctx           A pointer to the associated I2C slave driver instance.
  * \param app_data      A pointer to application specific data provided
  *                      by the application. Used to share data between
  *                      this callback function and the application.
- * \param data          A pointer to the data to transmit to the master, set by the callback.
+ * \param data          A pointer to the data buffer to transmit to the master. The driver sets this
+ *                      to its internal data buffer, which has a size of RTOS_I2C_SLAVE_BUF_LEN, prior
+ *                      to calling this callback. This may be set to a different buffer by the callback.
+ *                      The callback must fill this buffer with the data to send to the master.
  *
  * \return              The number of bytes to transmit to the master from \p data. If the master
  *                      reads more bytes than this, the driver will wrap around to the start of the
@@ -97,7 +100,7 @@ struct rtos_i2c_slave_struct {
     uint8_t device_addr;
 
     void *app_data;
-    uint8_t rx_data[RTOS_I2C_SLAVE_MAX_WRITE_LEN];
+    uint8_t data_buf[RTOS_I2C_SLAVE_BUF_LEN];
     size_t rx_data_i;
 
     uint8_t *tx_data;

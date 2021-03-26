@@ -26,9 +26,7 @@ set(USE_RTOS_QSPI_FLASH_DRIVER FALSE)
 set(USE_RTOS_TRACE_DRIVER FALSE)
 set(USE_RTOS_WIFI_DRIVER FALSE)
 
-set(USE_WIFI_MANAGER FALSE)
-set(USE_DHCPD FALSE)
-set(USE_FATFS FALSE)
+set(USE_DEVICE_CONTROL TRUE)
 
 ## Import XMOS RTOS platform configuration.
 ## Must be done after setting the configuration options.
