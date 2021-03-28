@@ -31,7 +31,7 @@ set(INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin")
 set(BUILD_FLAGS
   "-fxscope"
   "${CMAKE_CURRENT_SOURCE_DIR}/config.xscope"
-  "-target=XCORE-AI-EXPLORER"
+  "${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn"
   "-mcmodel=large"
   "-report"
   "-Wno-xcore-fptrgroup"

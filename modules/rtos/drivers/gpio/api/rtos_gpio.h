@@ -105,7 +105,7 @@ typedef struct {
  */
 struct rtos_gpio_struct {
     rtos_driver_rpc_t *rpc_config;
-    chanend_t rpc_interrupt_c;
+    chanend_t rpc_interrupt_c[RTOS_DRIVER_RPC_MAX_CLIENT_TILES];
 
     __attribute__((fptrgroup("rtos_gpio_port_enable_fptr_grp")))
     void (*port_enable)(rtos_gpio_t *, rtos_gpio_port_id_t);

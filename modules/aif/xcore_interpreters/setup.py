@@ -12,8 +12,8 @@ LIB_XCORE_INTERPRETERS = [
 EXCLUDES = ["*tests", "*tests.*", "host_library"]
 
 INSTALL_REQUIRES = [
-    "numpy==1.19.5",
-    "typing-extensions==3.7.4",
+    "numpy~=1.19.5",
+    "typing-extensions~=3.7.4",
 ]
 
 setuptools.setup(

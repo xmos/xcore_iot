@@ -1,10 +1,6 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-
 #include "rtos/drivers/i2c/api/rtos_i2c_master.h"
 
 __attribute__((fptrgroup("rtos_i2c_master_write_fptr_grp")))
