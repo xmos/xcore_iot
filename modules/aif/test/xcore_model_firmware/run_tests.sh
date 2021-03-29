@@ -51,8 +51,3 @@ for model in ${models[@]}; do
     echo "END_TEST"  | tee -a ${REPORT}
   done
 done
-
-echo "****************************"
-echo "****************************"
-echo "****************************"
-(pytest -v)
