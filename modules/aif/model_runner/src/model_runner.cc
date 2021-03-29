@@ -9,7 +9,9 @@ extern "C" {
 #define _clock_defined
 #endif
 }
+
 #include <platform.h>  // for PLATFORM_REFERENCE_MHZ
+#include <xcore/assert.h>
 
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
@@ -33,6 +35,9 @@ static micro_allocator_t *allocator = nullptr;
 size_t model_runner_buffer_size_get() { return sizeof(interpreter_t); }
 
 void model_runner_init(uint8_t *arena, size_t arena_size) {
+  xassert(arena);
+  xassert(arena_size > 0);
+  
   // Set up error reporting
   if (reporter == nullptr) {
     reporter = &error_reporter_s;
@@ -47,6 +52,8 @@ void model_runner_init(uint8_t *arena, size_t arena_size) {
 
 ModelRunnerStatus model_runner_allocate(model_runner_t *ctx,
                                         const uint8_t *model_content) {
+  xassert(model_content);
+
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   const tflite::Model *model;
@@ -95,6 +102,9 @@ size_t model_runner_input_size_get(model_runner_t *ctx) {
 
 void model_runner_input_quant_get(model_runner_t *ctx, float *scale,
                                   int *zero_point) {
+  xassert(scale);
+  xassert(zero_point);
+
   interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
   *scale = interpreter->input(0)->params.scale;
   *zero_point = interpreter->input(0)->params.zero_point;
@@ -128,6 +138,9 @@ size_t model_runner_output_size_get(model_runner_t *ctx) {
 
 void model_runner_output_quant_get(model_runner_t *ctx, float *scale,
                                    int *zero_point) {
+  xassert(scale);
+  xassert(zero_point);
+
   interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
   *scale = interpreter->output(0)->params.scale;
   *zero_point = interpreter->output(0)->params.zero_point;
@@ -135,16 +148,23 @@ void model_runner_output_quant_get(model_runner_t *ctx, float *scale,
 
 #ifndef NDEBUG
 
+void model_runner_profiler_durations_get(model_runner_t *ctx, uint32_t *count, const uint32_t **durations) {
+  xassert(count);
+  xassert(durations);
+
+  ctx->profiler_durations_get_fun(count, durations);
+}
+
 void model_runner_profiler_summary_print(model_runner_t *ctx) {
   uint32_t count = 0;
   uint32_t total = 0;
   uint32_t time_ms = 0;
-  const uint32_t *times_ticks = nullptr;
+  const uint32_t *durations = nullptr;
   const char *op_name;
 
   interpreter_t *interpreter = static_cast<interpreter_t *>(ctx->hInterpreter);
 
-  ctx->profiler_times_get_fun(&count, &times_ticks);
+  ctx->profiler_durations_get_fun(&count, &durations);
 
   for (size_t i = 0; i < interpreter->operators_size(); ++i) {
     if (i < count) {
@@ -157,7 +177,7 @@ void model_runner_profiler_summary_print(model_runner_t *ctx) {
         op_name = tflite::EnumNameBuiltinOperator(
             tflite::BuiltinOperator(registration->builtin_code));
       }
-      time_ms = times_ticks[i] / PLATFORM_REFERENCE_MHZ;
+      time_ms = durations[i] / PLATFORM_REFERENCE_MHZ;
       total += time_ms;
       printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_ms);
     }
