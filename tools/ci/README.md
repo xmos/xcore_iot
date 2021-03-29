@@ -1,8 +1,10 @@
 # Continuous Integration Tools
 
-## Installing Requirements
+Source and license checks must currently be performed manually.  The `infr` tools must be installed first.
 
-    $ pip install --src infr -r requirements.txt
+To install te `infr` tools, run:
+
+    $ pip install --src infr -r inf_requirements.txt
 
 ## Running Source Checks
 
