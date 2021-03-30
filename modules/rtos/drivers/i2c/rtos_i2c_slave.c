@@ -98,6 +98,10 @@ static void i2c_slave_thread(rtos_i2c_slave_t *ctx)
         .app_data = ctx,
     };
 
+    if (ctx->start != NULL) {
+        ctx->start(ctx, ctx->app_data);
+    }
+
     /* Ensure the I2C thread is never preempted */
     rtos_osal_thread_preemption_disable(NULL);
     /* And exclude it from core 0 where the system tick interrupt runs */
@@ -113,12 +117,14 @@ static void i2c_slave_thread(rtos_i2c_slave_t *ctx)
 void rtos_i2c_slave_start(
         rtos_i2c_slave_t *i2c_slave_ctx,
         void *app_data,
+        rtos_i2c_slave_start_cb_t start,
         rtos_i2c_slave_rx_cb_t rx,
         rtos_i2c_slave_tx_start_cb_t tx_start,
         rtos_i2c_slave_tx_done_cb_t tx_done,
         unsigned priority)
 {
     i2c_slave_ctx->app_data = app_data;
+    i2c_slave_ctx->start = start;
     i2c_slave_ctx->rx = rx;
     i2c_slave_ctx->tx_start = tx_start;
     i2c_slave_ctx->tx_done = tx_done;

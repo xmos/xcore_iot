@@ -17,10 +17,12 @@
 static rtos_i2c_slave_t i2c_slave_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
 static rtos_intertile_t intertile_ctx_s;
+static device_control_t device_control_ctx_s;
 
 static rtos_i2c_slave_t *i2c_slave_ctx = &i2c_slave_ctx_s;
 static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
+static device_control_t *device_control_ctx = &device_control_ctx_s;
 
 chanend_t other_tile_c;
 
@@ -34,6 +36,24 @@ void vApplicationMallocFailedHook(void)
 #define GPIO_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
 RTOS_I2C_SLAVE_CALLBACK_ATTR
+void rtos_i2c_slave_start_cb(rtos_i2c_slave_t *ctx, void *app_data)
+{
+    rtos_printf("I2C STARTED\n");
+
+    control_ret_t dc_ret;
+
+    dc_ret = device_control_resources_register(device_control_ctx,
+                                               2); //SERVICER COUNT
+
+    if (dc_ret != CONTROL_SUCCESS) {
+        rtos_printf("Device control resources failed to register on tile %d\n", THIS_XCORE_TILE);
+    } else {
+        rtos_printf("Device control resources registered on tile %d\n", THIS_XCORE_TILE);
+    }
+    xassert(dc_ret == CONTROL_SUCCESS);
+}
+
+RTOS_I2C_SLAVE_CALLBACK_ATTR
 void rtos_i2c_slave_rx_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
 {
     rtos_printf("I2C write %d bytes\n", len);
@@ -43,18 +63,21 @@ void rtos_i2c_slave_rx_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, 
     rtos_printf("\n");
 
     if (len >= 3) {
-        device_control_request(data[0],
+        device_control_request(device_control_ctx,
+                               data[0],
                                data[1],
                                data[2]);
 
-        device_control_payload_transfer(&data[3], len - 3, CONTROL_HOST_TO_DEVICE);
+        device_control_payload_transfer(device_control_ctx,
+                                        &data[3], len - 3, CONTROL_HOST_TO_DEVICE);
     }
 }
 
 RTOS_I2C_SLAVE_CALLBACK_ATTR
 size_t rtos_i2c_slave_tx_start_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data)
 {
-    device_control_payload_transfer(*data, RTOS_I2C_SLAVE_BUF_LEN, CONTROL_DEVICE_TO_HOST);
+    device_control_payload_transfer(device_control_ctx,
+                                    *data, RTOS_I2C_SLAVE_BUF_LEN, CONTROL_DEVICE_TO_HOST);
     rtos_printf("I2C read started\n");
     return 8;
 }
@@ -74,6 +97,47 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     rtos_gpio_rpc_config(gpio_ctx, GPIO_RPC_PORT, GPIO_RPC_HOST_TASK_PRIORITY);
 
+    control_ret_t dc_ret;
+
+    dc_ret = device_control_start(device_control_ctx,
+                                  1, //PORT
+                                  configMAX_PRIORITIES-1);
+
+    if (dc_ret != CONTROL_SUCCESS) {
+        rtos_printf("Device control failed to start on tile %d\n", THIS_XCORE_TILE);
+    } else {
+        rtos_printf("Device control started on tile %d\n", THIS_XCORE_TILE);
+    }
+    xassert(dc_ret == CONTROL_SUCCESS);
+
+    #if ON_TILE(0)
+    {
+        control_resid_t resources[] = {3, 6, 9};
+
+        rtos_osal_queue_t servicer_q;
+        rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
+        rtos_osal_queue_create(&servicer_q, "servicer_q", 1, sizeof(void *));
+        dc_ret = device_control_servicer_register(device_control_ctx,
+                                                  &servicer_q,
+                                                  resources,
+                                                  sizeof(resources));
+        rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
+    }
+    #endif
+    #if ON_TILE(1)
+    {
+        control_resid_t resources[] = {33, 66, 99};
+
+        rtos_osal_queue_t servicer_q;
+        rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
+        rtos_osal_queue_create(&servicer_q, "servicer_q", 1, sizeof(void *));
+        dc_ret = device_control_servicer_register(device_control_ctx,
+                                                  &servicer_q,
+                                                  resources,
+                                                  sizeof(resources));
+        rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
+    }
+    #endif
 
     #if ON_TILE(0)
     {
@@ -82,7 +146,8 @@ void vApplicationDaemonTaskStartup(void *arg)
 
         rtos_printf("Starting I2C slave driver\n");
         rtos_i2c_slave_start(i2c_slave_ctx,
-                             NULL,
+                             device_control_ctx,
+                             rtos_i2c_slave_start_cb,
                              rtos_i2c_slave_rx_cb,
                              rtos_i2c_slave_tx_start_cb,
                              rtos_i2c_slave_tx_done_cb,
@@ -110,6 +175,11 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 
     other_tile_c = c1;
 
+    device_control_init(device_control_ctx,
+            DEVICE_CONTROL_HOST_MODE,
+            &intertile_ctx,
+            1);
+
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
                 RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
@@ -131,6 +201,11 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     (void) c3;
 
     other_tile_c = c0;
+
+    device_control_init(device_control_ctx,
+            DEVICE_CONTROL_CLIENT_MODE,
+            &intertile_ctx,
+            1);
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
