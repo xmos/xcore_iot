@@ -25,6 +25,19 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_intertile_isr, arg)
     }
 }
 
+/*
+ * TODO: If msg is NULL, then save len in the context and return
+ * without releasing the mutex.
+ * This can then be called again. If the saved len > 0, just send
+ * MIN(len, saved_len) bytes from buf. Subtract sent number of bytes
+ * from saved_len. If zero, release mutex.
+ *
+ * This should allow a single send to be split over multiple calls.
+ *
+ * OR two new functions, tx_len and tx_data to be consistent with the
+ * rx versions. Or tx_len and tx_data could just be wrappers around this
+ * modified as above.
+ */
 void rtos_intertile_tx(
         rtos_intertile_t *ctx,
         uint8_t port,
@@ -40,29 +53,42 @@ void rtos_intertile_tx(
     rtos_osal_mutex_put(&ctx->lock);
 }
 
+/*
+ * TODO: Add two new functions. rx_len and rx_data.
+ * rx_len waits and then returns just the length. Then
+ * rx_data should be able to be called multiple times
+ * up to the total number of bytes. This would allow
+ * receiving into multiple buffers (eg. header+payload).
+ */
 uint32_t rtos_intertile_rx(
         rtos_intertile_t *ctx,
         uint8_t port,
         void **msg,
         unsigned timeout)
 {
-    uint32_t len;
+    uint32_t len = 0;
     uint32_t flags;
+    rtos_osal_status_t status;
 
-    rtos_osal_event_group_get_bits(&ctx->event_group,
+    *msg = NULL;
+
+    status = rtos_osal_event_group_get_bits(&ctx->event_group,
                         (1 << port),
                         RTOS_OSAL_OR_CLEAR,
                         &flags,
-                        RTOS_OSAL_PORT_WAIT_FOREVER);
+                        timeout);
 
-    len = s_chan_in_word(ctx->c);
+    if (status == RTOS_OSAL_SUCCESS) {
 
-    *msg = rtos_osal_malloc(len);
-    xassert(*msg != NULL);
+        len = s_chan_in_word(ctx->c);
 
-    s_chan_in_buf_byte(ctx->c, *msg, len);
+        *msg = rtos_osal_malloc(len);
+        xassert(*msg != NULL);
 
-    triggerable_enable_trigger(ctx->c);
+        s_chan_in_buf_byte(ctx->c, *msg, len);
+
+        triggerable_enable_trigger(ctx->c);
+    }
 
     return len;
 }
