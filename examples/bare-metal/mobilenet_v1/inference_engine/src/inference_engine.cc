@@ -22,7 +22,7 @@ tflite::ErrorReporter *reporter = nullptr;
 const tflite::Model *model = nullptr;
 tflite::micro::xcore::XCoreInterpreter *interpreter = nullptr;
 tflite::micro::xcore::XCoreProfiler *profiler = nullptr;
-constexpr int kTensorArenaSize = 286000;
+constexpr int kTensorArenaSize = 175000;
 uint8_t tensor_arena[kTensorArenaSize];
 
 void invoke() {

@@ -7,16 +7,16 @@ import os
 import time
 import struct
 import ctypes
+import urllib.request
+import json
 
 import numpy as np
 from matplotlib import pyplot
 from PIL import Image
 
-CHUCK_SIZE = 128
-
 IMAGE_SHAPE = (128, 128)
 INPUT_SHAPE = IMAGE_SHAPE + (3,)
-INPUT_SCALE = 0.007843137718737125
+INPUT_SCALE = 0.007843081839382648
 INPUT_ZERO_POINT = -1
 NORM_SCALE = 127.5
 NORM_SHIFT = 1
@@ -25,19 +25,10 @@ BATCH_RUN = 0  # Set to 1 if this script is run as part of a batch job
 OUTPUT_SCALE = 1 / 256
 OUTPUT_ZERO_POINT = -128
 
-OBJECT_CLASSES = [
-    "tench",
-    "goldfish",
-    "great_white_shark",
-    "tiger_shark",
-    "hammerhead",
-    "electric_ray",
-    "stingray",
-    "cock",
-    "hen",
-    "ostrich",
-]
-
+OBJECT_CLASSES = None
+OBJECT_CLASSES_URL = "https://s3.amazonaws.com/deep-learning-models/image-models/imagenet_class_index.json"
+with urllib.request.urlopen(OBJECT_CLASSES_URL) as url:
+    OBJECT_CLASSES = json.load(url)
 
 PRINT_CALLBACK = ctypes.CFUNCTYPE(
     None, ctypes.c_ulonglong, ctypes.c_uint, ctypes.c_char_p
@@ -83,6 +74,16 @@ class Endpoint(object):
             ctypes.c_uint(len(data) + 1), ctypes.c_char_p(data)
         )
 
+    def send_blob(self, blob):
+        CHUNK_SIZE = 128
+        SLEEP_DURATION = 0.025
+
+        self.ready = False
+
+        for i in range(0, len(blob), CHUNK_SIZE):
+            self.publish(blob[i : i + CHUNK_SIZE])
+            time.sleep(SLEEP_DURATION)
+
 
 from tflite2xcore.utils import quantize, dequantize
 
@@ -93,9 +94,9 @@ try:
     if ep.connect():
         print("Failed to connect")
     else:
-        image_file_path = sys.argv[1]
         print("Connnected")
-        print("Running inference on image " + image_file_path)
+        image_file_path = sys.argv[1]
+        print("Sending image to device: " + image_file_path)
         # Some png files have RGBA format. convert to RGB to be on the safe side
         img = Image.open(image_file_path).convert("RGB")
         img = img.resize(IMAGE_SHAPE)
@@ -108,9 +109,9 @@ try:
         img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)
         raw_img = img_array.flatten().tobytes()
 
-        for i in range(0, len(raw_img), CHUCK_SIZE):
-            retval = ep.publish(raw_img[i : i + CHUCK_SIZE])
+        ep.send_blob(raw_img)
 
+        print("Running inference on image: " + image_file_path)
         while not ep.ready:
             pass
 
@@ -119,8 +120,6 @@ except KeyboardInterrupt:
     pass
 
 ep.disconnect()
-print("\n".join(ep.lines))
-
 
 if raw_img is not None:
     max_value = -128
@@ -133,9 +132,17 @@ if raw_img is not None:
             if value >= max_value:
                 max_value = value
                 max_value_index = index
+        else:
+            print(line)
+
     print()
     prob = (max_value - OUTPUT_ZERO_POINT) * OUTPUT_SCALE * 100.0
-    print(OBJECT_CLASSES[max_value_index], f"{prob:0.2f}%")
+    if OBJECT_CLASSES:
+        object_class = OBJECT_CLASSES[str(max_value_index)][1]
+        object_str = f"Object class={object_class}"
+    else:
+        object_str = f"Object index={max_value_index}"
+    print(f"{object_str}   {prob:0.2f}%")
 
     np_img = np.frombuffer(raw_img, dtype=np.int8).reshape(INPUT_SHAPE)
     np_img = np.round(
