@@ -8,7 +8,7 @@
   benchmark:
     SRAM: 8510
     EXTMEM: 9054
-    SWMEM: 16410
+    SWMEM: 19044
 - model: cifar10
   par: 5
   arena_size:
@@ -19,7 +19,7 @@
   benchmark:
     SRAM: 2700
     EXTMEM: 3247
-    SWMEM: null
+    SWMEM: 13260
 - model: vww_96
   par: 1
   arena_size:
@@ -30,7 +30,7 @@
   benchmark:
     SRAM: 19878
     EXTMEM: 22068
-    SWMEM: null
+    SWMEM: 57922
 - model: vww_96
   par: 5
   arena_size:
@@ -41,4 +41,4 @@
   benchmark:
     SRAM: 9866
     EXTMEM: 12216
-    SWMEM: null
+    SWMEM: 47853

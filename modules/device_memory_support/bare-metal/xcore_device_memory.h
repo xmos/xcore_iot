@@ -6,16 +6,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef XCORE
-#ifdef _TIME_H_
-#define _clock_defined
-#endif
-#include <xcore/thread.h>
-
 #define STRINGIFY(NAME) #NAME
 #define GET_STACKWORDS(DEST, NAME) \
   asm("ldc %[__dest], " STRINGIFY(NAME) ".nstackwords" : [ __dest ] "=r"(DEST))
@@ -26,6 +16,7 @@ extern "C" {
         : [ __dest ] "=r"(_stack_words));                \
     DEST = (_stack_words + 2) * 4;                       \
   }
+
 #define IS_RAM(a) (((uintptr_t)a >= 0x80000) && ((uintptr_t)a <= 0x100000))
 #define IS_NOT_RAM(a) ((uintptr_t)a > 0x100000)
 #define IS_EXTMEM(a) \
@@ -33,23 +24,36 @@ extern "C" {
 #define IS_SWMEM(a) \
   (((uintptr_t)a >= 0x40000000) && (((uintptr_t)a <= 0x80000000)))
 
-#ifdef USE_SWMEM
-void swmem_setup();
-#endif  // USE_SWMEM
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void swmem_handler(void *ignored);
+/**
+ * Connect to the flash memory and setup the SwMem minicache fill handling
+ */
+void swmem_setup();
+
+/**
+ * Disconnect from the flash memory and tear down the SwMem handling
+ */
 void swmem_teardown();
 
-#else  // not XCORE
+/**
+ * SwMem minicache fill event handler
+ *
+ * Start this task after calling swmem_setup() and before accessing the SwMem
+ * memory segment and before calling swmem_load().
+ */
+void swmem_handler(void *ignored);
 
-#define GET_STACKSIZE(DEST, NAME) DEST = 0
-#define GET_STACKWORDS(DEST, NAME) DEST = 0
-#define IS_RAM(a) (1)
-#define IS_NOT_RAM(a) (0)
-
-#endif  // XCORE
-
-void memload(void *dest, void *src, size_t size);
+/**
+ * Load memory from an external memory segment.
+ *
+ * @param[out] dest Pointer to the memory location to copy to
+ * @param[in]  src  Pointer to the memory location to copy from
+ * @param[in]  size Number of bytes to copy
+ */
+size_t swmem_load(void *dest, const void *src, size_t size);
 
 #ifdef __cplusplus
 }

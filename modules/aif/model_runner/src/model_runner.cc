@@ -13,6 +13,7 @@ extern "C" {
 #include <platform.h>  // for PLATFORM_REFERENCE_MHZ
 #include <xcore/assert.h>
 
+#include "model_memory_loader.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
@@ -24,10 +25,12 @@ typedef tflite::SimpleMemoryAllocator simple_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::MicroOpResolver micro_op_resolver_t;
 typedef tflite::MicroProfiler tflite_profiler_t;
+typedef tflite::micro::xcore::ModelMemoryLoader memory_loader_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
 
 // static variables
 static error_reporter_t error_reporter_s;
+static memory_loader_t memory_loader_s;
 static error_reporter_t *reporter = nullptr;
 
 static micro_allocator_t *allocator = nullptr;
@@ -37,7 +40,7 @@ size_t model_runner_buffer_size_get() { return sizeof(interpreter_t); }
 void model_runner_init(uint8_t *arena, size_t arena_size) {
   xassert(arena);
   xassert(arena_size > 0);
-  
+
   // Set up error reporting
   if (reporter == nullptr) {
     reporter = &error_reporter_s;
@@ -78,8 +81,8 @@ ModelRunnerStatus model_runner_allocate(model_runner_t *ctx,
     ctx->hInterpreter = malloc(model_runner_buffer_size_get());
   }
   // Build an interpreter to run the model with
-  interpreter_t *interpreter = new (ctx->hInterpreter)
-      interpreter_t(model, *resolver, allocator, reporter, true, profiler);
+  interpreter_t *interpreter = new (ctx->hInterpreter) interpreter_t(
+      model, *resolver, allocator, reporter, true, memory_loader_s, profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_tensors_status = interpreter->AllocateTensors();
@@ -148,7 +151,8 @@ void model_runner_output_quant_get(model_runner_t *ctx, float *scale,
 
 #ifndef NDEBUG
 
-void model_runner_profiler_durations_get(model_runner_t *ctx, uint32_t *count, const uint32_t **durations) {
+void model_runner_profiler_durations_get(model_runner_t *ctx, uint32_t *count,
+                                         const uint32_t **durations) {
   xassert(count);
   xassert(durations);
 
