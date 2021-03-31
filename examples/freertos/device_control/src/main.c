@@ -113,33 +113,6 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     #if ON_TILE(0)
     {
-        control_resid_t resources[] = {3, 6, 9};
-
-        device_control_servicer_t servicer_ctx;
-        rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
-        dc_ret = device_control_servicer_register(&servicer_ctx,
-                                                  device_control_ctx,
-                                                  resources,
-                                                  sizeof(resources));
-        rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
-    }
-    #endif
-    #if ON_TILE(1)
-    {
-        control_resid_t resources[] = {33, 66, 99};
-
-        device_control_servicer_t servicer_ctx;
-        rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
-        dc_ret = device_control_servicer_register(&servicer_ctx,
-                                                  device_control_ctx,
-                                                  resources,
-                                                  sizeof(resources));
-        rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
-    }
-    #endif
-
-    #if ON_TILE(0)
-    {
         rtos_printf("Starting GPIO driver\n");
         rtos_gpio_start(gpio_ctx);
 
@@ -159,6 +132,41 @@ void vApplicationDaemonTaskStartup(void *arg)
     #endif
 
     chanend_free(other_tile_c);
+
+#if ON_TILE(0)
+{
+    control_resid_t resources[] = {3, 6, 9};
+
+    device_control_servicer_t servicer_ctx;
+    rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
+    dc_ret = device_control_servicer_register(&servicer_ctx,
+                                              device_control_ctx,
+                                              resources,
+                                              sizeof(resources));
+    rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
+
+    for (;;) {
+        device_control_servicer_cmd_recv(&servicer_ctx, RTOS_OSAL_WAIT_FOREVER);
+    }
+}
+#endif
+#if ON_TILE(1)
+{
+    control_resid_t resources[] = {33, 66, 99};
+
+    device_control_servicer_t servicer_ctx;
+    rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
+    dc_ret = device_control_servicer_register(&servicer_ctx,
+                                              device_control_ctx,
+                                              resources,
+                                              sizeof(resources));
+    rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
+
+    for (;;) {
+        device_control_servicer_cmd_recv(&servicer_ctx, RTOS_OSAL_WAIT_FOREVER);
+    }
+}
+#endif
 
     vTaskDelete(NULL);
 }

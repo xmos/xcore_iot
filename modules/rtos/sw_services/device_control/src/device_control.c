@@ -21,15 +21,13 @@ typedef struct {
     control_resid_t resources[];
 } servicer_init_data_t;
 
-/*
- *
- */
 typedef struct {
-    rtos_osal_queue_t *queue; /* servicer's queue */
+    rtos_osal_queue_t *queue;
+    size_t payload_len;
+    uint8_t *payload;
     control_resid_t resid;
     control_cmd_t cmd;
-    size_t payload_len;
-    uint8_t payload[];
+    uint8_t buf[];
 } cmd_to_servicer_t;
 
 void resource_table_init(device_control_t *ctx);
@@ -37,11 +35,11 @@ void resource_table_init(device_control_t *ctx);
 int resource_table_add(device_control_t *ctx,
                        const control_resid_t resources[],
                        size_t num_resources,
-                       int servicer);
+                       uint8_t servicer);
 
 int resource_table_search(device_control_t *ctx,
                           control_resid_t resid,
-                          uint8_t *ifnum);
+                          uint8_t *servicer);
 
 static control_ret_t special_read_command(control_cmd_t cmd,
                                           uint8_t payload[],
@@ -64,24 +62,73 @@ static control_ret_t special_read_command(control_cmd_t cmd,
     }
 }
 
-static control_ret_t write_command(int ifnum,
+static control_ret_t write_command(device_control_t *ctx,
+                                   uint8_t servicer,
                                    control_resid_t resid,
                                    control_cmd_t cmd,
-                                   const uint8_t payload[],
+                                   uint8_t payload[],
                                    unsigned payload_len)
 {
     if (resid == CONTROL_SPECIAL_RESID) {
         rtos_printf("ignoring write to special resource %d\n", CONTROL_SPECIAL_RESID);
         return CONTROL_BAD_COMMAND;
     } else {
-        rtos_printf("%d write command %d, %d, %d\n", ifnum, resid, cmd, payload_len);
+
+        rtos_intertile_t *intertile_ctx = ctx->servicer_table[servicer].intertile_ctx;
+        rtos_osal_queue_t *queue = ctx->servicer_table[servicer].queue;
+
+        cmd_to_servicer_t c = {
+                .queue = queue,
+                .resid = resid,
+                .cmd = cmd,
+                .payload_len = payload_len,
+                .payload = payload,
+                .buf = {}
+        };
+        cmd_to_servicer_t *c_ptr = &c;
+
+        if (intertile_ctx == NULL) {
+            /* Put to queue */
+            rtos_osal_queue_send(queue, &c_ptr, RTOS_OSAL_WAIT_FOREVER);
+
+            int *ptr;
+            rtos_osal_queue_receive(&ctx->gateway_queue, &ptr, RTOS_OSAL_WAIT_FOREVER);
+            rtos_printf("Got back %d\n", *ptr);
+            rtos_osal_free(ptr);
+
+        } else {
+            /* Send to intertile */
+
+            /*
+             * TODO: If intertile_tx is split up to allow multiple calls, then this
+             * malloc nonsense shouldn't be necessary.
+             */
+
+            c_ptr = rtos_osal_malloc(sizeof(cmd_to_servicer_t) + payload_len);
+
+            memcpy(c_ptr, &c, sizeof(cmd_to_servicer_t));
+            memcpy(c_ptr->buf, payload, payload_len);
+
+            rtos_intertile_tx(intertile_ctx, ctx->intertile_port, c_ptr, sizeof(cmd_to_servicer_t) + payload_len);
+            rtos_osal_free(c_ptr);
+
+            int *ptr;
+            if (rtos_intertile_rx(intertile_ctx, ctx->intertile_port, (void **) &ptr, 1) != 0) {
+                rtos_printf("Got back %d\n", *ptr);
+                rtos_osal_free(ptr);
+            }
+        }
+
+
+        rtos_printf("%d write command %d, %d, %d\n", servicer, resid, cmd, payload_len);
         //control_ret_t ret = i[ifnum].write_command(resid, cmd, payload, payload_len);
         control_ret_t ret = CONTROL_SUCCESS;
         return ret;
     }
 }
 
-static control_ret_t read_command(unsigned char ifnum,
+static control_ret_t read_command(device_control_t *ctx,
+                                  uint8_t servicer,
                                   control_resid_t resid,
                                   control_cmd_t cmd,
                                   uint8_t payload[],
@@ -90,7 +137,7 @@ static control_ret_t read_command(unsigned char ifnum,
     if (resid == CONTROL_SPECIAL_RESID) {
         return special_read_command(cmd, payload, payload_len);
     } else {
-        rtos_printf("%d read command %d, %d, %d\n", ifnum, resid, cmd, payload_len);
+        rtos_printf("%d read command %d, %d, %d\n", servicer, resid, cmd, payload_len);
         //control_ret_t ret = i[ifnum].read_command(resid, cmd, payload, payload_len);
         // Just read from the QUEUE here
         control_ret_t ret = CONTROL_SUCCESS;
@@ -115,13 +162,13 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
                                               size_t buf_size,
                                               control_direction_t direction)
 {
-    uint8_t ifnum;
+    uint8_t servicer;
 
     const size_t requested_payload_len = ctx->requested_payload_len;
     const control_resid_t requested_resid = ctx->requested_resid;
     const control_cmd_t requested_cmd = ctx->requested_cmd;
 
-    if (resource_table_search(ctx, requested_resid, &ifnum) != 0) {
+    if (resource_table_search(ctx, requested_resid, &servicer) != 0) {
         rtos_printf("resource %d not found\n", requested_resid);
         return CONTROL_BAD_COMMAND;
     }
@@ -131,9 +178,9 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
     }
 
     if (direction == CONTROL_DEVICE_TO_HOST && IS_CONTROL_CMD_READ(requested_cmd)) {
-        return read_command(ifnum, requested_resid, requested_cmd, payload_buf, requested_payload_len);
+        return read_command(ctx, servicer, requested_resid, requested_cmd, payload_buf, requested_payload_len);
     } else if (direction == CONTROL_HOST_TO_DEVICE && !IS_CONTROL_CMD_READ(requested_cmd)) {
-        return write_command(ifnum, requested_resid, requested_cmd, payload_buf, requested_payload_len);
+        return write_command(ctx, servicer, requested_resid, requested_cmd, payload_buf, requested_payload_len);
     } else {
         if (buf_size > 0) {
             return CONTROL_BAD_COMMAND;
@@ -195,13 +242,43 @@ control_ret_t device_control_resources_register(device_control_t *ctx,
 }
 
 control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
-                                               control_resid_t *resid,
-                                               control_cmd_t *cmd,
-                                               size_t *payload_len,
-                                               uint8_t *payload,
+//                                               control_resid_t *resid,
+//                                               control_cmd_t *cmd,
+//                                               size_t *payload_len,
+//                                               uint8_t *payload,
                                                unsigned timeout)
 {
+    device_control_t *device_control_ctx = ctx->device_control_ctx;
+    rtos_osal_status_t status;
+    control_ret_t ret = CONTROL_ERROR;
+    cmd_to_servicer_t *c_ptr;
 
+    status = rtos_osal_queue_receive(&ctx->queue, &c_ptr, timeout);
+    if (status == RTOS_OSAL_SUCCESS) {
+        rtos_printf("Servicer on tile %d received command %02x for resid %d\n", THIS_XCORE_TILE, c_ptr->cmd, c_ptr->resid);
+        rtos_printf("The command has %d bytes\n", c_ptr->payload_len);
+        for (int i = 0; i < c_ptr->payload_len; i++) {
+            rtos_printf("%d ", c_ptr->payload[i]);
+        }
+        rtos_printf("\n");
+
+        if (device_control_ctx->resource_table != NULL) {
+            int *m = rtos_osal_malloc(4);
+            *m = 42;
+            status = rtos_osal_queue_send(&device_control_ctx->gateway_queue, &m, 0); /* THIS SHOULD NOT EVER BLOCK */
+            xassert(status == RTOS_OSAL_SUCCESS);
+        } else {
+            /* gateway is on another tile */
+
+            rtos_osal_free(c_ptr);
+
+            int m = 43;
+            rtos_intertile_tx(device_control_ctx->host_intertile, device_control_ctx->intertile_port,
+                              &m, sizeof(m));
+        }
+    }
+
+    return status == RTOS_OSAL_SUCCESS ? CONTROL_SUCCESS : CONTROL_ERROR;
 }
 
 control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
@@ -238,18 +315,19 @@ control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
 static void device_control_client_thread(device_control_t *ctx)
 {
     uint32_t msg_length;
-    uint8_t *req_msg;
+    cmd_to_servicer_t *c_ptr;
 
     for (;;) {
         msg_length = rtos_intertile_rx(ctx->host_intertile,
                                        ctx->intertile_port,
-                                       (void **) &req_msg,
+                                       (void **) &c_ptr,
                                        RTOS_OSAL_WAIT_FOREVER);
 
-
+        if (msg_length != 0) {
+            c_ptr->payload = c_ptr->buf;
+            rtos_osal_queue_send(c_ptr->queue, &c_ptr, RTOS_OSAL_WAIT_FOREVER);
+        }
     }
-
-
 }
 
 /*

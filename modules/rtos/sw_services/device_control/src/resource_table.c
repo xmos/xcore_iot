@@ -14,7 +14,7 @@
 int resource_table_add(device_control_t *ctx,
                        const control_resid_t resources[],
                        size_t num_resources,
-                       int servicer)
+                       uint8_t servicer)
 {
     control_resid_t resid;
 
@@ -46,9 +46,9 @@ int resource_table_add(device_control_t *ctx,
 
 int resource_table_search(device_control_t *ctx,
                           control_resid_t resid,
-                          uint8_t *ifnum)
+                          uint8_t *servicer)
 {
-    *ifnum = ctx->resource_table[resid];
+    *servicer = ctx->resource_table[resid];
 
     if (resid == CONTROL_SPECIAL_RESID || ctx->resource_table[resid] != NO_SERVICER) {
         return 0;

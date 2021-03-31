@@ -91,6 +91,8 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
 #define DEVICE_CONTROL_CLIENT_MODE 1
 
 
+control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
+                                               unsigned timeout);
 
 /**
  * \param servicer_count  The number of "servicers". Each servicer must register before
