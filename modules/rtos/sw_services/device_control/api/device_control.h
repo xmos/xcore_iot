@@ -52,11 +52,6 @@ typedef enum {
 #define CONTROL_GET_LAST_COMMAND_STATUS CONTROL_CMD_SET_READ(1)
 
 typedef struct {
-    rtos_intertile_t *intertile_ctx;
-    rtos_osal_queue_t *queue;
-} device_control_servicer_t;
-
-typedef struct {
     rtos_osal_queue_t gateway_queue;
     union {
         rtos_intertile_t *client_intertile[3];
@@ -65,12 +60,22 @@ typedef struct {
     size_t intertile_count;
     int intertile_port;
     uint8_t *resource_table; /* NULL on client tiles */
-    device_control_servicer_t *servicer_table;
+    //device_control_servicer_t *servicer_table;
+
+    struct {
+        rtos_intertile_t *intertile_ctx;
+        rtos_osal_queue_t *queue;
+    } *servicer_table;
 
     size_t requested_payload_len;
     control_resid_t requested_resid;
     control_cmd_t requested_cmd;
 } device_control_t;
+
+typedef struct {
+    device_control_t *device_control_ctx;
+    rtos_osal_queue_t queue;
+} device_control_servicer_t;
 
 void device_control_request(device_control_t *ctx,
                             control_resid_t resid,
@@ -92,10 +97,11 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
  *                        this function can return.
  */
 control_ret_t device_control_resources_register(device_control_t *ctx,
-                                                const size_t servicer_count);
+                                                const size_t servicer_count,
+                                                unsigned timeout);
 
-control_ret_t device_control_servicer_register(device_control_t *ctx,
-                                               rtos_osal_queue_t *queue,
+control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
+                                               device_control_t *device_control_ctx,
                                                const control_resid_t resources[],
                                                size_t num_resources);
 

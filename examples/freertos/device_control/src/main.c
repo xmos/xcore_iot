@@ -43,7 +43,8 @@ void rtos_i2c_slave_start_cb(rtos_i2c_slave_t *ctx, void *app_data)
     control_ret_t dc_ret;
 
     dc_ret = device_control_resources_register(device_control_ctx,
-                                               2); //SERVICER COUNT
+                                               2, //SERVICER COUNT
+                                               pdMS_TO_TICKS(100));
 
     if (dc_ret != CONTROL_SUCCESS) {
         rtos_printf("Device control resources failed to register on tile %d\n", THIS_XCORE_TILE);
@@ -114,11 +115,10 @@ void vApplicationDaemonTaskStartup(void *arg)
     {
         control_resid_t resources[] = {3, 6, 9};
 
-        rtos_osal_queue_t servicer_q;
+        device_control_servicer_t servicer_ctx;
         rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
-        rtos_osal_queue_create(&servicer_q, "servicer_q", 1, sizeof(void *));
-        dc_ret = device_control_servicer_register(device_control_ctx,
-                                                  &servicer_q,
+        dc_ret = device_control_servicer_register(&servicer_ctx,
+                                                  device_control_ctx,
                                                   resources,
                                                   sizeof(resources));
         rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
@@ -128,11 +128,10 @@ void vApplicationDaemonTaskStartup(void *arg)
     {
         control_resid_t resources[] = {33, 66, 99};
 
-        rtos_osal_queue_t servicer_q;
+        device_control_servicer_t servicer_ctx;
         rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
-        rtos_osal_queue_create(&servicer_q, "servicer_q", 1, sizeof(void *));
-        dc_ret = device_control_servicer_register(device_control_ctx,
-                                                  &servicer_q,
+        dc_ret = device_control_servicer_register(&servicer_ctx,
+                                                  device_control_ctx,
                                                   resources,
                                                   sizeof(resources));
         rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);

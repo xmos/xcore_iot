@@ -143,42 +143,46 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
     }
 }
 
+static int servicer_register(device_control_t *ctx,
+                              servicer_init_data_t *init_cmd,
+                              rtos_intertile_t *intertile_ctx,
+                              int servicer_index)
+{
+    int ret;
+    ctx->servicer_table[servicer_index].queue = init_cmd->queue;
+    ctx->servicer_table[servicer_index].intertile_ctx = intertile_ctx;
+    ret = resource_table_add(ctx, init_cmd->resources, init_cmd->num_resources, servicer_index);
+    rtos_osal_free(init_cmd);
+    return ret;
+}
+
 control_ret_t device_control_resources_register(device_control_t *ctx,
-                                                const size_t servicer_count)
+                                                const size_t servicer_count,
+                                                unsigned timeout)
 {
     servicer_init_data_t *init_cmd;
     int registered_count = 0;
+    int ret = 0;
 
-    ctx->servicer_table = rtos_osal_malloc(servicer_count * sizeof(device_control_servicer_t));
+    ctx->servicer_table = rtos_osal_malloc(servicer_count * sizeof(*ctx->servicer_table));
 
-    TickType_t start_time = xTaskGetTickCount();
-
-    //TODO PARAMETERIZE TIMEOUT
     //TODO tick count should be in osal
-    while (registered_count < servicer_count && xTaskGetTickCount() - start_time < 100) {
-        rtos_osal_status_t ret;
+    TickType_t start_time = xTaskGetTickCount();
+    while (registered_count < servicer_count && ret == 0 && xTaskGetTickCount() - start_time < timeout) {
 
-        ret = rtos_osal_queue_receive(&ctx->gateway_queue, &init_cmd, 0);
-
-        if (ret == RTOS_OSAL_SUCCESS) {
-            ctx->servicer_table[registered_count].queue = init_cmd->queue;
-            ctx->servicer_table[registered_count].intertile_ctx = NULL;
-            resource_table_add(ctx, init_cmd->resources, init_cmd->num_resources, registered_count);
-            rtos_osal_free(init_cmd);
-            registered_count++;
+        if (rtos_osal_queue_receive(&ctx->gateway_queue, &init_cmd, 1) == RTOS_OSAL_SUCCESS) {
+            ret = servicer_register(ctx, init_cmd, NULL, registered_count);
+            if (ret == 0) {
+                registered_count++;
+            }
         }
 
-        for (int i = 0; i < ctx->intertile_count && registered_count < servicer_count; i++) {
-            uint32_t len;
-
-            len = rtos_intertile_rx(ctx->client_intertile[i], ctx->intertile_port, (void **) &init_cmd, 0);
-
-            if (len != 0) {
-                ctx->servicer_table[registered_count].queue = init_cmd->queue;
-                ctx->servicer_table[registered_count].intertile_ctx = ctx->client_intertile[i];
-                resource_table_add(ctx, init_cmd->resources, init_cmd->num_resources, registered_count);
-                rtos_osal_free(init_cmd);
-                registered_count++;
+        for (int i = 0; i < ctx->intertile_count && registered_count < servicer_count && ret == 0; i++) {
+            if (rtos_intertile_rx(ctx->client_intertile[i], ctx->intertile_port, (void **) &init_cmd, 1) != 0) {
+                ret = servicer_register(ctx, init_cmd, ctx->client_intertile[i], registered_count);
+                if (ret == 0) {
+                    registered_count++;
+                }
             }
         }
     }
@@ -190,24 +194,33 @@ control_ret_t device_control_resources_register(device_control_t *ctx,
     }
 }
 
-/**
- * TODO: Create the queue? Initialize a "servicer" instance?
- */
-control_ret_t device_control_servicer_register(device_control_t *ctx,
-                                               rtos_osal_queue_t *queue,
+control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
+                                               control_resid_t *resid,
+                                               control_cmd_t *cmd,
+                                               size_t *payload_len,
+                                               uint8_t *payload,
+                                               unsigned timeout)
+{
+
+}
+
+control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
+                                               device_control_t *device_control_ctx,
                                                const control_resid_t resources[],
                                                size_t num_resources)
 {
     const size_t len = sizeof(servicer_init_data_t) + sizeof(control_resid_t) * num_resources;
     servicer_init_data_t *init_data = rtos_osal_malloc(len);
 
+    ctx->device_control_ctx = device_control_ctx;
     init_data->num_resources = num_resources;
-    init_data->queue = queue;
+    rtos_osal_queue_create(&ctx->queue, "servicer_q", 1, sizeof(void *));
+    init_data->queue = &ctx->queue;
     memcpy(init_data->resources, resources, sizeof(control_resid_t) * num_resources);
 
-    if (ctx->resource_table != NULL) {
+    if (device_control_ctx->resource_table != NULL) {
 
-        rtos_osal_queue_send(&ctx->gateway_queue, &init_data, RTOS_OSAL_WAIT_FOREVER);
+        rtos_osal_queue_send(&device_control_ctx->gateway_queue, &init_data, RTOS_OSAL_WAIT_FOREVER);
 
     } else {
         /* Resource table is NULL on client tiles */
@@ -215,7 +228,7 @@ control_ret_t device_control_servicer_register(device_control_t *ctx,
          * TODO: If update to intertile driver is made, this could be two sends,
          * no malloc() required.
          */
-        rtos_intertile_tx(ctx->host_intertile, ctx->intertile_port, init_data, len);
+        rtos_intertile_tx(device_control_ctx->host_intertile, device_control_ctx->intertile_port, init_data, len);
         rtos_osal_free(init_data);
     }
 
@@ -239,6 +252,13 @@ static void device_control_client_thread(device_control_t *ctx)
 
 }
 
+/*
+ * TODO: Consider making this just for "client" tiles and
+ * moving the queue_create into init() for the "host" tile.
+ *
+ * OR just combine the two functions? Do we really need both
+ * init and start. It doesn't need to be like the drivers.
+ */
 control_ret_t device_control_start(device_control_t *ctx,
                                    uint8_t intertile_port,
                                    unsigned priority)
