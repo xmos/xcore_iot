@@ -57,11 +57,7 @@ void rtos_i2c_slave_start_cb(rtos_i2c_slave_t *ctx, void *app_data)
 RTOS_I2C_SLAVE_CALLBACK_ATTR
 void rtos_i2c_slave_rx_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
 {
-    rtos_printf("I2C write %d bytes\n", len);
-    for (int i = 0; i < len; i++) {
-        rtos_printf("%02x ", data[i]);
-    }
-    rtos_printf("\n");
+    control_ret_t ret;
 
     if (len >= 3) {
         device_control_request(device_control_ctx,
@@ -69,17 +65,20 @@ void rtos_i2c_slave_rx_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, 
                                data[1],
                                data[2]);
 
-        device_control_payload_transfer(device_control_ctx,
-                                        &data[3], len - 3, CONTROL_HOST_TO_DEVICE);
+        ret = device_control_payload_transfer(device_control_ctx,
+                                              &data[3], len - 3, CONTROL_HOST_TO_DEVICE);
+        rtos_printf("I2C write completed - device control status %d\n", ret);
     }
 }
 
 RTOS_I2C_SLAVE_CALLBACK_ATTR
 size_t rtos_i2c_slave_tx_start_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data)
 {
-    device_control_payload_transfer(device_control_ctx,
-                                    *data, RTOS_I2C_SLAVE_BUF_LEN, CONTROL_DEVICE_TO_HOST);
-    rtos_printf("I2C read started\n");
+    control_ret_t ret;
+
+    ret = device_control_payload_transfer(device_control_ctx,
+                                          *data, RTOS_I2C_SLAVE_BUF_LEN, CONTROL_DEVICE_TO_HOST);
+    rtos_printf("I2C read started - device control status %d\n", ret);
     return 8;
 }
 
@@ -87,6 +86,64 @@ RTOS_I2C_SLAVE_CALLBACK_ATTR
 void rtos_i2c_slave_tx_done_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
 {
     rtos_printf("I2C read of %d bytes complete\n", len);
+}
+
+DEVICE_CONTROL_CALLBACK_ATTR
+control_ret_t read_cmd_on_tile(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data)
+{
+    rtos_printf("Device control READ on tile\n");
+
+    rtos_printf("Servicer on tile %d received command %02x for resid %02x\n", THIS_XCORE_TILE, cmd, resid);
+    rtos_printf("The command is requesting %d bytes\n", payload_len);
+    for (int i = 0; i < payload_len; i++) {
+        payload[i] = (cmd & 0x7F) + i;
+    }
+
+    return CONTROL_ERROR;
+}
+
+DEVICE_CONTROL_CALLBACK_ATTR
+control_ret_t write_cmd_on_tile(control_resid_t resid, control_cmd_t cmd, const uint8_t *payload, size_t payload_len, void *app_data)
+{
+    rtos_printf("Device control WRITE on tile\n");
+
+    rtos_printf("Servicer on tile %d received command %02x for resid %02x\n", THIS_XCORE_TILE, cmd, resid);
+    rtos_printf("The command has %d bytes\n", payload_len);
+    for (int i = 0; i < payload_len; i++) {
+        rtos_printf("%02x ", payload[i]);
+    }
+    rtos_printf("\n");
+
+    return CONTROL_ERROR;
+}
+
+DEVICE_CONTROL_CALLBACK_ATTR
+control_ret_t read_cmd_off_tile(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data)
+{
+    rtos_printf("Device control READ off tile\n");
+
+    rtos_printf("Servicer on tile %d received command %02x for resid %02x\n", THIS_XCORE_TILE, cmd, resid);
+    rtos_printf("The command is requesting %d bytes\n", payload_len);
+    for (int i = 0; i < payload_len; i++) {
+        payload[i] = (cmd & 0x7F) + i;
+    }
+
+    return CONTROL_ERROR;
+}
+
+DEVICE_CONTROL_CALLBACK_ATTR
+control_ret_t write_cmd_off_tile(control_resid_t resid, control_cmd_t cmd, const uint8_t *payload, size_t payload_len, void *app_data)
+{
+    rtos_printf("Device control WRITE off tile\n");
+
+    rtos_printf("Servicer on tile %d received command %02x for resid %02x\n", THIS_XCORE_TILE, cmd, resid);
+    rtos_printf("The command has %d bytes\n", payload_len);
+    for (int i = 0; i < payload_len; i++) {
+        rtos_printf("%02x ", payload[i]);
+    }
+    rtos_printf("\n");
+
+    return CONTROL_ERROR;
 }
 
 void vApplicationDaemonTaskStartup(void *arg)
@@ -135,7 +192,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 
 #if ON_TILE(0)
 {
-    control_resid_t resources[] = {3, 6, 9};
+    control_resid_t resources[] = {0x3, 0x6, 0x9};
 
     device_control_servicer_t servicer_ctx;
     rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
@@ -146,13 +203,13 @@ void vApplicationDaemonTaskStartup(void *arg)
     rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
 
     for (;;) {
-        device_control_servicer_cmd_recv(&servicer_ctx, RTOS_OSAL_WAIT_FOREVER);
+        device_control_servicer_cmd_recv(&servicer_ctx, read_cmd_on_tile, write_cmd_on_tile, NULL, RTOS_OSAL_WAIT_FOREVER);
     }
 }
 #endif
 #if ON_TILE(1)
 {
-    control_resid_t resources[] = {33, 66, 99};
+    control_resid_t resources[] = {0x33, 0x66, 0x99};
 
     device_control_servicer_t servicer_ctx;
     rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
@@ -163,7 +220,7 @@ void vApplicationDaemonTaskStartup(void *arg)
     rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
 
     for (;;) {
-        device_control_servicer_cmd_recv(&servicer_ctx, RTOS_OSAL_WAIT_FOREVER);
+        device_control_servicer_cmd_recv(&servicer_ctx, read_cmd_off_tile, write_cmd_off_tile, NULL, RTOS_OSAL_WAIT_FOREVER);
     }
 }
 #endif

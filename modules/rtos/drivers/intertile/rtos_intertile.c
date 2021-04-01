@@ -25,24 +25,43 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_intertile_isr, arg)
     }
 }
 
-/*
- * TODO: If msg is NULL, then save len in the context and return
- * without releasing the mutex.
- * This can then be called again. If the saved len > 0, just send
- * MIN(len, saved_len) bytes from buf. Subtract sent number of bytes
- * from saved_len. If zero, release mutex.
- *
- * This should allow a single send to be split over multiple calls.
- *
- * OR two new functions, tx_len and tx_data to be consistent with the
- * rx versions. Or tx_len and tx_data could just be wrappers around this
- * modified as above.
- */
+void rtos_intertile_tx_len(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        size_t len)
+{
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_PORT_WAIT_FOREVER);
+
+    xassert(ctx->tx_len == 0);
+
+    ctx->tx_len = len;
+    s_chan_out_byte(ctx->c, port); //to the ISR
+    s_chan_out_word(ctx->c, len);
+}
+
+size_t rtos_intertile_tx_data(
+        rtos_intertile_t *ctx,
+        void *data,
+        size_t len)
+{
+    size_t tx_len = len <= ctx->tx_len ? len : ctx->tx_len;
+
+    s_chan_out_buf_byte(ctx->c, data, tx_len);
+
+    ctx->tx_len -= tx_len;
+
+    if (ctx->tx_len == 0) {
+        rtos_osal_mutex_put(&ctx->lock);
+    }
+
+    return tx_len;
+}
+
 void rtos_intertile_tx(
         rtos_intertile_t *ctx,
         uint8_t port,
         void *msg,
-        uint32_t len)
+        size_t len)
 {
     rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_PORT_WAIT_FOREVER);
 
@@ -53,14 +72,48 @@ void rtos_intertile_tx(
     rtos_osal_mutex_put(&ctx->lock);
 }
 
-/*
- * TODO: Add two new functions. rx_len and rx_data.
- * rx_len waits and then returns just the length. Then
- * rx_data should be able to be called multiple times
- * up to the total number of bytes. This would allow
- * receiving into multiple buffers (eg. header+payload).
- */
-uint32_t rtos_intertile_rx(
+size_t rtos_intertile_rx_len(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        unsigned timeout)
+{
+    uint32_t flags;
+    rtos_osal_status_t status;
+
+    xassert(ctx->rx_len == 0);
+
+    status = rtos_osal_event_group_get_bits(&ctx->event_group,
+                        (1 << port),
+                        RTOS_OSAL_OR_CLEAR,
+                        &flags,
+                        timeout);
+
+    if (status == RTOS_OSAL_SUCCESS) {
+        ctx->rx_len = s_chan_in_word(ctx->c);
+    }
+
+    return ctx->rx_len;
+}
+
+size_t rtos_intertile_rx_data(
+        rtos_intertile_t *ctx,
+        void *data,
+        size_t len)
+{
+    size_t rx_len = len <= ctx->rx_len ? len : ctx->rx_len;
+
+    s_chan_in_buf_byte(ctx->c, data, rx_len);
+
+    ctx->rx_len -= rx_len;
+
+    if (ctx->rx_len == 0) {
+        triggerable_enable_trigger(ctx->c);
+    }
+
+    return rx_len;
+}
+
+size_t rtos_intertile_rx(
         rtos_intertile_t *ctx,
         uint8_t port,
         void **msg,
@@ -96,6 +149,8 @@ uint32_t rtos_intertile_rx(
 void rtos_intertile_start(
         rtos_intertile_t *intertile_ctx)
 {
+    intertile_ctx->tx_len = 0;
+    intertile_ctx->rx_len = 0;
     rtos_osal_mutex_create(&intertile_ctx->lock, "intertile_mutex", RTOS_OSAL_NOT_RECURSIVE);
     rtos_osal_event_group_create(&intertile_ctx->event_group, "intertile_group");
 

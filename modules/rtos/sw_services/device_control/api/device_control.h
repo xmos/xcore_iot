@@ -90,8 +90,15 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
 #define DEVICE_CONTROL_HOST_MODE   0
 #define DEVICE_CONTROL_CLIENT_MODE 1
 
+#define DEVICE_CONTROL_CALLBACK_ATTR __attribute__((fptrgroup("device_control_cb_fptr_grp")))
+
+typedef control_ret_t (*device_control_read_cmd_cb_t)(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data);
+typedef control_ret_t (*device_control_write_cmd_cb_t)(control_resid_t resid, control_cmd_t cmd, const uint8_t *payload, size_t payload_len, void *app_data);
 
 control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
+                                               device_control_read_cmd_cb_t read_cmd_cb,
+                                               device_control_write_cmd_cb_t write_cmd_cb,
+                                               void *app_data,
                                                unsigned timeout);
 
 /**
