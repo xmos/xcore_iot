@@ -312,12 +312,12 @@ control_ret_t device_control_resources_register(device_control_t *ctx,
     servicer_init_data_t *init_cmd;
     int registered_count = 0;
     int ret = 0;
+    rtos_osal_tick_t start_time;
 
     ctx->servicer_table = rtos_osal_malloc(servicer_count * sizeof(*ctx->servicer_table));
 
-    //TODO tick count should be in osal
-    TickType_t start_time = xTaskGetTickCount();
-    while (registered_count < servicer_count && ret == 0 && xTaskGetTickCount() - start_time < timeout) {
+    start_time = rtos_osal_tick_get();
+    while (registered_count < servicer_count && ret == 0 && rtos_osal_tick_get() - start_time < timeout) {
 
         if (rtos_osal_queue_receive(&ctx->gateway_queue, &init_cmd, 1) == RTOS_OSAL_SUCCESS) {
             ret = servicer_register(ctx, init_cmd, NULL, registered_count);

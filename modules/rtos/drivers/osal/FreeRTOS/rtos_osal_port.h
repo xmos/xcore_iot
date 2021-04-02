@@ -25,6 +25,7 @@
 #define RTOS_OSAL_PORT_AND        2
 #define RTOS_OSAL_PORT_AND_CLEAR  (RTOS_OSAL_PORT_AND | RTOS_OSAL_PORT_CLEAR)
 
+typedef TickType_t rtos_osal_tick_t;
 
 struct rtos_osal_thread_struct {
     TaskHandle_t thread;
