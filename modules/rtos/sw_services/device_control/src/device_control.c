@@ -94,9 +94,8 @@ static control_ret_t do_command(device_control_t *ctx,
         cmd_to_servicer_t *c_ptr = &c;
 
         if (intertile_ctx == NULL) { /* on tile case */
-            /* Put to queue */
-            rtos_osal_queue_send(queue, &c_ptr, RTOS_OSAL_WAIT_FOREVER);
 
+            rtos_osal_queue_send(queue, &c_ptr, RTOS_OSAL_WAIT_FOREVER);
             rtos_osal_queue_receive(&ctx->gateway_queue, &ret, RTOS_OSAL_WAIT_FOREVER);
 
         } else { /* off tile case */
@@ -250,9 +249,9 @@ control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
         }
 
         if (device_control_ctx->resource_table != NULL) {
-            status = rtos_osal_queue_send(&device_control_ctx->gateway_queue, &ret, 10); /* If this servicer thread is higher priority than
-                                                                                            the device control transport thread, this this
-                                                                                            may block, but it shouldn't be long. */
+            status = rtos_osal_queue_send(&device_control_ctx->gateway_queue, &ret, 0); /* This should not block. As long as everything
+                                                                                           is working as designed, this queue will always
+                                                                                           be empty here. */
             xassert(status == RTOS_OSAL_SUCCESS);
         } else {
             /* gateway is on another tile */
@@ -394,16 +393,7 @@ control_ret_t device_control_init(device_control_t *ctx,
 
     if (mode == DEVICE_CONTROL_HOST_MODE) {
         resource_table_init(ctx);
-    }
 
-    if (mode == DEVICE_CONTROL_CLIENT_MODE) {
-        xassert(intertile_count == 1);
-        if (intertile_count != 1) {
-            return CONTROL_REGISTRATION_FAILED;
-        }
-
-        ctx->host_intertile = intertile_ctx[0];
-    } else {
         xassert(intertile_count <= 3);
         if (intertile_count > 3) {
             return CONTROL_REGISTRATION_FAILED;
@@ -412,6 +402,14 @@ control_ret_t device_control_init(device_control_t *ctx,
         for (int i = 0; i < intertile_count; i++) {
             ctx->client_intertile[i] = intertile_ctx[i];
         }
+    } else {
+
+        xassert(intertile_count == 1);
+        if (intertile_count != 1) {
+            return CONTROL_REGISTRATION_FAILED;
+        }
+
+        ctx->host_intertile = intertile_ctx[0];
     }
 
     return CONTROL_SUCCESS;
