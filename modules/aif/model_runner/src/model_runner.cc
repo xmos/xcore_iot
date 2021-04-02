@@ -4,11 +4,6 @@
 #include "model_runner.h"
 
 #include <ctime>
-extern "C" {
-#ifdef _TIME_H_
-#define _clock_defined
-#endif
-}
 
 #include <platform.h>  // for PLATFORM_REFERENCE_MHZ
 #include <xcore/assert.h>

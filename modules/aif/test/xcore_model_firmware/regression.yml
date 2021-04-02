@@ -4,7 +4,7 @@
     SRAM: 44400
     EXTMEM: 57424
   code_size:
-    tile_0: 59744
+    tile_0: 60180
   benchmark:
     SRAM: 8510
     EXTMEM: 9054
@@ -15,7 +15,7 @@
     SRAM: 44704
     EXTMEM: 57728
   code_size:
-    tile_0: 59744
+    tile_0: 60180
   benchmark:
     SRAM: 2700
     EXTMEM: 3247
@@ -26,10 +26,10 @@
     SRAM: 87504
     EXTMEM: 91824
   code_size:
-    tile_0: 59364
+    tile_0: 59784
   benchmark:
     SRAM: 19878
-    EXTMEM: 22068
+    EXTMEM: 22297
     SWMEM: 57922
 - model: vww_96
   par: 5
@@ -37,8 +37,8 @@
     SRAM: 88656
     EXTMEM: 92976
   code_size:
-    tile_0: 59364
+    tile_0: 59784
   benchmark:
     SRAM: 9866
-    EXTMEM: 12216
+    EXTMEM: 12441
     SWMEM: 47853

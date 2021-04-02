@@ -39,6 +39,7 @@ set(BUILD_FLAGS
   "-fno-rtti"
   "-fno-exceptions"
   "-DXCORE"
+  "-D_clock_defined"       # workaround for tools bug id=18509
   "-DTF_LITE_STATIC_MEMORY"
   "-Os"
 )

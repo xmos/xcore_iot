@@ -5,6 +5,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <xs1.h>
 
 #define STRINGIFY(NAME) #NAME
 #define GET_STACKWORDS(DEST, NAME) \
@@ -17,12 +18,16 @@
     DEST = (_stack_words + 2) * 4;                       \
   }
 
-#define IS_RAM(a) (((uintptr_t)a >= 0x80000) && ((uintptr_t)a <= 0x100000))
-#define IS_NOT_RAM(a) ((uintptr_t)a > 0x100000)
-#define IS_EXTMEM(a) \
-  (((uintptr_t)a >= 0x10000000) && (((uintptr_t)a <= 0x20000000)))
-#define IS_SWMEM(a) \
-  (((uintptr_t)a >= 0x40000000) && (((uintptr_t)a <= 0x80000000)))
+#define IS_RAM(a)                    \
+  (((uintptr_t)a >= XS1_RAM_BASE) && \
+   ((uintptr_t)a <= (XS1_RAM_BASE + XS1_RAM_SIZE)))
+#define IS_NOT_RAM(a) ((uintptr_t)a > XS1_RAM_BASE)
+#define IS_EXTMEM(a)                    \
+  (((uintptr_t)a >= XS1_EXTMEM_BASE) && \
+   (((uintptr_t)a <= (XS1_EXTMEM_BASE + XS1_EXTMEM_SIZE))))
+#define IS_SWMEM(a)                    \
+  (((uintptr_t)a >= XS1_SWMEM_BASE) && \
+   (((uintptr_t)a <= (XS1_SWMEM_BASE - 1 + XS1_SWMEM_SIZE))))
 
 #ifdef __cplusplus
 extern "C" {
