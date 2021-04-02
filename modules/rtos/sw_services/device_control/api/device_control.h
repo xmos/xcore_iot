@@ -103,6 +103,28 @@ typedef enum {
 #define CONTROL_GET_LAST_COMMAND_STATUS CONTROL_CMD_SET_READ(1)
 
 /**
+ * The mode value to use when initializing a device control instance
+ * that is on the same tile as its associated transport layer. These
+ * may be connected to device control instances on other tiles that
+ * have been initialized with DEVICE_CONTROL_CLIENT_MODE.
+ */
+#define DEVICE_CONTROL_HOST_MODE   0
+
+/**
+ * The mode value to use when initializing a device control instance
+ * that is not on the same tile as its associated transport layer.
+ * These must be connected to a device control instance on another tile
+ * that has been initialized with DEVICE_CONTROL_HOST_MODE.
+ */
+#define DEVICE_CONTROL_CLIENT_MODE 1
+
+/**
+ * This attribute must be specified on all device control command handler callback functions
+ * provided by the application.
+ */
+#define DEVICE_CONTROL_CALLBACK_ATTR __attribute__((fptrgroup("device_control_cb_fptr_grp")))
+
+/**
  * Struct representing a device control instance.
  *
  * The members in this struct should not be accessed directly.
@@ -113,8 +135,12 @@ typedef struct {
     union {
         rtos_intertile_t *host_intertile;
 
-        /* Everything past this point is only used by the host tile */
-        /* Perhaps could use a reduced version for clients */
+        /*
+         * Everything past this point is only used by the host tile.
+         * The device_control_client_t struct includes only the above
+         * members and may be used to save some memory when initialized
+         * with DEVICE_CONTROL_CLIENT_MODE.
+         */
         struct {
             rtos_intertile_t *client_intertile[3];
 
@@ -134,6 +160,17 @@ typedef struct {
 } device_control_t;
 
 /**
+ * A device_control_t pointer may be cast to a pointer to this structure type and
+ * used with the device control API, provided it is initialized with DEVICE_CONTROL_CLIENT_MODE.
+ * This is not necessary to do, but will save a small amount of memory.
+ */
+typedef struct {
+    uint8_t *resource_table; /* NULL on client tiles */
+    int intertile_port;
+    rtos_intertile_t *host_intertile;
+} device_control_client_t;
+
+/**
  * Struct representing a device control servicer instance.
  *
  * The members in this struct should not be accessed directly.
@@ -142,6 +179,47 @@ typedef struct {
     device_control_t *device_control_ctx;
     rtos_osal_queue_t queue;
 } device_control_servicer_t;
+
+/**
+ * Function pointer type for application provided device control read command handler callback functions.
+ *
+ * Called by device_control_servicer_cmd_recv() when a read command is received from the transport layer.
+ * The command consists of a resource ID, command value, and a payload_len. This handler must respond with
+ * a payload of the requested length.
+ *
+ * \param[in]  resid       Resource ID. Indicates which resource the command is intended for.
+ * \param[in]  cmd         Command code. Note that this will be in the range 0x80 to 0xFF
+ *                         because bit 7 set indicates a read command.
+ * \param[out] payload     Payload bytes of length \p payload_len that will be sent back over
+ *                         the transport layer in response to this read command.
+ * \param[in]  payload_len Requested size of the payload in bytes.
+ * \param[in,out] app_data A pointer to application specific data provided to device_control_servicer_cmd_recv().
+ *                         How and if this is used is entirely up to the application.
+ *
+ * \returns                CONTROL_SUCCESS if the handling of the read data by the device was successful. An
+ *                         error code otherwise.
+ */
+typedef control_ret_t (*device_control_read_cmd_cb_t)(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data);
+
+/**
+ * Function pointer type for application provided device control write command handler callback functions.
+ *
+ * Called by device_control_servicer_cmd_recv() when a write command is received from the transport layer.
+ * The command consists of a resource ID, command value, payload, and the payload's length.
+ *
+ * \param[in]  resid       Resource ID. Indicates which resource the command is intended for.
+ * \param[in]  cmd         Command code. Note that this will be in the range 0x80 to 0xFF
+ *                         because bit 7 set indicates a read command.
+ * \param[in]  payload     Payload bytes of length \p payload_len.
+ * \param[in]  payload_len The number of bytes in \p payload.
+ * \param[in,out] app_data A pointer to application specific data provided to device_control_servicer_cmd_recv().
+ *                         How and if this is used is entirely up to the application.
+ *
+ * \returns                CONTROL_SUCCESS if the handling of the read data by the device was successful. An
+ *                         error code otherwise.
+ */
+typedef control_ret_t (*device_control_write_cmd_cb_t)(control_resid_t resid, control_cmd_t cmd, const uint8_t *payload, size_t payload_len, void *app_data);
+
 
 /**
  * Must be called by the transport layer when a new request is received.
@@ -184,68 +262,6 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
                                               uint8_t *payload_buf,
                                               size_t buf_size,
                                               control_direction_t direction);
-
-/**
- * The mode value to use when initializing a device control instance
- * that is on the same tile as its associated transport layer. These
- * may be connected to device control instances on other tiles that
- * have been initialized with DEVICE_CONTROL_CLIENT_MODE.
- */
-#define DEVICE_CONTROL_HOST_MODE   0
-
-/**
- * The mode value to use when initializing a device control instance
- * that is not on the same tile as its associated transport layer.
- * These must be connected to a device control instance on another tile
- * that has been initialized with DEVICE_CONTROL_HOST_MODE.
- */
-#define DEVICE_CONTROL_CLIENT_MODE 1
-
-/**
- * This attribute must be specified on all device control command handler callback functions
- * provided by the application.
- */
-#define DEVICE_CONTROL_CALLBACK_ATTR __attribute__((fptrgroup("device_control_cb_fptr_grp")))
-
-/**
- * Function pointer type for application provided device control read command handler callback functions.
- *
- * Called by device_control_servicer_cmd_recv() when a read command is received from the transport layer.
- * The command consists of a resource ID, command value, and a payload_len. This handler must respond with
- * a payload of the requested length.
- *
- * \param[in]  resid       Resource ID. Indicates which resource the command is intended for.
- * \param[in]  cmd         Command code. Note that this will be in the range 0x80 to 0xFF
- *                         because bit 7 set indicates a read command.
- * \param[out] payload     Payload bytes of length \p payload_len that will be sent back over
- *                         the transport layer in response to this read command.
- * \param[in]  payload_len Requested size of the payload in bytes.
- * \param[in,out] app_data A pointer to application specific data provided to device_control_servicer_cmd_recv().
- *                         How and if this is used is entirely up to the application.
- *
- * \returns                CONTROL_SUCCESS if the handling of the read data by the device was successful. An
- *                         error code otherwise.
- */
-typedef control_ret_t (*device_control_read_cmd_cb_t)(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data);
-
-/**
- * Function pointer type for application provided device control write command handler callback functions.
- *
- * Called by device_control_servicer_cmd_recv() when a write command is received from the transport layer.
- * The command consists of a resource ID, command value, payload, and the payload's length.
- *
- * \param[in]  resid       Resource ID. Indicates which resource the command is intended for.
- * \param[in]  cmd         Command code. Note that this will be in the range 0x80 to 0xFF
- *                         because bit 7 set indicates a read command.
- * \param[in]  payload     Payload bytes of length \p payload_len.
- * \param[in]  payload_len The number of bytes in \p payload.
- * \param[in,out] app_data A pointer to application specific data provided to device_control_servicer_cmd_recv().
- *                         How and if this is used is entirely up to the application.
- *
- * \returns                CONTROL_SUCCESS if the handling of the read data by the device was successful. An
- *                         error code otherwise.
- */
-typedef control_ret_t (*device_control_write_cmd_cb_t)(control_resid_t resid, control_cmd_t cmd, const uint8_t *payload, size_t payload_len, void *app_data);
 
 /**
  * This is called by servicers to wait for and receive any commands received by the transport layer

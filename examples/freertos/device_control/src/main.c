@@ -17,12 +17,17 @@
 static rtos_i2c_slave_t i2c_slave_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
 static rtos_intertile_t intertile_ctx_s;
+
+#if ON_TILE(0)
 static device_control_t device_control_ctx_s;
+#elif ON_TILE(1)
+static device_control_client_t device_control_ctx_s;
+#endif
 
 static rtos_i2c_slave_t *i2c_slave_ctx = &i2c_slave_ctx_s;
 static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
-static device_control_t *device_control_ctx = &device_control_ctx_s;
+static device_control_t *device_control_ctx = (device_control_t *) &device_control_ctx_s;
 
 chanend_t other_tile_c;
 
