@@ -25,11 +25,12 @@
 /**
  * @{
  * These types are used in control functions to identify the resource id,
- * command, and version.
+ * command, version, and status.
  */
 typedef uint8_t control_resid_t;
 typedef uint8_t control_cmd_t;
 typedef uint8_t control_version_t;
+typedef uint8_t control_status_t;
 /**@}*/
 
 /**
@@ -97,8 +98,8 @@ typedef enum {
 #define CONTROL_GET_VERSION CONTROL_CMD_SET_READ(0)
 
 /**
- * Unimplemented command for the special resource ID.
- * \todo Implement this?
+ * The command to read the return status of the last command.
+ * It must be sent to resource ID CONTROL_SPECIAL_RESID.
  */
 #define CONTROL_GET_LAST_COMMAND_STATUS CONTROL_CMD_SET_READ(1)
 
@@ -155,6 +156,7 @@ typedef struct {
             size_t requested_payload_len;
             control_resid_t requested_resid;
             control_cmd_t requested_cmd;
+            control_status_t last_status;
         };
     };
 } device_control_t;
@@ -241,26 +243,31 @@ void device_control_request(device_control_t *ctx,
  * Must be called by the transport layer either when it receives a payload, or
  * when it requires a payload to transmit.
  *
- * \param ctx A pointer to the associated device control instance.
+ * \param ctx         A pointer to the associated device control instance.
  * \param payload_buf A pointer to the payload buffer.
- * \param buf_size  The size of the buffer. Note that this is not necessarily
- *                  the number of valid payload bytes in the buffer.
- * \param direction The direction of the payload transfer.
+ * \param buf_size    A pointer to a variable containing the size of \p payload_buf.
  *
- *                  This must be CONTROL_HOST_TO_DEVICE when a payload has already
- *                  been received and is inside \p payload_buf.
+ *                    When \p direction is CONTROL_HOST_TO_DEVICE, no more than this
+ *                    number of bytes will be read from it.
  *
- *                  This must be CONTROL_DEVICE_TO_HOST when a payload needs to be
- *                  copied into \p payload_buf by device_control_payload_transfer()
- *                  before sending it.
+ *                    When \p direction is CONTROL_DEVICE_TO_HOST, this will be updated
+ *                    to the number of bytes actually written to \p payload_buf.
+ * \param direction   The direction of the payload transfer.
  *
- * \returns         CONTROL_SUCCESS if everything works and the command is successfully
- *                  handled by a registered servicer. An error code otherwise.
+ *                    This must be CONTROL_HOST_TO_DEVICE when a payload has already
+ *                    been received and is inside \p payload_buf.
+ *
+ *                    This must be CONTROL_DEVICE_TO_HOST when a payload needs to be
+ *                    written into \p payload_buf by device_control_payload_transfer()
+ *                    before sending it.
+ *
+ * \returns           CONTROL_SUCCESS if everything works and the command is successfully
+ *                    handled by a registered servicer. An error code otherwise.
  *
  */
 control_ret_t device_control_payload_transfer(device_control_t *ctx,
                                               uint8_t *payload_buf,
-                                              size_t buf_size,
+                                              size_t *buf_size,
                                               control_direction_t direction);
 
 /**

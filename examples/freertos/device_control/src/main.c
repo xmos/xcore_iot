@@ -70,8 +70,9 @@ void rtos_i2c_slave_rx_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, 
                                data[1],
                                data[2]);
 
+        len -= 3;
         ret = device_control_payload_transfer(device_control_ctx,
-                                              &data[3], len - 3, CONTROL_HOST_TO_DEVICE);
+                                              &data[3], &len, CONTROL_HOST_TO_DEVICE);
         rtos_printf("I2C write completed - device control status %d\n", ret);
     }
 }
@@ -80,11 +81,18 @@ RTOS_I2C_SLAVE_CALLBACK_ATTR
 size_t rtos_i2c_slave_tx_start_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data)
 {
     control_ret_t ret;
+    size_t len = RTOS_I2C_SLAVE_BUF_LEN;
 
     ret = device_control_payload_transfer(device_control_ctx,
-                                          *data, RTOS_I2C_SLAVE_BUF_LEN, CONTROL_DEVICE_TO_HOST);
+                                          *data, &len, CONTROL_DEVICE_TO_HOST);
     rtos_printf("I2C read started - device control status %d\n", ret);
-    return 8;
+
+    if (ret != CONTROL_SUCCESS) {
+        (*data)[0] = (control_status_t) ret;
+        len = 1;
+    }
+
+    return len;
 }
 
 RTOS_I2C_SLAVE_CALLBACK_ATTR
@@ -104,7 +112,7 @@ control_ret_t read_cmd_on_tile(control_resid_t resid, control_cmd_t cmd, uint8_t
         payload[i] = (cmd & 0x7F) + i;
     }
 
-    return CONTROL_ERROR;
+    return CONTROL_SUCCESS;
 }
 
 DEVICE_CONTROL_CALLBACK_ATTR
@@ -119,7 +127,7 @@ control_ret_t write_cmd_on_tile(control_resid_t resid, control_cmd_t cmd, const 
     }
     rtos_printf("\n");
 
-    return CONTROL_ERROR;
+    return CONTROL_SUCCESS;
 }
 
 DEVICE_CONTROL_CALLBACK_ATTR
@@ -133,7 +141,7 @@ control_ret_t read_cmd_off_tile(control_resid_t resid, control_cmd_t cmd, uint8_
         payload[i] = (cmd & 0x7F) + i;
     }
 
-    return CONTROL_ERROR;
+    return CONTROL_SUCCESS;
 }
 
 DEVICE_CONTROL_CALLBACK_ATTR
@@ -148,7 +156,7 @@ control_ret_t write_cmd_off_tile(control_resid_t resid, control_cmd_t cmd, const
     }
     rtos_printf("\n");
 
-    return CONTROL_ERROR;
+    return CONTROL_SUCCESS;
 }
 
 void vApplicationDaemonTaskStartup(void *arg)

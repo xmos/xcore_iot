@@ -124,12 +124,14 @@ static void device_control_client_thread(device_control_t *ctx)
     }
 }
 
-static control_ret_t special_read_command(control_cmd_t cmd,
+static control_ret_t special_read_command(device_control_t *ctx,
+                                          control_cmd_t cmd,
                                           uint8_t payload[],
                                           unsigned payload_len)
 {
-    if (cmd == CONTROL_GET_VERSION) {
-        rtos_printf("read version\n");
+    switch (cmd) {
+    case CONTROL_GET_VERSION:
+        rtos_printf("read version %d\n", CONTROL_VERSION);
         if (payload_len != sizeof(control_version_t)) {
             rtos_printf("wrong payload size %d for read version command, need %d\n",
                     payload_len, sizeof(control_version_t));
@@ -139,7 +141,20 @@ static control_ret_t special_read_command(control_cmd_t cmd,
             *((control_version_t*) payload) = CONTROL_VERSION;
             return CONTROL_SUCCESS;
         }
-    } else {
+
+    case CONTROL_GET_LAST_COMMAND_STATUS:
+        rtos_printf("read last command status %d\n", ctx->last_status);
+        if (payload_len != sizeof(control_status_t)) {
+            rtos_printf("wrong payload size %d for read version command, need %d\n",
+                    payload_len, sizeof(control_version_t));
+
+            return CONTROL_BAD_COMMAND;
+        } else {
+            *((control_status_t*) payload) = ctx->last_status;
+            return CONTROL_SUCCESS;
+        }
+
+    default:
         rtos_printf("unrecognised special resource command %d\n", cmd);
         return CONTROL_BAD_COMMAND;
     }
@@ -156,7 +171,7 @@ static control_ret_t do_command(device_control_t *ctx,
 
     if (resid == CONTROL_SPECIAL_RESID) {
         if (IS_CONTROL_CMD_READ(cmd)) {
-            return special_read_command(cmd, payload, payload_len);
+            return special_read_command(ctx, cmd, payload, payload_len);
         } else {
             rtos_printf("ignoring write to special resource %d\n", CONTROL_SPECIAL_RESID);
             return CONTROL_BAD_COMMAND;
@@ -219,35 +234,48 @@ static control_ret_t do_command(device_control_t *ctx,
 
 control_ret_t device_control_payload_transfer(device_control_t *ctx,
                                               uint8_t *payload_buf,
-                                              size_t buf_size,
+                                              size_t *buf_size,
                                               control_direction_t direction)
 {
+    control_ret_t ret;
     uint8_t servicer;
 
     const size_t requested_payload_len = ctx->requested_payload_len;
     const control_resid_t requested_resid = ctx->requested_resid;
     const control_cmd_t requested_cmd = ctx->requested_cmd;
 
-    if (resource_table_search(ctx, requested_resid, &servicer) != 0) {
-        rtos_printf("resource %d not found\n", requested_resid);
-        return CONTROL_BAD_COMMAND;
-    }
+    if (resource_table_search(ctx, requested_resid, &servicer) == 0) {
 
-    if ((direction == CONTROL_DEVICE_TO_HOST && IS_CONTROL_CMD_READ(requested_cmd)) ||
-        (direction == CONTROL_HOST_TO_DEVICE && !IS_CONTROL_CMD_READ(requested_cmd))) {
+        if ((direction == CONTROL_DEVICE_TO_HOST && IS_CONTROL_CMD_READ(requested_cmd)) ||
+            (direction == CONTROL_HOST_TO_DEVICE && !IS_CONTROL_CMD_READ(requested_cmd))) {
 
-        if (requested_payload_len > buf_size) {
-            return CONTROL_DATA_LENGTH_ERROR;
-        }
-
-        return do_command(ctx, servicer, requested_resid, requested_cmd, payload_buf, requested_payload_len);
-    } else {
-        if (buf_size > 0) {
-            return CONTROL_BAD_COMMAND;
+            if (requested_payload_len <= *buf_size) {
+                ret = do_command(ctx, servicer, requested_resid, requested_cmd, payload_buf, requested_payload_len);
+                if (direction == CONTROL_DEVICE_TO_HOST) {
+                    *buf_size = requested_payload_len;
+                }
+            } else {
+                ret = CONTROL_DATA_LENGTH_ERROR;
+            }
         } else {
-            return CONTROL_SUCCESS;
+            if (*buf_size > 0) {
+                ret = CONTROL_BAD_COMMAND;
+            } else {
+                /*
+                 * return early here since we don't want to
+                 * save the status in this case.
+                 */
+                return CONTROL_SUCCESS;
+            }
         }
+    } else {
+        rtos_printf("resource %d not found\n", requested_resid);
+        ret = CONTROL_BAD_COMMAND;
     }
+
+    ctx->last_status = ret;
+
+    return ret;
 }
 
 void device_control_request(device_control_t *ctx,
