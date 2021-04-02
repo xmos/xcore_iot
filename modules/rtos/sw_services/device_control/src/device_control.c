@@ -41,6 +41,89 @@ int resource_table_search(device_control_t *ctx,
                           control_resid_t resid,
                           uint8_t *servicer);
 
+control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
+                                               DEVICE_CONTROL_CALLBACK_ATTR device_control_read_cmd_cb_t read_cmd_cb,
+                                               DEVICE_CONTROL_CALLBACK_ATTR device_control_write_cmd_cb_t write_cmd_cb,
+                                               void *app_data,
+                                               unsigned timeout)
+{
+    device_control_t *device_control_ctx = ctx->device_control_ctx;
+    rtos_osal_status_t status;
+    control_ret_t ret = CONTROL_ERROR;
+    cmd_to_servicer_t *c_ptr;
+
+    status = rtos_osal_queue_receive(&ctx->queue, &c_ptr, timeout);
+    if (status == RTOS_OSAL_SUCCESS) {
+
+        if (IS_CONTROL_CMD_READ(c_ptr->cmd)) {
+            ret = read_cmd_cb(c_ptr->resid, c_ptr->cmd, c_ptr->payload, c_ptr->payload_len, app_data);
+        } else {
+            ret = write_cmd_cb(c_ptr->resid, c_ptr->cmd, c_ptr->payload, c_ptr->payload_len, app_data);
+        }
+
+        if (device_control_ctx->resource_table != NULL) {
+            status = rtos_osal_queue_send(&device_control_ctx->gateway_queue, &ret, 0); /* This should not block. As long as everything
+                                                                                           is working as designed, this queue will always
+                                                                                           be empty here. */
+            xassert(status == RTOS_OSAL_SUCCESS);
+        } else {
+            /* gateway is on another tile */
+
+            if (IS_CONTROL_CMD_READ(c_ptr->cmd)) {
+                rtos_intertile_tx_len(device_control_ctx->host_intertile, device_control_ctx->intertile_port, sizeof(ret) + c_ptr->payload_len);
+                rtos_intertile_tx_data(device_control_ctx->host_intertile, &ret, sizeof(ret));
+                rtos_intertile_tx_data(device_control_ctx->host_intertile, c_ptr->payload, c_ptr->payload_len);
+                /*
+                 * the thread that received this over the intertile channel
+                 * malloc'd this buffer, so it must be freed here.
+                 */
+                rtos_osal_free(c_ptr->payload);
+            } else {
+                rtos_intertile_tx(device_control_ctx->host_intertile, device_control_ctx->intertile_port, &ret, sizeof(ret));
+            }
+
+            /*
+             * the thread that received this over the intertile channel
+             * malloc'd this buffer, so it must be freed here.
+             * In the above case where it came from the same tile, this
+             * is still owned by the application.
+             */
+            rtos_osal_free(c_ptr);
+        }
+    }
+
+    return status == RTOS_OSAL_SUCCESS ? CONTROL_SUCCESS : CONTROL_ERROR;
+}
+
+static void device_control_client_thread(device_control_t *ctx)
+{
+    uint32_t msg_length;
+    cmd_to_servicer_t *c_ptr;
+
+    for (;;) {
+        msg_length = rtos_intertile_rx(ctx->host_intertile,
+                                       ctx->intertile_port,
+                                       (void **) &c_ptr,
+                                       RTOS_OSAL_WAIT_FOREVER);
+
+        if (msg_length != 0) {
+
+            if (IS_CONTROL_CMD_READ(c_ptr->cmd)) {
+                xassert(msg_length == sizeof(cmd_to_servicer_t));
+                xassert(c_ptr->payload_len > 0);
+                /* Allocate a buffer for the read data to be written to */
+                c_ptr->payload = rtos_osal_malloc(c_ptr->payload_len);
+            } else {
+                xassert(msg_length >= sizeof(cmd_to_servicer_t));
+                xassert(c_ptr->payload_len == msg_length - sizeof(cmd_to_servicer_t));
+                c_ptr->payload = c_ptr->buf;
+            }
+
+            rtos_osal_queue_send(c_ptr->queue, &c_ptr, RTOS_OSAL_WAIT_FOREVER);
+        }
+    }
+}
+
 static control_ret_t special_read_command(control_cmd_t cmd,
                                           uint8_t payload[],
                                           unsigned payload_len)
@@ -134,16 +217,6 @@ static control_ret_t do_command(device_control_t *ctx,
     }
 }
 
-void device_control_request(device_control_t *ctx,
-                            control_resid_t resid,
-                            control_cmd_t cmd,
-                            size_t payload_len)
-{
-    ctx->requested_resid = resid;
-    ctx->requested_cmd = cmd;
-    ctx->requested_payload_len = payload_len;
-}
-
 control_ret_t device_control_payload_transfer(device_control_t *ctx,
                                               uint8_t *payload_buf,
                                               size_t buf_size,
@@ -175,6 +248,48 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
             return CONTROL_SUCCESS;
         }
     }
+}
+
+void device_control_request(device_control_t *ctx,
+                            control_resid_t resid,
+                            control_cmd_t cmd,
+                            size_t payload_len)
+{
+    ctx->requested_resid = resid;
+    ctx->requested_cmd = cmd;
+    ctx->requested_payload_len = payload_len;
+}
+
+control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
+                                               device_control_t *device_control_ctx,
+                                               const control_resid_t resources[],
+                                               size_t num_resources)
+{
+    const size_t len = sizeof(servicer_init_data_t) + sizeof(control_resid_t) * num_resources;
+    servicer_init_data_t *init_data = rtos_osal_malloc(len);
+
+    /*
+     * TODO: Perhaps wait for an ACK. Then this would not need malloc().
+     */
+
+    ctx->device_control_ctx = device_control_ctx;
+    init_data->num_resources = num_resources;
+    rtos_osal_queue_create(&ctx->queue, "servicer_q", 1, sizeof(void *));
+    init_data->queue = &ctx->queue;
+    memcpy(init_data->resources, resources, sizeof(control_resid_t) * num_resources);
+
+    if (device_control_ctx->resource_table != NULL) {
+
+        rtos_osal_queue_send(&device_control_ctx->gateway_queue, &init_data, RTOS_OSAL_WAIT_FOREVER);
+
+    } else {
+        /* Resource table is NULL on client tiles */
+
+        rtos_intertile_tx(device_control_ctx->host_intertile, device_control_ctx->intertile_port, init_data, len);
+        rtos_osal_free(init_data);
+    }
+
+    return CONTROL_SUCCESS;
 }
 
 static int servicer_register(device_control_t *ctx,
@@ -228,128 +343,6 @@ control_ret_t device_control_resources_register(device_control_t *ctx,
     }
 }
 
-control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
-                                               DEVICE_CONTROL_CALLBACK_ATTR device_control_read_cmd_cb_t read_cmd_cb,
-                                               DEVICE_CONTROL_CALLBACK_ATTR device_control_write_cmd_cb_t write_cmd_cb,
-                                               void *app_data,
-                                               unsigned timeout)
-{
-    device_control_t *device_control_ctx = ctx->device_control_ctx;
-    rtos_osal_status_t status;
-    control_ret_t ret = CONTROL_ERROR;
-    cmd_to_servicer_t *c_ptr;
-
-    status = rtos_osal_queue_receive(&ctx->queue, &c_ptr, timeout);
-    if (status == RTOS_OSAL_SUCCESS) {
-
-        if (IS_CONTROL_CMD_READ(c_ptr->cmd)) {
-            ret = read_cmd_cb(c_ptr->resid, c_ptr->cmd, c_ptr->payload, c_ptr->payload_len, app_data);
-        } else {
-            ret = write_cmd_cb(c_ptr->resid, c_ptr->cmd, c_ptr->payload, c_ptr->payload_len, app_data);
-        }
-
-        if (device_control_ctx->resource_table != NULL) {
-            status = rtos_osal_queue_send(&device_control_ctx->gateway_queue, &ret, 0); /* This should not block. As long as everything
-                                                                                           is working as designed, this queue will always
-                                                                                           be empty here. */
-            xassert(status == RTOS_OSAL_SUCCESS);
-        } else {
-            /* gateway is on another tile */
-
-            if (IS_CONTROL_CMD_READ(c_ptr->cmd)) {
-                rtos_intertile_tx_len(device_control_ctx->host_intertile, device_control_ctx->intertile_port, sizeof(ret) + c_ptr->payload_len);
-                rtos_intertile_tx_data(device_control_ctx->host_intertile, &ret, sizeof(ret));
-                rtos_intertile_tx_data(device_control_ctx->host_intertile, c_ptr->payload, c_ptr->payload_len);
-                /*
-                 * the thread that received this over the intertile channel
-                 * malloc'd this buffer, so it must be freed here.
-                 */
-                rtos_osal_free(c_ptr->payload);
-            } else {
-                rtos_intertile_tx(device_control_ctx->host_intertile, device_control_ctx->intertile_port, &ret, sizeof(ret));
-            }
-
-            /*
-             * the thread that received this over the intertile channel
-             * malloc'd this buffer, so it must be freed here.
-             * In the above case where it came from the same tile, this
-             * is still owned by the application.
-             */
-            rtos_osal_free(c_ptr);
-        }
-    }
-
-    return status == RTOS_OSAL_SUCCESS ? CONTROL_SUCCESS : CONTROL_ERROR;
-}
-
-control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
-                                               device_control_t *device_control_ctx,
-                                               const control_resid_t resources[],
-                                               size_t num_resources)
-{
-    const size_t len = sizeof(servicer_init_data_t) + sizeof(control_resid_t) * num_resources;
-    servicer_init_data_t *init_data = rtos_osal_malloc(len);
-
-    /*
-     * TODO: Wait for an ACK? If so, would not need malloc().
-     */
-
-    ctx->device_control_ctx = device_control_ctx;
-    init_data->num_resources = num_resources;
-    rtos_osal_queue_create(&ctx->queue, "servicer_q", 1, sizeof(void *));
-    init_data->queue = &ctx->queue;
-    memcpy(init_data->resources, resources, sizeof(control_resid_t) * num_resources);
-
-    if (device_control_ctx->resource_table != NULL) {
-
-        rtos_osal_queue_send(&device_control_ctx->gateway_queue, &init_data, RTOS_OSAL_WAIT_FOREVER);
-
-    } else {
-        /* Resource table is NULL on client tiles */
-
-        rtos_intertile_tx(device_control_ctx->host_intertile, device_control_ctx->intertile_port, init_data, len);
-        rtos_osal_free(init_data);
-    }
-
-    return CONTROL_SUCCESS;
-}
-
-static void device_control_client_thread(device_control_t *ctx)
-{
-    uint32_t msg_length;
-    cmd_to_servicer_t *c_ptr;
-
-    for (;;) {
-        msg_length = rtos_intertile_rx(ctx->host_intertile,
-                                       ctx->intertile_port,
-                                       (void **) &c_ptr,
-                                       RTOS_OSAL_WAIT_FOREVER);
-
-        if (msg_length != 0) {
-
-            if (IS_CONTROL_CMD_READ(c_ptr->cmd)) {
-                xassert(msg_length == sizeof(cmd_to_servicer_t));
-                xassert(c_ptr->payload_len > 0);
-                /* Allocate a buffer for the read data to be written to */
-                c_ptr->payload = rtos_osal_malloc(c_ptr->payload_len);
-            } else {
-                xassert(msg_length >= sizeof(cmd_to_servicer_t));
-                xassert(c_ptr->payload_len == msg_length - sizeof(cmd_to_servicer_t));
-                c_ptr->payload = c_ptr->buf;
-            }
-
-            rtos_osal_queue_send(c_ptr->queue, &c_ptr, RTOS_OSAL_WAIT_FOREVER);
-        }
-    }
-}
-
-/*
- * TODO: Consider making this just for "client" tiles and
- * moving the queue_create into init() for the "host" tile.
- *
- * OR just combine the two functions? Do we really need both
- * init and start. It doesn't need to be like the drivers.
- */
 control_ret_t device_control_start(device_control_t *ctx,
                                    uint8_t intertile_port,
                                    unsigned priority)
