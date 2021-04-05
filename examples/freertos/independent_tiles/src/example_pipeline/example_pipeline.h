@@ -5,7 +5,7 @@
 #define SRC_EXAMPLE_PIPELINE_H_
 
 #include "rtos/drivers/mic_array/api/rtos_mic_array.h"
-#include "rtos/drivers/i2s/api/rtos_i2s_master.h"
+#include "rtos/drivers/i2s/api/rtos_i2s.h"
 
 #define EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE 48000
 #define EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH MIC_DUAL_FRAME_SIZE

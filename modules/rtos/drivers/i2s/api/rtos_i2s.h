@@ -61,7 +61,7 @@ struct rtos_i2s_struct{
     } send_buffer;
 };
 
-#include "rtos/drivers/i2s/api/rtos_i2s_master_rpc.h"
+#include "rtos/drivers/i2s/api/rtos_i2s_rpc.h"
 
 /**
  * \defgroup rtos_i2s_driver_core

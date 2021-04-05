@@ -3,7 +3,7 @@
 
 #include "rtos/drivers/rpc/api/rtos_rpc.h"
 
-#include "rtos/drivers/i2s/api/rtos_i2s_master.h"
+#include "rtos/drivers/i2s/api/rtos_i2s.h"
 
 __attribute__((fptrgroup("rtos_i2s_tx_fptr_grp")))
 static size_t i2s_remote_tx(
