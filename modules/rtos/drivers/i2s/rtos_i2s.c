@@ -18,12 +18,14 @@
 DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_i2s_isr, arg)
 {
     rtos_i2s_t *ctx = arg;
-    uint32_t isr_action;
+    int isr_action;
 
-    isr_action = s_chan_in_word(ctx->c_i2s_isr.end_b);
+    isr_action = s_chan_in_byte(ctx->c_i2s_isr.end_b);
 
     if (isr_action == ISR_RESUME_SEND) {
         rtos_osal_semaphore_put(&ctx->send_sem);
+    } else if (isr_action == ISR_RESUME_RECV) {
+        rtos_osal_semaphore_put(&ctx->recv_sem);
     }
 }
 
@@ -41,10 +43,32 @@ static i2s_restart_t i2s_restart_check(rtos_i2s_t *ctx)
 }
 
 I2S_CALLBACK_ATTR
-static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *samples)
+static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *i2s_sample_buf)
 {
-    (void) num_in;
-    (void) samples;
+    size_t words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
+    size_t words_free = ctx->recv_buffer.buf_size - words_available;
+
+    if (num_in <= words_free) {
+        memcpy(&ctx->recv_buffer.buf[ctx->recv_buffer.write_index], i2s_sample_buf, num_in * sizeof(int32_t));
+        ctx->recv_buffer.write_index += num_in;
+        if (ctx->recv_buffer.write_index >= ctx->recv_buffer.buf_size) {
+            ctx->recv_buffer.write_index = 0;
+        }
+        RTOS_MEMORY_BARRIER();
+        ctx->recv_buffer.total_written += num_in;
+    } else {
+        rtos_printf("i2s rx dropped\n");
+        //xassert(0);
+    }
+
+    if (ctx->recv_buffer.required_available_count > 0) {
+        words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
+
+        if (words_available >= ctx->recv_buffer.required_available_count) {
+            ctx->recv_buffer.required_available_count = 0;
+            s_chan_out_byte(ctx->c_i2s_isr.end_a, ISR_RESUME_RECV);
+        }
+    }
 }
 
 I2S_CALLBACK_ATTR
@@ -68,7 +92,7 @@ static void i2s_send(rtos_i2s_t *ctx, size_t num_out, int32_t *i2s_sample_buf)
 
         if (words_free >= ctx->send_buffer.required_free_count) {
             ctx->send_buffer.required_free_count = 0;
-            s_chan_out_word(ctx->c_i2s_isr.end_a, ISR_RESUME_SEND);
+            s_chan_out_byte(ctx->c_i2s_isr.end_a, ISR_RESUME_SEND);
         }
     }
 }
@@ -155,8 +179,63 @@ static void i2s_slave_thread(rtos_i2s_t *ctx)
             ctx->bclk);
 }
 
+__attribute__((fptrgroup("rtos_i2s_rx_fptr_grp")))
+static size_t i2s_local_rx(rtos_i2s_t *ctx,
+                           int32_t *i2s_sample_buf,
+                           size_t frame_count,
+                           unsigned timeout)
+{
+    size_t frames_recvd = 0;
+    size_t words_remaining = frame_count * (2 * ctx->num_in);
+    int32_t *sample_buf_ptr = (int32_t *) i2s_sample_buf;
+
+    xassert(words_remaining <= ctx->recv_buffer.buf_size);
+    if (words_remaining > ctx->recv_buffer.buf_size) {
+        return frames_recvd;
+    }
+
+    if (!ctx->recv_blocked) {
+        size_t words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
+        if (words_remaining > words_available) {
+            ctx->recv_buffer.required_available_count = words_remaining;
+            ctx->recv_blocked = 1;
+        }
+    }
+
+    if (ctx->recv_blocked) {
+        if (rtos_osal_semaphore_get(&ctx->recv_sem, timeout) == RTOS_OSAL_SUCCESS) {
+            ctx->recv_blocked = 0;
+        }
+    }
+
+    if (!ctx->recv_blocked) {
+        while (words_remaining) {
+            size_t words_to_copy = MIN(words_remaining, ctx->recv_buffer.buf_size - ctx->recv_buffer.read_index);
+            memcpy(sample_buf_ptr, &ctx->recv_buffer.buf[ctx->recv_buffer.read_index], words_to_copy * sizeof(int32_t));
+            ctx->recv_buffer.read_index += words_to_copy;
+
+            sample_buf_ptr += words_to_copy;
+            words_remaining -= words_to_copy;
+
+            if (ctx->recv_buffer.read_index >= ctx->recv_buffer.buf_size) {
+                ctx->recv_buffer.read_index = 0;
+            }
+        }
+
+        RTOS_MEMORY_BARRIER();
+        ctx->recv_buffer.total_read += frame_count * (2 * ctx->num_in);
+
+        frames_recvd = frame_count;
+    }
+
+    return frames_recvd;
+}
+
 __attribute__((fptrgroup("rtos_i2s_tx_fptr_grp")))
-static size_t i2s_local_tx(rtos_i2s_t *ctx, int32_t *i2s_sample_buf, size_t frame_count, unsigned timeout)
+static size_t i2s_local_tx(rtos_i2s_t *ctx,
+                           int32_t *i2s_sample_buf,
+                           size_t frame_count,
+                           unsigned timeout)
 {
     size_t frames_sent = 0;
     size_t words_remaining = frame_count * (2 * ctx->num_out);
@@ -207,16 +286,26 @@ void rtos_i2s_start(
         rtos_i2s_t *i2s_ctx,
         unsigned mclk_bclk_ratio,
         i2s_mode_t mode,
-        size_t buffer_size,
+        size_t recv_buffer_size,
+        size_t send_buffer_size,
         unsigned priority)
 {
     i2s_ctx->mclk_bclk_ratio = mclk_bclk_ratio;
     i2s_ctx->mode = mode;
 
+    memset(&i2s_ctx->recv_buffer, 0, sizeof(i2s_ctx->send_buffer));
+    if (i2s_ctx->num_in > 0) {
+        i2s_ctx->recv_buffer.buf_size = recv_buffer_size * (2 * i2s_ctx->num_in);
+        i2s_ctx->recv_buffer.buf = rtos_osal_malloc(i2s_ctx->recv_buffer.buf_size * sizeof(int32_t));
+        rtos_osal_semaphore_create(&i2s_ctx->recv_sem, "i2s_recv_sem", 1, 0);
+    }
+
     memset(&i2s_ctx->send_buffer, 0, sizeof(i2s_ctx->send_buffer));
-    i2s_ctx->send_buffer.buf_size = buffer_size * (2 * i2s_ctx->num_out);
-    i2s_ctx->send_buffer.buf = rtos_osal_malloc(i2s_ctx->send_buffer.buf_size * sizeof(int32_t));
-    rtos_osal_semaphore_create(&i2s_ctx->send_sem, "i2s_send_sem", 1, 0);
+    if (i2s_ctx->num_out > 0) {
+        i2s_ctx->send_buffer.buf_size = send_buffer_size * (2 * i2s_ctx->num_out);
+        i2s_ctx->send_buffer.buf = rtos_osal_malloc(i2s_ctx->send_buffer.buf_size * sizeof(int32_t));
+        rtos_osal_semaphore_create(&i2s_ctx->send_sem, "i2s_send_sem", 1, 0);
+    }
 
     rtos_osal_thread_create(
             NULL,
@@ -265,6 +354,7 @@ static void rtos_i2s_init(
     ctx->c_i2s_isr = s_chan_alloc();
 
     ctx->rpc_config = NULL;
+    ctx->rx = i2s_local_rx;
     ctx->tx = i2s_local_tx;
 }
 

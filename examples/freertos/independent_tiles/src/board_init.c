@@ -240,6 +240,10 @@ void board_tile1_init(
     port_t p_i2s_dout[1] = {
             PORT_I2S_DAC_DATA
     };
+    /* Ports for the I2S. */
+    port_t p_i2s_din[1] = {
+            PORT_I2S_ADC_DATA
+    };
     port_t p_bclk = PORT_I2S_BCLK;
     port_t p_lrclk = PORT_I2S_LRCLK;
 
@@ -265,8 +269,8 @@ void board_tile1_init(
             i2s_ctx,
             p_i2s_dout,
             1,
-            NULL,
-            0,
+            p_i2s_din,
+            1,
             p_bclk,
             p_lrclk,
             p_mclk,

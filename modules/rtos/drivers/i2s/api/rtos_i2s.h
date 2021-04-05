@@ -31,6 +31,9 @@ typedef struct rtos_i2s_struct rtos_i2s_t;
 struct rtos_i2s_struct{
     rtos_driver_rpc_t *rpc_config;
 
+    __attribute__((fptrgroup("rtos_i2s_rx_fptr_grp")))
+    size_t (*rx)(rtos_i2s_t *, int32_t *, size_t, unsigned);
+
     __attribute__((fptrgroup("rtos_i2s_tx_fptr_grp")))
     size_t (*tx)(rtos_i2s_t *, int32_t *, size_t, unsigned);
 
@@ -49,7 +52,9 @@ struct rtos_i2s_struct{
     size_t driver_thread_entry_size;
     streaming_channel_t c_i2s_isr;
     rtos_osal_semaphore_t send_sem;
+    rtos_osal_semaphore_t recv_sem;
     int send_blocked;
+    int recv_blocked;
     struct {
         int32_t *buf;
         size_t buf_size;
@@ -59,6 +64,15 @@ struct rtos_i2s_struct{
         volatile size_t total_read;
         volatile size_t required_free_count;
     } send_buffer;
+    struct {
+        int32_t *buf;
+        size_t buf_size;
+        size_t write_index;
+        size_t read_index;
+        volatile size_t total_written;
+        volatile size_t total_read;
+        volatile size_t required_available_count;
+    } recv_buffer;
 };
 
 #include "rtos/drivers/i2s/api/rtos_i2s_rpc.h"
@@ -71,6 +85,30 @@ struct rtos_i2s_struct{
  * by both the host and any client tiles that RPC has been enabled for.
  * @{
  */
+
+/**
+ * Receives sample frames from the I2S interface.
+ *
+ * This function will block until new frames are available.
+ *
+ * \param ctx            A pointer to the I2S driver instance to use.
+ * \param i2s_sample_buf A buffer to copy the received sample frames into.
+ * \param frame_count    The number of frames to receive from the buffer.
+ *                       This must be less than or equal to the size of the
+ *                       input buffer specified to rtos_i2s_start().
+ * \param timeout        The amount of time to wait before the requested number
+ *                       of frames becomes available.
+ *
+ * \returns              The number of frames actually received into \p i2s_sample_buf.
+ */
+inline size_t rtos_i2s_rx(
+        rtos_i2s_t *ctx,
+        int32_t *i2s_sample_buf,
+        size_t frame_count,
+        unsigned timeout)
+{
+    return ctx->rx(ctx, i2s_sample_buf, frame_count, timeout);
+}
 
 /**
  * Transmits sample frames out to the I2S interface.
@@ -127,26 +165,31 @@ inline int rtos_i2s_mclk_bclk_ratio(
  * One of rtos_i2s_master_init(), rtos_i2s_master_ext_clock_init, or rtos_i2s_slave_init()
  * must be called on this I2S driver instance prior to calling this.
  *
- * \param i2s_ctx         A pointer to the I2S driver instance to start.
- * \param mclk_bclk_ratio The master clock to bit clock ratio. This may be computed
- *                        by the helper function rtos_i2s_mclk_bclk_ratio().
- *                        This is only used if the I2S instance was initialized with
- *                        rtos_i2s_master_init(). Otherwise it is ignored.
- * \param mode            The mode of the LR clock. See i2s_mode_t.
- * \param buffer_size     The size in frames of the output buffer. Each frame is two samples
- *                        (left and right channels) per output port. For example, a size of two
- *                        here when num_out is three would create a buffer that holds up to
- *                        12 samples.
- *                        Frames transmitted by rtos_i2s_tx() are stored in this
- *                        buffers before they are sent out to the I2S interface.
- * \param priority        The priority of the task that gets created by the driver to
- *                        handle the I2S interface.
+ * \param i2s_ctx          A pointer to the I2S driver instance to start.
+ * \param mclk_bclk_ratio  The master clock to bit clock ratio. This may be computed
+ *                         by the helper function rtos_i2s_mclk_bclk_ratio().
+ *                         This is only used if the I2S instance was initialized with
+ *                         rtos_i2s_master_init(). Otherwise it is ignored.
+ * \param mode             The mode of the LR clock. See i2s_mode_t.
+ * \param recv_buffer_size The size in frames of the input buffer. Each frame is two samples
+ *                         (left and right channels) per input port. For example, a size of two
+ *                         here when num_in is three would create a buffer that holds up to
+ *                         12 samples.
+ * \param send_buffer_size The size in frames of the output buffer. Each frame is two samples
+ *                         (left and right channels) per output port. For example, a size of two
+ *                         here when num_out is three would create a buffer that holds up to
+ *                         12 samples.
+ *                         Frames transmitted by rtos_i2s_tx() are stored in this
+ *                         buffers before they are sent out to the I2S interface.
+ * \param priority         The priority of the task that gets created by the driver to
+ *                         handle the I2S interface.
  */
 void rtos_i2s_start(
         rtos_i2s_t *i2s_ctx,
         unsigned mclk_bclk_ratio,
         i2s_mode_t mode,
-        size_t buffer_size,
+        size_t recv_buffer_size,
+        size_t send_buffer_size,
         unsigned priority);
 
 /**

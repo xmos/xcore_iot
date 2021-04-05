@@ -50,15 +50,21 @@
 
 void *example_pipeline_input(void *data)
 {
-    rtos_mic_array_t *mic_array_ctx = data;
+    //rtos_mic_array_t *mic_array_ctx = data;
+    rtos_i2s_t *i2s_ctx = data;
 
     int32_t (*audio_frame)[2];
 
     audio_frame = pvPortMalloc(EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH * sizeof(audio_frame[0]));
 
-    rtos_mic_array_rx(
-            mic_array_ctx,
-            audio_frame,
+//    rtos_mic_array_rx(
+//            mic_array_ctx,
+//            audio_frame,
+//            EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
+//            portMAX_DELAY);
+    rtos_i2s_rx(
+            i2s_ctx,
+            (int32_t *) audio_frame,
             EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
             portMAX_DELAY);
 
@@ -140,7 +146,7 @@ void example_pipeline_init(
 	audio_pipeline_init(
 			example_pipeline_input,
 			example_pipeline_output,
-			mic_array_ctx,
+			i2s_ctx,//mic_array_ctx,
 			i2s_ctx,
 			stages,
 			stage_stack_sizes,

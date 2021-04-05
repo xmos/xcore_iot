@@ -27,7 +27,7 @@
 #endif
 
 #define I2C_TILE 1
-#define PIPELINE_TILE 0
+#define PIPELINE_TILE 1
 #define GPIO_TILE 0
 #define WIFI_TILE 1 /* Uses SPI, GPIO, and QSPI */
 #define QSPI_FLASH_TILE 1
@@ -218,7 +218,8 @@ void vApplicationDaemonTaskStartup(void *arg)
                 i2s_ctx,
                 rtos_i2s_mclk_bclk_ratio(AUDIO_CLOCK_FREQUENCY, EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE),
                 I2S_MODE_I2S,
-                1.2 * MIC_DUAL_FRAME_SIZE,
+                3.0 * MIC_DUAL_FRAME_SIZE,
+                3.0 * MIC_DUAL_FRAME_SIZE,
                 configMAX_PRIORITIES-1);
     }
     #endif
