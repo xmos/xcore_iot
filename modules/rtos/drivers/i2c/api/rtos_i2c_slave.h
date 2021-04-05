@@ -20,8 +20,8 @@
  * The maximum number of bytes that a the RTOS I2C slave driver can receive from a master
  * in a single write transaction.
  */
-#ifndef RTOS_I2C_SLAVE_MAX_WRITE_LEN
-#define RTOS_I2C_SLAVE_MAX_WRITE_LEN 256
+#ifndef RTOS_I2C_SLAVE_BUF_LEN
+#define RTOS_I2C_SLAVE_BUF_LEN 256
 #endif
 
 /**
@@ -34,6 +34,20 @@
  * Typedef to the RTOS I2C slave driver instance struct.
  */
 typedef struct rtos_i2c_slave_struct rtos_i2c_slave_t;
+
+/**
+ * Function pointer type for application provided RTOS I2C slave start callback functions.
+ *
+ * These callback functions are optionally called by an I2C slave driver's thread when it is first
+ * started. This gives the application a chance to perform startup initialization from within the
+ * driver's thread.
+ *
+ * \param ctx           A pointer to the associated I2C slave driver instance.
+ * \param app_data      A pointer to application specific data provided
+ *                      by the application. Used to share data between
+ *                      this callback function and the application.
+ */
+typedef void (*rtos_i2c_slave_start_cb_t)(rtos_i2c_slave_t *ctx, void *app_data);
 
 /**
  * Function pointer type for application provided RTOS I2C slave receive callback functions.
@@ -54,13 +68,16 @@ typedef void (*rtos_i2c_slave_rx_cb_t)(rtos_i2c_slave_t *ctx, void *app_data, ui
  * Function pointer type for application provided RTOS I2C slave transmit start callback functions.
  *
  * These callback functions are called when an I2C slave driver instance needs to transmit data to
- * a master device. This callback must provide a buffer to transmit and its length.
+ * a master device. This callback must provide the data to transmit and the length.
  *
  * \param ctx           A pointer to the associated I2C slave driver instance.
  * \param app_data      A pointer to application specific data provided
  *                      by the application. Used to share data between
  *                      this callback function and the application.
- * \param data          A pointer to the data to transmit to the master, set by the callback.
+ * \param data          A pointer to the data buffer to transmit to the master. The driver sets this
+ *                      to its internal data buffer, which has a size of RTOS_I2C_SLAVE_BUF_LEN, prior
+ *                      to calling this callback. This may be set to a different buffer by the callback.
+ *                      The callback must fill this buffer with the data to send to the master.
  *
  * \return              The number of bytes to transmit to the master from \p data. If the master
  *                      reads more bytes than this, the driver will wrap around to the start of the
@@ -69,7 +86,7 @@ typedef void (*rtos_i2c_slave_rx_cb_t)(rtos_i2c_slave_t *ctx, void *app_data, ui
 typedef size_t (*rtos_i2c_slave_tx_start_cb_t)(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data);
 
 /**
- * Optional function pointer type for application provided RTOS I2C slave transmit done callback functions.
+ * Function pointer type for application provided RTOS I2C slave transmit done callback functions.
  *
  * These callback functions are optionally called when an I2C slave driver instance is done transmitting data to
  * a master device. A buffer to the data sent and the actual number of bytes sent are provided to the callback.
@@ -97,7 +114,7 @@ struct rtos_i2c_slave_struct {
     uint8_t device_addr;
 
     void *app_data;
-    uint8_t rx_data[RTOS_I2C_SLAVE_MAX_WRITE_LEN];
+    uint8_t data_buf[RTOS_I2C_SLAVE_BUF_LEN];
     size_t rx_data_i;
 
     uint8_t *tx_data;
@@ -105,6 +122,7 @@ struct rtos_i2c_slave_struct {
     size_t tx_data_i;
     size_t tx_data_sent;
 
+    RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_start_cb_t start;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_rx_cb_t rx;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_tx_start_cb_t tx_start;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_tx_done_cb_t tx_done;
@@ -120,6 +138,8 @@ struct rtos_i2c_slave_struct {
  * \param i2c_slave_ctx A pointer to the I2C slave driver instance to start.
  * \param app_data      A pointer to application specific data to pass to
  *                      the callback functions.
+ * \param start         The callback function that is called when the driver's
+ *                      thread starts. This is optional and may be NULL.
  * \param rx            The callback function to receive data from the bus master.
  * \param tx_start      The callback function to transmit data to the bus master.
  * \param tx_done       The callback function that is notified when transmits are
@@ -130,6 +150,7 @@ struct rtos_i2c_slave_struct {
 void rtos_i2c_slave_start(
         rtos_i2c_slave_t *i2c_slave_ctx,
         void *app_data,
+        rtos_i2c_slave_start_cb_t start,
         rtos_i2c_slave_rx_cb_t rx,
         rtos_i2c_slave_tx_start_cb_t tx_start,
         rtos_i2c_slave_tx_done_cb_t tx_done,

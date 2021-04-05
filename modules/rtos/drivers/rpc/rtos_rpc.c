@@ -249,7 +249,7 @@ void rpc_client_call_generic(rtos_intertile_t *intertile_ctx, uint8_t port, int 
     rtos_osal_free(req_msg);
 
     /* receive RPC response message from host */
-    msg_length = rtos_intertile_rx(intertile_ctx, port, (void **) &resp_msg, portMAX_DELAY);
+    msg_length = rtos_intertile_rx(intertile_ctx, port, (void **) &resp_msg, RTOS_OSAL_WAIT_FOREVER);
     if (msg_length == 0) {
         /* TODO: What to do here? */
         xassert(0);
