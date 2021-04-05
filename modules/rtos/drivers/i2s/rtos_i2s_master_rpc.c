@@ -5,15 +5,15 @@
 
 #include "rtos/drivers/i2s/api/rtos_i2s_master.h"
 
-__attribute__((fptrgroup("rtos_i2s_master_tx_fptr_grp")))
-static size_t i2s_master_remote_tx(
-        rtos_i2s_master_t *ctx,
+__attribute__((fptrgroup("rtos_i2s_tx_fptr_grp")))
+static size_t i2s_remote_tx(
+        rtos_i2s_t *ctx,
         int32_t *i2s_sample_buf,
         size_t frame_count,
         unsigned timeout)
 {
     rtos_intertile_address_t *host_address = &ctx->rpc_config->host_address;
-    rtos_i2s_master_t *host_ctx_ptr = ctx->rpc_config->host_ctx_ptr;
+    rtos_i2s_t *host_ctx_ptr = ctx->rpc_config->host_ctx_ptr;
     size_t ret;
 
     const rpc_param_desc_t rpc_param_desc[] = {
@@ -32,11 +32,11 @@ static size_t i2s_master_remote_tx(
     return ret;
 }
 
-static int i2s_master_tx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+static int i2s_tx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 {
     int msg_length;
 
-    rtos_i2s_master_t *i2s_master_ctx;
+    rtos_i2s_t *i2s_ctx;
     int32_t *i2s_sample_buf;
     size_t frame_count;
     unsigned timeout;
@@ -44,13 +44,13 @@ static int i2s_master_tx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 
     rpc_request_unmarshall(
             rpc_msg,
-            &i2s_master_ctx, &i2s_sample_buf, &frame_count, &timeout, &ret);
+            &i2s_ctx, &i2s_sample_buf, &frame_count, &timeout, &ret);
 
-    ret = rtos_i2s_master_tx(i2s_master_ctx, i2s_sample_buf, frame_count, timeout);
+    ret = rtos_i2s_tx(i2s_ctx, i2s_sample_buf, frame_count, timeout);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
-            i2s_master_ctx, i2s_sample_buf, frame_count, timeout, ret);
+            i2s_ctx, i2s_sample_buf, frame_count, timeout, ret);
 
     return msg_length;
 }
@@ -72,7 +72,7 @@ static void i2s_rpc_thread(rtos_intertile_address_t *client_address)
 
         /* IGNORING rpc_msg->fcode, assuming the port is only used by this mic context */
 
-        msg_length = i2s_master_tx_rpc_host(&rpc_msg, &resp_msg);
+        msg_length = i2s_tx_rpc_host(&rpc_msg, &resp_msg);
 
         rtos_osal_free(req_msg);
 
@@ -83,7 +83,7 @@ static void i2s_rpc_thread(rtos_intertile_address_t *client_address)
 }
 
 __attribute__((fptrgroup("rtos_driver_rpc_host_start_fptr_grp")))
-static void i2s_master_rpc_start(
+static void i2s_rpc_start(
         rtos_driver_rpc_t *rpc_config)
 {
     xassert(rpc_config->host_task_priority >= 0);
@@ -104,12 +104,12 @@ static void i2s_master_rpc_start(
     }
 }
 
-void rtos_i2s_master_rpc_config(
-        rtos_i2s_master_t *i2s_master_ctx,
+void rtos_i2s_rpc_config(
+        rtos_i2s_t *i2s_ctx,
         unsigned intertile_port,
         unsigned host_task_priority)
 {
-    rtos_driver_rpc_t *rpc_config = i2s_master_ctx->rpc_config;
+    rtos_driver_rpc_t *rpc_config = i2s_ctx->rpc_config;
 
     if (rpc_config->remote_client_count == 0) {
         /* This is a client */
@@ -122,46 +122,46 @@ void rtos_i2s_master_rpc_config(
     }
 }
 
-void rtos_i2s_master_rpc_client_init(
-        rtos_i2s_master_t *i2s_master_ctx,
+void rtos_i2s_rpc_client_init(
+        rtos_i2s_t *i2s_ctx,
         rtos_driver_rpc_t *rpc_config,
         rtos_intertile_t *host_intertile_ctx)
 {
-    i2s_master_ctx->rpc_config = rpc_config;
-    i2s_master_ctx->tx = i2s_master_remote_tx;
+    i2s_ctx->rpc_config = rpc_config;
+    i2s_ctx->tx = i2s_remote_tx;
     rpc_config->rpc_host_start = NULL;
     rpc_config->remote_client_count = 0;
     rpc_config->host_task_priority = -1;
 
-    /* This must be configured later with rtos_i2s_master_rpc_config() */
+    /* This must be configured later with rtos_i2s_rpc_config() */
     rpc_config->host_address.port = -1;
 
     rpc_config->host_address.intertile_ctx = host_intertile_ctx;
     rpc_config->host_ctx_ptr = (void *) s_chan_in_word(host_intertile_ctx->c);
-    i2s_master_ctx->num_out = s_chan_in_word(host_intertile_ctx->c);
-    i2s_master_ctx->num_in = s_chan_in_word(host_intertile_ctx->c);
+    i2s_ctx->num_out = s_chan_in_word(host_intertile_ctx->c);
+    i2s_ctx->num_in = s_chan_in_word(host_intertile_ctx->c);
 }
 
-void rtos_i2s_master_rpc_host_init(
-        rtos_i2s_master_t *i2s_master_ctx,
+void rtos_i2s_rpc_host_init(
+        rtos_i2s_t *i2s_ctx,
         rtos_driver_rpc_t *rpc_config,
         rtos_intertile_t *client_intertile_ctx[],
         size_t remote_client_count)
 {
-    i2s_master_ctx->rpc_config = rpc_config;
-    rpc_config->rpc_host_start = i2s_master_rpc_start;
+    i2s_ctx->rpc_config = rpc_config;
+    rpc_config->rpc_host_start = i2s_rpc_start;
     rpc_config->remote_client_count = remote_client_count;
 
-    /* This must be configured later with rtos_i2s_master_rpc_config() */
+    /* This must be configured later with rtos_i2s_rpc_config() */
     rpc_config->host_task_priority = -1;
 
     for (int i = 0; i < remote_client_count; i++) {
         rpc_config->client_address[i].intertile_ctx = client_intertile_ctx[i];
-        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) i2s_master_ctx);
-        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) i2s_master_ctx->num_out);
-        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) i2s_master_ctx->num_in);
+        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) i2s_ctx);
+        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) i2s_ctx->num_out);
+        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) i2s_ctx->num_in);
 
-        /* This must be configured later with rtos_i2s_master_rpc_config() */
+        /* This must be configured later with rtos_i2s_rpc_config() */
         rpc_config->client_address[i].port = -1;
     }
 }

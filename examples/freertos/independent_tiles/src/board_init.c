@@ -94,7 +94,7 @@ void board_tile0_init(
         rtos_intertile_t *intertile1_ctx,
         rtos_intertile_t *intertile2_ctx,
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_ctx,
         rtos_i2c_master_t *i2c_master_ctx,
         rtos_spi_master_t *spi_master_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
@@ -203,8 +203,8 @@ void board_tile0_init(
             intertile1_ctx);
 #endif
 #if I2S_RPC_ENABLED
-    rtos_i2s_master_rpc_client_init(
-            i2s_master_ctx,
+    rtos_i2s_rpc_client_init(
+            i2s_ctx,
             &i2s_rpc_config,
             intertile1_ctx);
 #endif
@@ -215,7 +215,7 @@ void board_tile1_init(
         rtos_intertile_t *intertile1_ctx,
         rtos_intertile_t *intertile2_ctx,
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_ctx,
         rtos_i2c_master_t *i2c_master_ctx,
         rtos_spi_master_t *spi_master_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
@@ -262,7 +262,7 @@ void board_tile1_init(
             p_pdm_mics);
 
     rtos_i2s_master_init(
-            i2s_master_ctx,
+            i2s_ctx,
             p_i2s_dout,
             1,
             NULL,
@@ -305,8 +305,8 @@ void board_tile1_init(
             1);
 #endif
 #if I2S_RPC_ENABLED
-    rtos_i2s_master_rpc_host_init(
-            i2s_master_ctx,
+    rtos_i2s_rpc_host_init(
+            i2s_ctx,
             &i2s_rpc_config,
             client_intertile_ctx,
             1);

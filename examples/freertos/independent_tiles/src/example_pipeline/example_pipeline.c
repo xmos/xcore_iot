@@ -67,10 +67,10 @@ void *example_pipeline_input(void *data)
 
 int example_pipeline_output(void *audio_frame, void *data)
 {
-    rtos_i2s_master_t *i2s_master_ctx = data;
+    rtos_i2s_t *i2s_ctx = data;
 
-    rtos_i2s_master_tx(
-            i2s_master_ctx,
+    rtos_i2s_tx(
+            i2s_ctx,
             audio_frame,
             EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
             portMAX_DELAY);
@@ -121,7 +121,7 @@ void stage2(int32_t (*audio_frame)[2])
 
 void example_pipeline_init(
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx)
+        rtos_i2s_t *i2s_ctx)
 {
 	const int stage_count = 3;
 
@@ -141,7 +141,7 @@ void example_pipeline_init(
 			example_pipeline_input,
 			example_pipeline_output,
 			mic_array_ctx,
-			i2s_master_ctx,
+			i2s_ctx,
 			stages,
 			stage_stack_sizes,
 			configMAX_PRIORITIES / 2,

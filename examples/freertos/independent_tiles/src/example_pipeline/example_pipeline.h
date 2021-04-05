@@ -12,6 +12,6 @@
 
 void example_pipeline_init(
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx);
+        rtos_i2s_t *i2s_ctx);
 
 #endif /* SRC_EXAMPLE_PIPELINE_H_ */
