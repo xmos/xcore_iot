@@ -37,6 +37,61 @@ static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 
+#define MODE_ADDR   0x200000
+static int mode = 0;
+
+int check_dfu_mode()
+{
+    rtos_qspi_flash_read(
+        qspi_flash_ctx,
+        (uint8_t*)&mode,
+        (unsigned)(MODE_ADDR),
+        (size_t)sizeof(int));
+        rtos_printf("*****Mode is %u\n", mode);
+    if(mode == 0xffffffff) mode = 0;
+    return mode;
+}
+
+#define QSPI_FLASH_SECTOR_SIZE 4096
+
+void write_dfu_mode()
+{
+    uint8_t *tmp_buf = rtos_osal_malloc( sizeof(uint8_t) * QSPI_FLASH_SECTOR_SIZE);
+    rtos_qspi_flash_lock(qspi_flash_ctx);
+    {
+        rtos_qspi_flash_read(
+                qspi_flash_ctx,
+                tmp_buf,
+                (unsigned)(MODE_ADDR),
+                (size_t)QSPI_FLASH_SECTOR_SIZE);
+
+        memcpy(tmp_buf, &mode, sizeof(int));
+
+        rtos_qspi_flash_erase(
+                qspi_flash_ctx,
+                (unsigned)(MODE_ADDR),
+                (size_t)QSPI_FLASH_SECTOR_SIZE);
+        rtos_qspi_flash_write(
+                qspi_flash_ctx,
+                (uint8_t *) tmp_buf,
+                (unsigned)(MODE_ADDR),
+                (size_t)QSPI_FLASH_SECTOR_SIZE);
+    }
+    rtos_qspi_flash_unlock(qspi_flash_ctx);
+
+    rtos_osal_free(tmp_buf);
+}
+
+void set_rt_mode()
+{
+    mode = 0;
+}
+
+void set_dfu_mode()
+{
+    mode = 1;
+}
+
 void vApplicationDaemonTaskStartup(void *arg)
 {
     rtos_printf("vApplicationDaemonTaskStartup() on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
@@ -61,7 +116,10 @@ void vApplicationDaemonTaskStartup(void *arg)
 #ifdef MSC_MAX_DISKS
     create_tinyusb_disks(qspi_flash_ctx);
 #endif
-    create_tinyusb_demo(gpio_ctx, appconfTINYUSB_DEMO_TASK_PRIORITY);
+    demo_args_t *demo_task_args = pvPortMalloc(sizeof(demo_args_t));
+    demo_task_args->gpio_ctx = gpio_ctx;
+    demo_task_args->qspi_ctx = qspi_flash_ctx;
+    create_tinyusb_demo(demo_task_args, appconfTINYUSB_DEMO_TASK_PRIORITY);
     usb_manager_start(appconfUSB_MANAGER_TASK_PRIORITY);
 #endif
 
