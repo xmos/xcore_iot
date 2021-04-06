@@ -22,6 +22,8 @@
 #define SPI_RPC_ENABLED 1
 #define QSPI_FLASH_RPC_ENABLED 1
 
+#define I2S_ADC_ENABLED 0
+
 void board_tile0_init(
         chanend_t tile1,
         rtos_intertile_t *intertile1_ctx,

@@ -270,7 +270,7 @@ void board_tile1_init(
             p_i2s_dout,
             1,
             p_i2s_din,
-            1,
+            I2S_ADC_ENABLED ? 1 : 0,
             p_bclk,
             p_lrclk,
             p_mclk,

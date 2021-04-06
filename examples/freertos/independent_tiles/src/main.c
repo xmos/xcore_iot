@@ -27,7 +27,7 @@
 #endif
 
 #define I2C_TILE 1
-#define PIPELINE_TILE 1
+#define PIPELINE_TILE 0
 #define GPIO_TILE 0
 #define WIFI_TILE 1 /* Uses SPI, GPIO, and QSPI */
 #define QSPI_FLASH_TILE 1
@@ -95,7 +95,9 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
     switch (xCoreID) {
 
     case 0:
+#if !I2S_ADC_ENABLED
         rtos_mic_array_interrupt_init(mic_array_ctx);
+#endif
         break;
     case 1:
         rtos_i2s_interrupt_init(i2s_ctx);
@@ -141,7 +143,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 #if I2C_RPC_ENABLED
     rtos_i2c_master_rpc_config(i2c_master_ctx, I2C_MASTER_RPC_PORT, I2C_MASTER_RPC_HOST_TASK_PRIORITY);
 #endif
-#if MIC_ARRAY_RPC_ENABLED
+#if MIC_ARRAY_RPC_ENABLED && !I2S_ADC_ENABLED
     rtos_mic_array_rpc_config(mic_array_ctx, MIC_ARRAY_RPC_PORT, MIC_ARRAY_RPC_HOST_TASK_PRIORITY);
 #endif
 #if I2S_RPC_ENABLED
@@ -200,6 +202,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     #if ON_TILE(1)
     {
+#if !I2S_ADC_ENABLED
         const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
                 PDM_CLOCK_FREQUENCY,
                 EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE);
@@ -210,9 +213,9 @@ void vApplicationDaemonTaskStartup(void *arg)
                 pdm_decimation_factor,
                 rtos_mic_array_third_stage_coefs(pdm_decimation_factor),
                 rtos_mic_array_fir_compensation(pdm_decimation_factor),
-                1.2 * MIC_DUAL_FRAME_SIZE,
+                3.0 * MIC_DUAL_FRAME_SIZE,
                 configMAX_PRIORITIES-1);
-
+#endif
         rtos_printf("Starting i2s driver\n");
         rtos_i2s_start(
                 i2s_ctx,

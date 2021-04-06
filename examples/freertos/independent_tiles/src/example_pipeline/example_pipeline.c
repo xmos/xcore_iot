@@ -11,6 +11,7 @@
 
 #include "audio_pipeline/audio_pipeline.h"
 #include "example_pipeline.h"
+#include "board_init.h"
 
 #define GOOD 1
 
@@ -50,23 +51,23 @@
 
 void *example_pipeline_input(void *data)
 {
-    //rtos_mic_array_t *mic_array_ctx = data;
-    rtos_i2s_t *i2s_ctx = data;
-
     int32_t (*audio_frame)[2];
 
     audio_frame = pvPortMalloc(EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH * sizeof(audio_frame[0]));
 
-//    rtos_mic_array_rx(
-//            mic_array_ctx,
-//            audio_frame,
-//            EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
-//            portMAX_DELAY);
+#if I2S_ADC_ENABLED
     rtos_i2s_rx(
-            i2s_ctx,
+            (rtos_i2s_t *) data,
             (int32_t *) audio_frame,
             EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
             portMAX_DELAY);
+#else
+    rtos_mic_array_rx(
+            (rtos_mic_array_t *) data,
+            audio_frame,
+            EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
+            portMAX_DELAY);
+#endif
 
     return audio_frame;
 }
@@ -146,7 +147,11 @@ void example_pipeline_init(
 	audio_pipeline_init(
 			example_pipeline_input,
 			example_pipeline_output,
-			i2s_ctx,//mic_array_ctx,
+#if I2S_ADC_ENABLED
+			i2s_ctx,
+#else
+			mic_array_ctx,
+#endif
 			i2s_ctx,
 			stages,
 			stage_stack_sizes,
