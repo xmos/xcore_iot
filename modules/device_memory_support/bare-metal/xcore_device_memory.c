@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#ifdef XCORE
+#include <xcore/assert.h>
 #include <xcore/port.h>
 #include <xcore/swmem_fill.h>
 #include <xmos_flash.h>
@@ -17,6 +17,7 @@
 #define BYTE_TO_WORD_ADDRESS(b) ((b) / sizeof(uint32_t))
 
 #ifdef USE_SWMEM
+
 flash_ports_t flash_ports_0 = {PORT_SQI_CS, PORT_SQI_SCLK, PORT_SQI_SIO,
                                XS1_CLKBLK_5};
 
@@ -61,19 +62,14 @@ void swmem_handler(void *ignored) {
     swmem_fill(address);
   }
 }
-#endif /* USE_SWMEM */
 
-void memload(void *dest, void *src, size_t size) {
-#ifdef USE_SWMEM
-  if (IS_SWMEM(src)) {
-    flash_read_quad(&flash_handle,
-                    BYTE_TO_WORD_ADDRESS(((uintptr_t)src - XS1_SWMEM_BASE)),
-                    (unsigned int *)dest, BYTES_TO_WORDS(size));
-  } else
-#endif /* USE_SWMEM */
-      if (IS_EXTMEM(src)) {
-    memcpy(dest, src, size);
-  }
+size_t swmem_load(void *dest, const void *src, size_t size) {
+  xassert(IS_SWMEM(src));
+
+  flash_read_quad(&flash_handle,
+                  BYTE_TO_WORD_ADDRESS(((uintptr_t)src - XS1_SWMEM_BASE)),
+                  (unsigned int *)dest, BYTES_TO_WORDS(size));
+  return size;
 }
 
-#endif  // XCORE
+#endif /* USE_SWMEM */

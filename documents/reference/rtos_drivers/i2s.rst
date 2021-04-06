@@ -11,7 +11,7 @@ Initialization API
 ******************
 The following structures and functions are used to initialize and start an |I2S| driver instance.
 
-.. doxygengroup:: rtos_i2s_master_driver
+.. doxygengroup:: rtos_i2s_driver
    :content-only:
 
 ********
@@ -20,7 +20,7 @@ Core API
 
 The following functions are the core |I2S| driver functions that are used after it has been initialized and started.
 
-.. doxygengroup:: rtos_i2s_master_driver_core
+.. doxygengroup:: rtos_i2s_driver_core
    :content-only:
 
 **********************
@@ -30,5 +30,5 @@ RPC Initialization API
 The following functions may be used to share a |I2S| driver instance with other XCore tiles. Tiles that the
 driver instance is shared with may call any of the core functions listed above.
 
-.. doxygengroup:: rtos_i2s_master_driver_rpc
+.. doxygengroup:: rtos_i2s_driver_rpc
    :content-only:

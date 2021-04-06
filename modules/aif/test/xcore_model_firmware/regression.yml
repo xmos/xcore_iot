@@ -4,41 +4,41 @@
     SRAM: 44400
     EXTMEM: 57424
   code_size:
-    tile_0: 59744
+    tile_0: 60180
   benchmark:
-    SRAM: 7294
-    EXTMEM: 7870
-    SWMEM: 16410
+    SRAM: 8510
+    EXTMEM: 9054
+    SWMEM: 19044
 - model: cifar10
   par: 5
   arena_size:
     SRAM: 44704
     EXTMEM: 57728
   code_size:
-    tile_0: 59744
+    tile_0: 60180
   benchmark:
-    SRAM: 2309
-    EXTMEM: 2888
-    SWMEM: null
+    SRAM: 2700
+    EXTMEM: 3247
+    SWMEM: 13260
 - model: vww_96
   par: 1
   arena_size:
     SRAM: 87504
     EXTMEM: 91824
   code_size:
-    tile_0: 59364
+    tile_0: 59784
   benchmark:
-    SRAM: 17035
-    EXTMEM: 19244
-    SWMEM: null
+    SRAM: 19878
+    EXTMEM: 22297
+    SWMEM: 57922
 - model: vww_96
   par: 5
   arena_size:
     SRAM: 88656
     EXTMEM: 92976
   code_size:
-    tile_0: 59364
+    tile_0: 59784
   benchmark:
-    SRAM: 8452
-    EXTMEM: 10774
-    SWMEM: null
+    SRAM: 9866
+    EXTMEM: 12441
+    SWMEM: 47853
