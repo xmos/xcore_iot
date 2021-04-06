@@ -161,6 +161,10 @@ uint16_t tud_dfu_mode_req_upload_data_cb(uint16_t block_num, uint8_t* data, uint
   }
 }
 
+dfu_protocol_type_t dfu_init_in_mode_cb()
+{
+  return DFU_PROTOCOL_DFU;
+}
 
 static void reboot()
 {

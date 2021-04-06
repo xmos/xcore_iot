@@ -104,9 +104,6 @@ set(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST FALSE)
 ## In progress
 set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
 
-## On Hold
-set(USE_TINYUSB_DEMO_NET_LWIP_WEBSERVER          FALSE)
-
 if(XMOS_TINYUSB_DEMO)
     set(DEMO_SOURCES
         "src/xmos_demo/demo_main.c"

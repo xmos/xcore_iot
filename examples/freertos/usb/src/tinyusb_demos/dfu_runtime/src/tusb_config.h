@@ -80,8 +80,9 @@
 
 //------------- CLASS -------------//
 
-#define CFG_TUD_DFU_RUNTIME 1
-#define CFG_TUD_DFU_MODE    1
+// #define CFG_TUD_DFU_RUNTIME 1
+// #define CFG_TUD_DFU_MODE    1
+#define CFG_TUD_DFU_RUNTIME_AND_MODE    1
 
 #ifdef __cplusplus
  }

@@ -14,7 +14,6 @@ set(HID_GENERIC_INOUT_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_generic_inout/src")
 set(HID_MULTIPLE_INTERFACE_TEST_PATH "${TINYUSB_DEMO_PATH}/hid_multiple_interface/src")
 set(MIDI_TEST_PATH "${TINYUSB_DEMO_PATH}/midi_test/src")
 set(MSC_DUAL_LUN_PATH "${TINYUSB_DEMO_PATH}/msc_dual_lun/src")
-set(NET_LWIP_WEBSERVER_PATH "${TINYUSB_DEMO_PATH}/net_lwip_webserver/src")
 set(UAC2_HEADSET_PATH "${TINYUSB_DEMO_PATH}/uac2_headset/src")
 set(USBTMC_PATH "${TINYUSB_DEMO_PATH}/usbtmc/src")
 set(WEBUSB_SERIAL "${TINYUSB_DEMO_PATH}/webusb_serial/src")
@@ -31,7 +30,6 @@ option(USE_TINYUSB_DEMO_HID_GENERIC_INOUT_TEST      "Enable to use TinyUSB demo"
 option(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_MIDI_TEST                   "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_MSC_DUAL_LUN                "Enable to use TinyUSB demo" FALSE)
-option(USE_TINYUSB_DEMO_NET_LWIP_WEBSERVER          "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_UAC2_HEADSET                "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_USBTMC                      "Enable to use TinyUSB demo" FALSE)
 option(USE_TINYUSB_DEMO_WEBUSB_SERIAL               "Enable to use TinyUSB demo" FALSE)
@@ -148,19 +146,6 @@ if(USE_TINYUSB_DEMO_MSC_DUAL_LUN)
     set(TINYUSB_DEMO_SOURCES
         "${DEMO_PATH}/demo_main.c"
         "${DEMO_PATH}/msc_disk_dual.c"
-        "${DEMO_PATH}/usb_descriptors.c"
-    )
-
-    set(TINYUSB_DEMO_INCLUDES
-        ${DEMO_PATH}
-    )
-endif()
-
-if(USE_TINYUSB_DEMO_NET_LWIP_WEBSERVER)
-    set(DEMO_PATH ${NET_LWIP_WEBSERVER_PATH})
-
-    set(TINYUSB_DEMO_SOURCES
-        "${DEMO_PATH}/demo_main.c"
         "${DEMO_PATH}/usb_descriptors.c"
     )
 
