@@ -40,5 +40,5 @@
     tile_0: 59784
   benchmark:
     SRAM: 9866
-    EXTMEM: 12441
+    EXTMEM: 12332
     SWMEM: 47853
