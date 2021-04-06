@@ -56,7 +56,7 @@ pipeline {
         }
         stage("Patch toolchain") {
             steps {
-                sh "patch -N /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/target/include/xs1_clock.h -i xs1_clock.patch"
+                sh "patch -N /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/${params.TOOLS_VERSION}/target/include/xs1_clock.h -i xs1_clock.patch"
             }
         }
         stage("Update environment") {
