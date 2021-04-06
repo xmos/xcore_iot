@@ -57,7 +57,7 @@
 
 static rtos_mic_array_t mic_array_ctx_s;
 static rtos_i2c_master_t i2c_master_ctx_s;
-static rtos_i2s_master_t i2s_master_ctx_s;
+static rtos_i2s_t i2s_ctx_s;
 static rtos_spi_master_t spi_master_ctx_s;
 static rtos_spi_master_device_t wifi_device_ctx_s;
 static rtos_qspi_flash_t qspi_flash_ctx_s;
@@ -67,7 +67,7 @@ static rtos_intertile_t intertile2_ctx_s;
 
 static rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_i2c_master_t *i2c_master_ctx = &i2c_master_ctx_s;
-static rtos_i2s_master_t *i2s_master_ctx = &i2s_master_ctx_s;
+static rtos_i2s_t *i2s_ctx = &i2s_ctx_s;
 static rtos_spi_master_t *spi_master_ctx = &spi_master_ctx_s;
 static rtos_spi_master_device_t *wifi_device_ctx = &wifi_device_ctx_s;
 static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
@@ -95,10 +95,12 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
     switch (xCoreID) {
 
     case 0:
+#if !I2S_ADC_ENABLED
         rtos_mic_array_interrupt_init(mic_array_ctx);
+#endif
         break;
     case 1:
-        rtos_i2s_master_interrupt_init(i2s_master_ctx);
+        rtos_i2s_interrupt_init(i2s_ctx);
         break;
     }
 
@@ -111,8 +113,8 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
 #define MIC_ARRAY_RPC_PORT 10
 #define MIC_ARRAY_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
-#define I2S_MASTER_RPC_PORT 11
-#define I2S_MASTER_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
+#define I2S_RPC_PORT 11
+#define I2S_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
 #define GPIO_RPC_PORT 12
 #define GPIO_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
@@ -141,11 +143,11 @@ void vApplicationDaemonTaskStartup(void *arg)
 #if I2C_RPC_ENABLED
     rtos_i2c_master_rpc_config(i2c_master_ctx, I2C_MASTER_RPC_PORT, I2C_MASTER_RPC_HOST_TASK_PRIORITY);
 #endif
-#if MIC_ARRAY_RPC_ENABLED
+#if MIC_ARRAY_RPC_ENABLED && !I2S_ADC_ENABLED
     rtos_mic_array_rpc_config(mic_array_ctx, MIC_ARRAY_RPC_PORT, MIC_ARRAY_RPC_HOST_TASK_PRIORITY);
 #endif
 #if I2S_RPC_ENABLED
-    rtos_i2s_master_rpc_config(i2s_master_ctx, I2S_MASTER_RPC_PORT, I2S_MASTER_RPC_HOST_TASK_PRIORITY);
+    rtos_i2s_rpc_config(i2s_ctx, I2S_RPC_PORT, I2S_RPC_HOST_TASK_PRIORITY);
 #endif
 #if GPIO_RPC_ENABLED
     rtos_gpio_rpc_config(gpio_ctx, GPIO_RPC_PORT, GPIO_RPC_HOST_TASK_PRIORITY);
@@ -200,6 +202,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     #if ON_TILE(1)
     {
+#if !I2S_ADC_ENABLED
         const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
                 PDM_CLOCK_FREQUENCY,
                 EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE);
@@ -210,22 +213,23 @@ void vApplicationDaemonTaskStartup(void *arg)
                 pdm_decimation_factor,
                 rtos_mic_array_third_stage_coefs(pdm_decimation_factor),
                 rtos_mic_array_fir_compensation(pdm_decimation_factor),
-                1.2 * MIC_DUAL_FRAME_SIZE,
+                3.0 * MIC_DUAL_FRAME_SIZE,
                 configMAX_PRIORITIES-1);
-
+#endif
         rtos_printf("Starting i2s driver\n");
-        rtos_i2s_master_start(
-                i2s_master_ctx,
-                rtos_i2s_master_mclk_bclk_ratio(AUDIO_CLOCK_FREQUENCY, EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE),
+        rtos_i2s_start(
+                i2s_ctx,
+                rtos_i2s_mclk_bclk_ratio(AUDIO_CLOCK_FREQUENCY, EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE),
                 I2S_MODE_I2S,
-                1.2 * MIC_DUAL_FRAME_SIZE,
+                3.0 * MIC_DUAL_FRAME_SIZE,
+                3.0 * MIC_DUAL_FRAME_SIZE,
                 configMAX_PRIORITIES-1);
     }
     #endif
 
     #if ON_TILE(PIPELINE_TILE)
     {
-        example_pipeline_init(mic_array_ctx, i2s_master_ctx);
+        example_pipeline_init(mic_array_ctx, i2s_ctx);
     }
     #endif
 
@@ -295,7 +299,7 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 #endif
 
     (void) c0;
-    board_tile0_init(c1, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
+    board_tile0_init(c1, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
     (void) c2;
     (void) c3;
 
@@ -322,7 +326,7 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     swmem_test_init();
 #endif
 
-    board_tile1_init(c0, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
+    board_tile1_init(c0, intertile_ctx, intertile2_ctx, mic_array_ctx, i2s_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, wifi_device_ctx, gpio_ctx);
     (void) c1;
     (void) c2;
     (void) c3;

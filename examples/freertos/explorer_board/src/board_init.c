@@ -165,7 +165,7 @@ void board_tile1_init(
         chanend_t tile0,
         rtos_intertile_t *intertile1_ctx,
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_ctx,
         rtos_i2c_master_t *i2c_master_ctx,
         rtos_gpio_t *gpio_ctx)
 {
@@ -207,7 +207,7 @@ void board_tile1_init(
             p_pdm_mics);
 
     rtos_i2s_master_init(
-            i2s_master_ctx,
+            i2s_ctx,
             p_i2s_dout,
             1,
             NULL,

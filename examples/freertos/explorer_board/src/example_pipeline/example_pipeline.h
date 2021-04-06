@@ -5,7 +5,7 @@
 #define SRC_EXAMPLE_PIPELINE_H_
 
 #include "rtos/drivers/mic_array/api/rtos_mic_array.h"
-#include "rtos/drivers/i2s/api/rtos_i2s_master.h"
+#include "rtos/drivers/i2s/api/rtos_i2s.h"
 
 enum {
     GET_GAIN_VAL = 1,
@@ -14,7 +14,7 @@ enum {
 
 void example_pipeline_init(
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_ctx,
         rtos_intertile_t *host_intertile_ctx,
         unsigned intertile_port);
 
