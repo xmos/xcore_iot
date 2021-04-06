@@ -13,6 +13,12 @@
 static swmem_fill_t swmem_fill_res;
 static swmem_evict_t swmem_evict_res;
 
+#define SWMEM_ADDRESS_UNINITIALISED 0xffffffff
+
+// This must be initialized to a value, to prevent it from being memset to zero during
+// C runtime startup.  This value may be set by the bootloader
+static volatile unsigned int __swmem_address = SWMEM_ADDRESS_UNINITIALISED;
+
 static bool started;
 static rtos_osal_event_group_t swmem_event_group;
 
@@ -76,7 +82,7 @@ static void rtos_swmem_thread(void *arg)
         if (flags & RTOS_SWMEM_READ_FLAG) {
             uint32_t buf[SWMEM_FILL_SIZE_WORDS];
             fill_slot_t fill_slot = swmem_fill_in_address(swmem_fill_res);
-            rtos_swmem_read_request((unsigned)(fill_slot - XS1_SWMEM_BASE), buf);
+            rtos_swmem_read_request((unsigned)(fill_slot - XS1_SWMEM_BASE + __swmem_address), buf);
             swmem_fill_populate_from_buffer(swmem_fill_res, fill_slot, buf);
             triggerable_enable_trigger(swmem_fill_res);
         }
@@ -86,7 +92,7 @@ static void rtos_swmem_thread(void *arg)
             evict_slot_t evict_slot = swmem_evict_in_address(swmem_evict_res);
             evict_mask_t dirty_mask = swmem_evict_get_dirty_mask(swmem_evict_res, evict_slot);
             swmem_evict_to_buffer(swmem_evict_res, evict_slot, buf);
-            rtos_swmem_write_request((unsigned)(evict_slot - XS1_SWMEM_BASE), dirty_mask, buf);
+            rtos_swmem_write_request((unsigned)(evict_slot - XS1_SWMEM_BASE + __swmem_address), dirty_mask, buf);
             triggerable_enable_trigger(swmem_evict_res);
         }
 
@@ -125,6 +131,11 @@ void rtos_swmem_start(unsigned priority)
 
 void rtos_swmem_init(uint32_t init_flags)
 {
+    if (__swmem_address == SWMEM_ADDRESS_UNINITIALISED)
+    {
+        __swmem_address = 0;
+    }
+
     if ((init_flags & RTOS_SWMEM_READ_FLAG) && swmem_fill_res == 0) {
         swmem_fill_res = swmem_fill_get();
     }
