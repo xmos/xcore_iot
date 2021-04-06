@@ -64,7 +64,9 @@ void setup() {
 
   // This pulls in all the operation implementations we need.
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroMutableOpResolver<1> resolver;
+  static tflite::MicroMutableOpResolver<4> resolver;
+  resolver.AddQuantize();
+  resolver.AddDequantize();
   resolver.AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode,
                      tflite::ops::micro::xcore::Register_FullyConnected_8());
 
@@ -99,8 +101,7 @@ void loop() {
   float x_val = position * kXrange;
 
   // Place our calculated x value in the model's input tensor
-  input->data.int8[0] =
-      std::round(x_val / input->params.scale) + input->params.zero_point;
+  input->data.f[0] = x_val;
 
   // Run inference, and report any error
   TfLiteStatus invoke_status = interpreter->Invoke();
@@ -111,8 +112,7 @@ void loop() {
   }
 
   // Read the predicted y value from the model's output tensor
-  float y_val =
-      (output->data.int8[0] - output->params.zero_point) * output->params.scale;
+  float y_val = output->data.f[0];
 
   // Output the results. A custom HandleOutput function can be implemented
   // for each supported hardware target.
