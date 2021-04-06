@@ -74,12 +74,11 @@ add_compile_definitions(
     CFG_TUSB_MCU=OPT_MCU_NONE
     CFG_TUSB_OS=OPT_OS_CUSTOM
     BOARD_DEVICE_RHPORT_NUM=0
-    BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED
     CFG_TUD_EP_MAX=12  ## RTOS_USB_ENDPOINT_COUNT_MAX
     CFG_TUD_TASK_QUEUE_SZ=8
 
     CFG_TUSB_DEBUG_PRINTF=rtos_printf
-    CFG_TUSB_DEBUG=0
+    CFG_TUSB_DEBUG=2
 
     DEBUG_PRINT_ENABLE=1
     XUD_CORE_CLOCK=${SYSCLK_FREQ}
@@ -89,26 +88,21 @@ add_compile_definitions(
 )
 
 ## Select demo
-set(XMOS_TINYUSB_DEMO                            TRUE)
+set(XMOS_TINYUSB_DEMO                            FALSE)
 set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
 set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
-
-## In progress
+set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               FALSE)
+set(USE_TINYUSB_DEMO_MIDI_TEST                   FALSE)
+set(USE_TINYUSB_DEMO_USBTMC                      FALSE)
 set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
 set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE)
-set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
-
-## TODO
+set(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            TRUE)
 set(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         FALSE)
-set(USE_TINYUSB_DEMO_CDC_MSC_FREERTOS_TEST       FALSE)
-set(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            FALSE)
-set(USE_TINYUSB_DEMO_DYNAMIC_CONFIGURATION_TEST  FALSE)
 set(USE_TINYUSB_DEMO_HID_GENERIC_INOUT_TEST      FALSE)
 set(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST FALSE)
-set(USE_TINYUSB_DEMO_MIDI_TEST                   FALSE)
-set(USE_TINYUSB_DEMO_NET_LWIP_WEBSERVER          FALSE)
-set(USE_TINYUSB_DEMO_USBTMC                      FALSE)
-set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               FALSE)
+
+## In progress
+set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
 
 if(XMOS_TINYUSB_DEMO)
     set(DEMO_SOURCES
@@ -120,11 +114,18 @@ if(XMOS_TINYUSB_DEMO)
         "src/xmos_demo"
     )
     add_compile_definitions(MSC_MAX_DISKS=2)
+    set(USE_DISK_MANAGER_TUSB                   TRUE)
 else()
     include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
 
     set(DEMO_SOURCES ${TINYUSB_DEMO_SOURCES})
     set(DEMO_INCLUDES ${TINYUSB_DEMO_INCLUDES})
+
+if(USE_TINYUSB_DEMO_USBTMC)
+    add_compile_definitions(BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_FULL_SPEED)
+else()
+    add_compile_definitions(BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+endif()
 endif()
 
 ## Create targets

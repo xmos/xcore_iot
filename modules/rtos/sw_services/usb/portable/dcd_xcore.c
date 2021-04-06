@@ -401,16 +401,18 @@ bool dcd_edpt_xfer(uint8_t rhport,
 // Stall endpoint
 void dcd_edpt_stall (uint8_t rhport, uint8_t ep_addr)
 {
-  (void) rhport;
-
-  prepare_setup(false);
-  rtos_usb_endpoint_stall_set(&usb_ctx, ep_addr);
+    (void) rhport;
+    rtos_printf("Stalling EP %02x\n", ep_addr);
+    if (tu_edpt_number(ep_addr) == 0) {
+        prepare_setup(false);
+    }
+    rtos_usb_endpoint_stall_set(&usb_ctx, ep_addr);
 }
 
 // clear stall, data toggle is also reset to DATA0
 void dcd_edpt_clear_stall (uint8_t rhport, uint8_t ep_addr)
 {
-  (void) rhport;
+    (void) rhport;
 
-  rtos_usb_endpoint_stall_clear(&usb_ctx, ep_addr);
+    rtos_usb_endpoint_stall_clear(&usb_ctx, ep_addr);
 }

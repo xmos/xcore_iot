@@ -19,10 +19,6 @@
 	path = modules/rtos/sw_services/mqtt/thirdparty/paho.mqtt.embedded-c
 	url = git@github.com:eclipse/paho.mqtt.embedded-c.git
 	shallow = true
-[submodule "http-parser"]
-	path = modules/rtos/sw_services/http/thirdparty/http-parser
-	url = git@github.com:nodejs/http-parser.git
-	shallow = true
 [submodule "jsmn"]
 	path = modules/rtos/sw_services/json/thirdparty/jsmn
 	url = git@github.com:zserge/jsmn.git
@@ -61,6 +57,10 @@
 [submodule "wfx-firmware"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware
 	url = git@github.com:SiliconLabs/wfx-firmware.git
+[submodule "lib_xud"]
+	path = modules/hil/lib_xud
+	url = git@github.com:xmos/lib_xud.git
+	branch = DEV/XS3
 [submodule "tinyusb"]
 	path = modules/rtos/sw_services/usb/thirdparty/tinyusb
 	url = git@github.com:hathach/tinyusb.git
@@ -84,7 +84,6 @@
 [submodule "modules/aif/tensorflow"]
 	path = modules/aif/tensorflow
 	url = git@github.com:xmos/tensorflow.git
-[submodule "lib_xud"]
-	path = modules/hil/lib_xud
-	url = git@github.com:xmos/lib_xud.git
-	branch = DEV/XS3
+[submodule "coreHTTP"]
+	path = modules/rtos/sw_services/http/thirdparty/coreHTTP
+	url = git@github.com:FreeRTOS/coreHTTP.git
