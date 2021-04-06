@@ -46,7 +46,7 @@
 
 #endif
 
-#define TIME_PER_CYCLE (700.0 / 500.0 * 5.0 / 5.0)
+#define TIME_PER_CYCLE (600.0 / 500.0 * 5.0 / 5.0)
 
 void *example_pipeline_input(void *data)
 {

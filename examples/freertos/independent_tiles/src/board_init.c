@@ -140,16 +140,16 @@ void board_tile0_init(
             PORT_SQI_SCLK,
             PORT_SQI_SIO,
 
-            /** Derive QSPI clock from the 700 MHz xcore clock **/
+            /** Derive QSPI clock from the 600 MHz xcore clock **/
             qspi_io_source_clock_xcore,
 
             /** Full speed clock configuration **/
-            5, // 700 MHz / (2*5) -> 70 MHz,
+            5, // 600 MHz / (2*5) -> 60 MHz,
             1,
             qspi_io_sample_edge_rising,
             0,
             /** SPI read clock configuration **/
-            12, // 700 MHz / (2*12) -> ~29 MHz
+            12, // 600 MHz / (2*12) -> 25 MHz
             0,
             qspi_io_sample_edge_falling,
             0,

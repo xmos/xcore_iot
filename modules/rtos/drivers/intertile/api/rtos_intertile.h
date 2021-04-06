@@ -36,6 +36,8 @@
 typedef struct {
     chanend_t c;
 
+    size_t tx_len;
+    size_t rx_len;
     rtos_osal_mutex_t lock;
     rtos_osal_event_group_t event_group;
 } rtos_intertile_t;
@@ -58,6 +60,15 @@ typedef struct {
  * @{
  */
 
+void rtos_intertile_tx_len(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        size_t len);
+size_t rtos_intertile_tx_data(
+        rtos_intertile_t *ctx,
+        void *data,
+        size_t len);
+
 /**
  * Transmits data to an intertile link.
  *
@@ -72,7 +83,16 @@ void rtos_intertile_tx(
         rtos_intertile_t *ctx,
         uint8_t port,
         void *msg,
-        uint32_t len);
+        size_t len);
+
+size_t rtos_intertile_rx_len(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        unsigned timeout);
+size_t rtos_intertile_rx_data(
+        rtos_intertile_t *ctx,
+        void *data,
+        size_t len);
 
 /**
  * Receives data from an intertile link.
@@ -97,7 +117,7 @@ void rtos_intertile_tx(
  *
  * \returns the number of bytes received.
  */
-uint32_t rtos_intertile_rx(
+size_t rtos_intertile_rx(
         rtos_intertile_t *ctx,
         uint8_t port,
         void **msg,

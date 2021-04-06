@@ -14,7 +14,7 @@ static void xfer_complete_check(rtos_i2c_slave_t *ctx)
         ctx->tx_data_i = 0;
         ctx->tx_data_sent = 0;
     } else if (ctx->rx_data_i > 0) {
-        ctx->rx(ctx, ctx->app_data, ctx->rx_data, ctx->rx_data_i);
+        ctx->rx(ctx, ctx->app_data, ctx->data_buf, ctx->rx_data_i);
         ctx->rx_data_i = 0;
     }
 }
@@ -24,6 +24,7 @@ static i2c_slave_ack_t i2c_ack_read_req(rtos_i2c_slave_t *ctx)
     /* could be repeated start */
     xfer_complete_check(ctx);
 
+    ctx->tx_data = ctx->data_buf;
     ctx->tx_data_len = ctx->tx_start(ctx, ctx->app_data, &ctx->tx_data);
 
     ctx->tx_data_i = 0;
@@ -65,11 +66,11 @@ static uint8_t i2c_master_req_data(rtos_i2c_slave_t *ctx)
 
 static i2c_slave_ack_t i2c_master_sent_data(rtos_i2c_slave_t *ctx, uint8_t data)
 {
-    if (ctx->rx_data_i < RTOS_I2C_SLAVE_MAX_WRITE_LEN) {
-        ctx->rx_data[ctx->rx_data_i++] = data;
+    if (ctx->rx_data_i < RTOS_I2C_SLAVE_BUF_LEN) {
+        ctx->data_buf[ctx->rx_data_i++] = data;
     }
 
-    if (ctx->rx_data_i < RTOS_I2C_SLAVE_MAX_WRITE_LEN) {
+    if (ctx->rx_data_i < RTOS_I2C_SLAVE_BUF_LEN) {
         return I2C_SLAVE_ACK;
     } else {
         return I2C_SLAVE_NACK;
@@ -97,6 +98,10 @@ static void i2c_slave_thread(rtos_i2c_slave_t *ctx)
         .app_data = ctx,
     };
 
+    if (ctx->start != NULL) {
+        ctx->start(ctx, ctx->app_data);
+    }
+
     /* Ensure the I2C thread is never preempted */
     rtos_osal_thread_preemption_disable(NULL);
     /* And exclude it from core 0 where the system tick interrupt runs */
@@ -112,12 +117,14 @@ static void i2c_slave_thread(rtos_i2c_slave_t *ctx)
 void rtos_i2c_slave_start(
         rtos_i2c_slave_t *i2c_slave_ctx,
         void *app_data,
+        rtos_i2c_slave_start_cb_t start,
         rtos_i2c_slave_rx_cb_t rx,
         rtos_i2c_slave_tx_start_cb_t tx_start,
         rtos_i2c_slave_tx_done_cb_t tx_done,
         unsigned priority)
 {
     i2c_slave_ctx->app_data = app_data;
+    i2c_slave_ctx->start = start;
     i2c_slave_ctx->rx = rx;
     i2c_slave_ctx->tx_start = tx_start;
     i2c_slave_ctx->tx_done = tx_done;
