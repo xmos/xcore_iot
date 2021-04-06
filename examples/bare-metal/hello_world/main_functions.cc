@@ -64,7 +64,7 @@ void setup() {
 
   // This pulls in all the operation implementations we need.
   // NOLINTNEXTLINE(runtime-global-variables)
-  static tflite::MicroMutableOpResolver<4> resolver;
+  static tflite::MicroMutableOpResolver<3> resolver;
   resolver.AddQuantize();
   resolver.AddDequantize();
   resolver.AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode,
