@@ -5,6 +5,38 @@
 
 #include "rtos/drivers/i2s/api/rtos_i2s.h"
 
+enum {
+    fcode_rx,
+    fcode_tx,
+};
+
+__attribute__((fptrgroup("rtos_i2s_rx_fptr_grp")))
+static size_t i2s_remote_rx(
+        rtos_i2s_t *ctx,
+        int32_t *i2s_sample_buf,
+        size_t frame_count,
+        unsigned timeout)
+{
+    rtos_intertile_address_t *host_address = &ctx->rpc_config->host_address;
+    rtos_i2s_t *host_ctx_ptr = ctx->rpc_config->host_ctx_ptr;
+    size_t ret;
+
+    const rpc_param_desc_t rpc_param_desc[] = {
+            RPC_PARAM_TYPE(ctx),
+            RPC_PARAM_OUT_BUFFER(i2s_sample_buf, frame_count * (2 * ctx->num_in)),
+            RPC_PARAM_TYPE(frame_count),
+            RPC_PARAM_TYPE(timeout),
+            RPC_PARAM_RETURN(size_t),
+            RPC_PARAM_LIST_END
+    };
+
+    rpc_client_call_generic(
+            host_address->intertile_ctx, host_address->port, fcode_rx, rpc_param_desc,
+            &host_ctx_ptr, i2s_sample_buf, &frame_count, &timeout, &ret);
+
+    return ret;
+}
+
 __attribute__((fptrgroup("rtos_i2s_tx_fptr_grp")))
 static size_t i2s_remote_tx(
         rtos_i2s_t *ctx,
@@ -26,10 +58,45 @@ static size_t i2s_remote_tx(
     };
 
     rpc_client_call_generic(
-            host_address->intertile_ctx, host_address->port, 0, rpc_param_desc,
+            host_address->intertile_ctx, host_address->port, fcode_tx, rpc_param_desc,
             &host_ctx_ptr, i2s_sample_buf, &frame_count, &timeout, &ret);
 
     return ret;
+}
+
+static int i2s_rx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+{
+    int msg_length;
+
+    rtos_i2s_t *i2s_ctx;
+    int32_t *i2s_sample_buf;
+    size_t frame_count;
+    unsigned timeout;
+    size_t ret;
+
+    /* Here, because the buffer is output only, the buffer
+    pointer will not get set. */
+    rpc_request_unmarshall(
+            rpc_msg,
+            &i2s_ctx, &i2s_sample_buf, &frame_count, &timeout, &ret);
+
+    /* Instead allocate a buffer with the length parameter
+    before calling, as this is what would be done by
+    the client. */
+    i2s_sample_buf = rtos_osal_malloc(frame_count * (2 * i2s_ctx->num_out) * sizeof(i2s_sample_buf[0]));
+
+    ret = rtos_i2s_rx(i2s_ctx, i2s_sample_buf, frame_count, timeout);
+
+    msg_length = rpc_response_marshall(
+            resp_msg, rpc_msg,
+            i2s_ctx, i2s_sample_buf, frame_count, timeout, ret);
+
+    /* The data from buffer has been copied into the response
+    message. Since buffer was allocated on the heap, free
+    it now. */
+    rtos_osal_free(i2s_sample_buf);
+
+    return msg_length;
 }
 
 static int i2s_tx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
@@ -70,9 +137,14 @@ static void i2s_rpc_thread(rtos_intertile_address_t *client_address)
 
         rpc_request_parse(&rpc_msg, req_msg);
 
-        /* IGNORING rpc_msg->fcode, assuming the port is only used by this mic context */
-
-        msg_length = i2s_tx_rpc_host(&rpc_msg, &resp_msg);
+        switch (rpc_msg.fcode) {
+        case fcode_rx:
+            msg_length = i2s_rx_rpc_host(&rpc_msg, &resp_msg);
+            break;
+        case fcode_tx:
+            msg_length = i2s_tx_rpc_host(&rpc_msg, &resp_msg);
+            break;
+        }
 
         rtos_osal_free(req_msg);
 
@@ -128,6 +200,7 @@ void rtos_i2s_rpc_client_init(
         rtos_intertile_t *host_intertile_ctx)
 {
     i2s_ctx->rpc_config = rpc_config;
+    i2s_ctx->rx = i2s_remote_rx;
     i2s_ctx->tx = i2s_remote_tx;
     rpc_config->rpc_host_start = NULL;
     rpc_config->remote_client_count = 0;
