@@ -50,6 +50,7 @@ struct rtos_i2s_struct{
 
     rtos_osal_entry_function_t driver_thread_entry;
     size_t driver_thread_entry_size;
+    rtos_osal_mutex_t mutex;
     streaming_channel_t c_i2s_isr;
     rtos_osal_semaphore_t send_sem;
     rtos_osal_semaphore_t recv_sem;
@@ -73,6 +74,7 @@ struct rtos_i2s_struct{
         volatile size_t total_read;
         volatile size_t required_available_count;
     } recv_buffer;
+    uint8_t isr_cmd;
 };
 
 #include "rtos/drivers/i2s/api/rtos_i2s_rpc.h"

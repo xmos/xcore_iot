@@ -1,6 +1,8 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+#define DEBUG_UNIT RTOS_I2S
+
 #include <string.h>
 
 #include <xcore/assert.h>
@@ -12,8 +14,8 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-#define ISR_RESUME_SEND 1
-#define ISR_RESUME_RECV 2
+#define ISR_RESUME_SEND_BM 0x01
+#define ISR_RESUME_RECV_BM 0x02
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_i2s_isr, arg)
 {
@@ -22,9 +24,11 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_i2s_isr, arg)
 
     isr_action = s_chan_in_byte(ctx->c_i2s_isr.end_b);
 
-    if (isr_action == ISR_RESUME_SEND) {
+    if (isr_action & ISR_RESUME_SEND_BM) {
         rtos_osal_semaphore_put(&ctx->send_sem);
-    } else if (isr_action == ISR_RESUME_RECV) {
+    }
+
+    if (isr_action & ISR_RESUME_RECV_BM) {
         rtos_osal_semaphore_put(&ctx->recv_sem);
     }
 }
@@ -57,8 +61,7 @@ static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *i2s_sampl
         RTOS_MEMORY_BARRIER();
         ctx->recv_buffer.total_written += num_in;
     } else {
-        rtos_printf("i2s rx dropped\n");
-        //xassert(0);
+        rtos_printf("i2s rx overrun\n");
     }
 
     if (ctx->recv_buffer.required_available_count > 0) {
@@ -66,8 +69,13 @@ static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *i2s_sampl
 
         if (words_available >= ctx->recv_buffer.required_available_count) {
             ctx->recv_buffer.required_available_count = 0;
-            s_chan_out_byte(ctx->c_i2s_isr.end_a, ISR_RESUME_RECV);
+            ctx->isr_cmd |= ISR_RESUME_RECV_BM;
         }
+    }
+
+    if (ctx->num_out == 0 && ctx->isr_cmd != 0) {
+        s_chan_out_byte(ctx->c_i2s_isr.end_a, ctx->isr_cmd);
+        ctx->isr_cmd = 0;
     }
 }
 
@@ -84,6 +92,8 @@ static void i2s_send(rtos_i2s_t *ctx, size_t num_out, int32_t *i2s_sample_buf)
         }
         RTOS_MEMORY_BARRIER();
         ctx->send_buffer.total_read += num_out;
+    } else {
+        rtos_printf("i2s tx underrun\n");
     }
 
     if (ctx->send_buffer.required_free_count > 0) {
@@ -92,8 +102,12 @@ static void i2s_send(rtos_i2s_t *ctx, size_t num_out, int32_t *i2s_sample_buf)
 
         if (words_free >= ctx->send_buffer.required_free_count) {
             ctx->send_buffer.required_free_count = 0;
-            s_chan_out_byte(ctx->c_i2s_isr.end_a, ISR_RESUME_SEND);
+            ctx->isr_cmd |= ISR_RESUME_SEND_BM;
         }
+    }
+    if (ctx->isr_cmd != 0) {
+        s_chan_out_byte(ctx->c_i2s_isr.end_a, ctx->isr_cmd);
+        ctx->isr_cmd = 0;
     }
 }
 
@@ -292,6 +306,7 @@ void rtos_i2s_start(
 {
     i2s_ctx->mclk_bclk_ratio = mclk_bclk_ratio;
     i2s_ctx->mode = mode;
+    i2s_ctx->isr_cmd = 0;
 
     memset(&i2s_ctx->recv_buffer, 0, sizeof(i2s_ctx->send_buffer));
     if (i2s_ctx->num_in > 0) {

@@ -30,9 +30,13 @@ static size_t i2s_remote_rx(
             RPC_PARAM_LIST_END
     };
 
+    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
+
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_rx, rpc_param_desc,
             &host_ctx_ptr, i2s_sample_buf, &frame_count, &timeout, &ret);
+
+    rtos_osal_mutex_put(&ctx->mutex);
 
     return ret;
 }
@@ -57,9 +61,13 @@ static size_t i2s_remote_tx(
             RPC_PARAM_LIST_END
     };
 
+    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
+
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_tx, rpc_param_desc,
             &host_ctx_ptr, i2s_sample_buf, &frame_count, &timeout, &ret);
+
+    rtos_osal_mutex_put(&ctx->mutex);
 
     return ret;
 }
@@ -186,6 +194,9 @@ void rtos_i2s_rpc_config(
     if (rpc_config->remote_client_count == 0) {
         /* This is a client */
         rpc_config->host_address.port = intertile_port;
+
+        rtos_osal_mutex_create(&i2s_ctx->mutex, "i2s_lock", RTOS_OSAL_NOT_RECURSIVE);
+
     } else {
         for (int i = 0; i < rpc_config->remote_client_count; i++) {
             rpc_config->client_address[i].port = intertile_port;
