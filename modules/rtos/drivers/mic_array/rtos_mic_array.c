@@ -1,6 +1,8 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+#define DEBUG_UNIT RTOS_MIC_ARRAY
+
 #include <string.h>
 
 #include <xcore/assert.h>
@@ -62,6 +64,8 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
 
         RTOS_MEMORY_BARRIER();
         ctx->recv_buffer.total_written += MIC_DUAL_FRAME_SIZE * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+    } else {
+        rtos_printf("mic rx overrun\n");
     }
 
     if (ctx->recv_buffer.required_available_count > 0) {

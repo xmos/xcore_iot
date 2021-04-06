@@ -15,7 +15,7 @@
 /* Library headers */
 #include "rtos/drivers/gpio/api/rtos_gpio.h"
 #include "rtos/drivers/i2c/api/rtos_i2c_master.h"
-#include "rtos/drivers/i2s/api/rtos_i2s_master.h"
+#include "rtos/drivers/i2s/api/rtos_i2s.h"
 #include "rtos/drivers/intertile/api/rtos_intertile.h"
 #include "rtos/drivers/mic_array/api/rtos_mic_array.h"
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"

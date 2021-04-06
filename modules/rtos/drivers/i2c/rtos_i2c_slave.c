@@ -1,6 +1,8 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+#define DEBUG_UNIT RTOS_I2C
+
 #include "rtos/drivers/i2c/api/rtos_i2c_slave.h"
 
 static void xfer_complete_check(rtos_i2c_slave_t *ctx)

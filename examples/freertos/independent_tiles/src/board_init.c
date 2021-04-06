@@ -94,7 +94,7 @@ void board_tile0_init(
         rtos_intertile_t *intertile1_ctx,
         rtos_intertile_t *intertile2_ctx,
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_ctx,
         rtos_i2c_master_t *i2c_master_ctx,
         rtos_spi_master_t *spi_master_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
@@ -203,8 +203,8 @@ void board_tile0_init(
             intertile1_ctx);
 #endif
 #if I2S_RPC_ENABLED
-    rtos_i2s_master_rpc_client_init(
-            i2s_master_ctx,
+    rtos_i2s_rpc_client_init(
+            i2s_ctx,
             &i2s_rpc_config,
             intertile1_ctx);
 #endif
@@ -215,7 +215,7 @@ void board_tile1_init(
         rtos_intertile_t *intertile1_ctx,
         rtos_intertile_t *intertile2_ctx,
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_ctx,
         rtos_i2c_master_t *i2c_master_ctx,
         rtos_spi_master_t *spi_master_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
@@ -240,6 +240,10 @@ void board_tile1_init(
     port_t p_i2s_dout[1] = {
             PORT_I2S_DAC_DATA
     };
+    /* Ports for the I2S. */
+    port_t p_i2s_din[1] = {
+            PORT_I2S_ADC_DATA
+    };
     port_t p_bclk = PORT_I2S_BCLK;
     port_t p_lrclk = PORT_I2S_LRCLK;
 
@@ -262,11 +266,11 @@ void board_tile1_init(
             p_pdm_mics);
 
     rtos_i2s_master_init(
-            i2s_master_ctx,
+            i2s_ctx,
             p_i2s_dout,
             1,
-            NULL,
-            0,
+            p_i2s_din,
+            I2S_ADC_ENABLED ? 1 : 0,
             p_bclk,
             p_lrclk,
             p_mclk,
@@ -305,8 +309,8 @@ void board_tile1_init(
             1);
 #endif
 #if I2S_RPC_ENABLED
-    rtos_i2s_master_rpc_host_init(
-            i2s_master_ctx,
+    rtos_i2s_rpc_host_init(
+            i2s_ctx,
             &i2s_rpc_config,
             client_intertile_ctx,
             1);
