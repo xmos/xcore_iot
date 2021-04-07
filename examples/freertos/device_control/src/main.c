@@ -8,19 +8,30 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "usb_support.h"
+
 #include "device_control.h"
 
 #include "rtos_printf.h"
 
 #include "board_init.h"
 
+#define USB_DEVICE_CONTROL 0
+#define I2C_DEVICE_CONTROL 1
+
+#if (USB_DEVICE_CONTROL + I2C_DEVICE_CONTROL) != 1
+#error Must define exactly one device control transport
+#endif
+
+#define DEVICE_CONTROL_HOST_TILE (I2C_DEVICE_CONTROL ? 0 : (USB_DEVICE_CONTROL ? USB_TILE_NO : -1))
+
 static rtos_i2c_slave_t i2c_slave_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
 static rtos_intertile_t intertile_ctx_s;
 
-#if ON_TILE(0)
+#if ON_TILE(DEVICE_CONTROL_HOST_TILE)
 static device_control_t device_control_ctx_s;
-#elif ON_TILE(1)
+#else
 static device_control_client_t device_control_ctx_s;
 #endif
 
@@ -40,66 +51,24 @@ void vApplicationMallocFailedHook(void)
 #define GPIO_RPC_PORT 0
 #define GPIO_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
-RTOS_I2C_SLAVE_CALLBACK_ATTR
-void rtos_i2c_slave_start_cb(rtos_i2c_slave_t *ctx, void *app_data)
-{
-    rtos_printf("I2C STARTED\n");
 
-    control_ret_t dc_ret;
+#if I2C_DEVICE_CONTROL
+void i2c_dev_ctrl_start_cb(rtos_i2c_slave_t *ctx,
+                           device_control_t *device_control_ctx);
 
-    dc_ret = device_control_resources_register(device_control_ctx,
-                                               2, //SERVICER COUNT
-                                               pdMS_TO_TICKS(100));
+void i2c_dev_ctrl_rx_cb(rtos_i2c_slave_t *ctx,
+                        device_control_t *device_control_ctx,
+                        uint8_t *data,
+                        size_t len);
 
-    if (dc_ret != CONTROL_SUCCESS) {
-        rtos_printf("Device control resources failed to register on tile %d\n", THIS_XCORE_TILE);
-    } else {
-        rtos_printf("Device control resources registered on tile %d\n", THIS_XCORE_TILE);
-    }
-    xassert(dc_ret == CONTROL_SUCCESS);
-}
+size_t i2c_dev_ctrl_tx_start_cb(rtos_i2c_slave_t *ctx,
+                                device_control_t *device_control_ctx,
+                                uint8_t **data);
+#endif
 
-RTOS_I2C_SLAVE_CALLBACK_ATTR
-void rtos_i2c_slave_rx_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
-{
-    control_ret_t ret;
-
-    if (len >= 3) {
-        device_control_request(device_control_ctx,
-                               data[0],
-                               data[1],
-                               data[2]);
-
-        len -= 3;
-        ret = device_control_payload_transfer(device_control_ctx,
-                                              &data[3], &len, CONTROL_HOST_TO_DEVICE);
-        rtos_printf("I2C write completed - device control status %d\n", ret);
-    }
-}
-
-RTOS_I2C_SLAVE_CALLBACK_ATTR
-size_t rtos_i2c_slave_tx_start_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data)
-{
-    control_ret_t ret;
-    size_t len = RTOS_I2C_SLAVE_BUF_LEN;
-
-    ret = device_control_payload_transfer(device_control_ctx,
-                                          *data, &len, CONTROL_DEVICE_TO_HOST);
-    rtos_printf("I2C read started - device control status %d\n", ret);
-
-    if (ret != CONTROL_SUCCESS) {
-        (*data)[0] = (control_status_t) ret;
-        len = 1;
-    }
-
-    return len;
-}
-
-RTOS_I2C_SLAVE_CALLBACK_ATTR
-void rtos_i2c_slave_tx_done_cb(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
-{
-    rtos_printf("I2C read of %d bytes complete\n", len);
-}
+#if USB_DEVICE_CONTROL
+void usb_device_control_set_ctx(device_control_t *ctx);
+#endif
 
 DEVICE_CONTROL_CALLBACK_ATTR
 control_ret_t read_cmd_on_tile(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data)
@@ -186,19 +155,26 @@ void vApplicationDaemonTaskStartup(void *arg)
         rtos_printf("Starting GPIO driver\n");
         rtos_gpio_start(gpio_ctx);
 
-        rtos_printf("Starting I2C slave driver\n");
-        rtos_i2c_slave_start(i2c_slave_ctx,
-                             device_control_ctx,
-                             rtos_i2c_slave_start_cb,
-                             rtos_i2c_slave_rx_cb,
-                             rtos_i2c_slave_tx_start_cb,
-                             rtos_i2c_slave_tx_done_cb,
-                             configMAX_PRIORITIES / 2);
+        #if I2C_DEVICE_CONTROL
+        {
+            rtos_printf("Starting I2C slave driver\n");
+            rtos_i2c_slave_start(i2c_slave_ctx,
+                                 device_control_ctx,
+                                 (rtos_i2c_slave_start_cb_t) i2c_dev_ctrl_start_cb,
+                                 (rtos_i2c_slave_rx_cb_t) i2c_dev_ctrl_rx_cb,
+                                 (rtos_i2c_slave_tx_start_cb_t) i2c_dev_ctrl_tx_start_cb,
+                                 (rtos_i2c_slave_tx_done_cb_t) NULL,
+                                 configMAX_PRIORITIES / 2);
+        }
+        #endif
     }
     #endif
 
-    #if ON_TILE(USB_TILE_NO)
-        //usb_manager_start(configMAX_PRIORITIES - 1);
+    #if USB_DEVICE_CONTROL && ON_TILE(USB_TILE_NO)
+    {
+        usb_device_control_set_ctx(device_control_ctx);
+        usb_manager_start(configMAX_PRIORITIES - 1);
+    }
     #endif
 
     chanend_free(other_tile_c);
@@ -252,10 +228,14 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 
     other_tile_c = c1;
 
+#if ON_TILE(DEVICE_CONTROL_HOST_TILE)
+    rtos_printf("Tile %d is host\n", THIS_XCORE_TILE);
+#endif
+
     device_control_init(device_control_ctx,
-            DEVICE_CONTROL_HOST_MODE,
-            &intertile_ctx,
-            1);
+                        DEVICE_CONTROL_HOST_TILE == THIS_XCORE_TILE ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
+                        &intertile_ctx,
+                        1);
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
@@ -279,10 +259,14 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 
     other_tile_c = c0;
 
+#if ON_TILE(DEVICE_CONTROL_HOST_TILE)
+    rtos_printf("Tile %d is host\n", THIS_XCORE_TILE);
+#endif
+
     device_control_init(device_control_ctx,
-            DEVICE_CONTROL_CLIENT_MODE,
-            &intertile_ctx,
-            1);
+                        DEVICE_CONTROL_HOST_TILE == 1 ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
+                        &intertile_ctx,
+                        1);
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",

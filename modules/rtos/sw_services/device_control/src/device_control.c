@@ -226,7 +226,11 @@ static control_ret_t do_command(device_control_t *ctx,
             }
         }
 
-        rtos_printf("%d write command %d, %d, %d\n", servicer, resid, cmd, payload_len);
+        if (IS_CONTROL_CMD_READ(cmd)) {
+            rtos_printf("%d read command %d, %d, %d\n", servicer, resid, cmd, payload_len);
+        } else {
+            rtos_printf("%d write command %d, %d, %d\n", servicer, resid, cmd, payload_len);
+        }
 
         return ret;
     }
@@ -410,9 +414,8 @@ control_ret_t device_control_init(device_control_t *ctx,
                                   rtos_intertile_t *intertile_ctx[],
                                   size_t intertile_count)
 {
-    memset(ctx, 0, sizeof(device_control_t));
-
     if (mode == DEVICE_CONTROL_HOST_MODE) {
+        memset(ctx, 0, sizeof(device_control_t));
         resource_table_init(ctx);
 
         xassert(intertile_count <= 3);
@@ -424,7 +427,7 @@ control_ret_t device_control_init(device_control_t *ctx,
             ctx->client_intertile[i] = intertile_ctx[i];
         }
     } else {
-
+        memset(ctx, 0, sizeof(device_control_client_t));
         xassert(intertile_count == 1);
         if (intertile_count != 1) {
             return CONTROL_REGISTRATION_FAILED;
