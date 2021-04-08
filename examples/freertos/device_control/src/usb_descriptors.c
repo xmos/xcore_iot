@@ -25,13 +25,8 @@
 
 #include "tusb.h"
 
-/* A combination of interfaces must have a unique product id, since PC will save device driver after the first plug.
- * Same VID/PID with different interface e.g MSC (first), then CDC (later) will possibly cause system error on PC.
- *
- * Auto ProductID layout's Bitmap:
- *   [MSB]       MIDI | HID | MSC | CDC          [LSB]
- */
-#define _PID_MAP(itf, n)  ( (CFG_TUD_##itf) << (n) )
+#define XMOS_VID          0x20B1
+#define DEV_CTRL_TEST_PID 0x1010
 
 //--------------------------------------------------------------------+
 // Device Descriptors
@@ -42,22 +37,20 @@ tusb_desc_device_t const desc_device =
     .bDescriptorType    = TUSB_DESC_DEVICE,
     .bcdUSB             = 0x0200,
 
-    // Use Interface Association Descriptor (IAD) for CDC
-    // As required by USB Specs IAD's subclass must be common class (2) and protocol must be IAD (1)
-    .bDeviceClass       = TUSB_CLASS_MISC,
-    .bDeviceSubClass    = MISC_SUBCLASS_COMMON,
-    .bDeviceProtocol    = MISC_PROTOCOL_IAD,
+    .bDeviceClass       = TUSB_CLASS_UNSPECIFIED,
+    .bDeviceSubClass    = TUSB_CLASS_UNSPECIFIED,
+    .bDeviceProtocol    = TUSB_CLASS_UNSPECIFIED,
     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
 
-    .idVendor           = 0x20B1,
-    .idProduct          = 0x1010,
+    .idVendor           = XMOS_VID,
+    .idProduct          = DEV_CTRL_TEST_PID,
     .bcdDevice          = 0x1000,
 
-    .iManufacturer      = 0x01,
-    .iProduct           = 0x02,
-    .iSerialNumber      = 0x03,
+    .iManufacturer      = 1,
+    .iProduct           = 2,
+    .iSerialNumber      = 3,
 
-    .bNumConfigurations = 0x01
+    .bNumConfigurations = 1
 };
 
 // Invoked when received GET DEVICE DESCRIPTOR
@@ -71,13 +64,13 @@ uint8_t const * tud_descriptor_device_cb(void)
 // Configuration Descriptor
 //--------------------------------------------------------------------+
 enum {
-    ITF_NUM_VENDOR = 0,
+    ITF_XMOS_DEV_CTRL = 0,
     ITF_NUM_TOTAL
 };
 
 #define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + 9)
 
-#define TUD_VENDOR_NOEP_DESCRIPTOR(_itfnum, _stridx) \
+#define TUD_XMOS_DEVICE_CONTROL_DESCRIPTOR(_itfnum, _stridx) \
   /* Interface */\
   9, TUSB_DESC_INTERFACE, _itfnum, 0, 0, TUSB_CLASS_VENDOR_SPECIFIC, 0x00, 0x00, _stridx,\
 
@@ -87,7 +80,7 @@ uint8_t const desc_configuration[] =
   TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CONFIG_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 400),
 
   // Interface number, string index, EP Out & IN address, EP size
-  TUD_VENDOR_NOEP_DESCRIPTOR(ITF_NUM_VENDOR, 4)
+  TUD_XMOS_DEVICE_CONTROL_DESCRIPTOR(ITF_XMOS_DEV_CTRL, 4)
 };
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
