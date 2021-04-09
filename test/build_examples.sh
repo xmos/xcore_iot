@@ -31,7 +31,7 @@ board=XCORE-AI-EXPLORER
 declare -a bare_metal_examples=(
     "cifar10"
     "hello_world"
-    "mobilenet_v1"
+    "visual_wake_words"
     "hotdog_not_hotdog"
     )
 
