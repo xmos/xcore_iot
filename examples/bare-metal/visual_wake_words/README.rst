@@ -1,27 +1,10 @@
-############
-MobileNet V1
-############
+#################
+Visual Wake Words
+#################
 
-This example application implements a `MobileNet V1 <https://arxiv.org/abs/1704.04861>`__ CNN architecture trained on the `ImageNet <http://www.image-net.org/>`__ dataset.  The model was trained with the following parameters:
+This example application implements the `Visual Wake Words <https://blog.tensorflow.org/2019/10/visual-wake-words-with-tensorflow-lite_30.html>`__ CNN architecture.  The VWW model is trained to classify images to two classes (person/not-person) and serves as a popular use-case for microcontrollers.
 
-- Classes = 10
-- Alpha = 0.50
-- Image size = 128x128
-
-This example demonstrates how to place models in LPDDR and to recieve input data using `xscope`.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
-
-- tench
-- goldfish
-- great_white_shark
-- tiger_shark
-- hammerhead
-- electric_ray
-- stingray
-- cock
-- hen
-- ostrich
-
-This example also demonstrates how to to build the inference engine into a static library.
+This example demonstrates how to receive input data using `xscope`.
 
 *********************
 Building the firmware
@@ -60,13 +43,13 @@ Running with hardware
 
 .. code-block:: console
 
-    $ xrun --xscope-port localhost:10234 bin/mobilenet_v1.xe
+    $ xrun --xscope-port localhost:10234 bin/vww.xe
 
 Running with simulator
 
 .. code-block:: console
 
-    $ xsim --xscope "-realtime localhost:10234" bin/mobilenet_v1.xe
+    $ xsim --xscope "-realtime localhost:10234" bin/vww.xe
 
 The firmware will now wait until a data is sent from a host application. Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires the following Python modules and should be run in a new terminal window:
 
@@ -101,4 +84,4 @@ The following unix command will generate a C source file that contains the Tenso
 
 .. code-block:: console
 
-    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/mobilenet_v1.h --source inference_engine/src/mobilenet_v1.c --variable-name mobilenet_v1
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/vww.h --source inference_engine/src/vww.c --variable-name vww
