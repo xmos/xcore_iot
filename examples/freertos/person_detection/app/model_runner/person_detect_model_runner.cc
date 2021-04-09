@@ -62,11 +62,12 @@ person_detect_profiler_reset() {
 #ifndef NDEBUG
 
 __attribute__((
-    fptrgroup("model_runner_profiler_times_get_fptr_grp"))) static void
-person_detect_profiler_times_get(uint32_t *count, const uint32_t **times) {
+    fptrgroup("model_runner_profiler_durations_get_fptr_grp"))) static void
+person_detect_profiler_durations_get(uint32_t *count,
+                                     const uint32_t **durations) {
   if (profiler) {
     *count = profiler->GetNumEvents();
-    *times = profiler->GetEventDurations();
+    *durations = profiler->GetEventDurations();
   }
 }
 
@@ -80,5 +81,5 @@ void person_detect_model_runner_create(model_runner_t *ctx, void *buffer) {
   ctx->resolver_get_fun = &person_detect_resolver_get;
   ctx->profiler_get_fun = &person_detect_profiler_get;
   ctx->profiler_reset_fun = &person_detect_profiler_reset;
-  ctx->profiler_times_get_fun = &person_detect_profiler_times_get;
+  ctx->profiler_durations_get_fun = &person_detect_profiler_durations_get;
 }

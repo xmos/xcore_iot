@@ -43,6 +43,11 @@ void *rtos_osal_malloc(size_t size);
 void rtos_osal_free(void *ptr);
 
 /*
+ * Time
+ */
+rtos_osal_tick_t rtos_osal_tick_get(void);
+
+/*
  * Thread management
  */
 typedef void (*rtos_osal_entry_function_t)(void *);

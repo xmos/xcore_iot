@@ -283,7 +283,7 @@ static void i2c_master_rpc_thread(rtos_intertile_address_t *client_address)
 
     for (;;) {
         /* receive RPC request message from client */
-        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &req_msg, portMAX_DELAY);
+        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &req_msg, RTOS_OSAL_WAIT_FOREVER);
 
         rpc_request_parse(&rpc_msg, req_msg);
 

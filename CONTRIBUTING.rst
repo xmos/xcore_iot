@@ -39,19 +39,25 @@ It is recommended that you install the virtual environment in the repo's directo
 
 .. code-block:: console
 
-    conda env create -p ./xcore_sdk_venv -f environment.yml
+    $ conda env create -p ./xcore_sdk_venv -f tools/develop/environment.yml
 
 Activate the environment by specifying the path:
 
 .. code-block:: console
 
-    conda activate xcore_sdk_venv/
+    $ conda activate xcore_sdk_venv/
+
+Install the SDK:
+
+.. code-block:: console
+
+    $ ./install.sh
 
 To remove the environment, deactivate and run:
 
 .. code-block:: console
 
-    conda remove -p xcore_sdk_venv/ --all
+    $ conda remove -p xcore_sdk_venv/ --all
 
 *****************
 Building Examples

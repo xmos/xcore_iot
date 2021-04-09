@@ -49,7 +49,7 @@
 #endif
 
 
-#define TIME_PER_CYCLE (700.0 / 500.0 * 5.0 / 5.0)
+#define TIME_PER_CYCLE (600.0 / 500.0 * 5.0 / 5.0)
 
 #define MIN(X, Y) ((X) <= (Y) ? (X) : (Y))
 
@@ -110,14 +110,14 @@ void *example_pipeline_input(void *data)
 
 int example_pipeline_output(void *audio_frame, void *data)
 {
-    rtos_i2s_master_t *i2s_master_ctx = data;
+    rtos_i2s_t *i2s_ctx = data;
     rtos_intertile_t *intertile_ctx = intertile_addr->intertile_ctx;
     uint8_t intertile_port = intertile_addr->port;
 
     rtos_intertile_tx(intertile_ctx, intertile_port, audio_frame, FRAME_NUM_CHANS * appconfAUDIO_FRAME_LENGTH * sizeof(int32_t));
 
-    rtos_i2s_master_tx(
-            i2s_master_ctx,
+    rtos_i2s_tx(
+            i2s_ctx,
             audio_frame,
             appconfAUDIO_FRAME_LENGTH,
             portMAX_DELAY);
@@ -211,7 +211,7 @@ void intertile_pipeline_to_tcp_create(
 
 void example_pipeline_init(
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_ctx,
         rtos_intertile_t *host_intertile_ctx,
         unsigned intertile_port)
 {
@@ -234,7 +234,7 @@ void example_pipeline_init(
 			example_pipeline_input,
 			example_pipeline_output,
 			mic_array_ctx,
-			i2s_master_ctx,
+			i2s_ctx,
 			stages,
 			stage_stack_sizes,
 			configMAX_PRIORITIES / 2,

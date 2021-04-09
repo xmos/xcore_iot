@@ -13,9 +13,10 @@
 RTOS_GPIO_ISR_CALLBACK_ATTR
 static void rtos_gpio_rpc_host_isr(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_t port_id, uint32_t value)
 {
-    chanend_out_byte(ctx->rpc_interrupt_c, port_id);
-    chanend_out_word(ctx->rpc_interrupt_c, value);
-    chanend_out_control_token(ctx->rpc_interrupt_c, XS1_CT_PAUSE);
+    chanend_t rpc_interrupt_c = (chanend_t) app_data;
+    chanend_out_byte(rpc_interrupt_c, port_id);
+    chanend_out_word(rpc_interrupt_c, value);
+    chanend_out_control_token(rpc_interrupt_c, XS1_CT_PAUSE);
 }
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_gpio_rpc_client_isr, arg)
@@ -26,8 +27,8 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_gpio_rpc_client_isr, arg)
     void *isr_app_data;
     RTOS_GPIO_ISR_CALLBACK_ATTR rtos_gpio_isr_cb_t cb;
 
-    port_id = chanend_in_byte(gpio_ctx->rpc_interrupt_c);
-    value = chanend_in_word(gpio_ctx->rpc_interrupt_c);
+    port_id = chanend_in_byte(gpio_ctx->rpc_interrupt_c[0]);
+    value = chanend_in_word(gpio_ctx->rpc_interrupt_c[0]);
 
     int state = rtos_osal_critical_enter();
     {
@@ -133,6 +134,7 @@ static void gpio_remote_isr_callback_set(
 {
     rtos_intertile_address_t *host_address = &gpio_ctx->rpc_config->host_address;
     rtos_gpio_t *host_ctx_ptr = gpio_ctx->rpc_config->host_ctx_ptr;
+    chanend_t host_rpc_interrupt_c = chanend_get_dest(gpio_ctx->rpc_interrupt_c[0]);
 
     xassert(host_address->port >= 0);
 
@@ -150,13 +152,14 @@ static void gpio_remote_isr_callback_set(
     const rpc_param_desc_t rpc_param_desc[] = {
             RPC_PARAM_TYPE(gpio_ctx),
             RPC_PARAM_TYPE(port_id),
+            RPC_PARAM_TYPE(host_rpc_interrupt_c),
             RPC_PARAM_LIST_END
     };
 
     rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_isr_callback_set, rpc_param_desc,
-            &host_ctx_ptr, &port_id);
+            &host_ctx_ptr, &port_id, &host_rpc_interrupt_c);
     rtos_osal_mutex_put(&gpio_ctx->lock);
 }
 
@@ -275,16 +278,17 @@ static int gpio_isr_callback_set_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg
 
     rtos_gpio_t *gpio_ctx;
     rtos_gpio_port_id_t port_id;
+    chanend_t host_rpc_interrupt_c;
 
     rpc_request_unmarshall(
             rpc_msg,
-            &gpio_ctx, &port_id);
+            &gpio_ctx, &port_id, &host_rpc_interrupt_c);
 
-    rtos_gpio_isr_callback_set(gpio_ctx, port_id, rtos_gpio_rpc_host_isr, NULL);
+    rtos_gpio_isr_callback_set(gpio_ctx, port_id, rtos_gpio_rpc_host_isr, (void *) host_rpc_interrupt_c);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
-            gpio_ctx, port_id);
+            gpio_ctx, port_id, host_rpc_interrupt_c);
 
     return msg_length;
 }
@@ -438,10 +442,11 @@ void rtos_gpio_rpc_client_init(
     rpc_config->host_ctx_ptr = (void *) s_chan_in_word(host_intertile_ctx->c);
 
     memset(gpio_ctx->isr_info, 0, sizeof(gpio_ctx->isr_info));
-    gpio_ctx->rpc_interrupt_c = chanend_alloc();
-    s_chan_out_word(host_intertile_ctx->c, gpio_ctx->rpc_interrupt_c);
-    triggerable_setup_interrupt_callback(gpio_ctx->rpc_interrupt_c, gpio_ctx, RTOS_INTERRUPT_CALLBACK(rtos_gpio_rpc_client_isr));
-    triggerable_enable_trigger(gpio_ctx->rpc_interrupt_c);
+    gpio_ctx->rpc_interrupt_c[0] = chanend_alloc();
+    s_chan_out_word(host_intertile_ctx->c, gpio_ctx->rpc_interrupt_c[0]);
+    chanend_set_dest(gpio_ctx->rpc_interrupt_c[0], s_chan_in_word(host_intertile_ctx->c));
+    triggerable_setup_interrupt_callback(gpio_ctx->rpc_interrupt_c[0], gpio_ctx, RTOS_INTERRUPT_CALLBACK(rtos_gpio_rpc_client_isr));
+    triggerable_enable_trigger(gpio_ctx->rpc_interrupt_c[0]);
 }
 
 void rtos_gpio_rpc_host_init(
@@ -461,8 +466,9 @@ void rtos_gpio_rpc_host_init(
         rpc_config->client_address[i].intertile_ctx = client_intertile_ctx[i];
         s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) gpio_ctx);
 
-        gpio_ctx->rpc_interrupt_c = chanend_alloc();
-        chanend_set_dest(gpio_ctx->rpc_interrupt_c, s_chan_in_word(client_intertile_ctx[i]->c));
+        gpio_ctx->rpc_interrupt_c[i] = chanend_alloc();
+        chanend_set_dest(gpio_ctx->rpc_interrupt_c[i], s_chan_in_word(client_intertile_ctx[i]->c));
+        s_chan_out_word(client_intertile_ctx[i]->c, gpio_ctx->rpc_interrupt_c[i]);
 
         /* This must be configured later with rtos_gpio_rpc_config() */
         rpc_config->client_address[i].port = -1;

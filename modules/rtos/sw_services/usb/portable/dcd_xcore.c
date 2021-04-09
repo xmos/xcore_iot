@@ -10,17 +10,20 @@
 
 static rtos_usb_t usb_ctx;
 
-static struct setup_packet_struct {
+static union setup_packet_struct {
     tusb_control_request_t req;
-    uint32_t pad; /* just in case the transfer writes a CRC */
+    uint8_t pad[CFG_TUD_ENDPOINT0_SIZE]; /* In case an OUT data packet comes in instead of a SETUP packet */
 } setup_packet;
+
+static bool waiting_for_setup;
 
 static void prepare_setup(bool in_isr)
 {
     XUD_Result_t res;
 
     rtos_printf("preparing for setup packet\n");
-    res = rtos_usb_endpoint_transfer_start(&usb_ctx, 0x00, (uint8_t *) &setup_packet, sizeof(tusb_control_request_t));
+    waiting_for_setup = true;
+    res = rtos_usb_endpoint_transfer_start(&usb_ctx, 0x00, (uint8_t *) &setup_packet, sizeof(setup_packet));
 
     xassert(res == XUD_RES_OKAY);
 
@@ -75,6 +78,7 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
 
     if (is_setup) {
         rtos_printf("Setup packet of %d bytes received on %02x\n", xfer_len, ep_address);
+        waiting_for_setup = 0;
         dcd_event_setup_received(0, (uint8_t *) &setup_packet, true);
     } else {
         xfer_result_t tu_result;
@@ -83,18 +87,29 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
             rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
             tu_result = XFER_RESULT_SUCCESS;
 
-            if (xfer_len == 0 && ep_address == 0x00) {
-                /*
-                 * A ZLP has presumably been received on the output endpoint 0.
-                 * Ensure lib_xud is ready for the next setup packet. Hopefully
-                 * it does not come in prior to setting this up.
-                 *
-                 * TODO:
-                 * Ideally this buffer would be prepared prior to receiving the ZLP,
-                 * but it doesn't appear that this is currently possible to do
-                 * with lib_xud. This is under investigation.
-                 */
-                prepare_setup(true);
+            if (ep_address == 0x00) {
+                if (xfer_len == 0) {
+                    /*
+                     * A ZLP has presumably been received on the output endpoint 0.
+                     * Ensure lib_xud is ready for the next setup packet. Hopefully
+                     * it does not come in prior to setting this up.
+                     *
+                     * TODO:
+                     * Ideally this buffer would be prepared prior to receiving the ZLP,
+                     * but it doesn't appear that this is currently possible to do
+                     * with lib_xud. This is under investigation.
+                     */
+                    prepare_setup(true);
+                } else if (waiting_for_setup) {
+                    /*
+                     * We are waiting for a setup packet but OUT data on EP0 came in
+                     * instead. This might be due to an unhandled SET request. In this
+                     * case just drop the data and prepare for the next setup packet.
+                     */
+                    prepare_setup(true);
+                    rtos_printf("Dropped unhandled OUT packet on EP0\n");
+                    return;
+                }
             }
         } else {
             rtos_printf("xfer on %02x failed with status %d\n", ep_address, res);

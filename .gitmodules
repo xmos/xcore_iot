@@ -84,3 +84,7 @@
 [submodule "modules/aif/tensorflow"]
 	path = modules/aif/tensorflow
 	url = git@github.com:xmos/tensorflow.git
+[submodule "lib_xud"]
+	path = modules/hil/lib_xud
+	url = git@github.com:xmos/lib_xud.git
+	branch = DEV/XS3

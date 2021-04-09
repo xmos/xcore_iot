@@ -11,6 +11,7 @@
 
 #include "audio_pipeline/audio_pipeline.h"
 #include "example_pipeline.h"
+#include "board_init.h"
 
 #define GOOD 1
 
@@ -46,31 +47,37 @@
 
 #endif
 
-#define TIME_PER_CYCLE (700.0 / 500.0 * 5.0 / 5.0)
+#define TIME_PER_CYCLE (600.0 / 500.0 * 5.0 / 5.0)
 
 void *example_pipeline_input(void *data)
 {
-    rtos_mic_array_t *mic_array_ctx = data;
-
     int32_t (*audio_frame)[2];
 
     audio_frame = pvPortMalloc(EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH * sizeof(audio_frame[0]));
 
+#if I2S_ADC_ENABLED
+    rtos_i2s_rx(
+            (rtos_i2s_t *) data,
+            (int32_t *) audio_frame,
+            EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
+            portMAX_DELAY);
+#else
     rtos_mic_array_rx(
-            mic_array_ctx,
+            (rtos_mic_array_t *) data,
             audio_frame,
             EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
             portMAX_DELAY);
+#endif
 
     return audio_frame;
 }
 
 int example_pipeline_output(void *audio_frame, void *data)
 {
-    rtos_i2s_master_t *i2s_master_ctx = data;
+    rtos_i2s_t *i2s_ctx = data;
 
-    rtos_i2s_master_tx(
-            i2s_master_ctx,
+    rtos_i2s_tx(
+            i2s_ctx,
             audio_frame,
             EXAMPLE_PIPELINE_AUDIO_FRAME_LENGTH,
             portMAX_DELAY);
@@ -121,7 +128,7 @@ void stage2(int32_t (*audio_frame)[2])
 
 void example_pipeline_init(
         rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_master_t *i2s_master_ctx)
+        rtos_i2s_t *i2s_ctx)
 {
 	const int stage_count = 3;
 
@@ -140,8 +147,12 @@ void example_pipeline_init(
 	audio_pipeline_init(
 			example_pipeline_input,
 			example_pipeline_output,
+#if I2S_ADC_ENABLED
+			i2s_ctx,
+#else
 			mic_array_ctx,
-			i2s_master_ctx,
+#endif
+			i2s_ctx,
 			stages,
 			stage_stack_sizes,
 			configMAX_PRIORITIES / 2,
