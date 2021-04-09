@@ -16,7 +16,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
-project(mobilenet_v1 VERSION 1.0.0)
+project(vww VERSION 1.0.0)
 
 enable_language(CXX XC C ASM)
 
@@ -24,7 +24,7 @@ enable_language(CXX XC C ASM)
 # Build flags
 #**********************
 
-add_executable(mobilenet_v1)
+add_executable(vww)
 
 # Optimization
 # -DNDEBUG                        # define this to remove debug and profiling
@@ -40,13 +40,12 @@ set(BUILD_FLAGS
   "-report"
   "-DTF_LITE_STATIC_MEMORY"
   "-DXCORE"
-  "-DUSE_EXTMEM"
   "-Os"
 )
-target_link_options(mobilenet_v1 PRIVATE ${BUILD_FLAGS} -lquadspi -w)
-set_target_properties(mobilenet_v1 PROPERTIES OUTPUT_NAME mobilenet_v1.xe)
+target_link_options(vww PRIVATE ${BUILD_FLAGS} -lquadspi -w)
+set_target_properties(vww PROPERTIES OUTPUT_NAME vww.xe)
 
-target_compile_options(mobilenet_v1 PRIVATE ${BUILD_FLAGS})
+target_compile_options(vww PRIVATE ${BUILD_FLAGS})
 
 
 #**********************
@@ -69,7 +68,7 @@ set(INFERENCE_ENGINE_SOURCE_DIR
 set(INFERENCE_ENGINE_SOURCES
   ${XCORE_INTERPRETER_SOURCES}
   "${INFERENCE_ENGINE_SOURCE_DIR}/inference_engine.cc"
-  "${INFERENCE_ENGINE_SOURCE_DIR}/mobilenet_v1.c"
+  "${INFERENCE_ENGINE_SOURCE_DIR}/vww.c"
 )
 
 set(INFERENCE_ENGINE_INCLUDE_DIRS
@@ -85,13 +84,13 @@ set(APP_SOURCES
 #**********************
 # targets
 #**********************
-target_sources(mobilenet_v1
+target_sources(vww
   PRIVATE ${ADDITIONAL_C_SOURCES}
   PRIVATE ${INFERENCE_ENGINE_SOURCES}
   PRIVATE ${APP_SOURCES}
 )
 
-target_include_directories(mobilenet_v1
+target_include_directories(vww
   PRIVATE ${ADDITIONAL_INCLUDE_DIR}
   PRIVATE "${INFERENCE_ENGINE_INCLUDE_DIRS}"
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/app/src"
@@ -101,4 +100,4 @@ target_include_directories(mobilenet_v1
 # install
 #**********************
 set(INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin")
-install(TARGETS mobilenet_v1 DESTINATION ${INSTALL_DIR})
+install(TARGETS vww DESTINATION ${INSTALL_DIR})

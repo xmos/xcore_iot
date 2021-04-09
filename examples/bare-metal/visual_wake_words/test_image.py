@@ -14,21 +14,15 @@ import numpy as np
 from matplotlib import pyplot
 from PIL import Image
 
-IMAGE_SHAPE = (128, 128)
+IMAGE_SHAPE = (96, 96)
 INPUT_SHAPE = IMAGE_SHAPE + (3,)
-INPUT_SCALE = 0.007843081839382648
-INPUT_ZERO_POINT = -1
+INPUT_SCALE = 0.003921568859368563
+INPUT_ZERO_POINT = -128
 NORM_SCALE = 127.5
 NORM_SHIFT = 1
-BATCH_RUN = 0  # Set to 1 if this script is run as part of a batch job
 
 OUTPUT_SCALE = 1 / 256
 OUTPUT_ZERO_POINT = -128
-
-OBJECT_CLASSES = None
-OBJECT_CLASSES_URL = "https://s3.amazonaws.com/deep-learning-models/image-models/imagenet_class_index.json"
-with urllib.request.urlopen(OBJECT_CLASSES_URL) as url:
-    OBJECT_CLASSES = json.load(url)
 
 PRINT_CALLBACK = ctypes.CFUNCTYPE(
     None, ctypes.c_ulonglong, ctypes.c_uint, ctypes.c_char_p
@@ -137,19 +131,17 @@ if raw_img is not None:
 
     print()
     prob = (max_value - OUTPUT_ZERO_POINT) * OUTPUT_SCALE * 100.0
-    if OBJECT_CLASSES:
-        object_class = OBJECT_CLASSES[str(max_value_index)][1]
-        object_str = f"Object class={object_class}"
+
+    if max_value_index == 0:
+        print(f"Not-Person   {prob:0.2f}%")
     else:
-        object_str = f"Object index={max_value_index}"
-    print(f"{object_str}   {prob:0.2f}%")
+        print(f"Person   {prob:0.2f}%")
 
     np_img = np.frombuffer(raw_img, dtype=np.int8).reshape(INPUT_SHAPE)
     np_img = np.round(
         (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
     ).astype(np.uint8)
-    if not BATCH_RUN:
-        # Show the image how it was processed by the model
-        pyplot.imshow(np_img)
-        pyplot.show()
 
+    # Show the image
+    pyplot.imshow(np_img)
+    pyplot.show()

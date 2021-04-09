@@ -1,1 +1,0 @@
-.. include:: ../../../examples/bare-metal/mobilenet_v1/README.rst

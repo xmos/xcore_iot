@@ -72,7 +72,7 @@ Sending a test image to the xcore.ai Explorer board using `xscope`.
 Optimizing the model
 ********************
 
-Unoptimized and optimized models are included with the example.
+An unoptimized model is included with the example.
 
 First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 

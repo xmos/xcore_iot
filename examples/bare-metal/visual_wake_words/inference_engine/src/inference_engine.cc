@@ -9,20 +9,20 @@
 #include <cstdio>
 #include <iostream>
 
-#include "mobilenet_v1.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_ops.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_profiler.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/version.h"
+#include "vww.h"
 #include "xcore_device_memory.h"
 
 tflite::ErrorReporter *reporter = nullptr;
 const tflite::Model *model = nullptr;
 tflite::micro::xcore::XCoreInterpreter *interpreter = nullptr;
 tflite::micro::xcore::XCoreProfiler *profiler = nullptr;
-constexpr int kTensorArenaSize = 175000;
+constexpr int kTensorArenaSize = 100000;
 uint8_t tensor_arena[kTensorArenaSize];
 
 void invoke() {
@@ -46,7 +46,7 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  model = tflite::GetModel(mobilenet_v1_model_data);
+  model = tflite::GetModel(vww_model_data);
   if (model->version() != TFLITE_SCHEMA_VERSION) {
     TF_LITE_REPORT_ERROR(reporter,
                          "Model provided is schema version %d not equal "
@@ -65,8 +65,8 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
                      tflite::ops::micro::xcore::Register_Conv2D_Depthwise());
   resolver.AddCustom(tflite::ops::micro::xcore::Conv2D_1x1_OpCode,
                      tflite::ops::micro::xcore::Register_Conv2D_1x1());
-  resolver.AddCustom(tflite::ops::micro::xcore::AvgPool2D_Global_OpCode,
-                     tflite::ops::micro::xcore::Register_AvgPool2D_Global());
+  resolver.AddCustom(tflite::ops::micro::xcore::AvgPool2D_OpCode,
+                     tflite::ops::micro::xcore::Register_AvgPool2D());
   resolver.AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode,
                      tflite::ops::micro::xcore::Register_FullyConnected_8());
 
