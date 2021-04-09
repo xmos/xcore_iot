@@ -116,7 +116,7 @@ The following command will generate source files for a model runner as well as t
 Converting flatbuffer to source file
 ====================================
 
-If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
+If you do not want to regenerate the model runner, the following command will generate only the C source file that contains the TensorFlow Lite model as a character array:
 
 .. code-block:: console
 
