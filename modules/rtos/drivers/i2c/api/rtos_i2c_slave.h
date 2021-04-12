@@ -11,6 +11,7 @@
  * @{
  */
 
+#include <xcore/channel_streaming.h>
 #include "i2c.h"
 
 #include "rtos/drivers/osal/api/rtos_osal.h"
@@ -122,10 +123,17 @@ struct rtos_i2c_slave_struct {
     size_t tx_data_i;
     size_t tx_data_sent;
 
+    int waiting_for_complete_cb;
+
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_start_cb_t start;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_rx_cb_t rx;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_tx_start_cb_t tx_start;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_tx_done_cb_t tx_done;
+
+    streaming_channel_t c;
+    rtos_osal_event_group_t events;
+    rtos_osal_thread_t hil_thread;
+    rtos_osal_thread_t app_thread;
 };
 
 /**
@@ -145,7 +153,7 @@ struct rtos_i2c_slave_struct {
  * \param tx_done       The callback function that is notified when transmits are
  *                      complete. This is optional and may be NULL.
  * \param priority      The priority of the task that gets created by the driver to
- *                      handle the I2C slave interface.
+ *                      call the callback functions.
  */
 void rtos_i2c_slave_start(
         rtos_i2c_slave_t *i2c_slave_ctx,
