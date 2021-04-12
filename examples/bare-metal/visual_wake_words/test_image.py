@@ -18,8 +18,8 @@ IMAGE_SHAPE = (96, 96)
 INPUT_SHAPE = IMAGE_SHAPE + (3,)
 INPUT_SCALE = 0.003921568859368563
 INPUT_ZERO_POINT = -128
-NORM_SCALE = 127.5
-NORM_SHIFT = 1
+# NORM_SCALE = 127.5
+# NORM_SHIFT = 1
 
 OUTPUT_SCALE = 1 / 256
 OUTPUT_ZERO_POINT = -128
@@ -137,11 +137,11 @@ if raw_img is not None:
     else:
         print(f"Person   {prob:0.2f}%")
 
-    np_img = np.frombuffer(raw_img, dtype=np.int8).reshape(INPUT_SHAPE)
-    np_img = np.round(
-        (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
-    ).astype(np.uint8)
+    img = np.frombuffer(raw_img, dtype=np.int8).reshape(INPUT_SHAPE)
+    # np_img = np.round(
+    #     (dequantize(np_img, INPUT_SCALE, INPUT_ZERO_POINT) + NORM_SHIFT) * NORM_SCALE
+    # ).astype(np.uint8)
 
     # Show the image
-    pyplot.imshow(np_img)
+    pyplot.imshow(img)
     pyplot.show()
