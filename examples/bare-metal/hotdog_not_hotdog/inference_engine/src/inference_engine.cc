@@ -3,12 +3,15 @@
 
 #include "inference_engine.h"
 
-#include <platform.h>  // for PLATFORM_REFERENCE_MHZ
-
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
+
+#ifdef _TIME_H_
+#define _clock_defined
+#endif
+#include <platform.h>  // for PLATFORM_REFERENCE_MHZ
 
 #include "hotdog_not_hotdog.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_interpreter.h"
