@@ -96,7 +96,7 @@ void print_profiler_summary() {
   uint32_t const *times = nullptr;
   const char *op_name;
   uint32_t total = 0;
-  uint32_t time_ms = 0;
+  uint32_t time_us = 0;
 
   if (profiler) {
     count = profiler->GetNumEvents();
@@ -114,9 +114,9 @@ void print_profiler_summary() {
         op_name = tflite::EnumNameBuiltinOperator(
             tflite::BuiltinOperator(registration->builtin_code));
       }
-      time_ms = times[i] / PLATFORM_REFERENCE_MHZ;
-      total += time_ms;
-      printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_ms);
+      time_us = times[i] / PLATFORM_REFERENCE_MHZ;
+      total += time_us;
+      printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_us);
     }
   }
   printf("TOTAL %lu microseconds\n", total);
