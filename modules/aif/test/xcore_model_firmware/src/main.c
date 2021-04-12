@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _TIME_H_
+#define _clock_defined
+#endif
+#include <xcore/thread.h>
+
 #include "test_model_data.h"
 #include "test_model_runner.h"
 #include "xcore_device_memory.h"
@@ -14,7 +19,7 @@
 __attribute__((aligned(8))) static char swmem_handler_stack[1024];
 #endif
 
-#define TENSOR_ARENA_SIZE 100000 // this is big enough for all test models
+#define TENSOR_ARENA_SIZE 100000  // this is big enough for all test models
 static unsigned char tensor_arena[TENSOR_ARENA_SIZE];
 
 static model_runner_t model_runner_ctx_s;

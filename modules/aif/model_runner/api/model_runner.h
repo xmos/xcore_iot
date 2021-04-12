@@ -15,8 +15,8 @@ struct model_runner_struct {
   void (*profiler_get_fun)(void **);
   __attribute__((fptrgroup("model_runner_profiler_reset_fptr_grp")))
   void (*profiler_reset_fun)(void);
-  __attribute__((fptrgroup("model_runner_profiler_times_get_fptr_grp")))
-  void (*profiler_times_get_fun)(uint32_t *, const uint32_t **);
+  __attribute__((fptrgroup("model_runner_profiler_durations_get_fptr_grp")))
+  void (*profiler_durations_get_fun)(uint32_t *, const uint32_t **);
 };
 
 typedef struct model_runner_struct model_runner_t;
@@ -110,6 +110,14 @@ void model_runner_ouput_quant_get(model_runner_t *ctx, float *scale,
                                   int *zero_point);
 
 #ifndef NDEBUG
+/** Get the profiler inference durations.
+ *
+ * @param[in]  ctx        Model runner context
+ * @param[out] count      The number of durations in the array
+ * @param[out] durations  Pointer to the durations array
+ */
+void model_runner_profiler_durations_get(model_runner_t *ctx, uint32_t *count,
+                                         const uint32_t **durations);
 
 /** Print a summary report of profiler inference durations.
  *

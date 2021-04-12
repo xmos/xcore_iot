@@ -31,7 +31,7 @@ set(INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin")
 set(BUILD_FLAGS
   "-fxscope"
   "${CMAKE_CURRENT_SOURCE_DIR}/config.xscope"
-  "-target=XCORE-AI-EXPLORER"
+  "${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn"
   "-mcmodel=large"
   "-report"
   "-Wno-xcore-fptrgroup"
@@ -39,6 +39,7 @@ set(BUILD_FLAGS
   "-fno-rtti"
   "-fno-exceptions"
   "-DXCORE"
+  "-D_clock_defined"       # workaround for tools bug id=18509
   "-DTF_LITE_STATIC_MEMORY"
   "-Os"
 )
@@ -65,12 +66,12 @@ include("${PROJECT_SOURCE_DIR}/../../ai_framework.cmake")
 #**********************
 # Additional support sources
 #**********************
-set(QSPI_FLASH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../tensorflow_support/qspi_flash")
+set(DEVICE_MEMORY_SUPPORT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../device_memory_support/bare-metal")
 
 set(ADDITIONAL_C_SOURCES
-  "${QSPI_FLASH_DIR}/xcore_device_memory.c"
+  "${DEVICE_MEMORY_SUPPORT_DIR}/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${QSPI_FLASH_DIR}")
+set(ADDITIONAL_INCLUDE_DIR "${DEVICE_MEMORY_SUPPORT_DIR}")
 
 target_sources(xcore_model_firmware
   PRIVATE ${XCORE_INTERPRETER_SOURCES}

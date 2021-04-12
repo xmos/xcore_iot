@@ -50,12 +50,20 @@ int dac_init(rtos_i2c_master_t *i2c_ctx)
 		i2c_dac_reg_write(i2c_ctx, AIC3204_NDAC, 0x81) == 0 &&
 		// Power up MDAC and set to 4
 		i2c_dac_reg_write(i2c_ctx, AIC3204_MDAC, 0x84) == 0 &&
+        // Power up NADC and set to 1
+		i2c_dac_reg_write(i2c_ctx, AIC3204_NADC, 0x81) == 0 &&
+        // Power up MADC and set to 4
+	    i2c_dac_reg_write(i2c_ctx, AIC3204_MADC, 0x84) == 0 &&
 		// Program DOSR = 128
 		i2c_dac_reg_write(i2c_ctx, AIC3204_DOSR, 0x80) == 0 &&
+        // Program AOSR = 128
+        i2c_dac_reg_write(i2c_ctx, AIC3204_AOSR, 0x80) == 0 &&
 		// Set Audio Interface Config: I2S, 24 bits, slave mode, DOUT always driving.
 		i2c_dac_reg_write(i2c_ctx, AIC3204_CODEC_IF, 0x20) == 0 &&
 		// Program the DAC processing block to be used - PRB_P1
 		i2c_dac_reg_write(i2c_ctx, AIC3204_DAC_SIG_PROC, 0x01) == 0 &&
+		// Program the ADC processing block to be used - PRB_R1
+        i2c_dac_reg_write(i2c_ctx, AIC3204_ADC_SIG_PROC, 0x01) == 0 &&
 		// Select Page 1
 		i2c_dac_reg_write(i2c_ctx, AIC3204_PAGE_CTRL, 0x01) == 0 &&
 		// Enable the internal AVDD_LDO:
@@ -75,6 +83,8 @@ int dac_init(rtos_i2c_master_t *i2c_ctx)
 		// Set the Left & Right DAC PowerTune mode to PTM_P3/4. Use Class-AB driver.
 		i2c_dac_reg_write(i2c_ctx, AIC3204_PLAY_CFG1, 0x00) == 0 &&
 		i2c_dac_reg_write(i2c_ctx, AIC3204_PLAY_CFG2, 0x00) == 0 &&
+		// Set ADC PowerTune mode PTM_R4.
+		i2c_dac_reg_write(i2c_ctx, AIC3204_ADC_PTM, 0x00) == 0 &&
 		// Set MicPGA startup delay to 3.1ms
 		i2c_dac_reg_write(i2c_ctx, AIC3204_AN_IN_CHRG, 0x31) == 0 &&
 		// Set the REF charging time to 40ms
@@ -123,8 +133,12 @@ int dac_init(rtos_i2c_master_t *i2c_ctx)
 		// Power up the Left and Right DAC Channels. Route Left data to Left DAC and Right data to Right DAC.
 		// DAC Vol control soft step 1 step per DAC word clock.
 		i2c_dac_reg_write(i2c_ctx, AIC3204_DAC_CH_SET1, 0xd4) == 0 &&
+		// Power up Left and Right ADC Channels, ADC vol ctrl soft step 1 step per ADC word clock.
+		i2c_dac_reg_write(i2c_ctx, AIC3204_ADC_CH_SET, 0xc0) == 0 &&
 		// Unmute Left and Right DAC digital volume control
-		i2c_dac_reg_write(i2c_ctx, AIC3204_DAC_CH_SET2, 0x00) == 0
+		i2c_dac_reg_write(i2c_ctx, AIC3204_DAC_CH_SET2, 0x00) == 0 &&
+		// Unmute Left and Right ADC Digital Volume Control.
+		i2c_dac_reg_write(i2c_ctx, AIC3204_ADC_FGA_MUTE, 0x00) == 0
 	) {
 		return 0;
 	} else {

@@ -7,7 +7,7 @@ endif()
 
 ## Specify configuration
 set(USE_AIF TRUE)
-set(USE_TENSORFLOW_SUPPORT TRUE)
+set(USE_DEVICE_MEMORY_SUPPORT TRUE)
 
 ## Import XMOS configurations
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")

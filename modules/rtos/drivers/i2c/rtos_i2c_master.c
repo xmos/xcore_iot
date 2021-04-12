@@ -1,9 +1,7 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
+#define DEBUG_UNIT RTOS_I2C
 
 #include "rtos/drivers/i2c/api/rtos_i2c_master.h"
 

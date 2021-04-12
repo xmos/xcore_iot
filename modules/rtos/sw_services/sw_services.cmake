@@ -7,6 +7,7 @@ set(SW_SERVICES_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/sw_services")
 
 set(WIFI_MANAGER_DIR "${SW_SERVICES_DIR}/wifi_manager")
 set(DHCPD_DIR "${SW_SERVICES_DIR}/dhcpd")
+set(DEVICE_CONTROL_DIR "${SW_SERVICES_DIR}/device_control")
 set(FATFS_DIR "${SW_SERVICES_DIR}/fatfs")
 set(HTTP_PARSER_DIR "${SW_SERVICES_DIR}/http")
 set(JSON_PARSER_DIR "${SW_SERVICES_DIR}/json")
@@ -20,6 +21,7 @@ set(TINYUSB_DIR "${SW_SERVICES_DIR}/usb")
 #**********************
 option(USE_WIFI_MANAGER "Enable to use wifi manager" FALSE)
 option(USE_DHCPD "Enable to use DHCP" FALSE)
+option(USE_DEVICE_CONTROL "Enable to use Device Control" FALSE)
 option(USE_FATFS "Enable to use FATFS filesystem" FALSE)
 option(USE_HTTP_PARSER "Enable to use HTTP parser" FALSE)
 option(USE_JSON_PARSER "Enable to use JSON parser" FALSE)
@@ -72,6 +74,30 @@ if(${USE_${THIS_LIB}})
 
     add_compile_definitions(
         USE_DHCPD=1
+    )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
+#********************************
+# Gather Device Control sources
+#********************************
+set(THIS_LIB DEVICE_CONTROL)
+if(${USE_${THIS_LIB}})
+	set(${THIS_LIB}_FLAGS "-Os")
+
+	file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+
+    if(${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
+
+	set(${THIS_LIB}_INCLUDES
+	    "${${THIS_LIB}_DIR}/api"
+	)
+
+    add_compile_definitions(
+        USE_DEVICE_CONTROL=1
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
@@ -356,12 +382,14 @@ unset(THIS_LIB)
 # set user variables
 #**********************
 set(SW_SERVICES_SOURCES
+    ${DEVICE_CONTROL_SOURCES}
     ${FATFS_SOURCES}
     ${JSON_PARSER_SOURCES}
     ${TINYUSB_SOURCES}
 )
 
 set(SW_SERVICES_INCLUDES
+    ${DEVICE_CONTROL_INCLUDES}
     ${FATFS_INCLUDES}
     ${JSON_PARSER_INCLUDES}
     ${TINYUSB_INCLUDES}

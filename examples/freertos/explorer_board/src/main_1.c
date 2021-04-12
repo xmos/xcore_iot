@@ -16,7 +16,7 @@
 #include "rtos/drivers/intertile/api/rtos_intertile.h"
 #include "rtos/drivers/mic_array/api/rtos_mic_array.h"
 #include "rtos/drivers/i2c/api/rtos_i2c_master.h"
-#include "rtos/drivers/i2s/api/rtos_i2s_master.h"
+#include "rtos/drivers/i2s/api/rtos_i2s.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -29,13 +29,13 @@
 
 static rtos_mic_array_t mic_array_ctx_s;
 static rtos_i2c_master_t i2c_master_ctx_s;
-static rtos_i2s_master_t i2s_master_ctx_s;
+static rtos_i2s_t i2s_ctx_s;
 static rtos_intertile_t intertile_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
 
 static rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_i2c_master_t *i2c_master_ctx = &i2c_master_ctx_s;
-static rtos_i2s_master_t *i2s_master_ctx = &i2s_master_ctx_s;
+static rtos_i2s_t *i2s_ctx = &i2s_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 
@@ -86,10 +86,11 @@ void vApplicationDaemonTaskStartup( void )
             configMAX_PRIORITIES-1);
 
     rtos_printf("Starting i2s driver\n");
-    rtos_i2s_master_start(
-            i2s_master_ctx,
-            rtos_i2s_master_mclk_bclk_ratio(appconfAUDIO_CLOCK_FREQUENCY, appconfPIPELINE_AUDIO_SAMPLE_RATE),
+    rtos_i2s_start(
+            i2s_ctx,
+            rtos_i2s_mclk_bclk_ratio(appconfAUDIO_CLOCK_FREQUENCY, appconfPIPELINE_AUDIO_SAMPLE_RATE),
             I2S_MODE_I2S,
+            0,
             1.2 * MIC_DUAL_FRAME_SIZE,
             configMAX_PRIORITIES-1);
 
@@ -97,7 +98,7 @@ void vApplicationDaemonTaskStartup( void )
     gpio_ctrl_create(gpio_ctx, appconfGPIO_TASK_PRIORITY);
 
     /* Create audio pipeline */
-    example_pipeline_init(mic_array_ctx, i2s_master_ctx, intertile_ctx, INTERTILE_AUDIOPIPELINE_PORT);
+    example_pipeline_init(mic_array_ctx, i2s_ctx, intertile_ctx, INTERTILE_AUDIOPIPELINE_PORT);
     remote_cli_gain_init(intertile_ctx, CLI_RPC_PROCESS_COMMAND_PORT, CLI_RPC_PROCESS_COMMAND_TASK_PRIORITY);
 
     vTaskDelete(NULL);
@@ -113,14 +114,14 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
         rtos_mic_array_interrupt_init(mic_array_ctx);
         break;
     case 1:
-        rtos_i2s_master_interrupt_init(i2s_master_ctx);
+        rtos_i2s_interrupt_init(i2s_ctx);
         break;
     }
 }
 
 void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile1_init(c0, intertile_ctx, mic_array_ctx, i2s_master_ctx, i2c_master_ctx, gpio_ctx);
+    board_tile1_init(c0, intertile_ctx, mic_array_ctx, i2s_ctx, i2c_master_ctx, gpio_ctx);
     (void) c1;
     (void) c2;
     (void) c3;

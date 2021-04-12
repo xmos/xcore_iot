@@ -25,11 +25,43 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_intertile_isr, arg)
     }
 }
 
+void rtos_intertile_tx_len(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        size_t len)
+{
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_PORT_WAIT_FOREVER);
+
+    xassert(ctx->tx_len == 0);
+
+    ctx->tx_len = len;
+    s_chan_out_byte(ctx->c, port); //to the ISR
+    s_chan_out_word(ctx->c, len);
+}
+
+size_t rtos_intertile_tx_data(
+        rtos_intertile_t *ctx,
+        void *data,
+        size_t len)
+{
+    size_t tx_len = len <= ctx->tx_len ? len : ctx->tx_len;
+
+    s_chan_out_buf_byte(ctx->c, data, tx_len);
+
+    ctx->tx_len -= tx_len;
+
+    if (ctx->tx_len == 0) {
+        rtos_osal_mutex_put(&ctx->lock);
+    }
+
+    return tx_len;
+}
+
 void rtos_intertile_tx(
         rtos_intertile_t *ctx,
         uint8_t port,
         void *msg,
-        uint32_t len)
+        size_t len)
 {
     rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_PORT_WAIT_FOREVER);
 
@@ -40,29 +72,76 @@ void rtos_intertile_tx(
     rtos_osal_mutex_put(&ctx->lock);
 }
 
-uint32_t rtos_intertile_rx(
+size_t rtos_intertile_rx_len(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        unsigned timeout)
+{
+    uint32_t flags;
+    rtos_osal_status_t status;
+
+    xassert(ctx->rx_len == 0);
+
+    status = rtos_osal_event_group_get_bits(&ctx->event_group,
+                        (1 << port),
+                        RTOS_OSAL_OR_CLEAR,
+                        &flags,
+                        timeout);
+
+    if (status == RTOS_OSAL_SUCCESS) {
+        ctx->rx_len = s_chan_in_word(ctx->c);
+    }
+
+    return ctx->rx_len;
+}
+
+size_t rtos_intertile_rx_data(
+        rtos_intertile_t *ctx,
+        void *data,
+        size_t len)
+{
+    size_t rx_len = len <= ctx->rx_len ? len : ctx->rx_len;
+
+    s_chan_in_buf_byte(ctx->c, data, rx_len);
+
+    ctx->rx_len -= rx_len;
+
+    if (ctx->rx_len == 0) {
+        triggerable_enable_trigger(ctx->c);
+    }
+
+    return rx_len;
+}
+
+size_t rtos_intertile_rx(
         rtos_intertile_t *ctx,
         uint8_t port,
         void **msg,
         unsigned timeout)
 {
-    uint32_t len;
+    uint32_t len = 0;
     uint32_t flags;
+    rtos_osal_status_t status;
 
-    rtos_osal_event_group_get_bits(&ctx->event_group,
+    *msg = NULL;
+
+    status = rtos_osal_event_group_get_bits(&ctx->event_group,
                         (1 << port),
                         RTOS_OSAL_OR_CLEAR,
                         &flags,
-                        RTOS_OSAL_PORT_WAIT_FOREVER);
+                        timeout);
 
-    len = s_chan_in_word(ctx->c);
+    if (status == RTOS_OSAL_SUCCESS) {
 
-    *msg = rtos_osal_malloc(len);
-    xassert(*msg != NULL);
+        len = s_chan_in_word(ctx->c);
 
-    s_chan_in_buf_byte(ctx->c, *msg, len);
+        *msg = rtos_osal_malloc(len);
+        xassert(*msg != NULL);
 
-    triggerable_enable_trigger(ctx->c);
+        s_chan_in_buf_byte(ctx->c, *msg, len);
+
+        triggerable_enable_trigger(ctx->c);
+    }
 
     return len;
 }
@@ -70,6 +149,8 @@ uint32_t rtos_intertile_rx(
 void rtos_intertile_start(
         rtos_intertile_t *intertile_ctx)
 {
+    intertile_ctx->tx_len = 0;
+    intertile_ctx->rx_len = 0;
     rtos_osal_mutex_create(&intertile_ctx->lock, "intertile_mutex", RTOS_OSAL_NOT_RECURSIVE);
     rtos_osal_event_group_create(&intertile_ctx->event_group, "intertile_group");
 

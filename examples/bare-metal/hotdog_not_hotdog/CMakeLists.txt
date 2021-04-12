@@ -53,9 +53,9 @@ target_compile_options(hotdog_not_hotdog PRIVATE ${BUILD_FLAGS})
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash/xcore_device_memory.c"
+  "${AIOT_SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/tensorflow_support/qspi_flash")
+set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/device_memory_support/bare-metal")
 
 #**********************
 # APP sources

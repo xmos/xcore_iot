@@ -6,6 +6,7 @@
 #include <string.h>
 
 #ifdef XCORE
+#include <xcore/assert.h>
 #include <xcore/port.h>
 
 #define WORDS_TO_BYTES(w) ((w) * sizeof(uint32_t))
@@ -34,20 +35,18 @@ void swmem_setup(rtos_qspi_flash_t *ctx, unsigned swmem_task_priority) {
   rtos_swmem_init(RTOS_SWMEM_READ_FLAG);
   rtos_swmem_start(swmem_task_priority);
 }
-#endif /* USE_SWMEM */
 
-void memload(void *dest, void *src, size_t size) {
-#if USE_SWMEM
-  if (IS_SWMEM(src)) {
-    if (qspi_flash_ctx != NULL) {
-      rtos_qspi_flash_read(qspi_flash_ctx, (uint8_t *)dest,
-                           (unsigned)(src - XS1_SWMEM_BASE), size);
-    }
-  } else
-#endif /* USE_SWMEM */
-      if (IS_EXTMEM(src)) {
-    memcpy(dest, src, size);
+size_t swmem_load(void *dest, const void *src, size_t size) {
+  xassert(IS_SWMEM(src));
+
+  if (qspi_flash_ctx != NULL) {
+    rtos_qspi_flash_read(qspi_flash_ctx, (uint8_t *)dest,
+                         (unsigned)(src - XS1_SWMEM_BASE), size);
+    return size;
   }
+  return 0;
 }
+
+#endif /* USE_SWMEM */
 
 #endif  // XCORE
