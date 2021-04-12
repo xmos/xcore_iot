@@ -178,7 +178,6 @@ typedef struct {
  * The members in this struct should not be accessed directly.
  */
 typedef struct {
-    device_control_t *device_control_ctx;
     rtos_osal_queue_t queue;
 } device_control_servicer_t;
 
@@ -327,13 +326,17 @@ control_ret_t device_control_resources_register(device_control_t *ctx,
  * Servicers may be registered on any tile that has initialized a device control
  * instance. This must be called after calling device_control_start().
  *
- * \param ctx                A pointer to the device control servicer context to initialize.
- * \param device_control_ctx A pointer to the device control instance to register the servicer with.
- * \param resources          Array of resource IDs to associate with this servicer.
- * \param num_resources      The number of resource IDs within \p resources.
+ * \param ctx                      A pointer to the device control servicer context to initialize.
+ * \param device_control_ctx       An array of pointers to the device control instance to register
+ *                                 the servicer with.
+ * \param device_control_ctx_count The number of device control instances to register the servicer
+ *                                 with.
+ * \param resources                Array of resource IDs to associate with this servicer.
+ * \param num_resources            The number of resource IDs within \p resources.
  */
 control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
-                                               device_control_t *device_control_ctx,
+                                               device_control_t *device_control_ctx[],
+                                               size_t device_control_ctx_count,
                                                const control_resid_t resources[],
                                                size_t num_resources);
 

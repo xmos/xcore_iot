@@ -186,7 +186,8 @@ void vApplicationDaemonTaskStartup(void *arg)
     device_control_servicer_t servicer_ctx;
     rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
     dc_ret = device_control_servicer_register(&servicer_ctx,
-                                              device_control_ctx,
+                                              &device_control_ctx,
+                                              1,
                                               resources,
                                               sizeof(resources));
     rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
@@ -203,7 +204,8 @@ void vApplicationDaemonTaskStartup(void *arg)
     device_control_servicer_t servicer_ctx;
     rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
     dc_ret = device_control_servicer_register(&servicer_ctx,
-                                              device_control_ctx,
+                                              &device_control_ctx,
+                                              1,
                                               resources,
                                               sizeof(resources));
     rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);

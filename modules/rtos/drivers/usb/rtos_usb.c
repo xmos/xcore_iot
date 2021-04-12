@@ -51,7 +51,7 @@ static void usb_xud_thread(rtos_usb_t *ctx)
 
     CLRSR(XS1_SR_KEDI_MASK);
 
-    rtos_printf("Starting XUD_Main() with %d endpoints\n", ctx->endpoint_count);
+    rtos_printf("Starting XUD_Main() on core %d with %d endpoints\n", rtos_core_id_get(), ctx->endpoint_count);
 
     XUD_Main(ctx->c_ep_out_xud,
              ctx->endpoint_count,
