@@ -48,10 +48,10 @@ struct rtos_i2s_struct{
     port_t p_mclk;
     xclock_t bclk;
 
-    rtos_osal_entry_function_t driver_thread_entry;
-    size_t driver_thread_entry_size;
     rtos_osal_mutex_t mutex;
     streaming_channel_t c_i2s_isr;
+
+    rtos_osal_thread_t hil_thread;
     rtos_osal_semaphore_t send_sem;
     rtos_osal_semaphore_t recv_sem;
     int send_blocked;
