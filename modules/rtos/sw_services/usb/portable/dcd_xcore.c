@@ -243,18 +243,13 @@ void dcd_init(uint8_t rhport)
     endpoint_count = cfg_desc_parse(epTypeTableOut, epTypeTableIn, &pwr);
     rtos_printf("Endpoint count is %d\n", endpoint_count);
 
-    rtos_usb_start(&usb_ctx,
+    rtos_usb_init(&usb_ctx,
                    dcd_xcore_int_handler, NULL,
                    endpoint_count,
                    epTypeTableOut,
                    epTypeTableIn,
                    (CFG_TUSB_RHPORT0_MODE & OPT_MODE_HIGH_SPEED) ? XUD_SPEED_HS : XUD_SPEED_FS,
-                   pwr,
-                   configMAX_PRIORITIES - 1); /* TODO: configurable? */
-
-    rtos_usb_all_endpoints_ready(&usb_ctx, RTOS_OSAL_WAIT_FOREVER);
-
-    prepare_setup(false);
+                   pwr);
 
     (void) rhport;
 }

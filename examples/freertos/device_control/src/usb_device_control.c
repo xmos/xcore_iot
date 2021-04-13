@@ -19,19 +19,6 @@ static device_control_t *device_control_ctx;
 
 static void usb_device_control_init(void)
 {
-    control_ret_t dc_ret;
-
-    dc_ret = device_control_resources_register(device_control_ctx,
-                                               2, //SERVICER COUNT
-                                               pdMS_TO_TICKS(100));
-
-    if (dc_ret != CONTROL_SUCCESS) {
-        rtos_printf("Device control resources failed to register on tile %d\n", THIS_XCORE_TILE);
-    } else {
-        rtos_printf("Device control resources registered on tile %d\n", THIS_XCORE_TILE);
-    }
-    xassert(dc_ret == CONTROL_SUCCESS);
-
     rtos_printf("USB Device Control Driver Initialized!\n");
 }
 
@@ -44,14 +31,27 @@ static void usb_device_control_reset(uint8_t rhport)
 
 static uint16_t usb_device_control_open(uint8_t rhport, tusb_desc_interface_t const * itf_desc, uint16_t max_len)
 {
-    TU_VERIFY(TUSB_CLASS_VENDOR_SPECIFIC == itf_desc->bInterfaceClass, 0);
+    TU_VERIFY(TUSB_CLASS_VENDOR_SPECIFIC == itf_desc->bInterfaceClass);
 
     TU_VERIFY(itf_desc->bNumEndpoints == 0);
 
     uint16_t const drv_len = sizeof(tusb_desc_interface_t);
-    TU_VERIFY(max_len >= drv_len, 0);
+    TU_VERIFY(max_len >= drv_len);
 
-    rtos_printf("Device control USB interface is %d is opened\n", itf_desc->bInterfaceNumber);
+    control_ret_t dc_ret;
+
+    dc_ret = device_control_resources_register(device_control_ctx,
+                                               2, //SERVICER COUNT
+                                               pdMS_TO_TICKS(100));
+
+    if (dc_ret != CONTROL_SUCCESS) {
+        rtos_printf("Device control resources failed to register on tile %d\n", THIS_XCORE_TILE);
+    } else {
+        rtos_printf("Device control resources registered on tile %d\n", THIS_XCORE_TILE);
+    }
+    TU_VERIFY(dc_ret == CONTROL_SUCCESS);
+
+    rtos_printf("Device control USB interface #%d opened\n", itf_desc->bInterfaceNumber);
 
     return drv_len;
 }

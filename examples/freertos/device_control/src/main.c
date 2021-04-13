@@ -16,8 +16,8 @@
 
 #include "board_init.h"
 
-#define USB_DEVICE_CONTROL 0
-#define I2C_DEVICE_CONTROL 1
+#define USB_DEVICE_CONTROL 1
+#define I2C_DEVICE_CONTROL 0
 
 #if (USB_DEVICE_CONTROL + I2C_DEVICE_CONTROL) != 1
 #error Must define exactly one device control transport
@@ -239,6 +239,10 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                         &intertile_ctx,
                         1);
 
+#if USB_DEVICE_CONTROL && ON_TILE(USB_TILE_NO)
+    usb_manager_init();
+#endif
+
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
                 RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
@@ -269,6 +273,10 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                         DEVICE_CONTROL_HOST_TILE == 1 ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
                         &intertile_ctx,
                         1);
+
+#if USB_DEVICE_CONTROL && ON_TILE(USB_TILE_NO)
+    usb_manager_init();
+#endif
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",

@@ -48,6 +48,7 @@ void rtos_osal_free(void *ptr);
  * Time
  */
 rtos_osal_tick_t rtos_osal_tick_get(void);
+void rtos_osal_delay(unsigned ticks);
 
 /*
  * Thread management
