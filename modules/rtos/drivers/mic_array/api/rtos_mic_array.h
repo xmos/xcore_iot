@@ -53,6 +53,7 @@ struct rtos_mic_array_struct {
     mic_dual_third_stage_coef_t *third_stage_coefs;
     int fir_gain_compensation;
 
+    rtos_osal_thread_t hil_thread;
     rtos_osal_semaphore_t recv_sem;
     int recv_blocked;
     struct {

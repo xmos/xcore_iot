@@ -25,10 +25,7 @@ static void mic_array_thread(rtos_mic_array_t *ctx)
     chanend_t *ref_audio_ends = NULL;
 #endif
 
-    /* Ensure the mic array thread is never preempted */
-    rtos_osal_thread_preemption_disable(NULL);
-    /* And exclude it from core 0 where the system tick interrupt runs */
-    rtos_osal_thread_core_exclusion_set(NULL, (1 << 0));
+    (void) s_chan_in_byte(ctx->c_2x_pdm_mic.end_a);
 
     rtos_printf("PDM mics on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
     mic_dual_pdm_rx_decimate(
@@ -155,13 +152,8 @@ void rtos_mic_array_start(
     mic_array_ctx->third_stage_coefs = third_stage_coefs;
     mic_array_ctx->fir_gain_compensation = fir_gain_compensation;
 
-    rtos_osal_thread_create(
-            NULL,
-            "mic_array_thread",
-            (rtos_osal_entry_function_t) mic_array_thread,
-            mic_array_ctx,
-            RTOS_THREAD_STACK_SIZE(mic_array_thread),
-            priority);
+    /* Tells the task running the decimator to start */
+    s_chan_out_byte(mic_array_ctx->c_2x_pdm_mic.end_b, 0);
 
     if (mic_array_ctx->rpc_config != NULL && mic_array_ctx->rpc_config->rpc_host_start != NULL) {
         mic_array_ctx->rpc_config->rpc_host_start(mic_array_ctx->rpc_config);
@@ -250,4 +242,17 @@ void rtos_mic_array_init(
 
     mic_array_ctx->rpc_config = NULL;
     mic_array_ctx->rx = mic_array_local_rx;
+
+    rtos_osal_thread_create(
+            &mic_array_ctx->hil_thread,
+            "mic_array_thread",
+            (rtos_osal_entry_function_t) mic_array_thread,
+            mic_array_ctx,
+            RTOS_THREAD_STACK_SIZE(mic_array_thread),
+            RTOS_OSAL_HIGHEST_PRIORITY);
+
+    /* Ensure the mic array thread is never preempted */
+    rtos_osal_thread_preemption_disable(&mic_array_ctx->hil_thread);
+    /* And exclude it from core 0 where the system tick interrupt runs */
+    rtos_osal_thread_core_exclusion_set(&mic_array_ctx->hil_thread, (1 << 0));
 }
