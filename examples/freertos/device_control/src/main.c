@@ -16,8 +16,8 @@
 
 #include "board_init.h"
 
-#define USB_DEVICE_CONTROL 1
-#define I2C_DEVICE_CONTROL 0
+#define USB_DEVICE_CONTROL 0
+#define I2C_DEVICE_CONTROL 1
 
 #if (USB_DEVICE_CONTROL + I2C_DEVICE_CONTROL) != 1
 #error Must define exactly one device control transport
@@ -164,6 +164,7 @@ void vApplicationDaemonTaskStartup(void *arg)
                                  (rtos_i2c_slave_rx_cb_t) i2c_dev_ctrl_rx_cb,
                                  (rtos_i2c_slave_tx_start_cb_t) i2c_dev_ctrl_tx_start_cb,
                                  (rtos_i2c_slave_tx_done_cb_t) NULL,
+                                 0,
                                  configMAX_PRIORITIES / 2);
         }
         #endif

@@ -247,7 +247,7 @@ void rtos_usb_start(
     const XUD_EpType *endpoint_out_type = ctx->endpoint_out_type;
     const XUD_EpType *endpoint_in_type = ctx->endpoint_in_type;
 
-    /* Ensure that all USB interrupts are enabled on the requested cores */
+    /* Ensure that all USB interrupts are enabled on the requested core */
     rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
 

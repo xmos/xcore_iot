@@ -211,8 +211,11 @@ void rtos_i2c_slave_start(
         rtos_i2c_slave_rx_cb_t rx,
         rtos_i2c_slave_tx_start_cb_t tx_start,
         rtos_i2c_slave_tx_done_cb_t tx_done,
+        unsigned interrupt_core_id,
         unsigned priority)
 {
+    uint32_t core_exclude_map;
+
     i2c_slave_ctx->app_data = app_data;
     i2c_slave_ctx->start = start;
     i2c_slave_ctx->rx = rx;
@@ -235,12 +238,19 @@ void rtos_i2c_slave_start(
             RTOS_THREAD_STACK_SIZE(i2c_slave_app_thread),
             priority);
 
-    triggerable_setup_interrupt_callback(i2c_slave_ctx->c.end_b, i2c_slave_ctx, RTOS_INTERRUPT_CALLBACK(rtos_i2c_slave_isr));
+    /* Ensure that the I2C interrupt is enabled on the requested core */
+    rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
+    rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
+
     triggerable_enable_trigger(i2c_slave_ctx->c.end_b);
+
+    /* Restore the core exclusion map for the calling thread */
+    rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
 }
 
 void rtos_i2c_slave_init(
         rtos_i2c_slave_t *i2c_slave_ctx,
+        uint32_t io_core_mask,
         const port_t p_scl,
         const port_t p_sda,
         uint8_t device_addr)
@@ -252,6 +262,8 @@ void rtos_i2c_slave_init(
     i2c_slave_ctx->device_addr = device_addr;
     i2c_slave_ctx->c = s_chan_alloc();
 
+    triggerable_setup_interrupt_callback(i2c_slave_ctx->c.end_b, i2c_slave_ctx, RTOS_INTERRUPT_CALLBACK(rtos_i2c_slave_isr));
+
     rtos_osal_thread_create(
             &i2c_slave_ctx->hil_thread,
             "i2c_slave_hil_thread",
@@ -262,6 +274,6 @@ void rtos_i2c_slave_init(
 
     /* Ensure the I2C thread is never preempted */
     rtos_osal_thread_preemption_disable(&i2c_slave_ctx->hil_thread);
-    /* And exclude it from core 0 where the system tick interrupt runs */
-    rtos_osal_thread_core_exclusion_set(&i2c_slave_ctx->hil_thread, (1 << 0));
+    /* And ensure it only runs on one of the specified cores */
+    rtos_osal_thread_core_exclusion_set(&i2c_slave_ctx->hil_thread, ~io_core_mask);
 }

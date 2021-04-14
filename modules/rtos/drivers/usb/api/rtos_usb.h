@@ -240,7 +240,7 @@ static inline void rtos_usb_endpoint_stall_clear(rtos_usb_t *ctx,
  * rtos_usb_init() must be called on this USB driver instance prior to calling this.
  *
  * \param ctx               A pointer to the USB driver instance to start.
- * \param interrupt_core_id The ID of the core on which to enable interrupts.
+ * \param interrupt_core_id The ID of the core on which to enable the USB interrupts.
  */
 void rtos_usb_start(
         rtos_usb_t *ctx,
