@@ -160,31 +160,29 @@ inline int rtos_i2s_mclk_bclk_ratio(
 
 /**
  * Starts an RTOS I2S driver instance. This must only be called by the tile that
- * owns the driver instance. It may be called either before or after starting
- * the RTOS, but must be called before any of the core I2S driver functions are
- * called with this instance.
+ * owns the driver instance. It must be called after starting the RTOS from an RTOS thread,
+ * and must be called before any of the core I2S driver functions are called with this instance.
  *
  * One of rtos_i2s_master_init(), rtos_i2s_master_ext_clock_init, or rtos_i2s_slave_init()
  * must be called on this I2S driver instance prior to calling this.
  *
- * \param i2s_ctx          A pointer to the I2S driver instance to start.
- * \param mclk_bclk_ratio  The master clock to bit clock ratio. This may be computed
- *                         by the helper function rtos_i2s_mclk_bclk_ratio().
- *                         This is only used if the I2S instance was initialized with
- *                         rtos_i2s_master_init(). Otherwise it is ignored.
- * \param mode             The mode of the LR clock. See i2s_mode_t.
- * \param recv_buffer_size The size in frames of the input buffer. Each frame is two samples
- *                         (left and right channels) per input port. For example, a size of two
- *                         here when num_in is three would create a buffer that holds up to
- *                         12 samples.
- * \param send_buffer_size The size in frames of the output buffer. Each frame is two samples
- *                         (left and right channels) per output port. For example, a size of two
- *                         here when num_out is three would create a buffer that holds up to
- *                         12 samples.
- *                         Frames transmitted by rtos_i2s_tx() are stored in this
- *                         buffers before they are sent out to the I2S interface.
- * \param priority         The priority of the task that gets created by the driver to
- *                         handle the I2S interface.
+ * \param i2s_ctx           A pointer to the I2S driver instance to start.
+ * \param mclk_bclk_ratio   The master clock to bit clock ratio. This may be computed
+ *                          by the helper function rtos_i2s_mclk_bclk_ratio().
+ *                          This is only used if the I2S instance was initialized with
+ *                          rtos_i2s_master_init(). Otherwise it is ignored.
+ * \param mode              The mode of the LR clock. See i2s_mode_t.
+ * \param recv_buffer_size  The size in frames of the input buffer. Each frame is two samples
+ *                          (left and right channels) per input port. For example, a size of two
+ *                          here when num_in is three would create a buffer that holds up to
+ *                          12 samples.
+ * \param send_buffer_size  The size in frames of the output buffer. Each frame is two samples
+ *                          (left and right channels) per output port. For example, a size of two
+ *                          here when num_out is three would create a buffer that holds up to
+ *                          12 samples.
+ *                          Frames transmitted by rtos_i2s_tx() are stored in this
+ *                          buffers before they are sent out to the I2S interface.
+ * \param interrupt_core_id The ID of the core on which to enable the I2S interrupt.
  */
 void rtos_i2s_start(
         rtos_i2s_t *i2s_ctx,
@@ -192,25 +190,18 @@ void rtos_i2s_start(
         i2s_mode_t mode,
         size_t recv_buffer_size,
         size_t send_buffer_size,
-        unsigned priority);
-
-/**
- * Initializes the I2S driver's interrupt and ISR. Must be called on the core
- * that will process the interrupts, prior to calling rtos_i2s_start().
- * It is recommended that the core the ISR runs on is not the same as the core that
- * runs the I2S task started by rtos_i2s_start().
- *
- * \param i2s_ctx A pointer to the I2S driver instance for which to initialize interrupts.
- */
-void rtos_i2s_interrupt_init(rtos_i2s_t *i2s_ctx);
+        unsigned interrupt_core_id);
 
 /**
  * Initializes an RTOS I2S driver instance in master mode.
- * This must only be called by the tile that owns the driver instance. It may be
- * called either before or after starting the RTOS, but must be called before calling
- * rtos_i2s_master_start() or any of the core I2S driver functions with this instance.
+ * This must only be called by the tile that owns the driver instance. It should be
+ * called before starting the RTOS, and must be called before calling rtos_i2s_master_start()
+ * or any of the core I2S driver functions with this instance.
  *
  * \param i2s_ctx        A pointer to the I2S driver instance to initialize.
+ * \param io_core_mask   A bitmask representing the cores on which the low level I2S I/O thread
+ *                       created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                       etc.
  * \param p_dout         An array of data output ports.
  * \param num_out        The number of output data ports.
  * \param p_din          An array of data input ports.
@@ -223,6 +214,7 @@ void rtos_i2s_interrupt_init(rtos_i2s_t *i2s_ctx);
  */
 void rtos_i2s_master_init(
         rtos_i2s_t *i2s_ctx,
+        uint32_t io_core_mask,
         port_t p_dout[],
         size_t num_out,
         port_t p_din[],
@@ -235,11 +227,14 @@ void rtos_i2s_master_init(
 /**
  * Initializes an RTOS I2S driver instance in master mode but that uses an externally
  * generated bit clock.
- * This must only be called by the tile that owns the driver instance. It may be
- * called either before or after starting the RTOS, but must be called before calling
- * rtos_i2s_master_start() or any of the core I2S driver functions with this instance.
+ * This must only be called by the tile that owns the driver instance. It should be
+ * called before starting the RTOS, and must be called before calling rtos_i2s_master_start()
+ * or any of the core I2S driver functions with this instance.
  *
  * \param i2s_ctx        A pointer to the I2S driver instance to initialize.
+ * \param io_core_mask   A bitmask representing the cores on which the low level I2S I/O thread
+ *                       created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                       etc.
  * \param p_dout         An array of data output ports.
  * \param num_out        The number of output data ports.
  * \param p_din          An array of data input ports.
@@ -251,6 +246,7 @@ void rtos_i2s_master_init(
  */
 void rtos_i2s_master_ext_clock_init(
         rtos_i2s_t *i2s_ctx,
+        uint32_t io_core_mask,
         port_t p_dout[],
         size_t num_out,
         port_t p_din[],
@@ -261,11 +257,14 @@ void rtos_i2s_master_ext_clock_init(
 
 /**
  * Initializes an RTOS I2S driver instance in master mode.
- * This must only be called by the tile that owns the driver instance. It may be
- * called either before or after starting the RTOS, but must be called before calling
- * rtos_i2s_master_start() or any of the core I2S driver functions with this instance.
+ * This must only be called by the tile that owns the driver instance. It should be
+ * called before starting the RTOS, and must be called before calling rtos_i2s_master_start()
+ * or any of the core I2S driver functions with this instance.
  *
  * \param i2s_ctx        A pointer to the I2S driver instance to initialize.
+ * \param io_core_mask   A bitmask representing the cores on which the low level I2S I/O thread
+ *                       created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                       etc.
  * \param p_dout         An array of data output ports.
  * \param num_out        The number of output data ports.
  * \param p_din          An array of data input ports.
@@ -277,6 +276,7 @@ void rtos_i2s_master_ext_clock_init(
  */
 void rtos_i2s_slave_init(
         rtos_i2s_t *i2s_ctx,
+        uint32_t io_core_mask,
         port_t p_dout[],
         size_t num_out,
         port_t p_din[],

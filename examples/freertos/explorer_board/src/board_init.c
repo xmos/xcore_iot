@@ -208,6 +208,7 @@ void board_tile1_init(
 
     rtos_i2s_master_init(
             i2s_ctx,
+            ~(1 << 0),
             p_i2s_dout,
             1,
             NULL,

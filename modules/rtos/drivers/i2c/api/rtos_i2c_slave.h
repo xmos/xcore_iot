@@ -167,9 +167,8 @@ void rtos_i2c_slave_start(
 
 /**
  * Initializes an RTOS I2C slave driver instance.
- * This must only be called by the tile that owns the driver instance. It may be
- * called either before or after starting the RTOS, but must be called before calling
- * rtos_i2c_slave_start().
+ * This must only be called by the tile that owns the driver instance. It should be
+ * called before starting the RTOS, and must be called before calling rtos_i2c_slave_start().
  *
  * \param i2c_slave_ctx A pointer to the I2C slave driver instance to initialize.
  * \param io_core_mask  A bitmask representing the cores on which the low level I2C I/O thread

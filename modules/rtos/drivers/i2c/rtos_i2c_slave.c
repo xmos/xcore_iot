@@ -230,14 +230,6 @@ void rtos_i2c_slave_start(
 
     rtos_osal_event_group_create(&i2c_slave_ctx->events, "i2c_slave_events");
 
-    rtos_osal_thread_create(
-            &i2c_slave_ctx->app_thread,
-            "i2c_slave_app_thread",
-            (rtos_osal_entry_function_t) i2c_slave_app_thread,
-            i2c_slave_ctx,
-            RTOS_THREAD_STACK_SIZE(i2c_slave_app_thread),
-            priority);
-
     /* Ensure that the I2C interrupt is enabled on the requested core */
     rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
@@ -246,6 +238,14 @@ void rtos_i2c_slave_start(
 
     /* Restore the core exclusion map for the calling thread */
     rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
+
+    rtos_osal_thread_create(
+            &i2c_slave_ctx->app_thread,
+            "i2c_slave_app_thread",
+            (rtos_osal_entry_function_t) i2c_slave_app_thread,
+            i2c_slave_ctx,
+            RTOS_THREAD_STACK_SIZE(i2c_slave_app_thread),
+            priority);
 }
 
 void rtos_i2c_slave_init(

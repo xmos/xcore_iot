@@ -92,7 +92,7 @@ void vApplicationDaemonTaskStartup( void )
             I2S_MODE_I2S,
             0,
             1.2 * MIC_DUAL_FRAME_SIZE,
-            configMAX_PRIORITIES-1);
+            0);
 
     /* Create the gpio control task */
     gpio_ctrl_create(gpio_ctx, appconfGPIO_TASK_PRIORITY);
@@ -112,9 +112,6 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
 
     case 0:
         rtos_mic_array_interrupt_init(mic_array_ctx);
-        break;
-    case 1:
-        rtos_i2s_interrupt_init(i2s_ctx);
         break;
     }
 }

@@ -99,9 +99,6 @@ void vApplicationCoreInitHook(BaseType_t xCoreID)
         rtos_mic_array_interrupt_init(mic_array_ctx);
 #endif
         break;
-    case 1:
-        rtos_i2s_interrupt_init(i2s_ctx);
-        break;
     }
 
 #endif
@@ -223,7 +220,7 @@ void vApplicationDaemonTaskStartup(void *arg)
                 I2S_MODE_I2S,
                 3.0 * MIC_DUAL_FRAME_SIZE,
                 3.0 * MIC_DUAL_FRAME_SIZE,
-                configMAX_PRIORITIES-1);
+                0);
     }
     #endif
 

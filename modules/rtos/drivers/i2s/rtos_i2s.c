@@ -293,8 +293,10 @@ void rtos_i2s_start(
         i2s_mode_t mode,
         size_t recv_buffer_size,
         size_t send_buffer_size,
-        unsigned priority)
+        unsigned interrupt_core_id)
 {
+    uint32_t core_exclude_map;
+
     i2s_ctx->mclk_bclk_ratio = mclk_bclk_ratio;
     i2s_ctx->mode = mode;
     i2s_ctx->isr_cmd = 0;
@@ -313,22 +315,26 @@ void rtos_i2s_start(
         rtos_osal_semaphore_create(&i2s_ctx->send_sem, "i2s_send_sem", 1, 0);
     }
 
+    /* Ensure that the I2S interrupt is enabled on the requested core */
+    rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
+    rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
+
+    triggerable_enable_trigger(i2s_ctx->c_i2s_isr.end_b);
+
     /* Tells the task running the I2S I/O to start */
     s_chan_out_byte(i2s_ctx->c_i2s_isr.end_b, 0);
+
+    /* Restore the core exclusion map for the calling thread */
+    rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
 
     if (i2s_ctx->rpc_config != NULL && i2s_ctx->rpc_config->rpc_host_start != NULL) {
         i2s_ctx->rpc_config->rpc_host_start(i2s_ctx->rpc_config);
     }
 }
 
-void rtos_i2s_interrupt_init(rtos_i2s_t *i2s_ctx)
-{
-    triggerable_setup_interrupt_callback(i2s_ctx->c_i2s_isr.end_b, i2s_ctx, RTOS_INTERRUPT_CALLBACK(rtos_i2s_isr));
-    triggerable_enable_trigger(i2s_ctx->c_i2s_isr.end_b);
-}
-
 static void rtos_i2s_init(
         rtos_i2s_t *ctx,
+        uint32_t io_core_mask,
         port_t p_dout[],
         size_t num_out,
         port_t p_din[],
@@ -360,6 +366,8 @@ static void rtos_i2s_init(
     ctx->rx = i2s_local_rx;
     ctx->tx = i2s_local_tx;
 
+    triggerable_setup_interrupt_callback(ctx->c_i2s_isr.end_b, ctx, RTOS_INTERRUPT_CALLBACK(rtos_i2s_isr));
+
     rtos_osal_thread_create(
             &ctx->hil_thread,
             "i2s_thread",
@@ -370,12 +378,13 @@ static void rtos_i2s_init(
 
     /* Ensure the I2S thread is never preempted */
     rtos_osal_thread_preemption_disable(&ctx->hil_thread);
-    /* And exclude it from core 0 where the system tick interrupt runs */
-    rtos_osal_thread_core_exclusion_set(&ctx->hil_thread, (1 << 0));
+    /* And ensure it only runs on one of the specified cores */
+    rtos_osal_thread_core_exclusion_set(&ctx->hil_thread, ~io_core_mask);
 }
 
 void rtos_i2s_master_init(
         rtos_i2s_t *i2s_ctx,
+        uint32_t io_core_mask,
         port_t p_dout[],
         size_t num_out,
         port_t p_din[],
@@ -386,6 +395,7 @@ void rtos_i2s_master_init(
         xclock_t bclk)
 {
     rtos_i2s_init(i2s_ctx,
+                  io_core_mask,
                   p_dout,
                   num_out,
                   p_din,
@@ -400,6 +410,7 @@ void rtos_i2s_master_init(
 
 void rtos_i2s_master_ext_clock_init(
         rtos_i2s_t *i2s_ctx,
+        uint32_t io_core_mask,
         port_t p_dout[],
         size_t num_out,
         port_t p_din[],
@@ -409,6 +420,7 @@ void rtos_i2s_master_ext_clock_init(
         xclock_t bclk)
 {
     rtos_i2s_init(i2s_ctx,
+                  io_core_mask,
                   p_dout,
                   num_out,
                   p_din,
@@ -423,6 +435,7 @@ void rtos_i2s_master_ext_clock_init(
 
 void rtos_i2s_slave_init(
         rtos_i2s_t *i2s_ctx,
+        uint32_t io_core_mask,
         port_t p_dout[],
         size_t num_out,
         port_t p_din[],
@@ -432,6 +445,7 @@ void rtos_i2s_slave_init(
         xclock_t bclk)
 {
     rtos_i2s_init(i2s_ctx,
+                  io_core_mask,
                   p_dout,
                   num_out,
                   p_din,
