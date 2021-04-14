@@ -157,7 +157,7 @@ void model_runner_profiler_durations_get(model_runner_t *ctx, uint32_t *count,
 void model_runner_profiler_summary_print(model_runner_t *ctx) {
   uint32_t count = 0;
   uint32_t total = 0;
-  uint32_t time_ms = 0;
+  uint32_t time_us = 0;
   const uint32_t *durations = nullptr;
   const char *op_name;
 
@@ -176,9 +176,9 @@ void model_runner_profiler_summary_print(model_runner_t *ctx) {
         op_name = tflite::EnumNameBuiltinOperator(
             tflite::BuiltinOperator(registration->builtin_code));
       }
-      time_ms = durations[i] / PLATFORM_REFERENCE_MHZ;
-      total += time_ms;
-      printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_ms);
+      time_us = durations[i] / PLATFORM_REFERENCE_MHZ;
+      total += time_us;
+      printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_us);
     }
   }
   printf("TOTAL %lu microseconds\n", total);

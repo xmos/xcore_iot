@@ -1,8 +1,9 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
-// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #include "inference_engine.h"
+
+#include <platform.h>  // for PLATFORM_REFERENCE_MHZ
 
 #include <cstddef>
 #include <cstdint>
@@ -95,6 +96,7 @@ void print_profiler_summary() {
   uint32_t const *times = nullptr;
   const char *op_name;
   uint32_t total = 0;
+  uint32_t time_us = 0;
 
   if (profiler) {
     count = profiler->GetNumEvents();
@@ -112,8 +114,9 @@ void print_profiler_summary() {
         op_name = tflite::EnumNameBuiltinOperator(
             tflite::BuiltinOperator(registration->builtin_code));
       }
-      total += times[i];
-      printf("Operator %d, %s took %lu microseconds\n", i, op_name, times[i]);
+      time_us = times[i] / PLATFORM_REFERENCE_MHZ;
+      total += time_us;
+      printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_us);
     }
   }
   printf("TOTAL %lu microseconds\n", total);
