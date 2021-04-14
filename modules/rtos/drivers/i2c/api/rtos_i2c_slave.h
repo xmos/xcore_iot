@@ -11,6 +11,7 @@
  * @{
  */
 
+#include <xcore/channel_streaming.h>
 #include "i2c.h"
 
 #include "rtos/drivers/osal/api/rtos_osal.h"
@@ -122,30 +123,37 @@ struct rtos_i2c_slave_struct {
     size_t tx_data_i;
     size_t tx_data_sent;
 
+    int waiting_for_complete_cb;
+
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_start_cb_t start;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_rx_cb_t rx;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_tx_start_cb_t tx_start;
     RTOS_I2C_SLAVE_CALLBACK_ATTR rtos_i2c_slave_tx_done_cb_t tx_done;
+
+    streaming_channel_t c;
+    rtos_osal_event_group_t events;
+    rtos_osal_thread_t hil_thread;
+    rtos_osal_thread_t app_thread;
 };
 
 /**
  * Starts an RTOS I2C slave driver instance. This must only be called by the tile that
- * owns the driver instance. It may be called either before or after starting
- * the RTOS.
+ * owns the driver instance. It must be called after starting the RTOS from an RTOS thread.
  *
  * rtos_i2c_slave_init() must be called on this I2C slave driver instance prior to calling this.
  *
- * \param i2c_slave_ctx A pointer to the I2C slave driver instance to start.
- * \param app_data      A pointer to application specific data to pass to
- *                      the callback functions.
- * \param start         The callback function that is called when the driver's
- *                      thread starts. This is optional and may be NULL.
- * \param rx            The callback function to receive data from the bus master.
- * \param tx_start      The callback function to transmit data to the bus master.
- * \param tx_done       The callback function that is notified when transmits are
- *                      complete. This is optional and may be NULL.
- * \param priority      The priority of the task that gets created by the driver to
- *                      handle the I2C slave interface.
+ * \param i2c_slave_ctx     A pointer to the I2C slave driver instance to start.
+ * \param app_data          A pointer to application specific data to pass to
+ *                          the callback functions.
+ * \param start             The callback function that is called when the driver's
+ *                          thread starts. This is optional and may be NULL.
+ * \param rx                The callback function to receive data from the bus master.
+ * \param tx_start          The callback function to transmit data to the bus master.
+ * \param tx_done           The callback function that is notified when transmits are
+ *                          complete. This is optional and may be NULL.
+ * \param interrupt_core_id The ID of the core on which to enable the I2C interrupt.
+ * \param priority          The priority of the task that gets created by the driver to
+ *                          call the callback functions.
  */
 void rtos_i2c_slave_start(
         rtos_i2c_slave_t *i2c_slave_ctx,
@@ -154,23 +162,27 @@ void rtos_i2c_slave_start(
         rtos_i2c_slave_rx_cb_t rx,
         rtos_i2c_slave_tx_start_cb_t tx_start,
         rtos_i2c_slave_tx_done_cb_t tx_done,
+        unsigned interrupt_core_id,
         unsigned priority);
 
 /**
  * Initializes an RTOS I2C slave driver instance.
- * This must only be called by the tile that owns the driver instance. It may be
- * called either before or after starting the RTOS, but must be called before calling
- * rtos_i2c_slave_start().
+ * This must only be called by the tile that owns the driver instance. It should be
+ * called before starting the RTOS, and must be called before calling rtos_i2c_slave_start().
  *
- * \param i2c_slave_ctx       A pointer to the I2C slave driver instance to initialize.
- * \param p_scl               The port containing SCL. This must be a 1-bit port and
- *                            different than \p p_sda.
- * \param p_sda               The port containing SDA. This must be a 1-bit port and
- *                            different than \p p_scl.
- * \param device_addr         The 7-bit address of the slave device.
+ * \param i2c_slave_ctx A pointer to the I2C slave driver instance to initialize.
+ * \param io_core_mask  A bitmask representing the cores on which the low level I2C I/O thread
+ *                      created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                      etc.
+ * \param p_scl         The port containing SCL. This must be a 1-bit port and
+ *                      different than \p p_sda.
+ * \param p_sda         The port containing SDA. This must be a 1-bit port and
+ *                      different than \p p_scl.
+ * \param device_addr   The 7-bit address of the slave device.
  */
 void rtos_i2c_slave_init(
         rtos_i2c_slave_t *i2c_slave_ctx,
+        uint32_t io_core_mask,
         const port_t p_scl,
         const port_t p_sda,
         uint8_t device_addr);

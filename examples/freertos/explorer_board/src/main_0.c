@@ -126,11 +126,6 @@ void vApplicationDaemonTaskStartup( void )
     vTaskDelete(NULL);
 }
 
-void vApplicationCoreInitHook(BaseType_t xCoreID)
-{
-    rtos_printf("Initializing tile 0, core %d on core %d\n", xCoreID, portGET_CORE_ID());
-}
-
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
     (void) c0;

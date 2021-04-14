@@ -83,30 +83,6 @@ void vApplicationMallocFailedHook(void)
     for(;;);
 }
 
-void vApplicationCoreInitHook(BaseType_t xCoreID)
-{
-#if ON_TILE(0)
-    rtos_printf("Initializing tile 0, core %d on core %d\n", xCoreID, portGET_CORE_ID());
-#endif
-
-#if ON_TILE(1)
-    rtos_printf("Initializing tile 1 core %d on core %d\n", xCoreID, portGET_CORE_ID());
-
-    switch (xCoreID) {
-
-    case 0:
-#if !I2S_ADC_ENABLED
-        rtos_mic_array_interrupt_init(mic_array_ctx);
-#endif
-        break;
-    case 1:
-        rtos_i2s_interrupt_init(i2s_ctx);
-        break;
-    }
-
-#endif
-}
-
 #define I2C_MASTER_RPC_PORT 9
 #define I2C_MASTER_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
@@ -214,7 +190,7 @@ void vApplicationDaemonTaskStartup(void *arg)
                 rtos_mic_array_third_stage_coefs(pdm_decimation_factor),
                 rtos_mic_array_fir_compensation(pdm_decimation_factor),
                 3.0 * MIC_DUAL_FRAME_SIZE,
-                configMAX_PRIORITIES-1);
+                0);
 #endif
         rtos_printf("Starting i2s driver\n");
         rtos_i2s_start(
@@ -223,7 +199,7 @@ void vApplicationDaemonTaskStartup(void *arg)
                 I2S_MODE_I2S,
                 3.0 * MIC_DUAL_FRAME_SIZE,
                 3.0 * MIC_DUAL_FRAME_SIZE,
-                configMAX_PRIORITIES-1);
+                0);
     }
     #endif
 

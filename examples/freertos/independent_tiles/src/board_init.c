@@ -258,6 +258,7 @@ void board_tile1_init(
 
     rtos_mic_array_init(
             mic_array_ctx,
+            ~(1 << 0),
             pdmclk,
             pdmclk2,
             AUDIO_CLOCK_FREQUENCY / PDM_CLOCK_FREQUENCY,
@@ -267,6 +268,7 @@ void board_tile1_init(
 
     rtos_i2s_master_init(
             i2s_ctx,
+            ~(1 << 0),
             p_i2s_dout,
             1,
             p_i2s_din,

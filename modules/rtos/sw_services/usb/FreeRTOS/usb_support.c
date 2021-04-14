@@ -9,13 +9,17 @@
 #include "usb_support.h"
 #include "tusb.h"
 
+#ifndef USB_TASK_STACK_SIZE
 #define USB_TASK_STACK_SIZE 1000
+#endif
 
-void usb_task(void* args)
+static void usb_task(void* args)
 {
-    tusb_init();
+    xassert(tusb_inited() && "Tiny USB must first be initialized with usb_manager_init()");
 
-    while(1) {
+    tud_connect();
+
+    while (1) {
         tud_task();
     }
 }
@@ -28,4 +32,9 @@ void usb_manager_start(unsigned priority)
                 NULL,
 				priority,
                 NULL);
+}
+
+void usb_manager_init(void)
+{
+    tusb_init();
 }

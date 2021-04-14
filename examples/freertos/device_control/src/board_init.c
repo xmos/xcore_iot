@@ -20,6 +20,7 @@ void board_tile0_init(
     rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
 
     rtos_i2c_slave_init(i2c_slave_ctx,
+                        ~(1 << 0),
                         PORT_EXPANSION_1, //SCL
                         PORT_EXPANSION_3, //SDA
                         0x42);

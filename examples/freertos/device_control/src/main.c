@@ -164,6 +164,7 @@ void vApplicationDaemonTaskStartup(void *arg)
                                  (rtos_i2c_slave_rx_cb_t) i2c_dev_ctrl_rx_cb,
                                  (rtos_i2c_slave_tx_start_cb_t) i2c_dev_ctrl_tx_start_cb,
                                  (rtos_i2c_slave_tx_done_cb_t) NULL,
+                                 0,
                                  configMAX_PRIORITIES / 2);
         }
         #endif
@@ -239,6 +240,10 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                         &intertile_ctx,
                         1);
 
+#if USB_DEVICE_CONTROL && ON_TILE(USB_TILE_NO)
+    usb_manager_init();
+#endif
+
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
                 RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
@@ -269,6 +274,10 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                         DEVICE_CONTROL_HOST_TILE == 1 ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
                         &intertile_ctx,
                         1);
+
+#if USB_DEVICE_CONTROL && ON_TILE(USB_TILE_NO)
+    usb_manager_init();
+#endif
 
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
                 "vApplicationDaemonTaskStartup",
