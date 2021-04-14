@@ -243,29 +243,9 @@ static int cfg_desc_parse(XUD_EpType *epTypeTableOut, XUD_EpType *epTypeTableIn,
 // Initialize controller to device mode
 void dcd_init(uint8_t rhport)
 {
-    int i;
-    size_t endpoint_count;
-    XUD_PwrConfig pwr;
-
-    XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX] = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
-    XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX]  = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
-
-    for (i = 1; i < RTOS_USB_ENDPOINT_COUNT_MAX; i++) {
-        epTypeTableOut[i] = XUD_EPTYPE_DIS;
-        epTypeTableIn[i] = XUD_EPTYPE_DIS;
-    }
-
-    endpoint_count = cfg_desc_parse(epTypeTableOut, epTypeTableIn, &pwr);
-    rtos_printf("Endpoint count is %d\n", endpoint_count);
-
     rtos_usb_init(&usb_ctx,
                    CFG_TUD_XCORE_IO_CORE_MASK,
-                   dcd_xcore_int_handler, NULL,
-                   endpoint_count,
-                   epTypeTableOut,
-                   epTypeTableIn,
-                   TUD_OPT_HIGH_SPEED ? XUD_SPEED_HS : XUD_SPEED_FS,
-                   pwr);
+                   dcd_xcore_int_handler, NULL);
 
     (void) rhport;
 }
@@ -314,11 +294,30 @@ void dcd_remote_wakeup(uint8_t rhport)
 // tud_task().
 void dcd_connect(uint8_t rhport)
 {
-    /* This function appears to be unused by the stack or any example */
-    /* Only called by tud_connect() which is not called by anything */
     (void) rhport;
 
-    rtos_usb_start(&usb_ctx, CFG_TUD_XCORE_INTERRUPT_CORE);
+    int i;
+    size_t endpoint_count;
+    XUD_PwrConfig pwr;
+
+    XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX] = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
+    XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX]  = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
+
+    for (i = 1; i < RTOS_USB_ENDPOINT_COUNT_MAX; i++) {
+        epTypeTableOut[i] = XUD_EPTYPE_DIS;
+        epTypeTableIn[i] = XUD_EPTYPE_DIS;
+    }
+
+    endpoint_count = cfg_desc_parse(epTypeTableOut, epTypeTableIn, &pwr);
+    rtos_printf("Endpoint count is %d\n", endpoint_count);
+
+    rtos_usb_start(&usb_ctx,
+                   endpoint_count,
+                   epTypeTableOut,
+                   epTypeTableIn,
+                   TUD_OPT_HIGH_SPEED ? XUD_SPEED_HS : XUD_SPEED_FS,
+                   pwr,
+                   CFG_TUD_XCORE_INTERRUPT_CORE);
 }
 
 // Disconnect by disabling internal pull-up resistor on D+/D-

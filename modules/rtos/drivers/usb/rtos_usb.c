@@ -237,26 +237,63 @@ XUD_BusSpeed_t rtos_usb_endpoint_reset(rtos_usb_t *ctx,
     return XUD_ResetEndpoint(one, two);
 }
 
+static void ep_cfg(rtos_usb_t *ctx,
+                     int ep_num,
+                     int direction)
+{
+    channel_t tmp_chan = chan_alloc();
+
+    xassert(tmp_chan.end_a != 0);
+    if (direction == RTOS_USB_OUT_EP) {
+        ctx->c_ep_out_xud[ep_num] = tmp_chan.end_a;
+    } else {
+        ctx->c_ep_in_xud[ep_num] = tmp_chan.end_a;
+    }
+    ctx->c_ep[ep_num][direction] = tmp_chan.end_b;
+
+    ctx->ep_xfer_info[ep_num][direction].dir = direction;
+    ctx->ep_xfer_info[ep_num][direction].ep_num = ep_num;
+    ctx->ep_xfer_info[ep_num][direction].ep_address = (direction << 7) | ep_num;
+    ctx->ep_xfer_info[ep_num][direction].usb_ctx = ctx;
+    triggerable_setup_interrupt_callback(ctx->c_ep[ep_num][direction], &ctx->ep_xfer_info[ep_num][direction], RTOS_INTERRUPT_CALLBACK(usb_isr));
+    triggerable_enable_trigger(ctx->c_ep[ep_num][direction]);
+}
+
 void rtos_usb_start(
         rtos_usb_t *ctx,
+        size_t endpoint_count,
+        XUD_EpType endpoint_out_type[],
+        XUD_EpType endpoint_in_type[],
+        XUD_BusSpeed_t speed,
+        XUD_PwrConfig power_source,
         unsigned interrupt_core_id)
 {
     int i;
     uint32_t core_exclude_map;
-    const size_t endpoint_count = ctx->endpoint_count;
-    const XUD_EpType *endpoint_out_type = ctx->endpoint_out_type;
-    const XUD_EpType *endpoint_in_type = ctx->endpoint_in_type;
+
+    ctx->power_source = power_source;
+    ctx->speed = speed;
+
+    xassert(endpoint_count > 0 && endpoint_count <= RTOS_USB_ENDPOINT_COUNT_MAX);
+    ctx->endpoint_count = endpoint_count;
 
     /* Ensure that all USB interrupts are enabled on the requested core */
     rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
 
     for (i = 0; i < endpoint_count; i++) {
-        if (endpoint_out_type[i] != XUD_EPTYPE_DIS) {
-            triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_OUT_EP]);
-        }
-        if (endpoint_in_type[i] != XUD_EPTYPE_DIS) {
-            triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_IN_EP]);
+
+        ctx->endpoint_out_type[i] = endpoint_out_type[i];
+        ctx->endpoint_in_type[i] = endpoint_in_type[i];
+
+        if (i > 0) {
+            /* Endpoint 0 is configured by rtos_usb_init() */
+            if (endpoint_out_type[i] != XUD_EPTYPE_DIS) {
+                ep_cfg(ctx, i, RTOS_USB_OUT_EP);
+            }
+            if (endpoint_in_type[i] != XUD_EPTYPE_DIS) {
+                ep_cfg(ctx, i, RTOS_USB_IN_EP);
+            }
         }
     }
 
@@ -271,60 +308,20 @@ void rtos_usb_init(
         rtos_usb_t *ctx,
         uint32_t io_core_mask,
         rtos_usb_isr_cb_t isr_cb,
-        void *isr_app_data,
-        size_t endpoint_count,
-        XUD_EpType endpoint_out_type[],
-        XUD_EpType endpoint_in_type[],
-        XUD_BusSpeed_t speed,
-        XUD_PwrConfig power_source)
+        void *isr_app_data)
 {
-    int i;
     channel_t tmp_chan;
-
-    xassert(endpoint_count > 0 && endpoint_count <= RTOS_USB_ENDPOINT_COUNT_MAX);
 
     memset(ctx, 0, sizeof(rtos_usb_t));
 
     ctx->isr_cb = isr_cb;
     ctx->isr_app_data = isr_app_data;
 
-    ctx->endpoint_count = endpoint_count;
-
-    ctx->power_source = power_source;
-    ctx->speed = speed;
-
-    for (i = 0; i < endpoint_count; i++) {
-
-        ctx->endpoint_out_type[i] = endpoint_out_type[i];
-        if (endpoint_out_type[i] != XUD_EPTYPE_DIS) {
-
-            tmp_chan = chan_alloc();
-            ctx->c_ep_out_xud[i] = tmp_chan.end_a;
-            ctx->c_ep[i][RTOS_USB_OUT_EP] = tmp_chan.end_b;
-
-            ctx->ep_xfer_info[i][RTOS_USB_OUT_EP].dir = RTOS_USB_OUT_EP;
-            ctx->ep_xfer_info[i][RTOS_USB_OUT_EP].ep_num = i;
-            ctx->ep_xfer_info[i][RTOS_USB_OUT_EP].ep_address = i;
-            ctx->ep_xfer_info[i][RTOS_USB_OUT_EP].usb_ctx = ctx;
-            triggerable_setup_interrupt_callback(ctx->c_ep[i][RTOS_USB_OUT_EP], &ctx->ep_xfer_info[i][RTOS_USB_OUT_EP], RTOS_INTERRUPT_CALLBACK(usb_isr));
-        }
-
-        ctx->endpoint_in_type[i] = endpoint_in_type[i];
-        if (endpoint_in_type[i] != XUD_EPTYPE_DIS) {
-
-            tmp_chan = chan_alloc();
-            ctx->c_ep_in_xud[i] = tmp_chan.end_a;
-            ctx->c_ep[i][RTOS_USB_IN_EP] = tmp_chan.end_b;
-
-            ctx->ep_xfer_info[i][RTOS_USB_IN_EP].dir = RTOS_USB_IN_EP;
-            ctx->ep_xfer_info[i][RTOS_USB_IN_EP].ep_num = i;
-            ctx->ep_xfer_info[i][RTOS_USB_IN_EP].ep_address = 0x80 | i;
-            ctx->ep_xfer_info[i][RTOS_USB_IN_EP].usb_ctx = ctx;
-            triggerable_setup_interrupt_callback(ctx->c_ep[i][RTOS_USB_IN_EP], &ctx->ep_xfer_info[i][RTOS_USB_IN_EP], RTOS_INTERRUPT_CALLBACK(usb_isr));
-        }
-    }
+    ep_cfg(ctx, 0, RTOS_USB_OUT_EP);
+    ep_cfg(ctx, 0, RTOS_USB_IN_EP);
 
     tmp_chan = chan_alloc();
+    xassert(tmp_chan.end_a != 0);
     ctx->c_sof_xud = tmp_chan.end_a;
     ctx->c_sof = tmp_chan.end_b;
 
@@ -414,12 +411,7 @@ XUD_Result_t rtos_usb_simple_transfer_complete(rtos_usb_t *ctx,
 
 void rtos_usb_simple_init(
         rtos_usb_t *ctx,
-        uint32_t io_core_mask,
-        size_t endpoint_count,
-        XUD_EpType endpoint_out_type[],
-        XUD_EpType endpoint_in_type[],
-        XUD_BusSpeed_t speed,
-        XUD_PwrConfig power_source)
+        uint32_t io_core_mask)
 {
     static rtos_osal_event_group_t event_group;
 
@@ -429,12 +421,5 @@ void rtos_usb_simple_init(
             ctx,
             io_core_mask,
             usb_simple_isr_cb,
-            &event_group,
-            endpoint_count,
-            endpoint_out_type,
-            endpoint_in_type,
-            speed,
-            power_source);
+            &event_group);
 }
-
-

@@ -240,38 +240,6 @@ static inline void rtos_usb_endpoint_stall_clear(rtos_usb_t *ctx,
  * rtos_usb_init() must be called on this USB driver instance prior to calling this.
  *
  * \param ctx               A pointer to the USB driver instance to start.
- * \param interrupt_core_id The ID of the core on which to enable the USB interrupts.
- */
-void rtos_usb_start(
-        rtos_usb_t *ctx,
-        unsigned interrupt_core_id);
-
-/**
- * Initializes an RTOS USB driver instance. This must only be called by the tile that
- * owns the driver instance. It should be called prior to starting the RTOS, and must
- * be called before any of the core USB driver functions are called with this instance.
- *
- * This will create an RTOS thread that runs lib_xud's main loop. The driver will ensure
- * that this thread is not started on core 0 so that the system tick interrupt does not
- * interfere with it. It will also disable preemption on this thread, such that once it
- * is running, no other tasks will be able to interfere with it, even if they have a
- * higher priority.
- *
- * \note Due to implementation details of lib_xud, it is only possible to have one
- * USB instance per application. Functionally this is not an issue, as no XCore chips
- * have more than one USB interface.
- *
- * \note If using the Tiny USB stack, then this function should not be called directly
- * by the application. The XCore device port for Tiny USB takes care of calling this, as
- * well as all other USB driver functions.
- *
- * \param ctx               A pointer to the USB driver instance to start.
- * \param io_core_mask      A bitmask representing the cores on which the low level USB I/O thread
- *                          created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
- *                          etc.
- * \param isr_cb            The callback function for the driver to call when transfers are completed.
- * \param isr_app_data      A pointer to application specific data to pass to the application's ISR
- *                          callback function \p isr_cb.
  * \param endpoint_count    The number of endpoints that will be used by the application. A single
  *                          endpoint here includes both its IN and OUT endpoints. For example, if the
  *                          application uses EP0_IN, EP0_OUT, EP1_IN, EP2_IN, EP2_OUT, EP3_OUT, then the
@@ -290,20 +258,48 @@ void rtos_usb_start(
  *                          be set to XUD_EPTYPE_DIS.
  * \param speed             The speed at which the bus should operate. Either XUD_SPEED_FS or XUD_SPEED_HS. See
  *                          XUD_BusSpeed_t in lib_xud.
- * \param XUD_PwrConfig     The source of the device's power. Either bus powered (XUD_PWR_BUS) or self powered
+ * \param power_source      The source of the device's power. Either bus powered (XUD_PWR_BUS) or self powered
  *                          (XUD_PWR_SELF). See XUD_PwrConfig in lib_xud.
+ * \param interrupt_core_id The ID of the core on which to enable the USB interrupts.
+ */
+void rtos_usb_start(
+        rtos_usb_t *ctx,
+        size_t endpoint_count,
+        XUD_EpType endpoint_out_type[],
+        XUD_EpType endpoint_in_type[],
+        XUD_BusSpeed_t speed,
+        XUD_PwrConfig power_source,
+        unsigned interrupt_core_id);
+
+/**
+ * Initializes an RTOS USB driver instance. This must only be called by the tile that
+ * owns the driver instance. It should be called prior to starting the RTOS, and must
+ * be called before any of the core USB driver functions are called with this instance.
  *
+ * This will create an RTOS thread that runs lib_xud's main loop. This thread is created with
+ * the highest priority and with preemption disabled.
+ *
+ * \note Due to implementation details of lib_xud, it is only possible to have one
+ * USB instance per application. Functionally this is not an issue, as no XCore chips
+ * have more than one USB interface.
+ *
+ * \note If using the Tiny USB stack, then this function should not be called directly
+ * by the application. The XCore device port for Tiny USB takes care of calling this, as
+ * well as all other USB driver functions.
+ *
+ * \param ctx               A pointer to the USB driver instance to start.
+ * \param io_core_mask      A bitmask representing the cores on which the low level USB I/O thread
+ *                          created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                          etc.
+ * \param isr_cb            The callback function for the driver to call when transfers are completed.
+ * \param isr_app_data      A pointer to application specific data to pass to the application's ISR
+ *                          callback function \p isr_cb.
  */
 void rtos_usb_init(
         rtos_usb_t *ctx,
         uint32_t io_core_mask,
         rtos_usb_isr_cb_t isr_cb,
-        void *isr_app_data,
-        size_t endpoint_count,
-        XUD_EpType endpoint_out_type[],
-        XUD_EpType endpoint_in_type[],
-        XUD_BusSpeed_t speed,
-        XUD_PwrConfig power_source);
+        void *isr_app_data);
 
 
 /**
@@ -342,47 +338,22 @@ XUD_Result_t rtos_usb_simple_transfer_complete(rtos_usb_t *ctx,
  * own ISR callback when initialized with this function. This provides a similar programming
  * interface as a traditional bare metal XCore application using lib_xud.
  *
- * This will create an RTOS thread that runs lib_xud's main loop. The driver will ensure
- * that this thread is not started on core 0 so that the system tick interrupt does not
- * interfere with it. It will also disable preemption on this thread, such that once it
- * is running, no other tasks will be able to interfere with it, even if they have a
- * higher priority.
+ * This will create an RTOS thread that runs lib_xud's main loop. This thread is created with
+ * the highest priority and with preemption disabled.
  *
  * \note Due to implementation details of lib_xud, it is only possible to have one
  * USB instance per application. Functionally this is not an issue, as no XCore chips
  * have more than one USB interface.
  *
  * \param ctx               A pointer to the USB driver instance to start.
- * \param endpoint_count    The number of endpoints that will be used by the application. A single
- *                          endpoint here includes both its IN and OUT endpoints. For example, if the
- *                          application uses EP0_IN, EP0_OUT, EP1_IN, EP2_IN, EP2_OUT, EP3_OUT, then the
- *                          endpoint count specified here should be 4 (endpoint 0 through endpoint 3)
- *                          regardless of the lack of EP1_OUT and EP3_IN. If these two endpoints were used,
- *                          the count would still be 4.\n
- *                          If for whatever reason, the application needs to use a particular endpoint
- *                          number, say only EP6 in addition to EP0, then the count here needs to be 7, even
- *                          though endpoints 1 through 5 are unused. All unused endpoints must be marked as
- *                          disabled in the two endpoint type lists \p endpoint_out_type and \p endpoint_in_type.
- * \param endpoint_out_type A list of the endpoint types for each output endpoint. Index 0 represents the type
- *                          for EP0_OUT, and so on. See XUD_EpType in lib_xud. If the endpoint is unused, it must
- *                          be set to XUD_EPTYPE_DIS.
- * \param endpoint_in_type  A list of the endpoint types for each input endpoint. Index 0 represents the type
- *                          for EP0_IN, and so on. See XUD_EpType in lib_xud. If the endpoint is unused, it must
- *                          be set to XUD_EPTYPE_DIS.
- * \param speed             The speed at which the bus should operate. Either XUD_SPEED_FS or XUD_SPEED_HS. See
- *                          XUD_BusSpeed_t in lib_xud.
- * \param XUD_PwrConfig     The source of the device's power. Either bus powered (XUD_PWR_BUS) or self powered
- *                          (XUD_PWR_SELF). See XUD_PwrConfig in lib_xud.
+ * \param io_core_mask      A bitmask representing the cores on which the low level USB I/O thread
+ *                          created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                          etc.
  *
  */
 void rtos_usb_simple_init(
         rtos_usb_t *ctx,
-        uint32_t io_core_mask,
-        size_t endpoint_count,
-        XUD_EpType endpoint_out_type[],
-        XUD_EpType endpoint_in_type[],
-        XUD_BusSpeed_t speed,
-        XUD_PwrConfig power_source);
+        uint32_t io_core_mask);
 
 
 /**@}*/
