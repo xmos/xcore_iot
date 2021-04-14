@@ -233,6 +233,20 @@ static inline void rtos_usb_endpoint_stall_clear(rtos_usb_t *ctx,
 }
 
 /**
+ * Starts the USB driver instance's low level USB I/O thread and enables its interrupts
+ * on the requested core. This must only be called by the tile that owns the driver instance.
+ * It must be called after starting the RTOS from an RTOS thread.
+ *
+ * rtos_usb_init() must be called on this USB driver instance prior to calling this.
+ *
+ * \param ctx               A pointer to the USB driver instance to start.
+ * \param interrupt_core_id The ID of the core on which to enable interrupts.
+ */
+void rtos_usb_start(
+        rtos_usb_t *ctx,
+        unsigned interrupt_core_id);
+
+/**
  * Initializes an RTOS USB driver instance. This must only be called by the tile that
  * owns the driver instance. It should be called prior to starting the RTOS, and must
  * be called before any of the core USB driver functions are called with this instance.
@@ -252,6 +266,9 @@ static inline void rtos_usb_endpoint_stall_clear(rtos_usb_t *ctx,
  * well as all other USB driver functions.
  *
  * \param ctx               A pointer to the USB driver instance to start.
+ * \param io_core_mask      A bitmask representing the cores on which the low level USB I/O thread
+ *                          created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                          etc.
  * \param isr_cb            The callback function for the driver to call when transfers are completed.
  * \param isr_app_data      A pointer to application specific data to pass to the application's ISR
  *                          callback function \p isr_cb.
@@ -279,6 +296,7 @@ static inline void rtos_usb_endpoint_stall_clear(rtos_usb_t *ctx,
  */
 void rtos_usb_init(
         rtos_usb_t *ctx,
+        uint32_t io_core_mask,
         rtos_usb_isr_cb_t isr_cb,
         void *isr_app_data,
         size_t endpoint_count,
@@ -359,6 +377,7 @@ XUD_Result_t rtos_usb_simple_transfer_complete(rtos_usb_t *ctx,
  */
 void rtos_usb_simple_init(
         rtos_usb_t *ctx,
+        uint32_t io_core_mask,
         size_t endpoint_count,
         XUD_EpType endpoint_out_type[],
         XUD_EpType endpoint_in_type[],

@@ -27,6 +27,9 @@ int XUD_Main(chanend_t c_epOut[],
 
 static void usb_xud_thread(rtos_usb_t *ctx)
 {
+    XUD_EpType endpoint_out_type[RTOS_USB_ENDPOINT_COUNT_MAX];
+    XUD_EpType endpoint_in_type[RTOS_USB_ENDPOINT_COUNT_MAX];
+
     /*
      * XUD_Main() appears to require that interrupts be initially disabled.
      */
@@ -38,15 +41,20 @@ static void usb_xud_thread(rtos_usb_t *ctx)
      */
     CLRSR(XS1_SR_KEDI_MASK);
 
+    (void) s_chan_in_byte(ctx->c_ep_out_xud[0]);
+
     rtos_printf("Starting XUD_Main() on core %d with %d endpoints\n", rtos_core_id_get(), ctx->endpoint_count);
+
+    memcpy(endpoint_out_type, ctx->endpoint_out_type, sizeof(endpoint_out_type));
+    memcpy(endpoint_in_type, ctx->endpoint_in_type, sizeof(endpoint_in_type));
 
     XUD_Main(ctx->c_ep_out_xud,
              ctx->endpoint_count,
              ctx->c_ep_in_xud,
              ctx->endpoint_count,
              0/*ctx->c_sof_xud*/,
-             ctx->endpoint_out_type,
-             ctx->endpoint_in_type,
+             endpoint_out_type,
+             endpoint_in_type,
 #if !XUD_DEV_XS3
              0, 0, -1,
 #endif
@@ -229,8 +237,39 @@ XUD_BusSpeed_t rtos_usb_endpoint_reset(rtos_usb_t *ctx,
     return XUD_ResetEndpoint(one, two);
 }
 
+void rtos_usb_start(
+        rtos_usb_t *ctx,
+        unsigned interrupt_core_id)
+{
+    int i;
+    uint32_t core_exclude_map;
+    const size_t endpoint_count = ctx->endpoint_count;
+    const XUD_EpType *endpoint_out_type = ctx->endpoint_out_type;
+    const XUD_EpType *endpoint_in_type = ctx->endpoint_in_type;
+
+    /* Ensure that all USB interrupts are enabled on the requested cores */
+    rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
+    rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
+
+    for (i = 0; i < endpoint_count; i++) {
+        if (endpoint_out_type[i] != XUD_EPTYPE_DIS) {
+            triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_OUT_EP]);
+        }
+        if (endpoint_in_type[i] != XUD_EPTYPE_DIS) {
+            triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_IN_EP]);
+        }
+    }
+
+    /* Tells the I/O thread to enter XUD_Main() */
+    s_chan_out_byte(ctx->c_ep[0][RTOS_USB_OUT_EP], 0);
+
+    /* Restore the core exclusion map for the calling thread */
+    rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
+}
+
 void rtos_usb_init(
         rtos_usb_t *ctx,
+        uint32_t io_core_mask,
         rtos_usb_isr_cb_t isr_cb,
         void *isr_app_data,
         size_t endpoint_count,
@@ -242,7 +281,7 @@ void rtos_usb_init(
     int i;
     channel_t tmp_chan;
 
-    xassert(endpoint_count <= RTOS_USB_ENDPOINT_COUNT_MAX);
+    xassert(endpoint_count > 0 && endpoint_count <= RTOS_USB_ENDPOINT_COUNT_MAX);
 
     memset(ctx, 0, sizeof(rtos_usb_t));
 
@@ -268,7 +307,6 @@ void rtos_usb_init(
             ctx->ep_xfer_info[i][RTOS_USB_OUT_EP].ep_address = i;
             ctx->ep_xfer_info[i][RTOS_USB_OUT_EP].usb_ctx = ctx;
             triggerable_setup_interrupt_callback(ctx->c_ep[i][RTOS_USB_OUT_EP], &ctx->ep_xfer_info[i][RTOS_USB_OUT_EP], RTOS_INTERRUPT_CALLBACK(usb_isr));
-            triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_OUT_EP]);
         }
 
         ctx->endpoint_in_type[i] = endpoint_in_type[i];
@@ -283,7 +321,6 @@ void rtos_usb_init(
             ctx->ep_xfer_info[i][RTOS_USB_IN_EP].ep_address = 0x80 | i;
             ctx->ep_xfer_info[i][RTOS_USB_IN_EP].usb_ctx = ctx;
             triggerable_setup_interrupt_callback(ctx->c_ep[i][RTOS_USB_IN_EP], &ctx->ep_xfer_info[i][RTOS_USB_IN_EP], RTOS_INTERRUPT_CALLBACK(usb_isr));
-            triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_IN_EP]);
         }
     }
 
@@ -301,8 +338,8 @@ void rtos_usb_init(
 
     /* Ensure the I2C thread is never preempted */
     rtos_osal_thread_preemption_disable(&ctx->hil_thread);
-    /* And exclude it from core 0 where the system tick interrupt runs */
-    rtos_osal_thread_core_exclusion_set(&ctx->hil_thread, (1 << 0));
+    /* And ensure it only runs on one of the specified cores */
+    rtos_osal_thread_core_exclusion_set(&ctx->hil_thread, ~io_core_mask);
 }
 
 
@@ -377,6 +414,7 @@ XUD_Result_t rtos_usb_simple_transfer_complete(rtos_usb_t *ctx,
 
 void rtos_usb_simple_init(
         rtos_usb_t *ctx,
+        uint32_t io_core_mask,
         size_t endpoint_count,
         XUD_EpType endpoint_out_type[],
         XUD_EpType endpoint_in_type[],
@@ -389,6 +427,7 @@ void rtos_usb_simple_init(
 
     rtos_usb_init(
             ctx,
+            io_core_mask,
             usb_simple_isr_cb,
             &event_group,
             endpoint_count,

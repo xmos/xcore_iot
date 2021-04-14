@@ -6,6 +6,21 @@
 
 #define DEBUG_UNIT TUSB_DCD
 
+/*
+ * By default, USB interrupts will run on core 0.
+ */
+#ifndef CFG_TUD_XCORE_INTERRUPT_CORE
+#define CFG_TUD_XCORE_INTERRUPT_CORE 0
+#endif
+
+/*
+ * By default, the USB I/O thread may run on any
+ * core other than 0.
+ */
+#ifndef CFG_TUD_XCORE_IO_CORE_MASK
+#define CFG_TUD_XCORE_IO_CORE_MASK (~(1 << 0))
+#endif
+
 #include <rtos/drivers/usb/api/rtos_usb.h>
 
 static rtos_usb_t usb_ctx;
@@ -244,11 +259,12 @@ void dcd_init(uint8_t rhport)
     rtos_printf("Endpoint count is %d\n", endpoint_count);
 
     rtos_usb_init(&usb_ctx,
+                   CFG_TUD_XCORE_IO_CORE_MASK,
                    dcd_xcore_int_handler, NULL,
                    endpoint_count,
                    epTypeTableOut,
                    epTypeTableIn,
-                   (CFG_TUSB_RHPORT0_MODE & OPT_MODE_HIGH_SPEED) ? XUD_SPEED_HS : XUD_SPEED_FS,
+                   TUD_OPT_HIGH_SPEED ? XUD_SPEED_HS : XUD_SPEED_FS,
                    pwr);
 
     (void) rhport;
@@ -291,14 +307,22 @@ void dcd_remote_wakeup(uint8_t rhport)
 }
 
 // Connect by enabling internal pull-up resistor on D+/D-
+// This both enable interrupts, and causes the USB driver's
+// low level thread to enter XUD_Main().
+// It must be called from an RTOS thread.
+// This function is called by usb_task() prior to entering
+// tud_task().
 void dcd_connect(uint8_t rhport)
 {
     /* This function appears to be unused by the stack or any example */
     /* Only called by tud_connect() which is not called by anything */
     (void) rhport;
+
+    rtos_usb_start(&usb_ctx, CFG_TUD_XCORE_INTERRUPT_CORE);
 }
 
 // Disconnect by disabling internal pull-up resistor on D+/D-
+// TODO: Someday this might be able to make XUD_Main() return.
 void dcd_disconnect(uint8_t rhport)
 {
     /* This function appears to be unused by the stack or any example */

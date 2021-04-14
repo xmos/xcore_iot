@@ -17,6 +17,8 @@ static void usb_task(void* args)
 {
     xassert(tusb_inited() && "Tiny USB must first be initialized with usb_manager_init()");
 
+    tud_connect();
+
     while (1) {
         tud_task();
     }
