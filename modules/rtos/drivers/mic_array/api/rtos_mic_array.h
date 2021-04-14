@@ -181,9 +181,9 @@ inline int rtos_mic_array_decimation_factor(
 
 /**
  * Starts an RTOS mic array driver instance. This must only be called by the tile that
- * owns the driver instance. It may be called either before or after starting
- * the RTOS, but must be called before any of the core mic array driver functions are
- * called with this instance.
+ * owns the driver instance. It must be called after starting the RTOS from an RTOS thread,
+ * and must be called before any of the core mic array driver functions are called with this
+ * instance.
  *
  * rtos_mic_array_init() must be called on this mic array driver instance prior to calling this.
  *
@@ -198,9 +198,7 @@ inline int rtos_mic_array_decimation_factor(
  *                              (one for each microphone) plus one sample per reference channel.
  *                              This must be at least MIC_DUAL_FRAME_SIZE. Samples are pulled out
  *                              of this buffer by the application by calling rtos_mic_array_rx().
- *
- * \param priority              The priority of the task that gets created by the driver to
- *                              handle the PDM microphone interface.
+ * \param interrupt_core_id     The ID of the core on which to enable the mic array interrupt.
  */
 void rtos_mic_array_start(
         rtos_mic_array_t *mic_array_ctx,
@@ -208,25 +206,18 @@ void rtos_mic_array_start(
         mic_dual_third_stage_coef_t *third_stage_coefs,
         int fir_gain_compensation,
         size_t buffer_size,
-        unsigned priority);
-
-/**
- * Initializes the mic array driver's interrupt and ISR. Must be called on the core
- * that will process the interrupts, prior to calling rtos_mic_array_start().
- * It is recommended that the core the ISR runs on is not the same as the core that
- * runs the mic array task started by rtos_mic_array_start().
- *
- * \param mic_array_ctx A pointer to the mic array driver instance for which to initialize interrupts.
- */
-void rtos_mic_array_interrupt_init(rtos_mic_array_t *mic_array_ctx);
+        unsigned interrupt_core_id);
 
 /**
  * Initializes an RTOS mic array driver instance.
- * This must only be called by the tile that owns the driver instance. It may be
- * called either before or after starting the RTOS, but must be called before calling
- * rtos_mic_array_start() or any of the core mic array driver functions with this instance.
+ * This must only be called by the tile that owns the driver instance. It should be
+ * called before starting the RTOS, and must be called before calling rtos_mic_array_start()
+ * or any of the core mic array driver functions with this instance.
  *
  * \param mic_array_ctx     A pointer to the mic array driver instance to initialize.
+ * \param io_core_mask      A bitmask representing the cores on which the low level mic array
+ *                          I/O thread created by the driver is allowed to run. Bit 0 is core 0,
+ *                          bit 1 is core 1, etc.
  * \param pdmclk            A clock that will be configured to drive \p p_pdm_clk.
  * \param pdmclk2           A clock that must be specified if there are two mics in DDR
  *                          mode per pin. It will be configured and used to sample \p p_pdm_mics.
@@ -240,6 +231,7 @@ void rtos_mic_array_interrupt_init(rtos_mic_array_t *mic_array_ctx);
  */
 void rtos_mic_array_init(
         rtos_mic_array_t *mic_array_ctx,
+        uint32_t io_core_mask,
         const xclock_t pdmclk,
         const xclock_t pdmclk2,
         const unsigned pdm_clock_divider,
