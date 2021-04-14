@@ -197,6 +197,7 @@ void board_tile1_init(
 #if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_mic_array_init(
             mic_array_ctx,
+            ~(1 << 0),
             pdmclk,
             pdmclk2,
             AUDIO_CLOCK_FREQUENCY / PDM_CLOCK_FREQUENCY,
