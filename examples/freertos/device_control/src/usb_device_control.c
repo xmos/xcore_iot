@@ -67,10 +67,14 @@ bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_requ
     size_t len;
 
     if (stage == CONTROL_STAGE_SETUP) {
-        device_control_request(device_control_ctx,
-                               request->wIndex,
-                               request->wValue,
-                               request->wLength);
+        ret = device_control_request(device_control_ctx,
+                                     request->wIndex,
+                                     request->wValue,
+                                     request->wLength);
+        if (ret != CONTROL_SUCCESS) {
+            rtos_printf("Bad command received: %02x, %02x, %d\n", request->wIndex, request->wValue, request->wLength);
+            return false;
+        }
     }
 
     switch (request->bmRequestType) {

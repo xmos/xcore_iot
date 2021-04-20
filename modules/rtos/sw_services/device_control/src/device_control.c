@@ -287,14 +287,25 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
     return ret;
 }
 
-void device_control_request(device_control_t *ctx,
-                            control_resid_t resid,
-                            control_cmd_t cmd,
-                            size_t payload_len)
+control_ret_t device_control_request(device_control_t *ctx,
+                                     control_resid_t resid,
+                                     control_cmd_t cmd,
+                                     size_t payload_len)
 {
+    control_ret_t ret;
+    uint8_t servicer;
+
     ctx->requested_resid = resid;
-    ctx->requested_cmd = cmd;
-    ctx->requested_payload_len = payload_len;
+
+    if (resource_table_search(ctx, resid, &servicer) == 0) {
+        ctx->requested_cmd = cmd;
+        ctx->requested_payload_len = payload_len;
+        ret = CONTROL_SUCCESS;
+    } else {
+        ret = CONTROL_BAD_COMMAND;
+    }
+
+    return ret;
 }
 
 control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,

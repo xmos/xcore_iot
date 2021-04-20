@@ -232,11 +232,14 @@ typedef control_ret_t (*device_control_write_cmd_cb_t)(control_resid_t resid, co
  * \param resid       The received resource ID.
  * \param cmd         The received command value.
  * \param payload_len The length in bytes of the payload that will follow.
+ *
+ * \retval CONTROL_SUCCESS if \p resid has been registered by a servicer.
+ * \retval CONTROL_BAD_COMMAND if \p resid has not been registered by a servicer.
  */
-void device_control_request(device_control_t *ctx,
-                            control_resid_t resid,
-                            control_cmd_t cmd,
-                            size_t payload_len);
+control_ret_t device_control_request(device_control_t *ctx,
+                                     control_resid_t resid,
+                                     control_cmd_t cmd,
+                                     size_t payload_len);
 
 /**
  * Must be called by the transport layer either when it receives a payload, or

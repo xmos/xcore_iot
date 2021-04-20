@@ -16,8 +16,8 @@
 
 #include "board_init.h"
 
-#define USB_DEVICE_CONTROL 0
-#define I2C_DEVICE_CONTROL 1
+#define USB_DEVICE_CONTROL 1
+#define I2C_DEVICE_CONTROL 0
 
 #if (USB_DEVICE_CONTROL + I2C_DEVICE_CONTROL) != 1
 #error Must define exactly one device control transport
