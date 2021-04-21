@@ -10,6 +10,7 @@
 #include "device/usbd_pvt.h"
 
 static device_control_t *device_control_ctx;
+static size_t servicer_count_g;
 
 #if CFG_TUSB_DEBUG >= 2
   #define DRIVER_NAME(_name)    .name = _name,
@@ -40,14 +41,16 @@ static uint16_t usb_device_control_open(uint8_t rhport, tusb_desc_interface_t co
 
     control_ret_t dc_ret;
 
+    TU_VERIFY(device_control_ctx != NULL);
+
     dc_ret = device_control_resources_register(device_control_ctx,
-                                               2, //SERVICER COUNT
+                                               servicer_count_g,
                                                pdMS_TO_TICKS(100));
 
     if (dc_ret != CONTROL_SUCCESS) {
-        rtos_printf("Device control resources failed to register on tile %d\n", THIS_XCORE_TILE);
+        rtos_printf("Device control resources failed to register for USB on tile %d\n", THIS_XCORE_TILE);
     } else {
-        rtos_printf("Device control resources registered on tile %d\n", THIS_XCORE_TILE);
+        rtos_printf("Device control resources registered for USB on tile %d\n", THIS_XCORE_TILE);
     }
     TU_VERIFY(dc_ret == CONTROL_SUCCESS);
 
@@ -129,9 +132,11 @@ static const usbd_class_driver_t app_drv[1] = {
     }
 };
 
-void usb_device_control_set_ctx(device_control_t *ctx)
+void usb_device_control_set_ctx(device_control_t *ctx,
+                                size_t servicer_count)
 {
     device_control_ctx = ctx;
+    servicer_count_g = servicer_count;
 }
 
 usbd_class_driver_t const* usbd_app_driver_get_cb(uint8_t* driver_count)

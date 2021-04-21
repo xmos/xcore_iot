@@ -12,8 +12,6 @@ RTOS_I2C_SLAVE_CALLBACK_ATTR
 void i2c_dev_ctrl_start_cb(rtos_i2c_slave_t *ctx,
                            device_control_t *device_control_ctx)
 {
-    rtos_printf("I2C STARTED\n");
-
     control_ret_t dc_ret;
 
     dc_ret = device_control_resources_register(device_control_ctx,
@@ -21,9 +19,9 @@ void i2c_dev_ctrl_start_cb(rtos_i2c_slave_t *ctx,
                                                pdMS_TO_TICKS(100));
 
     if (dc_ret != CONTROL_SUCCESS) {
-        rtos_printf("Device control resources failed to register on tile %d\n", THIS_XCORE_TILE);
+        rtos_printf("Device control resources failed to register for I2C on tile %d\n", THIS_XCORE_TILE);
     } else {
-        rtos_printf("Device control resources registered on tile %d\n", THIS_XCORE_TILE);
+        rtos_printf("Device control resources registered for I2C on tile %d\n", THIS_XCORE_TILE);
     }
     xassert(dc_ret == CONTROL_SUCCESS);
 }
