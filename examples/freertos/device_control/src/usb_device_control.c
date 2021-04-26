@@ -10,6 +10,7 @@
 #include "device/usbd_pvt.h"
 
 static device_control_t *device_control_ctx;
+static size_t servicer_count_g;
 
 #if CFG_TUSB_DEBUG >= 2
   #define DRIVER_NAME(_name)    .name = _name,
@@ -19,19 +20,6 @@ static device_control_t *device_control_ctx;
 
 static void usb_device_control_init(void)
 {
-    control_ret_t dc_ret;
-
-    dc_ret = device_control_resources_register(device_control_ctx,
-                                               2, //SERVICER COUNT
-                                               pdMS_TO_TICKS(100));
-
-    if (dc_ret != CONTROL_SUCCESS) {
-        rtos_printf("Device control resources failed to register on tile %d\n", THIS_XCORE_TILE);
-    } else {
-        rtos_printf("Device control resources registered on tile %d\n", THIS_XCORE_TILE);
-    }
-    xassert(dc_ret == CONTROL_SUCCESS);
-
     rtos_printf("USB Device Control Driver Initialized!\n");
 }
 
@@ -44,14 +32,29 @@ static void usb_device_control_reset(uint8_t rhport)
 
 static uint16_t usb_device_control_open(uint8_t rhport, tusb_desc_interface_t const * itf_desc, uint16_t max_len)
 {
-    TU_VERIFY(TUSB_CLASS_VENDOR_SPECIFIC == itf_desc->bInterfaceClass, 0);
+    TU_VERIFY(TUSB_CLASS_VENDOR_SPECIFIC == itf_desc->bInterfaceClass);
 
     TU_VERIFY(itf_desc->bNumEndpoints == 0);
 
     uint16_t const drv_len = sizeof(tusb_desc_interface_t);
-    TU_VERIFY(max_len >= drv_len, 0);
+    TU_VERIFY(max_len >= drv_len);
 
-    rtos_printf("Device control USB interface is %d is opened\n", itf_desc->bInterfaceNumber);
+    control_ret_t dc_ret;
+
+    TU_VERIFY(device_control_ctx != NULL);
+
+    dc_ret = device_control_resources_register(device_control_ctx,
+                                               servicer_count_g,
+                                               pdMS_TO_TICKS(100));
+
+    if (dc_ret != CONTROL_SUCCESS) {
+        rtos_printf("Device control resources failed to register for USB on tile %d\n", THIS_XCORE_TILE);
+    } else {
+        rtos_printf("Device control resources registered for USB on tile %d\n", THIS_XCORE_TILE);
+    }
+    TU_VERIFY(dc_ret == CONTROL_SUCCESS);
+
+    rtos_printf("Device control USB interface #%d opened\n", itf_desc->bInterfaceNumber);
 
     return drv_len;
 }
@@ -67,10 +70,14 @@ bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_requ
     size_t len;
 
     if (stage == CONTROL_STAGE_SETUP) {
-        device_control_request(device_control_ctx,
-                               request->wIndex,
-                               request->wValue,
-                               request->wLength);
+        ret = device_control_request(device_control_ctx,
+                                     request->wIndex,
+                                     request->wValue,
+                                     request->wLength);
+        if (ret != CONTROL_SUCCESS) {
+            rtos_printf("Bad command received: %02x, %02x, %d\n", request->wIndex, request->wValue, request->wLength);
+            return false;
+        }
     }
 
     switch (request->bmRequestType) {
@@ -125,9 +132,11 @@ static const usbd_class_driver_t app_drv[1] = {
     }
 };
 
-void usb_device_control_set_ctx(device_control_t *ctx)
+void usb_device_control_set_ctx(device_control_t *ctx,
+                                size_t servicer_count)
 {
     device_control_ctx = ctx;
+    servicer_count_g = servicer_count;
 }
 
 usbd_class_driver_t const* usbd_app_driver_get_cb(uint8_t* driver_count)

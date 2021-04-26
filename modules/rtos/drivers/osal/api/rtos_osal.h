@@ -13,6 +13,8 @@
 #define RTOS_OSAL_WAIT_FOREVER  RTOS_OSAL_PORT_WAIT_FOREVER
 #define RTOS_OSAL_NO_WAIT       RTOS_OSAL_PORT_NO_WAIT
 
+#define RTOS_OSAL_HIGHEST_PRIORITY RTOS_OSAL_PORT_HIGHEST_PRIORITY
+
 #define RTOS_OSAL_OR         RTOS_OSAL_PORT_OR
 #define RTOS_OSAL_OR_CLEAR   RTOS_OSAL_PORT_OR_CLEAR
 #define RTOS_OSAL_AND        RTOS_OSAL_PORT_AND
@@ -46,6 +48,7 @@ void rtos_osal_free(void *ptr);
  * Time
  */
 rtos_osal_tick_t rtos_osal_tick_get(void);
+void rtos_osal_delay(unsigned ticks);
 
 /*
  * Thread management

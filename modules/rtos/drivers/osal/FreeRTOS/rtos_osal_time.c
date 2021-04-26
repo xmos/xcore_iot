@@ -15,3 +15,8 @@ rtos_osal_tick_t rtos_osal_tick_get(void)
         return xTaskGetTickCount();
     }
 }
+
+void rtos_osal_delay(unsigned ticks)
+{
+    vTaskDelay(ticks);
+}

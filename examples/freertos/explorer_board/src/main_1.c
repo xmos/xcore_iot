@@ -83,7 +83,7 @@ void vApplicationDaemonTaskStartup( void )
             rtos_mic_array_third_stage_coefs(pdm_decimation_factor),
             rtos_mic_array_fir_compensation(pdm_decimation_factor),
             1.2 * MIC_DUAL_FRAME_SIZE,
-            configMAX_PRIORITIES-1);
+            0);
 
     rtos_printf("Starting i2s driver\n");
     rtos_i2s_start(
@@ -92,7 +92,7 @@ void vApplicationDaemonTaskStartup( void )
             I2S_MODE_I2S,
             0,
             1.2 * MIC_DUAL_FRAME_SIZE,
-            configMAX_PRIORITIES-1);
+            0);
 
     /* Create the gpio control task */
     gpio_ctrl_create(gpio_ctx, appconfGPIO_TASK_PRIORITY);
@@ -102,21 +102,6 @@ void vApplicationDaemonTaskStartup( void )
     remote_cli_gain_init(intertile_ctx, CLI_RPC_PROCESS_COMMAND_PORT, CLI_RPC_PROCESS_COMMAND_TASK_PRIORITY);
 
     vTaskDelete(NULL);
-}
-
-void vApplicationCoreInitHook(BaseType_t xCoreID)
-{
-    rtos_printf("Initializing tile 1 core %d on core %d\n", xCoreID, portGET_CORE_ID());
-
-    switch (xCoreID) {
-
-    case 0:
-        rtos_mic_array_interrupt_init(mic_array_ctx);
-        break;
-    case 1:
-        rtos_i2s_interrupt_init(i2s_ctx);
-        break;
-    }
 }
 
 void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)

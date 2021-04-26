@@ -9,18 +9,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-
-void vApplicationCoreInitHook(BaseType_t xCoreID)
-{
-#if ON_TILE(0)
-    rtos_printf("Initializing tile 0, core %d on core %d\n", xCoreID, portGET_CORE_ID());
-#endif /* ON_TILE(0) */
-
-#if ON_TILE(1)
-    rtos_printf("Initializing tile 1, core %d on core %d\n", xCoreID, portGET_CORE_ID());
-#endif /* ON_TILE(1) */
-}
-
 void vApplicationMallocFailedHook( void )
 {
     rtos_printf("Malloc Failed on tile %d!\n", THIS_XCORE_TILE);
