@@ -47,8 +47,6 @@
 
 #endif
 
-#define TIME_PER_CYCLE (600.0 / 500.0 * 5.0 / 5.0)
-
 void *example_pipeline_input(void *data)
 {
     int32_t (*audio_frame)[2];
@@ -96,8 +94,8 @@ void stage0(int32_t (*audio_frame)[2])
 		audio_frame[i][1] *= 2;
 	}
 
-	uint32_t init_time = TIME_PER_STAGE * TIME_PER_CYCLE / 3;
-	while (init_time-- > 0) asm volatile ("nop");
+	uint32_t init_time = get_reference_time();
+	while (get_reference_time() - init_time < TIME_PER_STAGE);
 }
 
 void stage1(int32_t (*audio_frame)[2])
@@ -109,8 +107,8 @@ void stage1(int32_t (*audio_frame)[2])
         audio_frame[i][1] *= 3;
 	}
 
-    uint32_t init_time = TIME_PER_STAGE * TIME_PER_CYCLE / 3;
-    while (init_time-- > 0) asm volatile ("nop");
+    uint32_t init_time = get_reference_time();
+    while (get_reference_time() - init_time < TIME_PER_STAGE);
 }
 
 void stage2(int32_t (*audio_frame)[2])
@@ -122,8 +120,8 @@ void stage2(int32_t (*audio_frame)[2])
         audio_frame[i][1] *= 4;
 	}
 
-    uint32_t init_time = TIME_PER_STAGE * TIME_PER_CYCLE / 3;
-    while (init_time-- > 0) asm volatile ("nop");
+    uint32_t init_time = get_reference_time();
+    while (get_reference_time() - init_time < TIME_PER_STAGE);
 }
 
 void example_pipeline_init(
