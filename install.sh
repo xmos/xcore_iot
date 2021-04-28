@@ -21,13 +21,6 @@ else
 
     AIF_DIR=${XMOS_AIOT_SDK_PATH}/modules/aif
 
-    echo "*******************************"
-    echo "* Building xcore_interpreters *"
-    echo "******************************"
-    XCORE_INTERPRETERS_DIR=${AIF_DIR}/xcore_interpreters/host_library
-    (cd ${XCORE_INTERPRETERS_DIR}; mkdir -p build)
-    (cd ${XCORE_INTERPRETERS_DIR}/build; cmake ../ ; make install)
-
     echo "**********************************"
     echo "* Installing Python requirements *"
     echo "**********************************"
