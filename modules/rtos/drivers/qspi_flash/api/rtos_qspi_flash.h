@@ -271,11 +271,6 @@ void rtos_qspi_flash_start(
  * \param spi_read_sio_pad_delay         Number of core clock cycles to delay sampling the SIO pads during
  *                                       a SPI read transaction. This allows for more fine grained adjustment
  *                                       of sampling time. The value may be between 0 and 5.
- * \param quad_page_program_enable       If set to 1, then rtos_qspi_flash_write() will use all four SIO lines
- *                                       to send out the address and data. If set greater than 1, then qspi_flash_write()
- *                                       will send the address out on only SIO0 (MOSI) and the data out on all
- *                                       four SIO lines. Otherwise, if false then both the address and data will
- *                                       be sent out on only SIO0 (MOSI).
  * \param quad_page_program_cmd          The command that will be sent when rtos_qspi_flash_write() is called if
  *                                       quad_page_program_enable is true. This should be a value returned by
  *                                       the QSPI_IO_BYTE_TO_MOSI() macro.
@@ -304,8 +299,7 @@ void rtos_qspi_flash_init(
         uint32_t spi_read_sclk_sample_delay,
         qspi_io_sample_edge_t spi_read_sclk_sample_edge,
         uint32_t spi_read_sio_pad_delay,
-        int quad_page_program_enable,
-        uint32_t quad_page_program_cmd,
+        qspi_flash_page_program_cmd_t quad_page_program_cmd,
         uint32_t quad_enable_register_read_cmd,
         uint32_t quad_enable_register_write_cmd,
         uint32_t quad_enable_bitmask,

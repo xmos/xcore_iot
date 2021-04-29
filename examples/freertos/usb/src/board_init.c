@@ -120,8 +120,7 @@ void board_tile0_init(
             qspi_io_sample_edge_falling,
             0,
 
-            2, /* Enable quad page programming */
-            QSPI_IO_BYTE_TO_MOSI(0x32), /* The quad page program command */
+            qspi_flash_page_program_1_1_4,
 
             QSPI_IO_BYTE_TO_MOSI(0x35), /* The quad enable register read command */
             QSPI_IO_BYTE_TO_MOSI(0x31), /* The quad enable register write command */
@@ -150,8 +149,7 @@ void board_tile0_init(
             qspi_io_sample_edge_falling,
             0,
 
-            1, /* Enable quad page programming */
-            QSPI_IO_BYTE_TO_MOSI(0x38), /* The quad page program command */
+            qspi_flash_page_program_1_4_4,
 
             QSPI_IO_BYTE_TO_MOSI(0x05),  /* The quad enable register read command */
             QSPI_IO_BYTE_TO_MOSI(0x01),  /* The quad enable register write command */
