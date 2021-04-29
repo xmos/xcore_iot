@@ -14,8 +14,8 @@ typedef struct demo_args {
 
 void create_tinyusb_demo(demo_args_t *args, unsigned priority);
 
-void set_dfu_mode();
-void set_rt_mode();
-int check_dfu_mode();
+void set_dfu_mode(void);
+void set_rt_mode(void);
+int check_dfu_mode(void);
 
 #endif /* DEMO_MAIN_H_ */

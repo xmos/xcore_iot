@@ -28,6 +28,7 @@ set(USE_RTOS_WIFI_DRIVER FALSE)
 
 set(USE_FATFS TRUE)
 set(USE_TINYUSB TRUE)
+set(USE_DISK_MANAGER_TUSB TRUE)
 
 ## Import XMOS configurations
 include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
@@ -78,7 +79,7 @@ add_compile_definitions(
     CFG_TUD_TASK_QUEUE_SZ=8
 
     CFG_TUSB_DEBUG_PRINTF=rtos_printf
-    CFG_TUSB_DEBUG=2
+    CFG_TUSB_DEBUG=0
 
     DEBUG_PRINT_ENABLE=1
     XUD_CORE_CLOCK=${SYSCLK_FREQ}
@@ -114,7 +115,6 @@ if(XMOS_TINYUSB_DEMO)
         "src/xmos_demo"
     )
     add_compile_definitions(MSC_MAX_DISKS=2)
-    set(USE_DISK_MANAGER_TUSB                   TRUE)
 else()
     include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
 

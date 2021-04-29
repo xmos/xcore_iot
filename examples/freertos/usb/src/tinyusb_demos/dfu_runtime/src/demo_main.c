@@ -36,14 +36,45 @@
  * pattern to fast rate as indicator.
  */
 
+/*
+ * After device is enumerated in dfu mode run the following commands
+ *
+ * To transfer firmware from host to device:
+ *
+ * $ dfu-util -D [filename]
+ *
+ * To transfer firmware from device to host:
+ *
+ * $ dfu-util -U [filename]
+ *
+ */
+
+/*
+ * XMOS Specific
+ *
+ * To create a upgrade image use
+ *
+ * $ xflash --factory-version 15.0 --upgrade 0 [.xe file] -o [upgrade image filename]
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <xs1.h>
 
 #include "FreeRTOS.h"
 #include "rtos/drivers/gpio/api/rtos_gpio.h"
 #include "demo_main.h"
 #include "tusb.h"
+
+#include "flash_boot_image.h"
+
+#define FLASH_PAGE_SIZE     (4096)
+#define FLASH_PAGE_COUNT    (32768)
+
+static boot_image_manager_ctx_t bim_ctx;
+static boot_image_manager_ctx_t* bim_ctx_ptr = &bim_ctx;
 
 /* Blink pattern
  * - 1000 ms : device should reboot
@@ -64,6 +95,9 @@ static rtos_gpio_port_id_t led_port = 0;
 static uint32_t led_val = 0;
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
 static rtos_qspi_flash_t *qspi_ctx = NULL;
+
+static void reboot();
+
 //--------------------------------------------------------------------+
 // Device callbacks
 //--------------------------------------------------------------------+
@@ -98,107 +132,96 @@ void tud_resume_cb(void)
 //--------------------------------------------------------------------+
 // Class callbacks
 //--------------------------------------------------------------------+
-uint8_t tud_dfu_runtime_init_attrs_cb()
-{
-    return (uint8_t) DFU_FUNC_ATTR_CAN_DOWNLOAD_BITMASK | DFU_FUNC_ATTR_MANIFESTATION_TOLERANT_BITMASK | DFU_FUNC_ATTR_CAN_UPLOAD_BITMASK | DFU_FUNC_ATTR_WILL_DETACH_BITMASK;
-}
 
-uint8_t tud_dfu_mode_init_attrs_cb()
+static size_t total_len = 0;
+static size_t bytes_avail = 0;
+static uint32_t dn_base_addr = 0;
+bool tud_dfu_firmware_valid_check_cb()
 {
-    return (uint8_t) DFU_FUNC_ATTR_CAN_DOWNLOAD_BITMASK | DFU_FUNC_ATTR_MANIFESTATION_TOLERANT_BITMASK | DFU_FUNC_ATTR_CAN_UPLOAD_BITMASK | DFU_FUNC_ATTR_WILL_DETACH_BITMASK;
-}
-
-bool tud_dfu_mode_firmware_valid_check_cb()
-{
+    uint8_t dummy;
+    rtos_printf("Pass firmware validity check addr 0x%x size %u\n", dn_base_addr, total_len);
+    set_rt_mode();
+    boot_image_read(bim_ctx_ptr->app_data, 0, &dummy, 1);   // dummy read to ensure flash writes have completed
+    reboot();
     return true;
 }
 
-void tud_dfu_mode_req_dnload_data_cb(uint16_t wBlockNum, uint8_t* data, uint16_t length)
+void tud_dfu_req_dnload_data_cb(uint16_t wBlockNum, uint8_t* data, uint16_t length)
 {
-  rtos_printf("Block[%u] Len[%u] Buffer:\n", wBlockNum, length);
-  for(int i=0; i<11; i++) {
-    rtos_printf("%c", data[i] );
+  // rtos_printf("Block[%u] Len[%u] Buffer\n", wBlockNum, length);
+
+  if (dn_base_addr == 0)
+  {
+      uint32_t addr = 0;
+      total_len = 0;
+      int tmp = boot_image_locate_available_spot(bim_ctx_ptr, &addr, &bytes_avail);
+      if(tmp == -1)
+      {
+          boot_image_t* imgptr = NULL;
+          imgptr = boot_image_get_last_image(bim_ctx_ptr);
+          addr = imgptr->startAddress;
+          bytes_avail = bim_ctx_ptr->boot_partition_size - addr;
+      }
+      rtos_printf("Using addr 0x%x\nsize %u\n", addr, bytes_avail);
+      dn_base_addr = addr;
   }
-  rtos_printf("\n");
+
+  if(length > 0)
+  {
+    unsigned cur_addr = dn_base_addr + (wBlockNum * bim_ctx_ptr->page_size);
+    if((bytes_avail - total_len) >= length)
+    {
+        // rtos_printf("write %d at 0x%x\n", length, cur_addr);
+        boot_image_write(bim_ctx_ptr->app_data, cur_addr, data, length);
+        total_len += length;
+
+        tud_dfu_dnload_complete();
+    } else {
+        rtos_printf("Insufficient space\n");
+    }
+  }
 }
 
-void tud_dfu_mode_get_poll_timeout_cb(uint8_t *ms_timeout)
-{
-    *(ms_timeout+0) = 0;
-}
-
-void tud_dfu_mode_start_poll_timeout_cb(uint8_t *ms_timeout)
-{
-  uint32_t delay = ms_timeout[2] << 8 | ms_timeout[1] << 1 | ms_timeout[0];
-  rtos_printf("start poll timeout\n");
-  vTaskDelay(pdMS_TO_TICKS(delay)); // TODO: this delay should not be here
-  rtos_printf("timeout done\n");
-  tud_dfu_mode_poll_timeout_done();
-}
-
-bool tud_dfu_mode_device_data_done_check_cb()
+bool tud_dfu_device_data_done_check_cb()
 {
   rtos_printf("Dummy device data done check... Returning true\n");
   return true;
 }
 
-void tud_dfu_mode_abort_cb()
+void tud_dfu_abort_cb()
 {
   rtos_printf("Host Aborted transfer\n");
 }
 
-const char test_string[] = "This is an upload test.\nHello world!\n";
-static int test_send = 1;
-uint16_t tud_dfu_mode_req_upload_data_cb(uint16_t block_num, uint8_t* data, uint16_t length)
+uint16_t tud_dfu_req_upload_data_cb(uint16_t block_num, uint8_t* data, uint16_t length)
 {
-  if (test_send == 0) {
-    test_send = 1;
-    return 0;
-  } else {
-    memcpy(data, &test_string, sizeof(test_string));
-    test_send = 0;
-    return length;
-  }
+  memset(data, 0x00, length);
+  uint32_t addr = block_num * FLASH_PAGE_SIZE;
+  uint32_t endaddr;
+
+#if 0
+  // Test code which will just read out all of flash rather than a specific image
+  endaddr = 0x800000;
+#else
+  boot_image_t* imgptr = NULL;
+  imgptr = boot_image_get_last_image(bim_ctx_ptr);
+  addr += imgptr->startAddress;
+  endaddr = imgptr->startAddress + imgptr->size;
+#endif
+  return (addr >= endaddr) ? 0 : (uint16_t)boot_image_read(bim_ctx_ptr->app_data, addr, data, length);
 }
 
-dfu_protocol_type_t dfu_init_in_mode_cb()
+static void reboot(void)
 {
-  return DFU_PROTOCOL_DFU;
+    rtos_printf("Reboot initiated by tile:0x%x\n", get_local_tile_id());
+    write_sswitch_reg_no_ack(get_local_tile_id(), XS1_SSWITCH_WATCHDOG_COUNT_NUM, 0x10000);
+    write_sswitch_reg_no_ack(get_local_tile_id(), XS1_SSWITCH_WATCHDOG_CFG_NUM, (1 << XS1_WATCHDOG_COUNT_ENABLE_SHIFT) | (1 << XS1_WATCHDOG_TRIGGER_ENABLE_SHIFT) );
+    while(1) {;}
 }
 
-static void reboot()
+void tud_dfu_runtime_reboot_to_dfu_cb(void)
 {
-    // TODO reset other tiles too
-    unsigned pll_ctrl_val[1];
-
-    for (unsigned i = 0; i < 1; i++) {
-        read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM, &pll_ctrl_val[i]);
-        read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM, &pll_ctrl_val[i]);
-
-        //debug_printf("tile %d pll config: %x\n", i, pll_ctrl_val[i]);
-
-        /* ensure the reset and hold bits are cleared */
-        pll_ctrl_val[i] &= 0x8FFFFFFF;
-    }
-
-    /* reset the local node last */
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM, pll_ctrl_val[0]);
-    write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_PLL_CTL_NUM, pll_ctrl_val[0]);
-
-    while (1);
-}
-
-void tud_dfu_runtime_reboot_to_dfu_cb()
-{
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_DFU_MODE), 0);
     set_dfu_mode();
-    reboot();
-}
-
-void tud_dfu_mode_reboot_to_rt_cb()
-{
-    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_DFU_MODE), 0);
-    set_rt_mode();
     reboot();
 }
 
@@ -214,8 +237,9 @@ void led_blinky_cb(TimerHandle_t xTimer)
 #if OSPREY_BOARD
 #define RED         ~(1<<6)
 #define GREEN       ~(1<<7)
+#define OFF         ~(RED & GREEN)
     if(led_val) {
-        rtos_gpio_port_out(gpio_ctx, led_port, RED);
+        rtos_gpio_port_out(gpio_ctx, led_port, OFF);
     } else {
         rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
     }
@@ -228,10 +252,13 @@ void led_blinky_cb(TimerHandle_t xTimer)
 
 void create_tinyusb_demo(demo_args_t *args, unsigned priority)
 {
+    boot_image_manager_init(bim_ctx_ptr, FLASH_PAGE_SIZE, FLASH_PAGE_COUNT, args->qspi_ctx);
+    boot_image_build_table(bim_ctx_ptr);
+
     gpio_ctx = args->gpio_ctx;
     qspi_ctx =  args->qspi_ctx;
 
-    if (gpio_ctx == NULL) {
+    if (gpio_ctx != NULL) {
         led_port = rtos_gpio_port(PORT_LEDS);
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);

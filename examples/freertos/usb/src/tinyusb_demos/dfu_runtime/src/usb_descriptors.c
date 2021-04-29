@@ -25,6 +25,7 @@
 
 #include "tusb.h"
 #include "class/dfu/dfu_rt_device.h"
+#include "demo_main.h"
 
 /* A combination of interfaces must have a unique product id, since PC will save device driver after the first plug.
  * Same VID/PID with different interface e.g MSC (first), then CDC (later) will possibly cause system error on PC.
@@ -138,11 +139,9 @@ uint8_t const desc_configuration_mode[] =
   // Config number, interface count, string index, total length, attribute, power in mA
   TUD_CONFIG_DESCRIPTOR(1, ITF1_NUM_TOTAL, 0, CONFIG_1_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
 
-  // Interface number, string index, alternate setting, attributes, detach timeout, transfer size */
-  TUD_DFU_MODE_DESCRIPTOR(ITF1_NUM_DFU_MODE, 0, 0, FUNC_ATTRS, 1000, CFG_TUD_DFU_TRANSFER_BUFFER_SIZE),
+  // Interface number, string index, attributes, detach timeout, transfer size */
+  TUD_DFU_MODE_DESCRIPTOR(ITF1_NUM_DFU_MODE, 0, FUNC_ATTRS, 1000, CFG_TUD_DFU_TRANSFER_BUFFER_SIZE),
 };
-
-#include "demo_main.h"
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
 // Application return pointer to descriptor
@@ -150,9 +149,7 @@ uint8_t const desc_configuration_mode[] =
 uint8_t const * tud_descriptor_configuration_cb(uint8_t index)
 {
   (void) index; // for multiple configurations
-  // return check_dfu_mode() ? desc_configuration_rt : desc_configuration_mode;
-  // return desc_configuration_rt;
-  return desc_configuration_mode;
+  return check_dfu_mode() ? desc_configuration_rt : desc_configuration_mode;
 }
 
 //--------------------------------------------------------------------+

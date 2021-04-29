@@ -2,8 +2,9 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* System headers */
-#include <stdbool.h>
 #include <platform.h>
+#include <string.h>
+#include <stdbool.h>
 #include <xs1.h>
 #include <xcore/triggerable.h>
 
@@ -37,24 +38,38 @@ static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 
+
+#if DFU_DEMO
+#define QSPI_FLASH_SECTOR_SIZE 4096
 #define MODE_ADDR   0x200000
 static int mode = 0;
+void write_dfu_mode(void);
 
-int check_dfu_mode()
+int check_dfu_mode(void)
 {
     rtos_qspi_flash_read(
         qspi_flash_ctx,
         (uint8_t*)&mode,
         (unsigned)(MODE_ADDR),
         (size_t)sizeof(int));
-        rtos_printf("*****Mode is %u\n", mode);
-    if(mode == 0xffffffff) mode = 0;
+        // rtos_printf("Mode is %u\n", mode);
+    if(mode == 0xffffffff) mode = 0;    // uninitialized should be handled as RT
     return mode;
 }
 
-#define QSPI_FLASH_SECTOR_SIZE 4096
+void set_rt_mode(void)
+{
+    mode = 0;
+    write_dfu_mode();
+}
 
-void write_dfu_mode()
+void set_dfu_mode(void)
+{
+    mode = 1;
+    write_dfu_mode();
+}
+
+void write_dfu_mode(void)
 {
     uint8_t *tmp_buf = rtos_osal_malloc( sizeof(uint8_t) * QSPI_FLASH_SECTOR_SIZE);
     rtos_qspi_flash_lock(qspi_flash_ctx);
@@ -82,15 +97,45 @@ void write_dfu_mode()
     rtos_osal_free(tmp_buf);
 }
 
-void set_rt_mode()
+size_t boot_image_read(void* ctx, unsigned addr, uint8_t *buf, size_t len)
 {
-    mode = 0;
+    rtos_qspi_flash_t *qspi = (rtos_qspi_flash_t *)ctx;
+    rtos_qspi_flash_read(qspi, buf, addr, len);
+    return len;
 }
 
-void set_dfu_mode()
+size_t boot_image_write(void* ctx, unsigned addr, const uint8_t *buf, size_t len)
 {
-    mode = 1;
+    rtos_qspi_flash_t *qspi = (rtos_qspi_flash_t *)ctx;
+
+    uint8_t *tmp_buf = rtos_osal_malloc( sizeof(uint8_t) * QSPI_FLASH_SECTOR_SIZE);
+    rtos_qspi_flash_lock(qspi);
+    {
+        rtos_qspi_flash_read(
+                qspi,
+                tmp_buf,
+                (unsigned)(addr),
+                (size_t)QSPI_FLASH_SECTOR_SIZE);
+
+        memcpy(tmp_buf, buf, len);
+
+        rtos_qspi_flash_erase(
+                qspi,
+                (unsigned)(addr),
+                (size_t)QSPI_FLASH_SECTOR_SIZE);
+        rtos_qspi_flash_write(
+                qspi,
+                (uint8_t *) tmp_buf,
+                (unsigned)(addr),
+                (size_t)QSPI_FLASH_SECTOR_SIZE);
+    }
+    rtos_qspi_flash_unlock(qspi);
+
+    rtos_osal_free(tmp_buf);
+
+    return len;
 }
+#endif
 
 void vApplicationDaemonTaskStartup(void *arg)
 {
@@ -116,10 +161,15 @@ void vApplicationDaemonTaskStartup(void *arg)
 #ifdef MSC_MAX_DISKS
     create_tinyusb_disks(qspi_flash_ctx);
 #endif
+
+#if DFU_DEMO
     demo_args_t *demo_task_args = pvPortMalloc(sizeof(demo_args_t));
     demo_task_args->gpio_ctx = gpio_ctx;
     demo_task_args->qspi_ctx = qspi_flash_ctx;
     create_tinyusb_demo(demo_task_args, appconfTINYUSB_DEMO_TASK_PRIORITY);
+#else
+    create_tinyusb_demo(gpio_ctx, appconfTINYUSB_DEMO_TASK_PRIORITY);
+#endif
     usb_manager_start(appconfUSB_MANAGER_TASK_PRIORITY);
 #endif
 

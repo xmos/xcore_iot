@@ -81,11 +81,13 @@ if(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST)
     set(TINYUSB_DEMO_SOURCES
         "${DEMO_PATH}/demo_main.c"
         "${DEMO_PATH}/usb_descriptors.c"
+        "${DEMO_PATH}/flash_boot_image.c"
     )
 
     set(TINYUSB_DEMO_INCLUDES
         ${DEMO_PATH}
     )
+    add_compile_definitions(DFU_DEMO=1)
 endif()
 
 if(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST)
