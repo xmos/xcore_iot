@@ -22,6 +22,7 @@ typedef struct {
 } servicer_init_data_t;
 
 typedef struct {
+    device_control_t *dev_ctrl_ctx;
     rtos_osal_queue_t *queue;
     size_t payload_len;
     control_resid_t resid;
@@ -47,13 +48,14 @@ control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
                                                void *app_data,
                                                unsigned timeout)
 {
-    device_control_t *device_control_ctx = ctx->device_control_ctx;
     rtos_osal_status_t status;
     control_ret_t ret = CONTROL_ERROR;
     cmd_to_servicer_t *c_ptr;
 
     status = rtos_osal_queue_receive(&ctx->queue, &c_ptr, timeout);
     if (status == RTOS_OSAL_SUCCESS) {
+
+        device_control_t *device_control_ctx = c_ptr->dev_ctrl_ctx;
 
         if (IS_CONTROL_CMD_READ(c_ptr->cmd)) {
             ret = read_cmd_cb(c_ptr->resid, c_ptr->cmd, c_ptr->payload, c_ptr->payload_len, app_data);
@@ -105,6 +107,8 @@ static void device_control_client_thread(device_control_t *ctx)
                                        ctx->intertile_port,
                                        (void **) &c_ptr,
                                        RTOS_OSAL_WAIT_FOREVER);
+
+        c_ptr->dev_ctrl_ctx = ctx;
 
         if (msg_length != 0) {
 
@@ -182,6 +186,7 @@ static control_ret_t do_command(device_control_t *ctx,
         rtos_osal_queue_t *queue = ctx->servicer_table[servicer].queue;
 
         cmd_to_servicer_t c = {
+                .dev_ctrl_ctx = ctx,
                 .queue = queue,
                 .resid = resid,
                 .cmd = cmd,
@@ -226,7 +231,11 @@ static control_ret_t do_command(device_control_t *ctx,
             }
         }
 
-        rtos_printf("%d write command %d, %d, %d\n", servicer, resid, cmd, payload_len);
+        if (IS_CONTROL_CMD_READ(cmd)) {
+            rtos_printf("%d read command %d, %d, %d\n", servicer, resid, cmd, payload_len);
+        } else {
+            rtos_printf("%d write command %d, %d, %d\n", servicer, resid, cmd, payload_len);
+        }
 
         return ret;
     }
@@ -278,43 +287,58 @@ control_ret_t device_control_payload_transfer(device_control_t *ctx,
     return ret;
 }
 
-void device_control_request(device_control_t *ctx,
-                            control_resid_t resid,
-                            control_cmd_t cmd,
-                            size_t payload_len)
+control_ret_t device_control_request(device_control_t *ctx,
+                                     control_resid_t resid,
+                                     control_cmd_t cmd,
+                                     size_t payload_len)
 {
+    control_ret_t ret;
+    uint8_t servicer;
+
     ctx->requested_resid = resid;
-    ctx->requested_cmd = cmd;
-    ctx->requested_payload_len = payload_len;
+
+    if (resource_table_search(ctx, resid, &servicer) == 0) {
+        ctx->requested_cmd = cmd;
+        ctx->requested_payload_len = payload_len;
+        ret = CONTROL_SUCCESS;
+    } else {
+        ret = CONTROL_BAD_COMMAND;
+    }
+
+    return ret;
 }
 
 control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
-                                               device_control_t *device_control_ctx,
+                                               device_control_t *device_control_ctx[],
+                                               size_t device_control_ctx_count,
                                                const control_resid_t resources[],
                                                size_t num_resources)
 {
     const size_t len = sizeof(servicer_init_data_t) + sizeof(control_resid_t) * num_resources;
-    servicer_init_data_t *init_data = rtos_osal_malloc(len);
+
+    rtos_osal_queue_create(&ctx->queue, "servicer_q", 1, sizeof(void *));
 
     /*
      * TODO: Perhaps wait for an ACK. Then this would not need malloc().
      */
 
-    ctx->device_control_ctx = device_control_ctx;
-    init_data->num_resources = num_resources;
-    rtos_osal_queue_create(&ctx->queue, "servicer_q", 1, sizeof(void *));
-    init_data->queue = &ctx->queue;
-    memcpy(init_data->resources, resources, sizeof(control_resid_t) * num_resources);
+    for (int i = 0; i < device_control_ctx_count; i++) {
+        servicer_init_data_t *init_data = rtos_osal_malloc(len);
 
-    if (device_control_ctx->resource_table != NULL) {
+        init_data->num_resources = num_resources;
+        init_data->queue = &ctx->queue;
+        memcpy(init_data->resources, resources, sizeof(control_resid_t) * num_resources);
 
-        rtos_osal_queue_send(&device_control_ctx->gateway_queue, &init_data, RTOS_OSAL_WAIT_FOREVER);
+        if (device_control_ctx[i]->resource_table != NULL) {
 
-    } else {
-        /* Resource table is NULL on client tiles */
+            rtos_osal_queue_send(&device_control_ctx[i]->gateway_queue, &init_data, RTOS_OSAL_WAIT_FOREVER);
 
-        rtos_intertile_tx(device_control_ctx->host_intertile, device_control_ctx->intertile_port, init_data, len);
-        rtos_osal_free(init_data);
+        } else {
+            /* Resource table is NULL on client tiles */
+
+            rtos_intertile_tx(device_control_ctx[i]->host_intertile, device_control_ctx[i]->intertile_port, init_data, len);
+            rtos_osal_free(init_data);
+        }
     }
 
     return CONTROL_SUCCESS;
@@ -410,9 +434,8 @@ control_ret_t device_control_init(device_control_t *ctx,
                                   rtos_intertile_t *intertile_ctx[],
                                   size_t intertile_count)
 {
-    memset(ctx, 0, sizeof(device_control_t));
-
     if (mode == DEVICE_CONTROL_HOST_MODE) {
+        memset(ctx, 0, sizeof(device_control_t));
         resource_table_init(ctx);
 
         xassert(intertile_count <= 3);
@@ -424,7 +447,7 @@ control_ret_t device_control_init(device_control_t *ctx,
             ctx->client_intertile[i] = intertile_ctx[i];
         }
     } else {
-
+        memset(ctx, 0, sizeof(device_control_client_t));
         xassert(intertile_count == 1);
         if (intertile_count != 1) {
             return CONTROL_REGISTRATION_FAILED;

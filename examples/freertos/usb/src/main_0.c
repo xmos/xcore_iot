@@ -178,12 +178,14 @@ void vApplicationDaemonTaskStartup(void *arg)
 
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    TaskHandle_t startup_task;
-
     (void) c0;
     board_tile0_init(c1, intertile_ctx, qspi_flash_ctx, gpio_ctx, mic_array_ctx);
     (void) c2;
     (void) c3;
+
+#if ON_TILE(USB_TILE_NO)
+    usb_manager_init();
+#endif
 
     rtos_printf("Starting startup task on tile 0 with %d stack\n", RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup) * 4);
     xTaskCreate((TaskFunction_t) vApplicationDaemonTaskStartup,
@@ -191,19 +193,10 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 				RTOS_THREAD_STACK_SIZE(vApplicationDaemonTaskStartup),
                 NULL,
 				appconfSTARTUP_TASK_PRIORITY,
-                &startup_task);
-
-    /*
-     * Force the startup task to be on core 0. Any interrupts that it
-     * starts will therefore be enabled on core 0 and will not conflict
-     * with the XUD task.
-     */
-    vTaskCoreExclusionSet(startup_task, ~(1 << 0));
+                NULL);
 
     rtos_printf("Start scheduler on tile 0\n");
     vTaskStartScheduler();
-
-    return;
 }
 
 #endif /* ON_TILE(0) */

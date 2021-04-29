@@ -1,0 +1,13 @@
+--- /usr/local/XMOS/XTC/15.0.5/target/include/xs1_clock.h.bak	2021-04-06 11:27:34.683058159 -0400
++++ /usr/local/XMOS/XTC/15.0.5/target/include/xs1_clock.h	2021-04-06 11:28:02.948055303 -0400
+@@ -35,8 +35,8 @@
+  * \sa configure_clock_rate_at_most
+  */
+ #define clock __clock_t
+-#else
+-typedef unsigned clock;
++// #else
++// typedef unsigned clock;
+ #endif
+ 
+ #endif /* _clock_defined */

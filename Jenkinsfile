@@ -31,9 +31,9 @@ pipeline {
         stage("Setup") {
             // Clone and install build dependencies
             steps {
-                // clean auto default checkout
+                // Clean auto default checkout
                 sh "rm -rf *"
-                // clone
+                // Clone
                 checkout([
                     $class: 'GitSCM',
                     branches: scm.branches,
@@ -48,10 +48,15 @@ pipeline {
                     userRemoteConfigs: [[credentialsId: 'xmos-bot',
                                         url: 'git@github.com:xmos/aiot_sdk']]
                 ])
-                // create venv
+                // Create venv
                 sh "conda env create -q -p sdk_venv -f tools/develop/environment.yml"
                 // Install xmos tools version
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
+            }
+        }
+        stage("Patch toolchain") {
+            steps {
+                sh "patch -N /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/${params.TOOLS_VERSION}/target/include/xs1_clock.h -i xs1_clock.patch"
             }
         }
         stage("Update environment") {
@@ -77,8 +82,6 @@ pipeline {
                 // ***************************************************************************
                 // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
                 // ***************************************************************************
-                // run xcore interpreter tests
-                sh """. activate ./sdk_venv && pytest -v modules/aif/xcore_interpreters/xcore_interpreters/tests --junitxml xcore_interpreters_junit.xml"""
                 // run unit tests
                 sh """. activate ./sdk_venv && pytest -v test --junitxml test_junit.xml"""
                 // run notebook tests

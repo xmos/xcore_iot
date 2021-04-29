@@ -6,21 +6,39 @@
 
 #define DEBUG_UNIT TUSB_DCD
 
+/*
+ * By default, USB interrupts will run on core 0.
+ */
+#ifndef CFG_TUD_XCORE_INTERRUPT_CORE
+#define CFG_TUD_XCORE_INTERRUPT_CORE 0
+#endif
+
+/*
+ * By default, the USB I/O thread may run on any
+ * core other than 0.
+ */
+#ifndef CFG_TUD_XCORE_IO_CORE_MASK
+#define CFG_TUD_XCORE_IO_CORE_MASK (~(1 << 0))
+#endif
+
 #include <rtos/drivers/usb/api/rtos_usb.h>
 
 static rtos_usb_t usb_ctx;
 
-static struct setup_packet_struct {
+static union setup_packet_struct {
     tusb_control_request_t req;
-    uint32_t pad; /* just in case the transfer writes a CRC */
+    uint8_t pad[CFG_TUD_ENDPOINT0_SIZE]; /* In case an OUT data packet comes in instead of a SETUP packet */
 } setup_packet;
+
+static bool waiting_for_setup;
 
 static void prepare_setup(bool in_isr)
 {
     XUD_Result_t res;
 
-    rtos_printf("preparing for setup packet\n");
-    res = rtos_usb_endpoint_transfer_start(&usb_ctx, 0x00, (uint8_t *) &setup_packet, sizeof(tusb_control_request_t));
+//  rtos_printf("preparing for setup packet\n");
+    waiting_for_setup = true;
+    res = rtos_usb_endpoint_transfer_start(&usb_ctx, 0x00, (uint8_t *) &setup_packet, sizeof(setup_packet));
 
     xassert(res == XUD_RES_OKAY);
 
@@ -75,6 +93,7 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
 
     if (is_setup) {
         rtos_printf("Setup packet of %d bytes received on %02x\n", xfer_len, ep_address);
+        waiting_for_setup = 0;
         dcd_event_setup_received(0, (uint8_t *) &setup_packet, true);
     } else {
         xfer_result_t tu_result;
@@ -83,18 +102,29 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
             rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
             tu_result = XFER_RESULT_SUCCESS;
 
-            if (xfer_len == 0 && ep_address == 0x00) {
-                /*
-                 * A ZLP has presumably been received on the output endpoint 0.
-                 * Ensure lib_xud is ready for the next setup packet. Hopefully
-                 * it does not come in prior to setting this up.
-                 *
-                 * TODO:
-                 * Ideally this buffer would be prepared prior to receiving the ZLP,
-                 * but it doesn't appear that this is currently possible to do
-                 * with lib_xud. This is under investigation.
-                 */
-                prepare_setup(true);
+            if (ep_address == 0x00) {
+                if (xfer_len == 0) {
+                    /*
+                     * A ZLP has presumably been received on the output endpoint 0.
+                     * Ensure lib_xud is ready for the next setup packet. Hopefully
+                     * it does not come in prior to setting this up.
+                     *
+                     * TODO:
+                     * Ideally this buffer would be prepared prior to receiving the ZLP,
+                     * but it doesn't appear that this is currently possible to do
+                     * with lib_xud. This is under investigation.
+                     */
+                    prepare_setup(true);
+                } else if (waiting_for_setup) {
+                    /*
+                     * We are waiting for a setup packet but OUT data on EP0 came in
+                     * instead. This might be due to an unhandled SET request. In this
+                     * case just drop the data and prepare for the next setup packet.
+                     */
+                    prepare_setup(true);
+                    rtos_printf("Dropped unhandled OUT packet on EP0\n");
+                    return;
+                }
             }
         } else {
             rtos_printf("xfer on %02x failed with status %d\n", ep_address, res);
@@ -213,33 +243,9 @@ static int cfg_desc_parse(XUD_EpType *epTypeTableOut, XUD_EpType *epTypeTableIn,
 // Initialize controller to device mode
 void dcd_init(uint8_t rhport)
 {
-    int i;
-    size_t endpoint_count;
-    XUD_PwrConfig pwr;
-
-    XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX] = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
-    XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX]  = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
-
-    for (i = 1; i < RTOS_USB_ENDPOINT_COUNT_MAX; i++) {
-        epTypeTableOut[i] = XUD_EPTYPE_DIS;
-        epTypeTableIn[i] = XUD_EPTYPE_DIS;
-    }
-
-    endpoint_count = cfg_desc_parse(epTypeTableOut, epTypeTableIn, &pwr);
-    rtos_printf("Endpoint count is %d\n", endpoint_count);
-
-    rtos_usb_start(&usb_ctx,
-                   dcd_xcore_int_handler, NULL,
-                   endpoint_count,
-                   epTypeTableOut,
-                   epTypeTableIn,
-                   (CFG_TUSB_RHPORT0_MODE & OPT_MODE_HIGH_SPEED) ? XUD_SPEED_HS : XUD_SPEED_FS,
-                   pwr,
-                   configMAX_PRIORITIES - 1); /* TODO: configurable? */
-
-    rtos_usb_all_endpoints_ready(&usb_ctx, RTOS_OSAL_WAIT_FOREVER);
-
-    prepare_setup(false);
+    rtos_usb_init(&usb_ctx,
+                   CFG_TUD_XCORE_IO_CORE_MASK,
+                   dcd_xcore_int_handler, NULL);
 
     (void) rhport;
 }
@@ -281,14 +287,41 @@ void dcd_remote_wakeup(uint8_t rhport)
 }
 
 // Connect by enabling internal pull-up resistor on D+/D-
+// This both enable interrupts, and causes the USB driver's
+// low level thread to enter XUD_Main().
+// It must be called from an RTOS thread.
+// This function is called by usb_task() prior to entering
+// tud_task().
 void dcd_connect(uint8_t rhport)
 {
-    /* This function appears to be unused by the stack or any example */
-    /* Only called by tud_connect() which is not called by anything */
     (void) rhport;
+
+    int i;
+    size_t endpoint_count;
+    XUD_PwrConfig pwr;
+
+    XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX] = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
+    XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX]  = {XUD_EPTYPE_CTL | XUD_STATUS_ENABLE};
+
+    for (i = 1; i < RTOS_USB_ENDPOINT_COUNT_MAX; i++) {
+        epTypeTableOut[i] = XUD_EPTYPE_DIS;
+        epTypeTableIn[i] = XUD_EPTYPE_DIS;
+    }
+
+    endpoint_count = cfg_desc_parse(epTypeTableOut, epTypeTableIn, &pwr);
+    rtos_printf("Endpoint count is %d\n", endpoint_count);
+
+    rtos_usb_start(&usb_ctx,
+                   endpoint_count,
+                   epTypeTableOut,
+                   epTypeTableIn,
+                   TUD_OPT_HIGH_SPEED ? XUD_SPEED_HS : XUD_SPEED_FS,
+                   pwr,
+                   CFG_TUD_XCORE_INTERRUPT_CORE);
 }
 
 // Disconnect by disabling internal pull-up resistor on D+/D-
+// TODO: Someday this might be able to make XUD_Main() return.
 void dcd_disconnect(uint8_t rhport)
 {
     /* This function appears to be unused by the stack or any example */
@@ -402,11 +435,13 @@ bool dcd_edpt_xfer(uint8_t rhport,
 void dcd_edpt_stall (uint8_t rhport, uint8_t ep_addr)
 {
     (void) rhport;
-    rtos_printf("Stalling EP %02x\n", ep_addr);
-    if (tu_edpt_number(ep_addr) == 0) {
+
+    rtos_printf("STALLING EP %02x\n", ep_addr);
+    rtos_usb_endpoint_stall_set(&usb_ctx, ep_addr);
+
+    if (ep_addr == 0x00 && !waiting_for_setup) {
         prepare_setup(false);
     }
-    rtos_usb_endpoint_stall_set(&usb_ctx, ep_addr);
 }
 
 // clear stall, data toggle is also reset to DATA0

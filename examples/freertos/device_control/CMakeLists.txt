@@ -6,7 +6,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Specify configuration
-set(USE_XUD_HIL FALSE) # TRUE
+set(USE_XUD_HIL TRUE)
 set(USE_I2C_HIL TRUE)
 set(USE_I2S_HIL FALSE)
 set(USE_MIC_ARRAY_HIL FALSE)
@@ -20,13 +20,14 @@ set(USE_RTOS_INTERTILE_DRIVER TRUE)
 set(USE_RTOS_MIC_ARRAY_DRIVER FALSE)
 set(USE_RTOS_RPC_DRIVER TRUE)
 set(USE_RTOS_SPI_DRIVER FALSE)
-set(USE_RTOS_USB_DRIVER FALSE) # TRUE
+set(USE_RTOS_USB_DRIVER TRUE)
 set(USE_RTOS_SWMEM_DRIVER FALSE)
 set(USE_RTOS_QSPI_FLASH_DRIVER FALSE)
 set(USE_RTOS_TRACE_DRIVER FALSE)
 set(USE_RTOS_WIFI_DRIVER FALSE)
 
 set(USE_DEVICE_CONTROL TRUE)
+set(USE_TINYUSB TRUE)
 
 ## Import XMOS RTOS platform configuration.
 ## Must be done after setting the configuration options.
@@ -53,6 +54,9 @@ set(APP_COMPILER_FLAGS
 set(APP_SOURCES
     "src/main.c"
     "src/board_init.c"
+    "src/usb_descriptors.c"
+    "src/usb_device_control.c"
+    "src/i2c_device_control.c"
 )
 
 set(APP_INCLUDES

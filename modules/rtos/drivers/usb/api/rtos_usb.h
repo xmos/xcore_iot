@@ -102,15 +102,15 @@ struct rtos_usb_struct {
 
     chanend_t c_ep[RTOS_USB_ENDPOINT_COUNT_MAX][2];
     XUD_ep ep[RTOS_USB_ENDPOINT_COUNT_MAX][2];
-    rtos_osal_event_group_t event_group;
+    int reset_received;
+    rtos_osal_thread_t hil_thread;
     RTOS_USB_ISR_CALLBACK_ATTR rtos_usb_isr_cb_t isr_cb;
     void *isr_app_data;
     rtos_usb_ep_xfer_info_t ep_xfer_info[RTOS_USB_ENDPOINT_COUNT_MAX][2];
 };
 
 /**
- * Checks to see if a particular endpoint is ready to use. This should only
- * be checked once after starting the USB driver instance.
+ * Checks to see if a particular endpoint is ready to use.
  *
  * \param ctx           A pointer to the USB driver instance to use.
  * \param endpoint_addr The address of the endpoint to check.
@@ -125,8 +125,7 @@ int rtos_usb_endpoint_ready(rtos_usb_t *ctx,
                             unsigned timeout);
 
 /**
- * Checks to see if all endpoints are ready to use. This should only
- * be checked once after starting the USB driver instance.
+ * Checks to see if all endpoints are ready to use.
  *
  * \param ctx           A pointer to the USB driver instance to use.
  * \param timeout       The maximum amount of time to wait for all endpoints to
@@ -159,35 +158,6 @@ XUD_Result_t rtos_usb_endpoint_transfer_start(rtos_usb_t *ctx,
                                               uint32_t endpoint_addr,
                                               uint8_t *buffer,
                                               size_t len);
-
-/**
- * This function may be called to wait for a transfer on a particular endpoint
- * to complete.
- *
- * \note
- * To use this function, the application must provide rtos_usb_start() with the
- * usb_simple_isr_cb() callback function. If the application instead chooses to
- * provide its own ISR callback, then this function should not be used.
- *
- * \param ctx           A pointer to the USB driver instance to use.
- * \param endpoint_addr The address of the endpoint to wait for.
- * \param len           The actual number of bytes transferred. For IN endpoints,
- *                      this will be the same as the length requested by
- *                      rtos_usb_endpoint_transfer_start(). For OUT endpoints, it
- *                      may be less.
- * \param timeout       The maximum amount of time to wait for the transfer to complete
- *                      before returning.
- *
- * \retval XUD_RES_OKAY if the transfer was completed successfully.
- * \retval XUD_RES_RST  if the transfer was not able to complete and the USB bus needs
- *                      to be reset. In this case, the application should reset
- *                      the USB bus.
- * \retval XUD_RES_ERR  if there was an unexpected error transferring the data.
- */
-XUD_Result_t rtos_usb_endpoint_transfer_complete(rtos_usb_t *ctx,
-                                                 uint32_t endpoint_addr,
-                                                 size_t *len,
-                                                 unsigned timeout);
 
 /**
  * This function will complete a reset on an endpoint. The address of the endpoint
@@ -263,41 +233,13 @@ static inline void rtos_usb_endpoint_stall_clear(rtos_usb_t *ctx,
 }
 
 /**
- * This callback may be used by the application so that it may wait
- * for endpoint transfers to complete with rtos_usb_endpoint_transfer_complete().
- * This provides a similar usage model to bare metal applications that use lib_xud
- * directly.
+ * Starts the USB driver instance's low level USB I/O thread and enables its interrupts
+ * on the requested core. This must only be called by the tile that owns the driver instance.
+ * It must be called after starting the RTOS from an RTOS thread.
  *
- * To use this, it must be provided as the isr_cb parameter to rtos_usb_start().
- */
-void usb_simple_isr_cb(rtos_usb_t *ctx,
-                       void *app_data,
-                       uint32_t ep_address,
-                       size_t xfer_len,
-                       int is_setup,
-                       XUD_Result_t res);
-
-/**
- * Starts an RTOS USB driver instance. This must only be called by the tile that
- * owns the driver instance. It must be called after starting the RTOS, and must
- * be called before any of the core GPIO driver functions are called with this instance.
- *
- * This will start an RTOS thread that runs lib_xud's main loop. The driver will ensure
- * that this thread is not started on core 0 so that the system tick interrupt does not
- * interfere with it. It will also disable preemption on this thread, such that once it
- * is running, no other tasks will be able to interfere with it, even if they have a
- * higher priority.
- *
- * \note Due to implementation details of lib_xud, it is only possible to have one
- * USB instance per application. Functionally this is not an issue, as no XCore chips
- * have more than one USB interface. For the same reason, there is no need for an init
- * function, as all I/O initialization takes place by lib_xud after the driver instance
- * is started.
+ * rtos_usb_init() must be called on this USB driver instance prior to calling this.
  *
  * \param ctx               A pointer to the USB driver instance to start.
- * \param isr_cb            The callback function for the driver to call when transfers are completed.
- * \param isr_app_data      A pointer to application specific data to pass to the application's ISR
- *                          callback function \p isr_cb.
  * \param endpoint_count    The number of endpoints that will be used by the application. A single
  *                          endpoint here includes both its IN and OUT endpoints. For example, if the
  *                          application uses EP0_IN, EP0_OUT, EP1_IN, EP2_IN, EP2_OUT, EP3_OUT, then the
@@ -316,21 +258,103 @@ void usb_simple_isr_cb(rtos_usb_t *ctx,
  *                          be set to XUD_EPTYPE_DIS.
  * \param speed             The speed at which the bus should operate. Either XUD_SPEED_FS or XUD_SPEED_HS. See
  *                          XUD_BusSpeed_t in lib_xud.
- * \param XUD_PwrConfig     The source of the device's power. Either bus powered (XUD_PWR_BUS) or self powered
+ * \param power_source      The source of the device's power. Either bus powered (XUD_PWR_BUS) or self powered
  *                          (XUD_PWR_SELF). See XUD_PwrConfig in lib_xud.
- * \param priority          The priority to assign to the task that runs lib_xud's main loop.
- *
+ * \param interrupt_core_id The ID of the core on which to enable the USB interrupts.
  */
 void rtos_usb_start(
         rtos_usb_t *ctx,
-        rtos_usb_isr_cb_t isr_cb,
-        void *isr_app_data,
         size_t endpoint_count,
         XUD_EpType endpoint_out_type[],
         XUD_EpType endpoint_in_type[],
         XUD_BusSpeed_t speed,
         XUD_PwrConfig power_source,
-        unsigned priority);
+        unsigned interrupt_core_id);
+
+/**
+ * Initializes an RTOS USB driver instance. This must only be called by the tile that
+ * owns the driver instance. It should be called prior to starting the RTOS, and must
+ * be called before any of the core USB driver functions are called with this instance.
+ *
+ * This will create an RTOS thread that runs lib_xud's main loop. This thread is created with
+ * the highest priority and with preemption disabled.
+ *
+ * \note Due to implementation details of lib_xud, it is only possible to have one
+ * USB instance per application. Functionally this is not an issue, as no XCore chips
+ * have more than one USB interface.
+ *
+ * \note If using the Tiny USB stack, then this function should not be called directly
+ * by the application. The XCore device port for Tiny USB takes care of calling this, as
+ * well as all other USB driver functions.
+ *
+ * \param ctx               A pointer to the USB driver instance to start.
+ * \param io_core_mask      A bitmask representing the cores on which the low level USB I/O thread
+ *                          created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                          etc.
+ * \param isr_cb            The callback function for the driver to call when transfers are completed.
+ * \param isr_app_data      A pointer to application specific data to pass to the application's ISR
+ *                          callback function \p isr_cb.
+ */
+void rtos_usb_init(
+        rtos_usb_t *ctx,
+        uint32_t io_core_mask,
+        rtos_usb_isr_cb_t isr_cb,
+        void *isr_app_data);
+
+
+/**
+ * This function may be called to wait for a transfer on a particular endpoint
+ * to complete. This requires that the USB instance was initialized with
+ * rtos_usb_simple_init().
+ *
+ * \param ctx           A pointer to the USB driver instance to use.
+ * \param endpoint_addr The address of the endpoint to wait for.
+ * \param len           The actual number of bytes transferred. For IN endpoints,
+ *                      this will be the same as the length requested by
+ *                      rtos_usb_endpoint_transfer_start(). For OUT endpoints, it
+ *                      may be less.
+ * \param timeout       The maximum amount of time to wait for the transfer to complete
+ *                      before returning.
+ *
+ * \retval XUD_RES_OKAY if the transfer was completed successfully.
+ * \retval XUD_RES_RST  if the transfer was not able to complete and the USB bus needs
+ *                      to be reset. In this case, the application should reset
+ *                      the USB bus.
+ * \retval XUD_RES_ERR  if there was an unexpected error transferring the data.
+ */
+XUD_Result_t rtos_usb_simple_transfer_complete(rtos_usb_t *ctx,
+                                               uint32_t endpoint_addr,
+                                               size_t *len,
+                                               unsigned timeout);
+
+/**
+ * Initializes an RTOS USB driver instance. This must only be called by the tile that
+ * owns the driver instance. It should be called prior to starting the RTOS, and must
+ * be called before any of the core USB driver functions are called with this instance.
+ *
+ * This initialization function may be used instead of rtos_usb_init() if the application
+ * is not using a USB stack. This allows application threads to wait for transfers to complete
+ * with the rtos_usb_simple_transfer_complete() function. The application cannot provide its
+ * own ISR callback when initialized with this function. This provides a similar programming
+ * interface as a traditional bare metal XCore application using lib_xud.
+ *
+ * This will create an RTOS thread that runs lib_xud's main loop. This thread is created with
+ * the highest priority and with preemption disabled.
+ *
+ * \note Due to implementation details of lib_xud, it is only possible to have one
+ * USB instance per application. Functionally this is not an issue, as no XCore chips
+ * have more than one USB interface.
+ *
+ * \param ctx               A pointer to the USB driver instance to start.
+ * \param io_core_mask      A bitmask representing the cores on which the low level USB I/O thread
+ *                          created by the driver is allowed to run. Bit 0 is core 0, bit 1 is core 1,
+ *                          etc.
+ *
+ */
+void rtos_usb_simple_init(
+        rtos_usb_t *ctx,
+        uint32_t io_core_mask);
+
 
 /**@}*/
 

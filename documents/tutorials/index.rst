@@ -43,5 +43,5 @@ Several example bare-metal applications are included to illustrate the fundament
    bare-metal/hello_world
    bare-metal/cifar10
    bare-metal/micro_speech
-   bare-metal/mobilenet_v1
+   bare-metal/visual_wake_words
    bare-metal/hotdog_not_hotdog
