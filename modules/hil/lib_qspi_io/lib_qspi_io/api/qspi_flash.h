@@ -94,7 +94,7 @@ typedef struct {
 
     uint32_t busy_poll_cmd;
     uint8_t busy_poll_bit;
-    uint8_t busy_poll_busy_value;
+    uint8_t busy_poll_ready_value;
 
     /* 1 or 2. 0 means quad mode is automatically detected and cannot be explicitly entered */
     uint8_t qe_reg;

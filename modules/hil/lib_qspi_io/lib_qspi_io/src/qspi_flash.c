@@ -70,14 +70,14 @@ void qspi_flash_write_disable(qspi_flash_ctx_t *ctx)
 int qspi_flash_write_in_progress(qspi_flash_ctx_t *ctx)
 {
 	uint8_t status_reg;
-	qspi_flash_read_status_register(ctx, &status_reg, 1);
+	qspi_flash_read_register(ctx, ctx->busy_poll_cmd, &status_reg, 1);
 	
-	return (status_reg & QSPI_FLASH_STATUS_REG_WIP_BM) != 0;
+	return ((status_reg >> ctx->busy_poll_bit) & 1) != ctx->busy_poll_ready_value;
 }
 
 void qspi_flash_wait_while_write_in_progress(qspi_flash_ctx_t *ctx)
 {
-	qspi_flash_poll_status_register(ctx, QSPI_FLASH_STATUS_REG_WIP_BM, 0);
+	qspi_flash_poll_register(ctx, ctx->busy_poll_cmd, (1 << ctx->busy_poll_bit), ctx->busy_poll_ready_value << ctx->busy_poll_bit);
 }
 
 void qspi_flash_erase(qspi_flash_ctx_t *ctx,
@@ -575,7 +575,7 @@ void qspi_flash_init(qspi_flash_ctx_t *ctx)
 	    }
 	    xassert(ctx->flash_size_kbytes != 0 && "Unsupported flash size");
 
-	    ret = sfdp_busy_poll_method(&sfdp_info, &read_instruction, &ctx->busy_poll_bit, &ctx->busy_poll_busy_value);
+	    ret = sfdp_busy_poll_method(&sfdp_info, &read_instruction, &ctx->busy_poll_bit, &ctx->busy_poll_ready_value);
 	    if (ret == 0) {
 	        ctx->busy_poll_cmd = QSPI_IO_BYTE_TO_MOSI(read_instruction);
 	    }
@@ -638,7 +638,7 @@ void qspi_flash_init(qspi_flash_ctx_t *ctx)
 	    }
 	} else {
 	    debug_printf("Warning: QSPI flash does not support SFDP. Will use manually set parameters\n");
-	    xassert((ctx->address_bytes == 3 || ctx->address_bytes == 4) && ctx->busy_poll_bit <= 7 && (ctx->busy_poll_busy_value == 0 || ctx->busy_poll_busy_value == 1));
+	    xassert((ctx->address_bytes == 3 || ctx->address_bytes == 4) && ctx->busy_poll_bit <= 7 && (ctx->busy_poll_ready_value == 0 || ctx->busy_poll_ready_value == 1));
 	}
 }
 
