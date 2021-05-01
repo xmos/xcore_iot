@@ -6,6 +6,7 @@
  *  \brief API for QSPI Flash
  */
 
+#include <stdbool.h>
 #include "qspi_io.h"
 
 #if !defined(QSPI_FLASH_SANITY_CHECKS)
@@ -79,7 +80,7 @@ typedef struct {
 	 * SFDP is supported. These may be set prior to calling qspi_flash_init()
 	 * in the event that SFDP is not supported.
 	 */
-
+	bool sfdp_supported;
 	size_t page_size_bytes;
 	size_t page_count;
 	size_t flash_size_kbytes;
@@ -131,8 +132,57 @@ typedef enum {
  */
 #define QSPI_FLASH_STATUS_REG_WEL_BM 0x00000002
 
-#define QSPI_FLASH_ERASE_SIZE(ctx, i) (1 << (ctx)->erase_info[i].size_log2)
-#define QSPI_FLASH_ERASE_SIZE_LOG2(ctx, i) ((ctx)->erase_info[i].size_log2)
+/*
+ * Returns the erase size in bytes associated with the given erase type.
+ *
+ * \param ctx The QSPI flash context associated with the QSPI flash.
+ * \param erase_type The erase type to return the size of.
+ *
+ * \returns The erase size in bytes of \p erase type. If \p erase_type
+ * is qspi_flash_erase_chip then SIZE_MAX is returned. If \p erase_type
+ * is invalid or not available on the flash chip, then 0 is returned.
+ */
+inline size_t qspi_flash_erase_type_size(qspi_flash_ctx_t *ctx, qspi_flash_erase_length_t erase_type)
+{
+    if (erase_type >= qspi_flash_erase_1 && erase_type <= qspi_flash_erase_4) {
+        uint32_t size_log2 = ctx->erase_info[erase_type].size_log2;
+        return size_log2 > 0 ? (1 << size_log2) : 0;
+    } else if (erase_type == qspi_flash_erase_chip) {
+        return SIZE_MAX;
+    } else {
+        return 0;
+    }
+}
+
+/*
+ * Returns log2 of the erase size in bytes associated with the given erase type.
+ *
+ * \param ctx The QSPI flash context associated with the QSPI flash.
+ * \param erase_type The erase type to return the size of.
+ *
+ * \returns The log2 of the erase size in bytes of \p erase type. If \p erase_type
+ * is qspi_flash_erase_chip then UINT32_MAX is returned. If \p erase_type
+ * is invalid or not available on the flash chip, then 0 is returned.
+ */
+inline uint32_t qspi_flash_erase_type_size_log2(qspi_flash_ctx_t *ctx, qspi_flash_erase_length_t erase_type)
+{
+    if (erase_type >= qspi_flash_erase_1 && erase_type <= qspi_flash_erase_4) {
+        return ctx->erase_info[erase_type].size_log2;
+    } else if (erase_type == qspi_flash_erase_chip) {
+        return UINT32_MAX;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * Sets or clears the quad enable bit in the flash.
+ *
+ * \param ctx  The QSPI flash context associated with the QSPI flash.
+ * \param set  When true, the quad enable bit is set. When false,
+ *             the quad enable bit is cleared.
+ */
+void qspi_flash_quad_enable_write(qspi_flash_ctx_t *ctx, bool set);
 
 /**
  * Sets the write enable latch in the QSPI flash. This must be called
@@ -155,8 +205,12 @@ void qspi_flash_write_disable(qspi_flash_ctx_t *ctx);
  * This checks to see if the QSPI flash has a write operation in progress.
  *
  * \param ctx The QSPI flash context associated with the QSPI flash.
+ *
+ * \retval true if there is a flash write in progress.
+ * \retval false if the flash is not writing and is ready to accept another
+ *         read or write command.
  */
-int qspi_flash_write_in_progress(qspi_flash_ctx_t *ctx);
+bool qspi_flash_write_in_progress(qspi_flash_ctx_t *ctx);
 
 /**
  * This waits while the QSPI flash has a write operation in progress.

@@ -12,6 +12,7 @@
 		#undef NDEBUG
 	#endif
 #endif
+#include "debug_print.h"
 #include <xcore/assert.h>
 #include <xcore/hwtimer.h>
 
@@ -51,6 +52,70 @@
 #endif
 #define FAST_READ_DUMMY_CYCLES    8
 
+void qspi_flash_quad_enable_write(qspi_flash_ctx_t *ctx, bool set)
+{
+    uint8_t status[2];
+    uint8_t quad_enable_bitmask;
+
+    if (ctx->qe_reg == 0) {
+        return;
+    }
+
+    xassert(ctx->qe_reg == 1 || ctx->qe_reg == 2);
+    xassert(ctx->qe_bit >= 0 && ctx->qe_bit <= 7);
+
+    quad_enable_bitmask = 1 << ctx->qe_bit;
+
+    if (ctx->qe_reg == 1 || ctx->sr2_read_cmd == 0) {
+        debug_printf("Read SR%d w/ cmd %02x\n", ctx->qe_reg, READ_STATUS_REG_COMMAND);
+        qspi_flash_read_register(ctx, READ_STATUS_REG_COMMAND, status, ctx->qe_reg);
+    } else {
+        debug_printf("Read SR1 w/ cmd %02x\n", READ_STATUS_REG_COMMAND);
+        qspi_flash_read_register(ctx, READ_STATUS_REG_COMMAND, &status[0], 1);
+        debug_printf("Read SR2 w/ cmd %02x\n", ctx->sr2_read_cmd);
+        qspi_flash_read_register(ctx, ctx->sr2_read_cmd, &status[1], 1);
+    }
+
+    debug_printf("Set QE to %d\n", set);
+    if (!!(status[ctx->qe_reg - 1] & quad_enable_bitmask) != set) {
+        debug_printf("QE is not %d\n", set);
+        debug_printf("SR%d = %02x. mask is %02x\n", ctx->qe_reg, status[ctx->qe_reg - 1], quad_enable_bitmask);
+
+        if (set) {
+            status[ctx->qe_reg - 1] |= quad_enable_bitmask;
+        } else {
+            status[ctx->qe_reg - 1] &= ~quad_enable_bitmask;
+        }
+
+        debug_printf("Will write %02x\n", status[ctx->qe_reg - 1]);
+
+        qspi_flash_write_enable(ctx);
+
+        if (ctx->qe_reg == 1 || ctx->sr2_write_cmd == 0) {
+            debug_printf("Write SR%d w/ cmd %02x\n", ctx->qe_reg, WRITE_STATUS_REG_COMMAND);
+            qspi_flash_write_register(ctx, WRITE_STATUS_REG_COMMAND, status, ctx->qe_reg);
+        } else {
+            debug_printf("Write SR2 w/ cmd %02x\n", ctx->sr2_write_cmd);
+            qspi_flash_write_register(ctx, ctx->sr2_write_cmd, &status[1], 1);
+        }
+
+        qspi_flash_wait_while_write_in_progress(ctx);
+
+        status[0] = 0;
+        status[1] = 0;
+
+        if (ctx->qe_reg == 1 || ctx->sr2_read_cmd == 0) {
+            qspi_flash_read_register(ctx, READ_STATUS_REG_COMMAND, status, ctx->qe_reg);
+        } else {
+            qspi_flash_read_register(ctx, ctx->sr2_read_cmd, &status[1], 1);
+        }
+
+        debug_printf("SR%d = %02x. mask is %02x\n", ctx->qe_reg, status[ctx->qe_reg - 1], quad_enable_bitmask);
+
+        xassert(!!(status[ctx->qe_reg - 1] & quad_enable_bitmask) == set);
+    }
+}
+
 void qspi_flash_write_enable(qspi_flash_ctx_t *ctx)
 {
 	qspi_io_ctx_t *qspi_io_ctx = &ctx->qspi_io_ctx;
@@ -67,7 +132,7 @@ void qspi_flash_write_disable(qspi_flash_ctx_t *ctx)
 	qspi_io_end_transaction(qspi_io_ctx);
 }
 
-int qspi_flash_write_in_progress(qspi_flash_ctx_t *ctx)
+bool qspi_flash_write_in_progress(qspi_flash_ctx_t *ctx)
 {
 	uint8_t status_reg;
 	qspi_flash_read_register(ctx, ctx->busy_poll_cmd, &status_reg, 1);
@@ -105,7 +170,7 @@ void qspi_flash_erase(qspi_flash_ctx_t *ctx,
 	address_bytes = (uint8_t *) &address;
 
 	xassert(erase_length >= 0 && erase_length <= qspi_flash_erase_chip);
-	if (erase_length <= 0 || erase_length > qspi_flash_erase_chip) {
+	if (erase_length < 0 || erase_length > qspi_flash_erase_chip) {
 	    return;
 	}
 
@@ -508,8 +573,6 @@ void qspi_flash_deinit(qspi_flash_ctx_t *ctx)
 	qspi_io_deinit(qspi_io_ctx);
 }
 
-#include "debug_print.h"
-
 void qspi_flash_init(qspi_flash_ctx_t *ctx)
 {
     sfdp_info_t sfdp_info;
@@ -534,40 +597,41 @@ void qspi_flash_init(qspi_flash_ctx_t *ctx)
 	/* configure the QSPI I/O interface */
 	qspi_io_init(qspi_io_ctx, ctx->source_clock);
 
-	if (sfdp_discover(&sfdp_info, ctx, qspi_flash_sfdp_read)) {
+	if (sfdp_discover(&sfdp_info, ctx, (sfdp_read_cb_t) qspi_flash_sfdp_read)) {
 	    int ret;
 	    int erase_table_entries;
 	    uint8_t read_instruction;
 	    uint8_t write_instruction;
 
-	    /* Parameters from SFDP that shall be used:
-	     * 1) Flash size
-	     * 2) Page size   (compute page count as well?)
-	     * 3) Address bytes - 3,4, or both?
+	    ctx->sfdp_supported = true;
+
+	    /* Parameters from SFDP used:
+	     * 1) Flash size.
+	     * 2) Page size.
+	     * 3) Address bytes - 3, 4, or both
 	     *    Set the "current" address bytes to 3 if it's 3 only.
 	     *    Otherwise set to 4.
-	     *    If both modes are allowed, then will switch to 4 byte mode.
-	     * 4) supports_144_fast_read. This will be required. Get the
-	     *    command for it and save it. Alternatively ensure that it is
-	     *    0xEB.
-	     * 5) Ensure that the number of mode plus dummy clocks equals 6.
+	     *    If both modes are allowed, then should switch to 4 byte mode.
+	     * 4) Supports_144_fast_read. This is required. Ensure that its command
+	     *    is 0xEB.
+	     * 5) Ensure that the quad i/o read's mode plus dummy clocks equals 6.
 	     * 6) All the erase sizes and commands. Sort them and save to a table
 	     *    inside the flash ctx.
-	     * 7) The busy poll method. Implement both options.
-	     * 8) The quad enable method. Implement all options.
+	     * 7) The busy poll method.
+	     * 8) The quad enable method.
 	     *
-	     *    Nice to have:
+	     * TODO:
 	     * 9) If XIP mode is supported, The XIP entry/exit methods and implement them.
 	     *    Should have xip enter/xip exit functions. Reads will need issue the
-	     *    proper mode bits. Continue to use the xip read function.
-	     *
-	     * 10)
+	     *    proper mode bits. Continue to use the xip read function?
 	     */
 
+	    /* Verify that the QSPI flash chip supports quad I/O read mode with 6 dummy cycles */
 	    xassert(sfdp_info.basic_parameter_table.supports_144_fast_read && "Quad I/O Read mode support is required");
-	    xassert(sfdp_info.basic_parameter_table.quad_144_read_cmd == QUAD_IO_READ_CMD_VAL && "U nsupported Quad I/O Read command");
+	    xassert(sfdp_info.basic_parameter_table.quad_144_read_cmd == QUAD_IO_READ_CMD_VAL && "Unsupported Quad I/O Read command");
 	    xassert(sfdp_info.basic_parameter_table.quad_144_read_mode_clocks + sfdp_info.basic_parameter_table.quad_144_read_dummy_clocks == 6 && "Unsupported number of dummy clocks");
 
+	    /* Save the page and flash sizes. Calculate the page count */
 	    ctx->page_size_bytes = sfdp_flash_page_size_bytes(&sfdp_info);
 	    ctx->flash_size_kbytes = sfdp_flash_size_kbytes(&sfdp_info);
 	    if (ctx->flash_size_kbytes) {
@@ -575,44 +639,44 @@ void qspi_flash_init(qspi_flash_ctx_t *ctx)
 	    }
 	    xassert(ctx->flash_size_kbytes != 0 && "Unsupported flash size");
 
+	    /* Save the supported busy poll method */
 	    ret = sfdp_busy_poll_method(&sfdp_info, &read_instruction, &ctx->busy_poll_bit, &ctx->busy_poll_ready_value);
 	    if (ret == 0) {
 	        ctx->busy_poll_cmd = QSPI_IO_BYTE_TO_MOSI(read_instruction);
 	    }
-
 	    xassert(ret == 0 && "Unsupported busy poll method");
 
+	    /* Save the supported quad enable method */
 	    ret = sfdp_quad_enable_method(&sfdp_info, &ctx->qe_reg, &ctx->qe_bit, &read_instruction, &write_instruction);
         if (ret == 0) {
             ctx->sr2_read_cmd = QSPI_IO_BYTE_TO_MOSI(read_instruction);
             ctx->sr2_write_cmd = QSPI_IO_BYTE_TO_MOSI(write_instruction);
         }
-
         xassert(ret == 0 && "Unsupported QE enable method");
 
+        /* Parse and save the erase table */
         erase_table_entries = 0;
         for (int i = 0; i < 4; i++) {
             if (sfdp_info.basic_parameter_table.erase_info[i].size != 0) {
                 ctx->erase_info[erase_table_entries].size_log2 = sfdp_info.basic_parameter_table.erase_info[i].size;
                 ctx->erase_info[erase_table_entries].cmd = QSPI_IO_BYTE_TO_MOSI(sfdp_info.basic_parameter_table.erase_info[i].cmd);
-                debug_printf("Erase cmd %02x for sector size %d bytes\n",
-                             sfdp_info.basic_parameter_table.erase_info[i].cmd,
-                             QSPI_FLASH_ERASE_SIZE(ctx, i));
             } else {
                 ctx->erase_info[erase_table_entries].size_log2 = 0;
             }
             erase_table_entries++;
         }
-
         xassert(erase_table_entries > 0 && "Erase table found in SFDP is empty!");
 
+        /* Determine the number of address bytes. If 4 byte mode is available, switch to it */
 	    switch (sfdp_info.basic_parameter_table.address_bytes) {
 	    case sfdp_3_or_4_byte_address:
-	        /* enable 4 byte address mode now and fall thru to next case */
-	        xassert(0 && "4 byte address mode entry not yet implemented");
+	        ctx->address_bytes = 3; break; /* leave it in 3 byte address mode for now */
+
+	        /* TODO: enable 4 byte address mode now and fall thru to next case */
 	        // @suppress("No break at end of case")
 	    case sfdp_4_byte_address:
 	        ctx->address_bytes = 4;
+	        xassert(0 && "4 byte address mode entry not yet implemented");
 	        break;
         case sfdp_3_byte_address:
         default:
@@ -620,25 +684,12 @@ void qspi_flash_init(qspi_flash_ctx_t *ctx)
             break;
 	    }
 
-	    debug_printf("The flash is %u kibibytes\n", sfdp_flash_size_kbytes(&sfdp_info));
-
-	    debug_printf("quad_114_read_cmd: %02x\n", sfdp_info.basic_parameter_table.quad_114_read_cmd);
-	    debug_printf("quad_114_read_mode_clocks: %d\n", sfdp_info.basic_parameter_table.quad_114_read_mode_clocks);
-	    debug_printf("quad_114_read_dummy_clocks: %d\n", sfdp_info.basic_parameter_table.quad_114_read_dummy_clocks);
-	    debug_printf("quad_144_read_cmd: %02x\n", sfdp_info.basic_parameter_table.quad_144_read_cmd);
-	    debug_printf("quad_144_read_mode_clocks: %d\n", sfdp_info.basic_parameter_table.quad_144_read_mode_clocks);
-	    debug_printf("quad_144_read_dummy_clocks: %d\n", sfdp_info.basic_parameter_table.quad_144_read_dummy_clocks);
-
-	    for (int i = 0; i < 4; i++) {
-	        if (sfdp_info.basic_parameter_table.erase_info[i].size != 0) {
-	            debug_printf("Erase cmd %02x for sector size %d kibibytes\n",
-	                         sfdp_info.basic_parameter_table.erase_info[i].cmd,
-	                         (1 << sfdp_info.basic_parameter_table.erase_info[i].size));
-	        }
-	    }
 	} else {
+	    ctx->sfdp_supported = false;
 	    debug_printf("Warning: QSPI flash does not support SFDP. Will use manually set parameters\n");
 	    xassert((ctx->address_bytes == 3 || ctx->address_bytes == 4) && ctx->busy_poll_bit <= 7 && (ctx->busy_poll_ready_value == 0 || ctx->busy_poll_ready_value == 1));
 	}
-}
 
+	qspi_flash_quad_enable_write(ctx, false);
+	qspi_flash_quad_enable_write(ctx, true);
+}

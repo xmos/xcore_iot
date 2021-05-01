@@ -120,14 +120,14 @@ void board_tile0_init(
             qspi_io_sample_edge_falling,
             0,
 
-            qspi_flash_page_program_1_1_4,
+            qspi_flash_page_program_1_1_4);
 
-            QSPI_IO_BYTE_TO_MOSI(0x35), /* The quad enable register read command */
-            QSPI_IO_BYTE_TO_MOSI(0x31), /* The quad enable register write command */
-            0x02, /* quad_enable_bitmask */
-
-            256, /* page size is 256 bytes */
-            32768); /* the flash has 32768 pages */
+//            QSPI_IO_BYTE_TO_MOSI(0x35), /* The quad enable register read command */
+//            QSPI_IO_BYTE_TO_MOSI(0x31), /* The quad enable register write command */
+//            0x02, /* quad_enable_bitmask */
+//
+//            256, /* page size is 256 bytes */
+//            32768); /* the flash has 32768 pages */
 #endif
 #if XCOREAI_EXPLORER
             XS1_CLKBLK_1,
@@ -149,14 +149,14 @@ void board_tile0_init(
             qspi_io_sample_edge_falling,
             0,
 
-            qspi_flash_page_program_1_4_4,
+            qspi_flash_page_program_1_4_4);
 
-            QSPI_IO_BYTE_TO_MOSI(0x05),  /* The quad enable register read command */
-            QSPI_IO_BYTE_TO_MOSI(0x01),  /* The quad enable register write command */
-            0x40,                        /* quad_enable_bitmask */
-
-            256, /* page size is 256 bytes */
-            16384); /* the flash has 32768 pages */
+//            QSPI_IO_BYTE_TO_MOSI(0x05),  /* The quad enable register read command */
+//            QSPI_IO_BYTE_TO_MOSI(0x01),  /* The quad enable register write command */
+//            0x40,                        /* quad_enable_bitmask */
+//
+//            256, /* page size is 256 bytes */
+//            16384); /* the flash has 32768 pages */
 #endif
 #endif
 

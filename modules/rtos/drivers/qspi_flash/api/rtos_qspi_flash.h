@@ -45,13 +45,7 @@ struct rtos_qspi_flash_struct {
     void (*unlock)(rtos_qspi_flash_t *);
 
     qspi_flash_ctx_t ctx;
-
-    uint32_t quad_enable_register_read_cmd;
-    uint32_t quad_enable_register_write_cmd;
-    uint32_t quad_enable_bitmask;
-    size_t page_size;
     size_t flash_size;
-    uint32_t page_address_mask;
 
     unsigned op_task_priority;
     rtos_osal_thread_t op_task;
@@ -274,15 +268,6 @@ void rtos_qspi_flash_start(
  * \param quad_page_program_cmd          The command that will be sent when rtos_qspi_flash_write() is called if
  *                                       quad_page_program_enable is true. This should be a value returned by
  *                                       the QSPI_IO_BYTE_TO_MOSI() macro.
- * \param quad_enable_register_read_cmd  The command that will be sent when reading the register containing the
- *                                       "quad enabled" bit. This should be a value returned by the
- *                                       QSPI_IO_BYTE_TO_MOSI() macro.
- * \param quad_enable_register_write_cmd The command that will be sent when writing the register containing the
- *                                       "quad enabled" bit. This should be a value returned by the
- *                                       QSPI_IO_BYTE_TO_MOSI() macro.
- * \param quad_enable_bitmask            The bitmask to use when reading and writing the quad enabled bit.
- * \param page_size                      The size in bytes of each page in the connected QSPI flash chip.
- * \param page_count                     The number of pages in the connected QSPI flash chip.
  */
 void rtos_qspi_flash_init(
         rtos_qspi_flash_t *ctx,
@@ -299,12 +284,7 @@ void rtos_qspi_flash_init(
         uint32_t spi_read_sclk_sample_delay,
         qspi_io_sample_edge_t spi_read_sclk_sample_edge,
         uint32_t spi_read_sio_pad_delay,
-        qspi_flash_page_program_cmd_t quad_page_program_cmd,
-        uint32_t quad_enable_register_read_cmd,
-        uint32_t quad_enable_register_write_cmd,
-        uint32_t quad_enable_bitmask,
-        size_t page_size,
-        size_t page_count);
+        qspi_flash_page_program_cmd_t quad_page_program_cmd);
 
 /**@}*/
 
