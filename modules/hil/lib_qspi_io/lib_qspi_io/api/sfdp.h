@@ -134,7 +134,7 @@ typedef struct {
 
 #define SFDP_READ_CALLBACK_ATTR __attribute__((fptrgroup("sfdp_read_cb_fptr_grp")))
 
-typedef void (*sfdp_read_cb_t)(void *flash_ctx, uint8_t *data, uint32_t address, size_t len);
+typedef void (*sfdp_read_cb_t)(void *flash_ctx, void *data, uint32_t address, size_t len);
 
 size_t sfdp_flash_size_kbytes(sfdp_info_t *sfdp_info);
 size_t sfdp_flash_page_size_bytes(sfdp_info_t *sfdp_info);

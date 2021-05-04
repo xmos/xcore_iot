@@ -1,6 +1,8 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+#define DEBUG_UNIT QSPI_FLASH
+
 #include "qspi_flash.h"
 #include "sfdp.h"
 #if QSPI_FLASH_SANITY_CHECKS
@@ -26,9 +28,6 @@
 #define WRITE_ENABLE_COMMAND      QSPI_IO_BYTE_TO_MOSI(0x06)
 #define WRITE_DISABLE_COMMAND     QSPI_IO_BYTE_TO_MOSI(0x04)
 
-#define ERASE_4K_COMMAND          QSPI_IO_BYTE_TO_MOSI(0x20)
-#define ERASE_32K_COMMAND         QSPI_IO_BYTE_TO_MOSI(0x52)
-#define ERASE_64K_COMMAND         QSPI_IO_BYTE_TO_MOSI(0xD8)
 #define ERASE_CHIP_COMMAND        QSPI_IO_BYTE_TO_MOSI(0xC7)
 
 #define PP_1_1_1_COMMAND          QSPI_IO_BYTE_TO_MOSI(0x02)
@@ -36,7 +35,6 @@
 #define PP_1_4_4_COMMAND          QSPI_IO_BYTE_TO_MOSI(0x38)
 
 #define READ_STATUS_REG_COMMAND   QSPI_IO_BYTE_TO_MOSI(0x05)
-#define READ_STATUS_REG2_COMMAND  QSPI_IO_BYTE_TO_MOSI(0x35)
 #define READ_ID_COMMAND           QSPI_IO_BYTE_TO_MOSI(0x9F)
 
 #define WRITE_STATUS_REG_COMMAND  QSPI_IO_BYTE_TO_MOSI(0x01)
@@ -52,13 +50,14 @@
 #endif
 #define FAST_READ_DUMMY_CYCLES    8
 
-void qspi_flash_quad_enable_write(qspi_flash_ctx_t *ctx, bool set)
+bool qspi_flash_quad_enable_write(qspi_flash_ctx_t *ctx, bool set)
 {
     uint8_t status[2];
     uint8_t quad_enable_bitmask;
+    const uint32_t no_cmd = QSPI_IO_BYTE_TO_MOSI(0x00);
 
     if (ctx->qe_reg == 0) {
-        return;
+        return true;
     }
 
     xassert(ctx->qe_reg == 1 || ctx->qe_reg == 2);
@@ -66,36 +65,25 @@ void qspi_flash_quad_enable_write(qspi_flash_ctx_t *ctx, bool set)
 
     quad_enable_bitmask = 1 << ctx->qe_bit;
 
-    if (ctx->qe_reg == 1 || ctx->sr2_read_cmd == 0) {
-        debug_printf("Read SR%d w/ cmd %02x\n", ctx->qe_reg, READ_STATUS_REG_COMMAND);
-        qspi_flash_read_register(ctx, READ_STATUS_REG_COMMAND, status, ctx->qe_reg);
+    if (ctx->qe_reg == 1 || ctx->sr2_read_cmd == no_cmd) {
+        qspi_flash_read_status_register(ctx, status, ctx->qe_reg);
     } else {
-        debug_printf("Read SR1 w/ cmd %02x\n", READ_STATUS_REG_COMMAND);
-        qspi_flash_read_register(ctx, READ_STATUS_REG_COMMAND, &status[0], 1);
-        debug_printf("Read SR2 w/ cmd %02x\n", ctx->sr2_read_cmd);
+        qspi_flash_read_status_register(ctx, &status[0], 1);
         qspi_flash_read_register(ctx, ctx->sr2_read_cmd, &status[1], 1);
     }
 
-    debug_printf("Set QE to %d\n", set);
     if (!!(status[ctx->qe_reg - 1] & quad_enable_bitmask) != set) {
-        debug_printf("QE is not %d\n", set);
-        debug_printf("SR%d = %02x. mask is %02x\n", ctx->qe_reg, status[ctx->qe_reg - 1], quad_enable_bitmask);
-
         if (set) {
             status[ctx->qe_reg - 1] |= quad_enable_bitmask;
         } else {
             status[ctx->qe_reg - 1] &= ~quad_enable_bitmask;
         }
 
-        debug_printf("Will write %02x\n", status[ctx->qe_reg - 1]);
-
         qspi_flash_write_enable(ctx);
 
-        if (ctx->qe_reg == 1 || ctx->sr2_write_cmd == 0) {
-            debug_printf("Write SR%d w/ cmd %02x\n", ctx->qe_reg, WRITE_STATUS_REG_COMMAND);
-            qspi_flash_write_register(ctx, WRITE_STATUS_REG_COMMAND, status, ctx->qe_reg);
+        if (ctx->qe_reg == 1 || ctx->sr2_write_cmd == no_cmd) {
+            qspi_flash_write_status_register(ctx, status, ctx->qe_reg);
         } else {
-            debug_printf("Write SR2 w/ cmd %02x\n", ctx->sr2_write_cmd);
             qspi_flash_write_register(ctx, ctx->sr2_write_cmd, &status[1], 1);
         }
 
@@ -104,32 +92,40 @@ void qspi_flash_quad_enable_write(qspi_flash_ctx_t *ctx, bool set)
         status[0] = 0;
         status[1] = 0;
 
-        if (ctx->qe_reg == 1 || ctx->sr2_read_cmd == 0) {
-            qspi_flash_read_register(ctx, READ_STATUS_REG_COMMAND, status, ctx->qe_reg);
+        if (ctx->qe_reg == 1 || ctx->sr2_read_cmd == no_cmd) {
+            qspi_flash_read_status_register(ctx, status, ctx->qe_reg);
         } else {
             qspi_flash_read_register(ctx, ctx->sr2_read_cmd, &status[1], 1);
         }
 
-        debug_printf("SR%d = %02x. mask is %02x\n", ctx->qe_reg, status[ctx->qe_reg - 1], quad_enable_bitmask);
-
-        xassert(!!(status[ctx->qe_reg - 1] & quad_enable_bitmask) == set);
+        return !!(status[ctx->qe_reg - 1] & quad_enable_bitmask) == set;
+    } else {
+        return true;
     }
 }
 
 void qspi_flash_write_enable(qspi_flash_ctx_t *ctx)
 {
 	qspi_io_ctx_t *qspi_io_ctx = &ctx->qspi_io_ctx;
+	uint8_t status;
 
-	qspi_io_start_transaction(qspi_io_ctx, WRITE_ENABLE_COMMAND, 8, qspi_io_full_speed);
-	qspi_io_end_transaction(qspi_io_ctx);
+	do {
+	    qspi_io_start_transaction(qspi_io_ctx, WRITE_ENABLE_COMMAND, 8, qspi_io_full_speed);
+	    qspi_io_end_transaction(qspi_io_ctx);
+	    qspi_flash_read_status_register(ctx, &status, 1);
+	} while ((status & QSPI_FLASH_STATUS_REG_WEL_BM) == 0);
 }
 
 void qspi_flash_write_disable(qspi_flash_ctx_t *ctx)
 {
 	qspi_io_ctx_t *qspi_io_ctx = &ctx->qspi_io_ctx;
+    uint8_t status;
 
-	qspi_io_start_transaction(qspi_io_ctx, WRITE_DISABLE_COMMAND, 8, qspi_io_full_speed);
-	qspi_io_end_transaction(qspi_io_ctx);
+    do {
+        qspi_io_start_transaction(qspi_io_ctx, WRITE_DISABLE_COMMAND, 8, qspi_io_full_speed);
+        qspi_io_end_transaction(qspi_io_ctx);
+        qspi_flash_read_status_register(ctx, &status, 1);
+    } while ((status & QSPI_FLASH_STATUS_REG_WEL_BM) != 0);
 }
 
 bool qspi_flash_write_in_progress(qspi_flash_ctx_t *ctx)
@@ -322,61 +318,56 @@ void qspi_flash_fast_read(qspi_flash_ctx_t *ctx,
     qspi_flash_fast_read_i(ctx, QSPI_IO_BYTE_TO_MOSI(FAST_READ_COMMAND), data, address, len);
 }
 
-__attribute__((always_inline))
-inline void qspi_flash_read_i(qspi_flash_ctx_t *ctx,
-                              const qspi_io_transfer_mode_t transfer_mode,
-                              const int xip,
+__attribute__ ((noinline))
+void qspi_flash_read_calc(qspi_flash_ctx_t *ctx,
+                          const int xip,
 #if FOUR_BYTE_ADDRESS_SUPPORT
-                              const int four_byte_address,
+                          const int four_byte_address,
 #endif
-                              uint8_t *data,
-                              uint32_t address,
-                              size_t len)
+                          uint32_t *address,
+                          size_t len,
+                          size_t *cycles,
+                          size_t *input_cycle)
 {
-	qspi_io_ctx_t *qspi_io_ctx = &ctx->qspi_io_ctx;
-	size_t cycles;
-	size_t first_input_byte;
-	size_t input_cycle;
-	
 	/* The first input should occur on either the fourth
 	 * byte, or the last byte, whichever is first. */
-	first_input_byte = len > 4 ? 4 : len;
+	const size_t first_input_byte = len > 4 ? 4 : len;
 	
 #if FOUR_BYTE_ADDRESS_SUPPORT
     if (xip) {
-        cycles = (four_byte_address ? 8 : 6) + /* 6 or 8 cycles for address */
+        *cycles = (four_byte_address ? 8 : 6) + /* 6 or 8 cycles for address */
                  QUAD_IO_READ_DUMMY_CYCLES + /* dummy cycles */
                  2 * len; /* 2 cycles per byte */
 
-        input_cycle = (four_byte_address ? 8 : 6) + /* 6 or 8 cycles for address */
+        *input_cycle = (four_byte_address ? 8 : 6) + /* 6 or 8 cycles for address */
                       QUAD_IO_READ_DUMMY_CYCLES + /* dummy cycles */
                       2 * first_input_byte - 1; /* input on the last cycle of the first input byte */
     } else {
-        cycles = 8 + /* 8 cycles each for command */
+        *cycles = 8 + /* 8 cycles each for command */
                  (four_byte_address ? 8 : 6) + /* 6 or 8 cycles for address */
                  QUAD_IO_READ_DUMMY_CYCLES + /* dummy cycles */
                  2 * len; /* 2 cycles per byte */
 
-        input_cycle = 8 + /* 8 cycles each for command */
+        *input_cycle = 8 + /* 8 cycles each for command */
                       (four_byte_address ? 8 : 6) + /* 6 or 8 cycles for address */
                       QUAD_IO_READ_DUMMY_CYCLES + /* dummy cycles */
                       2 * first_input_byte - 1; /* input on the last cycle of the first input byte */
     }
 #else
 	if (xip) {
-		cycles = 8 + /* 8 cycles for address */
+		*cycles = 8 + /* 8 cycles for address */
 		         QUAD_IO_READ_DUMMY_CYCLES + /* dummy cycles */
 		         2 * len; /* 2 cycles per byte */
 
-		input_cycle = 8 + /* 8 cycles for address */
+		*input_cycle = 8 + /* 8 cycles for address */
 		              QUAD_IO_READ_DUMMY_CYCLES + /* dummy cycles */
 		              2 * first_input_byte - 1; /* input on the last cycle of the first input byte */
 	} else {
-		cycles = 8 * 2 + /* 8 cycles each for command and address */
+		*cycles = 8 * 2 + /* 8 cycles each for command and address */
 		         QUAD_IO_READ_DUMMY_CYCLES + /* dummy cycles */
 		         2 * len; /* 2 cycles per byte */
 
-		input_cycle = 8 * 2 + /* 8 cycles each for command and address */
+		*input_cycle = 8 * 2 + /* 8 cycles each for command and address */
 		              QUAD_IO_READ_DUMMY_CYCLES + /* dummy cycles */
 		              2 * first_input_byte - 1; /* input on the last cycle of the first input byte */
 	}
@@ -392,18 +383,35 @@ inline void qspi_flash_read_i(qspi_flash_ctx_t *ctx,
          * the first two dummy cycles. Some flashes use this to
          * enter "performance" or "XIP" mode.
          */
-        address = (address << 8) | (address >> 24);
+        *address = (*address << 8) | (*address >> 24);
 #if FOUR_BYTE_ADDRESS_SUPPORT
 	}
 #endif
+}
 
-	/* 
-	 * This just helps to ensure that the above calculations
-	 * have completed before beginning the QSPI transaction.
-	 * Specifically, we don't want input_cycle to get calculated
-	 * between qspi_io_sio_direction_input() and qspi_io_bytes_in().
-	 */
-	BARRIER();
+__attribute__((always_inline))
+inline void qspi_flash_read_i(qspi_flash_ctx_t *ctx,
+                              const qspi_io_transfer_mode_t transfer_mode,
+                              const int xip,
+#if FOUR_BYTE_ADDRESS_SUPPORT
+                              const int four_byte_address,
+#endif
+                              uint8_t *data,
+                              uint32_t address,
+                              size_t len)
+{
+	qspi_io_ctx_t *qspi_io_ctx = &ctx->qspi_io_ctx;
+	size_t cycles;
+	size_t input_cycle;
+	
+	qspi_flash_read_calc(ctx, xip,
+#if FOUR_BYTE_ADDRESS_SUPPORT
+                         four_byte_address,
+#endif
+                         &address,
+                         len,
+                         &cycles,
+                         &input_cycle);
 
 	if (xip) {
 		qspi_io_start_transaction(qspi_io_ctx, address, cycles, qspi_io_full_speed);
@@ -689,7 +697,4 @@ void qspi_flash_init(qspi_flash_ctx_t *ctx)
 	    debug_printf("Warning: QSPI flash does not support SFDP. Will use manually set parameters\n");
 	    xassert((ctx->address_bytes == 3 || ctx->address_bytes == 4) && ctx->busy_poll_bit <= 7 && (ctx->busy_poll_ready_value == 0 || ctx->busy_poll_ready_value == 1));
 	}
-
-	qspi_flash_quad_enable_write(ctx, false);
-	qspi_flash_quad_enable_write(ctx, true);
 }

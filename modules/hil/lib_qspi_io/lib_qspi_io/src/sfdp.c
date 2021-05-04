@@ -1,6 +1,8 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+#define DEBUG_UNIT SFDP
+
 #include "sfdp.h"
 #include "debug_print.h"
 
@@ -153,12 +155,6 @@ bool sfdp_discover(sfdp_info_t *sfdp_info,
 
         return false;
     }
-
-//    debug_printf("Parameter Table revision: %d.%d\n", sfdp_info->basic_parameter_header.major_revision, sfdp_info->basic_parameter_header.minor_revision);
-//    debug_printf("Parameter Table ID %02x%02x\n", sfdp_info->basic_parameter_header.id_msb, sfdp_info->basic_parameter_header.id_lsb);
-//    debug_printf("Parameter Table Address: %d\n", sfdp_info->basic_parameter_header.table_address);
-//    debug_printf("Parameter Table Length %d\n", sfdp_info->basic_parameter_header.length);
-
 
     if (sizeof(sfdp_parameter_table_t) < table_read_length) {
         table_read_length = sizeof(sfdp_parameter_table_t);

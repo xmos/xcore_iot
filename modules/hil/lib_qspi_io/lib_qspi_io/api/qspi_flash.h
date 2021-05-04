@@ -124,13 +124,13 @@ typedef enum {
  * The bit mask for the status register's write
  * in progress bit.
  */
-#define QSPI_FLASH_STATUS_REG_WIP_BM 0x00000001
+#define QSPI_FLASH_STATUS_REG_WIP_BM 0x01
 
 /**
  * The bit mask for the status register's write
  * enable latch bit.
  */
-#define QSPI_FLASH_STATUS_REG_WEL_BM 0x00000002
+#define QSPI_FLASH_STATUS_REG_WEL_BM 0x02
 
 /*
  * Returns the erase size in bytes associated with the given erase type.
@@ -178,11 +178,20 @@ inline uint32_t qspi_flash_erase_type_size_log2(qspi_flash_ctx_t *ctx, qspi_flas
 /**
  * Sets or clears the quad enable bit in the flash.
  *
+ * \note The quad enable bit is fixed to '1' in some QSPI flash
+ * chips, and cannot be cleared.
+ *
  * \param ctx  The QSPI flash context associated with the QSPI flash.
  * \param set  When true, the quad enable bit is set. When false,
- *             the quad enable bit is cleared.
+ *             the quad enable bit is cleared if possible.
+ *
+ * \retval true if the QE bit was already at the requested value,
+ *         or if the write was successful.
+ * \retval false if the write did not complete successfully. This
+ *         can happen when trying to clear the QE bit on parts where
+ *         it is fixed to '1'.
  */
-void qspi_flash_quad_enable_write(qspi_flash_ctx_t *ctx, bool set);
+bool qspi_flash_quad_enable_write(qspi_flash_ctx_t *ctx, bool set);
 
 /**
  * Sets the write enable latch in the QSPI flash. This must be called

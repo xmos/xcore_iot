@@ -199,6 +199,10 @@ typedef struct {
 static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
 {
     qspi_flash_op_req_t op;
+    bool quad_enabled;
+
+    quad_enabled = qspi_flash_quad_enable_write(&ctx->ctx, true);
+    xassert(quad_enabled && "QE bit could not be set\n");
 
     for (;;) {
         rtos_osal_queue_receive(&ctx->op_queue, &op, RTOS_OSAL_WAIT_FOREVER);
