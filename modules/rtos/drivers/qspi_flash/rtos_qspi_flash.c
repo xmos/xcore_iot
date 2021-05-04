@@ -52,13 +52,13 @@ static void read_op(
 
 static void while_busy(qspi_flash_ctx_t *ctx)
 {
-    uint8_t status;
+    bool busy;
 
     do {
         interrupt_mask_all();
-        qspi_flash_read_status_register(ctx, &status, sizeof(status));
+        busy = qspi_flash_write_in_progress(ctx);
         interrupt_unmask_all();
-    } while (status & QSPI_FLASH_STATUS_REG_WIP_BM);
+    } while (busy);
 }
 
 static void write_op(
@@ -77,7 +77,7 @@ static void write_op(
 
     while (bytes_left_to_write > 0) {
         /* compute the maximum number of bytes that can be written to the current page. */
-        size_t max_bytes_to_write = ctx->page_size - (address_to_write & ctx->page_address_mask);
+        size_t max_bytes_to_write = qspi_flash_ctx->page_size_bytes - (address_to_write & (qspi_flash_ctx->page_size_bytes - 1));
         size_t bytes_to_write = bytes_left_to_write <= max_bytes_to_write ? bytes_left_to_write : max_bytes_to_write;
 
         if (address_to_write >= ctx->flash_size) {
@@ -99,16 +99,11 @@ static void write_op(
     }
 }
 
-#define SECTORS_TO_BYTES(s, ss) ((s) * (ss))
-#define BYTES_TO_SECTORS(b, ss) (((b) + (ss) - 1) / (ss))
+#define SECTORS_TO_BYTES(s, ss_log2) ((s) << (ss_log2))
+#define BYTES_TO_SECTORS(b, ss_log2) (((b) + (1 << ss_log2) - 1) >> (ss_log2))
 
-#define SECTOR_TO_BYTE_ADDRESS(s, ss) SECTORS_TO_BYTES(s, ss)
-#define BYTE_TO_SECTOR_ADDRESS(b, ss) ((b) / (ss))
-
-#define ERASE_SIZE_4K  4096
-#define ERASE_SIZE_32K 32768
-#define ERASE_SIZE_64K 65536
-static const int erase_sizes[] = {ERASE_SIZE_4K, ERASE_SIZE_32K, ERASE_SIZE_64K};
+#define SECTOR_TO_BYTE_ADDRESS(s, ss_log2) SECTORS_TO_BYTES(s, ss_log2)
+#define BYTE_TO_SECTOR_ADDRESS(b, ss_log2) ((b) >> (ss_log2))
 
 static void erase_op(
         rtos_qspi_flash_t *ctx,
@@ -134,65 +129,50 @@ static void erase_op(
         while_busy(qspi_flash_ctx);
     } else {
 
-        if (SECTOR_TO_BYTE_ADDRESS(BYTE_TO_SECTOR_ADDRESS(address_to_erase, erase_sizes[0]), erase_sizes[0]) != address_to_erase) {
+        if (SECTOR_TO_BYTE_ADDRESS(BYTE_TO_SECTOR_ADDRESS(address_to_erase, qspi_flash_erase_type_size_log2(qspi_flash_ctx, 0)), qspi_flash_erase_type_size_log2(qspi_flash_ctx, 0)) != address_to_erase) {
             /*
              * If the provided starting erase address does not begin on the smallest
              * sector boundary, then update the starting address and number of bytes
              * to erase so that it does.
              */
             unsigned sector_address;
-            sector_address = BYTE_TO_SECTOR_ADDRESS(address_to_erase, erase_sizes[0]);
-            bytes_left_to_erase += address_to_erase - SECTOR_TO_BYTE_ADDRESS(sector_address, erase_sizes[0]);
-            address_to_erase = SECTOR_TO_BYTE_ADDRESS(sector_address, erase_sizes[0]);
+            sector_address = BYTE_TO_SECTOR_ADDRESS(address_to_erase, qspi_flash_erase_type_size_log2(qspi_flash_ctx, 0));
+            bytes_left_to_erase += address_to_erase - SECTOR_TO_BYTE_ADDRESS(sector_address, qspi_flash_erase_type_size_log2(qspi_flash_ctx, 0));
+            address_to_erase = SECTOR_TO_BYTE_ADDRESS(sector_address, qspi_flash_erase_type_size_log2(qspi_flash_ctx, 0));
             rtos_printf("adjusted starting erase address to %d\n", address_to_erase);
         }
 
         while (bytes_left_to_erase > 0) {
-            int erase_length = erase_sizes[0];
-            qspi_flash_erase_length_t erase_cmd;
+            int erase_length;
+            int erase_length_log2 = qspi_flash_erase_type_size_log2(qspi_flash_ctx, 0);
+            qspi_flash_erase_length_t erase_cmd = qspi_flash_erase_1;
 
             if (address_to_erase >= ctx->flash_size) {
                 break; /* do not erase past the end of the flash */
             }
 
-            for (int i = 2; i > 0; i--) {
-                int sector_size = erase_sizes[i];
-                if (SECTOR_TO_BYTE_ADDRESS(BYTE_TO_SECTOR_ADDRESS(address_to_erase, sector_size), sector_size) == address_to_erase) {
+            for (qspi_flash_erase_length_t i = qspi_flash_erase_4; i > qspi_flash_erase_1; i--) {
+                int sector_size_log2 = qspi_flash_erase_type_size_log2(qspi_flash_ctx, i);
+                if (sector_size_log2 != 0 && SECTOR_TO_BYTE_ADDRESS(BYTE_TO_SECTOR_ADDRESS(address_to_erase, sector_size_log2), sector_size_log2) == address_to_erase) {
                     /* The address we need to erase begins on a sector boundary */
-                    if (bytes_left_to_erase >= sector_size) {
+                    if (bytes_left_to_erase >= (1 << sector_size_log2)) {
                         /* And we still need to erase at least the size of this sector */
-                        erase_length = sector_size;
+                        erase_length_log2 = sector_size_log2;
+                        erase_cmd = i;
                         break;
                     }
                 }
             }
 
-            xassert(address_to_erase == SECTOR_TO_BYTE_ADDRESS(BYTE_TO_SECTOR_ADDRESS(address_to_erase, erase_length), erase_length));
+            erase_length = 1 << erase_length_log2;
+
+            xassert(address_to_erase == SECTOR_TO_BYTE_ADDRESS(BYTE_TO_SECTOR_ADDRESS(address_to_erase, erase_length_log2), erase_length_log2));
 
             rtos_printf("Erasing %d bytes (%d) at byte address %d\n", erase_length, bytes_left_to_erase, address_to_erase);
 
             interrupt_mask_all();
             qspi_flash_write_enable(qspi_flash_ctx);
             interrupt_unmask_all();
-
-            switch (erase_length) {
-            case ERASE_SIZE_4K:
-                erase_cmd = qspi_flash_erase_4k;
-                break;
-
-            case ERASE_SIZE_32K:
-                erase_cmd = qspi_flash_erase_32k;
-                break;
-
-            case ERASE_SIZE_64K:
-                erase_cmd = qspi_flash_erase_64k;
-                break;
-
-            default:
-                xassert(0);
-                bytes_left_to_erase = 0;
-                continue;
-            }
 
             interrupt_mask_all();
             qspi_flash_erase(qspi_flash_ctx, address_to_erase, erase_cmd);
@@ -216,39 +196,13 @@ typedef struct {
     unsigned priority;
 } qspi_flash_op_req_t;
 
-static void enable_quad_mode(rtos_qspi_flash_t *ctx)
-{
-    uint8_t status;
-
-    interrupt_mask_all();
-    qspi_flash_read_register(&ctx->ctx, ctx->quad_enable_register_read_cmd, &status, sizeof(status));
-    interrupt_unmask_all();
-
-    if ((status & ctx->quad_enable_bitmask) == 0) {
-        status |= ctx->quad_enable_bitmask;
-        interrupt_mask_all();
-        qspi_flash_write_enable(&ctx->ctx);
-        interrupt_unmask_all();
-        interrupt_mask_all();
-        qspi_flash_write_register(&ctx->ctx, ctx->quad_enable_register_write_cmd, &status, 1);
-        interrupt_unmask_all();
-        while_busy(&ctx->ctx);
-
-        interrupt_mask_all();
-        qspi_flash_read_register(&ctx->ctx, ctx->quad_enable_register_read_cmd, &status, sizeof(status));
-        interrupt_unmask_all();
-        xassert((status & ctx->quad_enable_bitmask) != 0);
-    }
-}
-
 static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
 {
     qspi_flash_op_req_t op;
+    bool quad_enabled;
 
-    /*
-     * Before entering the main loop, ensure the flash is in quad mode
-     */
-    enable_quad_mode(ctx);
+    quad_enabled = qspi_flash_quad_enable_write(&ctx->ctx, true);
+    xassert(quad_enabled && "QE bit could not be set\n");
 
     for (;;) {
         rtos_osal_queue_receive(&ctx->op_queue, &op, RTOS_OSAL_WAIT_FOREVER);
@@ -261,7 +215,9 @@ static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
 
         switch (op.op) {
         case FLASH_OP_READ:
-            read_op(ctx, op.data, op.address, op.len);
+            if (op.len > 0) {
+                read_op(ctx, op.data, op.address, op.len);
+            }
             rtos_osal_semaphore_put(&ctx->data_ready);
             break;
         case FLASH_OP_WRITE:
@@ -397,20 +353,13 @@ void rtos_qspi_flash_init(
         uint32_t spi_read_sclk_sample_delay,
         qspi_io_sample_edge_t spi_read_sclk_sample_edge,
         uint32_t spi_read_sio_pad_delay,
-        int quad_page_program_enable,
-        uint32_t quad_page_program_cmd,
-        uint32_t quad_enable_register_read_cmd,
-        uint32_t quad_enable_register_write_cmd,
-        uint32_t quad_enable_bitmask,
-        size_t page_size,
-        size_t page_count)
+        qspi_flash_page_program_cmd_t quad_page_program_cmd)
 {
     qspi_flash_ctx_t *qspi_flash_ctx = &ctx->ctx;
     qspi_io_ctx_t *qspi_io_ctx = &qspi_flash_ctx->qspi_io_ctx;
 
     qspi_flash_ctx->custom_clock_setup = 0;
     qspi_flash_ctx->quad_page_program_cmd = quad_page_program_cmd;
-    qspi_flash_ctx->quad_page_program_enable = quad_page_program_enable;
     qspi_flash_ctx->source_clock = source_clock;
 
     qspi_io_ctx->clock_block = clock_block;
@@ -428,15 +377,11 @@ void rtos_qspi_flash_init(
 
     qspi_flash_init(qspi_flash_ctx);
 
-    ctx->quad_enable_register_read_cmd = quad_enable_register_read_cmd;
-    ctx->quad_enable_register_write_cmd = quad_enable_register_write_cmd;
-    ctx->quad_enable_bitmask = quad_enable_bitmask;
-    ctx->page_size = page_size;
-    ctx->flash_size = page_size * page_count;
-    ctx->page_address_mask = page_size - 1;
+    ctx->flash_size = qspi_flash_ctx->flash_size_kbytes * 1024;
+    xassert(ctx->flash_size > qspi_flash_ctx->flash_size_kbytes);
 
     /* Verify that the page size is a power of two */
-    xassert((page_size != 0) && ((page_size & ctx->page_address_mask) == 0));
+    xassert((qspi_flash_ctx->page_size_bytes != 0) && ((qspi_flash_ctx->page_size_bytes & (qspi_flash_ctx->page_size_bytes - 1)) == 0));
 
     ctx->rpc_config = NULL;
     ctx->read = qspi_flash_local_read;

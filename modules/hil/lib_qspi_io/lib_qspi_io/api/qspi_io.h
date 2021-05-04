@@ -367,7 +367,6 @@ inline void qspi_io_start_transaction(qspi_io_ctx_t *ctx,
 		ctx->sio_pad_delay = QSPI_IO_SETC_PAD_DELAY(ctx->full_speed_sio_pad_delay);
 		ctx->sio_drive     = XS1_SETC_DRIVE_DRIVE; /* disable pullups during the read */
 	}
-	//clock_start(ctx->clock_block);
 
 	first_word = byterev(first_word);
 	first_word = qspi_io_nibble_swap(first_word);
