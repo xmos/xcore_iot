@@ -275,6 +275,7 @@ void qspi_flash_poll_status_register(qspi_flash_ctx_t *ctx,
 	qspi_flash_poll_register(ctx, READ_STATUS_REG_COMMAND, mask, val);
 }
 
+__attribute__((always_inline))
 static void qspi_flash_fast_read_i(qspi_flash_ctx_t *ctx,
                                    uint32_t cmd,
                                    uint8_t *data,
@@ -315,19 +316,19 @@ void qspi_flash_fast_read(qspi_flash_ctx_t *ctx,
                           uint32_t address,
                           size_t len)
 {
-    qspi_flash_fast_read_i(ctx, QSPI_IO_BYTE_TO_MOSI(FAST_READ_COMMAND), data, address, len);
+    qspi_flash_ctx_t local_ctx = *ctx;
+    qspi_flash_fast_read_i(&local_ctx, QSPI_IO_BYTE_TO_MOSI(FAST_READ_COMMAND), data, address, len);
 }
 
 __attribute__ ((noinline))
-void qspi_flash_read_calc(qspi_flash_ctx_t *ctx,
-                          const int xip,
+static void qspi_flash_read_calc(const int xip,
 #if FOUR_BYTE_ADDRESS_SUPPORT
-                          const int four_byte_address,
+                                 const int four_byte_address,
 #endif
-                          uint32_t *address,
-                          size_t len,
-                          size_t *cycles,
-                          size_t *input_cycle)
+                                 uint32_t *address,
+                                 size_t len,
+                                 size_t *cycles,
+                                 size_t *input_cycle)
 {
 	/* The first input should occur on either the fourth
 	 * byte, or the last byte, whichever is first. */
@@ -404,7 +405,7 @@ inline void qspi_flash_read_i(qspi_flash_ctx_t *ctx,
 	size_t cycles;
 	size_t input_cycle;
 	
-	qspi_flash_read_calc(ctx, xip,
+	qspi_flash_read_calc(xip,
 #if FOUR_BYTE_ADDRESS_SUPPORT
                          four_byte_address,
 #endif
@@ -437,7 +438,8 @@ void qspi_flash_read(qspi_flash_ctx_t *ctx,
                      uint32_t address,
                      size_t len)
 {
-	qspi_flash_read_i(ctx, qspi_io_transfer_normal, 0,
+    qspi_flash_ctx_t local_ctx = *ctx;
+	qspi_flash_read_i(&local_ctx, qspi_io_transfer_normal, 0,
 #if FOUR_BYTE_ADDRESS_SUPPORT
 	                  0,
 #endif
@@ -449,7 +451,8 @@ void qspi_flash_read_nibble_swapped(qspi_flash_ctx_t *ctx,
                                     uint32_t address,
                                     size_t len)
 {
-	qspi_flash_read_i(ctx, qspi_io_transfer_nibble_swap, 0,
+    qspi_flash_ctx_t local_ctx = *ctx;
+	qspi_flash_read_i(&local_ctx, qspi_io_transfer_nibble_swap, 0,
 #if FOUR_BYTE_ADDRESS_SUPPORT
                       0,
 #endif
@@ -461,7 +464,8 @@ void qspi_flash_xip_read(qspi_flash_ctx_t *ctx,
                          uint32_t address,
                          size_t len)
 {
-	qspi_flash_read_i(ctx, qspi_io_transfer_normal, 1,
+    qspi_flash_ctx_t local_ctx = *ctx;
+	qspi_flash_read_i(&local_ctx, qspi_io_transfer_normal, 1,
 #if FOUR_BYTE_ADDRESS_SUPPORT
                       0,
 #endif
@@ -473,7 +477,8 @@ void qspi_flash_xip_read_nibble_swapped(qspi_flash_ctx_t *ctx,
                          uint32_t address,
                          size_t len)
 {
-	qspi_flash_read_i(ctx, qspi_io_transfer_nibble_swap, 1,
+    qspi_flash_ctx_t local_ctx = *ctx;
+	qspi_flash_read_i(&local_ctx, qspi_io_transfer_nibble_swap, 1,
 #if FOUR_BYTE_ADDRESS_SUPPORT
                       0,
 #endif
@@ -554,7 +559,8 @@ void qspi_flash_write(qspi_flash_ctx_t *ctx,
                       uint32_t address,
                       size_t len)
 {
-	qspi_flash_write_i(ctx, qspi_io_transfer_normal, data, address, len);
+    qspi_flash_ctx_t local_ctx = *ctx;
+	qspi_flash_write_i(&local_ctx, qspi_io_transfer_normal, data, address, len);
 }
 
 void qspi_flash_write_nibble_swapped(qspi_flash_ctx_t *ctx,
@@ -562,7 +568,8 @@ void qspi_flash_write_nibble_swapped(qspi_flash_ctx_t *ctx,
                       uint32_t address,
                       size_t len)
 {
-	qspi_flash_write_i(ctx, qspi_io_transfer_nibble_swap, data, address, len);
+    qspi_flash_ctx_t local_ctx = *ctx;
+	qspi_flash_write_i(&local_ctx, qspi_io_transfer_nibble_swap, data, address, len);
 }
 
 SFDP_READ_CALLBACK_ATTR
@@ -571,7 +578,8 @@ void qspi_flash_sfdp_read(qspi_flash_ctx_t *ctx,
                           uint32_t address,
                           size_t len)
 {
-    qspi_flash_fast_read_i(ctx, QSPI_IO_BYTE_TO_MOSI(SFDP_READ_INSTRUCTION), data, address, len);
+    qspi_flash_ctx_t local_ctx = *ctx;
+    qspi_flash_fast_read_i(&local_ctx, QSPI_IO_BYTE_TO_MOSI(SFDP_READ_INSTRUCTION), data, address, len);
 }
 
 void qspi_flash_deinit(qspi_flash_ctx_t *ctx)
