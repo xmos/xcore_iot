@@ -132,21 +132,14 @@ void board_tile0_init(
             1,
             qspi_io_sample_edge_rising,
             0,
+
             /** SPI read clock configuration **/
             12, // 600 MHz / (2*12) -> 25 MHz
             0,
             qspi_io_sample_edge_falling,
             0,
 
-            1, /* Enable quad page programming */
-            QSPI_IO_BYTE_TO_MOSI(0x38), /* The quad page program command */
-
-            QSPI_IO_BYTE_TO_MOSI(0x05),  /* The quad enable register read command */
-            QSPI_IO_BYTE_TO_MOSI(0x01),  /* The quad enable register write command */
-            0x40,                        /* quad_enable_bitmask */
-
-            256, /* page size is 256 bytes */
-            16384); /* the flash has 16384 pages */
+            qspi_flash_page_program_1_4_4);
 
     rtos_i2c_master_rpc_host_init(
             i2c_master_ctx,
