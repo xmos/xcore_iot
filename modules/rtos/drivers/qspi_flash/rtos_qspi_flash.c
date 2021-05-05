@@ -10,6 +10,8 @@
 
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
 #define FLASH_OP_READ  0
 #define FLASH_OP_WRITE 1
 #define FLASH_OP_ERASE 2
@@ -24,30 +26,39 @@ static void read_op(
 
     rtos_printf("Asked to read %d bytes at address 0x%08x\n", len, address);
 
-    /*
-     * Cap the address at the size of the flash.
-     * This ensures the correction below will work if
-     * address is outside the flash's address space.
-     */
-    if (address >= ctx->flash_size) {
-        address = ctx->flash_size;
+    while (len > 0) {
+
+        size_t read_len = MIN(len, RTOS_QSPI_FLASH_READ_CHUNK_SIZE);
+
+        /*
+         * Cap the address at the size of the flash.
+         * This ensures the correction below will work if
+         * address is outside the flash's address space.
+         */
+        if (address >= ctx->flash_size) {
+            address = ctx->flash_size;
+        }
+
+        if (address + read_len > ctx->flash_size) {
+            int original_len = read_len;
+
+            /* Don't read past the end of the flash */
+            read_len = ctx->flash_size - address;
+
+            /* Return all 0xFF bytes for addresses beyond the end of the flash */
+            memset(&data[read_len], 0xFF, original_len - read_len);
+        }
+
+        rtos_printf("Read %d bytes from flash at address 0x%x\n", read_len, address);
+
+        interrupt_mask_all();
+        qspi_flash_read(qspi_flash_ctx, data, address, read_len);
+        interrupt_unmask_all();
+
+        len -= read_len;
+        data += read_len;
+        address += read_len;
     }
-
-    if (address + len > ctx->flash_size) {
-        int original_len = len;
-
-        /* Don't read past the end of the flash */
-        len = ctx->flash_size - address;
-
-        /* Return all 0xFF bytes for addresses beyond the end of the flash */
-        memset(&data[len], 0xFF, original_len - len);
-    }
-
-    rtos_printf("Read %d bytes from flash at address 0x%x\n", len, address);
-
-    interrupt_mask_all();
-    qspi_flash_read(qspi_flash_ctx, data, address, len);
-    interrupt_unmask_all();
 }
 
 static void while_busy(qspi_flash_ctx_t *ctx)
@@ -215,9 +226,7 @@ static void qspi_flash_op_thread(rtos_qspi_flash_t *ctx)
 
         switch (op.op) {
         case FLASH_OP_READ:
-            if (op.len > 0) {
-                read_op(ctx, op.data, op.address, op.len);
-            }
+            read_op(ctx, op.data, op.address, op.len);
             rtos_osal_semaphore_put(&ctx->data_ready);
             break;
         case FLASH_OP_WRITE:

@@ -16,6 +16,8 @@
 #include "rtos/drivers/osal/api/rtos_osal.h"
 #include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
 
+#define RTOS_QSPI_FLASH_READ_CHUNK_SIZE (24*1024)
+
 /**
  * Typedef to the RTOS QSPI flash driver instance struct.
  */
