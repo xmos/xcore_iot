@@ -24,7 +24,7 @@ option(USE_LIB_RANDOM "Enable to include lib_random" TRUE)
 option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not used
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
 option(USE_AIF "Enable to include AI framework" FALSE)
-option(USE_TENSORFLOW_SUPPORT "Enable to include TensorFlow support" FALSE)
+option(USE_DEVICE_MEMORY_SUPPORT "Enable to include TensorFlow support" FALSE)
 
 #********************************
 # Gather multitile support sources

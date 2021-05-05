@@ -15,6 +15,7 @@ set(MQTT_DIR "${SW_SERVICES_DIR}/mqtt")
 set(SNTPD_DIR "${SW_SERVICES_DIR}/sntpd")
 set(TLS_SUPPORT_DIR "${SW_SERVICES_DIR}/tls_support")
 set(TINYUSB_DIR "${SW_SERVICES_DIR}/usb")
+set(DISPATCH_QUEUE_DIR "${SW_SERVICES_DIR}/dispatch_queue")
 
 #**********************
 # Options
@@ -30,6 +31,7 @@ option(USE_SNTPD "Enable to use SNTPD" FALSE)
 option(USE_TLS_SUPPORT "Enable to use TLS support" FALSE)
 option(USE_CUSTOM_MBEDTLS_CONFIG "Enable to use provide an alternate mbedtls_config.h" FALSE)
 option(USE_TINYUSB "Enable to use TinyUSB" FALSE)
+option(USE_DISPATCH_QUEUE "Enable to use Dispatch Queue" FALSE)
 
 #********************************
 # Gather wifi manager sources
@@ -378,6 +380,30 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather Dispatch Queue sources
+#********************************
+set(THIS_LIB DISPATCH_QUEUE)
+if(${USE_${THIS_LIB}})
+	set(${THIS_LIB}_FLAGS "-Os")
+
+	file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+
+    if(${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
+
+	set(${THIS_LIB}_INCLUDES
+	    "${${THIS_LIB}_DIR}/api"
+	)
+
+    add_compile_definitions(
+        USE_DISPATCH_QUEUE=1
+    )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
@@ -386,6 +412,7 @@ set(SW_SERVICES_SOURCES
     ${FATFS_SOURCES}
     ${JSON_PARSER_SOURCES}
     ${TINYUSB_SOURCES}
+    ${DISPATCH_QUEUE_SOURCES}
 )
 
 set(SW_SERVICES_INCLUDES
@@ -393,6 +420,7 @@ set(SW_SERVICES_INCLUDES
     ${FATFS_INCLUDES}
     ${JSON_PARSER_INCLUDES}
     ${TINYUSB_INCLUDES}
+    ${DISPATCH_QUEUE_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES SW_SERVICES_SOURCES)
