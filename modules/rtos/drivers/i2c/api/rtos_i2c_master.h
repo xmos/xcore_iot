@@ -13,7 +13,7 @@
 
 #include "i2c.h"
 
-#include "rtos/drivers/osal/api/rtos_osal.h"
+#include "rtos/osal/api/rtos_osal.h"
 #include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
 
 /**
@@ -27,26 +27,27 @@ typedef struct rtos_i2c_master_struct rtos_i2c_master_t;
  * The members in this struct should not be accessed directly.
  */
 struct rtos_i2c_master_struct {
-    rtos_driver_rpc_t *rpc_config;
+  rtos_driver_rpc_t *rpc_config;
 
-    __attribute__((fptrgroup("rtos_i2c_master_write_fptr_grp")))
-    i2c_res_t (*write)(rtos_i2c_master_t *, uint8_t, uint8_t buf[], size_t, size_t *, int);
+  __attribute__((fptrgroup("rtos_i2c_master_write_fptr_grp")))
+  i2c_res_t (*write)(rtos_i2c_master_t *, uint8_t, uint8_t buf[], size_t,
+                     size_t *, int);
 
-    __attribute__((fptrgroup("rtos_i2c_master_read_fptr_grp")))
-    i2c_res_t (*read)(rtos_i2c_master_t *, uint8_t, uint8_t buf[], size_t, int);
+  __attribute__((fptrgroup("rtos_i2c_master_read_fptr_grp")))
+  i2c_res_t (*read)(rtos_i2c_master_t *, uint8_t, uint8_t buf[], size_t, int);
 
-    __attribute__((fptrgroup("rtos_i2c_master_stop_bit_send_fptr_grp")))
-    void (*stop_bit_send)(rtos_i2c_master_t *);
+  __attribute__((fptrgroup("rtos_i2c_master_stop_bit_send_fptr_grp"))) void (
+      *stop_bit_send)(rtos_i2c_master_t *);
 
-    __attribute__((fptrgroup("rtos_i2c_master_reg_write_fptr_grp")))
-    i2c_regop_res_t (*reg_write)(rtos_i2c_master_t *, uint8_t, uint8_t, uint8_t);
+  __attribute__((fptrgroup("rtos_i2c_master_reg_write_fptr_grp")))
+  i2c_regop_res_t (*reg_write)(rtos_i2c_master_t *, uint8_t, uint8_t, uint8_t);
 
-    __attribute__((fptrgroup("rtos_i2c_master_reg_read_fptr_grp")))
-    i2c_regop_res_t (*reg_read)(rtos_i2c_master_t *, uint8_t, uint8_t, uint8_t *);
+  __attribute__((fptrgroup("rtos_i2c_master_reg_read_fptr_grp")))
+  i2c_regop_res_t (*reg_read)(rtos_i2c_master_t *, uint8_t, uint8_t, uint8_t *);
 
-    i2c_master_t ctx;
+  i2c_master_t ctx;
 
-    rtos_osal_mutex_t lock;
+  rtos_osal_mutex_t lock;
 };
 
 #include "rtos/drivers/i2c/api/rtos_i2c_master_rpc.h"
@@ -79,18 +80,14 @@ struct rtos_i2c_master_struct {
  *                        be omitted. In this case, no other task can use
  *                        the component until a stop bit has been sent.
  *
- * \retval               ``I2C_ACK`` if the write was acknowledged by the device.
- * \retval               ``I2C_NACK``otherwise.
+ * \retval               ``I2C_ACK`` if the write was acknowledged by the
+ * device. \retval               ``I2C_NACK``otherwise.
  */
-inline i2c_res_t rtos_i2c_master_write(
-        rtos_i2c_master_t *ctx,
-        uint8_t device_addr,
-        uint8_t buf[],
-        size_t n,
-        size_t *num_bytes_sent,
-        int send_stop_bit)
-{
-    return ctx->write(ctx, device_addr, buf, n, num_bytes_sent, send_stop_bit);
+inline i2c_res_t rtos_i2c_master_write(rtos_i2c_master_t *ctx,
+                                       uint8_t device_addr, uint8_t buf[],
+                                       size_t n, size_t *num_bytes_sent,
+                                       int send_stop_bit) {
+  return ctx->write(ctx, device_addr, buf, n, num_bytes_sent, send_stop_bit);
 }
 
 /**
@@ -110,31 +107,24 @@ inline i2c_res_t rtos_i2c_master_write(
  * \retval               ``I2C_ACK`` if the read was acknowledged by the device.
  * \retval               ``I2C_NACK``otherwise.
  */
-inline i2c_res_t rtos_i2c_master_read(
-        rtos_i2c_master_t *ctx,
-        uint8_t device_addr,
-        uint8_t buf[],
-        size_t n,
-        int send_stop_bit)
-{
-    return ctx->read(ctx, device_addr, buf, n, send_stop_bit);
+inline i2c_res_t rtos_i2c_master_read(rtos_i2c_master_t *ctx,
+                                      uint8_t device_addr, uint8_t buf[],
+                                      size_t n, int send_stop_bit) {
+  return ctx->read(ctx, device_addr, buf, n, send_stop_bit);
 }
-
 
 /**
  * Send a stop bit to an I2C bus as a master.
  *
  * This function will cause a stop bit to be sent on the bus. It should
  * be used to complete/abort a transaction if the ``send_stop_bit`` argument
- * was not set when calling the rtos_i2c_master_read() or rtos_i2c_master_write()
- * functions.
+ * was not set when calling the rtos_i2c_master_read() or
+ * rtos_i2c_master_write() functions.
  *
  * \param ctx             A pointer to the I2C master driver instance to use.
  */
-inline void rtos_i2c_master_stop_bit_send(
-        rtos_i2c_master_t *ctx)
-{
-    ctx->stop_bit_send(ctx);
+inline void rtos_i2c_master_stop_bit_send(rtos_i2c_master_t *ctx) {
+  ctx->stop_bit_send(ctx);
 }
 
 /**
@@ -152,15 +142,14 @@ inline void rtos_i2c_master_stop_bit_send(
  *
  * \retval             ``I2C_REGOP_DEVICE_NACK`` if the address is NACKed.
  * \retval             ``I2C_REGOP_INCOMPLETE`` if not all data was ACKed.
- * \retval             ``I2C_REGOP_SUCCESS`` on successful completion of the write.
+ * \retval             ``I2C_REGOP_SUCCESS`` on successful completion of the
+ * write.
  */
-inline i2c_regop_res_t  rtos_i2c_master_reg_write(
-        rtos_i2c_master_t *ctx,
-        uint8_t device_addr,
-        uint8_t reg_addr,
-        uint8_t data)
-{
-    return ctx->reg_write(ctx, device_addr, reg_addr, data);
+inline i2c_regop_res_t rtos_i2c_master_reg_write(rtos_i2c_master_t *ctx,
+                                                 uint8_t device_addr,
+                                                 uint8_t reg_addr,
+                                                 uint8_t data) {
+  return ctx->reg_write(ctx, device_addr, reg_addr, data);
 }
 
 /**
@@ -177,68 +166,64 @@ inline i2c_regop_res_t  rtos_i2c_master_reg_write(
  * \param ctx          A pointer to the I2C master driver instance to use.
  * \param device_addr  The address of the device to read from.
  * \param reg_addr     The address of the register to read from.
- * \param data         A pointer to the byte to fill with data read from the register.
+ * \param data         A pointer to the byte to fill with data read from the
+ * register.
  *
  * \retval             ``I2C_REGOP_DEVICE_NACK`` if the device NACKed.
- * \retval             ``I2C_REGOP_SUCCESS`` on successful completion of the read.
+ * \retval             ``I2C_REGOP_SUCCESS`` on successful completion of the
+ * read.
  */
-inline i2c_regop_res_t  rtos_i2c_master_reg_read(
-        rtos_i2c_master_t *ctx,
-        uint8_t device_addr,
-        uint8_t reg_addr,
-        uint8_t *data)
-{
-    return ctx->reg_read(ctx, device_addr, reg_addr, data);
+inline i2c_regop_res_t rtos_i2c_master_reg_read(rtos_i2c_master_t *ctx,
+                                                uint8_t device_addr,
+                                                uint8_t reg_addr,
+                                                uint8_t *data) {
+  return ctx->reg_read(ctx, device_addr, reg_addr, data);
 }
 
 /**@}*/
 
 /**
- * Starts an RTOS I2C master driver instance. This must only be called by the tile that
- * owns the driver instance. It may be called either before or after starting
- * the RTOS, but must be called before any of the core I2C master driver functions are
- * called with this instance.
+ * Starts an RTOS I2C master driver instance. This must only be called by the
+ * tile that owns the driver instance. It may be called either before or after
+ * starting the RTOS, but must be called before any of the core I2C master
+ * driver functions are called with this instance.
  *
- * rtos_i2c_master_init() must be called on this I2C master driver instance prior to calling this.
+ * rtos_i2c_master_init() must be called on this I2C master driver instance
+ * prior to calling this.
  *
  * \param i2c_master_ctx A pointer to the I2C master driver instance to start.
  */
-void rtos_i2c_master_start(
-        rtos_i2c_master_t *i2c_master_ctx);
+void rtos_i2c_master_start(rtos_i2c_master_t *i2c_master_ctx);
 
 /**
  * Initializes an RTOS I2C master driver instance.
  * This must only be called by the tile that owns the driver instance. It may be
- * called either before or after starting the RTOS, but must be called before calling
- * rtos_i2c_master_start() or any of the core I2C master driver functions with this instance.
+ * called either before or after starting the RTOS, but must be called before
+ * calling rtos_i2c_master_start() or any of the core I2C master driver
+ * functions with this instance.
  *
- * \param i2c_master_ctx      A pointer to the I2C master driver instance to initialize.
- * \param p_scl               The port containing SCL. This may be either the same as
- *                            or different than \p p_sda.
- * \param scl_bit_position    The bit number of the SCL line on the port \p p_scl.
- * \param scl_other_bits_mask A value that is ORed into the port value driven to \p p_scl
- *                            both when SCL is high and low. The bit representing SCL (as
- *                            well as SDA if they share the same port) must be set to 0.
- * \param p_sda               The port containing SDA. This may be either the same as
- *                            or different than \p p_scl.
- * \param sda_bit_position    The bit number of the SDA line on the port \p p_sda.
- * \param sda_other_bits_mask A value that is ORed into the port value driven to \p p_sda
- *                            both when SDA is high and low. The bit representing SDA (as
- *                            well as SCL if they share the same port) must be set to 0.
- * \param tmr                 The hardware timer to use for the I2C bus timing. If set to
- *                            0 then a new hardware timer is allocated.
- * \param kbits_per_second    The speed of the I2C bus. The maximum value allowed is 400.
+ * \param i2c_master_ctx      A pointer to the I2C master driver instance to
+ * initialize. \param p_scl               The port containing SCL. This may be
+ * either the same as or different than \p p_sda. \param scl_bit_position    The
+ * bit number of the SCL line on the port \p p_scl. \param scl_other_bits_mask A
+ * value that is ORed into the port value driven to \p p_scl both when SCL is
+ * high and low. The bit representing SCL (as well as SDA if they share the same
+ * port) must be set to 0. \param p_sda               The port containing SDA.
+ * This may be either the same as or different than \p p_scl. \param
+ * sda_bit_position    The bit number of the SDA line on the port \p p_sda.
+ * \param sda_other_bits_mask A value that is ORed into the port value driven to
+ * \p p_sda both when SDA is high and low. The bit representing SDA (as well as
+ * SCL if they share the same port) must be set to 0. \param tmr The hardware
+ * timer to use for the I2C bus timing. If set to 0 then a new hardware timer is
+ * allocated. \param kbits_per_second    The speed of the I2C bus. The maximum
+ * value allowed is 400.
  */
-void rtos_i2c_master_init(
-        rtos_i2c_master_t *i2c_master_ctx,
-        const port_t p_scl,
-        const uint32_t scl_bit_position,
-        const uint32_t scl_other_bits_mask,
-        const port_t p_sda,
-        const uint32_t sda_bit_position,
-        const uint32_t sda_other_bits_mask,
-        hwtimer_t tmr,
-        const unsigned kbits_per_second);
+void rtos_i2c_master_init(rtos_i2c_master_t *i2c_master_ctx, const port_t p_scl,
+                          const uint32_t scl_bit_position,
+                          const uint32_t scl_other_bits_mask,
+                          const port_t p_sda, const uint32_t sda_bit_position,
+                          const uint32_t sda_other_bits_mask, hwtimer_t tmr,
+                          const unsigned kbits_per_second);
 
 /**@}*/
 

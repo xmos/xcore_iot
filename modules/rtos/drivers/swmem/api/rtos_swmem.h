@@ -13,13 +13,13 @@
  * @{
  */
 
-#include "rtos/drivers/osal/api/rtos_osal.h"
+#include "rtos/osal/api/rtos_osal.h"
 
 /**
  * Flag indicating that software memory reads should be enabled.
  * This should probably always be set when using software memory.
  */
-#define RTOS_SWMEM_READ_FLAG  0x01
+#define RTOS_SWMEM_READ_FLAG 0x01
 
 /**
  * Flag indicating that software memory writes should be enabled.
@@ -31,13 +31,13 @@
 /**
  * Services a software memory read request from within the software memory
  * fill interrupt handler. This function may be provided by the application
- * when the software memory driver is initialized with the RTOS_SWMEM_READ_FLAG flag.
- * If the application code to satisfy a fill request requires being run from within
- * an RTOS thread, then rtos_swmem_read_request() should be used instead.
- * Both this handler and rtos_swmem_read_request() may be used together. If the ISR
- * handler is able to satisfy the request it should return true. If it is not, but
- * the request can be satisfied from within rtos_swmem_read_request(), then it should
- * return false.
+ * when the software memory driver is initialized with the RTOS_SWMEM_READ_FLAG
+ * flag. If the application code to satisfy a fill request requires being run
+ * from within an RTOS thread, then rtos_swmem_read_request() should be used
+ * instead. Both this handler and rtos_swmem_read_request() may be used
+ * together. If the ISR handler is able to satisfy the request it should return
+ * true. If it is not, but the request can be satisfied from within
+ * rtos_swmem_read_request(), then it should return false.
  *
  * \param offset The byte offset into the software memory of the cache line
  *               that has had a cache miss.
@@ -49,18 +49,19 @@
  * \retval       false if the fill request was not satisfied. This requires that
  *               rtos_swmem_read_request() also be provided.
  */
-__attribute__((weak)) bool rtos_swmem_read_request_isr(unsigned offset, uint32_t *buf);
+__attribute__((weak)) bool rtos_swmem_read_request_isr(unsigned offset,
+                                                       uint32_t *buf);
 
 /**
  * Services a software memory write request from within the software memory
  * fill interrupt handler. This function may be provided by the application
- * when the software memory driver is initialized with the RTOS_SWMEM_WRITE_FLAG flag.
- * If the application code to satisfy an evict request requires being run from within
- * an RTOS thread, then rtos_swmem_write_request() should be used instead.
- * Both this handler and rtos_swmem_write_request() may be used together. If the ISR
- * handler is able to satisfy the request it should return true. If it is not, but
- * the request can be satisfied from within rtos_swmem_write_request(), then it should
- * return false.
+ * when the software memory driver is initialized with the RTOS_SWMEM_WRITE_FLAG
+ * flag. If the application code to satisfy an evict request requires being run
+ * from within an RTOS thread, then rtos_swmem_write_request() should be used
+ * instead. Both this handler and rtos_swmem_write_request() may be used
+ * together. If the ISR handler is able to satisfy the request it should return
+ * true. If it is not, but the request can be satisfied from within
+ * rtos_swmem_write_request(), then it should return false.
  *
  * \param offset     The byte offset into the software memory of the cache line
  *                   that is being evicted.
@@ -74,18 +75,20 @@ __attribute__((weak)) bool rtos_swmem_read_request_isr(unsigned offset, uint32_t
  *                   is to write it to flash memory.
  *
  * \retval           true if the evict request was satisifed.
- * \retval           false if the evict request was not satisfied. This requires that
- *                   rtos_swmem_write_request() also be provided.
+ * \retval           false if the evict request was not satisfied. This requires
+ * that rtos_swmem_write_request() also be provided.
  */
-__attribute__((weak)) bool rtos_swmem_write_request_isr(unsigned offset, uint32_t dirty_mask, const uint32_t *buf);
+__attribute__((weak)) bool rtos_swmem_write_request_isr(unsigned offset,
+                                                        uint32_t dirty_mask,
+                                                        const uint32_t *buf);
 
 /**
  * Services a software memory read request from within the software memory
  * RTOS thread. This function may be provided by the application when the
  * software memory driver is initialized with the RTOS_SWMEM_READ_FLAG flag.
  * If rtos_swmem_read_request_isr() is also implemented, then it will be called
- * first. If it is unable to satisfy the request, then this handler will be called.
- * See the description for rtos_swmem_read_request_isr().
+ * first. If it is unable to satisfy the request, then this handler will be
+ * called. See the description for rtos_swmem_read_request_isr().
  *
  * \param offset The byte offset into the software memory of the cache line
  *               that has had a cache miss.
@@ -93,15 +96,16 @@ __attribute__((weak)) bool rtos_swmem_write_request_isr(unsigned offset, uint32_
  *               words of data. Where this data comes from is up to the
  *               application. One example is from a flash memory.
  */
-__attribute__((weak)) void rtos_swmem_read_request(unsigned offset, uint32_t *buf);
+__attribute__((weak)) void rtos_swmem_read_request(unsigned offset,
+                                                   uint32_t *buf);
 
 /**
  * Services a software memory write request from within the software memory
  * RTOS thread. This function may be provided by the application when the
  * software memory driver is initialized with the RTOS_SWMEM_WRITE_FLAG flag.
  * If rtos_swmem_write_request_isr() is also implemented, then it will be called
- * first. If it is unable to satisfy the request, then this handler will be called.
- * See the description for rtos_swmem_write_request_isr().
+ * first. If it is unable to satisfy the request, then this handler will be
+ * called. See the description for rtos_swmem_write_request_isr().
  *
  * \param offset     The byte offset into the software memory of the cache line
  *                   that is being evicted.
@@ -114,7 +118,9 @@ __attribute__((weak)) void rtos_swmem_read_request(unsigned offset, uint32_t *bu
  *                   to the application what it does with this data. One example
  *                   is to write it to flash memory.
  */
-__attribute__((weak)) void rtos_swmem_write_request(unsigned offset, uint32_t dirty_mask, const uint32_t *buf);
+__attribute__((weak)) void rtos_swmem_write_request(unsigned offset,
+                                                    uint32_t dirty_mask,
+                                                    const uint32_t *buf);
 
 /**
  * Starts the RTOS software memory driver.
