@@ -14,7 +14,7 @@
 #include <xcore/channel_streaming.h>
 #include "i2c.h"
 
-#include "rtos/drivers/osal/api/rtos_osal.h"
+#include "rtos/osal/api/rtos_osal.h"
 #include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
 
 /**

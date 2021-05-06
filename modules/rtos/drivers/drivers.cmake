@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 set(DRIVERS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/drivers")
 
-set(OSAL_DIR "${DRIVERS_DIR}/osal")
 set(RTOS_GPIO_DRIVER_DIR "${DRIVERS_DIR}/gpio")
 set(RTOS_I2C_DRIVER_DIR "${DRIVERS_DIR}/i2c")
 set(RTOS_I2S_DRIVER_DIR "${DRIVERS_DIR}/i2s")
@@ -34,24 +33,6 @@ option(USE_RTOS_SWMEM_DRIVER "Enable to include RTOS SWMem driver" TRUE)
 option(USE_RTOS_QSPI_FLASH_DRIVER "Enable to include RTOS QSPI flash driver" TRUE)
 option(USE_RTOS_TRACE_DRIVER "Enable to include RTOS trace driver" TRUE)
 option(USE_RTOS_WIFI_DRIVER "Enable to include RTOS WiFi driver" TRUE)
-
-#********************************
-# Gather OSAL sources
-#********************************
-set(THIS_LIB OSAL)
-set(${THIS_LIB}_FLAGS "-Os")
-
-file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
-
-set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
-
-set(${THIS_LIB}_INCLUDES
-    "${${THIS_LIB}_DIR}/api"
-    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
-)
-
-message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
-unset(THIS_LIB)
 
 #********************************
 # Gather GPIO sources
@@ -305,7 +286,6 @@ unset(THIS_LIB)
 # set user variables
 #**********************
 set(DRIVERS_RTOS_SOURCES
-    ${OSAL_SOURCES}
     ${RTOS_GPIO_DRIVER_SOURCES}
     ${RTOS_I2C_DRIVER_SOURCES}
     ${RTOS_I2S_DRIVER_SOURCES}
@@ -320,7 +300,6 @@ set(DRIVERS_RTOS_SOURCES
 )
 
 set(DRIVERS_RTOS_INCLUDES
-    ${OSAL_INCLUDES}
     ${RTOS_GPIO_DRIVER_INCLUDES}
     ${RTOS_I2C_DRIVER_INCLUDES}
     ${RTOS_I2S_DRIVER_INCLUDES}

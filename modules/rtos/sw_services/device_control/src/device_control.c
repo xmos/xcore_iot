@@ -5,7 +5,7 @@
 #include <rtos_printf.h>
 #include <string.h>
 
-#include "rtos/drivers/osal/api/rtos_osal.h"
+#include "rtos/osal/api/rtos_osal.h"
 
 #include "device_control.h"
 
