@@ -1,10 +1,10 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+#define DEBUG_UNIT TUSB_DCD
+
 #include "device/dcd.h"
 #include "device/usbd.h" /* For tud_descriptor_configuration_cb() */
-
-#define DEBUG_UNIT TUSB_DCD
 
 /*
  * By default, USB interrupts will run on core 0.
