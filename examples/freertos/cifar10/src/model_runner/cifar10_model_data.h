@@ -1,5 +1,5 @@
-// This is a TensorFlow Lite model file that has been converted into a C data
-// array using the convert_tflite_to_c_source() tool.
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #ifndef CIFAR10_MODEL_DATA_H_
 #define CIFAR10_MODEL_DATA_H_
