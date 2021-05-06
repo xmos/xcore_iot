@@ -34,12 +34,12 @@
  * The members in this struct should not be accessed directly.
  */
 typedef struct {
-  chanend_t c;
+    chanend_t c;
 
-  size_t tx_len;
-  size_t rx_len;
-  rtos_osal_mutex_t lock;
-  rtos_osal_event_group_t event_group;
+    size_t tx_len;
+    size_t rx_len;
+    rtos_osal_mutex_t lock;
+    rtos_osal_event_group_t event_group;
 } rtos_intertile_t;
 
 /**
@@ -48,8 +48,8 @@ typedef struct {
  * used by the RPC mechanism in the RTOS drivers.
  */
 typedef struct {
-  rtos_intertile_t *intertile_ctx; /**< Intertile driver instance */
-  int port;                        /**< Port number to the remote function */
+    rtos_intertile_t *intertile_ctx; /**< Intertile driver instance */
+    int port;                        /**< Port number to the remote function */
 } rtos_intertile_address_t;
 
 /**
@@ -60,8 +60,14 @@ typedef struct {
  * @{
  */
 
-void rtos_intertile_tx_len(rtos_intertile_t *ctx, uint8_t port, size_t len);
-size_t rtos_intertile_tx_data(rtos_intertile_t *ctx, void *data, size_t len);
+void rtos_intertile_tx_len(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        size_t len);
+size_t rtos_intertile_tx_data(
+        rtos_intertile_t *ctx,
+        void *data,
+        size_t len);
 
 /**
  * Transmits data to an intertile link.
@@ -73,12 +79,20 @@ size_t rtos_intertile_tx_data(rtos_intertile_t *ctx, void *data, size_t len);
  * \param msg  A pointer to the data buffer to transmit.
  * \param len  The number of bytes from the buffer to transmit.
  */
-void rtos_intertile_tx(rtos_intertile_t *ctx, uint8_t port, void *msg,
-                       size_t len);
+void rtos_intertile_tx(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        void *msg,
+        size_t len);
 
-size_t rtos_intertile_rx_len(rtos_intertile_t *ctx, uint8_t port,
-                             unsigned timeout);
-size_t rtos_intertile_rx_data(rtos_intertile_t *ctx, void *data, size_t len);
+size_t rtos_intertile_rx_len(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        unsigned timeout);
+size_t rtos_intertile_rx_data(
+        rtos_intertile_t *ctx,
+        void *data,
+        size_t len);
 
 /**
  * Receives data from an intertile link.
@@ -103,40 +117,44 @@ size_t rtos_intertile_rx_data(rtos_intertile_t *ctx, void *data, size_t len);
  *
  * \returns the number of bytes received.
  */
-size_t rtos_intertile_rx(rtos_intertile_t *ctx, uint8_t port, void **msg,
-                         unsigned timeout);
+size_t rtos_intertile_rx(
+        rtos_intertile_t *ctx,
+        uint8_t port,
+        void **msg,
+        unsigned timeout);
 
 /**@}*/
 
 /**
- * Starts an RTOS intertile driver instance. It may be called either before or
- * after starting the RTOS, but must be called before any of the core intertile
- * driver functions are called with this instance.
+ * Starts an RTOS intertile driver instance. It may be called either before or after
+ * starting the RTOS, but must be called before any of the core intertile driver functions
+ * are called with this instance.
  *
- * rtos_intertile_init() must be called on this intertile driver instance prior
- * to calling this.
+ * rtos_intertile_init() must be called on this intertile driver instance prior to calling this.
  *
  * \param intertile_ctx A pointer to the intertile driver instance to start.
  */
-void rtos_intertile_start(rtos_intertile_t *intertile_ctx);
+void rtos_intertile_start(
+        rtos_intertile_t *intertile_ctx);
 
 /**
- * Initializes an RTOS intertile driver instance. This must be called
- * simultaneously on the two tiles establishing an intertile link. It may be
- * called either before or after starting the RTOS, but must be called before
- * calling rtos_intertile_start() or any of the core RTOS intertile functions
- * with this instance.
+ * Initializes an RTOS intertile driver instance. This must be called simultaneously on
+ * the two tiles establishing an intertile link. It may be called either before or after
+ * starting the RTOS, but must be called before calling rtos_intertile_start() or any of
+ * the core RTOS intertile functions with this instance.
  *
- * This establishes a new streaming channel between the two tiles, using the
- * provided non-streaming channel to bootstrap this.
+ * This establishes a new streaming channel between the two tiles, using the provided
+ * non-streaming channel to bootstrap this.
  *
- * \param intertile_ctx A pointer to the intertile driver instance to
- * initialize. \param c             A channel end that is already allocated and
- * connected to channel end on the tile with which to establish an intertile
- * link. After this function returns, this channel end is no longer needed and
- * may be deallocated or used for other purposes.
+ * \param intertile_ctx A pointer to the intertile driver instance to initialize.
+ * \param c             A channel end that is already allocated and connected to channel
+ *                      end on the tile with which to establish an intertile link.
+ *                      After this function returns, this channel end is no longer needed
+ *                      and may be deallocated or used for other purposes.
  */
-void rtos_intertile_init(rtos_intertile_t *intertile_ctx, chanend_t c);
+void rtos_intertile_init(
+        rtos_intertile_t *intertile_ctx,
+        chanend_t c);
 
 /**@}*/
 

@@ -16,7 +16,7 @@
 #include "rtos/osal/api/rtos_osal.h"
 #include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
 
-#define RTOS_QSPI_FLASH_READ_CHUNK_SIZE (24 * 1024)
+#define RTOS_QSPI_FLASH_READ_CHUNK_SIZE (24*1024)
 
 /**
  * Typedef to the RTOS QSPI flash driver instance struct.
@@ -29,31 +29,31 @@ typedef struct rtos_qspi_flash_struct rtos_qspi_flash_t;
  * The members in this struct should not be accessed directly.
  */
 struct rtos_qspi_flash_struct {
-  rtos_driver_rpc_t *rpc_config;
+    rtos_driver_rpc_t *rpc_config;
 
-  __attribute__((fptrgroup("rtos_qspi_flash_read_fptr_grp"))) void (*read)(
-      rtos_qspi_flash_t *, uint8_t *, unsigned, size_t);
+    __attribute__((fptrgroup("rtos_qspi_flash_read_fptr_grp")))
+    void (*read)(rtos_qspi_flash_t *, uint8_t *, unsigned, size_t);
 
-  __attribute__((fptrgroup("rtos_qspi_flash_write_fptr_grp"))) void (*write)(
-      rtos_qspi_flash_t *, const uint8_t *, unsigned, size_t);
+    __attribute__((fptrgroup("rtos_qspi_flash_write_fptr_grp")))
+    void (*write)(rtos_qspi_flash_t *, const uint8_t *, unsigned, size_t);
 
-  __attribute__((fptrgroup("rtos_qspi_flash_erase_fptr_grp"))) void (*erase)(
-      rtos_qspi_flash_t *, unsigned, size_t);
+    __attribute__((fptrgroup("rtos_qspi_flash_erase_fptr_grp")))
+    void (*erase)(rtos_qspi_flash_t *, unsigned, size_t);
 
-  __attribute__((fptrgroup("rtos_qspi_flash_lock_fptr_grp"))) void (*lock)(
-      rtos_qspi_flash_t *);
+    __attribute__((fptrgroup("rtos_qspi_flash_lock_fptr_grp")))
+    void (*lock)(rtos_qspi_flash_t *);
 
-  __attribute__((fptrgroup("rtos_qspi_flash_unlock_fptr_grp"))) void (*unlock)(
-      rtos_qspi_flash_t *);
+    __attribute__((fptrgroup("rtos_qspi_flash_unlock_fptr_grp")))
+    void (*unlock)(rtos_qspi_flash_t *);
 
-  qspi_flash_ctx_t ctx;
-  size_t flash_size;
+    qspi_flash_ctx_t ctx;
+    size_t flash_size;
 
-  unsigned op_task_priority;
-  rtos_osal_thread_t op_task;
-  rtos_osal_queue_t op_queue;
-  rtos_osal_semaphore_t data_ready;
-  rtos_osal_mutex_t mutex;
+    unsigned op_task_priority;
+    rtos_osal_thread_t op_task;
+    rtos_osal_queue_t op_queue;
+    rtos_osal_semaphore_t data_ready;
+    rtos_osal_mutex_t mutex;
 };
 
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash_rpc.h"
@@ -74,16 +74,20 @@ struct rtos_qspi_flash_struct {
  * the sequence and corrupting the data in the flash.
  *
  * If only a single atomic operation needs to be performed, such as a read, it
- * is not necessary to call this to obtain the lock first. Each individual
- * operation obtains and releases the lock automatically so that they cannot run
- * while another thread has the lock.
+ * is not necessary to call this to obtain the lock first. Each individual operation
+ * obtains and releases the lock automatically so that they cannot run while another
+ * thread has the lock.
  *
  * The lock MUST be released when it is no longer needed by calling
  * rtos_qspi_flash_unlock().
  *
  * \param ctx  A pointer to the QSPI flash driver instance to lock.
  */
-inline void rtos_qspi_flash_lock(rtos_qspi_flash_t *ctx) { ctx->lock(ctx); }
+inline void rtos_qspi_flash_lock(
+        rtos_qspi_flash_t *ctx)
+{
+    ctx->lock(ctx);
+}
 
 /**
  * Releases a lock for exclusive access to the QSPI flash. The lock
@@ -91,7 +95,11 @@ inline void rtos_qspi_flash_lock(rtos_qspi_flash_t *ctx) { ctx->lock(ctx); }
  *
  * \param ctx  A pointer to the QSPI flash driver instance to unlock.
  */
-inline void rtos_qspi_flash_unlock(rtos_qspi_flash_t *ctx) { ctx->unlock(ctx); }
+inline void rtos_qspi_flash_unlock(
+        rtos_qspi_flash_t *ctx)
+{
+    ctx->unlock(ctx);
+}
 
 /**
  * This reads data from the flash in quad I/O mode. All four lines are
@@ -107,25 +115,28 @@ inline void rtos_qspi_flash_unlock(rtos_qspi_flash_t *ctx) { ctx->unlock(ctx); }
  *                features, so this might be useful for some applications.
  * \param len     The number of bytes to read and save to \p data.
  */
-inline void rtos_qspi_flash_read(rtos_qspi_flash_t *ctx, uint8_t *data,
-                                 unsigned address, size_t len) {
-  ctx->read(ctx, data, address, len);
+inline void rtos_qspi_flash_read(
+        rtos_qspi_flash_t *ctx,
+        uint8_t *data,
+        unsigned address,
+        size_t len)
+{
+    ctx->read(ctx, data, address, len);
 }
 
 /**
  * This writes data to the QSPI flash. If the data spans multiple pages then
- * multiple page program commands will be issued. If
- * ctx->quad_page_program_enable is true, then the command in
- * ctx->quad_page_program_cmd is sent and all four SIO lines are used to send
- * the address and data. Otherwise, the standard page program command is sent
- * and only SIO0 (MOSI) is used to send the address and data.
+ * multiple page program commands will be issued. If ctx->quad_page_program_enable
+ * is true, then the command in ctx->quad_page_program_cmd is sent and all
+ * four SIO lines are used to send the address and data. Otherwise, the standard
+ * page program command is sent and only SIO0 (MOSI) is used to send the address
+ * and data.
  *
  * The driver handles sending the write enable command, as well as waiting for
  * the write to complete.
  *
- * This function may return before the write operation is complete, as the
- * actual write operation is queued and executed by a thread created by the
- * driver.
+ * This function may return before the write operation is complete, as the actual
+ * write operation is queued and executed by a thread created by the driver.
  *
  * \note this function does NOT erase the flash first. Erase operations must be
  * explicitly requested by the application.
@@ -137,9 +148,13 @@ inline void rtos_qspi_flash_read(rtos_qspi_flash_t *ctx, uint8_t *data,
  *                not sent.
  * \param len     The number of bytes to write to the flash.
  */
-inline void rtos_qspi_flash_write(rtos_qspi_flash_t *ctx, const uint8_t *data,
-                                  unsigned address, size_t len) {
-  ctx->write(ctx, data, address, len);
+inline void rtos_qspi_flash_write(
+        rtos_qspi_flash_t *ctx,
+        const uint8_t *data,
+        unsigned address,
+        size_t len)
+{
+    ctx->write(ctx, data, address, len);
 }
 
 /**
@@ -150,9 +165,8 @@ inline void rtos_qspi_flash_write(rtos_qspi_flash_t *ctx, const uint8_t *data,
  * The driver handles sending the write enable command, as well as waiting for
  * the write to complete.
  *
- * This function may return before the write operation is complete, as the
- * actual erase operation is queued and executed by a thread created by the
- * driver.
+ * This function may return before the write operation is complete, as the actual
+ * erase operation is queued and executed by a thread created by the driver.
  *
  * \note The smallest amount of data that can be erased is a 4k sector.
  * This means that data outside the address range specified by \p address
@@ -163,13 +177,16 @@ inline void rtos_qspi_flash_write(rtos_qspi_flash_t *ctx, const uint8_t *data,
  * \param address The byte address to begin erasing. This does not need to begin
  *                at a sector boundary, but if it does not, note that the entire
  *                sector that contains this address will still be erased.
- * \param len     The minimum number of bytes to erase. If \p address + \p len -
- * 1 does not correspond to the last address within a sector, note that the
- * entire sector that contains this address will still be erased.
+ * \param len     The minimum number of bytes to erase. If \p address + \p len - 1
+ *                does not correspond to the last address within a sector, note that
+ *                the entire sector that contains this address will still be erased.
  */
-inline void rtos_qspi_flash_erase(rtos_qspi_flash_t *ctx, unsigned address,
-                                  size_t len) {
-  ctx->erase(ctx, address, len);
+inline void rtos_qspi_flash_erase(
+        rtos_qspi_flash_t *ctx,
+        unsigned address,
+        size_t len)
+{
+    ctx->erase(ctx, address, len);
 }
 
 /**
@@ -179,88 +196,97 @@ inline void rtos_qspi_flash_erase(rtos_qspi_flash_t *ctx, unsigned address,
  *
  * \returns the size in bytes of the flash chip.
  */
-inline size_t rtos_qspi_flash_size_get(rtos_qspi_flash_t *qspi_flash_ctx) {
-  return qspi_flash_ctx->flash_size;
+inline size_t rtos_qspi_flash_size_get(
+        rtos_qspi_flash_t *qspi_flash_ctx)
+{
+    return qspi_flash_ctx->flash_size;
 }
 
 /**@}*/
 
 /**
- * Starts an RTOS QSPI flash driver instance. This must only be called by the
- * tile that owns the driver instance. It may be called either before or after
- * starting the RTOS, but must be called before any of the core QSPI flash
- * driver functions are called with this instance.
+ * Starts an RTOS QSPI flash driver instance. This must only be called by the tile that
+ * owns the driver instance. It may be called either before or after starting
+ * the RTOS, but must be called before any of the core QSPI flash driver functions are
+ * called with this instance.
  *
- * rtos_qspi_flash_init() must be called on this QSPI flash driver instance
- * prior to calling this.
+ * rtos_qspi_flash_init() must be called on this QSPI flash driver instance prior to calling this.
  *
  * \param ctx       A pointer to the QSPI flash driver instance to start.
  * \param priority  The priority of the task that gets created by the driver to
  *                  handle the QSPI flash interface.
  */
-void rtos_qspi_flash_start(rtos_qspi_flash_t *ctx, unsigned priority);
+void rtos_qspi_flash_start(
+        rtos_qspi_flash_t *ctx,
+        unsigned priority);
 
 /**
  * Initializes an RTOS QSPI flash driver instance.
  * This must only be called by the tile that owns the driver instance. It may be
- * called either before or after starting the RTOS, but must be called before
- * calling rtos_qspi_flash_start() or any of the core QSPI flash driver
- * functions with this instance.
+ * called either before or after starting the RTOS, but must be called before calling
+ * rtos_qspi_flash_start() or any of the core QSPI flash driver functions with this instance.
  *
- * \param ctx                            A pointer to the QSPI flash driver
- * instance to initialize. \param clock_block                    The clock block
- * to use for the qspi_io interface. \param cs_port                        The
- * chip select port. MUST be a 1-bit port. \param sclk_port The SCLK port. MUST
- * be a 1-bit port. \param sio_port                       The SIO port. MUST be
- * a 4-bit port. \param source_clock                   The source clock to use
- * for the QSPI I/O interface. Must be either qspi_io_source_clock_ref or
- * qspi_io_source_clock_xcore. \param full_speed_clk_divisor         The divisor
- * to use for QSPI reads and writes as well as SPI writes. The frequency of SCLK
- * will be set to: (F_src) / (2 * full_speed_clk_divisor) Where F_src is the
- * frequency of the source clock specified by \p source_clock. \param
- * full_speed_sclk_sample_delay   Number of SCLK cycles to delay the sampling of
- * SIO on input during a full speed transaction. Usually either 0 or 1 depending
- * on the SCLK frequency. \param full_speed_sclk_sample_edge    The SCLK edge to
- * sample the SIO input on during a full speed transaction. May be either
- * qspi_io_sample_edge_rising or qspi_io_sample_edge_falling. \param
- * full_speed_sio_pad_delay       Number of core clock cycles to delay sampling
- * the SIO pads during a full speed transaction. This allows for more fine
- * grained adjustment of sampling time. The value may be between 0 and 5. \param
- * spi_read_clk_divisor           The divisor to use for the clock when
- * performing a SPI read. This may need to be slower than the clock used for
- * writes and QSPI reads. This is because a small handful of instructions must
- * execute to turn the SIO port around from output to input and they must
- * execute within a single SCLK period during a SPI read. QSPI reads have dummy
- * cycles where these instructions may execute which allows for a higher clock
+ * \param ctx                            A pointer to the QSPI flash driver instance to initialize.
+ * \param clock_block                    The clock block to use for the qspi_io interface.
+ * \param cs_port                        The chip select port. MUST be a 1-bit port.
+ * \param sclk_port                      The SCLK port. MUST be a 1-bit port.
+ * \param sio_port                       The SIO port. MUST be a 4-bit port.
+ * \param source_clock                   The source clock to use for the QSPI I/O interface. Must be
+ *                                       either qspi_io_source_clock_ref or qspi_io_source_clock_xcore.
+ * \param full_speed_clk_divisor         The divisor to use for QSPI reads and writes as well as SPI writes.
+ *                                       The frequency of SCLK will be set to:
+ *                                       (F_src) / (2 * full_speed_clk_divisor)
+ *                                       Where F_src is the frequency of the source clock specified
+ *                                       by \p source_clock.
+ * \param full_speed_sclk_sample_delay   Number of SCLK cycles to delay the sampling of SIO on input
+ *                                       during a full speed transaction.
+ *                                       Usually either 0 or 1 depending on the SCLK frequency.
+ * \param full_speed_sclk_sample_edge    The SCLK edge to sample the SIO input on during a full speed
+ *                                       transaction. May be either qspi_io_sample_edge_rising or
+ *                                       qspi_io_sample_edge_falling.
+ * \param full_speed_sio_pad_delay       Number of core clock cycles to delay sampling the SIO pads during
+ *                                       a full speed transaction. This allows for more fine grained adjustment
+ *                                       of sampling time. The value may be between 0 and 5.
+ * \param spi_read_clk_divisor           The divisor to use for the clock when performing a SPI read. This
+ *                                       may need to be slower than the clock used for writes and QSPI reads.
+ *                                       This is because a small handful of instructions must execute to turn
+ *                                       the SIO port around from output to input and they must execute within
+ *                                       a single SCLK period during a SPI read. QSPI reads have dummy cycles
+ *                                       where these instructions may execute which allows for a higher clock
  *                                       frequency.
  *                                       The frequency of SCLK will be set to:
  *                                       (F_src) / (2 * spi_read_clk_divisor)
- *                                       Where F_src is the frequency of the
- * source clock specified by \p source_clock. \param spi_read_sclk_sample_delay
- * Number of SCLK cycles to delay the sampling of SIO on input during a SPI read
- * transaction. Usually either 0 or 1 depending on the SCLK frequency. \param
- * spi_read_sclk_sample_edge      The SCLK edge to sample the SIO input on
- * during a SPI read transaction. May be either qspi_io_sample_edge_rising or
+ *                                       Where F_src is the frequency of the source clock specified
+ *                                       by \p source_clock.
+ * \param spi_read_sclk_sample_delay     Number of SCLK cycles to delay the sampling of SIO on input
+ *                                       during a SPI read transaction.
+ *                                       Usually either 0 or 1 depending on the SCLK frequency.
+ * \param spi_read_sclk_sample_edge      The SCLK edge to sample the SIO input on during a SPI read
+ *                                       transaction. May be either qspi_io_sample_edge_rising or
  *                                       qspi_io_sample_edge_falling.
- * \param spi_read_sio_pad_delay         Number of core clock cycles to delay
- * sampling the SIO pads during a SPI read transaction. This allows for more
- * fine grained adjustment of sampling time. The value may be between 0 and 5.
- * \param quad_page_program_cmd          The command that will be sent when
- * rtos_qspi_flash_write() is called if quad_page_program_enable is true. This
- * should be a value returned by the QSPI_IO_BYTE_TO_MOSI() macro.
+ * \param spi_read_sio_pad_delay         Number of core clock cycles to delay sampling the SIO pads during
+ *                                       a SPI read transaction. This allows for more fine grained adjustment
+ *                                       of sampling time. The value may be between 0 and 5.
+ * \param quad_page_program_cmd          The command that will be sent when rtos_qspi_flash_write() is called if
+ *                                       quad_page_program_enable is true. This should be a value returned by
+ *                                       the QSPI_IO_BYTE_TO_MOSI() macro.
  */
-void rtos_qspi_flash_init(rtos_qspi_flash_t *ctx, xclock_t clock_block,
-                          port_t cs_port, port_t sclk_port, port_t sio_port,
-                          qspi_io_source_clock_t source_clock,
-                          int full_speed_clk_divisor,
-                          uint32_t full_speed_sclk_sample_delay,
-                          qspi_io_sample_edge_t full_speed_sclk_sample_edge,
-                          uint32_t full_speed_sio_pad_delay,
-                          int spi_read_clk_divisor,
-                          uint32_t spi_read_sclk_sample_delay,
-                          qspi_io_sample_edge_t spi_read_sclk_sample_edge,
-                          uint32_t spi_read_sio_pad_delay,
-                          qspi_flash_page_program_cmd_t quad_page_program_cmd);
+void rtos_qspi_flash_init(
+        rtos_qspi_flash_t *ctx,
+        xclock_t clock_block,
+        port_t cs_port,
+        port_t sclk_port,
+        port_t sio_port,
+        qspi_io_source_clock_t source_clock,
+        int full_speed_clk_divisor,
+        uint32_t full_speed_sclk_sample_delay,
+        qspi_io_sample_edge_t full_speed_sclk_sample_edge,
+        uint32_t full_speed_sio_pad_delay,
+        int spi_read_clk_divisor,
+        uint32_t spi_read_sclk_sample_delay,
+        qspi_io_sample_edge_t spi_read_sclk_sample_edge,
+        uint32_t spi_read_sio_pad_delay,
+        qspi_flash_page_program_cmd_t quad_page_program_cmd);
 
 /**@}*/
 
