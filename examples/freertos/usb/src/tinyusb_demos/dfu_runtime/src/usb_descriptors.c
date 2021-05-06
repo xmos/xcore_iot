@@ -25,6 +25,7 @@
 
 #include "tusb.h"
 #include "class/dfu/dfu_rt_device.h"
+#include "demo_main.h"
 
 /* A combination of interfaces must have a unique product id, since PC will save device driver after the first plug.
  * Same VID/PID with different interface e.g MSC (first), then CDC (later) will possibly cause system error on PC.
@@ -70,6 +71,30 @@ tusb_desc_device_t const desc_device =
     .bNumConfigurations = 0x01
 };
 
+
+// tusb_desc_device_t const desc_device_dfu_mode =
+// {
+//     .bLength            = sizeof(tusb_desc_device_t),
+//     .bDescriptorType    = TUSB_DESC_DEVICE,
+//     .bcdUSB             = 0x0100,
+//
+//     .bDeviceClass       = 0x00,
+//     .bDeviceSubClass    = 0x00,
+//     .bDeviceProtocol    = 0x00,
+//
+//     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
+//
+//     .idVendor           = 0xCafe,
+//     .idProduct          = USB_PID,
+//     .bcdDevice          = 0x0100,
+//
+//     .iManufacturer      = 0x01,
+//     .iProduct           = 0x02,
+//     .iSerialNumber      = 0x03,
+//
+//     .bNumConfigurations = 0x01
+// };
+
 // Invoked when received GET DEVICE DESCRIPTOR
 // Application return pointer to descriptor
 uint8_t const * tud_descriptor_device_cb(void)
@@ -80,24 +105,43 @@ uint8_t const * tud_descriptor_device_cb(void)
 //--------------------------------------------------------------------+
 // Configuration Descriptor
 //--------------------------------------------------------------------+
+enum
+{
+  ITF0_NUM_DFU_RT,
+  ITF0_NUM_TOTAL
+};
+
+#define CONFIG_0_TOTAL_LEN    (TUD_CONFIG_DESC_LEN + TUD_DFU_RT_DESC_LEN)
 
 enum
 {
-  ITF_NUM_DFU_RT,
-  ITF_NUM_TOTAL
+  ITF1_NUM_DFU_MODE,
+  ITF1_NUM_TOTAL
 };
 
-#define CONFIG_TOTAL_LEN    (TUD_CONFIG_DESC_LEN + TUD_DFU_RT_DESC_LEN)
+#define CONFIG_1_TOTAL_LEN    (TUD_CONFIG_DESC_LEN + TUD_DFU_MODE_DESC_LEN )
 
-uint8_t const desc_configuration[] =
+#define FUNC_ATTRS (DFU_FUNC_ATTR_CAN_UPLOAD_BITMASK | DFU_FUNC_ATTR_CAN_DOWNLOAD_BITMASK)
+// #define FUNC_ATTRS (DFU_FUNC_ATTR_WILL_DETACH_BITMASK | DFU_FUNC_ATTR_CAN_UPLOAD_BITMASK | DFU_FUNC_ATTR_CAN_DOWNLOAD_BITMASK)
+// #define FUNC_ATTRS 0x0d  // original
+
+uint8_t const desc_configuration_rt[] =
 {
   // Config number, interface count, string index, total length, attribute, power in mA
-  TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CONFIG_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
+  TUD_CONFIG_DESCRIPTOR(1, ITF0_NUM_TOTAL, 0, CONFIG_0_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
 
   // Interface number, string index, attributes, detach timeout, transfer size */
-  TUD_DFU_RT_DESCRIPTOR(ITF_NUM_DFU_RT, 4, 0x0d, 1000, 4096),
+  TUD_DFU_RT_DESCRIPTOR(ITF0_NUM_DFU_RT, 4, FUNC_ATTRS, 1000, CFG_TUD_DFU_TRANSFER_BUFFER_SIZE),
 };
 
+uint8_t const desc_configuration_mode[] =
+{
+  // Config number, interface count, string index, total length, attribute, power in mA
+  TUD_CONFIG_DESCRIPTOR(1, ITF1_NUM_TOTAL, 0, CONFIG_1_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
+
+  // Interface number, string index, attributes, detach timeout, transfer size */
+  TUD_DFU_MODE_DESCRIPTOR(ITF1_NUM_DFU_MODE, 0, FUNC_ATTRS, 1000, CFG_TUD_DFU_TRANSFER_BUFFER_SIZE),
+};
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
 // Application return pointer to descriptor
@@ -105,7 +149,7 @@ uint8_t const desc_configuration[] =
 uint8_t const * tud_descriptor_configuration_cb(uint8_t index)
 {
   (void) index; // for multiple configurations
-  return desc_configuration;
+  return check_dfu_mode() ? desc_configuration_rt : desc_configuration_mode;
 }
 
 //--------------------------------------------------------------------+
@@ -119,7 +163,7 @@ char const* string_desc_arr [] =
   "TinyUSB",                     // 1: Manufacturer
   "TinyUSB Device",              // 2: Product
   "123456",                      // 3: Serials, should use chip ID
-  "TinyUSB DFU runtime",         // 4: DFU runtimez
+  "TinyUSB DFU runtime",         // 4: DFU runtime
 };
 
 static uint16_t _desc_str[32];
