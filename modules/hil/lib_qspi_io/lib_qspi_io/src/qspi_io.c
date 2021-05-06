@@ -36,7 +36,6 @@ void qspi_io_init(const qspi_io_ctx_t *ctx,
 	 * NOTE: invert mode is not modeled correctly in xsim VCD trace.
 	 */
 	port_set_invert(ctx->cs_port);
-	//port_out(ctx->cs_port, 0);
 	/* Set chip select as the ready source for the clock */
 	clock_set_ready_src(ctx->clock_block, ctx->cs_port);
 
