@@ -41,7 +41,7 @@ static void usb_xud_thread(rtos_usb_t *ctx)
      */
     CLRSR(XS1_SR_KEDI_MASK);
 
-    (void) s_chan_in_byte(ctx->c_ep_out_xud[0]);
+    (void) s_chan_in_byte(ctx->c_sof_xud);
 
     rtos_printf("Starting XUD_Main() on core %d with %d endpoints\n", rtos_core_id_get(), ctx->endpoint_count);
 
@@ -52,7 +52,7 @@ static void usb_xud_thread(rtos_usb_t *ctx)
              ctx->endpoint_count,
              ctx->c_ep_in_xud,
              ctx->endpoint_count,
-             0/*ctx->c_sof_xud*/,
+             ctx->c_sof_xud,
              endpoint_out_type,
              endpoint_in_type,
 #if !XUD_DEV_XS3
@@ -130,11 +130,22 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_isr, arg)
         }
 
         if (ctx->isr_cb != NULL) {
-            ctx->isr_cb(ctx, ctx->isr_app_data, ep_xfer_info->ep_address, xfer_len, is_setup, res);
+            ctx->isr_cb(ctx, ctx->isr_app_data, ep_xfer_info->ep_address, xfer_len, is_setup ? rtos_usb_setup_packet : rtos_usb_data_packet, res);
         }
     } else {
         ctx->ep[ep_num][dir] = XUD_InitEp(ctx->c_ep[ep_num][dir]);
         rtos_printf("EP %d %d initialized\n", ep_num, dir);
+    }
+}
+
+DEFINE_RTOS_INTERRUPT_CALLBACK(usb_sof_isr, arg)
+{
+    rtos_usb_t *ctx = arg;
+
+    (void) s_chan_in_word(ctx->c_sof);
+
+    if (ctx->isr_cb != NULL) {
+        ctx->isr_cb(ctx, ctx->isr_app_data, 0, 0, rtos_usb_sof_packet, XUD_RES_OKAY);
     }
 }
 
@@ -238,8 +249,8 @@ XUD_BusSpeed_t rtos_usb_endpoint_reset(rtos_usb_t *ctx,
 }
 
 static void ep_cfg(rtos_usb_t *ctx,
-                     int ep_num,
-                     int direction)
+                   int ep_num,
+                   int direction)
 {
     channel_t tmp_chan = chan_alloc();
 
@@ -281,24 +292,24 @@ void rtos_usb_start(
     rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
 
+    triggerable_setup_interrupt_callback(ctx->c_sof, ctx, RTOS_INTERRUPT_CALLBACK(usb_sof_isr));
+    triggerable_enable_trigger(ctx->c_sof);
+
     for (i = 0; i < endpoint_count; i++) {
 
         ctx->endpoint_out_type[i] = endpoint_out_type[i];
         ctx->endpoint_in_type[i] = endpoint_in_type[i];
 
-        if (i > 0) {
-            /* Endpoint 0 is configured by rtos_usb_init() */
-            if (endpoint_out_type[i] != XUD_EPTYPE_DIS) {
-                ep_cfg(ctx, i, RTOS_USB_OUT_EP);
-            }
-            if (endpoint_in_type[i] != XUD_EPTYPE_DIS) {
-                ep_cfg(ctx, i, RTOS_USB_IN_EP);
-            }
+        if (endpoint_out_type[i] != XUD_EPTYPE_DIS) {
+            ep_cfg(ctx, i, RTOS_USB_OUT_EP);
+        }
+        if (endpoint_in_type[i] != XUD_EPTYPE_DIS) {
+            ep_cfg(ctx, i, RTOS_USB_IN_EP);
         }
     }
 
     /* Tells the I/O thread to enter XUD_Main() */
-    s_chan_out_byte(ctx->c_ep[0][RTOS_USB_OUT_EP], 0);
+    s_chan_out_byte(ctx->c_sof, 0);
 
     /* Restore the core exclusion map for the calling thread */
     rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
@@ -316,9 +327,6 @@ void rtos_usb_init(
 
     ctx->isr_cb = isr_cb;
     ctx->isr_app_data = isr_app_data;
-
-    ep_cfg(ctx, 0, RTOS_USB_OUT_EP);
-    ep_cfg(ctx, 0, RTOS_USB_IN_EP);
 
     tmp_chan = chan_alloc();
     xassert(tmp_chan.end_a != 0);
@@ -354,18 +362,19 @@ static void usb_simple_isr_cb(rtos_usb_t *ctx,
                               void *app_data,
                               uint32_t ep_address,
                               size_t xfer_len,
-                              int is_setup,
+                              rtos_usb_packet_type_t packet_type,
                               XUD_Result_t res)
 
 {
     rtos_osal_event_group_t *event_group = app_data;
     (void) xfer_len;
     (void) res;
-    (void) is_setup;
 
-    rtos_osal_event_group_set_bits(event_group,
-                                   ep_event_flag(endpoint_num(ep_address),
-                                                 endpoint_dir(ep_address)));
+    if (packet_type == rtos_usb_data_packet || packet_type == rtos_usb_setup_packet) {
+        rtos_osal_event_group_set_bits(event_group,
+                                       ep_event_flag(endpoint_num(ep_address),
+                                                     endpoint_dir(ep_address)));
+    }
 }
 
 static int endpoint_wait(rtos_usb_t *ctx,

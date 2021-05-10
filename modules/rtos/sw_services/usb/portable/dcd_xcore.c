@@ -21,6 +21,8 @@
 #define CFG_TUD_XCORE_IO_CORE_MASK (~(1 << 0))
 #endif
 
+TU_ATTR_WEAK bool tud_xcore_sof_cb(uint8_t rhport);
+
 #include <rtos/drivers/usb/api/rtos_usb.h>
 
 static rtos_usb_t usb_ctx;
@@ -83,19 +85,17 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
                                   void *app_data,
                                   uint32_t ep_address,
                                   size_t xfer_len,
-                                  int is_setup,
+                                  rtos_usb_packet_type_t packet_type,
                                   XUD_Result_t res)
 {
     if (res == XUD_RES_RST) {
         rtos_printf("Reset received on %02x\n", ep_address);
         reset_ep(ep_address, true);
+        return;
     }
 
-    if (is_setup) {
-        rtos_printf("Setup packet of %d bytes received on %02x\n", xfer_len, ep_address);
-        waiting_for_setup = 0;
-        dcd_event_setup_received(0, (uint8_t *) &setup_packet, true);
-    } else {
+    switch (packet_type) {
+    case rtos_usb_data_packet: {
         xfer_result_t tu_result;
 
         if (res == XUD_RES_OKAY) {
@@ -132,10 +132,21 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
             xfer_len = 0;
         }
 
-        /*
-         * TODO: Should this be called when res is XUD_RES_RST?
-         */
         dcd_event_xfer_complete(0, ep_address, xfer_len, tu_result, true);
+        break;
+    }
+    case rtos_usb_setup_packet:
+        rtos_printf("Setup packet of %d bytes received on %02x\n", xfer_len, ep_address);
+        waiting_for_setup = 0;
+        dcd_event_setup_received(0, (uint8_t *) &setup_packet, true);
+        break;
+    case rtos_usb_sof_packet:
+        if (tud_xcore_sof_cb) {
+            if (tud_xcore_sof_cb(0)) {
+                dcd_event_bus_signal(0, DCD_EVENT_SOF, true);
+            }
+        }
+        break;
     }
 }
 
