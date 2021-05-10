@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "rtos/drivers/osal/api/rtos_osal.h"
+#include "rtos/osal/api/rtos_osal.h"
 #include "rtos/drivers/intertile/api/rtos_intertile.h"
 
 /**

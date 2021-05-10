@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.14)
 # Paths
 #**********************
 set(RTOS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos")
+set(OSAL_DIR "${RTOS_DIR}/osal")
 
 #**********************
 # Set default configuration variables
@@ -24,10 +25,29 @@ include("${RTOS_DIR}/${RTOS_CMAKE_RTOS}/kernel.cmake")
 include("${RTOS_DIR}/rtos_support/rtos_support.cmake")
 include("${RTOS_DIR}/sw_services/sw_services.cmake")
 
+#********************************
+# Gather OSAL sources
+#********************************
+set(THIS_LIB OSAL)
+set(${THIS_LIB}_FLAGS "-Os")
+
+file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}/*.c")
+
+set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+set(${THIS_LIB}_INCLUDES
+    "${${THIS_LIB}_DIR}/api"
+    "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
+)
+
+message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+unset(THIS_LIB)
+
 #**********************
 # Set user variables
 #**********************
 set(RTOS_SOURCES
+    ${OSAL_SOURCES}
     ${DRIVERS_RTOS_SOURCES}
     ${RTOS_SUPPORT_SOURCES}
     ${KERNEL_SOURCES}
@@ -35,6 +55,7 @@ set(RTOS_SOURCES
 )
 
 set(RTOS_INCLUDES
+    ${OSAL_INCLUDES}
     ${DRIVERS_RTOS_INCLUDES}
     ${RTOS_SUPPORT_INCLUDES}
     ${KERNEL_INCLUDES}

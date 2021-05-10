@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)
@@ -27,7 +27,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bsp/board.h"
+#include "FreeRTOS.h"
+#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "demo_main.h"
 #include "tusb.h"
 
 /* This MIDI example send sequence of note (on/off) repeatedly. To test on PC, you need to install
@@ -37,43 +39,23 @@
  * - MacOS: SimpleSynth
  */
 
-//--------------------------------------------------------------------+
-// MACRO CONSTANT TYPEDEF PROTYPES
-//--------------------------------------------------------------------+
-
 /* Blink pattern
  * - 250 ms  : device not mounted
  * - 1000 ms : device mounted
  * - 2500 ms : device is suspended
  */
 enum  {
-  BLINK_NOT_MOUNTED = 250,
-  BLINK_MOUNTED = 1000,
-  BLINK_SUSPENDED = 2500,
+    BLINK_NOT_MOUNTED = 250,
+    BLINK_MOUNTED = 1000,
+    BLINK_SUSPENDED = 2500,
 };
 
+static TimerHandle_t blinky_timer_ctx = NULL;
+static rtos_gpio_t *gpio_ctx = NULL;
+static rtos_gpio_port_id_t button_port = 0;
+static rtos_gpio_port_id_t led_port = 0;
+static uint32_t led_val = 0;
 static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
-
-void led_blinking_task(void);
-void midi_task(void);
-
-/*------------- MAIN -------------*/
-int main(void)
-{
-  board_init();
-
-  tusb_init();
-
-  while (1)
-  {
-    tud_task(); // tinyusb device task
-    led_blinking_task();
-    midi_task();
-  }
-
-
-  return 0;
-}
 
 //--------------------------------------------------------------------+
 // Device callbacks
@@ -82,13 +64,13 @@ int main(void)
 // Invoked when device is mounted
 void tud_mount_cb(void)
 {
-  blink_interval_ms = BLINK_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void)
 {
-  blink_interval_ms = BLINK_NOT_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_NOT_MOUNTED), 0);
 }
 
 // Invoked when usb bus is suspended
@@ -96,14 +78,14 @@ void tud_umount_cb(void)
 // Within 7ms, device must draw an average of current less than 2.5 mA from bus
 void tud_suspend_cb(bool remote_wakeup_en)
 {
-  (void) remote_wakeup_en;
-  blink_interval_ms = BLINK_SUSPENDED;
+    (void) remote_wakeup_en;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_SUSPENDED), 0);
 }
 
 // Invoked when usb bus is resumed
 void tud_resume_cb(void)
 {
-  blink_interval_ms = BLINK_MOUNTED;
+    xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
 }
 
 //--------------------------------------------------------------------+
@@ -123,50 +105,93 @@ uint8_t note_sequence[] =
 
 void midi_task(void)
 {
-  static uint32_t start_ms = 0;
-
   // The MIDI interface always creates input and output port/jack descriptors
   // regardless of these being used or not. Therefore incoming traffic should be read
   // (possibly just discarded) to avoid the sender blocking in IO
   uint8_t packet[4];
-  while(tud_midi_available()) tud_midi_receive(packet);
 
-  // send note every 1000 ms
-  if (board_millis() - start_ms < 286) return; // not enough time
-  start_ms += 286;
+  while(1) {
+      while(tud_midi_available()) tud_midi_receive(packet);
 
-  // Previous positions in the note sequence.
-  int previous = note_pos - 1;
+      // send note every 1000 ms
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      rtos_printf("send next note\n");
 
-  // If we currently are at position 0, set the
-  // previous position to the last note in the sequence.
-  if (previous < 0) previous = sizeof(note_sequence) - 1;
+      // Previous positions in the note sequence.
+      int previous = note_pos - 1;
 
-  // Send Note On for current position at full velocity (127) on channel 1.
-  tudi_midi_write24(0, 0x90, note_sequence[note_pos], 127);
+      // If we currently are at position 0, set the
+      // previous position to the last note in the sequence.
+      if (previous < 0) previous = sizeof(note_sequence) - 1;
 
-  // Send Note Off for previous note.
-  tudi_midi_write24(0, 0x80, note_sequence[previous], 0);
+      // Send Note On for current position at full velocity (127) on channel 1.
+      tud_midi_write24(0, 0x90, note_sequence[note_pos], 127);
 
-  // Increment position
-  note_pos++;
+      // Send Note Off for previous note.
+      tud_midi_write24(0, 0x80, note_sequence[previous], 0);
 
-  // If we are at the end of the sequence, start over.
-  if (note_pos >= sizeof(note_sequence)) note_pos = 0;
+      // Increment position
+      note_pos++;
+
+      // If we are at the end of the sequence, start over.
+      if (note_pos >= sizeof(note_sequence)) note_pos = 0;
+    }
 }
 
 //--------------------------------------------------------------------+
 // BLINKING TASK
 //--------------------------------------------------------------------+
-void led_blinking_task(void)
+
+void led_blinky_cb(TimerHandle_t xTimer)
 {
-  static uint32_t start_ms = 0;
-  static bool led_state = false;
+    (void) xTimer;
+    led_val ^= 1;
 
-  // Blink every interval ms
-  if ( board_millis() - start_ms < blink_interval_ms) return; // not enough time
-  start_ms += blink_interval_ms;
+#if OSPREY_BOARD
+#define RED         ~(1<<6)
+#define GREEN       ~(1<<7)
+    if(led_val) {
+        rtos_gpio_port_out(gpio_ctx, led_port, RED);
+    } else {
+        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
+    }
+#elif XCOREAI_EXPLORER
+    rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+#else
+#error No valid board was specified
+#endif
+}
 
-  board_led_write(led_state);
-  led_state = 1 - led_state; // toggle
+void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
+{
+    if (gpio_ctx == NULL) {
+        gpio_ctx = ctx;
+
+        led_port = rtos_gpio_port(PORT_LEDS);
+        rtos_gpio_port_enable(gpio_ctx, led_port);
+        rtos_gpio_port_out(gpio_ctx, led_port, led_val);
+
+#if OSPREY_BOARD
+        button_port = rtos_gpio_port(PORT_BUTTON);
+#elif XCOREAI_EXPLORER
+        button_port = rtos_gpio_port(PORT_BUTTONS);
+#else
+#error No valid board was specified
+#endif
+        rtos_gpio_port_enable(gpio_ctx, button_port);
+
+        blinky_timer_ctx = xTimerCreate("blinky",
+                                        pdMS_TO_TICKS(blink_interval_ms),
+                                        pdTRUE,
+                                        NULL,
+                                        led_blinky_cb);
+        xTimerStart(blinky_timer_ctx, 0);
+
+        xTaskCreate((TaskFunction_t) midi_task,
+                    "midi_task",
+                    portTASK_STACK_DEPTH(midi_task),
+                    NULL,
+                    priority,
+                    NULL);
+    }
 }

@@ -8,6 +8,8 @@
 
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
 
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
 enum {
     fcode_lock,
     fcode_unlock,
@@ -70,19 +72,27 @@ static void qspi_flash_remote_read(
 
     xassert(host_address->port >= 0);
 
-    const rpc_param_desc_t rpc_param_desc[] = {
-            RPC_PARAM_TYPE(ctx),
-            RPC_PARAM_OUT_BUFFER(data, len),
-            RPC_PARAM_TYPE(address),
-            RPC_PARAM_TYPE(len),
-            RPC_PARAM_LIST_END
-    };
-
     rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
 
-    rpc_client_call_generic(
-            host_address->intertile_ctx, host_address->port, fcode_read, rpc_param_desc,
-            &host_ctx_ptr, data, &address, &len);
+    do {
+        size_t read_len = MIN(len, RTOS_QSPI_FLASH_READ_CHUNK_SIZE);
+
+        const rpc_param_desc_t rpc_param_desc[] = {
+                RPC_PARAM_TYPE(ctx),
+                RPC_PARAM_OUT_BUFFER(data, read_len),
+                RPC_PARAM_TYPE(address),
+                RPC_PARAM_TYPE(read_len),
+                RPC_PARAM_LIST_END
+        };
+
+        rpc_client_call_generic(
+                host_address->intertile_ctx, host_address->port, fcode_read, rpc_param_desc,
+                &host_ctx_ptr, data, &address, &read_len);
+
+        len -= read_len;
+        data += read_len;
+        address += read_len;
+    } while (len > 0);
 
     rtos_osal_mutex_put(&ctx->mutex);
 }
@@ -194,7 +204,11 @@ static int qspi_flash_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             rpc_msg,
             &ctx, &data, &address, &len);
 
-    data = rtos_osal_malloc(len);
+    if (len > 0) {
+        data = rtos_osal_malloc(len);
+    } else {
+        data = NULL;
+    }
 
     rtos_qspi_flash_read(ctx, data, address, len);
 
@@ -202,7 +216,9 @@ static int qspi_flash_read_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             resp_msg, rpc_msg,
             ctx, data, address, len);
 
-    rtos_osal_free(data);
+    if (len > 0) {
+        rtos_osal_free(data);
+    }
 
     return msg_length;
 }

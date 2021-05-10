@@ -15,7 +15,7 @@
 #include <xud.h>
 #include <xud_device.h>
 
-#include "rtos/drivers/osal/api/rtos_osal.h"
+#include "rtos/osal/api/rtos_osal.h"
 #include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
 
 /**
@@ -39,6 +39,12 @@
  */
 #define RTOS_USB_ISR_CALLBACK_ATTR __attribute__((fptrgroup("rtos_usb_isr_cb_fptr_grp")))
 
+typedef enum {
+    rtos_usb_data_packet,
+    rtos_usb_setup_packet,
+    rtos_usb_sof_packet
+} rtos_usb_packet_type_t;
+
 /**
  * Typedef to the RTOS USB driver instance struct.
  */
@@ -56,10 +62,10 @@ typedef struct rtos_usb_struct rtos_usb_t;
  * \param ep_address    The address of the USB endpoint that the transfer
  *                      has completed on.
  * \param xfer_len      The length of the data transferred.
- * \param is_setup      True if this is a setup packet. False otherwise.
+ * \param packet_type   The type of packet transferred. See rtos_usb_packet_type_t.
  * \param res           The result of the transfer. See XUD_Result_t.
  */
-typedef void (*rtos_usb_isr_cb_t)(rtos_usb_t *ctx, void *app_data, uint32_t ep_address, size_t xfer_len, int is_setup, XUD_Result_t res);
+typedef void (*rtos_usb_isr_cb_t)(rtos_usb_t *ctx, void *app_data, uint32_t ep_address, size_t xfer_len, rtos_usb_packet_type_t packet_type, XUD_Result_t res);
 
 /**
  * Struct to hold USB transfer state data per endpoint, used

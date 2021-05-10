@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "rtos_intertile.h"
-#include "rtos/drivers/osal/api/rtos_osal.h"
+#include "rtos/osal/api/rtos_osal.h"
 #include "rtos/drivers/rpc/api/rtos_rpc.h"
 
 int rpc_request_marshall_va(uint8_t **msg, int fcode, const rpc_param_desc_t param_desc[], va_list ap)

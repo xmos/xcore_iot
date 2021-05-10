@@ -241,6 +241,8 @@ void vApplicationDaemonTaskStartup(void *arg)
         uint8_t data[len];
         int erase = 0;
 
+        rtos_printf("The QSPI flash size is %u\n", rtos_qspi_flash_size_get(qspi_flash_ctx));
+
         rtos_qspi_flash_read(qspi_flash_ctx, data, 0, len);
         if (data[0] != 0xFF) {
             rtos_printf("First read: %s", data);

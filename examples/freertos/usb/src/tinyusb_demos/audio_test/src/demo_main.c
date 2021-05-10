@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2020 Reinhard Panhuber
@@ -57,13 +57,13 @@ static uint32_t led_val = 0;
 
 // Audio controls
 // Current states
-bool mute[CFG_TUD_AUDIO_N_CHANNELS_TX + 1]; 						// +1 for master channel 0
-uint16_t volume[CFG_TUD_AUDIO_N_CHANNELS_TX + 1]; 					// +1 for master channel 0
+bool mute[CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX + 1]; 						// +1 for master channel 0
+uint16_t volume[CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX + 1]; 					// +1 for master channel 0
 uint32_t sampFreq;
 uint8_t clkValid;
 
 // Range states
-audio_control_range_2_n_t(1) volumeRng[CFG_TUD_AUDIO_N_CHANNELS_TX+1]; 			// Volume range state
+audio_control_range_2_n_t(1) volumeRng[CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX+1]; 			// Volume range state
 audio_control_range_4_n_t(1) sampleFreqRng; 						// Sample frequency range state
 
 // Audio test data
@@ -130,13 +130,13 @@ void audio_task(void *arg)
                 samples_to_buffer[i] = mic_samples[i][0] >> 16;
             }
 
-            if (xStreamBufferSend(sample_stream_buf, samples_to_buffer, 256 * CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX, 0) != 256 * CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX) {
+            if (xStreamBufferSend(sample_stream_buf, samples_to_buffer, 256 * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX, 0) != 256 * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX) {
                 rtos_printf("lost mic samples\n");
             }
     #if TEST_SEND_FAST
             if (tmp++ == 100) {
                 int16_t extra_sample = 0x7FFF;
-                xStreamBufferSend(sample_stream_buf, &extra_sample, CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX, 0);
+                xStreamBufferSend(sample_stream_buf, &extra_sample, CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX, 0);
                 tmp = 0;
             }
     #endif
@@ -400,7 +400,7 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, u
 
   bytes_available = xStreamBufferBytesAvailable(sample_stream_buf);
 
-  if (bytes_available > (256 + 8) * CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX) {
+  if (bytes_available > (256 + 8) * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX) {
       tx_byte_count = BYTES_PER_FRAME_EXTRA;
 #if 0
       rtos_printf("Will send more samples to prevent an overflow (%u bytes in buffer)\n", bytes_available);
@@ -409,16 +409,16 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, u
       tx_byte_count = BYTES_PER_FRAME_NOMINAL;
   }
 
-  /* TODO: Should ensure that a multiple of CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX is received here */
+  /* TODO: Should ensure that a multiple of CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX is received here */
   bytes_available = xStreamBufferReceive(sample_stream_buf, buf, tx_byte_count, 0);
 
 #if 0
   if (bytes_available < BYTES_PER_FRAME_NOMINAL) {
-      rtos_printf("Only sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX));
+      rtos_printf("Only sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX));
   } else if (bytes_available > BYTES_PER_FRAME_NOMINAL) {
-      rtos_printf("Sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX));
+      rtos_printf("Sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX));
   } else {
-      rtos_printf("Sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX));
+      rtos_printf("Sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX));
   }
 #endif
 
@@ -526,8 +526,8 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
                                         led_blinky_cb);
         xTimerStart(blinky_timer_ctx, 0);
 
-        sample_stream_buf = xStreamBufferCreate(1.5 * 256 * CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX,
-                                                CFG_TUD_AUDIO_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_N_CHANNELS_TX);
+        sample_stream_buf = xStreamBufferCreate(1.5 * 256 * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX,
+                                                CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX);
 
         extern rtos_mic_array_t *mic_array_ctx;
         xTaskCreate((TaskFunction_t) audio_task,
