@@ -20,11 +20,13 @@ typedef tflite::SimpleMemoryAllocator simple_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::MicroOpResolver micro_op_resolver_t;
 typedef tflite::MicroProfiler tflite_profiler_t;
+typedef tflite::micro::xcore::GenericDispatcher dispatcher_t;
 typedef tflite::micro::xcore::ModelMemoryLoader memory_loader_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
 
 // static variables
 static error_reporter_t error_reporter_s;
+static dispatcher_t dispatcher_s;
 static memory_loader_t memory_loader_s;
 static error_reporter_t *reporter = nullptr;
 
@@ -76,8 +78,9 @@ ModelRunnerStatus model_runner_allocate(model_runner_t *ctx,
     ctx->hInterpreter = malloc(model_runner_buffer_size_get());
   }
   // Build an interpreter to run the model with
-  interpreter_t *interpreter = new (ctx->hInterpreter) interpreter_t(
-      model, *resolver, allocator, reporter, true, memory_loader_s, profiler);
+  interpreter_t *interpreter = new (ctx->hInterpreter)
+      interpreter_t(model, *resolver, allocator, reporter, dispatcher_s,
+                    memory_loader_s, profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_tensors_status = interpreter->AllocateTensors();

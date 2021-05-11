@@ -73,8 +73,7 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
 
   // Build an interpreter to run the model with
   static tflite::micro::xcore::XCoreInterpreter static_interpreter(
-      model, resolver, tensor_arena, kTensorArenaSize, reporter, true,
-      profiler);
+      model, resolver, tensor_arena, kTensorArenaSize, reporter, profiler);
   interpreter = &static_interpreter;
 
   // Allocate memory from the tensor_arena for the model's tensors.
