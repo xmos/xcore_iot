@@ -55,21 +55,8 @@ static inline XUD_Result_t xud_data_get_check(chanend_t c, XUD_ep ep, unsigned *
         /*
          * Data packets have a 16 bit CRC. Subtract this from
          * the length.
-         *
-         * According to comments in XUD_EpFuncs.S, ISO packets do not
-         * have this 16 bit CRC in the length. Depending on the
-         * particular function, this is either not handled at all, or
-         * "handled" by checking to see if the length goes negative and
-         * returning an error if it does.
-         *
-         * This handling differs from XUD_EpFuncs.S, and only performs
-         * this subtraction on non-ISO packets.
-         * TODO: Is this handling correct?
          */
-
-        if (ep_struct[5] != XUD_EPTYPE_ISO) {
-            tail_bitlen -= 16;
-        }
+        tail_bitlen -= 16;
     }
 
     byte_len = (4 * word_len) + (tail_bitlen / 8);
