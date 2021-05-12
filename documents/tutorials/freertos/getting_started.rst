@@ -116,7 +116,7 @@ These drivers are all found in the AIoT SDK under the path `modules/rtos/drivers
 
 Documentation on each of these drivers can be found under the :doc:`References/RTOS Drivers<../../reference/rtos_drivers/index>` section in the AIoT SDK documentation pages.
 
-It is worth noting that these drivers utilize a lightweight RTOS abstraction layer, meaning that they are not dependent on FreeRTOS. Conceivably they should work on any SMP RTOS, provided an abstraction layer for it is provided. This abstraction layer is found under the path `modules/rtos/drivers/osal <https://github.com/xmos/aiot_sdk/tree/develop/modules/rtos/drivers/osal>`_. At the moment the only available SMP RTOS for XCore is the XMOS SMP FreeRTOS, but more may become available in the future.
+It is worth noting that these drivers utilize a lightweight RTOS abstraction layer, meaning that they are not dependent on FreeRTOS. Conceivably they should work on any SMP RTOS, provided an abstraction layer for it is provided. This abstraction layer is found under the path `modules/rtos/osal <https://github.com/xmos/aiot_sdk/tree/develop/modules/rtos/osal>`_. At the moment the only available SMP RTOS for XCore is the XMOS SMP FreeRTOS, but more may become available in the future.
 
 XMOS also includes some higher level RTOS compatible software services, some of which the aforementioned drivers. These include, but are not necessarily limited to:
 
