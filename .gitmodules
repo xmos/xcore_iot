@@ -62,6 +62,7 @@
 	url = git@github.com:hathach/tinyusb.git
 	shallow = true
 	fetchRecurseSubmodules = false
+	ignore = dirty
 [submodule "modules/legacy_compat/lib_mic_array"]
 	path = modules/legacy_compat/lib_mic_array
 	url = git@github.com:xmos/lib_mic_array.git
