@@ -33,6 +33,6 @@ support is mentioned where appropriate.
 Prerequisites
 *************
 
-`xTIMEComposer 15.0.5 + <https://www.xmos.com/software/tools/>`_ and `CMake 3.14 <https://cmake.org/download/>`_ + are required for building the example applications.  If necessary, download and follow the installation instructions for those components.
+`XTC Tools 15.0.6 + <https://www.xmos.com/software/tools/>`_ and `CMake 3.14 <https://cmake.org/download/>`_ + are required for building the example applications.  If necessary, download and follow the installation instructions for those components.
 
 `Python 3.8 <https://www.python.org/downloads/>`_ + is required.  We recommend you setup an `Anaconda <https://www.anaconda.com/products/individual/>`_ environment before installing.  If necessary, download and follow Anaconda's installation instructions.
