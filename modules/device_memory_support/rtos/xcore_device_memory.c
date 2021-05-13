@@ -5,7 +5,6 @@
 #include <stddef.h>
 #include <string.h>
 
-#ifdef XCORE
 #include <xcore/assert.h>
 #include <xcore/port.h>
 
@@ -48,5 +47,3 @@ size_t swmem_load(void *dest, const void *src, size_t size) {
 }
 
 #endif /* USE_SWMEM */
-
-#endif  // XCORE

@@ -23,10 +23,6 @@ extern "C" {
 
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
 
-#ifdef _TIME_H_
-#define _clock_defined
-#endif
-
 /**
  * Initialize and start the SwMem driver.
  *
