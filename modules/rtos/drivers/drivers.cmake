@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(DRIVERS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/drivers")
+set(DRIVERS_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/drivers")
 
 set(RTOS_GPIO_DRIVER_DIR "${DRIVERS_DIR}/gpio")
 set(RTOS_I2C_DRIVER_DIR "${DRIVERS_DIR}/i2c")

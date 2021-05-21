@@ -51,4 +51,4 @@ run: $(EXECUTABLE)
 
 # This multitile build support file c the 
 # recipe for EXECUTABLE
-include $(XMOS_AIOT_SDK_PATH)/tools/cmake_utils/multitile_build.mk
+include $(XCORE_SDK_PATH)/tools/cmake_utils/multitile_build.mk

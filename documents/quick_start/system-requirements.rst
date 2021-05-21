@@ -4,7 +4,7 @@
 System Requirements
 ###################
 
-The AIoT SDK are officially supported on the following platforms. Unofficial
+The XCore SDK are officially supported on the following platforms. Unofficial
 support is mentioned where appropriate.
 
 

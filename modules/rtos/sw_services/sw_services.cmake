@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(SW_SERVICES_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/sw_services")
+set(SW_SERVICES_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/sw_services")
 
 set(WIFI_MANAGER_DIR "${SW_SERVICES_DIR}/wifi_manager")
 set(DHCPD_DIR "${SW_SERVICES_DIR}/dhcpd")

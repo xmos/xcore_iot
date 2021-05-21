@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(AIOT_SDK_PATH $ENV{XMOS_AIOT_SDK_PATH})
+set(SDK_PATH $ENV{XCORE_SDK_PATH})
 
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("${AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -49,14 +49,14 @@ target_compile_options(hello_world PRIVATE ${BUILD_FLAGS})
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "${AIOT_SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
+  "${SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/device_memory_support/bare-metal")
+set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal")
 
 #**********************
 # APP sources
 #**********************
-include("${AIOT_SDK_PATH}/modules/aif/ai_framework.cmake")
+include("${SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(APP_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/main.cc"

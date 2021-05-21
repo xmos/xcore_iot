@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(AIOT_SDK_PATH $ENV{XMOS_AIOT_SDK_PATH})
+set(SDK_PATH $ENV{XCORE_SDK_PATH})
 
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("${AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -17,7 +17,7 @@ endif()
 
 project(micro_speech VERSION 1.0.0 )
 
-enable_language(CXX XC C ASM)
+enable_language(CXX C ASM)
 
 #**********************
 # Paths
@@ -25,7 +25,7 @@ enable_language(CXX XC C ASM)
 
 set(KISS_FFT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/kissfft")
 
-set(RTOS_SUPPORT_DIR "${AIOT_SDK_PATH}/modules")
+set(RTOS_SUPPORT_DIR "${SDK_PATH}/modules")
 
 set(LIB_DSP_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/api")
 set(LIB_MIC_ARRAY_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/legacy_compat/lib_mic_array/lib_mic_array/api")
@@ -81,7 +81,7 @@ set(KISS_FFT_SOURCES
 # micro_features sources
 #**********************
 
-include("${AIOT_SDK_PATH}/modules/aif/ai_framework.cmake")
+include("${SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(MICRO_FEATURES_SOURCES
   "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
@@ -121,9 +121,9 @@ set(LIB_MIC_ARRAY_SOURCES
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "${AIOT_SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
+  "${SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/device_memory_support/bare-metal")
+set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal")
 
 #**********************
 # APP sources

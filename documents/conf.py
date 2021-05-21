@@ -21,7 +21,7 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 
 # -- Project information -----------------------------------------------------
 
-project = u"AIoT Software Development Kit"
+project = u"XCore Software Development Kit"
 copyright = u"2021, XMOS"
 author = "XMOS"
 
@@ -48,8 +48,8 @@ extensions = [
 ]
 
 # Breathe Configuration
-breathe_projects = {"AIoTSDK": "doxygen/xml/"}
-breathe_default_project = "AIoTSDK"
+breathe_projects = {"XCoreSDK": "doxygen/xml/"}
+breathe_default_project = "XCoreSDK"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

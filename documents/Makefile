@@ -1,9 +1,9 @@
 # Makefile to build the Sphinx and Doxygen documentation
-# for the AIoT SDK
+# for the XCoreSDK SDK
 #
 
 DOXYGEN_OUTPUT_DIR=doxygen/xml
-BREATHE_PROJECT=AIoTSDK
+BREATHE_PROJECT=XCoreSDKSDK
 
 # You can set these variables from the command line, and also
 # from the environment for the first two.

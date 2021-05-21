@@ -1,5 +1,5 @@
-AIoT SDK change log
-===================
+XCore SDK change log
+====================
 
 In progress
 -----------
