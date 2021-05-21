@@ -49,7 +49,7 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="aiot_sdk;cdt.managedbuild.toolchain.gnu.cross.base.135028835" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="xcore_sdk;cdt.managedbuild.toolchain.gnu.cross.base.135028835" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 			</storageModule>
 		</cconfiguration>
 	</storageModule>

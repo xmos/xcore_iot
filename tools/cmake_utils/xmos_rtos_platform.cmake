@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
-if(NOT DEFINED ENV{XMOS_AIOT_SDK_PATH})
-    message(FATAL_ERROR "Environment var XMOS_AIOT_SDK_PATH must be set before including xmos_utils.cmake")
+if(NOT DEFINED ENV{XCORE_SDK_PATH})
+    message(FATAL_ERROR "Environment var XCORE_SDK_PATH must be set before including xmos_utils.cmake")
 endif()
 
 #**********************
@@ -20,7 +20,7 @@ set(COLOR_WHITE   "${ESC}[37m")
 #********************************
 # Set up compiler
 #********************************
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #********************************
 # Set up for multi-tile builds
@@ -39,12 +39,12 @@ endif()
 if(NOT DEFINED BOARD)
     message(FATAL_ERROR "BOARD must be defined to specify the hardware target.")
 endif()
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/board_support/${BOARD}.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/board_support/${BOARD}.cmake")
 
 #**********************
 # Paths
 #**********************
-set(MODULES_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
+set(MODULES_DIR "$ENV{XCORE_SDK_PATH}/modules")
 
 #********************************
 # Gather various sources

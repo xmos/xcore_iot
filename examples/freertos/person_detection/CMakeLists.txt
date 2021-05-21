@@ -10,14 +10,14 @@ set(USE_AIF TRUE)
 set(USE_DEVICE_MEMORY_SUPPORT TRUE)
 
 ## Import XMOS configurations
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(person_detect)
 set(PROJECT_VERSION 0.6.0)
 
 ## Enable languages for project
-enable_language(CXX XC C ASM)
+enable_language(CXX C ASM)
 
 ## Set XMOS application variables
 set(APP_COMPILER_FLAGS

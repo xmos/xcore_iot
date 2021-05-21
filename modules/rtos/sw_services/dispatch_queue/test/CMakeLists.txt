@@ -17,12 +17,12 @@ set(USE_DISPATCH_QUEUE TRUE)
 
 # Import XMOS RTOS platform configuration.
 # Must be done after setting the configuration options.
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
-include("$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/rtos.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("$ENV{XCORE_SDK_PATH}/modules/rtos/rtos.cmake")
 
 project(dispatch_queue_tests VERSION 1.0.0)
 
-enable_language(XC CXX C ASM)
+enable_language(CXX C ASM)
 
 #**********************
 # install

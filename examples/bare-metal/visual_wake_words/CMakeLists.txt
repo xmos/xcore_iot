@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(AIOT_SDK_PATH $ENV{XMOS_AIOT_SDK_PATH})
+set(SDK_PATH $ENV{XCORE_SDK_PATH})
 
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("${AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -18,7 +18,7 @@ endif()
 
 project(vww VERSION 1.0.0)
 
-enable_language(CXX XC C ASM)
+enable_language(CXX C ASM)
 
 #**********************
 # Build flags
@@ -52,14 +52,14 @@ target_compile_options(vww PRIVATE ${BUILD_FLAGS})
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "${AIOT_SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
+  "${SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${AIOT_SDK_PATH}/modules/device_memory_support/bare-metal")
+set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal")
 
 #**********************
 # APP sources
 #**********************
-include("${AIOT_SDK_PATH}/modules/aif/ai_framework.cmake")
+include("${SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(INFERENCE_ENGINE_SOURCE_DIR
   "${PROJECT_SOURCE_DIR}/inference_engine/src"

@@ -63,11 +63,11 @@ To remove the environment, deactivate and run:
 Building Examples
 *****************
 
-To build the examples, the `XMOS_AIOT_SDK_PATH` environment variable must be set.
+To build the examples, the `XCORE_SDK_PATH` environment variable must be set.
 
 .. code-block:: console
 
-    $ export XMOS_AIOT_SDK_PATH#<path to>/xcore_sdk
+    $ export XCORE_SDK_PATH=<path to>/xcore_sdk
 
 You can also add this export command to your `.profile` or `.bash_profile` script. This way the environment variable will be set in a new terminal window.
 

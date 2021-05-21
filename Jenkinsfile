@@ -25,7 +25,7 @@ pipeline {
         timestamps()
     }
     environment {
-        XMOS_AIOT_SDK_PATH = "${env.WORKSPACE}"
+        XCORE_SDK_PATH = "${env.WORKSPACE}"
     }
     stages {
         stage("Setup") {
@@ -46,10 +46,10 @@ pipeline {
                                 recursiveSubmodules: true],
                                 [$class: 'CleanCheckout']],
                     userRemoteConfigs: [[credentialsId: 'xmos-bot',
-                                        url: 'git@github.com:xmos/aiot_sdk']]
+                                        url: 'git@github.com:xmos/xcore_sdk']]
                 ])
                 // Create venv
-                sh "conda env create -q -p sdk_venv -f tools/develop/environment.yml"
+                sh "conda env create -q -p xcore_sdk_env -f tools/develop/environment.yml"
                 // Install xmos tools version
                 sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
             }
@@ -58,18 +58,18 @@ pipeline {
             // Roll all conda packages forward beyond their pinned versions
             when { expression { return params.UPDATE_ALL } }
             steps {
-                sh "conda update --all -y -q -p sdk_venv"
+                sh "conda update --all -y -q -p xcore_sdk_env"
             }
         }
         stage("Build examples") {
             steps {
                 sh """. /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/${params.TOOLS_VERSION}/SetEnv &&
-                      . activate ./sdk_venv && bash test/build_examples.sh"""
+                      . activate ./xcore_sdk_env && bash test/build_examples.sh"""
             }
         }
         stage("Install") {
             steps {
-                sh """. activate ./sdk_venv && bash install.sh"""
+                sh """. activate ./xcore_sdk_env && bash install.sh"""
             }
         }
         stage("Test") {
@@ -78,9 +78,9 @@ pipeline {
                 // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
                 // ***************************************************************************
                 // run unit tests
-                sh """. activate ./sdk_venv && pytest -v test --junitxml test_junit.xml"""
+                sh """. activate ./xcore_sdk_env && pytest -v test --junitxml test_junit.xml"""
                 // run notebook tests
-                sh """. activate ./sdk_venv && cd test && bash test_notebooks.sh"""
+                sh """. activate ./xcore_sdk_env && cd test && bash test_notebooks.sh"""
                 // This step collects these files for display in Jenkins UI
                 junit "**/*_junit.xml"
             }
@@ -88,7 +88,7 @@ pipeline {
         stage("Build documentation") {
             steps {
                 dir('documents') {
-                    sh '. activate ../sdk_venv && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
+                    sh '. activate ../xcore_sdk_env && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
                     dir('_build') {
                         archiveArtifacts artifacts: 'html/**/*', fingerprint: false
                         sh 'tar -czf docs_sdk.tgz html'

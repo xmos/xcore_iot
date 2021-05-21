@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-if [ -z ${XMOS_AIOT_SDK_PATH} ]; then
-	echo "XMOS_AIOT_SDK_PATH must be set before running this script."
+if [ -z ${XCORE_SDK_PATH} ]; then
+	echo "XCORE_SDK_PATH must be set before running this script."
 else
-    INSTALL_DIR=${XMOS_AIOT_SDK_PATH}/tools/install
-    AI_TOOLS_DIR=${XMOS_AIOT_SDK_PATH}/tools/ai_tools
+    INSTALL_DIR=${XCORE_SDK_PATH}/tools/install
+    AI_TOOLS_DIR=${XCORE_SDK_PATH}/tools/ai_tools
 
     echo "*****************************"
     echo "* Updating tools submodules *"
@@ -22,7 +22,7 @@ else
     echo "*******************************"
     echo "* Building xcore_interpreters *"
     echo "******************************"
-    ADF_DIR=${XMOS_AIOT_SDK_PATH}/modules/aif
+    ADF_DIR=${XCORE_SDK_PATH}/modules/aif
     XCORE_INTERPRETERS_DIR=${AI_TOOLS_DIR}/utils/adf/xcore_interpreters/host_library
     (cd ${XCORE_INTERPRETERS_DIR}; mkdir -p build)
     (cd ${XCORE_INTERPRETERS_DIR}/build; cmake ../ ; make install)

@@ -62,7 +62,7 @@ If you setup a virtual environment as suggested in the :ref:`Getting Started <sd
 
 We've provided two paths for you to optimize your model for xcore.ai.
 
-The **recommended** option is to use Python or a Jupyter Notebook.  We've provided an `example Notebook <https://github.com/xmos/aiot_sdk/tree/develop/examples/bare-metal/cifar10/train/training_and_converting.ipynb>`_ where we demonstrate how to load a TensorFlow CNN model trained using the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset, convert it to TensorFlow Lite, then optimize it to be deployed to xcore.ai.  This notebook requires the installation of some additional Python packages
+The **recommended** option is to use Python or a Jupyter Notebook.  We've provided an `example Notebook <https://github.com/xmos/xcore_sdk/tree/develop/examples/bare-metal/cifar10/train/training_and_converting.ipynb>`_ where we demonstrate how to load a TensorFlow CNN model trained using the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ dataset, convert it to TensorFlow Lite, then optimize it to be deployed to xcore.ai.  This notebook requires the installation of some additional Python packages
 
 .. code-block:: console
 

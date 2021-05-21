@@ -31,14 +31,14 @@ set(USE_TINYUSB TRUE)
 set(USE_DISK_MANAGER_TUSB TRUE)
 
 ## Import XMOS configurations
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(usb)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
-enable_language(XC CXX C ASM)
+enable_language(CXX C ASM)
 
 ## Set app vars
 set(APP_COMPILER_FLAGS

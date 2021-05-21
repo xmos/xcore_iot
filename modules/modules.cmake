@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(MODULES_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules")
+set(MODULES_DIR "$ENV{XCORE_SDK_PATH}/modules")
 
 set(MULTITILE_SUPPORT_DIR "${MODULES_DIR}/multitile_support")
 set(LIB_DSP_DIR "${MODULES_DIR}/lib_dsp")
