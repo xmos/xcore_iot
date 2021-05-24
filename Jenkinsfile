@@ -5,7 +5,7 @@ pipeline {
         dockerfile {
             filename 'Dockerfile'
             dir 'tools/ci'
-            args ""
+            args "-v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro -v /home/jenkins/.ssh:/home/jenkins/.ssh:ro"
         }
     }
     parameters { // Available to modify on the job page within Jenkins if starting a build
