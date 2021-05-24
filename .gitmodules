@@ -23,10 +23,6 @@
 	path = modules/rtos/sw_services/json/thirdparty/jsmn
 	url = git@github.com:zserge/jsmn.git
 	shallow = true
-[submodule "ai_tools"]
-	path = tools/ai_tools
-	url = git@github.com:xmos/ai_tools.git
-	shallow = true
 [submodule "lib_i2c"]
 	path = modules/hil/lib_i2c
 	url = git@github.com:xmos/lib_i2c.git
