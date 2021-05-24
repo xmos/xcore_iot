@@ -5,7 +5,7 @@ pipeline {
         dockerfile {
             filename 'Dockerfile'
             dir 'tools/ci'
-            args ""
+            args "-v /etc/passwd:/etc/passwd:ro -v /etc/group:/etc/group:ro -v /home/jenkins/.ssh:/home/jenkins/.ssh:ro"
         }
     }
     parameters { // Available to modify on the job page within Jenkins if starting a build
@@ -67,20 +67,20 @@ pipeline {
                       . activate ./xcore_sdk_env && bash test/build_examples.sh"""
             }
         }
-        stage("Install") {
+        stage("Install AI Tools") {
             steps {
-                sh """. activate ./xcore_sdk_env && bash install.sh"""
+                sh """. activate ./xcore_sdk_env && bash tools/ai/install.sh"""
             }
         }
-        stage("Test") {
+        stage("AI Tools Test") {
             steps {
                 // ***************************************************************************
                 // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
                 // ***************************************************************************
                 // run unit tests
-                sh """. activate ./xcore_sdk_env && pytest -v test --junitxml test_junit.xml"""
+                sh """. activate ./xcore_sdk_env && cd test/ai && pytest -v --junitxml test_junit.xml"""
                 // run notebook tests
-                sh """. activate ./xcore_sdk_env && cd test && bash test_notebooks.sh"""
+                sh """. activate ./xcore_sdk_env && cd test/ai && bash test_notebooks.sh"""
                 // This step collects these files for display in Jenkins UI
                 junit "**/*_junit.xml"
             }

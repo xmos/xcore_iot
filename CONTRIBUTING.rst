@@ -47,11 +47,11 @@ Activate the environment by specifying the path:
 
     $ conda activate xcore_sdk_venv/
 
-Install the SDK:
+Install the AI Tools:
 
 .. code-block:: console
 
-    $ ./install.sh
+    $ ./tools/ai/install.sh
 
 To remove the environment, deactivate and run:
 

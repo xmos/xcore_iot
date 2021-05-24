@@ -7,7 +7,6 @@
 **/*.egg-info/*
 **/*.eggs/*
 **/.ipynb_checkpoints/*
-*sdk_venv/*
 
 # Build & debug cruft
 **/.build*/*
@@ -48,3 +47,7 @@ build/
 
 # macOS cruft
 .DS_Store
+
+# ai_tools
+tools/ai/ai_tools
+*xcore_sdk_venv/*
