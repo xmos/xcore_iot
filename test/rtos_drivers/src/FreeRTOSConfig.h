@@ -51,14 +51,7 @@ your application. */
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-
-#if ON_TILE(0)
-#define configTOTAL_HEAP_SIZE                   224*1024
-#endif
-#if ON_TILE(1)
-#define configTOTAL_HEAP_SIZE                   128*1024
-#endif
-
+#define configTOTAL_HEAP_SIZE                   256*1024
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */

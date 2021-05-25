@@ -1,8 +1,8 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#ifndef TEST_PRINT_H_
-#define TEST_PRINT_H_
+#ifndef RTOS_TEST_UTILS_H_
+#define RTOS_TEST_UTILS_H_
 
 #include "rtos_printf.h"
 
@@ -11,4 +11,11 @@
 #define test_printf( FMT, ... )      module_printf("Test", FMT, ##__VA_ARGS__)
 #define kernel_printf( FMT, ... )    module_printf("Kernel", FMT, ##__VA_ARGS__)
 
-#endif /* TEST_PRINT_H_ */
+/* Chan transaction used to sync tiles */
+#if ON_TILE(0)
+#define sync(chan)     { chan_out_byte(chan, 0);   }
+#else
+#define sync(chan)     { (void)chan_in_byte(chan); }
+#endif
+
+#endif /* RTOS_TEST_UTILS_H_ */

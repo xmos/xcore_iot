@@ -22,7 +22,7 @@
 /* App headers */
 #include "app_conf.h"
 #include "board_init.h"
-#include "test_printf.h"
+#include "rtos_test/rtos_test_utils.h"
 #include "individual_tests/individual_tests.h"
 
 static rtos_intertile_t intertile_ctx_s;
@@ -55,50 +55,21 @@ void vApplicationMallocFailedHook( void )
 
 void vApplicationStackOverflowHook( TaskHandle_t pxTask, char* pcTaskName )
 {
-    kernel_printf("Stack Overflow!");
+    kernel_printf("Stack Overflow! %s", pcTaskName);
     configASSERT(0);
 }
 
-/* Use chan transaction to sync tiles */
-#if ON_TILE(0)
-#define advance_stage(chan, val)                  \
-{                                                \
-    test_printf("Proceed to stage %d", val);     \
-    chan_out_byte(chan, val++);                  \
-}
-#else
-#define advance_stage(chan, val)                  \
-{                                                \
-    val = chan_in_byte(chan);                    \
-    test_printf("Synced to stage %d", val);      \
-}
-#endif
-
-
 void vApplicationDaemonTaskStartup(void *arg)
 {
-    uint32_t test_state = 0;
-
     test_printf("Starting intertile device");
     rtos_intertile_start(intertile_ctx);
 
-    advance_stage(other_tile_c, test_state);
-    {
-        i2c_printf("Start devices");
-        start_i2c_devices(i2c_master_ctx, i2c_slave_ctx);
-        i2c_printf("Devices started");
+    if (RUN_I2C_TESTS) {
+        i2c_device_tests(i2c_master_ctx, i2c_slave_ctx, other_tile_c);
+    } else {
+        test_printf("Skipped I2C tests");
     }
 
-    advance_stage(other_tile_c, test_state);
-    {
-        i2c_printf("Start test");
-        if (run_i2c_tests(i2c_master_ctx, i2c_slave_ctx) == -1)
-        {
-            i2c_printf("Test failed");
-            configASSERT(0);
-        }
-    }
-    advance_stage(other_tile_c, test_state);
 
     // rtos_gpio_rpc_config(gpio_ctx_t0, appconfGPIO_T0_RPC_PORT, appconfGPIO_RPC_HOST_PRIORITY);
     // rtos_gpio_rpc_config(gpio_ctx_t1, appconfGPIO_T1_RPC_PORT, appconfGPIO_RPC_HOST_PRIORITY);

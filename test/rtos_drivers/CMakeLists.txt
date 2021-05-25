@@ -41,12 +41,14 @@ set(APP_COMPILER_FLAGS
 set(APP_SOURCES
     "src/main.c"
     "src/board_init.c"
+
     "src/individual_tests/i2c/i2c_test.c"
     "src/individual_tests/i2c/master_reg_write_test.c"
     "src/individual_tests/i2c/master_reg_read_test.c"
     "src/individual_tests/i2c/master_write_test.c"
     "src/individual_tests/i2c/master_write_multiple_test.c"
-    # "src/individual_tests/i2c/master_read_test.c"
+    "src/individual_tests/i2c/master_read_test.c"
+    "src/individual_tests/i2c/master_read_multiple_test.c"
 )
 
 set(APP_INCLUDES
@@ -54,6 +56,8 @@ set(APP_INCLUDES
 )
 
 add_compile_definitions(
+    RUN_I2C_TESTS=${I2C_TEST}
+
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
 )

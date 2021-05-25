@@ -16,15 +16,18 @@
 #include "app_conf.h"
 #include "individual_tests/i2c/i2c_test.h"
 
-#define local_printf( FMT, ... )    i2c_printf("master_reg_read_test|" FMT, ##__VA_ARGS__)
+static const char* test_name = "master_reg_read_test";
+
+#define local_printf( FMT, ... )    i2c_printf("%s|" FMT, test_name, ##__VA_ARGS__)
 
 typedef struct reg_test {
     uint8_t reg;
     uint8_t val;
 } reg_test_t;
 
+/* Test Vector */
 #define I2C_MASTER_REG_READ_TEST_ITER   4
-static reg_test_t read_reg_test_vector[I2C_MASTER_REG_READ_TEST_ITER] =
+static reg_test_t test_vector[I2C_MASTER_REG_READ_TEST_ITER] =
 {
     {0xDE, 0xFF},
     {0xAD, 0x00},
@@ -34,51 +37,9 @@ static reg_test_t read_reg_test_vector[I2C_MASTER_REG_READ_TEST_ITER] =
 
 #if ON_TILE(1)
 static uint32_t test_slave_iters = 0;
-static uint8_t test_slave_send_val = 0;
-static uint8_t* test_slave_send_val_ptr = &test_slave_send_val;
-
-int master_reg_read_test_i2c_slave_rx(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
-{
-    local_printf("SLAVE read iteration %d", test_slave_iters);
-
-    if (len != 1)
-    {
-        local_printf("SLAVE failed on iteration %d got len %d expected %d", test_slave_iters, len, 1);
-    } else {
-        for (int i=0; i<I2C_MASTER_REG_READ_TEST_ITER ;i++)
-        {
-            if (read_reg_test_vector[i].reg == *data)
-            {
-                test_slave_send_val = read_reg_test_vector[i].val;
-                local_printf("SLAVE rx set tx val to 0x%x", test_slave_send_val);
-                break;
-            }
-        }
-    }
-
-    test_slave_iters++;
-    return (test_slave_iters == I2C_MASTER_REG_READ_TEST_ITER);
-}
-
-size_t master_reg_read_test_i2c_slave_tx_start(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data)
-{
-    size_t len = 0;
-
-    *data = test_slave_send_val_ptr;
-    local_printf("SLAVE tx 0x%x", **data);
-    len = 1;
-
-    if(test_slave_iters == I2C_MASTER_REG_READ_TEST_ITER)
-    {
-        i2c_slave_test_stage_increment();
-    }
-
-    return len;
-}
-
 #endif
 
-int master_reg_read_test_master(rtos_i2c_master_t *i2c_master_ctx)
+static int main_test(i2c_test_ctx_t *ctx)
 {
     local_printf("Start");
 
@@ -89,9 +50,9 @@ int master_reg_read_test_master(rtos_i2c_master_t *i2c_master_ctx)
         {
             uint8_t tmpval = 0;
             local_printf("MASTER read iteration %d", i);
-            reg_ret = rtos_i2c_master_reg_read(i2c_master_ctx,
+            reg_ret = rtos_i2c_master_reg_read(ctx->i2c_master_ctx,
                                                I2C_SLAVE_ADDR,
-                                               read_reg_test_vector[i].reg,
+                                               test_vector[i].reg,
                                                &tmpval);
 
             if (reg_ret != I2C_REGOP_SUCCESS)
@@ -100,9 +61,9 @@ int master_reg_read_test_master(rtos_i2c_master_t *i2c_master_ctx)
                 return -1;
             }
 
-            if (tmpval != read_reg_test_vector[i].val)
+            if (tmpval != test_vector[i].val)
             {
-                local_printf("MASTER failed on iteration %d got 0x%x expected 0x%x", i, tmpval, read_reg_test_vector[i].val);
+                local_printf("MASTER failed on iteration %d got 0x%x expected 0x%x", i, tmpval, test_vector[i].val);
                 return -1;
             }
         }
@@ -113,13 +74,97 @@ int master_reg_read_test_master(rtos_i2c_master_t *i2c_master_ctx)
     {
         while(test_slave_iters < I2C_MASTER_REG_READ_TEST_ITER)
         {
-            vTaskDelay(pdMS_TO_TICKS(10));
+            vTaskDelay(pdMS_TO_TICKS(1));
+        }
+
+        if (ctx->slave_success[ctx->cur_test] != 0)
+        {
+            local_printf("SLAVE failed");
+            return -1;
         }
     }
     #endif
 
     local_printf("Done");
     return 0;
+}
+
+
+#if ON_TILE(1)
+static uint8_t test_slave_send_val = 0;
+static uint8_t* test_slave_send_val_ptr = &test_slave_send_val;
+
+I2C_SLAVE_RX_ATTR
+static void slave_rx(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
+{
+    local_printf("SLAVE read iteration %d", test_slave_iters);
+    i2c_test_ctx_t *test_ctx = (i2c_test_ctx_t*)ctx->app_data;
+
+    if (len != 1)
+    {
+        local_printf("SLAVE failed on iteration %d got len %d expected %d", test_slave_iters, len, 1);
+        test_ctx->slave_success[test_ctx->cur_test] = -1;
+    } else {
+        for (int i=0; i<I2C_MASTER_REG_READ_TEST_ITER ;i++)
+        {
+            if (test_vector[i].reg == *data)
+            {
+                test_slave_send_val = test_vector[i].val;
+                local_printf("SLAVE rx set tx val to 0x%x", test_slave_send_val);
+                break;
+            }
+        }
+    }
+
+    test_slave_iters++;
+}
+
+I2C_SLAVE_TX_START_ATTR
+static size_t slave_tx_start(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data)
+{
+    size_t len = 0;
+
+    *data = test_slave_send_val_ptr;
+    local_printf("SLAVE tx 0x%x", **data);
+    len = 1;
+
+    return len;
+}
+
+I2C_SLAVE_TX_DONE_ATTR
+static void slave_tx_done(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
+{
+    local_printf("SLAVE tx done %d bytes", len);
+
+    if (len != 1)
+    {
+        i2c_test_ctx_t *test_ctx = (i2c_test_ctx_t*)ctx->app_data;
+        test_ctx->slave_success[test_ctx->cur_test] = -1;
+    }
+}
+
+#endif
+
+void register_master_reg_read_test(i2c_test_ctx_t *test_ctx)
+{
+    uint32_t this_test_num = test_ctx->test_cnt;
+
+    local_printf("Register to test num %d", this_test_num);
+
+    test_ctx->name[this_test_num] = (char*)test_name;
+    test_ctx->main_test[this_test_num] = main_test;
+
+    #if ON_TILE(1)
+    test_ctx->slave_rx[this_test_num] = slave_rx;
+    test_ctx->slave_tx_start[this_test_num] = slave_tx_start;
+    test_ctx->slave_tx_done[this_test_num] = slave_tx_done;
+    #endif
+
+    #if ON_TILE(0)
+    test_ctx->slave_rx[this_test_num] = NULL;
+    #endif
+
+    test_ctx->test_cnt++;
 }
 
 #undef local_printf

@@ -16,13 +16,13 @@
 #include "app_conf.h"
 #include "individual_tests/i2c/i2c_test.h"
 
-static const char* test_name = "master_read_test";
+static const char* test_name = "master_read_multiple_test";
 
 #define local_printf( FMT, ... )    i2c_printf("%s|" FMT, test_name, ##__VA_ARGS__)
 
-#define I2C_MASTER_READ_TEST_ITER   2
-#define I2C_MASTER_READ_TEST_SIZE   4
-static uint8_t test_vector[I2C_MASTER_READ_TEST_ITER][I2C_MASTER_READ_TEST_SIZE] =
+#define I2C_MASTER_READ_MULTIPLE_TEST_ITER   2
+#define I2C_MASTER_READ_MULTIPLE_TEST_SIZE   4
+static uint8_t test_vector[I2C_MASTER_READ_MULTIPLE_TEST_ITER][I2C_MASTER_READ_MULTIPLE_TEST_SIZE] =
 {
     {0x00, 0xFF, 0xAA, 0x55},
     {0xDE, 0xAD, 0xBE, 0xEF},
@@ -40,23 +40,36 @@ static int main_test(i2c_test_ctx_t *ctx)
     #if ON_TILE(0)
     {
         i2c_res_t ret;
-        for (int i=0; i<I2C_MASTER_READ_TEST_ITER; i++)
+        for (int i=0; i<I2C_MASTER_READ_MULTIPLE_TEST_ITER; i++)
         {
-            uint8_t buf[I2C_MASTER_READ_TEST_SIZE] = {0};
-            local_printf("MASTER read iteration %d", i);
+            uint8_t buf[I2C_MASTER_READ_MULTIPLE_TEST_SIZE] = {0};
+            local_printf("MASTER read multiple iteration %d", i);
+
+            local_printf("MASTER read 1");
             ret = rtos_i2c_master_read(ctx->i2c_master_ctx,
                                        I2C_SLAVE_ADDR,
                                        buf,
-                                       I2C_MASTER_READ_TEST_SIZE,
-                                       1);
-
+                                       1,
+                                       0);
             if (ret != I2C_ACK)
             {
                 local_printf("MASTER failed on iteration %d", i);
                 return -1;
             }
 
-            for (int j=0; j<I2C_MASTER_READ_TEST_SIZE; j++)
+            local_printf("MASTER read %d", I2C_MASTER_READ_MULTIPLE_TEST_SIZE-1);
+            ret = rtos_i2c_master_read(ctx->i2c_master_ctx,
+                                       I2C_SLAVE_ADDR,
+                                       buf+1,
+                                       I2C_MASTER_READ_MULTIPLE_TEST_SIZE-1,
+                                       0);
+            if (ret != I2C_ACK)
+            {
+                local_printf("MASTER failed on iteration %d", i);
+                return -1;
+            }
+
+            for (int j=0; j<I2C_MASTER_READ_MULTIPLE_TEST_SIZE; j++)
             {
                 if (buf[j] != test_vector[i][j])
                 {
@@ -64,13 +77,16 @@ static int main_test(i2c_test_ctx_t *ctx)
                     return -1;
                 }
             }
+
+            local_printf("MASTER send stop bit iteration %d", i);
+            rtos_i2c_master_stop_bit_send(ctx->i2c_master_ctx);
         }
     }
     #endif
 
     #if ON_TILE(1)
     {
-        while(test_slave_iters < I2C_MASTER_READ_TEST_ITER)
+        while(test_slave_iters < (I2C_MASTER_READ_MULTIPLE_TEST_ITER << 1))    // each iter has 2 slave steps
         {
             vTaskDelay(pdMS_TO_TICKS(1));
         }
@@ -89,7 +105,7 @@ static int main_test(i2c_test_ctx_t *ctx)
 
 #if ON_TILE(1)
 
-static uint8_t send_buf[I2C_MASTER_READ_TEST_SIZE] = {0};
+static uint8_t send_buf[I2C_MASTER_READ_MULTIPLE_TEST_SIZE] = {0};
 static uint8_t* send_buf_ptr = (uint8_t*)&send_buf;
 
 I2C_SLAVE_RX_ATTR
@@ -101,19 +117,22 @@ static void slave_rx(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_
 I2C_SLAVE_TX_START_ATTR
 static size_t slave_tx_start(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data)
 {
+    size_t len;
     local_printf("SLAVE tx start");
-    *data = send_buf_ptr;
-    memcpy(send_buf, test_vector[test_slave_iters], I2C_MASTER_READ_TEST_SIZE);
+    memcpy(send_buf, test_vector[test_slave_iters>>1], I2C_MASTER_READ_MULTIPLE_TEST_SIZE);
+    *data = ((test_slave_iters%2) == 0) ? send_buf_ptr : send_buf_ptr+1;
+    len = ((test_slave_iters%2) == 0) ? 1 : I2C_MASTER_READ_MULTIPLE_TEST_SIZE-1;
 
-    return I2C_MASTER_READ_TEST_SIZE;
+    return len;
 }
 
 I2C_SLAVE_TX_DONE_ATTR
 static void slave_tx_done(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
 {
     local_printf("SLAVE tx done len %d", len);
+    size_t expected_len = ((test_slave_iters%2) == 0) ? 1 : I2C_MASTER_READ_MULTIPLE_TEST_SIZE-1;
 
-    if (len != I2C_MASTER_READ_TEST_SIZE)
+    if (len != expected_len)
     {
         i2c_test_ctx_t *test_ctx = (i2c_test_ctx_t*)ctx->app_data;
         test_ctx->slave_success[test_ctx->cur_test] = -1;
@@ -124,7 +143,7 @@ static void slave_tx_done(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, 
 
 #endif
 
-void register_master_read_test(i2c_test_ctx_t *test_ctx)
+void register_master_read_multiple_test(i2c_test_ctx_t *test_ctx)
 {
     uint32_t this_test_num = test_ctx->test_cnt;
 
