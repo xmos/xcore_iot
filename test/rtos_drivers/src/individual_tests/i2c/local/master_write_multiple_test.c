@@ -20,6 +20,10 @@ static const char* test_name = "master_write_multiple_test";
 
 #define local_printf( FMT, ... )    i2c_printf("%s|" FMT, test_name, ##__VA_ARGS__)
 
+#define I2C_MASTER_TILE 0
+#define I2C_SLAVE_TILE  1
+
+#if ON_TILE(I2C_MASTER_TILE) || ON_TILE(I2C_SLAVE_TILE)
 #define I2C_MASTER_WRITE_MULTIPLE_TEST_ITER   2
 #define I2C_MASTER_WRITE_MULTIPLE_TEST_SIZE   4
 static uint8_t test_vector[I2C_MASTER_WRITE_MULTIPLE_TEST_ITER][I2C_MASTER_WRITE_MULTIPLE_TEST_SIZE] =
@@ -27,8 +31,9 @@ static uint8_t test_vector[I2C_MASTER_WRITE_MULTIPLE_TEST_ITER][I2C_MASTER_WRITE
     {0x00, 0xFF, 0xAA, 0x55},
     {0xDE, 0xAD, 0xBE, 0xEF},
 };
+#endif
 
-#if ON_TILE(1)
+#if ON_TILE(I2C_SLAVE_TILE)
 static uint32_t test_slave_iters = 0;
 #endif
 
@@ -37,7 +42,7 @@ static int main_test(i2c_test_ctx_t *ctx)
 {
     local_printf("Start");
 
-    #if ON_TILE(0)
+    #if ON_TILE(I2C_MASTER_TILE)
     {
         i2c_res_t ret;
         for (int i=0; i<I2C_MASTER_WRITE_MULTIPLE_TEST_ITER; i++)
@@ -79,7 +84,7 @@ static int main_test(i2c_test_ctx_t *ctx)
     }
     #endif
 
-    #if ON_TILE(1)
+    #if ON_TILE(I2C_SLAVE_TILE)
     {
         while(test_slave_iters < (I2C_MASTER_WRITE_MULTIPLE_TEST_ITER << 1))    // each iter has 2 slave steps
         {
@@ -98,7 +103,7 @@ static int main_test(i2c_test_ctx_t *ctx)
     return 0;
 }
 
-#if ON_TILE(1)
+#if ON_TILE(I2C_SLAVE_TILE)
 I2C_SLAVE_RX_ATTR
 static void slave_rx(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
 {
@@ -136,11 +141,11 @@ void register_master_write_multiple_test(i2c_test_ctx_t *test_ctx)
     test_ctx->name[this_test_num] = (char*)test_name;
     test_ctx->main_test[this_test_num] = main_test;
 
-    #if ON_TILE(1)
+    #if ON_TILE(I2C_SLAVE_TILE)
     test_ctx->slave_rx[this_test_num] = slave_rx;
     #endif
 
-    #if ON_TILE(0)
+    #if ON_TILE(I2C_MASTER_TILE)
     test_ctx->slave_rx[this_test_num] = NULL;
     #endif
 

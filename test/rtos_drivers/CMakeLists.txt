@@ -43,12 +43,19 @@ set(APP_SOURCES
     "src/board_init.c"
 
     "src/individual_tests/i2c/i2c_test.c"
-    "src/individual_tests/i2c/master_reg_write_test.c"
-    "src/individual_tests/i2c/master_reg_read_test.c"
-    "src/individual_tests/i2c/master_write_test.c"
-    "src/individual_tests/i2c/master_write_multiple_test.c"
-    "src/individual_tests/i2c/master_read_test.c"
-    "src/individual_tests/i2c/master_read_multiple_test.c"
+    "src/individual_tests/i2c/local/master_reg_write_test.c"
+    "src/individual_tests/i2c/local/master_reg_read_test.c"
+    "src/individual_tests/i2c/local/master_write_test.c"
+    "src/individual_tests/i2c/local/master_write_multiple_test.c"
+    "src/individual_tests/i2c/local/master_read_test.c"
+    "src/individual_tests/i2c/local/master_read_multiple_test.c"
+
+    "src/individual_tests/i2c/rpc/master_reg_write_test.c"
+    "src/individual_tests/i2c/rpc/master_reg_read_test.c"
+    "src/individual_tests/i2c/rpc/master_write_test.c"
+    "src/individual_tests/i2c/rpc/master_write_multiple_test.c"
+    "src/individual_tests/i2c/rpc/master_read_test.c"
+    "src/individual_tests/i2c/rpc/master_read_multiple_test.c"
 )
 
 set(APP_INCLUDES

@@ -8,7 +8,7 @@
 
 #define i2c_printf( FMT, ... )       module_printf("I2C", FMT, ##__VA_ARGS__)
 
-#define I2C_MAX_TESTS   10
+#define I2C_MAX_TESTS   12
 
 #define I2C_MAIN_TEST_ATTR      __attribute__((fptrgroup("rtos_test_main_test_fptr_grp")))
 #define I2C_SLAVE_RX_ATTR       __attribute__((fptrgroup("rtos_test_i2c_slave_rx_fptr_grp")))
@@ -45,5 +45,12 @@ void register_master_write_test(i2c_test_ctx_t *test_ctx);
 void register_master_write_multiple_test(i2c_test_ctx_t *test_ctx);
 void register_master_read_test(i2c_test_ctx_t *test_ctx);
 void register_master_read_multiple_test(i2c_test_ctx_t *test_ctx);
+
+void register_rpc_master_reg_write_test(i2c_test_ctx_t *test_ctx);
+void register_rpc_master_reg_read_test(i2c_test_ctx_t *test_ctx);
+void register_rpc_master_write_test(i2c_test_ctx_t *test_ctx);
+void register_rpc_master_write_multiple_test(i2c_test_ctx_t *test_ctx);
+void register_rpc_master_read_test(i2c_test_ctx_t *test_ctx);
+void register_rpc_master_read_multiple_test(i2c_test_ctx_t *test_ctx);
 
 #endif /* I2C_TEST_H_ */

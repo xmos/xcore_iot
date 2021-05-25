@@ -16,16 +16,19 @@
 #include "app_conf.h"
 #include "individual_tests/i2c/i2c_test.h"
 
-static const char* test_name = "master_reg_write_test";
+static const char* test_name = "rpc_master_reg_write_test";
 
 #define local_printf( FMT, ... )    i2c_printf("%s|" FMT, test_name, ##__VA_ARGS__)
+
+#define I2C_MASTER_TILE 1
+#define I2C_SLAVE_TILE  1
 
 typedef struct reg_test {
     uint8_t reg;
     uint8_t val;
 } reg_test_t;
 
-/* Test Vector */
+#if ON_TILE(I2C_MASTER_TILE) || ON_TILE(I2C_SLAVE_TILE)
 #define I2C_MASTER_REG_WRITE_TEST_ITER   4
 static reg_test_t test_vector[I2C_MASTER_REG_WRITE_TEST_ITER] =
 {
@@ -34,8 +37,9 @@ static reg_test_t test_vector[I2C_MASTER_REG_WRITE_TEST_ITER] =
     {0xFA, 0xBE},
     {0xB4, 0xEF},
 };
+#endif
 
-#if ON_TILE(1)
+#if ON_TILE(I2C_SLAVE_TILE)
 static uint32_t test_slave_iters = 0;
 #endif
 
@@ -44,7 +48,7 @@ static int main_test(i2c_test_ctx_t *ctx)
 {
     local_printf("Start");
 
-    #if ON_TILE(0)
+    #if ON_TILE(I2C_MASTER_TILE)
     {
         i2c_regop_res_t reg_ret;
         for (int i=0; i<I2C_MASTER_REG_WRITE_TEST_ITER; i++)
@@ -63,7 +67,7 @@ static int main_test(i2c_test_ctx_t *ctx)
     }
     #endif
 
-    #if ON_TILE(1)
+    #if ON_TILE(I2C_SLAVE_TILE)
     {
         while(test_slave_iters < I2C_MASTER_REG_WRITE_TEST_ITER)
         {
@@ -82,7 +86,7 @@ static int main_test(i2c_test_ctx_t *ctx)
     return 0;
 }
 
-#if ON_TILE(1)
+#if ON_TILE(I2C_SLAVE_TILE)
 I2C_SLAVE_RX_ATTR
 static void slave_rx(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len)
 {
@@ -109,7 +113,7 @@ static void slave_rx(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_
 }
 #endif
 
-void register_master_reg_write_test(i2c_test_ctx_t *test_ctx)
+void register_rpc_master_reg_write_test(i2c_test_ctx_t *test_ctx)
 {
     uint32_t this_test_num = test_ctx->test_cnt;
 
@@ -118,7 +122,7 @@ void register_master_reg_write_test(i2c_test_ctx_t *test_ctx)
     test_ctx->name[this_test_num] = (char*)test_name;
     test_ctx->main_test[this_test_num] = main_test;
 
-    #if ON_TILE(1)
+    #if ON_TILE(I2C_SLAVE_TILE)
     test_ctx->slave_rx[this_test_num] = slave_rx;
     #endif
 

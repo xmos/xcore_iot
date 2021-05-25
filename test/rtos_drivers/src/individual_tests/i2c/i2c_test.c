@@ -435,6 +435,13 @@ static void register_i2c_tests(i2c_test_ctx_t *test_ctx)
     register_master_write_multiple_test(test_ctx);
     register_master_read_test(test_ctx);
     register_master_read_multiple_test(test_ctx);
+
+    register_rpc_master_reg_write_test(test_ctx);
+    register_rpc_master_reg_read_test(test_ctx);
+    register_rpc_master_write_test(test_ctx);
+    register_rpc_master_write_multiple_test(test_ctx);
+    register_rpc_master_read_test(test_ctx);
+    register_rpc_master_read_multiple_test(test_ctx);
 }
 
 static void i2c_init_tests(i2c_test_ctx_t *test_ctx, rtos_i2c_master_t *i2c_master_ctx, rtos_i2c_slave_t *i2c_slave_ctx)
@@ -446,6 +453,7 @@ static void i2c_init_tests(i2c_test_ctx_t *test_ctx, rtos_i2c_master_t *i2c_mast
     test_ctx->test_cnt = 0;
 
     register_i2c_tests(test_ctx);
+    configASSERT(test_ctx->test_cnt <= I2C_MAX_TESTS);
 }
 
 void i2c_device_tests(rtos_i2c_master_t *i2c_master_ctx, rtos_i2c_slave_t *i2c_slave_ctx, chanend_t c)
