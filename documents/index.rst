@@ -1,10 +1,10 @@
-.. _aiot_sdk_user_guide:
+.. _xcore_sdk_user_guide:
 
-###################
-AIoT SDK User Guide
-###################
+####################
+XCore SDK User Guide
+####################
 
-This is the user guide for the `XMOS AIoT Software Development Kit <https://github.com/xmos/aiot_sdk>`_. 
+This is the user guide for the `XCore Software Development Kit <https://github.com/xmos/xcore_sdk>`_. 
 
 .. toctree::
    :maxdepth: 2

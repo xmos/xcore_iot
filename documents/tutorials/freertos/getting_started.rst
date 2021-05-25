@@ -1,6 +1,6 @@
-#################################################################################
-Getting Started with FreeRTOS Application Programming on XCore using the AIoT SDK
-#################################################################################
+############################################################################
+Getting Started with FreeRTOS Application Programming on XCore using the SDK
+############################################################################
 
 *********
 Rationale
@@ -112,11 +112,11 @@ To help ease development of XCore applications using an SMP RTOS, XMOS provides 
 
   - Silicon Labs WF200 series WiFi transceiver
 
-These drivers are all found in the AIoT SDK under the path `modules/rtos/drivers <https://github.com/xmos/aiot_sdk/tree/develop/modules/rtos/drivers>`_.
+These drivers are all found in the SDK under the path `modules/rtos/drivers <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/drivers>`_.
 
-Documentation on each of these drivers can be found under the :doc:`References/RTOS Drivers<../../reference/rtos_drivers/index>` section in the AIoT SDK documentation pages.
+Documentation on each of these drivers can be found under the :doc:`References/RTOS Drivers<../../reference/rtos_drivers/index>` section in the SDK documentation pages.
 
-It is worth noting that these drivers utilize a lightweight RTOS abstraction layer, meaning that they are not dependent on FreeRTOS. Conceivably they should work on any SMP RTOS, provided an abstraction layer for it is provided. This abstraction layer is found under the path `modules/rtos/osal <https://github.com/xmos/aiot_sdk/tree/develop/modules/rtos/osal>`_. At the moment the only available SMP RTOS for XCore is the XMOS SMP FreeRTOS, but more may become available in the future.
+It is worth noting that these drivers utilize a lightweight RTOS abstraction layer, meaning that they are not dependent on FreeRTOS. Conceivably they should work on any SMP RTOS, provided an abstraction layer for it is provided. This abstraction layer is found under the path `modules/rtos/osal <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/osal>`_. At the moment the only available SMP RTOS for XCore is the XMOS SMP FreeRTOS, but more may become available in the future.
 
 XMOS also includes some higher level RTOS compatible software services, some of which the aforementioned drivers. These include, but are not necessarily limited to:
 
@@ -130,13 +130,13 @@ XMOS also includes some higher level RTOS compatible software services, some of 
 - USB stack
 - WiFi connection manager
 
-These services are all found in the AIoT SDK under the path `modules/rtos/sw_services <https://github.com/xmos/aiot_sdk/tree/develop/modules/rtos/sw_services>`_.
+These services are all found in the SDK under the path `modules/rtos/sw_services <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/sw_services>`_.
 
 ***********************
 RTOS Application Design
 ***********************
 
-A fully functional example application that demonstrates usage of a majority of the available drivers can be found in the AIoT SDK under the path `examples/freertos/independent_tiles <https://github.com/xmos/aiot_sdk/tree/develop/examples/freertos/independent_tiles>`_. In addition to being a reference for how to use most of the drivers, it also serves as one example for how to structure an SMP RTOS application for XCore.
+A fully functional example application that demonstrates usage of a majority of the available drivers can be found in the SDK under the path `examples/freertos/independent_tiles <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/independent_tiles>`_. In addition to being a reference for how to use most of the drivers, it also serves as one example for how to structure an SMP RTOS application for XCore.
 
 This example application runs two instances of SMP FreeRTOS, one on each of the processor's two tiles. Because each tile has its own memory which is not shared between them, this can be viewed as a single asymmetric multiprocessing (AMP) system that comprises two SMP systems. A FreeRTOS thread that is created on one tile will never be scheduled to run on the other tile. Similarly, an RTOS object that is created on tile tile, such as a queue, can only be accessed by threads and ISRs that run on that tile and never by code running on the other tile.
 
@@ -148,7 +148,7 @@ For example, a SPI interface might be available on tile 0. Normally, initializat
 
 The example application referenced above, as well as the RTOS driver documentation, should be consulted to see exactly how to initialize and share driver instances.
 
-The AIoT SDK provides the ON_TILE(t) preprocessor macro. This macro may be used by applications to ensure certain code is included only on a specific tile at compile time. In the example application, there is a single task that is created on both tiles that starts the drivers and creates the remaining application tasks. While this function is written as a single function, various parts are inside #if ON_TILE() blocks. For example, consider the following code snippet found inside the task vApplicationDaemonTaskStartup():
+The SDK provides the ON_TILE(t) preprocessor macro. This macro may be used by applications to ensure certain code is included only on a specific tile at compile time. In the example application, there is a single task that is created on both tiles that starts the drivers and creates the remaining application tasks. While this function is written as a single function, various parts are inside #if ON_TILE() blocks. For example, consider the following code snippet found inside the task vApplicationDaemonTaskStartup():
 
 .. code-block:: C
 
@@ -174,7 +174,7 @@ When this function is compiled for tile I2C_TILE, only the first block is includ
 
 I2C_TILE is defined at the top of the file. Because the |I2C| driver instance is shared between the two tiles, it may in fact be set to either zero or one, providing a demonstration of the way that drivers instances may be shared between tiles.
 
-The AIoT SDK provides a single XC file that provides the main() function. This provided main() function calls main_tile0() through main_tile3(), depending on the number of tiles that the application requires and the number of tiles provided by the target XCore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
+The SDK provides a single XC file that provides the main() function. This provided main() function calls main_tile0() through main_tile3(), depending on the number of tiles that the application requires and the number of tiles provided by the target XCore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
 
 The example application provides both main_tile0() and main_tile1(). Each one calls an initialization function that initializes all the drivers for the interfaces specific to its tile. These functions also call the initialization functions to share these driver instances between the tiles. These initialization functions are found in the board_init.c source file.
 
@@ -184,13 +184,13 @@ The application may be experimented with by modifying the \*RPC_ENABLED macros i
 
 Consult the RTOS driver documentation for the details on what exactly each of the RTOS API functions called by this application does.
 
-For a more interesting application that does more than just exercise the RTOS drivers see the example application under the path `examples/freertos/explorer_board <https://github.com/xmos/aiot_sdk/tree/develop/examples/freertos/explorer_board>`_ This application does not provide as complete an example of how to use and share all of the drivers, but does utilize many of the software services.
+For a more interesting application that does more than just exercise the RTOS drivers see the example application under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_ This application does not provide as complete an example of how to use and share all of the drivers, but does utilize many of the software services.
 
 **************************
 Building RTOS Applications
 **************************
 
-RTOS applications using the AIoT SDK are built using CMake. The AIoT SDK provides many drivers and services, all of which have .cmake files which can be included by the application's CMakeLists.txt file. The application's CMakeLists can specify precisely which drivers and software services within the AIoT SDK should be included through the use of various CMake options.
+RTOS applications using the SDK are built using CMake. The SDK provides many drivers and services, all of which have .cmake files which can be included by the application's CMakeLists.txt file. The application's CMakeLists can specify precisely which drivers and software services within the SDK should be included through the use of various CMake options.
 
 The example applications also provide a Makefile that actually runs CMake and then runs make with the generated CMake makefiles. This is done to automate the steps that must be taken to build for more than one tile. The Makefile actually runs CMake once per tile. Each tile is built independently, and the two resulting binaries are then stitched together by the Makefile.
 

@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(FREERTOS_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Kernel")
-set(FREERTOS_SMP_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel")
+set(FREERTOS_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Kernel")
+set(FREERTOS_SMP_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel")
 
 #********************************
 # Gather FreeRTOS sources
@@ -68,8 +68,8 @@ set(THIS_LIB FREERTOS_PLUS_TCP)
 set(${THIS_LIB}_FLAGS "-Os")
 
 # Always use the sources from the single core kernel dir for Plus TCP
-set(${THIS_LIB}_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Plus-TCP")
-set(${THIS_LIB}_PORTABLE_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/rtos/FreeRTOS/portable/FreeRTOS-Plus-TCP")
+set(${THIS_LIB}_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Plus-TCP")
+set(${THIS_LIB}_PORTABLE_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/FreeRTOS/portable/FreeRTOS-Plus-TCP")
 
 set(${THIS_LIB}_SOURCES
     "${${THIS_LIB}_DIR}/FreeRTOS_ARP.c"

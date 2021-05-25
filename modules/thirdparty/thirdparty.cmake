@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(THIRDPARTY_DIR "$ENV{XMOS_AIOT_SDK_PATH}/modules/thirdparty")
+set(THIRDPARTY_DIR "$ENV{XCORE_SDK_PATH}/modules/thirdparty")
 
 #**********************
 # Set user variables
