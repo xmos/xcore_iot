@@ -394,6 +394,8 @@ void rtos_i2s_master_init(
         port_t p_mclk,
         xclock_t bclk)
 {
+    port_enable(p_mclk);
+
     rtos_i2s_init(i2s_ctx,
                   io_core_mask,
                   p_dout,

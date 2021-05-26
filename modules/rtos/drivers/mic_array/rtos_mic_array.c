@@ -172,12 +172,16 @@ static void mic_array_setup_sdr(
         port_t p_pdm_mics,
         int divide)
 {
+    clock_enable(pdmclk);
+    port_enable(p_mclk);
     clock_set_source_port(pdmclk, p_mclk);
     clock_set_divide(pdmclk, divide/2);
 
+    port_enable(p_pdm_clk);
     port_set_clock(p_pdm_clk, pdmclk);
     port_set_out_clock(p_pdm_clk);
 
+    port_start_buffered(p_pdm_mics, 32);
     port_set_clock(p_pdm_mics, pdmclk);
     port_clear_buffer(p_pdm_mics);
 
@@ -194,15 +198,20 @@ static void mic_array_setup_ddr(
 {
     uint32_t tmp;
 
+    clock_enable(pdmclk);
+    port_enable(p_mclk);
     clock_set_source_port(pdmclk, p_mclk);
     clock_set_divide(pdmclk, divide/2);
 
+    clock_enable(pdmclk6);
     clock_set_source_port(pdmclk6, p_mclk);
     clock_set_divide(pdmclk6, divide/4);
 
+    port_enable(p_pdm_clk);
     port_set_clock(p_pdm_clk, pdmclk);
     port_set_out_clock(p_pdm_clk);
 
+    port_start_buffered(p_pdm_mics, 32);
     port_set_clock(p_pdm_mics, pdmclk6);
     port_clear_buffer(p_pdm_mics);
 

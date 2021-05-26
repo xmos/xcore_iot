@@ -27,12 +27,11 @@ static inline XUD_Result_t xud_data_get_start(XUD_ep ep, uint8_t *buffer)
     return XUD_RES_OKAY;
 }
 
-static inline XUD_Result_t xud_data_get_check(chanend_t c, XUD_ep ep, unsigned *length, int *is_setup)
+static inline XUD_Result_t xud_data_get_check(chanend_t c, unsigned *length, int *is_setup)
 {
     int32_t word_len;
     int8_t tail_bitlen;
     int32_t byte_len;
-    unsigned int *ep_struct = (unsigned int *) ep;
 
     /* Test if there is a RESET */
     if (chanend_test_control_token_next_byte(c)) {
