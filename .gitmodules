@@ -55,7 +55,7 @@
 	url = git@github.com:SiliconLabs/wfx-firmware.git
 [submodule "tinyusb"]
 	path = modules/rtos/sw_services/usb/thirdparty/tinyusb
-	url = git@github.com:xmos-jmccarthy/tinyusb.git
+	url = git@github.com:hathach/tinyusb.git
 	shallow = true
 	fetchRecurseSubmodules = false
 	ignore = dirty
