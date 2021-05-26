@@ -53,12 +53,6 @@
 [submodule "wfx-firmware"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware
 	url = git@github.com:SiliconLabs/wfx-firmware.git
-[submodule "tinyusb"]
-	path = modules/rtos/sw_services/usb/thirdparty/tinyusb
-	url = git@github.com:hathach/tinyusb.git
-	shallow = true
-	fetchRecurseSubmodules = false
-	ignore = dirty
 [submodule "modules/legacy_compat/lib_mic_array"]
 	path = modules/legacy_compat/lib_mic_array
 	url = git@github.com:xmos/lib_mic_array.git
@@ -83,3 +77,6 @@
 [submodule "coreHTTP"]
 	path = modules/rtos/sw_services/http/thirdparty/coreHTTP
 	url = git@github.com:FreeRTOS/coreHTTP.git
+[submodule "tinyusb_src"]
+	path = modules/rtos/sw_services/usb/thirdparty/tinyusb_src
+	url = git@github.com:hathach/tinyusb_src.git
