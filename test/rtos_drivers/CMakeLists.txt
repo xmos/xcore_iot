@@ -16,7 +16,7 @@ set(USE_SNTPD TRUE)
 set(USE_TLS_SUPPORT TRUE)
 
 ## Import XMOS configurations
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(rtos_drivers)

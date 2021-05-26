@@ -26,7 +26,7 @@ qspi_flash
 
 
 
-i2c
-slave
-SCL: X1D36
-SDA: X1D38
+I2C Tests
+Required connections to run the I2C tests are:
+SCL IOL : X1D36
+SDA IOL : X1D38
