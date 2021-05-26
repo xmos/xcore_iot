@@ -82,7 +82,7 @@ static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
         *is_setup = 0;
         *len = ctx->ep_xfer_info[ep_num][dir].len;
     } else {
-        res = xud_data_get_check(ctx->c_ep[ep_num][dir], ctx->ep[ep_num][dir], len, is_setup);
+        res = xud_data_get_check(ctx->c_ep[ep_num][dir], len, is_setup);
 
         if (*len > ctx->ep_xfer_info[ep_num][dir].len) {
             rtos_printf("Length of %d bytes transferred on ep %d direction %d. Should have been <= %d\n", *len, ep_num, dir, ctx->ep_xfer_info[ep_num][dir].len);
