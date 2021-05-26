@@ -377,10 +377,10 @@ set(THIS_LIB TINYUSB)
 if(${USE_${THIS_LIB}})
 	set(${THIS_LIB}_FLAGS "")
 
-    file(GLOB_RECURSE ROOT_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src/tusb.c")
-    file(GLOB_RECURSE CLASS_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src/class/*/*.c")
-    file(GLOB_RECURSE COMMON_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src/common/*.c")
-    file(GLOB_RECURSE DEVICE_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src/device/*.c")
+    file(GLOB_RECURSE ROOT_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb_src/src/tusb.c")
+    file(GLOB_RECURSE CLASS_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb_src/src/class/*/*.c")
+    file(GLOB_RECURSE COMMON_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb_src/src/common/*.c")
+    file(GLOB_RECURSE DEVICE_SOURCES "${${THIS_LIB}_DIR}/thirdparty/tinyusb_src/src/device/*.c")
 
     set(${THIS_LIB}_SOURCES  ${ROOT_SOURCES}
                              ${CLASS_SOURCES}
@@ -406,7 +406,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/api"
 	    "${${THIS_LIB}_DIR}/msc"
 	    "${${THIS_LIB}_DIR}/portable"
-	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb/src"
+	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb_src/src"
 	)
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
