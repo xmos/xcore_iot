@@ -10,7 +10,6 @@
 #include "device/usbd_pvt.h"
 
 static device_control_t *device_control_ctx;
-static size_t servicer_count_g;
 
 #if CFG_TUSB_DEBUG >= 2
   #define DRIVER_NAME(_name)    .name = _name,
@@ -44,7 +43,6 @@ static uint16_t usb_device_control_open(uint8_t rhport, tusb_desc_interface_t co
     TU_VERIFY(device_control_ctx != NULL);
 
     dc_ret = device_control_resources_register(device_control_ctx,
-                                               servicer_count_g,
                                                pdMS_TO_TICKS(100));
 
     if (dc_ret != CONTROL_SUCCESS) {
@@ -132,11 +130,9 @@ static const usbd_class_driver_t app_drv[1] = {
     }
 };
 
-void usb_device_control_set_ctx(device_control_t *ctx,
-                                size_t servicer_count)
+void usb_device_control_set_ctx(device_control_t *ctx)
 {
     device_control_ctx = ctx;
-    servicer_count_g = servicer_count;
 }
 
 usbd_class_driver_t const* usbd_app_driver_get_cb(uint8_t* driver_count)

@@ -15,7 +15,6 @@ void i2c_dev_ctrl_start_cb(rtos_i2c_slave_t *ctx,
     control_ret_t dc_ret;
 
     dc_ret = device_control_resources_register(device_control_ctx,
-                                               2, //SERVICER COUNT
                                                pdMS_TO_TICKS(100));
 
     if (dc_ret != CONTROL_SUCCESS) {

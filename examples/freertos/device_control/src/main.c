@@ -81,8 +81,7 @@ size_t i2c_dev_ctrl_tx_start_cb(rtos_i2c_slave_t *ctx,
 #endif
 
 #if USB_DEVICE_CONTROL
-void usb_device_control_set_ctx(device_control_t *ctx,
-                                size_t servicer_count);
+void usb_device_control_set_ctx(device_control_t *ctx);
 #endif
 
 DEVICE_CONTROL_CALLBACK_ATTR
@@ -189,7 +188,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     #if USB_DEVICE_CONTROL && ON_TILE(USB_TILE_NO)
     {
-        usb_device_control_set_ctx(device_control_usb_ctx, 2);
+        usb_device_control_set_ctx(device_control_usb_ctx);
         usb_manager_start(configMAX_PRIORITIES - 1);
     }
     #endif
@@ -242,8 +241,8 @@ static void tile_common_init(void)
     {
         device_control_init(device_control_i2c_ctx,
                             THIS_XCORE_TILE == I2C_TILE_NO ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
-                            &intertile_ctx,
-                            1);
+                            2, //SERVICER COUNT
+                            &intertile_ctx, 1);
     }
     #endif
 
@@ -251,8 +250,8 @@ static void tile_common_init(void)
     {
         device_control_init(device_control_usb_ctx,
                             THIS_XCORE_TILE == USB_TILE_NO ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
-                            &intertile_ctx,
-                            1);
+                            2, //SERVICER COUNT
+                            &intertile_ctx, 1);
 
         #if ON_TILE(USB_TILE_NO)
         {
