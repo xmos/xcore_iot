@@ -72,13 +72,13 @@ pipeline {
                 sh """. activate ./xcore_sdk_env && bash tools/ai/install.sh"""
             }
         }
-        stage("AI Tools Test") {
+        stage("AI Tests") {
             steps {
                 // ***************************************************************************
                 // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
                 // ***************************************************************************
-                // run unit tests
-                sh """. activate ./xcore_sdk_env && cd test/ai && pytest -v --junitxml test_junit.xml"""
+                // run ai tools install test
+                sh """. activate ./xcore_sdk_env && cd test/ai && pytest -v test_tflite2xcore_install.py --junitxml test_junit.xml"""
                 // run notebook tests
                 sh """. activate ./xcore_sdk_env && cd test/ai && bash test_notebooks.sh"""
                 // This step collects these files for display in Jenkins UI
