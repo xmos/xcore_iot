@@ -319,7 +319,8 @@ control_ret_t device_control_servicer_register(device_control_servicer_t *ctx,
     rtos_osal_queue_create(&ctx->queue, "servicer_q", 1, sizeof(void *));
 
     /*
-     * TODO: Perhaps wait for an ACK. Then this would not need malloc().
+     * TODO: Perhaps wait for an ACK. Then this would not need malloc()
+     * and would also detect failures.
      */
 
     for (int i = 0; i < device_control_ctx_count; i++) {
@@ -358,7 +359,6 @@ static int servicer_register(device_control_t *ctx,
 }
 
 control_ret_t device_control_resources_register(device_control_t *ctx,
-                                                const size_t servicer_count,
                                                 unsigned timeout)
 {
     servicer_init_data_t *init_cmd;
@@ -366,10 +366,10 @@ control_ret_t device_control_resources_register(device_control_t *ctx,
     int ret = 0;
     rtos_osal_tick_t start_time;
 
-    ctx->servicer_table = rtos_osal_malloc(servicer_count * sizeof(*ctx->servicer_table));
+    ctx->servicer_table = rtos_osal_malloc(ctx->servicer_count * sizeof(*ctx->servicer_table));
 
     start_time = rtos_osal_tick_get();
-    while (registered_count < servicer_count && ret == 0 && rtos_osal_tick_get() - start_time < timeout) {
+    while (registered_count < ctx->servicer_count && ret == 0 && rtos_osal_tick_get() - start_time < timeout) {
 
         if (rtos_osal_queue_receive(&ctx->gateway_queue, &init_cmd, 1) == RTOS_OSAL_SUCCESS) {
             ret = servicer_register(ctx, init_cmd, NULL, registered_count);
@@ -378,7 +378,7 @@ control_ret_t device_control_resources_register(device_control_t *ctx,
             }
         }
 
-        for (int i = 0; i < ctx->intertile_count && registered_count < servicer_count && ret == 0; i++) {
+        for (int i = 0; i < ctx->intertile_count && registered_count < ctx->servicer_count && ret == 0; i++) {
             if (rtos_intertile_rx(ctx->client_intertile[i], ctx->intertile_port, (void **) &init_cmd, 1) != 0) {
                 ret = servicer_register(ctx, init_cmd, ctx->client_intertile[i], registered_count);
                 if (ret == 0) {
@@ -388,7 +388,7 @@ control_ret_t device_control_resources_register(device_control_t *ctx,
         }
     }
 
-    if (registered_count == servicer_count) {
+    if (registered_count == ctx->servicer_count) {
         return CONTROL_SUCCESS;
     } else {
         return CONTROL_REGISTRATION_FAILED;
@@ -431,12 +431,15 @@ control_ret_t device_control_start(device_control_t *ctx,
 
 control_ret_t device_control_init(device_control_t *ctx,
                                   int mode,
+                                  size_t servicer_count,
                                   rtos_intertile_t *intertile_ctx[],
                                   size_t intertile_count)
 {
     if (mode == DEVICE_CONTROL_HOST_MODE) {
         memset(ctx, 0, sizeof(device_control_t));
         resource_table_init(ctx);
+
+        ctx->servicer_count = servicer_count;
 
         xassert(intertile_count <= 3);
         if (intertile_count > 3) {
