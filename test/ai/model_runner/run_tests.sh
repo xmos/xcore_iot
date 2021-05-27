@@ -2,8 +2,8 @@
 set -e
 
 REPORT=test.rpt
-FIRMWARE=xcore_model_firmware.xe
-SPLITFILE=xcore_model_firmware.xb
+FIRMWARE=model_runner.xe
+SPLITFILE=model_runner.xb
 
 rm -f ${REPORT}
 
@@ -30,7 +30,7 @@ for model in ${models[@]}; do
     echo "par=${par}"  | tee -a ${REPORT}
     echo "ARENA_SIZE"  | tee -a ${REPORT}
     (xformer.py --analyze -par ${par} ${QUANT_MODEL} ${XCORE_MODEL} 2> /dev/null | tee -a ${REPORT})
-    (python ../../tools/generate/generate_model_runner.py --input ${XCORE_MODEL} --output src --name test)
+    (python ${XCORE_SDK_PATH}/modules/aif/tools/generate/generate_model_runner.py --input ${XCORE_MODEL} --output src --name test)
 
     #(cd build; rm -rf *; cmake ../; make install)
     (rm -rf build; cmake -B build; cmake --build build --target install)
