@@ -23,8 +23,14 @@ qspi_flash
 
 
 
+GPIO Tests
+XS1_PORT_1P
+in
+X1D12
 
-
+XS1_PORT_1E
+X1D39
+out
 
 I2C Tests
 Required connections to run the I2C tests are:

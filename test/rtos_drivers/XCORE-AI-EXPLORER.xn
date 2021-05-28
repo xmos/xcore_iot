@@ -78,6 +78,9 @@
             <!-- I2C Slave ports -->
             <Port Location="XS1_PORT_1M" Name="PORT_I2C_SLAVE_SCL"/>
             <Port Location="XS1_PORT_1O" Name="PORT_I2C_SLAVE_SDA"/>
+
+            <Port Location="XS1_PORT_1E" Name="PORT_GPIO_TEST_OUT"/>
+            <Port Location="XS1_PORT_1P" Name="PORT_GPIO_TEST_IN"/>
           </Tile>
         </Node>
       </Nodes>

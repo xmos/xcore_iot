@@ -60,7 +60,7 @@ static int main_test(i2c_test_ctx_t *ctx)
                                                 test_vector[i].val);
             if (reg_ret != I2C_REGOP_SUCCESS)
             {
-                local_printf("MASTER failed on iteration %d", i);
+                local_printf("MASTER failed on iteration %d %d", i, reg_ret);
                 return -1;
             }
         }

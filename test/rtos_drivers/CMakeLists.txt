@@ -56,6 +56,10 @@ set(APP_SOURCES
     "src/individual_tests/i2c/rpc/master_write_multiple_test.c"
     "src/individual_tests/i2c/rpc/master_read_test.c"
     "src/individual_tests/i2c/rpc/master_read_multiple_test.c"
+
+    "src/individual_tests/gpio/gpio_test.c"
+    "src/individual_tests/gpio/local/io_test.c"
+    "src/individual_tests/gpio/rpc/io_test.c"
 )
 
 set(APP_INCLUDES
@@ -64,6 +68,7 @@ set(APP_INCLUDES
 
 add_compile_definitions(
     RUN_I2C_TESTS=${I2C_TEST}
+    RUN_GPIO_TESTS=${GPIO_TEST}
 
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1

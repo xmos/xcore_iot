@@ -64,6 +64,12 @@ void vApplicationDaemonTaskStartup(void *arg)
     test_printf("Starting intertile device");
     rtos_intertile_start(intertile_ctx);
 
+    if (RUN_GPIO_TESTS) {
+        gpio_device_tests(gpio_ctx, other_tile_c);
+    } else {
+        test_printf("Skipped GPIO tests");
+    }
+
     if (RUN_I2C_TESTS) {
         i2c_device_tests(i2c_master_ctx, i2c_slave_ctx, other_tile_c);
     } else {

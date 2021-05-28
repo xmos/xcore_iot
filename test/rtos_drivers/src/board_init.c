@@ -88,9 +88,6 @@ void board_tile0_init(
     rtos_intertile_init(intertile_ctx, tile1);
     rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
 
-    rtos_gpio_init(
-            gpio_ctx);
-
     rtos_i2c_master_init(
             i2c_master_ctx,
             PORT_I2C_SCL, 0, 0,
@@ -136,11 +133,10 @@ void board_tile0_init(
             client_intertile_ctx,
             1);
 
-    rtos_gpio_rpc_host_init(
+    rtos_gpio_rpc_client_init(
             gpio_ctx,
             &gpio_rpc_config,
-            client_intertile_ctx,
-            1);
+            intertile_ctx);
 }
 
 void board_tile1_init(
@@ -185,28 +181,32 @@ void board_tile1_init(
     set_app_pll();
 
     rtos_intertile_init(intertile_ctx, tile0);
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
 
-    rtos_mic_array_init(
-            mic_array_ctx,
-            ~(1 << 0),
-            pdmclk,
-            pdmclk2,
-            appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY,
-            p_mclk,
-            p_pdm_clk,
-            p_pdm_mics);
+    rtos_gpio_init(
+            gpio_ctx);
 
-    rtos_i2s_master_init(
-            i2s_ctx,
-            ~(1 << 0),
-            p_i2s_dout,
-            1,
-            NULL,
-            0,
-            p_bclk,
-            p_lrclk,
-            p_mclk,
-            bclk);
+    // rtos_mic_array_init(
+    //         mic_array_ctx,
+    //         ~(1 << 0),
+    //         pdmclk,
+    //         pdmclk2,
+    //         appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY,
+    //         p_mclk,
+    //         p_pdm_clk,
+    //         p_pdm_mics);
+
+    // rtos_i2s_master_init(
+    //         i2s_ctx,
+    //         ~(1 << 0),
+    //         p_i2s_dout,
+    //         1,
+    //         NULL,
+    //         0,
+    //         p_bclk,
+    //         p_lrclk,
+    //         p_mclk,
+    //         bclk);
 
     rtos_i2c_slave_init(
             i2c_slave_ctx,
@@ -220,8 +220,9 @@ void board_tile1_init(
             &i2c_rpc_config,
             intertile_ctx);
 
-    rtos_gpio_rpc_client_init(
+    rtos_gpio_rpc_host_init(
             gpio_ctx,
             &gpio_rpc_config,
-            intertile_ctx);
+            client_intertile_ctx,
+            1);
 }

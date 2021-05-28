@@ -6,6 +6,7 @@
 
 #include "rtos_test/rtos_test_utils.h"
 
+#include "individual_tests/gpio/gpio_test.h"
 #include "individual_tests/i2c/i2c_test.h"
 
 #endif /* INDIVIDUAL_TESTS_H_ */
