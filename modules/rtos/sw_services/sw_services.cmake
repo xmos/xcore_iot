@@ -408,6 +408,11 @@ if(${USE_${THIS_LIB}})
 	    "${${THIS_LIB}_DIR}/portable"
 	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb_src/src"
 	)
+	
+	add_compile_definitions(
+        USE_TINYUSB=1
+    )
+	
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
