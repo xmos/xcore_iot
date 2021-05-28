@@ -45,6 +45,7 @@ enum {
     fcode_port_enable,
     fcode_port_in,
     fcode_port_out,
+    fcode_port_write_control_word,
     fcode_isr_callback_set,
     fcode_interrupt_enable,
     fcode_interrupt_disable
@@ -121,6 +122,31 @@ static void gpio_remote_port_out(
     rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, fcode_port_out, rpc_param_desc,
+            &host_ctx_ptr, &port_id, &value);
+    rtos_osal_mutex_put(&gpio_ctx->lock);
+}
+
+__attribute__((fptrgroup("rtos_gpio_port_write_control_word_fptr_grp")))
+static void gpio_remote_port_write_control_word(
+        rtos_gpio_t *gpio_ctx,
+        rtos_gpio_port_id_t port_id,
+        uint32_t value)
+{
+    rtos_intertile_address_t *host_address = &gpio_ctx->rpc_config->host_address;
+    rtos_gpio_t *host_ctx_ptr = gpio_ctx->rpc_config->host_ctx_ptr;
+
+    xassert(host_address->port >= 0);
+
+    const rpc_param_desc_t rpc_param_desc[] = {
+            RPC_PARAM_TYPE(gpio_ctx),
+            RPC_PARAM_TYPE(port_id),
+            RPC_PARAM_TYPE(value),
+            RPC_PARAM_LIST_END
+    };
+
+    rtos_osal_mutex_get(&gpio_ctx->lock, RTOS_OSAL_WAIT_FOREVER);
+    rpc_client_call_generic(
+            host_address->intertile_ctx, host_address->port, fcode_port_write_control_word, rpc_param_desc,
             &host_ctx_ptr, &port_id, &value);
     rtos_osal_mutex_put(&gpio_ctx->lock);
 }
@@ -209,7 +235,6 @@ static void gpio_remote_interrupt_disable(
     rtos_osal_mutex_put(&gpio_ctx->lock);
 }
 
-
 static int gpio_port_enable_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
 {
     int msg_length;
@@ -264,6 +289,27 @@ static int gpio_port_out_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
             &gpio_ctx, &port_id, &value);
 
     rtos_gpio_port_out(gpio_ctx, port_id, value);
+
+    msg_length = rpc_response_marshall(
+            resp_msg, rpc_msg,
+            gpio_ctx, port_id, value);
+
+    return msg_length;
+}
+
+static int gpio_port_write_control_word_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
+{
+    int msg_length;
+
+    rtos_gpio_t *gpio_ctx;
+    rtos_gpio_port_id_t port_id;
+    uint32_t value;
+
+    rpc_request_unmarshall(
+            rpc_msg,
+            &gpio_ctx, &port_id, &value);
+
+    rtos_gpio_write_control_word(gpio_ctx, port_id, value);
 
     msg_length = rpc_response_marshall(
             resp_msg, rpc_msg,
@@ -358,6 +404,9 @@ static void gpio_rpc_thread(rtos_intertile_address_t *client_address)
         case fcode_port_out:
             msg_length = gpio_port_out_rpc_host(&rpc_msg, &resp_msg);
             break;
+        case fcode_port_write_control_word:
+            msg_length = gpio_port_write_control_word_rpc_host(&rpc_msg, &resp_msg);
+            break;
         case fcode_isr_callback_set:
             msg_length = gpio_isr_callback_set_rpc_host(&rpc_msg, &resp_msg);
             break;
@@ -428,6 +477,7 @@ void rtos_gpio_rpc_client_init(
     gpio_ctx->port_enable = gpio_remote_port_enable;
     gpio_ctx->port_in = gpio_remote_port_in;
     gpio_ctx->port_out = gpio_remote_port_out;
+    gpio_ctx->port_write_control_word = gpio_remote_port_write_control_word;
     gpio_ctx->isr_callback_set = gpio_remote_isr_callback_set;
     gpio_ctx->interrupt_enable = gpio_remote_interrupt_enable;
     gpio_ctx->interrupt_disable = gpio_remote_interrupt_disable;
