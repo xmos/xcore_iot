@@ -55,8 +55,6 @@ set(APP_SOURCES
     "src/main.c"
     "src/board_init.c"
     "src/usb_descriptors.c"
-    "src/usb_device_control.c"
-    "src/i2c_device_control.c"
 )
 
 set(APP_INCLUDES

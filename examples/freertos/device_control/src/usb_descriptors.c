@@ -24,6 +24,7 @@
  */
 
 #include "tusb.h"
+#include "device_control_usb.h"
 
 #define XMOS_VID          0x20B1
 #define DEV_CTRL_TEST_PID 0x1010
@@ -68,18 +69,14 @@ enum {
     ITF_NUM_TOTAL
 };
 
-#define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + 9)
-
-#define TUD_XMOS_DEVICE_CONTROL_DESCRIPTOR(_itfnum, _stridx) \
-  /* Interface */\
-  9, TUSB_DESC_INTERFACE, _itfnum, 0, 0, TUSB_CLASS_VENDOR_SPECIFIC, 0x00, 0x00, _stridx,\
+#define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_XMOS_DEVICE_CONTROL_DESC_LEN)
 
 uint8_t const desc_configuration[] =
 {
   // Config number, interface count, string index, total length, attribute, power in mA
   TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CONFIG_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 400),
 
-  // Interface number, string index, EP Out & IN address, EP size
+  // Interface number, string index
   TUD_XMOS_DEVICE_CONTROL_DESCRIPTOR(ITF_XMOS_DEV_CTRL, 4)
 };
 
