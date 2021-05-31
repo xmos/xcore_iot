@@ -118,7 +118,7 @@ Documentation on each of these drivers can be found under the :doc:`References/R
 
 It is worth noting that these drivers utilize a lightweight RTOS abstraction layer, meaning that they are not dependent on FreeRTOS. Conceivably they should work on any SMP RTOS, provided an abstraction layer for it is provided. This abstraction layer is found under the path `modules/rtos/osal <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/osal>`_. At the moment the only available SMP RTOS for XCore is the XMOS SMP FreeRTOS, but more may become available in the future.
 
-XMOS also includes some higher level RTOS compatible software services, some of which the aforementioned drivers. These include, but are not necessarily limited to:
+XMOS also includes some higher level RTOS compatible software services, some of which call the aforementioned drivers. These include, but are not necessarily limited to:
 
 - DHCP server
 - FAT filesystem
@@ -128,6 +128,7 @@ XMOS also includes some higher level RTOS compatible software services, some of 
 - SNTP client
 - TLS
 - USB stack
+- Dispatch Queue
 - WiFi connection manager
 
 These services are all found in the SDK under the path `modules/rtos/sw_services <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/sw_services>`_.
