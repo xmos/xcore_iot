@@ -11,6 +11,7 @@
 #define test_printf( FMT, ... )      module_printf("Test", FMT, ##__VA_ARGS__)
 #define kernel_printf( FMT, ... )    module_printf("Kernel", FMT, ##__VA_ARGS__)
 
+#include "xcore/channel.h"
 /* Chan transaction used to sync tiles */
 #if ON_TILE(0)
 #define sync(chan)     { chan_out_byte(chan, 0);   }

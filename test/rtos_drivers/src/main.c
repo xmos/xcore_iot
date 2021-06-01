@@ -82,24 +82,11 @@ void vApplicationDaemonTaskStartup(void *arg)
         test_printf("Skipped I2C tests");
     }
 
-
-    // rtos_gpio_rpc_config(gpio_ctx_t0, appconfGPIO_T0_RPC_PORT, appconfGPIO_RPC_HOST_PRIORITY);
-    // rtos_gpio_rpc_config(gpio_ctx_t1, appconfGPIO_T1_RPC_PORT, appconfGPIO_RPC_HOST_PRIORITY);
-    // #if ON_TILE(0)
-    // {
-    //     rtos_qspi_flash_start(qspi_flash_ctx, appconfQSPI_FLASH_TASK_PRIORITY);
-    //     rtos_gpio_start(gpio_ctx_t0);
-    //
-    //     gpio_test(gpio_ctx_t0);
-    //
-    // }
-    // #endif
-
-    // #if ON_TILE(1)
-    // {
-    //     rtos_gpio_start(gpio_ctx_t1);
-    // }
-    // #endif
+    if (RUN_SWMEM_TESTS) {
+        swmem_device_tests(other_tile_c);
+    } else {
+        test_printf("Skipped SWMEM tests");
+    }
 
     // #if ON_TILE(USB_TILE_NO)
     // {

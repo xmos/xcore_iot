@@ -9,5 +9,6 @@
 #include "individual_tests/intertile/intertile_test.h"
 #include "individual_tests/gpio/gpio_test.h"
 #include "individual_tests/i2c/i2c_test.h"
+#include "individual_tests/swmem/swmem_test.h"
 
 #endif /* INDIVIDUAL_TESTS_H_ */
