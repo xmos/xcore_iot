@@ -61,8 +61,14 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char* pcTaskName )
 
 void vApplicationDaemonTaskStartup(void *arg)
 {
-    test_printf("Starting intertile device");
-    rtos_intertile_start(intertile_ctx);
+    /* Intertile test must always before any test that uses RPC */
+    if (RUN_INTERTILE_TESTS) {
+        intertile_device_tests(intertile_ctx, other_tile_c);
+    } else {
+        test_printf("Skipped INTERTILE tests");
+        test_printf("Starting intertile device");
+        rtos_intertile_start(intertile_ctx);
+    }
 
     if (RUN_GPIO_TESTS) {
         gpio_device_tests(gpio_ctx, other_tile_c);

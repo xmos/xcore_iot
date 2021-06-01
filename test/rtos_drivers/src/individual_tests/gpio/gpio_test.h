@@ -10,7 +10,7 @@
 
 #define GPIO_MAX_TESTS   2
 
-#define GPIO_MAIN_TEST_ATTR      __attribute__((fptrgroup("rtos_test_main_test_fptr_grp")))
+#define GPIO_MAIN_TEST_ATTR      __attribute__((fptrgroup("rtos_test_gpio_main_test_fptr_grp")))
 
 typedef struct gpio_test_ctx gpio_test_ctx_t;
 
@@ -34,7 +34,10 @@ typedef int (*gpio_main_test_t)(gpio_test_ctx_t *ctx);
 
 void gpio_device_tests(rtos_gpio_t *gpio_ctx, chanend_t c);
 
+/* Local Tests */
 void register_io_test(gpio_test_ctx_t *test_ctx);
+
+/* RPC Tests */
 void register_rpc_io_test(gpio_test_ctx_t *test_ctx);
 
 #endif /* GPIO_TEST_H_ */

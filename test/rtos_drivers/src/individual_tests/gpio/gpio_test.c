@@ -74,7 +74,6 @@ static void gpio_init_tests(gpio_test_ctx_t *test_ctx, rtos_gpio_t *gpio_ctx)
     memset(test_ctx, 0, sizeof(gpio_test_ctx_t));
     test_ctx->gpio_ctx = gpio_ctx;
 
-
     test_ctx->cur_test = 0;
     test_ctx->test_cnt = 0;
 

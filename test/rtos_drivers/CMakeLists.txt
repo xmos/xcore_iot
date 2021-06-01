@@ -42,6 +42,10 @@ set(APP_SOURCES
     "src/main.c"
     "src/board_init.c"
 
+    "src/individual_tests/intertile/intertile_test.c"
+    "src/individual_tests/intertile/local/fixed_len_tx_test.c"
+    "src/individual_tests/intertile/local/var_len_tx_test.c"
+
     "src/individual_tests/i2c/i2c_test.c"
     "src/individual_tests/i2c/local/master_reg_write_test.c"
     "src/individual_tests/i2c/local/master_reg_read_test.c"
@@ -67,6 +71,7 @@ set(APP_INCLUDES
 )
 
 add_compile_definitions(
+    RUN_INTERTILE_TESTS=${INTERTILE_TEST}
     RUN_I2C_TESTS=${I2C_TEST}
     RUN_GPIO_TESTS=${GPIO_TEST}
 
