@@ -41,29 +41,6 @@ set(APP_COMPILER_FLAGS
 set(APP_SOURCES
     "src/main.c"
     "src/board_init.c"
-
-    "src/individual_tests/intertile/intertile_test.c"
-    "src/individual_tests/intertile/local/fixed_len_tx_test.c"
-    "src/individual_tests/intertile/local/var_len_tx_test.c"
-
-    "src/individual_tests/i2c/i2c_test.c"
-    "src/individual_tests/i2c/local/master_reg_write_test.c"
-    "src/individual_tests/i2c/local/master_reg_read_test.c"
-    "src/individual_tests/i2c/local/master_write_test.c"
-    "src/individual_tests/i2c/local/master_write_multiple_test.c"
-    "src/individual_tests/i2c/local/master_read_test.c"
-    "src/individual_tests/i2c/local/master_read_multiple_test.c"
-
-    "src/individual_tests/i2c/rpc/master_reg_write_test.c"
-    "src/individual_tests/i2c/rpc/master_reg_read_test.c"
-    "src/individual_tests/i2c/rpc/master_write_test.c"
-    "src/individual_tests/i2c/rpc/master_write_multiple_test.c"
-    "src/individual_tests/i2c/rpc/master_read_test.c"
-    "src/individual_tests/i2c/rpc/master_read_multiple_test.c"
-
-    "src/individual_tests/gpio/gpio_test.c"
-    "src/individual_tests/gpio/local/io_test.c"
-    "src/individual_tests/gpio/rpc/io_test.c"
 )
 
 set(APP_INCLUDES
@@ -89,9 +66,12 @@ else()
     set(TARGET_NAME "${PROJECT_NAME}.xe")
 endif()
 
+## Gather test sources
+file(GLOB_RECURSE INDIVIDUAL_TEST_SOURCES "src/individual_tests/*.c")
+
 add_executable(${TARGET_NAME})
 
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
+target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES} ${INDIVIDUAL_TEST_SOURCES})
 target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
