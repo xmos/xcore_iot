@@ -21,12 +21,6 @@ static const char* test_name = "io_test";
 
 #define GPIO_TILE 0
 
-#define INPUT_PORT              XS1_PORT_1P
-#define INPUT_PORT_PIN_OFFSET   0
-
-#define OUTPUT_PORT             XS1_PORT_1E
-#define OUTPUT_PORT_PIN_OFFSET  0
-
 #if ON_TILE(GPIO_TILE)
 RTOS_GPIO_ISR_CALLBACK_ATTR
 static void input_cb(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_t port_id, uint32_t value)
@@ -67,11 +61,6 @@ static int main_test(gpio_test_ctx_t *ctx)
 
         uint32_t status = 0;
         uint32_t val = 0;
-
-        local_printf("Enable input port 0x%x", p_test_input);
-        rtos_gpio_port_enable(ctx->gpio_ctx, p_test_input);
-        local_printf("Enable output port 0x%x", p_test_output);
-        rtos_gpio_port_enable(ctx->gpio_ctx, p_test_output);
 
         local_printf("Set value to 1");
         val = rtos_gpio_port_in(ctx->gpio_ctx, p_test_output);
@@ -152,6 +141,7 @@ static int main_test(gpio_test_ctx_t *ctx)
             local_printf("Read after ISR trigger passed.  Got %u expected %u", val, 1);
         }
 
+        local_printf("Delete output thread");
         vTaskDelete(output_handle);
     }
     #endif
@@ -159,7 +149,6 @@ static int main_test(gpio_test_ctx_t *ctx)
     local_printf("Done");
     return 0;
 }
-
 
 void register_rpc_io_test(gpio_test_ctx_t *test_ctx)
 {

@@ -20,6 +20,18 @@ static int run_gpio_tests(gpio_test_ctx_t *test_ctx, chanend_t c)
 {
     int retval = 0;
 
+    // Enable ports, one via local calls the other via rpc
+#if ON_TILE(0)
+    const rtos_gpio_port_id_t p_test_input = rtos_gpio_port(INPUT_PORT);
+    gpio_printf("Enable input port 0x%x", p_test_input);
+    rtos_gpio_port_enable(test_ctx->gpio_ctx, p_test_input);
+#endif
+#if ON_TILE(1)
+    const rtos_gpio_port_id_t p_test_output = rtos_gpio_port(OUTPUT_PORT);
+    gpio_printf("Enable output port 0x%x", p_test_output);
+    rtos_gpio_port_enable(test_ctx->gpio_ctx, p_test_output);
+#endif
+
     do
     {
         sync(c);
