@@ -11,7 +11,7 @@
 dispatch_group_t *dispatch_group_create(size_t length, bool waitable) {
   dispatch_group_t *group;
 
-  rtos_printf("dispatch_group_create: length=%d\n", length);
+  // rtos_printf("dispatch_group_create: length=%d\n", length);
 
   group = rtos_osal_malloc(sizeof(dispatch_group_t));
 
@@ -54,7 +54,7 @@ void dispatch_group_task_add(dispatch_group_t *group, dispatch_task_t *task) {
 void dispatch_group_perform(dispatch_group_t *group) {
   xassert(group);
 
-  rtos_printf("dispatch_group_perform: %u\n", (size_t)group);
+  // rtos_printf("dispatch_group_perform: %u\n", (size_t)group);
 
   // call group in current thread
   for (int i = 0; i < group->count; i++) {
@@ -66,6 +66,8 @@ void dispatch_group_perform(dispatch_group_t *group) {
 void dispatch_group_delete(dispatch_group_t *group) {
   xassert(group);
   xassert(group->tasks);
+
+  // rtos_printf("dispatch_group_delete: %u\n", (size_t)group);
 
   rtos_osal_free(group->tasks);
   rtos_osal_free(group);

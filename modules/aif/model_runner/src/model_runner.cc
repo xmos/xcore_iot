@@ -14,23 +14,27 @@
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/version.h"
 
+#if RTOS_FREERTOS
+#include "rtos_dispatcher.h"
+#endif
+
 // typedefs
 typedef tflite::MicroAllocator micro_allocator_t;
 typedef tflite::SimpleMemoryAllocator simple_allocator_t;
 typedef tflite::MicroErrorReporter error_reporter_t;
 typedef tflite::MicroOpResolver micro_op_resolver_t;
 typedef tflite::MicroProfiler tflite_profiler_t;
-typedef tflite::micro::xcore::GenericDispatcher dispatcher_t;
 typedef tflite::micro::xcore::ModelMemoryLoader memory_loader_t;
 typedef tflite::micro::xcore::XCoreInterpreter interpreter_t;
+typedef tflite::micro::xcore::Dispatcher dispatcher_t;
 
 // static variables
 static error_reporter_t error_reporter_s;
-static dispatcher_t dispatcher_s;
 static memory_loader_t memory_loader_s;
-static error_reporter_t *reporter = nullptr;
 
+static error_reporter_t *reporter = nullptr;
 static micro_allocator_t *allocator = nullptr;
+static dispatcher_t *dispatcher = nullptr;
 
 size_t model_runner_buffer_size_get() { return sizeof(interpreter_t); }
 
@@ -49,6 +53,26 @@ void model_runner_init(uint8_t *arena, size_t arena_size) {
     allocator = micro_allocator_t::Create(&simple_allocator_s, reporter);
   }
 }
+
+#if RTOS_FREERTOS
+ModelRunnerStatus model_runner_dispatcher_create(model_runner_t *ctx,
+                                                 dispatch_queue_t *queue) {
+  xassert(queue);
+  void *dispatcher_buf = allocator->AllocatePersistentBuffer(
+      sizeof(tflite::micro::xcore::RTOSDispatcher));
+  dispatcher = new (dispatcher_buf) tflite::micro::xcore::RTOSDispatcher(queue);
+
+  return Ok;
+}
+#else
+ModelRunnerStatus model_runner_dispatcher_create(model_runner_t *ctx) {
+  void *dispatcher_buf = allocator->AllocatePersistentBuffer(
+      sizeof(tflite::micro::xcore::GenericDispatcher));
+  dispatcher = new (dispatcher_buf) tflite::micro::xcore::GenericDispatcher();
+
+  return Ok;
+}
+#endif
 
 ModelRunnerStatus model_runner_allocate(model_runner_t *ctx,
                                         const uint8_t *model_content) {
@@ -73,13 +97,24 @@ ModelRunnerStatus model_runner_allocate(model_runner_t *ctx,
   ctx->profiler_get_fun(&v_profiler);
   tflite_profiler_t *profiler = static_cast<tflite_profiler_t *>(v_profiler);
 
+  // Ensure dispatcher created
+#if RTOS_FREERTOS
+  // RTOS applications must create the dispatcher before calling
+  // model_runner_allocate
+  xassert(dispatcher);
+#else
+  // Bare-metal applications are allowed to not create the dispatcher before
+  // calling model_runner_allocate.  A default one will be created for them.
+  if (dispatcher == nullptr) model_runner_dispatcher_create(ctx);
+#endif
+
   // Allocate buffer for interpreter (if not already allocated)
   if (ctx->hInterpreter == nullptr) {
     ctx->hInterpreter = malloc(model_runner_buffer_size_get());
   }
   // Build an interpreter to run the model with
   interpreter_t *interpreter = new (ctx->hInterpreter)
-      interpreter_t(model, *resolver, allocator, reporter, dispatcher_s,
+      interpreter_t(model, *resolver, allocator, reporter, *dispatcher,
                     memory_loader_s, profiler);
 
   // Allocate memory from the tensor_arena for the model's tensors.

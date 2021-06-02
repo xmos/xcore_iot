@@ -36,8 +36,7 @@ set(USE_LIB_RANDOM FALSE)
 set(USE_LEGACY_COMPAT TRUE)
 set(USE_AIF TRUE)
 set(USE_DEVICE_MEMORY_SUPPORT TRUE)
-
-#set(USE_DISPATCH_QUEUE TRUE)
+set(USE_DISPATCH_QUEUE TRUE)
 
 # Import XMOS RTOS platform configuration.
 # Must be done after setting the configuration options.

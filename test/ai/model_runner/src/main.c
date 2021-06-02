@@ -13,20 +13,35 @@
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
 #include "rtos/drivers/swmem/api/rtos_swmem.h"
 #include "xcore_device_memory.h"
+#include "dispatch.h"
 
 #include "app_conf.h"
 #include "test_model_data.h"
 #include "test_model_runner.h"
-
-#define TENSOR_ARENA_SIZE (100000)  // this is big enough for all test models
-#define MODEL_RUNNER_TASK_STACK_SIZE (1024)
 
 #if USE_SWMEM
 static rtos_qspi_flash_t qspi_flash_ctx_s;
 static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
 #endif
 
-void model_runner_task(unsigned priority) {
+dispatch_queue_t *dispatch_queue_setup() {
+  dispatch_queue_t *queue;
+
+  rtos_printf("Setting up dispatch queue\n");
+  queue = dispatch_queue_create(appconfDISPATCH_QUEUE_LENGTH,
+                                appconfDISPATCH_QUEUE_THREAD_COUNT,
+                                appconfDISPATCH_QUEUE_THREAD_STACK_SIZE,
+                                appconfDISPATCH_QUEUE_TASK_PRIORITY);
+
+  return queue;
+}
+
+void dispatch_queue_teardown(dispatch_queue_t *queue) {
+  rtos_printf("Tearing down dispatch queue\n");
+  dispatch_queue_delete(queue);
+}
+
+void model_runner_task(void *arg) {
   size_t req_size = 0;
   uint8_t *tensor_arena = NULL;
   uint8_t *interpreter_buf = NULL;
@@ -36,15 +51,20 @@ void model_runner_task(unsigned priority) {
   model_runner_t *model_runner_ctx = NULL;
 
   // initialize model runner global state
-  tensor_arena = pvPortMalloc(TENSOR_ARENA_SIZE);
-  model_runner_init(tensor_arena, TENSOR_ARENA_SIZE);
+  tensor_arena = pvPortMalloc(appconfTENSOR_ARENA_SIZE);
+  memset(tensor_arena, 0, appconfTENSOR_ARENA_SIZE);
+  model_runner_init(tensor_arena, appconfTENSOR_ARENA_SIZE);
 
   req_size = model_runner_buffer_size_get();
   interpreter_buf = pvPortMalloc(req_size);
   model_runner_ctx = pvPortMalloc(sizeof(model_runner_t));
 
+  // create dispatch queue
+  dispatch_queue_t *dispatch_queue = dispatch_queue_setup();
+
   // setup model runner
   test_model_runner_create(model_runner_ctx, NULL);
+  model_runner_dispatcher_create(model_runner_ctx, dispatch_queue);
   model_runner_allocate(model_runner_ctx, test_model_data);
   input_buffer = model_runner_input_buffer_get(model_runner_ctx);
   input_size = model_runner_input_size_get(model_runner_ctx);
@@ -59,21 +79,26 @@ void model_runner_task(unsigned priority) {
 
   model_runner_profiler_summary_print(model_runner_ctx);
 
-  vPortFree(tensor_arena);
+  dispatch_queue_teardown(dispatch_queue);
   vPortFree(interpreter_buf);
   vPortFree(model_runner_ctx);
+  vPortFree(tensor_arena);
 
   _Exit(0);
 }
 
 void vApplicationMallocFailedHook(void) {
   rtos_printf("Malloc Failed!");
-  configASSERT(0);
+  // configASSERT(0);
+  for (;;)
+    ;
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName) {
   rtos_printf("Stack Overflow! %s", pcTaskName);
-  configASSERT(0);
+  // configASSERT(0);
+  for (;;)
+    ;
 }
 
 void vApplicationDaemonTaskStartup(void *arg) {
@@ -103,7 +128,7 @@ void vApplicationDaemonTaskStartup(void *arg) {
 #endif
   rtos_printf("Starting model runner task\n");
   xTaskCreate((TaskFunction_t)model_runner_task, "model_runner_task",
-              MODEL_RUNNER_TASK_STACK_SIZE, NULL,
+              appconfMODEL_RUNNER_TASK_STACK_SIZE, NULL,
               appconfMODEL_RUNNER_TASK_PRIORITY, NULL);
   vTaskDelete(NULL);
 }
