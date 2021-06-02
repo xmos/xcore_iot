@@ -7,16 +7,23 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if RTOS_FREERTOS
+#include "dispatch.h"
+#endif
+
 struct model_runner_struct {
   void *hInterpreter;
-  __attribute__((fptrgroup("model_runner_resolver_get_fptr_grp")))
-  void (*resolver_get_fun)(void **);
-  __attribute__((fptrgroup("model_runner_profiler_get_fptr_grp")))
-  void (*profiler_get_fun)(void **);
-  __attribute__((fptrgroup("model_runner_profiler_reset_fptr_grp")))
-  void (*profiler_reset_fun)(void);
-  __attribute__((fptrgroup("model_runner_profiler_durations_get_fptr_grp")))
-  void (*profiler_durations_get_fun)(uint32_t *, const uint32_t **);
+  __attribute__((fptrgroup("model_runner_resolver_get_fptr_grp"))) void (
+      *resolver_get_fun)(void **);
+  __attribute__((fptrgroup("model_runner_profiler_get_fptr_grp"))) void (
+      *profiler_get_fun)(void **);
+  __attribute__((fptrgroup("model_runner_profiler_reset_fptr_grp"))) void (
+      *profiler_reset_fun)(void);
+  __attribute__((fptrgroup(
+      "model_runner_profiler_durations_get_fptr_grp"))) void (*profiler_durations_get_fun)(uint32_t
+                                                                                               *,
+                                                                                           const uint32_t
+                                                                                               **);
 };
 
 typedef struct model_runner_struct model_runner_t;
@@ -45,17 +52,31 @@ size_t model_runner_buffer_size_get();
  */
 void model_runner_init(uint8_t *arena, size_t arena_size);
 
+/** Create a Dispatcher.
+ *  Must be called before model_runner_allocate
+ *
+ * @param[in] ctx    Model runner context
+ * @param[in] queue  Dispatch Queue object (for RTOS only)
+ */
+#if RTOS_FREERTOS
+ModelRunnerStatus model_runner_dispatcher_create(model_runner_t *ctx,
+                                                 dispatch_queue_t *queue);
+#else
+ModelRunnerStatus model_runner_dispatcher_create(model_runner_t *ctx);
+#endif
+
 /** Allocate the model runner with the specified model content.
  *
- * @param[in] ctx              Model runner context
- * @param[in] model_content    Array containing model content
+ * @param[in] ctx                Model runner context
+ * @param[in] model_content      Array containing model content
  */
 ModelRunnerStatus model_runner_allocate(model_runner_t *ctx,
                                         const uint8_t *model_content);
 
 /** Get the model input buffer.
  *
- * @param[in] ctx   Model runner context
+ * @param[in] ctx                Model runner context
+ * @param[in] model_content      Model contents
  *
  * @return    Pointer to model input buffer.
  */

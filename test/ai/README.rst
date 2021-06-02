@@ -10,7 +10,7 @@ Model Runner
 
 The `model_runner` tests are designed to regression test several performance metrics including; code size, tensor arena size, and runtime performance. See the README in the `model_runner` folder for additional information.
 
-This test should be run whenever the code or submodules in `modules\aif` are changed.
+This test should be run whenever the code or submodules in `modules/aif` are changed.
 
 ****************
 AI Tools Install

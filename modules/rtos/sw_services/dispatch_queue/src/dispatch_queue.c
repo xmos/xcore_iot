@@ -14,6 +14,8 @@
 #include "event_counter.h"
 #include "rtos_osal.h"
 
+#include "rtos_interrupt.h"
+
 //***********************
 //***********************
 //***********************
@@ -31,8 +33,8 @@ void dispatch_queue_worker(void *param) {
   for (;;) {
     if (rtos_osal_queue_receive(queue, &task, RTOS_OSAL_WAIT_FOREVER) ==
         RTOS_OSAL_SUCCESS) {
-      // run task
       dispatch_task_perform(task);
+
       if (task->waitable) {
         // signal the event counter
         event_counter_signal(task->event_counter);
@@ -114,8 +116,9 @@ void dispatch_queue_task_add(dispatch_queue_t *dispatch_queue,
   xassert(dispatch_queue);
   xassert(task);
 
-  rtos_printf("dispatch_queue_add_task: %u   task=%u\n", (size_t)dispatch_queue,
-              (size_t)task);
+  // rtos_printf("dispatch_queue_add_task: %u   task=%u\n",
+  // (size_t)dispatch_queue,
+  //             (size_t)task);
 
   if (task->waitable) {
     task->event_counter = event_counter_create(1);
@@ -131,8 +134,8 @@ void dispatch_queue_group_add(dispatch_queue_t *dispatch_queue,
   xassert(dispatch_queue);
   xassert(group);
 
-  rtos_printf("dispatch_queue_group_add: %u   group=%u\n",
-              (size_t)dispatch_queue, (size_t)group);
+  // rtos_printf("dispatch_queue_group_add: %u   group=%u\n",
+  //             (size_t)dispatch_queue, (size_t)group);
 
   event_counter_t *counter = NULL;
 
@@ -154,8 +157,8 @@ void dispatch_queue_task_wait(dispatch_queue_t *dispatch_queue,
   xassert(task);
   xassert(task->waitable);
 
-  rtos_printf("dispatch_queue_task_wait: %u   task=%u\n",
-              (size_t)dispatch_queue, (size_t)task);
+  // rtos_printf("dispatch_queue_task_wait: %u   task=%u\n",
+  //             (size_t)dispatch_queue, (size_t)task);
 
   if (task->waitable) {
     event_counter_t *counter = (event_counter_t *)task->event_counter;
@@ -171,11 +174,12 @@ void dispatch_queue_group_wait(dispatch_queue_t *dispatch_queue,
   xassert(group);
   xassert(group->waitable);
 
-  rtos_printf("dispatch_queue_group_wait: %u   group=%u\n",
-              (size_t)dispatch_queue, (size_t)group);
+  // rtos_printf("dispatch_queue_group_wait: %u   group=%u\n",
+  //             (size_t)dispatch_queue, (size_t)group);
 
   if (group->waitable) {
     event_counter_t *counter = group->tasks[0]->event_counter;
+    xassert(counter);
     event_counter_wait(counter);
     event_counter_delete(counter);
     for (int i = 0; i < group->count; i++) {
