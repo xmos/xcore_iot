@@ -149,11 +149,6 @@ size_t rtos_intertile_rx(
 void rtos_intertile_start(
         rtos_intertile_t *intertile_ctx)
 {
-    intertile_ctx->tx_len = 0;
-    intertile_ctx->rx_len = 0;
-    rtos_osal_mutex_create(&intertile_ctx->lock, "intertile_mutex", RTOS_OSAL_NOT_RECURSIVE);
-    rtos_osal_event_group_create(&intertile_ctx->event_group, "intertile_group");
-
     triggerable_setup_interrupt_callback(intertile_ctx->c, intertile_ctx, RTOS_INTERRUPT_CALLBACK(rtos_intertile_isr));
     triggerable_enable_trigger(intertile_ctx->c);
 }
@@ -184,4 +179,8 @@ void rtos_intertile_init(
         chanend_t c)
 {
     intertile_ctx->c = channel_establish(c);
+    intertile_ctx->tx_len = 0;
+    intertile_ctx->rx_len = 0;
+    rtos_osal_mutex_create(&intertile_ctx->lock, "intertile_mutex", RTOS_OSAL_NOT_RECURSIVE);
+    rtos_osal_event_group_create(&intertile_ctx->event_group, "intertile_group");
 }

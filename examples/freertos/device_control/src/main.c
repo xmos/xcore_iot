@@ -11,6 +11,8 @@
 #include "usb_support.h"
 
 #include "device_control.h"
+#include "device_control_i2c.h"
+#include "device_control_usb.h"
 
 #include "rtos_printf.h"
 
@@ -56,6 +58,22 @@ void vApplicationMallocFailedHook(void)
     for(;;);
 }
 
+device_control_t *device_control_usb_get_ctrl_ctx_cb(void)
+{
+    return device_control_usb_ctx;
+}
+
+usbd_class_driver_t const* usbd_app_driver_get_cb(uint8_t *driver_count)
+{
+    *driver_count = 1;
+    return &device_control_usb_app_driver;
+}
+
+bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t const *request)
+{
+    return device_control_usb_xfer(rhport, stage, request);
+}
+
 #define GPIO_RPC_PORT 0
 #define GPIO_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
@@ -65,25 +83,6 @@ void vApplicationMallocFailedHook(void)
 #define DEVICE_CONTROL_I2C_PORT 2
 #define DEVICE_CONTROL_I2C_CLIENT_PRIORITY  (configMAX_PRIORITIES-1)
 
-
-#if I2C_DEVICE_CONTROL
-void i2c_dev_ctrl_start_cb(rtos_i2c_slave_t *ctx,
-                           device_control_t *device_control_ctx);
-
-void i2c_dev_ctrl_rx_cb(rtos_i2c_slave_t *ctx,
-                        device_control_t *device_control_ctx,
-                        uint8_t *data,
-                        size_t len);
-
-size_t i2c_dev_ctrl_tx_start_cb(rtos_i2c_slave_t *ctx,
-                                device_control_t *device_control_ctx,
-                                uint8_t **data);
-#endif
-
-#if USB_DEVICE_CONTROL
-void usb_device_control_set_ctx(device_control_t *ctx,
-                                size_t servicer_count);
-#endif
 
 DEVICE_CONTROL_CALLBACK_ATTR
 control_ret_t read_cmd(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data)
@@ -178,9 +177,9 @@ void vApplicationDaemonTaskStartup(void *arg)
         rtos_printf("Starting I2C slave driver\n");
         rtos_i2c_slave_start(i2c_slave_ctx,
                              device_control_i2c_ctx,
-                             (rtos_i2c_slave_start_cb_t) i2c_dev_ctrl_start_cb,
-                             (rtos_i2c_slave_rx_cb_t) i2c_dev_ctrl_rx_cb,
-                             (rtos_i2c_slave_tx_start_cb_t) i2c_dev_ctrl_tx_start_cb,
+                             (rtos_i2c_slave_start_cb_t) device_control_i2c_start_cb,
+                             (rtos_i2c_slave_rx_cb_t) device_control_i2c_rx_cb,
+                             (rtos_i2c_slave_tx_start_cb_t) device_control_i2c_tx_start_cb,
                              (rtos_i2c_slave_tx_done_cb_t) NULL,
                              0,
                              configMAX_PRIORITIES / 2);
@@ -189,7 +188,6 @@ void vApplicationDaemonTaskStartup(void *arg)
 
     #if USB_DEVICE_CONTROL && ON_TILE(USB_TILE_NO)
     {
-        usb_device_control_set_ctx(device_control_usb_ctx, 2);
         usb_manager_start(configMAX_PRIORITIES - 1);
     }
     #endif
@@ -242,8 +240,8 @@ static void tile_common_init(void)
     {
         device_control_init(device_control_i2c_ctx,
                             THIS_XCORE_TILE == I2C_TILE_NO ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
-                            &intertile_ctx,
-                            1);
+                            2, //SERVICER COUNT
+                            &intertile_ctx, 1);
     }
     #endif
 
@@ -251,8 +249,8 @@ static void tile_common_init(void)
     {
         device_control_init(device_control_usb_ctx,
                             THIS_XCORE_TILE == USB_TILE_NO ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
-                            &intertile_ctx,
-                            1);
+                            2, //SERVICER COUNT
+                            &intertile_ctx, 1);
 
         #if ON_TILE(USB_TILE_NO)
         {

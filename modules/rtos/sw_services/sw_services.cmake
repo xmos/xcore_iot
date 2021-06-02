@@ -93,18 +93,27 @@ if(${USE_${THIS_LIB}})
 
 	file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
 
-    if(${${THIS_LIB}_FLAGS})
-       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
-    endif()
-
 	set(${THIS_LIB}_INCLUDES
-	    "${${THIS_LIB}_DIR}/api"
+		"${${THIS_LIB}_DIR}/api"
 	)
 
-    add_compile_definitions(
-        USE_DEVICE_CONTROL=1
-    )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+	if(${USE_TINYUSB})
+		list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/transport/usb/device_control_usb.c")
+		list(APPEND ${THIS_LIB}_INCLUDES "${${THIS_LIB}_DIR}/transport/usb")
+	endif()
+	if(${USE_RTOS_I2C_DRIVER})
+		list(APPEND ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/transport/i2c/device_control_i2c.c")
+		list(APPEND ${THIS_LIB}_INCLUDES "${${THIS_LIB}_DIR}/transport/i2c")
+	endif()
+
+	if(${${THIS_LIB}_FLAGS})
+		set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+	endif()
+
+	add_compile_definitions(
+		USE_DEVICE_CONTROL=1
+	)
+	message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -408,6 +417,11 @@ if(${USE_${THIS_LIB}})
 	    "${${THIS_LIB}_DIR}/portable"
 	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb_src/src"
 	)
+	
+	add_compile_definitions(
+        USE_TINYUSB=1
+    )
+	
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)

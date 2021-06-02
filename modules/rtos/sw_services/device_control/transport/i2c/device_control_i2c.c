@@ -9,13 +9,13 @@
 #include "device_control.h"
 
 RTOS_I2C_SLAVE_CALLBACK_ATTR
-void i2c_dev_ctrl_start_cb(rtos_i2c_slave_t *ctx,
-                           device_control_t *device_control_ctx)
+void device_control_i2c_start_cb(rtos_i2c_slave_t *ctx,
+                                 device_control_t *device_control_ctx)
 {
     control_ret_t dc_ret;
 
+    rtos_printf("Registering I2C device control resources now\n");
     dc_ret = device_control_resources_register(device_control_ctx,
-                                               2, //SERVICER COUNT
                                                pdMS_TO_TICKS(100));
 
     if (dc_ret != CONTROL_SUCCESS) {
@@ -27,10 +27,10 @@ void i2c_dev_ctrl_start_cb(rtos_i2c_slave_t *ctx,
 }
 
 RTOS_I2C_SLAVE_CALLBACK_ATTR
-void i2c_dev_ctrl_rx_cb(rtos_i2c_slave_t *ctx,
-                        device_control_t *device_control_ctx,
-                        uint8_t *data,
-                        size_t len)
+void device_control_i2c_rx_cb(rtos_i2c_slave_t *ctx,
+                              device_control_t *device_control_ctx,
+                              uint8_t *data,
+                              size_t len)
 {
     control_ret_t ret;
 
@@ -48,9 +48,9 @@ void i2c_dev_ctrl_rx_cb(rtos_i2c_slave_t *ctx,
 }
 
 RTOS_I2C_SLAVE_CALLBACK_ATTR
-size_t i2c_dev_ctrl_tx_start_cb(rtos_i2c_slave_t *ctx,
-                                device_control_t *device_control_ctx,
-                                uint8_t **data)
+size_t device_control_i2c_tx_start_cb(rtos_i2c_slave_t *ctx,
+                                      device_control_t *device_control_ctx,
+                                      uint8_t **data)
 {
     control_ret_t ret;
     size_t len = RTOS_I2C_SLAVE_BUF_LEN;

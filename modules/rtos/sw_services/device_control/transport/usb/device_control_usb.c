@@ -3,14 +3,12 @@
 
 #include <platform.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "rtos_printf.h"
-#include "device_control.h"
-#include "tusb.h"
-#include "device/usbd_pvt.h"
+#include "device_control_usb.h"
 
 static device_control_t *device_control_ctx;
-static size_t servicer_count_g;
 
 #if CFG_TUSB_DEBUG >= 2
   #define DRIVER_NAME(_name)    .name = _name,
@@ -18,33 +16,37 @@ static size_t servicer_count_g;
   #define DRIVER_NAME(_name)
 #endif
 
-static void usb_device_control_init(void)
+static void device_control_usb_init(void)
 {
-    rtos_printf("USB Device Control Driver Initialized!\n");
+    if (device_control_usb_get_ctrl_ctx_cb) {
+        device_control_ctx = device_control_usb_get_ctrl_ctx_cb();
+        rtos_printf("USB Device Control Driver Initialized!\n");
+    } else {
+        rtos_printf("tud_device_control_get_ctrl_ctx_cb required to use USB device control\n");
+    }
 }
 
-static void usb_device_control_reset(uint8_t rhport)
+static void device_control_usb_reset(uint8_t rhport)
 {
   (void) rhport;
 
   rtos_printf("USB Device Control Driver Reset!\n");
 }
 
-static uint16_t usb_device_control_open(uint8_t rhport, tusb_desc_interface_t const * itf_desc, uint16_t max_len)
+static uint16_t device_control_usb_open(uint8_t rhport, tusb_desc_interface_t const *itf_desc, uint16_t max_len)
 {
     TU_VERIFY(TUSB_CLASS_VENDOR_SPECIFIC == itf_desc->bInterfaceClass);
 
     TU_VERIFY(itf_desc->bNumEndpoints == 0);
+
+    TU_VERIFY(device_control_ctx != NULL);
 
     uint16_t const drv_len = sizeof(tusb_desc_interface_t);
     TU_VERIFY(max_len >= drv_len);
 
     control_ret_t dc_ret;
 
-    TU_VERIFY(device_control_ctx != NULL);
-
     dc_ret = device_control_resources_register(device_control_ctx,
-                                               servicer_count_g,
                                                pdMS_TO_TICKS(100));
 
     if (dc_ret != CONTROL_SUCCESS) {
@@ -59,13 +61,11 @@ static uint16_t usb_device_control_open(uint8_t rhport, tusb_desc_interface_t co
     return drv_len;
 }
 
-static uint8_t request_data[CFG_TUD_ENDPOINT0_SIZE];
-
-
 #define REQ_TYPE(direction, type, recipient) ((uint8_t) ((direction) << 7)) | ((uint8_t) ((type) << 5)) | (recipient)
 
-bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t const * request)
+bool device_control_usb_xfer(uint8_t rhport, uint8_t stage, tusb_control_request_t const *request)
 {
+    static uint8_t request_data[CFG_TUD_ENDPOINT0_SIZE];
     control_ret_t ret;
     size_t len;
 
@@ -120,27 +120,12 @@ bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_requ
     return false;
 }
 
-static const usbd_class_driver_t app_drv[1] = {
-    {
-        DRIVER_NAME("XMOS-DEVICE-CONTROL")
-        .init = usb_device_control_init,
-        .reset = usb_device_control_reset,
-        .open = usb_device_control_open,
-        .control_xfer_cb = NULL,
-        .xfer_cb = NULL,
-        .sof = NULL,
-    }
+const usbd_class_driver_t device_control_usb_app_driver = {
+    DRIVER_NAME("XMOS-DEVICE-CONTROL")
+    .init = device_control_usb_init,
+    .reset = device_control_usb_reset,
+    .open = device_control_usb_open,
+    .control_xfer_cb = NULL,
+    .xfer_cb = NULL,
+    .sof = NULL,
 };
-
-void usb_device_control_set_ctx(device_control_t *ctx,
-                                size_t servicer_count)
-{
-    device_control_ctx = ctx;
-    servicer_count_g = servicer_count;
-}
-
-usbd_class_driver_t const* usbd_app_driver_get_cb(uint8_t* driver_count)
-{
-    *driver_count = 1;
-    return app_drv;
-}

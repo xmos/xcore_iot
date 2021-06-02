@@ -145,6 +145,7 @@ typedef struct {
         struct {
             rtos_intertile_t *client_intertile[3];
 
+            size_t servicer_count;
             size_t intertile_count;
             rtos_osal_queue_t gateway_queue;
 
@@ -302,22 +303,18 @@ control_ret_t device_control_servicer_cmd_recv(device_control_servicer_t *ctx,
  * must be called after calling device_control_start() and before the transport
  * layer is started. It is to be run simultaneously with device_control_servicer_register()
  * from other threads on any tiles associated with the device control instance.
+ * The number of servicers that must register is specified by the servicer_count parameter
+ * of device_control_init().
  *
- * \param ctx             A pointer to the device control instance to register resources for.
+ * \param ctx     A pointer to the device control instance to register resources for.
+ * \param timeout The amount of time in RTOS ticks to wait before all servicers register
+ *                their resource IDs with device_control_servicer_register().
  *
- * \param servicer_count  The number of servicers that will be associated with this device
- *                        control instance. Each associated servicer must register its resource
- *                        IDs with device_control_servicer_register() before this function will
- *                        return successfully.
- * \param timeout         The amount of time in RTOS ticks to wait before all servicers register
- *                        their resource IDs with device_control_servicer_register().
- *
- * \retval                CONTROL_SUCCESS if all servicers successfully register their resource
- *                        IDs before the timeout. was successful.
- * \retval                CONTROL_REGISTRATION_FAILED otherwise.
+ * \retval        CONTROL_SUCCESS if all servicers successfully register their resource
+ *                IDs before the timeout.
+ * \retval        CONTROL_REGISTRATION_FAILED otherwise.
  */
 control_ret_t device_control_resources_register(device_control_t *ctx,
-                                                const size_t servicer_count,
                                                 unsigned timeout);
 
 /**
@@ -380,6 +377,8 @@ control_ret_t device_control_start(device_control_t *ctx,
  * \param mode            Set to DEVICE_CONTROL_HOST_MODE if the command transport layer is on the
  *                        same tile. Set to DEVICE_CONTROL_CLIENT_MODE if the command transport layer
  *                        is on another tile.
+ * \param servicer_count  The number of servicers that will be associated with this device
+ *                        control instance.
  * \param intertile_ctx   An array of intertile contexts used to communicate with other tiles.
  * \param intertile_count The number of intertile contexts in the \p intertile_ctx array.
  *
@@ -396,6 +395,7 @@ control_ret_t device_control_start(device_control_t *ctx,
  */
 control_ret_t device_control_init(device_control_t *ctx,
                                   int mode,
+                                  size_t servicer_count,
                                   rtos_intertile_t *intertile_ctx[],
                                   size_t intertile_count);
 
