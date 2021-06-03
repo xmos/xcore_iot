@@ -12,6 +12,7 @@ extern "C" {
 #endif  // __cplusplus
 
 event_counter_t *event_counter_create(size_t count);
+void event_counter_init(event_counter_t *counter, size_t count);
 void event_counter_signal(event_counter_t *counter);
 void event_counter_wait(event_counter_t *counter);
 void event_counter_delete(event_counter_t *counter);

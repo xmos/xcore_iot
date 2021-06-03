@@ -27,7 +27,7 @@ extern "C" {
  * \return              Task object
  */
 dispatch_task_t *dispatch_task_create(dispatch_function_t function,
-                                      void *aargumentrg, bool waitable);
+                                      void *argument, bool waitable);
 
 /** Initialize a task
  *

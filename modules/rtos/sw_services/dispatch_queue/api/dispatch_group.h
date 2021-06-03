@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the 
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 #ifndef DISPATCH_GROUP_H_
 #define DISPATCH_GROUP_H_
@@ -30,6 +30,14 @@ dispatch_group_t *dispatch_group_create(size_t length, bool waitable);
  * not be waited on
  */
 void dispatch_group_init(dispatch_group_t *group, bool waitable);
+
+/** Get pointer to the group's tasks array
+ *
+ * \param group     Group object
+ *
+ * \return          Task array pointer
+ */
+dispatch_task_t **dispatch_group_tasks_get(dispatch_group_t *group);
 
 /** Free memory allocated by dispatch_group_create
  *

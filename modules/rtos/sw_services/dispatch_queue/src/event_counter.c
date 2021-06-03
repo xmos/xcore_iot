@@ -15,9 +15,16 @@ struct event_counter_struct {
 event_counter_t *event_counter_create(size_t count) {
   event_counter_t *counter = rtos_osal_malloc(sizeof(event_counter_t));
 
-  counter->count = count;
   rtos_osal_semaphore_create(&counter->semaphore, "", 1, 0);
+
+  event_counter_init(counter, count);
   return counter;
+}
+
+void event_counter_init(event_counter_t *counter, size_t count) {
+  xassert(counter);
+
+  counter->count = count;
 }
 
 void event_counter_signal(event_counter_t *counter) {

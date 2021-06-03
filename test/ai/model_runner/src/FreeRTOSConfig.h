@@ -9,7 +9,7 @@ your application. */
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE 0
 #define configCPU_CLOCK_HZ 100000000
-#define configNUM_CORES 7
+#define configNUM_CORES 5
 #define configTICK_RATE_HZ 1000
 #define configMAX_PRIORITIES 32
 #define configRUN_MULTIPLE_PRIORITIES 1
@@ -32,7 +32,7 @@ your application. */
 #define configENABLE_BACKWARD_COMPATIBILITY                                   \
   1 /* Required for FreeRTOS_TCP_WIN.c TODO: active closed bug, may have been \
        fixed upstream */
-#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 7
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configSTACK_DEPTH_TYPE uint32_t
 #define configMESSAGE_BUFFER_LENGTH_TYPE size_t
 
@@ -45,8 +45,8 @@ your application. */
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK 0
 #define configUSE_TICK_HOOK 0
-#define configCHECK_FOR_STACK_OVERFLOW 2
-#define configUSE_MALLOC_FAILED_HOOK 1
+#define configCHECK_FOR_STACK_OVERFLOW 0
+#define configUSE_MALLOC_FAILED_HOOK 0
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 0
 #define configUSE_CORE_INIT_HOOK 0
 
