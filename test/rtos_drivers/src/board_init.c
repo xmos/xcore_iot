@@ -73,6 +73,7 @@ static void set_app_pll(void)
 
 static rtos_driver_rpc_t i2c_rpc_config;
 static rtos_driver_rpc_t gpio_rpc_config;
+static rtos_driver_rpc_t qspi_flash_rpc_config;
 
 void board_tile0_init(
         chanend_t tile1,
@@ -137,6 +138,12 @@ void board_tile0_init(
             gpio_ctx,
             &gpio_rpc_config,
             intertile_ctx);
+
+    rtos_qspi_flash_rpc_host_init(
+            qspi_flash_ctx,
+            &qspi_flash_rpc_config,
+            client_intertile_ctx,
+            1);
 }
 
 void board_tile1_init(
@@ -225,4 +232,9 @@ void board_tile1_init(
             &gpio_rpc_config,
             client_intertile_ctx,
             1);
+
+    rtos_qspi_flash_rpc_client_init(
+            qspi_flash_ctx,
+            &qspi_flash_rpc_config,
+            intertile_ctx);
 }

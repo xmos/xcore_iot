@@ -88,6 +88,8 @@ void vApplicationDaemonTaskStartup(void *arg)
         test_printf("Skipped SWMEM tests");
     }
 
+    qspi_flash_device_tests(qspi_flash_ctx, other_tile_c);
+
     // #if ON_TILE(USB_TILE_NO)
     // {
     //     usb_audio_init(intertile_ctx, appconfUSB_AUDIO_TASK_PRIORITY);

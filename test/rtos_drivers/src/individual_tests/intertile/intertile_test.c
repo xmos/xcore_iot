@@ -6,9 +6,6 @@
 #include <xs1.h>
 #include <string.h>
 
-/* FreeRTOS headers */
-#include "FreeRTOS.h"
-
 /* Library headers */
 #include "rtos/drivers/intertile/api/rtos_intertile.h"
 

@@ -66,6 +66,7 @@ static void start_gpio_devices(gpio_test_ctx_t *test_ctx)
 static void register_gpio_tests(gpio_test_ctx_t *test_ctx)
 {
     register_io_test(test_ctx);
+
     register_rpc_io_test(test_ctx);
 }
 
