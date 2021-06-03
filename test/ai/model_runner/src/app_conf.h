@@ -10,7 +10,7 @@
 
 /* Model Runner */
 #define appconfTENSOR_ARENA_SIZE \
-  (90000)  // this is big enough for all test models
+  (100000)  // this is big enough for all test models
 #define appconfMODEL_RUNNER_TASK_STACK_SIZE (1024)
 
 /* Dispatch Queue */

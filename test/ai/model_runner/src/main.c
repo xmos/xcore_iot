@@ -13,6 +13,7 @@
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
 #include "rtos/drivers/swmem/api/rtos_swmem.h"
 #include "xcore_device_memory.h"
+#include "model_runner.h"
 #include "dispatch.h"
 
 #include "app_conf.h"
@@ -48,6 +49,7 @@ void model_runner_task(void *arg) {
   int8_t *input_buffer;
   size_t input_size;
   int8_t *output_buffer;
+  size_t output_size;
   model_runner_t *model_runner_ctx = NULL;
 
   // initialize model runner global state
@@ -69,14 +71,25 @@ void model_runner_task(void *arg) {
   input_buffer = model_runner_input_buffer_get(model_runner_ctx);
   input_size = model_runner_input_size_get(model_runner_ctx);
   output_buffer = model_runner_output_buffer_get(model_runner_ctx);
+  output_size = model_runner_output_size_get(model_runner_ctx);
 
-  // set input tensor to all zeros
+  // set input & output tensors to all zeros
   memset(input_buffer, 0, input_size);
+  memset(output_buffer, 0, output_size);
 
   // Run inference, and report any error
   rtos_printf("Running inference...\n");
   model_runner_invoke(model_runner_ctx);
 
+  // print output buffer
+  rtos_printf("Output buffer:");
+  for (size_t i = 0; i < output_size; i++) {
+    rtos_printf(" %d", (int)output_buffer[i]);
+  }
+  rtos_printf("\n");
+
+  // print profiler report
+  rtos_printf("Profiler report:\n");
   model_runner_profiler_summary_print(model_runner_ctx);
 
   dispatch_queue_teardown(dispatch_queue);

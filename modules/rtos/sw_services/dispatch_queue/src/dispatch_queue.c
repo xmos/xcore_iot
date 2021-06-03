@@ -28,20 +28,23 @@ void dispatch_queue_worker(void *param) {
   rtos_osal_queue_t *queue = (rtos_osal_queue_t *)param;
   dispatch_task_t *task = NULL;
 
-  rtos_printf("dispatch_queue_worker started\n");
+  dispatch_queue_log("dispatch_queue_worker started\n");
 
   for (;;) {
     if (rtos_osal_queue_receive(queue, &task, RTOS_OSAL_WAIT_FOREVER) ==
         RTOS_OSAL_SUCCESS) {
+      dispatch_queue_log("dispatch_queue_worker received task=%u\n",
+                         (size_t)task);
+
       dispatch_task_perform(task);
 
       if (task->waitable) {
         // signal the event counter
         event_counter_signal(task->event_counter);
-        // clear semaphore
       } else {
         // the contract is that the worker must delete non-waitable tasks
-        dispatch_task_delete(task);
+        // FIXME
+        // dispatch_task_delete(task);
       }
     }
   }
@@ -72,8 +75,8 @@ struct dispatch_queue_struct {
 dispatch_queue_t *dispatch_queue_create(size_t length, size_t thread_count,
                                         size_t thread_stack_size,
                                         size_t thread_priority) {
-  rtos_printf("dispatch_queue_create: length=%d, thread_count=%d\n", length,
-              thread_count);
+  dispatch_queue_log("dispatch_queue_create: length=%d, thread_count=%d\n",
+                     length, thread_count);
 
   dispatch_queue_t *dispatch_queue = rtos_osal_malloc(sizeof(dispatch_queue_t));
 
@@ -100,7 +103,7 @@ void dispatch_queue_init(dispatch_queue_t *dispatch_queue,
                          size_t thread_priority) {
   xassert(dispatch_queue);
 
-  rtos_printf("dispatch_queue_init: %u\n", (size_t)dispatch_queue);
+  dispatch_queue_log("dispatch_queue_init: %u\n", (size_t)dispatch_queue);
 
   // create workers
   for (int i = 0; i < dispatch_queue->thread_count; i++) {
@@ -116,9 +119,8 @@ void dispatch_queue_task_add(dispatch_queue_t *dispatch_queue,
   xassert(dispatch_queue);
   xassert(task);
 
-  // rtos_printf("dispatch_queue_add_task: %u   task=%u\n",
-  // (size_t)dispatch_queue,
-  //             (size_t)task);
+  dispatch_queue_log("dispatch_queue_add_task: %u   task=%u\n",
+                     (size_t)dispatch_queue, (size_t)task);
 
   if (task->waitable) {
     task->event_counter = event_counter_create(1);
@@ -134,19 +136,24 @@ void dispatch_queue_group_add(dispatch_queue_t *dispatch_queue,
   xassert(dispatch_queue);
   xassert(group);
 
-  // rtos_printf("dispatch_queue_group_add: %u   group=%u\n",
-  //             (size_t)dispatch_queue, (size_t)group);
+  dispatch_queue_log("dispatch_queue_group_add: %u   group=%u\n",
+                     (size_t)dispatch_queue, (size_t)group);
 
-  event_counter_t *counter = NULL;
+  // event_counter_t *counter = NULL;
+
+  // if (group->waitable) {
+  //   // create event counter
+  //   counter = event_counter_create(group->count);
+  // }
 
   if (group->waitable) {
-    // create event counter
-    counter = event_counter_create(group->count);
+    // init event counter
+    event_counter_init(group->event_counter, group->count);
   }
 
   // send to queue
   for (int i = 0; i < group->count; i++) {
-    group->tasks[i]->event_counter = counter;
+    // group->tasks[i]->event_counter = counter;
     rtos_osal_queue_send(&dispatch_queue->queue, (void *)&group->tasks[i],
                          RTOS_OSAL_WAIT_FOREVER);
   }
@@ -157,15 +164,15 @@ void dispatch_queue_task_wait(dispatch_queue_t *dispatch_queue,
   xassert(task);
   xassert(task->waitable);
 
-  // rtos_printf("dispatch_queue_task_wait: %u   task=%u\n",
-  //             (size_t)dispatch_queue, (size_t)task);
+  dispatch_queue_log("dispatch_queue_task_wait: %u   task=%u\n",
+                     (size_t)dispatch_queue, (size_t)task);
 
   if (task->waitable) {
-    event_counter_t *counter = (event_counter_t *)task->event_counter;
-    event_counter_wait(counter);
+    xassert(task->event_counter);
+    event_counter_wait(task->event_counter);
     // the contract is that the dispatch queue must delete waitable tasks
-    event_counter_delete(counter);
-    dispatch_task_delete(task);
+    // event_counter_delete(counter);
+    // FIXME dispatch_task_delete(task);
   }
 }
 
@@ -174,24 +181,27 @@ void dispatch_queue_group_wait(dispatch_queue_t *dispatch_queue,
   xassert(group);
   xassert(group->waitable);
 
-  // rtos_printf("dispatch_queue_group_wait: %u   group=%u\n",
-  //             (size_t)dispatch_queue, (size_t)group);
+  dispatch_queue_log("dispatch_queue_group_wait: %u   group=%u\n",
+                     (size_t)dispatch_queue, (size_t)group);
 
   if (group->waitable) {
+    // can pick any task in the group to wait on because they
+    // share the same event counter
     event_counter_t *counter = group->tasks[0]->event_counter;
     xassert(counter);
     event_counter_wait(counter);
-    event_counter_delete(counter);
-    for (int i = 0; i < group->count; i++) {
-      dispatch_task_delete(group->tasks[i]);
-    }
+    // event_counter_delete(counter);
+    // FIXME
+    // for (int i = 0; i < group->count; i++) {
+    //   dispatch_task_delete(group->tasks[i]);
+    // }
   }
 }
 
 void dispatch_queue_delete(dispatch_queue_t *dispatch_queue) {
   xassert(dispatch_queue);
 
-  rtos_printf("dispatch_queue_delete: %u\n", (size_t)dispatch_queue);
+  dispatch_queue_log("dispatch_queue_delete: %u\n", (size_t)dispatch_queue);
 
   // delete all threads
   for (int i = 0; i < dispatch_queue->thread_count; i++) {
