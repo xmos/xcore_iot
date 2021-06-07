@@ -8,7 +8,7 @@
 
 #define swmem_printf( FMT, ... )       module_printf("SWMEM", FMT, ##__VA_ARGS__)
 
-#define SWMEM_MAX_TESTS   2
+#define SWMEM_MAX_TESTS   1
 
 #define SWMEM_MAIN_TEST_ATTR      __attribute__((fptrgroup("rtos_test_swmem_main_test_fptr_grp")))
 

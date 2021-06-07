@@ -56,10 +56,10 @@ static void register_qspi_flash_tests(qspi_flash_test_ctx_t *test_ctx)
     register_check_params_test(test_ctx);
 
     register_read_write_read_test(test_ctx);
-    // register_multiple_user_test(test_ctx);
 
-    // register_rpc_read_write_read_test(test_ctx);
-    // register_rpc_multiple_user_test(test_ctx);
+    register_rpc_read_write_read_test(test_ctx);
+
+    register_multiple_user_test(test_ctx);
 }
 
 static void qspi_flash_init_tests(qspi_flash_test_ctx_t *test_ctx, rtos_qspi_flash_t *qspi_flash_ctx)

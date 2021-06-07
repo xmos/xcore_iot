@@ -88,7 +88,12 @@ void vApplicationDaemonTaskStartup(void *arg)
         test_printf("Skipped SWMEM tests");
     }
 
-    qspi_flash_device_tests(qspi_flash_ctx, other_tile_c);
+    if (RUN_QSPI_FLASH_TESTS) {
+        qspi_flash_device_tests(qspi_flash_ctx, other_tile_c);
+    } else {
+        test_printf("Skipped QSPI_FLASH tests");
+    }
+
 
     // #if ON_TILE(USB_TILE_NO)
     // {
