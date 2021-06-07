@@ -340,7 +340,7 @@ void rtos_qspi_flash_rpc_config(
         /* This is a client */
         rpc_config->host_address.port = intertile_port;
 
-        rtos_osal_mutex_create(&qspi_flash_ctx->mutex, "qspi_lock", RTOS_OSAL_NOT_RECURSIVE);
+        rtos_osal_mutex_create(&qspi_flash_ctx->mutex, "qspi_lock", RTOS_OSAL_RECURSIVE);
 
     } else {
         for (int i = 0; i < rpc_config->remote_client_count; i++) {
