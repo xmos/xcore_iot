@@ -92,7 +92,6 @@ set_target_properties(model_runner PROPERTIES OUTPUT_NAME model_runner.xe)
 
 target_sources(model_runner
   PRIVATE ${XMOS_RTOS_PLATFORM_SOURCES}
-  PRIVATE ${DISPATCHER_SOURCES}
   "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/test_model_data.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/test_model_runner.cc"
@@ -100,7 +99,6 @@ target_sources(model_runner
 
 target_include_directories(model_runner
   PRIVATE ${XMOS_RTOS_PLATFORM_INCLUDES}
-  PRIVATE ${DISPATCHER_INCLUDES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
