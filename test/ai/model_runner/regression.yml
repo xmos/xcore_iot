@@ -39,6 +39,6 @@
   code_size:
     tile_0: 77548
   benchmark:
-    SRAM: 9658
+    SRAM: 10387
     EXTMEM: 34337
     SWMEM: 161116
