@@ -1,10 +1,10 @@
-// Copyright 2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public Licence: Version 1.
+// This is a TensorFlow Lite model file that has been converted into a C data
+// array using the convert_tflite_to_c_source() tool.
 
-#ifndef PERSON_DETECT_MODEL_H_
-#define PERSON_DETECT_MODEL_H_
+#ifndef PERSON_DETECT_MODEL_DATA_H_
+#define PERSON_DETECT_MODEL_DATA_H_
 
-extern unsigned char person_detect_model_data[];
-extern const int person_detect_model_len;
+extern const unsigned char person_detect_model_data[];
+extern const int person_detect_model_data_len;
 
-#endif  // PERSON_DETECT_MODEL_H_
+#endif  // PERSON_DETECT_MODEL_DATA_H_
