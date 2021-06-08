@@ -32,7 +32,6 @@ for model in ${models[@]}; do
     (xformer.py --analyze -par ${par} ${QUANT_MODEL} ${XCORE_MODEL} 2> /dev/null | tee -a ${REPORT})
     (python ${XCORE_SDK_PATH}/modules/aif/tools/generate/generate_model_runner.py --input ${XCORE_MODEL} --output src --name test)
 
-    #(cd build; rm -rf *; cmake ../; make install)
     (rm -rf build; cmake -B build; cmake --build build --target install)
     echo "CODE_SIZE"  | tee -a ${REPORT}
     (xobjdump --size bin/${FIRMWARE} | tee -a ${REPORT})

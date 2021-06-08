@@ -119,7 +119,7 @@ If you do not want to regenerate the model runner, the following command will ge
 
 .. code-block:: console
 
-    $ convert_tflite_to_c_source.py --input model/person_detect_xcore.tflite --header app/model_runner/person_detect_model.h --source src/model_runner/person_detect_model.c --variable-name person_detect
+    $ convert_tflite_to_c_source.py --input model/person_detect_xcore.tflite --header app/model_runner/person_detect_model.h --source app/model_runner/person_detect_model.c --variable-name person_detect
 
 ******************
 Training the model
