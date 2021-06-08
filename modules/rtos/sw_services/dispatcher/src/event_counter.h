@@ -5,20 +5,22 @@
 
 #include <stddef.h>
 
+#include "worker_types.h"
+
 typedef struct event_counter_struct event_counter_t;
 
 #ifdef __cplusplus
 extern "C" {
-#endif  // __cplusplus
+#endif // __cplusplus
 
-event_counter_t *event_counter_create(size_t count);
+event_counter_t *event_counter_create(size_t count, WorkerType worker_type);
 void event_counter_init(event_counter_t *counter, size_t count);
-void event_counter_signal(event_counter_t *counter);
-void event_counter_wait(event_counter_t *counter);
+int event_counter_signal(event_counter_t *counter, WorkerType worker_type);
+void event_counter_wait(event_counter_t *counter, WorkerType worker_type);
 void event_counter_delete(event_counter_t *counter);
 
 #ifdef __cplusplus
-}  // extern "C"
-#endif  // __cplusplus
+} // extern "C"
+#endif // __cplusplus
 
-#endif  // DISPATCH_EVENT_COUNTER_H_
+#endif // DISPATCH_EVENT_COUNTER_H_

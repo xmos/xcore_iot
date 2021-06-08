@@ -13,14 +13,14 @@ endif()
 
 # Specify configuration
 set(MULTITILE_BUILD FALSE)
-set(USE_DISPATCH_QUEUE TRUE)
+set(USE_DISPATCHER TRUE)
 
 # Import XMOS RTOS platform configuration.
 # Must be done after setting the configuration options.
 include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 include("$ENV{XCORE_SDK_PATH}/modules/rtos/rtos.cmake")
 
-project(dispatch_queue_tests VERSION 1.0.0)
+project(dispatcher_tests VERSION 1.0.0)
 
 enable_language(CXX C ASM)
 
@@ -46,37 +46,38 @@ set(BUILD_FLAGS
   "-Os"
 )
 
-add_executable(dispatch_queue_tests)
+add_executable(dispatcher_tests)
 
-target_compile_options(dispatch_queue_tests PRIVATE ${BUILD_FLAGS})
-target_link_options(dispatch_queue_tests PRIVATE ${BUILD_FLAGS})
+target_compile_options(dispatcher_tests PRIVATE ${BUILD_FLAGS})
+target_link_options(dispatcher_tests PRIVATE ${BUILD_FLAGS})
 
-set_target_properties(dispatch_queue_tests PROPERTIES OUTPUT_NAME dispatch_queue_tests.xe)
+set_target_properties(dispatcher_tests PROPERTIES OUTPUT_NAME dispatcher_tests.xe)
 
 #**********************
 # targets
 #**********************
 include("${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake")
 
-target_sources(dispatch_queue_tests
+target_sources(dispatcher_tests
   PRIVATE ${KERNEL_SOURCES}
   PRIVATE ${RTOS_SUPPORT_SOURCES}
   PRIVATE ${OSAL_SOURCES}
-  PRIVATE ${DISPATCH_QUEUE_SOURCES}
+  PRIVATE ${DISPATCHER_SOURCES}
   PRIVATE ${UNITY_SOURCES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c"
-  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/test_dispatch_task.c"
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/test_dispatch_job.c"
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/test_dispatch_group.c"
-  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/test_dispatch_queue.c"
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/test_threads_dispatcher.c"
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/test_isr_dispatcher.c"
 )
 
-target_include_directories(dispatch_queue_tests
+target_include_directories(dispatcher_tests
   PRIVATE ${KERNEL_INCLUDES}
   PRIVATE ${RTOS_SUPPORT_INCLUDES}
   PRIVATE ${OSAL_INCLUDES}
-  PRIVATE ${DISPATCH_QUEUE_INCLUDES}
+  PRIVATE ${DISPATCHER_INCLUDES}
   PRIVATE ${UNITY_INCLUDES}
   PRIVATE "src"
 )
 
-install(TARGETS dispatch_queue_tests DESTINATION ${INSTALL_DIR})
+install(TARGETS dispatcher_tests DESTINATION ${INSTALL_DIR})

@@ -28,10 +28,11 @@ TfLiteStatus RTOSDispatcher::Invoke(void** arguments, size_t size) const {
   size_t num_threads_added = 0;
   dispatch_task_t** tasks = dispatch_group_tasks_get(group_);
 
+  // reset the group for first iteration
   dispatch_group_init(group_, true);
+  // printf("Invoke  size=%d      %u\n", size, (size_t)function_);
 
   for (int i = 0; i < size; i++) {
-    // dispatch_group_function_add(group_, function_, arguments[i]);
     dispatch_task_init(tasks[i], function_, arguments[i], true);
     dispatch_group_task_add(group_, tasks[i]);
 
@@ -39,6 +40,7 @@ TfLiteStatus RTOSDispatcher::Invoke(void** arguments, size_t size) const {
     if (num_threads_added == num_threads_) {
       dispatch_queue_group_add(dispatch_queue_, group_);
       dispatch_queue_group_wait(dispatch_queue_, group_);
+      // reset the group for next iteration
       dispatch_group_init(group_, true);
       num_threads_added = 0;
     }
