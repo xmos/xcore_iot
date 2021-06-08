@@ -28,11 +28,9 @@
 
 static inline void chanend_job_send(chanend_t src, chanend_t dst,
                                     dispatch_job_t *job) {
-  uint32_t mask = rtos_interrupt_mask_all();
   chanend_set_dest(src, dst);
   s_chan_out_word(src, (uint32_t)job);
   chanend_out_control_token(src, XS1_CT_PAUSE);
-  rtos_interrupt_mask_set(mask);
 }
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(dispatcher_isr_worker, arg) {
@@ -138,9 +136,13 @@ void dispatcher_delete(dispatcher_t *dispatcher) {
   } else if (dispatcher->worker_type == ISRWorker) {
     // send all ISR workers a NULL job which instructs them to free their
     // chanend
+    // disable interrupts while dispatching jobs
+    uint32_t mask = rtos_interrupt_mask_all();
     for (int i = 0; i < dispatcher->worker_count; i++) {
       chanend_job_send(dispatcher->chanend, dispatcher->isr_chanends[i], NULL);
     }
+    // re-enable interupts
+    rtos_interrupt_mask_set(mask);
     chanend_free(dispatcher->chanend);
     rtos_osal_free((void *)dispatcher->isr_chanends);
   }
@@ -253,7 +255,11 @@ void dispatcher_job_add(dispatcher_t *dispatcher, dispatch_job_t *job) {
     rtos_osal_queue_send(&dispatcher->queue, (void *)&job,
                          RTOS_OSAL_WAIT_FOREVER);
   } else if (dispatcher->worker_type == ISRWorker) {
+    // disable interrupts while dispatching jobs
+    uint32_t mask = rtos_interrupt_mask_all();
     chanend_job_send(dispatcher->chanend, dispatcher->isr_chanends[0], job);
+    // re-enable interrupts
+    rtos_interrupt_mask_set(mask);
   }
 }
 
@@ -279,11 +285,15 @@ void dispatcher_group_add(dispatcher_t *dispatcher, dispatch_group_t *group) {
                            RTOS_OSAL_WAIT_FOREVER);
     }
   } else if (dispatcher->worker_type == ISRWorker) {
+    // disable interrupts while dispatching jobs
+    uint32_t mask = rtos_interrupt_mask_all();
     for (int i = 0; i < group->count; i++) {
       group->jobs[i]->event_counter = group->event_counter;
       chanend_job_send(dispatcher->chanend, dispatcher->isr_chanends[i],
                        group->jobs[i]);
     }
+    // re-enable interrupts
+    rtos_interrupt_mask_set(mask);
   }
 }
 
