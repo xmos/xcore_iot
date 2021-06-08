@@ -5,18 +5,11 @@
 your application. */
 #include "platform.h"
 
-/*
- * TODO remove this. Just a hack to prevent the i2s task from calling
- * vTaskSuspendAll(). Not a good solution. the i2s task should probably not be
- * using a FreeRTOS stream buffer.
- */
-#define sbRECEIVE_COMPLETED(pxStreamBuffer)
-
 #define configUSE_PREEMPTION 1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE 0
 #define configCPU_CLOCK_HZ 100000000
-#define configNUM_CORES 2
+#define configNUM_CORES 5
 #define configTICK_RATE_HZ 1000
 #define configMAX_PRIORITIES 32
 #define configRUN_MULTIPLE_PRIORITIES 1
@@ -36,8 +29,8 @@ your application. */
 #define configUSE_QUEUE_SETS 1
 #define configUSE_TIME_SLICING 1
 #define configUSE_NEWLIB_REENTRANT 0
-#define configENABLE_BACKWARD_COMPATIBILITY                                   \
-  1 /* Required for FreeRTOS_TCP_WIN.c TODO: active closed bug, may have been \
+#define configENABLE_BACKWARD_COMPATIBILITY                                    \
+  1 /* Required for FreeRTOS_TCP_WIN.c TODO: active closed bug, may have been  \
        fixed upstream */
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configSTACK_DEPTH_TYPE uint32_t
@@ -46,21 +39,21 @@ your application. */
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION 0
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
-#define configTOTAL_HEAP_SIZE 128 * 1024
+#define configTOTAL_HEAP_SIZE 148000
 #define configAPPLICATION_ALLOCATED_HEAP 0
 
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK 0
 #define configUSE_TICK_HOOK 0
-#define configCHECK_FOR_STACK_OVERFLOW 1
-#define configUSE_MALLOC_FAILED_HOOK 1
+#define configCHECK_FOR_STACK_OVERFLOW 0
+#define configUSE_MALLOC_FAILED_HOOK 0
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 0
 #define configUSE_CORE_INIT_HOOK 0
 
 /* Run time and task stats gathering related definitions. */
-#define configGENERATE_RUN_TIME_STATS 1
-#define configUSE_TRACE_FACILITY 1
-#define configUSE_STATS_FORMATTING_FUNCTIONS \
+#define configGENERATE_RUN_TIME_STATS 0
+#define configUSE_TRACE_FACILITY 0
+#define configUSE_STATS_FORMATTING_FUNCTIONS                                   \
   2 /* Setting to 2 does not include <stdio.h> in tasks.c */
 
 /* Co-routine related definitions. */

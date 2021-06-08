@@ -5,7 +5,7 @@
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE 0
 #define configCPU_CLOCK_HZ 100000000
-#define configNUM_CORES 5
+#define configNUM_CORES 8
 #define configTICK_RATE_HZ 1000
 #define configMAX_PRIORITIES 32
 #define configRUN_MULTIPLE_PRIORITIES 1
@@ -24,10 +24,10 @@
 #define configUSE_NEWLIB_REENTRANT 0
 #define configUSE_TASK_PREEMPTION_DISABLE 1
 #define configUSE_CORE_EXCLUSION 1
-#define configENABLE_BACKWARD_COMPATIBILITY                                   \
-  1 /* Required for FreeRTOS_TCP_WIN.c TODO: active closed bug, may have been \
+#define configENABLE_BACKWARD_COMPATIBILITY                                    \
+  1 /* Required for FreeRTOS_TCP_WIN.c TODO: active closed bug, may have been  \
        fixed upstream */
-#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 8
 #define configSTACK_DEPTH_TYPE uint32_t
 #define configMESSAGE_BUFFER_LENGTH_TYPE size_t
 
@@ -47,7 +47,7 @@
 /* Run time and task stats gathering related definitions. */
 #define configGENERATE_RUN_TIME_STATS 0
 #define configUSE_TRACE_FACILITY 0
-#define configUSE_STATS_FORMATTING_FUNCTIONS \
+#define configUSE_STATS_FORMATTING_FUNCTIONS                                   \
   2 /* Setting to 2 does not include <stdio.h> in tasks.c */
 
 /* Co-routine related definitions. */

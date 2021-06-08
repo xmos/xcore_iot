@@ -8,6 +8,7 @@ endif()
 ## Specify configuration
 set(USE_FATFS TRUE)
 set(USE_AIF TRUE)
+set(USE_DISPATCHER TRUE)
 set(USE_DEVICE_MEMORY_SUPPORT TRUE)
 
 ## Import XMOS configurations
@@ -74,8 +75,14 @@ endif()
 
 add_executable(${TARGET_NAME})
 
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
+target_sources(${TARGET_NAME} PRIVATE
+    ${APP_SOURCES}
+    ${XMOS_RTOS_PLATFORM_SOURCES}
+)
+target_include_directories(${TARGET_NAME} PRIVATE
+    ${APP_INCLUDES}
+    ${XMOS_RTOS_PLATFORM_INCLUDES}
+)
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})

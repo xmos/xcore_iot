@@ -47,7 +47,9 @@ def parse_report(content):
                         "SRAM": arena_size_sram,
                         "EXTMEM": arena_size_extmem,
                     },
-                    "code_size": {"tile_0": code_size_tile_0,},
+                    "code_size": {
+                        "tile_0": code_size_tile_0,
+                    },
                     "benchmark": {
                         "SRAM": benchmark_sram,
                         "EXTMEM": benchmark_extmem,
@@ -119,7 +121,7 @@ def test_models():
             if not math.isclose(
                 regression["code_size"]["tile_0"],
                 test["code_size"]["tile_0"],
-                rel_tol=0.005,
+                rel_tol=0.01,
             ):
                 print(
                     f'Expected code_size {regression["code_size"]["tile_0"]}, reported code_size={test["code_size"]["tile_0"]}'
@@ -130,7 +132,7 @@ def test_models():
                 if not math.isclose(
                     regression["arena_size"][segment],
                     test["arena_size"][segment],
-                    rel_tol=0.005,
+                    rel_tol=0.01,
                 ):
                     print(
                         f'Expected {segment} arena_size {regression["arena_size"][segment]}, reported arena_size={test["arena_size"][segment]}'
@@ -142,7 +144,7 @@ def test_models():
                     if not math.isclose(
                         regression["benchmark"][segment],
                         test["benchmark"][segment],
-                        rel_tol=0.005,
+                        rel_tol=0.05,
                     ):
                         print(
                             f'Expected {segment} benchmark {regression["benchmark"][segment]}, reported benchmark={test["benchmark"][segment]}'
