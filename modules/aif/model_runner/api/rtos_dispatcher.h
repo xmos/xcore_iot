@@ -3,7 +3,7 @@
 #ifndef RTOS_DISPATCHER_H_
 #define RTOS_DISPATCHER_H_
 
-#include "dispatch.h"
+#include "dispatcher.h"
 #include "tensorflow/lite/micro/kernels/xcore/xcore_dispatcher.h"
 
 namespace tflite {
@@ -16,19 +16,19 @@ namespace xcore {
  * RTOS implementation of the Dispatcher abstract base class.
  */
 class RTOSDispatcher : public Dispatcher {
- public:
-  RTOSDispatcher(dispatch_queue_t *dispatch_queue);
+public:
+  RTOSDispatcher(dispatcher_t *dispatcher);
   ~RTOSDispatcher();
 
   TfLiteStatus Invoke(void **arguments, size_t size) const override;
 
- private:
-  dispatch_queue_t *dispatch_queue_;
+private:
+  dispatcher_t *dispatcher_;
   dispatch_group_t *group_;
 };
 
-}  // namespace xcore
-}  // namespace micro
-}  // namespace tflite
+} // namespace xcore
+} // namespace micro
+} // namespace tflite
 
-#endif  // RTOS_DISPATCHER_H_
+#endif // RTOS_DISPATCHER_H_

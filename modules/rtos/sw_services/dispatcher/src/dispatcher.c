@@ -26,6 +26,15 @@
 #define GROUP_CHANNEL_WAIT 1
 #define MAX_CORE_COUNT (8)
 
+static inline void chanend_job_send(chanend_t src, chanend_t dst,
+                                    dispatch_job_t *job) {
+  uint32_t mask = rtos_interrupt_mask_all();
+  chanend_set_dest(src, dst);
+  s_chan_out_word(src, (uint32_t)job);
+  chanend_out_control_token(src, XS1_CT_PAUSE);
+  rtos_interrupt_mask_set(mask);
+}
+
 DEFINE_RTOS_INTERRUPT_CALLBACK(dispatcher_isr_worker, arg) {
   dispatch_job_t *job = NULL;
   chanend_t *chanend = arg;
@@ -37,13 +46,19 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(dispatcher_isr_worker, arg) {
   // dispatcher_log("Minimum heap free: %d\n\tCurrent heap free: %d\n",
   //                xPortGetMinimumEverFreeHeapSize(), xPortGetFreeHeapSize());
 
-  dispatch_job_perform(job);
+  if (job) {
+    dispatch_job_perform(job);
 
-  // signal the event counter
-  if (event_counter_signal(job->event_counter, ISRWorker)) {
+    // signal the event counter
+    if (event_counter_signal(job->event_counter, ISRWorker)) {
 #if GROUP_CHANNEL_WAIT
-    chanend_out_end_token(*chanend);
+      chanend_out_end_token(*chanend);
 #endif
+    }
+  } else {
+    // a NULL job means it is time to free my chanend
+    triggerable_disable_trigger(*chanend);
+    chanend_free(*chanend);
   }
 }
 
@@ -87,10 +102,10 @@ void dispatcher_thread_worker(void *param) {
 struct dispatcher_struct {
   WorkerType worker_type;
   size_t worker_count;
-  // thread worker members
+  // thread worker state
   rtos_osal_queue_t queue;
   rtos_osal_thread_t *threads;
-  // isr worker members
+  // isr worker state
   chanend_t chanend;
   chanend_t *isr_chanends;
 };
@@ -121,10 +136,10 @@ void dispatcher_delete(dispatcher_t *dispatcher) {
     }
     rtos_osal_free((void *)dispatcher->threads);
   } else if (dispatcher->worker_type == ISRWorker) {
+    // send all ISR workers a NULL job which instructs them to free their
+    // chanend
     for (int i = 0; i < dispatcher->worker_count; i++) {
-      // TODO: FIXME
-      // rtos_printf("i=%d\n", i);
-      // chanend_free(dispatcher->isr_chanends[i]);
+      chanend_job_send(dispatcher->chanend, dispatcher->isr_chanends[i], NULL);
     }
     chanend_free(dispatcher->chanend);
     rtos_osal_free((void *)dispatcher->isr_chanends);
@@ -171,6 +186,9 @@ void dispatcher_isr_init(dispatcher_t *dispatcher, uint32_t core_map) {
 
   dispatcher->worker_type = ISRWorker;
 
+  uint32_t core_exclude_map;
+  rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
+
   // create the dispatcher's chanend
   dispatcher->chanend = chanend_alloc();
   xassert(dispatcher->chanend);
@@ -216,6 +234,9 @@ void dispatcher_isr_init(dispatcher_t *dispatcher, uint32_t core_map) {
 
     index++;
   }
+
+  // Restore the core exclusion map for the calling thread
+  rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
 }
 
 void dispatcher_job_add(dispatcher_t *dispatcher, dispatch_job_t *job) {
@@ -232,11 +253,7 @@ void dispatcher_job_add(dispatcher_t *dispatcher, dispatch_job_t *job) {
     rtos_osal_queue_send(&dispatcher->queue, (void *)&job,
                          RTOS_OSAL_WAIT_FOREVER);
   } else if (dispatcher->worker_type == ISRWorker) {
-    uint32_t mask = rtos_interrupt_mask_all();
-    chanend_set_dest(dispatcher->chanend, dispatcher->isr_chanends[0]);
-    s_chan_out_word(dispatcher->chanend, (uint32_t)job);
-    chanend_out_control_token(dispatcher->chanend, XS1_CT_PAUSE);
-    rtos_interrupt_mask_set(mask);
+    chanend_job_send(dispatcher->chanend, dispatcher->isr_chanends[0], job);
   }
 }
 
@@ -262,14 +279,11 @@ void dispatcher_group_add(dispatcher_t *dispatcher, dispatch_group_t *group) {
                            RTOS_OSAL_WAIT_FOREVER);
     }
   } else if (dispatcher->worker_type == ISRWorker) {
-    uint32_t mask = rtos_interrupt_mask_all();
     for (int i = 0; i < group->count; i++) {
       group->jobs[i]->event_counter = group->event_counter;
-      chanend_set_dest(dispatcher->chanend, dispatcher->isr_chanends[i]);
-      s_chan_out_word(dispatcher->chanend, (uint32_t)group->jobs[i]);
-      chanend_out_control_token(dispatcher->chanend, XS1_CT_PAUSE);
+      chanend_job_send(dispatcher->chanend, dispatcher->isr_chanends[i],
+                       group->jobs[i]);
     }
-    rtos_interrupt_mask_set(mask);
   }
 }
 

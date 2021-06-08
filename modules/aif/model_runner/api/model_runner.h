@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #if RTOS_FREERTOS
-#include "dispatch.h"
+#include "dispatcher.h"
 #endif
 
 struct model_runner_struct {
@@ -19,11 +19,10 @@ struct model_runner_struct {
       *profiler_get_fun)(void **);
   __attribute__((fptrgroup("model_runner_profiler_reset_fptr_grp"))) void (
       *profiler_reset_fun)(void);
-  __attribute__((fptrgroup(
-      "model_runner_profiler_durations_get_fptr_grp"))) void (*profiler_durations_get_fun)(uint32_t
-                                                                                               *,
-                                                                                           const uint32_t
-                                                                                               **);
+  __attribute__((
+      fptrgroup("model_runner_profiler_durations_get_fptr_"
+                "grp"))) void (*profiler_durations_get_fun)(uint32_t *,
+                                                            const uint32_t **);
 };
 
 typedef struct model_runner_struct model_runner_t;
@@ -60,7 +59,7 @@ void model_runner_init(uint8_t *arena, size_t arena_size);
  */
 #if RTOS_FREERTOS
 ModelRunnerStatus model_runner_dispatcher_create(model_runner_t *ctx,
-                                                 dispatch_queue_t *queue);
+                                                 dispatcher_t *dispatcher);
 #else
 ModelRunnerStatus model_runner_dispatcher_create(model_runner_t *ctx);
 #endif
@@ -152,4 +151,4 @@ void model_runner_profiler_summary_print(model_runner_t *ctx);
 };
 #endif
 
-#endif  // DRIVERS_SW_SERVICES_MODEL_RUNNER_H_
+#endif // DRIVERS_SW_SERVICES_MODEL_RUNNER_H_

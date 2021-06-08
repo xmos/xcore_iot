@@ -36,7 +36,7 @@ set(USE_LIB_RANDOM FALSE)
 set(USE_LEGACY_COMPAT TRUE)
 set(USE_AIF TRUE)
 set(USE_DEVICE_MEMORY_SUPPORT TRUE)
-set(USE_DISPATCH_QUEUE TRUE)
+set(USE_DISPATCHER TRUE)
 
 # Import XMOS RTOS platform configuration.
 # Must be done after setting the configuration options.
@@ -92,6 +92,7 @@ set_target_properties(model_runner PROPERTIES OUTPUT_NAME model_runner.xe)
 
 target_sources(model_runner
   PRIVATE ${XMOS_RTOS_PLATFORM_SOURCES}
+  PRIVATE ${DISPATCHER_SOURCES}
   "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/test_model_data.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/test_model_runner.cc"
@@ -99,6 +100,7 @@ target_sources(model_runner
 
 target_include_directories(model_runner
   PRIVATE ${XMOS_RTOS_PLATFORM_INCLUDES}
+  PRIVATE ${DISPATCHER_INCLUDES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
