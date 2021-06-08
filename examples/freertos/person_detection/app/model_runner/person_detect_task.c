@@ -125,16 +125,22 @@ static void person_detect_task_runner(void *args) {
   model_runner_t *model_runner_ctx = NULL;
   uint8_t *tensor_arena = NULL;
   uint8_t *input_tensor;
+  dispatcher_t *dispatcher;
 
   tensor_arena = pvPortMalloc(TENSOR_ARENA_SIZE);
 
   model_runner_init(tensor_arena, TENSOR_ARENA_SIZE);
+  dispatcher = dispatcher_create();
+  dispatcher_thread_init(dispatcher, appconfDISPATCHER_LENGTH,
+                         appconfDISPATCHER_THREAD_COUNT,
+                         appconfDISPATCHER_THREAD_PRIORITY);
 
   req_size = model_runner_buffer_size_get();
   interpreter_buf = pvPortMalloc(req_size);
   model_runner_ctx = pvPortMalloc(sizeof(model_runner_t));
 
   person_detect_model_runner_create(model_runner_ctx, interpreter_buf);
+  model_runner_dispatcher_create(model_runner_ctx, dispatcher);
   if (model_runner_allocate(model_runner_ctx, person_detect_model_data) != 0) {
     rtos_printf("Invalid model provided!\n");
 
