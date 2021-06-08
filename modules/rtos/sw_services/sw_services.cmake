@@ -16,7 +16,7 @@ set(MQTT_DIR "${SW_SERVICES_DIR}/mqtt")
 set(SNTPD_DIR "${SW_SERVICES_DIR}/sntpd")
 set(TLS_SUPPORT_DIR "${SW_SERVICES_DIR}/tls_support")
 set(TINYUSB_DIR "${SW_SERVICES_DIR}/usb")
-set(DISPATCH_QUEUE_DIR "${SW_SERVICES_DIR}/dispatch_queue")
+set(DISPATCHER_DIR "${SW_SERVICES_DIR}/dispatcher")
 
 #**********************
 # Options
@@ -34,7 +34,7 @@ option(USE_TLS_SUPPORT "Enable to use TLS support" FALSE)
 option(USE_CUSTOM_MBEDTLS_CONFIG "Enable to use provide an alternate mbedtls_config.h" FALSE)
 option(USE_TINYUSB "Enable to use TinyUSB" FALSE)
 option(USE_DISK_MANAGER_TUSB "Enable to use RAM and Flash disk manager" FALSE)
-option(USE_DISPATCH_QUEUE "Enable to use Dispatch Queue" FALSE)
+option(USE_DISPATCHER "Enable to use Dispatcher" FALSE)
 
 #********************************
 # Gather wifi manager sources
@@ -427,9 +427,9 @@ endif()
 unset(THIS_LIB)
 
 #********************************
-# Gather Dispatch Queue sources
+# Gather Dispatcher sources
 #********************************
-set(THIS_LIB DISPATCH_QUEUE)
+set(THIS_LIB DISPATCHER)
 if(${USE_${THIS_LIB}})
 	set(${THIS_LIB}_FLAGS "-Os")
 
@@ -444,7 +444,7 @@ if(${USE_${THIS_LIB}})
 	)
 
     add_compile_definitions(
-        USE_DISPATCH_QUEUE=1
+        USE_DISPATCHER=1
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()

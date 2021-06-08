@@ -13,15 +13,16 @@ void vApplicationMallocFailedHook(void) {
   exit(1);
 }
 
-static void RunTests(void* unused) {
-  RUN_TEST_GROUP(dispatch_task);
+static void RunTests(void *unused) {
+  RUN_TEST_GROUP(dispatch_job);
   RUN_TEST_GROUP(dispatch_group);
-  RUN_TEST_GROUP(dispatch_queue);
+  RUN_TEST_GROUP(threads_dispatcher);
+  RUN_TEST_GROUP(isr_dispatcher);
   UnityEnd();
   exit(Unity.TestFailures);
 }
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char *argv[]) {
   UnityGetCommandLineOptions(argc, argv);
   UnityBegin(argv[0]);
 
