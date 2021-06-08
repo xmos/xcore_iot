@@ -185,11 +185,13 @@ set(MODEL_RUNNER_SOURCES
     "${MODEL_RUNNER_DIR}/src/model_runner.cc"
 )
 
-if (${RTOS_CMAKE_RTOS} AND ${RTOS_CMAKE_RTOS} STREQUAL "FreeRTOS")
-  set(MODEL_RUNNER_SOURCES
-    ${MODEL_RUNNER_SOURCES}
-    "${MODEL_RUNNER_DIR}/src/rtos_dispatcher.cc"
-  )
+if (DEFINED RTOS_CMAKE_RTOS)
+  if (${RTOS_CMAKE_RTOS} STREQUAL "FreeRTOS")
+    set(MODEL_RUNNER_SOURCES
+      ${MODEL_RUNNER_SOURCES}
+      "${MODEL_RUNNER_DIR}/src/rtos_dispatcher.cc"
+    )
+  endif ()
 endif ()
 
 set(MODEL_RUNNER_INCLUDES
