@@ -14,7 +14,7 @@
 #include "rtos/drivers/swmem/api/rtos_swmem.h"
 #include "xcore_device_memory.h"
 #include "model_runner.h"
-#include "dispatch.h"
+#include "dispatcher.h"
 
 #include "app_conf.h"
 #include "test_model_data.h"
@@ -25,21 +25,25 @@ static rtos_qspi_flash_t qspi_flash_ctx_s;
 static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
 #endif
 
-dispatch_queue_t *dispatch_queue_setup() {
-  dispatch_queue_t *queue;
+dispatcher_t *dispatcher_setup() {
+  dispatcher_t *dispatcher;
 
-  rtos_printf("Setting up dispatch queue\n");
-  queue = dispatch_queue_create(appconfDISPATCH_QUEUE_LENGTH,
-                                appconfDISPATCH_QUEUE_THREAD_COUNT,
-                                appconfDISPATCH_QUEUE_THREAD_STACK_SIZE,
-                                appconfDISPATCH_QUEUE_TASK_PRIORITY);
+  rtos_printf("Setting up dispatcher\n");
+  dispatcher = dispatcher_create();
+#if appconfUSE_ISR_DISPATCHER
+  dispatcher_isr_init(dispatcher, appconfDISPATCHER_CORE_MAP);
+#elif appconfUSE_THREAD_DISPATCHER
+  dispatcher_thread_init(dispatcher, appconfDISPATCHER_LENGTH,
+                         appconfDISPATCHER_THREAD_COUNT,
+                         appconfDISPATCHER_THREAD_PRIORITY);
+#endif
 
-  return queue;
+  return dispatcher;
 }
 
-void dispatch_queue_teardown(dispatch_queue_t *queue) {
-  rtos_printf("Tearing down dispatch queue\n");
-  dispatch_queue_delete(queue);
+void dispatcher_teardown(dispatcher_t *queue) {
+  rtos_printf("Tearing down dispatcher\n");
+  dispatcher_delete(queue);
 }
 
 void model_runner_task(void *arg) {
@@ -62,11 +66,11 @@ void model_runner_task(void *arg) {
   model_runner_ctx = pvPortMalloc(sizeof(model_runner_t));
 
   // create dispatch queue
-  dispatch_queue_t *dispatch_queue = dispatch_queue_setup();
+  dispatcher_t *dispatcher = dispatcher_setup();
 
   // setup model runner
   test_model_runner_create(model_runner_ctx, NULL);
-  model_runner_dispatcher_create(model_runner_ctx, dispatch_queue);
+  model_runner_dispatcher_create(model_runner_ctx, dispatcher);
   model_runner_allocate(model_runner_ctx, test_model_data);
   input_buffer = model_runner_input_buffer_get(model_runner_ctx);
   input_size = model_runner_input_size_get(model_runner_ctx);
@@ -92,7 +96,7 @@ void model_runner_task(void *arg) {
   rtos_printf("Profiler report:\n");
   model_runner_profiler_summary_print(model_runner_ctx);
 
-  dispatch_queue_teardown(dispatch_queue);
+  dispatcher_teardown(dispatcher);
   vPortFree(interpreter_buf);
   vPortFree(model_runner_ctx);
   vPortFree(tensor_arena);
@@ -124,11 +128,11 @@ void vApplicationDaemonTaskStartup(void *arg) {
                        qspi_io_source_clock_xcore,
 
                        /** Full speed clock configuration **/
-                       5,  // 600 MHz / (2*5) -> 60 MHz,
+                       5, // 600 MHz / (2*5) -> 60 MHz,
                        1, qspi_io_sample_edge_rising, 0,
 
                        /** SPI read clock configuration **/
-                       12,  // 600 MHz / (2*12) -> 25 MHz
+                       12, // 600 MHz / (2*12) -> 25 MHz
                        0, qspi_io_sample_edge_falling, 0,
 
                        qspi_flash_page_program_1_1_1);

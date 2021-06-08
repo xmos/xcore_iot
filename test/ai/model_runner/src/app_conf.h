@@ -9,14 +9,20 @@
 #define appconfSWMEM_TASK_PRIORITY (configMAX_PRIORITIES - 2)
 
 /* Model Runner */
-#define appconfTENSOR_ARENA_SIZE \
-  (100000)  // this is big enough for all test models
+#define appconfTENSOR_ARENA_SIZE                                               \
+  (100000) // this is big enough for all test models
 #define appconfMODEL_RUNNER_TASK_STACK_SIZE (1024)
 
-/* Dispatch Queue */
-#define appconfDISPATCH_QUEUE_LENGTH (10)
-#define appconfDISPATCH_QUEUE_THREAD_COUNT (6)
-#define appconfDISPATCH_QUEUE_TASK_PRIORITY (configMAX_PRIORITIES - 1)
-#define appconfDISPATCH_QUEUE_THREAD_STACK_SIZE (512)
+/* ISR Dispatcher */
+#define appconfUSE_ISR_DISPATCHER                                              \
+  (1) // if 1, appconfUSE_THREAD_DISPATCHER must be 0
+#define appconfDISPATCHER_CORE_MAP (0b00011111)
+
+/* Thread Dispatcher */
+#define appconfUSE_THREAD_DISPATCHER                                           \
+  (0) // if 1, appconfUSE_ISR_DISPATCHER must be 0
+#define appconfDISPATCHER_LENGTH (5)
+#define appconfDISPATCHER_THREAD_COUNT (5)
+#define appconfDISPATCHER_THREAD_PRIORITY (configMAX_PRIORITIES - 1)
 
 #endif /* APP_CONF_H_ */
