@@ -77,38 +77,38 @@ static void cifar10_task_app(void *args) {
                             (void **)&output_tensor, portMAX_DELAY);
 
       switch (argmax((int8_t *)output_tensor, 10)) {
-        case 0:
-          rtos_snprintf(classification, 9, "Airplane");
-          break;
-        case 1:
-          rtos_snprintf(classification, 11, "Automobile");
-          break;
-        case 2:
-          rtos_snprintf(classification, 5, "Bird");
-          break;
-        case 3:
-          rtos_snprintf(classification, 4, "Cat");
-          break;
-        case 4:
-          rtos_snprintf(classification, 5, "Deer");
-          break;
-        case 5:
-          rtos_snprintf(classification, 4, "Dog");
-          break;
-        case 6:
-          rtos_snprintf(classification, 5, "Frog");
-          break;
-        case 7:
-          rtos_snprintf(classification, 6, "Horse");
-          break;
-        case 8:
-          rtos_snprintf(classification, 5, "Ship");
-          break;
-        case 9:
-          rtos_snprintf(classification, 6, "Truck");
-          break;
-        default:
-          break;
+      case 0:
+        rtos_snprintf(classification, 9, "Airplane");
+        break;
+      case 1:
+        rtos_snprintf(classification, 11, "Automobile");
+        break;
+      case 2:
+        rtos_snprintf(classification, 5, "Bird");
+        break;
+      case 3:
+        rtos_snprintf(classification, 4, "Cat");
+        break;
+      case 4:
+        rtos_snprintf(classification, 5, "Deer");
+        break;
+      case 5:
+        rtos_snprintf(classification, 4, "Dog");
+        break;
+      case 6:
+        rtos_snprintf(classification, 5, "Frog");
+        break;
+      case 7:
+        rtos_snprintf(classification, 6, "Horse");
+        break;
+      case 8:
+        rtos_snprintf(classification, 5, "Ship");
+        break;
+      case 9:
+        rtos_snprintf(classification, 6, "Truck");
+        break;
+      default:
+        break;
       }
       rtos_printf("Classification of file %s is %s\n", test_input_files[i],
                   classification);
@@ -146,8 +146,14 @@ static void cifar10_task_runner(void *args) {
   model_runner_t *model_runner_ctx = NULL;
   uint8_t *tensor_arena = NULL;
   uint8_t *input_tensor;
+  dispatcher_t *dispatcher;
 
   tensor_arena = pvPortMalloc(TENSOR_ARENA_SIZE);
+
+  dispatcher = dispatcher_create();
+  dispatcher_thread_init(dispatcher, appconfDISPATCHER_LENGTH,
+                         appconfDISPATCHER_THREAD_COUNT,
+                         appconfDISPATCHER_THREAD_PRIORITY);
 
   model_runner_init(tensor_arena, TENSOR_ARENA_SIZE);
 
@@ -156,6 +162,7 @@ static void cifar10_task_runner(void *args) {
   model_runner_ctx = pvPortMalloc(sizeof(model_runner_t));
 
   cifar10_model_runner_create(model_runner_ctx, interpreter_buf);
+  model_runner_dispatcher_create(model_runner_ctx, dispatcher);
   if (model_runner_allocate(model_runner_ctx, cifar10_model_data) != 0) {
     rtos_printf("Invalid model provided!\n");
 
