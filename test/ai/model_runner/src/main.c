@@ -30,12 +30,12 @@ dispatcher_t *dispatcher_setup() {
 
   rtos_printf("Setting up dispatcher\n");
   dispatcher = dispatcher_create();
-#if appconfUSE_ISR_DISPATCHER
-  dispatcher_isr_init(dispatcher, appconfDISPATCHER_CORE_MAP);
-#elif appconfUSE_THREAD_DISPATCHER
+#if (USE_SWMEM == 1) || (USE_EXTMEM == 1)
   dispatcher_thread_init(dispatcher, appconfDISPATCHER_LENGTH,
                          appconfDISPATCHER_THREAD_COUNT,
                          appconfDISPATCHER_THREAD_PRIORITY);
+#else
+  dispatcher_isr_init(dispatcher, appconfDISPATCHER_CORE_MAP);
 #endif
 
   return dispatcher;
@@ -120,7 +120,6 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName) {
 
 void vApplicationDaemonTaskStartup(void *arg) {
 #if USE_SWMEM
-
   rtos_qspi_flash_init(qspi_flash_ctx, XS1_CLKBLK_2, PORT_SQI_CS, PORT_SQI_SCLK,
                        PORT_SQI_SIO,
 
@@ -138,7 +137,7 @@ void vApplicationDaemonTaskStartup(void *arg) {
                        qspi_flash_page_program_1_1_1);
 
   rtos_printf("Starting QSPI flash driver\n");
-  rtos_qspi_flash_start(qspi_flash_ctx, configMAX_PRIORITIES - 1);
+  rtos_qspi_flash_start(qspi_flash_ctx, appconfQSPI_FLASH_TASK_PRIORITY);
 
   rtos_printf("Starting SwMem task\n");
   swmem_setup(qspi_flash_ctx, appconfSWMEM_TASK_PRIORITY);

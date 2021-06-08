@@ -5,8 +5,9 @@
 
 /* Task Priorities */
 #define appconfSTARTUP_TASK_PRIORITY (configMAX_PRIORITIES - 2)
-#define appconfMODEL_RUNNER_TASK_PRIORITY (configMAX_PRIORITIES - 1)
-#define appconfSWMEM_TASK_PRIORITY (configMAX_PRIORITIES - 2)
+#define appconfMODEL_RUNNER_TASK_PRIORITY (configMAX_PRIORITIES - 2)
+#define appconfQSPI_FLASH_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+#define appconfSWMEM_TASK_PRIORITY (configMAX_PRIORITIES - 1)
 
 /* Model Runner */
 #define appconfTENSOR_ARENA_SIZE                                               \
@@ -14,13 +15,9 @@
 #define appconfMODEL_RUNNER_TASK_STACK_SIZE (1024)
 
 /* ISR Dispatcher */
-#define appconfUSE_ISR_DISPATCHER                                              \
-  (1) // if 1, appconfUSE_THREAD_DISPATCHER must be 0
 #define appconfDISPATCHER_CORE_MAP (0b00011111)
 
 /* Thread Dispatcher */
-#define appconfUSE_THREAD_DISPATCHER                                           \
-  (0) // if 1, appconfUSE_ISR_DISPATCHER must be 0
 #define appconfDISPATCHER_LENGTH (5)
 #define appconfDISPATCHER_THREAD_COUNT (5)
 #define appconfDISPATCHER_THREAD_PRIORITY (configMAX_PRIORITIES - 1)
