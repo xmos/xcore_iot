@@ -78,12 +78,10 @@ add_executable(${TARGET_NAME})
 target_sources(${TARGET_NAME} PRIVATE
     ${APP_SOURCES}
     ${XMOS_RTOS_PLATFORM_SOURCES}
-    ${DISPATCHER_SOURCES}
 )
 target_include_directories(${TARGET_NAME} PRIVATE
     ${APP_INCLUDES}
     ${XMOS_RTOS_PLATFORM_INCLUDES}
-    ${DISPATCHER_INCLUDES}
 )
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
