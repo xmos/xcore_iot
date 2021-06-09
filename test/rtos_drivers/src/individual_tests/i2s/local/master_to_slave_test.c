@@ -42,37 +42,43 @@ static int main_test(i2s_test_ctx_t *ctx)
         {
             tx_buf[i] = i;
         }
-        local_printf("MASTER tx");
-        tx_len = rtos_i2s_tx(ctx->i2s_master_ctx,
-                             tx_buf,
-                             I2S_FRAME_LEN,
-                             portMAX_DELAY);
-
-        local_printf("MASTER txed %d",tx_len);
-        xassert(tx_len == I2S_FRAME_LEN);
+        while(1)
+        {
+            local_printf("MASTER tx");
+            tx_len = rtos_i2s_tx(ctx->i2s_master_ctx,
+                                 tx_buf,
+                                 I2S_FRAME_LEN,
+                                 portMAX_DELAY);
+             vTaskDelay(pdMS_TO_TICKS(5000));
+            // local_printf("MASTER txed %d",tx_len);
+        }
+        // xassert(tx_len == I2S_FRAME_LEN);
     }
     #endif
 
     #if ON_TILE(I2S_SLAVE_TILE)
     {
-        local_printf("SLAVE rx");
-        rx_len = rtos_i2s_rx(ctx->i2s_slave_ctx,
-                             rx_buf,
-                             I2S_FRAME_LEN,
-                             portMAX_DELAY);
-
-        if (rx_len != I2S_FRAME_LEN)
+        while(1)
         {
-            local_printf("SLAVE failed rx got %u expected %u", rx_len, I2S_FRAME_LEN);
-            return -1;
-        }
+            local_printf("SLAVE rx");
+            rx_len = rtos_i2s_rx(ctx->i2s_slave_ctx,
+                                 rx_buf,
+                                 I2S_FRAME_LEN,
+                                 portMAX_DELAY);
 
-        for (int i=0; i<I2S_FRAME_LEN*FRAME_NUM_CHANS; i++)
-        {
-            if (rx_buf[i] != (i << 1))
+            // if (rx_len != I2S_FRAME_LEN)
+            // {
+            //     local_printf("SLAVE failed rx got %u expected %u", rx_len, I2S_FRAME_LEN);
+            //     return -1;
+            // }
+
+            for (int i=0; i<I2S_FRAME_LEN*FRAME_NUM_CHANS; i++)
             {
-                local_printf("SLAVE failed got rx_buf[%d]:%u expected %u", i, rx_buf[i], i << 1);
-                return -1;
+                if (rx_buf[i] != (i << 1))
+                {
+                    local_printf("SLAVE failed got rx_buf[%d]:%u expected %u", i, rx_buf[i], i << 1);
+                    // return -1;
+                }
             }
         }
     }

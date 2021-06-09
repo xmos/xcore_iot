@@ -5,6 +5,7 @@
 
 #include <string.h>
 
+#include "rtos_printf.h"
 #include <xcore/assert.h>
 #include <xcore/triggerable.h>
 
@@ -25,10 +26,12 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_i2s_isr, arg)
     isr_action = s_chan_in_byte(ctx->c_i2s_isr.end_b);
 
     if (isr_action & ISR_RESUME_SEND_BM) {
+        rtos_printf("send put\n");
         rtos_osal_semaphore_put(&ctx->send_sem);
     }
 
     if (isr_action & ISR_RESUME_RECV_BM) {
+        rtos_printf("recv put\n");
         rtos_osal_semaphore_put(&ctx->recv_sem);
     }
 }
@@ -61,7 +64,7 @@ static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *i2s_sampl
         RTOS_MEMORY_BARRIER();
         ctx->recv_buffer.total_written += num_in;
     } else {
-        rtos_printf("i2s rx overrun\n");
+        // rtos_printf("i2s rx overrun\n");
     }
 
     if (ctx->recv_buffer.required_available_count > 0) {
@@ -93,7 +96,7 @@ static void i2s_send(rtos_i2s_t *ctx, size_t num_out, int32_t *i2s_sample_buf)
         RTOS_MEMORY_BARRIER();
         ctx->send_buffer.total_read += num_out;
     } else {
-        rtos_printf("i2s tx underrun\n");
+        // rtos_printf("i2s tx underrun\n");
     }
 
     if (ctx->send_buffer.required_free_count > 0) {
@@ -208,6 +211,7 @@ static size_t i2s_local_rx(rtos_i2s_t *ctx,
     }
 
     if (ctx->recv_blocked) {
+        rtos_printf("recv get\n");
         if (rtos_osal_semaphore_get(&ctx->recv_sem, timeout) == RTOS_OSAL_SUCCESS) {
             ctx->recv_blocked = 0;
         }
@@ -259,6 +263,7 @@ static size_t i2s_local_tx(rtos_i2s_t *ctx,
     }
 
     if (ctx->send_blocked) {
+        rtos_printf("send get\n");
         if (rtos_osal_semaphore_get(&ctx->send_sem, timeout) == RTOS_OSAL_SUCCESS) {
             ctx->send_blocked = 0;
         }
@@ -356,9 +361,9 @@ static void rtos_i2s_init(
     ctx->num_in = num_in;
 
     ctx->p_bclk = p_bclk;
-    ctx-> p_lrclk = p_lrclk;
+    ctx->p_lrclk = p_lrclk;
     ctx->p_mclk = p_mclk;
-    ctx-> bclk = bclk;
+    ctx->bclk = bclk;
 
     ctx->c_i2s_isr = s_chan_alloc();
 

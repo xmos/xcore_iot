@@ -163,7 +163,7 @@ void board_tile0_init(
     port_t p_lrclk = XS1_PORT_1H;
 
     /* Clock blocks for I2S */
-    xclock_t bclk = clock_init(XS1_CLKBLK_3);
+    xclock_t bclk = XS1_CLKBLK_3;
 
     rtos_i2s_slave_init(
            i2s_slave_ctx,
@@ -227,15 +227,15 @@ void board_tile1_init(
     rtos_gpio_init(
             gpio_ctx);
 
-    // rtos_mic_array_init(
-    //         mic_array_ctx,
-    //         MIC_ARRAY_CORE_MASK,
-    //         pdmclk,
-    //         pdmclk2,
-    //         appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY,
-    //         p_mclk,
-    //         p_pdm_clk,
-    //         p_pdm_mics);
+    rtos_mic_array_init(
+            mic_array_ctx,
+            MIC_ARRAY_CORE_MASK,
+            pdmclk,
+            pdmclk2,
+            appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY,
+            p_mclk,
+            p_pdm_clk,
+            p_pdm_mics);
 
     rtos_i2s_master_init(
             i2s_master_ctx,
