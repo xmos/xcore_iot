@@ -21,7 +21,8 @@ void board_tile0_init(
         rtos_spi_master_t *spi_master_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_gpio_t *gpio_ctx,
-        rtos_i2s_t *i2s_ctx
+        rtos_i2s_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_slave_ctx
     );
 
 void board_tile1_init(
@@ -32,7 +33,7 @@ void board_tile1_init(
         rtos_i2c_slave_t *i2c_slave_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_gpio_t *gpio_ctx,
-        rtos_i2s_t *i2s_ctx
+        rtos_i2s_t *i2s_master_ctx
     );
 
 #endif /* BOARD_INIT_H_ */

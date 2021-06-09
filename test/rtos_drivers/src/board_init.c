@@ -71,9 +71,10 @@ static void set_app_pll(void)
     write_sswitch_reg(tileid, XS1_SSWITCH_SS_APP_CLK_DIVIDER_NUM, APP_PLL_DIV_0);
 }
 
-static rtos_driver_rpc_t i2c_rpc_config;
+static rtos_driver_rpc_t i2c_master_rpc_config;
 static rtos_driver_rpc_t gpio_rpc_config;
 static rtos_driver_rpc_t qspi_flash_rpc_config;
+static rtos_driver_rpc_t i2s_master_rpc_config;
 
 void board_tile0_init(
         chanend_t tile1,
@@ -83,7 +84,8 @@ void board_tile0_init(
         rtos_spi_master_t *spi_master_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_gpio_t *gpio_ctx,
-        rtos_i2s_t *i2s_ctx
+        rtos_i2s_t *i2s_master_ctx,
+        rtos_i2s_t *i2s_slave_ctx
     )
 {
     rtos_intertile_init(intertile_ctx, tile1);
@@ -130,7 +132,7 @@ void board_tile0_init(
 
     rtos_i2c_master_rpc_host_init(
             i2c_master_ctx,
-            &i2c_rpc_config,
+            &i2c_master_rpc_config,
             client_intertile_ctx,
             1);
 
@@ -144,6 +146,35 @@ void board_tile0_init(
             &qspi_flash_rpc_config,
             client_intertile_ctx,
             1);
+
+    rtos_i2s_rpc_client_init(
+            i2s_master_ctx,
+            &i2s_master_rpc_config,
+            intertile_ctx);
+
+    /* Ports for the I2S. */
+    port_t p_i2s_dout[1] = {
+            XS1_PORT_1F
+    };
+    port_t p_i2s_din[1] = {
+            XS1_PORT_1E
+    };
+    port_t p_bclk = XS1_PORT_1G;
+    port_t p_lrclk = XS1_PORT_1H;
+
+    /* Clock blocks for I2S */
+    xclock_t bclk = clock_init(XS1_CLKBLK_3);
+
+    rtos_i2s_slave_init(
+           i2s_slave_ctx,
+           I2S_SLAVE_CORE_MASK,
+           p_i2s_dout,
+           1,
+           p_i2s_din,
+           1,
+           p_bclk,
+           p_lrclk,
+           bclk);
 }
 
 void board_tile1_init(
@@ -154,7 +185,7 @@ void board_tile1_init(
         rtos_i2c_slave_t *i2c_slave_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_gpio_t *gpio_ctx,
-        rtos_i2s_t *i2s_ctx
+        rtos_i2s_t *i2s_master_ctx
     )
 {
     port_t p_rst_shared = port_init(PORT_CODEC_RST_N, PORT_OUTPUT, PORT_UNBUFFERED);
@@ -174,6 +205,9 @@ void board_tile1_init(
     /* Ports for the I2S. */
     port_t p_i2s_dout[1] = {
             PORT_I2S_DAC_DATA
+    };
+    port_t p_i2s_din[1] = {
+            PORT_I2S_ADC_DATA
     };
     port_t p_bclk = PORT_I2S_BCLK;
     port_t p_lrclk = PORT_I2S_LRCLK;
@@ -195,7 +229,7 @@ void board_tile1_init(
 
     // rtos_mic_array_init(
     //         mic_array_ctx,
-    //         ~(1 << 0),
+    //         MIC_ARRAY_CORE_MASK,
     //         pdmclk,
     //         pdmclk2,
     //         appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY,
@@ -203,17 +237,17 @@ void board_tile1_init(
     //         p_pdm_clk,
     //         p_pdm_mics);
 
-    // rtos_i2s_master_init(
-    //         i2s_ctx,
-    //         ~(1 << 0),
-    //         p_i2s_dout,
-    //         1,
-    //         NULL,
-    //         0,
-    //         p_bclk,
-    //         p_lrclk,
-    //         p_mclk,
-    //         bclk);
+    rtos_i2s_master_init(
+            i2s_master_ctx,
+            I2S_MASTER_CORE_MASK,
+            p_i2s_dout,
+            1,
+            p_i2s_din,
+            1,
+            p_bclk,
+            p_lrclk,
+            p_mclk,
+            bclk);
 
     rtos_i2c_slave_init(
             i2c_slave_ctx,
@@ -224,7 +258,7 @@ void board_tile1_init(
 
     rtos_i2c_master_rpc_client_init(
             i2c_master_ctx,
-            &i2c_rpc_config,
+            &i2c_master_rpc_config,
             intertile_ctx);
 
     rtos_gpio_rpc_host_init(
@@ -237,4 +271,10 @@ void board_tile1_init(
             qspi_flash_ctx,
             &qspi_flash_rpc_config,
             intertile_ctx);
+
+    rtos_i2s_rpc_host_init(
+            i2s_master_ctx,
+            &i2s_master_rpc_config,
+            client_intertile_ctx,
+            1);
 }

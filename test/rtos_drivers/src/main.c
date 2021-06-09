@@ -28,22 +28,24 @@
 static rtos_intertile_t intertile_ctx_s;
 static rtos_mic_array_t mic_array_ctx_s;
 static rtos_i2c_master_t i2c_master_ctx_s;
+static rtos_i2c_slave_t i2c_slave_ctx_s;
 static rtos_spi_master_t spi_master_ctx_s;
 static rtos_spi_master_device_t wifi_device_ctx_s;
 static rtos_qspi_flash_t qspi_flash_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
-static rtos_i2s_t i2s_ctx_s;
-static rtos_i2c_slave_t i2c_slave_ctx_s;
+static rtos_i2s_t i2s_master_ctx_s;
+static rtos_i2s_t i2s_slave_ctx_s;
 
 static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 static rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_i2c_master_t *i2c_master_ctx = &i2c_master_ctx_s;
+static rtos_i2c_slave_t *i2c_slave_ctx = &i2c_slave_ctx_s;
 static rtos_spi_master_t *spi_master_ctx = &spi_master_ctx_s;
 static rtos_spi_master_device_t *wifi_device_ctx = &wifi_device_ctx_s;
 static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
 static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
-static rtos_i2s_t *i2s_ctx = &i2s_ctx_s;
-static rtos_i2c_slave_t *i2c_slave_ctx = &i2c_slave_ctx_s;
+static rtos_i2s_t *i2s_master_ctx = &i2s_master_ctx_s;
+static rtos_i2s_t *i2s_slave_ctx = &i2s_slave_ctx_s;
 
 chanend_t other_tile_c;
 
@@ -61,7 +63,8 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char* pcTaskName )
 
 void vApplicationDaemonTaskStartup(void *arg)
 {
-    /* Intertile test must always before any test that uses RPC */
+    /* Intertile test must always before any test that uses RPC or the intertile
+       device must be started */
     if (RUN_INTERTILE_TESTS) {
         intertile_device_tests(intertile_ctx, other_tile_c);
     } else {
@@ -94,6 +97,11 @@ void vApplicationDaemonTaskStartup(void *arg)
         test_printf("Skipped QSPI_FLASH tests");
     }
 
+    if (RUN_I2S_TESTS) {
+        i2s_device_tests(i2s_master_ctx, i2s_slave_ctx, other_tile_c);
+    } else {
+        test_printf("Skipped I2S tests");
+    }
 
     // #if ON_TILE(USB_TILE_NO)
     // {
@@ -140,7 +148,7 @@ void vApplicationDaemonTaskStartup(void *arg)
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
     (void) c0;
-    board_tile0_init(c1, intertile_ctx, mic_array_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, gpio_ctx, i2s_ctx);
+    board_tile0_init(c1, intertile_ctx, mic_array_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, gpio_ctx, i2s_master_ctx, i2s_slave_ctx);
     (void) c2;
     (void) c3;
 
@@ -163,7 +171,7 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 #if ON_TILE(1)
 void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile1_init(c0, intertile_ctx, mic_array_ctx, i2c_master_ctx, i2c_slave_ctx, qspi_flash_ctx, gpio_ctx, i2s_ctx);
+    board_tile1_init(c0, intertile_ctx, mic_array_ctx, i2c_master_ctx, i2c_slave_ctx, qspi_flash_ctx, gpio_ctx, i2s_master_ctx);
     (void) c1;
     (void) c2;
     (void) c3;
