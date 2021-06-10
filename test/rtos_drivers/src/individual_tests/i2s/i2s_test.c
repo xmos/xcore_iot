@@ -76,9 +76,10 @@ static void start_i2s_devices(i2s_test_ctx_t *test_ctx)
 static void register_i2s_tests(i2s_test_ctx_t *test_ctx)
 {
     register_master_to_slave_test(test_ctx);
-    // register_slave_to_master_test(test_ctx);
+    register_slave_to_master_test(test_ctx);
 
-    // register_rpc_loopback_test(test_ctx);
+    register_rpc_master_to_slave_test(test_ctx);
+    register_rpc_slave_to_master_test(test_ctx);
 }
 
 static void i2s_init_tests(i2s_test_ctx_t *test_ctx, rtos_i2s_t *i2s_master_ctx, rtos_i2s_t *i2s_slave_ctx)

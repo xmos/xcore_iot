@@ -37,18 +37,12 @@
 #define I2S_TEST_AUDIO_CLOCK_FREQUENCY  appconfAUDIO_CLOCK_FREQUENCY
 #define I2S_TEST_AUDIO_SAMPLE_RATE      16000
 #define I2S_FRAME_LEN                   256
-#define I2S_MASTER_RECV_BUF_SIZE    (I2S_FRAME_LEN * 1.2)
-#define I2S_MASTER_SEND_BUF_SIZE    (I2S_FRAME_LEN * 1.2)
-#define I2S_SLAVE_RECV_BUF_SIZE     (I2S_FRAME_LEN * 1.2)
-#define I2S_SLAVE_SEND_BUF_SIZE     (I2S_FRAME_LEN * 1.2)
+#define I2S_MASTER_RECV_BUF_SIZE    (I2S_FRAME_LEN * 2)
+#define I2S_MASTER_SEND_BUF_SIZE    (I2S_FRAME_LEN * 2)
+#define I2S_SLAVE_RECV_BUF_SIZE     (I2S_FRAME_LEN * 2)
+#define I2S_SLAVE_SEND_BUF_SIZE     (I2S_FRAME_LEN * 2)
 #define I2S_MASTER_ISR_CORE         (0)
 #define I2S_SLAVE_ISR_CORE          (0)
-
-/* Audio Pipeline Configuration */
-// #define appconfPIPELINE_AUDIO_SAMPLE_RATE       48000
-// #define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN    42
-// #define appconfAUDIO_FRAME_LENGTH            	256
-// #define appconfPRINT_AUDIO_FRAME_POWER          0
 
 /* Task Priorities */
 #define appconfSTARTUP_TASK_PRIORITY            ( configMAX_PRIORITIES - 1 )

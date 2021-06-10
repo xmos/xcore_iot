@@ -15,12 +15,12 @@
 #include "app_conf.h"
 #include "individual_tests/i2s/i2s_test.h"
 
-static const char* test_name = "master_to_slave_test";
+static const char* test_name = "rpc_master_to_slave_test";
 
 #define local_printf( FMT, ... )    i2s_printf("%s|" FMT, test_name, ##__VA_ARGS__)
 
-#define I2S_MASTER_TILE 1
-#define I2S_SLAVE_TILE  0
+#define I2S_MASTER_TILE 0
+#define I2S_SLAVE_TILE  0   // No slave RPC
 
 #define FRAME_NUM_CHANS 2
 
@@ -91,7 +91,7 @@ static int main_test(i2s_test_ctx_t *ctx)
     return 0;
 }
 
-void register_master_to_slave_test(i2s_test_ctx_t *test_ctx)
+void register_rpc_master_to_slave_test(i2s_test_ctx_t *test_ctx)
 {
     uint32_t this_test_num = test_ctx->test_cnt;
 
