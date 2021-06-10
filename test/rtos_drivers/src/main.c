@@ -103,39 +103,11 @@ void vApplicationDaemonTaskStartup(void *arg)
         test_printf("Skipped I2S tests");
     }
 
-    // #if ON_TILE(USB_TILE_NO)
-    // {
-    //     usb_audio_init(intertile_ctx, appconfUSB_AUDIO_TASK_PRIORITY);
-    //     usb_device_control_set_ctx(device_control_usb_ctx, 1);
-    //     usb_manager_start(appconfUSB_MGR_TASK_PRIORITY);
-    // }
-    // #endif
-
-    // #if ON_TILE(AUDIO_TILE)
-    // {
-    //     const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
-    //             PDM_CLOCK_FREQUENCY,
-    //             VFE_PIPELINE_AUDIO_SAMPLE_RATE);
-    //
-    //     rtos_mic_array_start(
-    //             mic_array_ctx,
-    //             pdm_decimation_factor,
-    //             rtos_mic_array_third_stage_coefs(pdm_decimation_factor),
-    //             rtos_mic_array_fir_compensation(pdm_decimation_factor),
-    //             2 * MIC_DUAL_FRAME_SIZE,
-    //             3);
-    //
-    //     rtos_i2s_start(
-    //             i2s_ctx,
-    //             rtos_i2s_mclk_bclk_ratio(AUDIO_CLOCK_FREQUENCY, VFE_PIPELINE_AUDIO_SAMPLE_RATE),
-    //             I2S_MODE_I2S,
-    //             0,
-    //             1.2 * VFE_PIPELINE_AUDIO_FRAME_LENGTH,
-    //             4);
-    //
-    //     vfe_pipeline_init(mic_array_ctx, i2s_ctx);
-    // }
-    // #endif
+    if (RUN_MIC_ARRAY_TESTS) {
+        mic_array_device_tests(mic_array_ctx, other_tile_c);
+    } else {
+        test_printf("Skipped MIC_ARRAY tests");
+    }
 
     test_printf("Done");
     _Exit(0);
@@ -148,7 +120,15 @@ void vApplicationDaemonTaskStartup(void *arg)
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
     (void) c0;
-    board_tile0_init(c1, intertile_ctx, mic_array_ctx, i2c_master_ctx, spi_master_ctx, qspi_flash_ctx, gpio_ctx, i2s_master_ctx, i2s_slave_ctx);
+    board_tile0_init(c1,
+                     intertile_ctx,
+                     mic_array_ctx,
+                     i2c_master_ctx,
+                     spi_master_ctx,
+                     qspi_flash_ctx,
+                     gpio_ctx,
+                     i2s_master_ctx,
+                     i2s_slave_ctx);
     (void) c2;
     (void) c3;
 
@@ -171,7 +151,14 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 #if ON_TILE(1)
 void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
-    board_tile1_init(c0, intertile_ctx, mic_array_ctx, i2c_master_ctx, i2c_slave_ctx, qspi_flash_ctx, gpio_ctx, i2s_master_ctx);
+    board_tile1_init(c0,
+                     intertile_ctx,
+                     mic_array_ctx,
+                     i2c_master_ctx,
+                     i2c_slave_ctx,
+                     qspi_flash_ctx,
+                     gpio_ctx,
+                     i2s_master_ctx);
     (void) c1;
     (void) c2;
     (void) c3;

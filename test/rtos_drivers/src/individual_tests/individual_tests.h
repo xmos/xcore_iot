@@ -12,5 +12,6 @@
 #include "individual_tests/swmem/swmem_test.h"
 #include "individual_tests/qspi_flash/qspi_flash_test.h"
 #include "individual_tests/i2s/i2s_test.h"
+#include "individual_tests/mic_array/mic_array_test.h"
 
 #endif /* INDIVIDUAL_TESTS_H_ */

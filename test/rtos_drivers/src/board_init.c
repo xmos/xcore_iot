@@ -75,6 +75,7 @@ static rtos_driver_rpc_t i2c_master_rpc_config;
 static rtos_driver_rpc_t gpio_rpc_config;
 static rtos_driver_rpc_t qspi_flash_rpc_config;
 static rtos_driver_rpc_t i2s_master_rpc_config;
+static rtos_driver_rpc_t mic_array_rpc_config;
 
 void board_tile0_init(
         chanend_t tile1,
@@ -175,6 +176,11 @@ void board_tile0_init(
            p_bclk,
            p_lrclk,
            bclk);
+
+    rtos_mic_array_rpc_client_init(
+           mic_array_ctx,
+           &mic_array_rpc_config,
+           intertile_ctx);
 }
 
 void board_tile1_init(
@@ -275,6 +281,12 @@ void board_tile1_init(
     rtos_i2s_rpc_host_init(
             i2s_master_ctx,
             &i2s_master_rpc_config,
+            client_intertile_ctx,
+            1);
+
+    rtos_mic_array_rpc_host_init(
+            mic_array_ctx,
+            &mic_array_rpc_config,
             client_intertile_ctx,
             1);
 }
