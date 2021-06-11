@@ -22,7 +22,11 @@ flash_ports_t flash_ports_0 = {PORT_SQI_CS, PORT_SQI_SCLK, PORT_SQI_SIO,
                                XS1_CLKBLK_5};
 
 flash_clock_config_t flash_clock_config = {
-    1, 8, 8, 1, 0,
+    flash_clock_reference,
+    0,
+    1,
+    flash_clock_input_edge_plusone,
+    flash_port_pad_delay_1,
 };
 
 flash_qe_config_t flash_qe_config_0 = {flash_qe_location_status_reg_0,
