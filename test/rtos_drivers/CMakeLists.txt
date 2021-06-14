@@ -5,16 +5,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
-## Specify configuration
-set(USE_WIFI_MANAGER TRUE)
-set(USE_DHCPD TRUE)
-set(USE_FATFS TRUE)
-set(USE_HTTP_CORE TRUE)
-set(USE_JSON_PARSER TRUE)
-set(USE_MQTT TRUE)
-set(USE_SNTPD TRUE)
-set(USE_TLS_SUPPORT TRUE)
-
 ## Import XMOS configurations
 include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
