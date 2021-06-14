@@ -4,7 +4,7 @@ Dispatcher
 
 The Dispatcher is a job queue for XCore that can simplify dispatching jobs. Two job worker configuration types are supported; threads or interrupt service routines (ISR). The thread worker configuration is the most flexible while the ISR worker configuration has the least runtime overhead.
 
-This document covers the Dispatcher data types, complete with code snippet to demonstrate usage. A full dispatcher code example is provided at the end of this document.
+This document covers the Dispatcher concepts and includes code snippets to demonstrate usage. A full dispatcher code example is provided at the end of this document.
 
 **********
 Data Types
@@ -94,7 +94,9 @@ Threads
 
 The thread configuration is the most flexible because it functions like a typical job queue. Jobs are added to the queue while a pool of worker threads pop jobs off the queue and execute them in first in, first out (FIFO) order. The application developer specifies the length of the queue, the number of worker threads in the pool, and the priority of the worker threads.
 
-While the queue is empty, the worker threads will not be scheduled for execution by the RTOS kernel. They will remain idle until a new job is added to the queue. When a new job is added to the queue, the RTOS kernel will then schedule the worker threads for execution. Each threads will check the queue, one of the threads will execute the new job, and the other threads will return to the idle state. This process has some small overhead which is why, if your job executes in less than 1 millisecond, you may want to additionally test with the ISR configuration.
+While the queue is empty, the worker threads will not be scheduled for execution by the RTOS kernel. They will remain idle until a new job is added to the queue. When a new job is added to the queue, the RTOS kernel will then schedule the worker threads for execution. Each threads will check the queue, one of the threads will execute the new job, and the other threads will return to the idle state.
+
+This process has some small but not zero overhead which is why, if your jobs execute in less than 1 millisecond, you may observe that your computation does not parallelize well and you may want to test with the ISR configuration. This is more true as the duration of jobs reduces to something even smaller.  A computation split up into jobs that execute in 50-100 microseconds will not parallelize at all unless the ISR worker configuration is used.
 
 The following code snippet demonstrates how to create and initialize the thread worker dispatcher configuration.
 
@@ -117,7 +119,7 @@ The following code snippet demonstrates how to create and initialize the thread 
 ISRs
 ====
 
-The ISR configuration is the most lightweight because it does not function like a typical job queue. Instead, jobs are dispatched to interrupt service routines which execute the job. Jobs are not queued and an application must not add more jobs than ISRs. To configure the ISR workers, the application only specifies the cores where ISRs are executed. It is important for application performance that, when using the ISR worker configuration, that jobs execute very quickly because no other threads will be scheduled on an ISR worker's core until the job completes.
+The ISR configuration is the most lightweight because it does not function like a typical job queue. Instead, jobs are dispatched far more quickly to interrupt service routines which execute the job. Jobs can not be queued so an application must not add more jobs than ISRs. To configure the ISR workers, the application only specifies the cores where ISRs are executed. It is important for application performance that, when using the ISR worker configuration, that jobs execute very quickly because no other threads will be scheduled on an ISR worker's core until the job completes.
 
 The following code snippet demonstrates how to create and initialize the ISR worker dispatcher configuration.
 
@@ -130,7 +132,7 @@ The following code snippet demonstrates how to create and initialize the ISR wor
     disp = dispatcher_create();
     
     // initialize the dispatcher with ISRs enabled on 
-    // cores 1, 2, 3, 4, & 6
+    // cores 1, 2, 3 & 5
     dispatcher_isr_init(disp, 0b00101110);
 
     // use dispatcher here...
@@ -141,7 +143,7 @@ The following code snippet demonstrates how to create and initialize the ISR wor
 Code Example
 ************
 
-The following example code demonstrates how to create a dispatcher and add jobs that print out "Hello World".  TO build this and other dispatcher examples, see the `README.rst` in `modules/rtos/sw_services/dispatcher/examples`.
+The following example code demonstrates how to create a dispatcher and add jobs that print out "Hello World". To build this and other dispatcher examples, see the `README.rst` in `modules/rtos/sw_services/dispatcher/examples`.
 
 .. literalinclude:: ../../../../modules/rtos/sw_services/dispatcher/examples/src/hello_world.c
   :language: c
