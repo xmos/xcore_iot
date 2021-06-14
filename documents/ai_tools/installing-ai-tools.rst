@@ -1,13 +1,13 @@
 
-###########################
-Installing the AI Toolchain
-###########################
+#######################
+Installing the AI Tools
+#######################
 
 ********
 Overview
 ********
 
-The AI Toolchain is a collection of Python scripts, tools and libraries to convert TensorFlow Lite for Microcontroller models to a format targetting accelerated operations on the xcore.ai platform.
+The AI Tools are a collection of Python scripts, tools and libraries to convert TensorFlow Lite for Microcontroller models to a format targetting accelerated operations on the xcore.ai platform.
 
 ************
 Installation

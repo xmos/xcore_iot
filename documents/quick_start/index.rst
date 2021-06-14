@@ -7,4 +7,3 @@ Quick start
 
    system-requirements
    getting-started
-   installing-ai-tools

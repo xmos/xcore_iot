@@ -1,6 +1,6 @@
-############################################################################
-Getting Started with FreeRTOS Application Programming on XCore using the SDK
-############################################################################
+#####################################################
+Getting Started with FreeRTOS Application Programming
+#####################################################
 
 *********
 Rationale

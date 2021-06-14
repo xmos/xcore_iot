@@ -1,14 +1,14 @@
-.. _ai_framework_user_guide:
+.. _ai_deployment_user_guide:
 
-#######################
-AI Framework User Guide
-#######################
+########################
+AI Deployment User Guide
+########################
 
 ************
 Introduction
 ************
 
-After you have :ref:`optimized your model for XCORE <ai_toolchain_extensions_user_guide>`, the final step in our optimization workflow is to deploy your model in our port of the TensorFlow Lite for Microcontrollers runtime. The TensorFlow Lite for Microcontrollers project provides the tools necessary to encapsulate the model and the runtime in source files that can be linked with the rest of your embedded project, compiled using our tools, and deployed on the hardware or tested in our cycle-accurate simulator. To execute the optimized graph, our runtime relies on a library of fine-tuned neural network kernels that take full advantage of the xcore.ai VPU. This library is also self-contained, so you can implement the model execution yourself if the computation constraints do not allow the overhead associated with the runtime. This overhead can be anything between 20KB and 160KB, depending on how many and which kernels your model uses, but decreases continuously as we improve our implementation of the runtime and the kernels.
+After you have :ref:`optimized your model for XCORE <ai_tools_user_guide>`, the final step in our optimization workflow is to deploy your model in our port of the TensorFlow Lite for Microcontrollers runtime. The TensorFlow Lite for Microcontrollers project provides the tools necessary to encapsulate the model and the runtime in source files that can be linked with the rest of your embedded project, compiled using our tools, and deployed on the hardware or tested in our cycle-accurate simulator. To execute the optimized graph, our runtime relies on a library of fine-tuned neural network kernels that take full advantage of the xcore.ai VPU. This library is also self-contained, so you can implement the model execution yourself if the computation constraints do not allow the overhead associated with the runtime. This overhead can be anything between 20KB and 160KB, depending on how many and which kernels your model uses, but decreases continuously as we improve our implementation of the runtime and the kernels.
 
 Recommended Model Deployment
 ============================

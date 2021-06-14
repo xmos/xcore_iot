@@ -12,6 +12,7 @@ This is the user guide for the `XCore Software Development Kit <https://github.c
    quick_start/index
    tutorials/index
    reference/index
+   ai_tools/index
    copyright
 
 .. only:: html

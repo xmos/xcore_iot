@@ -15,7 +15,7 @@ The XCore SDK is comprised the following components:
 
 The SDK is designed to be used in conjunction with the xcore-ai Explorer board. The example applications compile targeting this board. Further information about the Explorer board, and xcore.ai device are available to authorised parties on www.xmos.ai. Future releases will include other xcore.ai hardware platforms, targeting specific use case applications. The following sections detail required tools, describe the example applications, upcoming features and how to get support and provide feedback.
 
- .. _sdk-installation-label:
+.. _sdk-installation-label:
 
 ************
 Installation

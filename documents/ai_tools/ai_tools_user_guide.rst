@@ -1,21 +1,21 @@
-.. _ai_toolchain_extensions_user_guide:
+.. _ai_tools_user_guide:
 
-##################################
-AI Toolchain Extensions User Guide
-##################################
+###################
+AI Tools User Guide
+###################
 
 ************
 Introduction
 ************
 
-XCORE is a family of cross-over processors for the IoT and AIoT, helping you to get to the market fast, with products that stand out from the competition.  With XCORE, multiple cores are available for the execution of real-time machine learnig inferencing, decisioning at the edge, signal processing, control and communication - all wrapped up in a single chip.
+XCore is a family of cross-over processors for the IoT and AIoT, helping you to get to the market fast, with products that stand out from the competition.  With XCore, multiple cores are available for the execution of real-time machine learnig inferencing, decisioning at the edge, signal processing, control and communication - all wrapped up in a single chip.
 
-At the heart of the machine learning inference capabilities lies the vector processing unit (VPU). To keep the system simple and the die area small, while retaining the hard-real-time guarantees of XCORE processors, we decided to integrate the VPU closely with the rest of the ALU. This allows for reduced latency and increased throughput since there is no need to copy memory to/from the accelerator’s memory. Moreover, the VPU breaks with some traditions of traditional RISC architectures.
+At the heart of the machine learning inference capabilities lies the vector processing unit (VPU). To keep the system simple and the die area small, while retaining the hard-real-time guarantees of XCore processors, we decided to integrate the VPU closely with the rest of the ALU. This allows for reduced latency and increased throughput since there is no need to copy memory to/from the accelerator’s memory. Moreover, the VPU breaks with some traditions of traditional RISC architectures.
 
-AI Toolchain Extensions
-=======================
+Overview
+========
 
-We have developed a Python module that extends the xTIMEcomposer toolchain and allows model designers and embedded software developers to optimize models for the xcore.ai processor.
+We have developed a Python module that extends the XTC Tools and allows model designers and embedded software developers to optimize models for the xcore.ai processor.
 
 The figure below illustrates our neural network deployment workflow, starting with a trained model (with floating point weights and activations) on the left. Our workflow currently targets only `TensorFlow <https://www.tensorflow.org/>`_ models, so you need to convert your model first if you are training in a different framework. Once your model is in TensorFlow, the first step is to convert and quantize it using the built-in `TensorFlow Lite converter <https://www.tensorflow.org/lite/microcontrollers/build_convert>`_. You can do this manually, but we provide you with a helper function that takes a tf.keras Model object and a representative dataset for quantization, then configures and calls the converter/quantizer with the appropriate settings for xcore.ai.
 
@@ -58,7 +58,7 @@ It is worth noting that our optimizer is a standalone executable with the input 
 Optimizing Your Model
 *********************
 
-Be sure you have installed the XMOS AI Toolchain extensions.  If you setup a virtual environment as suggested in the :ref:`Getting Started <ai_tools-setup-virtual-environment-label>` guide, remember to :ref:`activate <ai_tools-activate-virtual-environment-label>` it before proceeding.
+Be sure you have installed the XMOS AI Tools.  If you setup a virtual environment as suggested in the :ref:`Getting Started <ai_tools-setup-virtual-environment-label>` guide, remember to :ref:`activate <ai_tools-activate-virtual-environment-label>` it before proceeding.
 
 We've provided two paths for you to optimize your model for xcore.ai.
 
@@ -99,4 +99,4 @@ Open ``<output .html file>`` in your browser to inspect the model.
 Model Deployment
 ================
 
-The :ref:`AI Deployment Framework User Guide <ai_framework_user_guide>` provides information on deploying your optimized model to XCORE.
+The :ref:`AI Deployment User Guide <ai_deployment_user_guide>` provides information on deploying your optimized model to XCORE.
