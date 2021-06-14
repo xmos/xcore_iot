@@ -25,15 +25,15 @@ The target hardware for these tests is the XCORE-AI-EXPLORER board.
 To setup the board for testing, the following connections must be made:
 
 ============  ================
-Test  Desc    Connection
-====  ======  ================
-GPIO  I/O     X1D12 : X1D39
-I2C   SCL     SCL IOL : X1D36
-I2C   SDA     SDA IOL : X1D38
-I2S   DACD    DAC_DAT : X0D12
-I2S   ADCD    ADC_DAT : X0D13
-I2S   BCLK    BCLK : X0D22
-I2S   LRCLK   LRCLK : X0D23
+Pin Desc      Connection
+============  ================
+GPIO I/O      X1D12 : X1D39
+I2C SCL       SCL IOL : X1D36
+I2C SDA       SDA IOL : X1D38
+I2S DACD      DAC_DAT : X0D12
+I2S ADCD      ADC_DAT : X0D13
+I2S BCLK      BCLK : X0D22
+I2S LRCLK     LRCLK : X0D23
 ============  ================
 
 *****************
