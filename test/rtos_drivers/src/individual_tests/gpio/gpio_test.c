@@ -82,9 +82,10 @@ static void gpio_init_tests(gpio_test_ctx_t *test_ctx, rtos_gpio_t *gpio_ctx)
     configASSERT(test_ctx->test_cnt <= GPIO_MAX_TESTS);
 }
 
-void gpio_device_tests(rtos_gpio_t *gpio_ctx, chanend_t c)
+int gpio_device_tests(rtos_gpio_t *gpio_ctx, chanend_t c)
 {
     gpio_test_ctx_t test_ctx;
+    int res = 0;
 
     sync(c);
     gpio_printf("Init test context");
@@ -98,12 +99,8 @@ void gpio_device_tests(rtos_gpio_t *gpio_ctx, chanend_t c)
 
     sync(c);
     gpio_printf("Start tests");
-    if (run_gpio_tests(&test_ctx, c) != 0)
-    {
-        gpio_printf("Test failed");
-    } else {
-        gpio_printf("Tests passed");
-    }
+    res = run_gpio_tests(&test_ctx, c);
 
     sync(c);   // Sync before return
+    return res;
 }

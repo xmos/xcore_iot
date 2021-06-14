@@ -26,7 +26,7 @@ struct qspi_flash_test_ctx {
 
 typedef int (*qspi_flash_main_test_t)(qspi_flash_test_ctx_t *ctx);
 
-void qspi_flash_device_tests(rtos_qspi_flash_t *qspi_flash_ctx, chanend_t c);
+int qspi_flash_device_tests(rtos_qspi_flash_t *qspi_flash_ctx, chanend_t c);
 
 /* Independant Tests */
 void register_check_params_test(qspi_flash_test_ctx_t *test_ctx);

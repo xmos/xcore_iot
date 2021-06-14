@@ -94,9 +94,10 @@ static void i2s_init_tests(i2s_test_ctx_t *test_ctx, rtos_i2s_t *i2s_master_ctx,
     configASSERT(test_ctx->test_cnt <= I2S_MAX_TESTS);
 }
 
-void i2s_device_tests(rtos_i2s_t *i2s_master_ctx, rtos_i2s_t *i2s_slave_ctx, chanend_t c)
+int i2s_device_tests(rtos_i2s_t *i2s_master_ctx, rtos_i2s_t *i2s_slave_ctx, chanend_t c)
 {
     i2s_test_ctx_t test_ctx;
+    int res = 0;
 
     sync(c);
     i2s_printf("Init test context");
@@ -110,12 +111,8 @@ void i2s_device_tests(rtos_i2s_t *i2s_master_ctx, rtos_i2s_t *i2s_slave_ctx, cha
 
     sync(c);
     i2s_printf("Start tests");
-    if (run_i2s_tests(&test_ctx, c) != 0)
-    {
-        i2s_printf("Test failed");
-    } else {
-        i2s_printf("Tests passed");
-    }
+    res = run_i2s_tests(&test_ctx, c);
 
     sync(c);   // Sync before return
+    return res;
 }

@@ -62,9 +62,10 @@ static void swmem_init_tests(swmem_test_ctx_t *test_ctx)
     configASSERT(test_ctx->test_cnt <= SWMEM_MAX_TESTS);
 }
 
-void swmem_device_tests(chanend_t c)
+int swmem_device_tests(chanend_t c)
 {
     swmem_test_ctx_t test_ctx;
+    int res = 0;
 
     sync(c);
     swmem_printf("Init test context");
@@ -78,12 +79,8 @@ void swmem_device_tests(chanend_t c)
 
     sync(c);
     swmem_printf("Start tests");
-    if (run_swmem_tests(&test_ctx, c) != 0)
-    {
-        swmem_printf("Test failed");
-    } else {
-        swmem_printf("Tests passed");
-    }
+    res = run_swmem_tests(&test_ctx, c);
 
     sync(c);   // Sync before return
+    return res;
 }

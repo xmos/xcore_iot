@@ -60,9 +60,10 @@ static void intertile_init_tests(intertile_test_ctx_t *test_ctx, rtos_intertile_
     configASSERT(test_ctx->test_cnt <= INTERTILE_MAX_TESTS);
 }
 
-void intertile_device_tests(rtos_intertile_t *intertile_ctx, chanend_t c)
+int intertile_device_tests(rtos_intertile_t *intertile_ctx, chanend_t c)
 {
     intertile_test_ctx_t test_ctx;
+    int res = 0;
 
     sync(c);
     intertile_printf("Init test context");
@@ -76,12 +77,8 @@ void intertile_device_tests(rtos_intertile_t *intertile_ctx, chanend_t c)
 
     sync(c);
     intertile_printf("Start tests");
-    if (run_intertile_tests(&test_ctx, c) != 0)
-    {
-        intertile_printf("Test failed");
-    } else {
-        intertile_printf("Tests passed");
-    }
+    res = run_intertile_tests(&test_ctx, c);
 
     sync(c);   // Sync before return
+    return res;
 }

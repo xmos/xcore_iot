@@ -151,9 +151,10 @@ static void i2c_init_tests(i2c_test_ctx_t *test_ctx, rtos_i2c_master_t *i2c_mast
     configASSERT(test_ctx->test_cnt <= I2C_MAX_TESTS);
 }
 
-void i2c_device_tests(rtos_i2c_master_t *i2c_master_ctx, rtos_i2c_slave_t *i2c_slave_ctx, chanend_t c)
+int i2c_device_tests(rtos_i2c_master_t *i2c_master_ctx, rtos_i2c_slave_t *i2c_slave_ctx, chanend_t c)
 {
     i2c_test_ctx_t test_ctx;
+    int res = 0;
 
     sync(c);
     i2c_printf("Init test context");
@@ -167,12 +168,8 @@ void i2c_device_tests(rtos_i2c_master_t *i2c_master_ctx, rtos_i2c_slave_t *i2c_s
 
     sync(c);
     i2c_printf("Start tests");
-    if (run_i2c_tests(&test_ctx, c) != 0)
-    {
-        i2c_printf("Test failed");
-    } else {
-        i2c_printf("Tests passed");
-    }
+    res = run_i2c_tests(&test_ctx, c);
 
     sync(c);   // Sync before return
+    return res;
 }

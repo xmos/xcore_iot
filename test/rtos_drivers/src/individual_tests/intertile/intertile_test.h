@@ -26,7 +26,7 @@ struct intertile_test_ctx {
 
 typedef int (*intertile_main_test_t)(intertile_test_ctx_t *ctx);
 
-void intertile_device_tests(rtos_intertile_t *intertile_ctx, chanend_t c);
+int intertile_device_tests(rtos_intertile_t *intertile_ctx, chanend_t c);
 
 /* Local Tests */
 void register_fixed_len_tx_test(intertile_test_ctx_t *test_ctx);

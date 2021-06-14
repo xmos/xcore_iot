@@ -37,7 +37,7 @@ typedef void (*i2c_slave_rx_t)(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *d
 typedef size_t (*i2c_slave_tx_start_t)(rtos_i2c_slave_t *ctx, void *app_data, uint8_t **data);
 typedef void (*i2c_slave_tx_done_t)(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_t len);
 
-void i2c_device_tests(rtos_i2c_master_t *i2c_master_ctx, rtos_i2c_slave_t *i2c_slave_ctx, chanend_t c);
+int i2c_device_tests(rtos_i2c_master_t *i2c_master_ctx, rtos_i2c_slave_t *i2c_slave_ctx, chanend_t c);
 
 /* Local Tests */
 void register_master_reg_write_test(i2c_test_ctx_t *test_ctx);

@@ -27,7 +27,7 @@ struct mic_array_test_ctx {
 
 typedef int (*mic_array_main_test_t)(mic_array_test_ctx_t *ctx);
 
-void mic_array_device_tests(rtos_mic_array_t *mic_array_ctx, chanend_t c);
+int mic_array_device_tests(rtos_mic_array_t *mic_array_ctx, chanend_t c);
 
 /* Local Tests */
 void register_get_samples_test(mic_array_test_ctx_t *test_ctx);

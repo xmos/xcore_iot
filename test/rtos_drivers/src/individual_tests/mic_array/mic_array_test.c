@@ -80,9 +80,10 @@ static void mic_array_init_tests(mic_array_test_ctx_t *test_ctx, rtos_mic_array_
     configASSERT(test_ctx->test_cnt <= MIC_ARRAY_MAX_TESTS);
 }
 
-void mic_array_device_tests(rtos_mic_array_t *mic_array_ctx, chanend_t c)
+int mic_array_device_tests(rtos_mic_array_t *mic_array_ctx, chanend_t c)
 {
     mic_array_test_ctx_t test_ctx;
+    int res = 0;
 
     sync(c);
     mic_array_printf("Init test context");
@@ -96,12 +97,8 @@ void mic_array_device_tests(rtos_mic_array_t *mic_array_ctx, chanend_t c)
 
     sync(c);
     mic_array_printf("Start tests");
-    if (run_mic_array_tests(&test_ctx, c) != 0)
-    {
-        mic_array_printf("Test failed");
-    } else {
-        mic_array_printf("Tests passed");
-    }
+    res = run_mic_array_tests(&test_ctx, c);
 
     sync(c);   // Sync before return
+    return res;
 }

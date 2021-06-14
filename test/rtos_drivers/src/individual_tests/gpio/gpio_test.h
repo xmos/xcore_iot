@@ -32,7 +32,7 @@ typedef int (*gpio_main_test_t)(gpio_test_ctx_t *ctx);
 #define OUTPUT_PORT             XS1_PORT_1E
 #define OUTPUT_PORT_PIN_OFFSET  0
 
-void gpio_device_tests(rtos_gpio_t *gpio_ctx, chanend_t c);
+int gpio_device_tests(rtos_gpio_t *gpio_ctx, chanend_t c);
 
 /* Local Tests */
 void register_io_test(gpio_test_ctx_t *test_ctx);

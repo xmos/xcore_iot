@@ -49,6 +49,8 @@ static rtos_i2s_t *i2s_slave_ctx = &i2s_slave_ctx_s;
 
 chanend_t other_tile_c;
 
+#define kernel_printf( FMT, ... )    module_printf("KERNEL", FMT, ##__VA_ARGS__)
+
 void vApplicationMallocFailedHook( void )
 {
     kernel_printf("Malloc Failed!");
@@ -66,50 +68,83 @@ void vApplicationDaemonTaskStartup(void *arg)
     /* Intertile test must always before any test that uses RPC or the intertile
        device must be started */
     if (RUN_INTERTILE_TESTS) {
-        intertile_device_tests(intertile_ctx, other_tile_c);
+        if (intertile_device_tests(intertile_ctx, other_tile_c) != 0)
+        {
+            test_printf("FAIL INTERTILE");
+        } else {
+            test_printf("PASS INTERTILE");
+        }
     } else {
-        test_printf("Skipped INTERTILE tests");
-        test_printf("Starting intertile device");
+        test_printf("SKIP INTERTILE");
         rtos_intertile_start(intertile_ctx);
     }
 
     if (RUN_GPIO_TESTS) {
-        gpio_device_tests(gpio_ctx, other_tile_c);
+        if (gpio_device_tests(gpio_ctx, other_tile_c) != 0)
+        {
+            test_printf("FAIL GPIO");
+        } else {
+            test_printf("PASS GPIO");
+        }
     } else {
-        test_printf("Skipped GPIO tests");
+        test_printf("SKIP GPIO");
     }
 
     if (RUN_I2C_TESTS) {
-        i2c_device_tests(i2c_master_ctx, i2c_slave_ctx, other_tile_c);
+        if (i2c_device_tests(i2c_master_ctx, i2c_slave_ctx, other_tile_c) != 0)
+        {
+            test_printf("FAIL I2C");
+        } else {
+            test_printf("PASS I2C");
+        }
     } else {
-        test_printf("Skipped I2C tests");
+        test_printf("SKIP I2C");
     }
 
     if (RUN_SWMEM_TESTS) {
-        swmem_device_tests(other_tile_c);
+        if (swmem_device_tests(other_tile_c) != 0)
+        {
+            test_printf("FAIL SWMEM");
+        } else {
+            test_printf("PASS SWMEM");
+        }
     } else {
-        test_printf("Skipped SWMEM tests");
+        test_printf("SKIP SWMEM");
     }
 
     if (RUN_QSPI_FLASH_TESTS) {
-        qspi_flash_device_tests(qspi_flash_ctx, other_tile_c);
+        if (qspi_flash_device_tests(qspi_flash_ctx, other_tile_c) != 0)
+        {
+            test_printf("FAIL QSPI_FLASH");
+        } else {
+            test_printf("PASS QSPI_FLASH");
+        }
     } else {
-        test_printf("Skipped QSPI_FLASH tests");
+        test_printf("SKIP QSPI_FLASH");
     }
 
     if (RUN_I2S_TESTS) {
-        i2s_device_tests(i2s_master_ctx, i2s_slave_ctx, other_tile_c);
+        if (i2s_device_tests(i2s_master_ctx, i2s_slave_ctx, other_tile_c) != 0)
+        {
+            test_printf("FAIL I2S");
+        } else {
+            test_printf("PASS I2S");
+        }
     } else {
-        test_printf("Skipped I2S tests");
+        test_printf("SKIP I2S");
     }
 
     if (RUN_MIC_ARRAY_TESTS) {
-        mic_array_device_tests(mic_array_ctx, other_tile_c);
+        if (mic_array_device_tests(mic_array_ctx, other_tile_c) != 0)
+        {
+            test_printf("FAIL MIC_ARRAY");
+        } else {
+            test_printf("PASS MIC_ARRAY");
+        }
     } else {
-        test_printf("Skipped MIC_ARRAY tests");
+        test_printf("SKIP MIC_ARRAY");
     }
 
-    test_printf("Done");
     _Exit(0);
 
     chanend_free(other_tile_c);

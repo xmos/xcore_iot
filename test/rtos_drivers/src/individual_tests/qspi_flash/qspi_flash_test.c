@@ -73,9 +73,10 @@ static void qspi_flash_init_tests(qspi_flash_test_ctx_t *test_ctx, rtos_qspi_fla
     configASSERT(test_ctx->test_cnt <= QSPI_FLASH_MAX_TESTS);
 }
 
-void qspi_flash_device_tests(rtos_qspi_flash_t *qspi_flash_ctx, chanend_t c)
+int qspi_flash_device_tests(rtos_qspi_flash_t *qspi_flash_ctx, chanend_t c)
 {
     qspi_flash_test_ctx_t test_ctx;
+    int res = 0;
 
     sync(c);
     qspi_flash_printf("Init test context");
@@ -89,12 +90,8 @@ void qspi_flash_device_tests(rtos_qspi_flash_t *qspi_flash_ctx, chanend_t c)
 
     sync(c);
     qspi_flash_printf("Start tests");
-    if (run_qspi_flash_tests(&test_ctx, c) != 0)
-    {
-        qspi_flash_printf("Test failed");
-    } else {
-        qspi_flash_printf("Tests passed");
-    }
+    res = run_qspi_flash_tests(&test_ctx, c);
 
     sync(c);   // Sync before return
+    return res;
 }

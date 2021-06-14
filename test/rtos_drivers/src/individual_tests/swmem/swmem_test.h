@@ -24,7 +24,7 @@ struct swmem_test_ctx {
 
 typedef int (*swmem_main_test_t)(swmem_test_ctx_t *ctx);
 
-void swmem_device_tests(chanend_t c);
+int swmem_device_tests(chanend_t c);
 
 /* Local Tests */
 void register_swmem_read_write_test(swmem_test_ctx_t *test_ctx);

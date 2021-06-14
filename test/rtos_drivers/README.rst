@@ -1,46 +1,55 @@
-This is a readme
+################
+RTOS Driver Tests
+################
 
-swmem
-trace
+The RTOS driver tests are designed to regression test RTOS driver behavior for the following drivers:
 
-rpc
-intertile
+- gpio
+- i2c
+- i2s
+- intertile
+- mic_array
+- qspi_flash
+- swmem
 
-gpio
-i2c
-i2s
-mic_array
-spi
+These tests assume that the associated RTOS and HILs used have been verified by their own localized separate testing.
 
+These tests should be run whenever the code or submodules in 'modules\rtos' or 'modules\hil' are changed.
 
-usb
+*****************
+Hardware Setup
+*****************
 
-wifi
-qspi_flash
+The target hardware for these tests is the XCORE-AI-EXPLORER board.
 
+To setup the board for testing, the following connections must be made:
 
+============  ================
+Test  Desc    Connection
+====  ======  ================
+GPIO  I/O     X1D12 : X1D39
+I2C   SCL     SCL IOL : X1D36
+I2C   SDA     SDA IOL : X1D38
+I2S   DACD    DAC_DAT : X0D12
+I2S   ADCD    ADC_DAT : X0D13
+I2S   BCLK    BCLK : X0D22
+I2S   LRCLK   LRCLK : X0D23
+============  ================
 
+*****************
+Running Tests
+*****************
 
+Run the tests with the following command:
 
+.. code-block:: console
 
-GPIO Tests
-XS1_PORT_1P
-in
-X1D12
+    $ ./build_and_run_tests.sh
 
-XS1_PORT_1E
-X1D39
-out
+Alternatively, if the firmware is built separately, the tests alone can be run with the following command:
 
-I2C Tests
-Required connections to run the I2C tests are:
-SCL IOL : X1D36
-SDA IOL : X1D38
+.. code-block:: console
 
+    $ ./run_tests.sh
 
-I2S Tests
-master               slave
-PORT_I2S_DAC_DATA  : port e0 x0d12
-PORT_I2S_ADC_DATA  : port f0  x0d13
-PORT_I2S_BCLK      : port g0  x0d22
-PORT_I2S_LRCLK     : port h0  x0d23
+This test is primarily used by the CI system.  However, it may be useful for developers when modifying the SDK.

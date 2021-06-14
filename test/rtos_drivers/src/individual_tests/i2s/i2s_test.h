@@ -28,7 +28,7 @@ struct i2s_test_ctx {
 
 typedef int (*i2s_main_test_t)(i2s_test_ctx_t *ctx);
 
-void i2s_device_tests(rtos_i2s_t *i2s_master_ctx, rtos_i2s_t *i2s_slave_ctx, chanend_t c);
+int i2s_device_tests(rtos_i2s_t *i2s_master_ctx, rtos_i2s_t *i2s_slave_ctx, chanend_t c);
 
 /* Local Tests */
 void register_master_to_slave_test(i2s_test_ctx_t *test_ctx);
