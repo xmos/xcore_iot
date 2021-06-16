@@ -6,7 +6,7 @@ import pytest
 import re
 
 test_results_filename = "testing/test_results.txt"
-test_regex = r"^Tile\[(\d{1})\]\|FCore\[(\d{1})\]\|(\d+)\|TEST\|(.+)$"
+test_regex = r"^Tile\[(\d{1})\]\|FCore\[(\d{1})\]\|(\d+)\|TEST\|(\w{4}) GPIO$"
 
 def test_results():
     f = open(test_results_filename, "r")
