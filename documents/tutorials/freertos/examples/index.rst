@@ -7,7 +7,12 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
 .. toctree::
    :maxdepth: 1
 
+   getting_started
+   independent_tiles
    explorer_board
+   usb
+   device_control
+   dispatcher
    cifar10
    person_detection
    iot_aws
