@@ -21,7 +21,7 @@ set(DISPATCHER_DIR "${SW_SERVICES_DIR}/dispatcher")
 #**********************
 # Options
 #**********************
-option(USE_WIFI_MANAGER "Enable to use wifi manager" FALSE)
+option(USE_WIFI_MANAGER "Enable to use WiFi manager" FALSE)
 option(USE_DHCPD "Enable to use DHCP" FALSE)
 option(USE_DEVICE_CONTROL "Enable to use Device Control" FALSE)
 option(USE_FATFS "Enable to use FATFS filesystem" FALSE)
@@ -31,7 +31,7 @@ option(USE_JSON_PARSER "Enable to use JSON parser" FALSE)
 option(USE_MQTT "Enable to use MQTT" FALSE)
 option(USE_SNTPD "Enable to use SNTPD" FALSE)
 option(USE_TLS_SUPPORT "Enable to use TLS support" FALSE)
-option(USE_CUSTOM_MBEDTLS_CONFIG "Enable to use provide an alternate mbedtls_config.h" FALSE)
+option(USE_CUSTOM_MBEDTLS_CONFIG "Enable to provide an alternate mbedtls_config.h" FALSE)
 option(USE_TINYUSB "Enable to use TinyUSB" FALSE)
 option(USE_DISK_MANAGER_TUSB "Enable to use RAM and Flash disk manager" FALSE)
 option(USE_DISPATCHER "Enable to use Dispatcher" FALSE)
