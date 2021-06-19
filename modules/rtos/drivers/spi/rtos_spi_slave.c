@@ -38,15 +38,15 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_spi_slave_isr, arg)
 
     isr_action = s_chan_in_byte(ctx->c.end_b);
 
-    if (rtos_osal_queue_send(&ctx->xfer_done_queue, &item, RTOS_OSAL_NO_WAIT) != RTOS_OSAL_SUCCESS) {
+    if (rtos_osal_queue_send(&ctx->xfer_done_queue, &item, RTOS_OSAL_NO_WAIT) == RTOS_OSAL_SUCCESS) {
+        if (ctx->xfer_done != NULL) {
+            /*
+             * TODO: FIXME, FreeRTOS specific, not using OSAL here
+             */
+            xTaskNotifyGive(ctx->app_thread.thread);
+        }
+    } else {
         rtos_printf("Lost SPI slave transfer\n");
-    }
-
-    if (ctx->xfer_done != NULL) {
-        /*
-         * TODO: FIXME, FreeRTOS specific, not using OSAL here
-         */
-        xTaskNotifyGive(ctx->app_thread.thread);
     }
 
     ctx->waiting_for_isr = 0;

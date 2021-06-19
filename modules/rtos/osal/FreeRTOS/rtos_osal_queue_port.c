@@ -7,11 +7,11 @@
 
 #include "rtos_osal.h"
 
-rtos_osal_status_t rtos_osal_queue_create(rtos_osal_queue_t *queue, char *name, size_t queue_length, size_t item_word_size)
+rtos_osal_status_t rtos_osal_queue_create(rtos_osal_queue_t *queue, char *name, size_t queue_length, size_t item_size)
 {
     (void) name;
 
-    queue->queue = xQueueCreate(queue_length, item_word_size);
+    queue->queue = xQueueCreate(queue_length, item_size);
     if (queue->queue != NULL) {
 
         #if configQUEUE_REGISTRY_SIZE > 0
