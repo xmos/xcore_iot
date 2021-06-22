@@ -40,10 +40,11 @@ Clone the XCore SDK repository with the following commands:
 Set up Environment Variable
 ===========================
 
-All code examples require that an environment variable be set that specifies the fully-qualified path to the xcore_sdk directory. Set the following environment variable:
+All code examples require that an environment variable be set that specifies the fully-qualified path to the xcore_sdk directory. Set the following environment variables:
 
 .. code-block:: console
 
     $ export XCORE_SDK_PATH=<path to>/xcore_sdk
+    $ export XMOS_AIOT_SDK_PATH=<path to>/xcore_sdk
 
 .. note:: You can also add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.
