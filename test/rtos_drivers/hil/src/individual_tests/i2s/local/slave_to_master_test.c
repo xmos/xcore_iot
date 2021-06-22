@@ -29,12 +29,10 @@ static int main_test(i2s_test_ctx_t *ctx)
 {
     local_printf("Start");
 
-    size_t rx_len = 0;
-    int32_t rx_buf[I2S_FRAME_LEN*FRAME_NUM_CHANS] = {0};
-    TaskHandle_t output_handle;
-
     #if ON_TILE(I2S_MASTER_TILE)
     {
+        int32_t rx_buf[I2S_FRAME_LEN*FRAME_NUM_CHANS] = {0};
+        size_t rx_len = 0;
         int start = 0;
         do
         {

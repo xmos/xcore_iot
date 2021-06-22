@@ -82,7 +82,6 @@ void board_tile0_init(
         rtos_intertile_t *intertile_ctx,
         rtos_mic_array_t *mic_array_ctx,
         rtos_i2c_master_t *i2c_master_ctx,
-        rtos_spi_master_t *spi_master_ctx,
         rtos_qspi_flash_t *qspi_flash_ctx,
         rtos_gpio_t *gpio_ctx,
         rtos_i2s_t *i2s_master_ctx,
@@ -98,14 +97,6 @@ void board_tile0_init(
             PORT_I2C_SDA, 0, 0,
             0,
             100);
-
-    rtos_spi_master_init(
-            spi_master_ctx,
-            XS1_CLKBLK_1,
-            WIFI_CS_N,
-            WIFI_CLK,
-            WIFI_MOSI,
-            WIFI_MISO);
 
     rtos_qspi_flash_init(
             qspi_flash_ctx,

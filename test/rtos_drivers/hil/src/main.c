@@ -17,7 +17,6 @@
 #include "rtos/drivers/intertile/api/rtos_intertile.h"
 #include "rtos/drivers/mic_array/api/rtos_mic_array.h"
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
-#include "rtos/drivers/spi/api/rtos_spi_master.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -29,7 +28,6 @@ static rtos_intertile_t intertile_ctx_s;
 static rtos_mic_array_t mic_array_ctx_s;
 static rtos_i2c_master_t i2c_master_ctx_s;
 static rtos_i2c_slave_t i2c_slave_ctx_s;
-static rtos_spi_master_t spi_master_ctx_s;
 static rtos_qspi_flash_t qspi_flash_ctx_s;
 static rtos_gpio_t gpio_ctx_s;
 static rtos_i2s_t i2s_master_ctx_s;
@@ -39,7 +37,6 @@ static rtos_intertile_t *intertile_ctx = &intertile_ctx_s;
 static rtos_mic_array_t *mic_array_ctx = &mic_array_ctx_s;
 static rtos_i2c_master_t *i2c_master_ctx = &i2c_master_ctx_s;
 static rtos_i2c_slave_t *i2c_slave_ctx = &i2c_slave_ctx_s;
-static rtos_spi_master_t *spi_master_ctx = &spi_master_ctx_s;
 static rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
 static rtos_gpio_t *gpio_ctx = &gpio_ctx_s;
 static rtos_i2s_t *i2s_master_ctx = &i2s_master_ctx_s;
@@ -157,7 +154,6 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                      intertile_ctx,
                      mic_array_ctx,
                      i2c_master_ctx,
-                     spi_master_ctx,
                      qspi_flash_ctx,
                      gpio_ctx,
                      i2s_master_ctx,
