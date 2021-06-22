@@ -22,12 +22,12 @@ void cifar10_resolver_get(void **v_resolver)
   //   This pulls in all the operation implementations we need.
   if (resolver == nullptr) {
     resolver = &resolver_s;
-    resolver->AddPad();
     resolver->AddSoftmax();
+    resolver->AddPad();
     resolver->AddCustom(tflite::ops::micro::xcore::FullyConnected_8_OpCode, tflite::ops::micro::xcore::Register_FullyConnected_8());
     resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Deep_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Deep());
-    resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
     resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_Shallow_OpCode, tflite::ops::micro::xcore::Register_Conv2D_Shallow());
+    resolver->AddCustom(tflite::ops::micro::xcore::MaxPool2D_OpCode, tflite::ops::micro::xcore::Register_MaxPool2D());
   }
 
   *v_resolver = static_cast<void *>(resolver);

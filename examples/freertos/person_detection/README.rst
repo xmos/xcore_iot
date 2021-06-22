@@ -101,7 +101,7 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
 .. code-block:: console
 
-    $ xformer.py --analyze -par 5 model/person_detect_quant.tflite model/person_detect_xcore.tflite
+    $ xformer.py --analyze -par 1 model/person_detect_quant.tflite model/person_detect_xcore.tflite
 
 Generating the model runner
 ===========================
