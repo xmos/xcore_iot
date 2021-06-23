@@ -91,7 +91,7 @@ rtos_osal_status_t rtos_osal_semaphore_delete(rtos_osal_semaphore_t *semaphore);
  * Queues
  */
 typedef struct rtos_osal_queue_struct rtos_osal_queue_t;
-rtos_osal_status_t rtos_osal_queue_create(rtos_osal_queue_t *queue, char *name, size_t queue_length, size_t item_word_size);
+rtos_osal_status_t rtos_osal_queue_create(rtos_osal_queue_t *queue, char *name, size_t queue_length, size_t item_size);
 rtos_osal_status_t rtos_osal_queue_send(rtos_osal_queue_t *queue, const void *item, unsigned timeout);
 rtos_osal_status_t rtos_osal_queue_receive(rtos_osal_queue_t *queue, void *item, unsigned timeout);
 rtos_osal_status_t rtos_osal_queue_delete(rtos_osal_queue_t *queue);

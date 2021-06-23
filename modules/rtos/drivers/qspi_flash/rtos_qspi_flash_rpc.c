@@ -340,7 +340,7 @@ void rtos_qspi_flash_rpc_config(
         /* This is a client */
         rpc_config->host_address.port = intertile_port;
 
-        rtos_osal_mutex_create(&qspi_flash_ctx->mutex, "qspi_lock", RTOS_OSAL_NOT_RECURSIVE);
+        rtos_osal_mutex_create(&qspi_flash_ctx->mutex, "qspi_lock", RTOS_OSAL_RECURSIVE);
 
     } else {
         for (int i = 0; i < rpc_config->remote_client_count; i++) {
@@ -371,6 +371,9 @@ void rtos_qspi_flash_rpc_client_init(
     rpc_config->host_address.intertile_ctx = host_intertile_ctx;
     rpc_config->host_ctx_ptr = (void *) s_chan_in_word(host_intertile_ctx->c);
     qspi_flash_ctx->flash_size = s_chan_in_word(host_intertile_ctx->c);
+    qspi_flash_ctx->ctx.page_size_bytes = s_chan_in_word(host_intertile_ctx->c);
+    qspi_flash_ctx->ctx.page_count = s_chan_in_word(host_intertile_ctx->c);
+    qspi_flash_ctx->ctx.erase_info[0].size_log2 = s_chan_in_word(host_intertile_ctx->c);
 }
 
 void rtos_qspi_flash_rpc_host_init(
@@ -390,6 +393,9 @@ void rtos_qspi_flash_rpc_host_init(
         rpc_config->client_address[i].intertile_ctx = client_intertile_ctx[i];
         s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) qspi_flash_ctx);
         s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) qspi_flash_ctx->flash_size);
+        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) qspi_flash_ctx->ctx.page_size_bytes);
+        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) qspi_flash_ctx->ctx.page_count);
+        s_chan_out_word(client_intertile_ctx[i]->c, (uint32_t) qspi_flash_ctx->ctx.erase_info[0].size_log2);
 
         /* This must be configured later with rtos_qspi_flash_rpc_config() */
         rpc_config->client_address[i].port = -1;

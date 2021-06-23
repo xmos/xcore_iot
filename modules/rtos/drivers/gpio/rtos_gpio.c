@@ -95,6 +95,20 @@ static void gpio_local_port_out(rtos_gpio_t *ctx, rtos_gpio_port_id_t port_id, u
     rtos_osal_critical_exit(state);
 }
 
+__attribute__((fptrgroup("rtos_gpio_port_write_control_word_fptr_grp")))
+static void gpio_local_port_write_control_word(rtos_gpio_t *ctx, rtos_gpio_port_id_t port_id, uint32_t value)
+{
+    (void) ctx;
+
+    xassert(port_valid(port_id));
+
+    int state = rtos_osal_critical_enter();
+    {
+        port_write_control_word(gpio_port_lookup[port_id], value);
+    }
+    rtos_osal_critical_exit(state);
+}
+
 __attribute__((fptrgroup("rtos_gpio_isr_callback_set_fptr_grp")))
 static void gpio_local_isr_callback_set(rtos_gpio_t *ctx, rtos_gpio_port_id_t port_id, rtos_gpio_isr_cb_t cb, void *app_data)
 {
@@ -168,6 +182,7 @@ void rtos_gpio_init(
     ctx->port_enable = gpio_local_port_enable;
     ctx->port_in = gpio_local_port_in;
     ctx->port_out = gpio_local_port_out;
+    ctx->port_write_control_word = gpio_local_port_write_control_word;
     ctx->isr_callback_set = gpio_local_isr_callback_set;
     ctx->interrupt_enable = gpio_local_interrupt_enable;
     ctx->interrupt_disable = gpio_local_interrupt_disable;
