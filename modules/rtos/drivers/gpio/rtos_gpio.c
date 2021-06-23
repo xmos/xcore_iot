@@ -62,6 +62,7 @@ static void gpio_local_port_enable(rtos_gpio_t *ctx, rtos_gpio_port_id_t port_id
 
     xassert(port_valid(port_id));
     port_enable(gpio_port_lookup[port_id]);
+    port_set_clock(gpio_port_lookup[port_id], XS1_CLKBLK_REF);
 }
 
 __attribute__((fptrgroup("rtos_gpio_port_in_fptr_grp")))

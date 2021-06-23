@@ -235,7 +235,7 @@ inline void rtos_gpio_port_enable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
 {
-    return ctx->port_enable(ctx, port_id);
+    ctx->port_enable(ctx, port_id);
 }
 
 /**
@@ -265,7 +265,7 @@ inline void rtos_gpio_port_out(
         rtos_gpio_port_id_t port_id,
         uint32_t value)
 {
-    return ctx->port_out(ctx, port_id, value);
+    ctx->port_out(ctx, port_id, value);
 }
 
 /**
@@ -289,7 +289,7 @@ inline void rtos_gpio_isr_callback_set(
         rtos_gpio_isr_cb_t cb,
         void *app_data)
 {
-    return ctx->isr_callback_set(ctx, port_id, cb, app_data);
+    ctx->isr_callback_set(ctx, port_id, cb, app_data);
 }
 
 /**
@@ -303,7 +303,7 @@ inline void rtos_gpio_interrupt_enable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
 {
-    return ctx->interrupt_enable(ctx, port_id);
+    ctx->interrupt_enable(ctx, port_id);
 }
 
 /**
@@ -316,7 +316,7 @@ inline void rtos_gpio_interrupt_disable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
 {
-    return ctx->interrupt_disable(ctx, port_id);
+    ctx->interrupt_disable(ctx, port_id);
 }
 
 /**
