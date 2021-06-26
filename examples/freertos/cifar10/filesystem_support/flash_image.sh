@@ -25,7 +25,6 @@ then
         echo "Extract swmem..."
         xobjdump --strip cifar10_1.xe
         xobjdump --split cifar10_1.xb
-        cp image_n0c1.swmem ../../filesystem_support
         popd
         echo "Combine filesystem and swmem..."
         cat fat.fs | dd of=image_n0c1.swmem bs=1 seek=1048576 conv=notrunc
