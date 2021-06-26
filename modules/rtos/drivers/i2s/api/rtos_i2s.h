@@ -19,9 +19,67 @@
 #include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
 
 /**
+ * This attribute must be specified on all RTOS I2S send filter callback functions
+ * provided by the application.
+ */
+#define RTOS_I2S_APP_SEND_FILTER_CALLBACK_ATTR __attribute__((fptrgroup("rtos_i2s_send_filter_cb_fptr_grp")))
+
+/**
+ * This attribute must be specified on all RTOS I2S receive filter callback functions
+ * provided by the application.
+ */
+#define RTOS_I2S_APP_RECEIVE_FILTER_CALLBACK_ATTR __attribute__((fptrgroup("rtos_i2s_receive_filter_cb_fptr_grp")))
+
+/**
  * Typedef to the RTOS I2S driver instance struct.
  */
 typedef struct rtos_i2s_struct rtos_i2s_t;
+
+/**
+ * Function pointer type for application provided RTOS I2S send filter callback functions.
+ *
+ * These callback functions are called when an I2S driver instance needs output the next
+ * audio frame to its interface. By default, audio frames in the driver's send buffer are
+ * output directly to its interface. However, this gives the application an opportunity to
+ * override this and provide filtering.
+ *
+ * These functions must not block.
+ *
+ * \param ctx               A pointer to the associated I2C slave driver instance.
+ * \param app_data          A pointer to application specific data provided
+ *                          by the application. Used to share data between
+ *                          this callback function and the application.
+ * \param i2s_frame         A pointer to the buffer where the callback should
+ *                          write the next frame to send.
+ * \param i2s_frame_size    The number of samples that should be written to
+ *                          \p i2s_frame.
+ * \param send_buf          A pointer to the next frame in the driver's send
+ *                          buffer. The callback should use this as the input
+ *                          to its filter.
+ * \param samples_available The number of samples available in \p send_buf.
+ *
+ * \returns the number of samples read out of the send buffer
+ */
+typedef size_t (*rtos_i2s_send_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *send_buf, size_t samples_available);
+
+/**
+ * Function pointer type for application provided RTOS I2S receive filter callback functions.
+ *
+ * These callback functions are called when an I2S driver instance has received the next audio
+ * frame from its interface. By default, audio frames received from the driver's interface are
+ * put directly into its receive buffer. However, this gives the application an opportunity to
+ * override this and provide filtering.
+ *
+ * These functions must not block.
+ *
+ * \param ctx           A pointer to the associated I2C slave driver instance.
+ * \param app_data      A pointer to application specific data provided
+ *                      by the application. Used to share data between
+ *                      this callback function and the application.
+ * \param data          A pointer to the data received from the master.
+ * \param len           The number of valid bytes in \p data.
+ */
+typedef size_t (*rtos_i2s_receive_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *send_buf, size_t samples_available);
 
 /**
  * Struct representing an RTOS I2S driver instance.
@@ -47,6 +105,12 @@ struct rtos_i2s_struct{
     port_t p_lrclk;
     port_t p_mclk;
     xclock_t bclk;
+
+    void *send_filter_app_data;
+    RTOS_I2S_APP_SEND_FILTER_CALLBACK_ATTR rtos_i2s_send_filter_cb_t send_filter_cb;
+
+    void *receive_filter_app_data;
+    RTOS_I2S_APP_RECEIVE_FILTER_CALLBACK_ATTR rtos_i2s_receive_filter_cb_t receive_filter_cb;
 
     rtos_osal_mutex_t mutex;
     streaming_channel_t c_i2s_isr;
@@ -156,6 +220,24 @@ inline int rtos_i2s_mclk_bclk_ratio(
         const unsigned sample_rate)
 {
     return audio_clock_frequency / (sample_rate * (8 * sizeof(int32_t)) * I2S_CHANS_PER_FRAME);
+}
+
+inline void rtos_i2s_send_filter_cb_set(
+        rtos_i2s_t *ctx,
+        rtos_i2s_send_filter_cb_t send_filter_cb,
+        void *send_filter_app_data)
+{
+    ctx->send_filter_app_data = send_filter_app_data;
+    ctx->send_filter_cb = send_filter_cb;
+}
+
+inline void rtos_i2s_receive_filter_cb_set(
+        rtos_i2s_t *ctx,
+        rtos_i2s_receive_filter_cb_t receive_filter_cb,
+        void *receive_filter_app_data)
+{
+    ctx->receive_filter_app_data = receive_filter_app_data;
+    ctx->receive_filter_cb = receive_filter_cb;
 }
 
 /**

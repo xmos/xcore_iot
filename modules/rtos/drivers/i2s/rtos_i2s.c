@@ -86,17 +86,31 @@ I2S_CALLBACK_ATTR
 static void i2s_send(rtos_i2s_t *ctx, size_t num_out, int32_t *i2s_sample_buf)
 {
     size_t words_available = ctx->send_buffer.total_written - ctx->send_buffer.total_read;
+    size_t buffer_words_read = 0;
 
-    if (words_available >= num_out) {
-        memcpy(i2s_sample_buf, &ctx->send_buffer.buf[ctx->send_buffer.read_index], num_out * sizeof(int32_t));
-        ctx->send_buffer.read_index += num_out;
+    if (ctx->send_filter_cb == NULL) {
+        if (words_available >= num_out) {
+            memcpy(i2s_sample_buf, &ctx->send_buffer.buf[ctx->send_buffer.read_index], num_out * sizeof(int32_t));
+            buffer_words_read = num_out;
+        } else {
+            // rtos_printf("i2s tx underrun\n");
+        }
+    } else {
+        /*
+         * The callback can't read past the end of the send buffer,
+         * even if more samples are actually available
+         */
+        size_t samples_available = MIN(words_available, ctx->send_buffer.buf_size - ctx->send_buffer.read_index);
+        buffer_words_read = ctx->send_filter_cb(ctx, ctx->send_filter_app_data, i2s_sample_buf, num_out, &ctx->send_buffer.buf[ctx->send_buffer.read_index], samples_available);
+    }
+
+    if (buffer_words_read > 0) {
+        ctx->send_buffer.read_index += buffer_words_read;
         if (ctx->send_buffer.read_index >= ctx->send_buffer.buf_size) {
             ctx->send_buffer.read_index = 0;
         }
         RTOS_MEMORY_BARRIER();
-        ctx->send_buffer.total_read += num_out;
-    } else {
-        // rtos_printf("i2s tx underrun\n");
+        ctx->send_buffer.total_read += buffer_words_read;
     }
 
     if (ctx->send_buffer.required_free_count > 0) {
