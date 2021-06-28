@@ -1,4 +1,4 @@
-.. |I2S| replace:: I\ :sup:`2`\ S
+.. include:: ../../substitutions.rst
 
 ########################
 |I2S| Master RTOS Driver

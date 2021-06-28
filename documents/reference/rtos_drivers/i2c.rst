@@ -1,4 +1,4 @@
-.. |I2C| replace:: I\ :sup:`2`\ C
+.. include:: ../../substitutions.rst
 
 ########################
 |I2C| Master RTOS Driver

@@ -5,6 +5,7 @@ FreeRTOS
 .. toctree::
    :maxdepth: 2
 
+   application_programming
    getting_started
-   sw_services/index
+   build_configurations
    examples/index

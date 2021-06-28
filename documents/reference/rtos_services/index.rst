@@ -1,6 +1,6 @@
-#################
-Software Services
-#################
+#############
+RTOS Services
+#############
 
 Several RTOS software services are included to accelerate development of new applications.
 

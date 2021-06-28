@@ -145,5 +145,5 @@ Code Example
 
 The following example code demonstrates how to create a dispatcher and add jobs that print out "Hello World". To build this and other dispatcher examples, see the `README.rst` in `modules/rtos/sw_services/dispatcher/examples`.
 
-.. literalinclude:: ../../../../modules/rtos/sw_services/dispatcher/examples/src/hello_world.c
+.. literalinclude:: ../../../modules/rtos/sw_services/dispatcher/examples/src/hello_world.c
   :language: c

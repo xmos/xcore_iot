@@ -34,7 +34,9 @@ set(APP_COMPILER_FLAGS
 
 set(APP_SOURCES
     "src/main.c"
-    "src/board_init.c"
+    "src/platform/platform_init.c"
+    "src/platform/platform_start.c"
+    "src/platform/driver_instances.c"
 
     "src/audio_pipeline/audio_pipeline.c"
     "src/example_pipeline/dac_init.c"
@@ -49,6 +51,7 @@ set(APP_SOURCES
 
 set(APP_INCLUDES
     "src"
+    "src/platform"
 )
 
 add_compile_definitions(
