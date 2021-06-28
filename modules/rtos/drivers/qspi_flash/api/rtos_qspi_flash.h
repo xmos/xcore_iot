@@ -144,7 +144,7 @@ inline void rtos_qspi_flash_read(
  * \param ctx     A pointer to the QSPI flash driver instance to use.
  * \param data    Pointer to the data to write to the flash.
  * \param address The byte address in the flash to begin writing at.
- *                Only bits 23:0 contain the address. The byte in bits 31:0 is
+ *                Only bits 23:0 contain the address. The byte in bits 31:24 is
  *                not sent.
  * \param len     The number of bytes to write to the flash.
  */
@@ -200,6 +200,45 @@ inline size_t rtos_qspi_flash_size_get(
         rtos_qspi_flash_t *qspi_flash_ctx)
 {
     return qspi_flash_ctx->flash_size;
+}
+
+/**
+ * This gets the size in bytes of each page in the flash chip.
+ *
+ * \param A pointer to the QSPI flash driver instance to query.
+ *
+ * \returns the size in bytes of the flash page.
+ */
+inline size_t rtos_qspi_flash_page_size_get(
+        rtos_qspi_flash_t *qspi_flash_ctx)
+{
+    return qspi_flash_ctx->ctx.page_size_bytes;
+}
+
+/**
+ * This gets the number of pages in the flash chip.
+ *
+ * \param A pointer to the QSPI flash driver instance to query.
+ *
+ * \returns the number of pages in the flash chip.
+ */
+inline size_t rtos_qspi_flash_page_count_get(
+        rtos_qspi_flash_t *qspi_flash_ctx)
+{
+    return qspi_flash_ctx->ctx.page_count;
+}
+
+/**
+ * This gets the sector size of the flash chip
+ *
+ * \param A pointer to the QSPI flash driver instance to query.
+ *
+ * \returns the size in bytes of the smallest sector
+ */
+inline size_t rtos_qspi_flash_sector_size_get(
+        rtos_qspi_flash_t *qspi_flash_ctx)
+{
+    return qspi_flash_erase_type_size(&qspi_flash_ctx->ctx, 0);
 }
 
 /**@}*/

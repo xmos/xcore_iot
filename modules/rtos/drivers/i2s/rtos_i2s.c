@@ -5,6 +5,7 @@
 
 #include <string.h>
 
+#include "rtos_printf.h"
 #include <xcore/assert.h>
 #include <xcore/triggerable.h>
 
@@ -25,10 +26,12 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_i2s_isr, arg)
     isr_action = s_chan_in_byte(ctx->c_i2s_isr.end_b);
 
     if (isr_action & ISR_RESUME_SEND_BM) {
+        rtos_printf("send put\n");
         rtos_osal_semaphore_put(&ctx->send_sem);
     }
 
     if (isr_action & ISR_RESUME_RECV_BM) {
+        rtos_printf("recv put\n");
         rtos_osal_semaphore_put(&ctx->recv_sem);
     }
 }
@@ -51,17 +54,31 @@ static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *i2s_sampl
 {
     size_t words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
     size_t words_free = ctx->recv_buffer.buf_size - words_available;
+    size_t buffer_words_written = 0;
 
-    if (num_in <= words_free) {
-        memcpy(&ctx->recv_buffer.buf[ctx->recv_buffer.write_index], i2s_sample_buf, num_in * sizeof(int32_t));
+    if (ctx->receive_filter_cb == NULL) {
+        if (num_in <= words_free) {
+            memcpy(&ctx->recv_buffer.buf[ctx->recv_buffer.write_index], i2s_sample_buf, num_in * sizeof(int32_t));
+            buffer_words_written = num_in;
+        } else {
+            // rtos_printf("i2s rx overrun\n");
+        }
+    } else {
+        /*
+         * The callback can't write past the end of the receive buffer,
+         * even if more sample spaces are actually free
+         */
+        size_t sample_spaces_free = MIN(words_free, ctx->recv_buffer.buf_size - ctx->recv_buffer.write_index);
+        buffer_words_written = ctx->receive_filter_cb(ctx, ctx->send_filter_app_data, i2s_sample_buf, num_in, &ctx->recv_buffer.buf[ctx->recv_buffer.write_index], sample_spaces_free);
+    }
+
+    if (buffer_words_written > 0) {
         ctx->recv_buffer.write_index += num_in;
         if (ctx->recv_buffer.write_index >= ctx->recv_buffer.buf_size) {
             ctx->recv_buffer.write_index = 0;
         }
         RTOS_MEMORY_BARRIER();
         ctx->recv_buffer.total_written += num_in;
-    } else {
-        rtos_printf("i2s rx overrun\n");
     }
 
     if (ctx->recv_buffer.required_available_count > 0) {
@@ -83,17 +100,31 @@ I2S_CALLBACK_ATTR
 static void i2s_send(rtos_i2s_t *ctx, size_t num_out, int32_t *i2s_sample_buf)
 {
     size_t words_available = ctx->send_buffer.total_written - ctx->send_buffer.total_read;
+    size_t buffer_words_read = 0;
 
-    if (words_available >= num_out) {
-        memcpy(i2s_sample_buf, &ctx->send_buffer.buf[ctx->send_buffer.read_index], num_out * sizeof(int32_t));
-        ctx->send_buffer.read_index += num_out;
+    if (ctx->send_filter_cb == NULL) {
+        if (words_available >= num_out) {
+            memcpy(i2s_sample_buf, &ctx->send_buffer.buf[ctx->send_buffer.read_index], num_out * sizeof(int32_t));
+            buffer_words_read = num_out;
+        } else {
+            // rtos_printf("i2s tx underrun\n");
+        }
+    } else {
+        /*
+         * The callback can't read past the end of the send buffer,
+         * even if more samples are actually available
+         */
+        size_t samples_available = MIN(words_available, ctx->send_buffer.buf_size - ctx->send_buffer.read_index);
+        buffer_words_read = ctx->send_filter_cb(ctx, ctx->send_filter_app_data, i2s_sample_buf, num_out, &ctx->send_buffer.buf[ctx->send_buffer.read_index], samples_available);
+    }
+
+    if (buffer_words_read > 0) {
+        ctx->send_buffer.read_index += buffer_words_read;
         if (ctx->send_buffer.read_index >= ctx->send_buffer.buf_size) {
             ctx->send_buffer.read_index = 0;
         }
         RTOS_MEMORY_BARRIER();
-        ctx->send_buffer.total_read += num_out;
-    } else {
-        rtos_printf("i2s tx underrun\n");
+        ctx->send_buffer.total_read += buffer_words_read;
     }
 
     if (ctx->send_buffer.required_free_count > 0) {
@@ -208,6 +239,7 @@ static size_t i2s_local_rx(rtos_i2s_t *ctx,
     }
 
     if (ctx->recv_blocked) {
+        rtos_printf("recv get\n");
         if (rtos_osal_semaphore_get(&ctx->recv_sem, timeout) == RTOS_OSAL_SUCCESS) {
             ctx->recv_blocked = 0;
         }
@@ -259,6 +291,7 @@ static size_t i2s_local_tx(rtos_i2s_t *ctx,
     }
 
     if (ctx->send_blocked) {
+        rtos_printf("send get\n");
         if (rtos_osal_semaphore_get(&ctx->send_sem, timeout) == RTOS_OSAL_SUCCESS) {
             ctx->send_blocked = 0;
         }
@@ -356,9 +389,9 @@ static void rtos_i2s_init(
     ctx->num_in = num_in;
 
     ctx->p_bclk = p_bclk;
-    ctx-> p_lrclk = p_lrclk;
+    ctx->p_lrclk = p_lrclk;
     ctx->p_mclk = p_mclk;
-    ctx-> bclk = bclk;
+    ctx->bclk = bclk;
 
     ctx->c_i2s_isr = s_chan_alloc();
 

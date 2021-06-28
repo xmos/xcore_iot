@@ -36,11 +36,22 @@
 # Test cruft
 **/.pytest_cache/*
 **/*_junit.xml
+**/testing/*
 
 # waf build cruft
 .lock-waf_*
 .waf-*/
 build/
+
+# filesystem cruft
+**/fat.fs
+**/flash_bin_node0
+**/fw-*
+**/spanning-xn-*
+**/target-xn-*
+
+# wifi cruft
+**/networks.dat
 
 # systemview debug cruft
 *.SVDAT

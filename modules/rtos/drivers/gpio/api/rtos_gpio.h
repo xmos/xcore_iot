@@ -116,6 +116,9 @@ struct rtos_gpio_struct {
     __attribute__((fptrgroup("rtos_gpio_port_out_fptr_grp")))
     void (*port_out)(rtos_gpio_t *, rtos_gpio_port_id_t, uint32_t);
 
+    __attribute__((fptrgroup("rtos_gpio_port_write_control_word_fptr_grp")))
+    void (*port_write_control_word)(rtos_gpio_t *, rtos_gpio_port_id_t, uint32_t);
+
     __attribute__((fptrgroup("rtos_gpio_isr_callback_set_fptr_grp")))
     void (*isr_callback_set)(rtos_gpio_t *, rtos_gpio_port_id_t, rtos_gpio_isr_cb_t, void *);
 
@@ -232,7 +235,7 @@ inline void rtos_gpio_port_enable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
 {
-    return ctx->port_enable(ctx, port_id);
+    ctx->port_enable(ctx, port_id);
 }
 
 /**
@@ -262,7 +265,7 @@ inline void rtos_gpio_port_out(
         rtos_gpio_port_id_t port_id,
         uint32_t value)
 {
-    return ctx->port_out(ctx, port_id, value);
+    ctx->port_out(ctx, port_id, value);
 }
 
 /**
@@ -286,7 +289,7 @@ inline void rtos_gpio_isr_callback_set(
         rtos_gpio_isr_cb_t cb,
         void *app_data)
 {
-    return ctx->isr_callback_set(ctx, port_id, cb, app_data);
+    ctx->isr_callback_set(ctx, port_id, cb, app_data);
 }
 
 /**
@@ -300,7 +303,7 @@ inline void rtos_gpio_interrupt_enable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
 {
-    return ctx->interrupt_enable(ctx, port_id);
+    ctx->interrupt_enable(ctx, port_id);
 }
 
 /**
@@ -313,7 +316,107 @@ inline void rtos_gpio_interrupt_disable(
         rtos_gpio_t *ctx,
         rtos_gpio_port_id_t port_id)
 {
-    return ctx->interrupt_disable(ctx, port_id);
+    ctx->interrupt_disable(ctx, port_id);
+}
+
+/**
+* Configures a port in drive mode.  Output values will be driven
+* on the pins.  This is the default drive state of a port.  This has
+* the side effect of disabling the port's internal pull-up and
+* pull down resistors.
+*
+* \param ctx      A pointer to the GPIO driver instance to use.
+* \param port_id  The GPIO port to set to drive mode.
+*/
+inline void rtos_gpio_port_drive(
+       rtos_gpio_t *ctx,
+       rtos_gpio_port_id_t port_id)
+{
+   return ctx->port_write_control_word(ctx, port_id, XS1_SETC_DRIVE_DRIVE);
+}
+
+/**
+* Configures a port in drive low mode.  When the output value is 0
+* the pin is driven low, otherwise no value is driven.  This has
+* the side effect of enabled the port's internal pull-up resistor.
+*
+* \param ctx      A pointer to the GPIO driver instance to use.
+* \param port_id  The GPIO port to set to drive mode low.
+*/
+inline void rtos_gpio_port_drive_low(
+       rtos_gpio_t *ctx,
+       rtos_gpio_port_id_t port_id)
+{
+   return ctx->port_write_control_word(ctx, port_id, XS1_SETC_DRIVE_PULL_UP);
+}
+
+/**
+* Configures a port in drive high mode.  When the output value is 1
+* the pin is driven high, otherwise no value is driven.  This has
+* the side effect of enabled the port's internal pull-down resistor.
+*
+* \param ctx      A pointer to the GPIO driver instance to use.
+* \param port_id  The GPIO port to set to drive mode high.
+*/
+inline void rtos_gpio_port_drive_high(
+       rtos_gpio_t *ctx,
+       rtos_gpio_port_id_t port_id)
+{
+   return ctx->port_write_control_word(ctx, port_id, XS1_SETC_DRIVE_PULL_DOWN);
+}
+
+/**
+* Disables the port's internal pull-up and pull down resistors.
+*
+* \param ctx      A pointer to the GPIO driver instance to use.
+* \param port_id  The GPIO port to set to pull none mode.
+*/
+inline void rtos_gpio_port_pull_none(
+       rtos_gpio_t *ctx,
+       rtos_gpio_port_id_t port_id)
+{
+   return ctx->port_write_control_word(ctx, port_id, XS1_SETC_DRIVE_DRIVE);
+}
+
+/**
+* Enables the port's internal pull-up resistor.
+*
+* \param ctx      A pointer to the GPIO driver instance to use.
+* \param port_id  The GPIO port to set to pull up mode.
+*/
+inline void rtos_gpio_port_pull_up(
+       rtos_gpio_t *ctx,
+       rtos_gpio_port_id_t port_id)
+{
+   return ctx->port_write_control_word(ctx, port_id, XS1_SETC_DRIVE_PULL_UP);
+}
+
+/**
+* Enables the port's internal pull-down resistor.
+*
+* \param ctx      A pointer to the GPIO driver instance to use.
+* \param port_id  The GPIO port to set to pull down mode.
+*/
+inline void rtos_gpio_port_pull_down(
+       rtos_gpio_t *ctx,
+       rtos_gpio_port_id_t port_id)
+{
+   return ctx->port_write_control_word(ctx, port_id, XS1_SETC_DRIVE_PULL_DOWN);
+}
+
+/**
+* Configures the port control word value
+*
+* \param ctx      A pointer to the GPIO driver instance to use.
+* \param port_id  The GPIO port to modify
+* \param value    The value to set the control word to
+*/
+inline void rtos_gpio_write_control_word(
+       rtos_gpio_t *ctx,
+       rtos_gpio_port_id_t port_id,
+       uint32_t value)
+{
+   return ctx->port_write_control_word(ctx, port_id, value);
 }
 
 /**@}*/

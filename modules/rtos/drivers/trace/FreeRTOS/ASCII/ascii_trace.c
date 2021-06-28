@@ -3,7 +3,7 @@
 
 #include "FreeRTOS.h"
 
-#if xcoretraceconfigASCII == 1
+#if ENABLE_RTOS_XSCOPE_TRACE == 1
 #include <stdarg.h>
 #include <ctype.h>
 #include <string.h>

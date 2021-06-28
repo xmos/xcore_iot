@@ -134,6 +134,7 @@ static void spi_master_local_delay_before_next_transfer(
 {
     spi_xfer_req_t req;
     req.op = SPI_OP_DELAY;
+    req.ctx = ctx;
     req.len = delay_ticks;
     rtos_osal_queue_send(&ctx->bus_ctx->xfer_req_queue, &req, RTOS_OSAL_WAIT_FOREVER);
 }
