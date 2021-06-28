@@ -46,13 +46,13 @@ When this function is compiled for tile I2C_TILE, only the first block is includ
 
 I2C_TILE is defined at the top of the file. Because the |I2C| driver instance is shared between the two tiles, it may in fact be set to either zero or one, providing a demonstration of the way that drivers instances may be shared between tiles.
 
-The SDK provides a single XC file that provides the main() function. This provided main() function calls main_tile0() through main_tile3(), depending on the number of tiles that the application requires and the number of tiles provided by the target XCore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
+The SDK provides a single XC file that provides the `main()` function. This provided `main()` function calls `main_tile0()` through `main_tile3()`, depending on the number of tiles that the application requires and the number of tiles provided by the target XCore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
 
-The example application provides both main_tile0() and main_tile1(). Each one calls an initialization function that initializes all the drivers for the interfaces specific to its tile. These functions also call the initialization functions to share these driver instances between the tiles. These initialization functions are found in the board_init.c source file.
+The example application provides both `main_tile0()` and `main_tile1()`. Each one calls a common initialization function that initializes all the drivers for the interfaces specific to its tile. These functions also call the initialization functions to share these driver instances between the tiles. These initialization functions are found in the `platform/platform_init.c` source file.
 
-Each tile then creates the vApplicationDaemonTaskStartup() task and starts the FreeRTOS scheduler. The vApplicationDaemonTaskStartup() task completes the driver instance sharing and then starts all of the driver instances. Additional application demo tasks are created before vApplicationDaemonTaskStartup() completes by deleting itself.
+Each tile then creates the `startup_task()` task and starts the FreeRTOS scheduler. The `startup_task()` completes the driver instance sharing and then starts all of the driver instances. The driver startup functions are found in the `platform/platform_start.c` source file.
 
-The application may be experimented with by modifying the \*RPC_ENABLED macros in board_init.h, as well as the \*_TILE macros at the top of main.c. RPC here stands for Remote Procedure Call, and is what allows for driver instances to be shared. Provided RPC is enabled for a particular driver, it may be used by either tile and the corresponding \*_TILE macros for it may be set to either tile. However, if RPC is disabled then note that when the corresponding \*_TILE macro is not set to the tile that owns the instance, the application will fail.
+The application may be experimented with by modifying the \*RPC_ENABLED macros in `app_conf.h`, as well as the \*_TILE macros at the top of `driver_instances.c`. RPC here stands for Remote Procedure Call, and is what allows for driver instances to be shared. Provided RPC is enabled for a particular driver, it may be used by either tile and the corresponding \*_TILE macros for it may be set to either tile. However, if RPC is disabled then note that when the corresponding \*_TILE macro is not set to the tile that owns the instance, the application will fail.
 
 Consult the RTOS driver documentation for the details on what exactly each of the RTOS API functions called by this application does.
 
@@ -63,7 +63,7 @@ For a more interesting application that does more than just exercise the RTOS dr
 Building RTOS Applications
 **************************
 
-RTOS applications using the SDK are built using CMake. The SDK provides many drivers and services, all of which have .cmake files which can be included by the application's CMakeLists.txt file. The application's CMakeLists can specify precisely which drivers and software services within the SDK should be included through the use of various CMake options.
+RTOS applications using the SDK are built using `CMake`. The SDK provides many drivers and services, all of which have `.cmake` files which can be included by the application's `CMakeLists.txt` file. The application's CMakeLists can specify precisely which drivers and software services within the SDK should be included through the use of various CMake options.
 
 The example applications also provide a Makefile that actually runs CMake and then runs make with the generated CMake makefiles. This is done to automate the steps that must be taken to build for more than one tile. The Makefile actually runs CMake once per tile. Each tile is built independently, and the two resulting binaries are then stitched together by the Makefile.
 
@@ -81,7 +81,17 @@ in the example application directories, all the steps necessary to build the ent
 
 will run it on the board with xscope enabled so that all debug output from the application will be routed to the terminal.
 
-TODO: ccmake -B build -DBOARD=XCORE-AI-EXPLORER  (AFTER running make)
+Build Configurations
+====================
+
+Many build configuration options can be specified in the application's `CMakeLists.txt` file. Each configuration options can be set using examples like below:
+
+.. code-block:: console
+
+  set(USE_WIFI_MANAGER TRUE)
+  set(USE_FATFS TRUE)
+
+See :ref:`build configurations <sdk-build-configurations-label>` for a full set of supported options.
 
 ********************
 New Project Template

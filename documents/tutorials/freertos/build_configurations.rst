@@ -1,3 +1,5 @@
+.. _sdk-build-configurations-label:
+
 ####################
 Build Configurations
 ####################
