@@ -12,11 +12,9 @@
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
 #include "rtos/drivers/gpio/api/rtos_gpio.h"
 
+#define I2C_TILE 1
 #define PIPELINE_TILE 0
 #define GPIO_TILE 0
-#define I2C_TILE 1
-#define MIC_TILE 1
-#define I2S_TILE 1
 #define WIFI_TILE 1 /* Uses SPI, GPIO, and QSPI */
 #define QSPI_FLASH_TILE 1
 

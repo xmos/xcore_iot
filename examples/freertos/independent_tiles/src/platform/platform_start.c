@@ -8,7 +8,7 @@
 #include "example_pipeline/example_pipeline.h"
 
 void gpio_start() {
-#if appconfGPIO_RPC_ENABLED && ON_TILE(I2C_TILE)
+#if appconfGPIO_RPC_ENABLED && ON_TILE(0)
   {
     rtos_gpio_rpc_config(gpio_ctx, appconfGPIO_RPC_PORT,
                          appconfGPIO_RPC_HOST_TASK_PRIORITY);
@@ -19,7 +19,7 @@ void gpio_start() {
 }
 
 void i2c_start() {
-#if appconfI2C_RPC_ENABLED && ON_TILE(I2C_TILE)
+#if appconfI2C_RPC_ENABLED && ON_TILE(0)
   {
     rtos_i2c_master_rpc_config(i2c_master_ctx, appconfI2C_MASTER_RPC_PORT,
                                appconfI2C_MASTER_RPC_HOST_TASK_PRIORITY);
@@ -30,7 +30,7 @@ void i2c_start() {
 }
 
 void spi_start() {
-#if appconfSPI_RPC_ENABLED && ON_TILE(SPI_TILE)
+#if appconfSPI_RPC_ENABLED && ON_TILE(0)
   {
     rtos_spi_master_rpc_config(spi_master_ctx, appconfSPI_RPC_PORT,
                                appconfSPI_RPC_HOST_TASK_PRIORITY);
@@ -41,7 +41,7 @@ void spi_start() {
 }
 
 void i2s_start() {
-#if appconfI2S_RPC_ENABLED && ON_TILE(I2S_TILE)
+#if appconfI2S_RPC_ENABLED && ON_TILE(1) && I2S_ADC_ENABLED
   {
     rtos_i2s_rpc_config(i2s_ctx, appconfI2S_RPC_PORT,
                         appconfI2S_RPC_HOST_TASK_PRIORITY);
@@ -56,7 +56,7 @@ void i2s_start() {
 }
 
 void mics_start() {
-#if appconfMIC_ARRAY_RPC_ENABLED && ON_TILE(MIC_TILE)
+#if appconfMIC_ARRAY_RPC_ENABLED && ON_TILE(1) && !I2S_ADC_ENABLED
   {
     rtos_mic_array_rpc_config(mic_array_ctx, appconfMIC_ARRAY_RPC_PORT,
                               appconfMIC_ARRAY_RPC_HOST_TASK_PRIORITY);
@@ -89,9 +89,9 @@ void platform_start(void) {
   rtos_intertile_start(intertile2_ctx);
 
   gpio_start();
-  i2c_start();
   spi_start();
+  flash_start();
+  i2c_start();
   i2s_start();
   mics_start();
-  flash_start();
 }
