@@ -129,7 +129,8 @@ void mclk_port_init() {
 }
 
 void gpio_init() {
-#if appconfGPIO_RPC_ENABLED && ON_TILE(0)
+#if appconfGPIO_RPC_ENABLED
+#if ON_TILE(0)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_gpio_init(gpio_ctx);
@@ -139,14 +140,14 @@ void gpio_init() {
 #else
   { rtos_gpio_rpc_client_init(gpio_ctx, &gpio_rpc_config, intertile1_ctx); }
 #endif
+#endif
 }
 
 void i2c_init() {
-#if appconfI2C_RPC_ENABLED && ON_TILE(0)
+#if appconfI2C_RPC_ENABLED
+#if ON_TILE(0)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
-    rtos_i2c_master_init(i2c_master_ctx, PORT_I2C_SCL, 0, 0, PORT_I2C_SDA, 0, 0,
-                         0, 100);
     rtos_i2c_master_rpc_host_init(i2c_master_ctx, &i2c_rpc_config,
                                   client_intertile_ctx, 1);
   }
@@ -156,10 +157,12 @@ void i2c_init() {
                                     intertile1_ctx);
   }
 #endif
+#endif
 }
 
 void spi_init() {
-#if appconfSPI_RPC_ENABLED && ON_TILE(0)
+#if appconfSPI_RPC_ENABLED
+#if ON_TILE(0)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_spi_master_init(spi_master_ctx, XS1_CLKBLK_1, WIFI_CS_N, WIFI_CLK,
@@ -183,10 +186,12 @@ void spi_init() {
                                     &spi_rpc_config, intertile1_ctx);
   }
 #endif
+#endif
 }
 
 void i2s_init() {
-#if appconfI2S_RPC_ENABLED && ON_TILE(1)
+#if appconfI2S_RPC_ENABLED
+#if ON_TILE(1)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_i2s_master_init(i2s_ctx, ~(1 << 0), p_i2s_dout, 1, p_i2s_din,
@@ -198,10 +203,12 @@ void i2s_init() {
 #else
   { rtos_i2s_rpc_client_init(i2s_ctx, &i2s_rpc_config, intertile1_ctx); }
 #endif
+#endif
 }
 
 void mics_init() {
-#if appconfMIC_ARRAY_RPC_ENABLED && ON_TILE(1)
+#if appconfMIC_ARRAY_RPC_ENABLED
+#if ON_TILE(1)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_mic_array_init(mic_array_ctx, ~(1 << 0), pdmclk, pdmclk2,
@@ -218,10 +225,12 @@ void mics_init() {
                                    intertile1_ctx);
   }
 #endif
+#endif
 }
 
 void flash_init() {
-#if appconfQSPI_FLASH_RPC_ENABLED && ON_TILE(0)
+#if appconfQSPI_FLASH_RPC_ENABLED
+#if ON_TILE(0)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_qspi_flash_init(qspi_flash_ctx, XS1_CLKBLK_2, PORT_SQI_CS,
@@ -248,6 +257,7 @@ void flash_init() {
     rtos_qspi_flash_rpc_client_init(qspi_flash_ctx, &qspi_flash_rpc_config,
                                     intertile1_ctx);
   }
+#endif
 #endif
 }
 
