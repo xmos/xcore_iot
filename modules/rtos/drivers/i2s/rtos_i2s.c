@@ -54,17 +54,31 @@ static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *i2s_sampl
 {
     size_t words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
     size_t words_free = ctx->recv_buffer.buf_size - words_available;
+    size_t buffer_words_written = 0;
 
-    if (num_in <= words_free) {
-        memcpy(&ctx->recv_buffer.buf[ctx->recv_buffer.write_index], i2s_sample_buf, num_in * sizeof(int32_t));
+    if (ctx->receive_filter_cb == NULL) {
+        if (num_in <= words_free) {
+            memcpy(&ctx->recv_buffer.buf[ctx->recv_buffer.write_index], i2s_sample_buf, num_in * sizeof(int32_t));
+            buffer_words_written = num_in;
+        } else {
+            // rtos_printf("i2s rx overrun\n");
+        }
+    } else {
+        /*
+         * The callback can't write past the end of the receive buffer,
+         * even if more sample spaces are actually free
+         */
+        size_t sample_spaces_free = MIN(words_free, ctx->recv_buffer.buf_size - ctx->recv_buffer.write_index);
+        buffer_words_written = ctx->receive_filter_cb(ctx, ctx->send_filter_app_data, i2s_sample_buf, num_in, &ctx->recv_buffer.buf[ctx->recv_buffer.write_index], sample_spaces_free);
+    }
+
+    if (buffer_words_written > 0) {
         ctx->recv_buffer.write_index += num_in;
         if (ctx->recv_buffer.write_index >= ctx->recv_buffer.buf_size) {
             ctx->recv_buffer.write_index = 0;
         }
         RTOS_MEMORY_BARRIER();
         ctx->recv_buffer.total_written += num_in;
-    } else {
-        // rtos_printf("i2s rx overrun\n");
     }
 
     if (ctx->recv_buffer.required_available_count > 0) {

@@ -58,7 +58,7 @@ typedef struct rtos_i2s_struct rtos_i2s_t;
  *                          to its filter.
  * \param samples_available The number of samples available in \p send_buf.
  *
- * \returns the number of samples read out of the send buffer
+ * \returns the number of samples read out of \p send_buf.
  */
 typedef size_t (*rtos_i2s_send_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *send_buf, size_t samples_available);
 
@@ -72,14 +72,23 @@ typedef size_t (*rtos_i2s_send_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int
  *
  * These functions must not block.
  *
- * \param ctx           A pointer to the associated I2C slave driver instance.
- * \param app_data      A pointer to application specific data provided
- *                      by the application. Used to share data between
- *                      this callback function and the application.
- * \param data          A pointer to the data received from the master.
- * \param len           The number of valid bytes in \p data.
+ * \param ctx                A pointer to the associated I2C slave driver instance.
+ * \param app_data           A pointer to application specific data provided
+ *                           by the application. Used to share data between
+ *                           this callback function and the application.
+ * \param i2s_frame          A pointer to the buffer where the callback should
+ *                           read the next received frame from The callback should
+ *                           use this as the input to its filter.
+ * \param i2s_frame_size     The number of samples that should be read from
+ *                           \p i2s_frame.
+ * \param receive_buf        A pointer to the next frame in the driver's send
+ *                           buffer. The callback should use this as the input
+ *                           to its filter.
+ * \param sample_spaces_free The number of sample spaces free in \p receive_buf.
+ *
+ * \returns the number of samples written to \p receive_buf.
  */
-typedef size_t (*rtos_i2s_receive_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *send_buf, size_t samples_available);
+typedef size_t (*rtos_i2s_receive_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *receive_buf, size_t sample_spaces_free);
 
 /**
  * Struct representing an RTOS I2S driver instance.
