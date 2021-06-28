@@ -81,7 +81,6 @@ void startup_task(void *arg) {
   { dac_configured = chan_in_byte(other_tile_c); }
 #endif
 
-  rtos_printf("chanend_free  %ld\n", other_tile_c);
   chanend_free(other_tile_c);
 
   if (!dac_configured) {
@@ -154,14 +153,13 @@ static void tile_common_init(chanend_t c) {
 
   other_tile_c = c;
 
-  platform_init(c);
-  chanend_free(c);
+  platform_init(other_tile_c);
 
   xTaskCreate((TaskFunction_t)startup_task, "startup_task",
               RTOS_THREAD_STACK_SIZE(startup_task), NULL,
               appconfSTARTUP_TASK_PRIORITY, NULL);
 
-  rtos_printf("start scheduler on tile %d\n", THIS_XCORE_TILE);
+  rtos_printf("Start scheduler on tile %d\n", THIS_XCORE_TILE);
   vTaskStartScheduler();
 }
 

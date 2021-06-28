@@ -124,50 +124,68 @@ void mclk_port_init() {
     bclk = clock_init(XS1_CLKBLK_3);
 
     set_app_pll();
+    rtos_printf("Clocks & ports initialized on tile %d\n", THIS_XCORE_TILE);
   }
 #endif
 }
 
 void gpio_init() {
+#if ON_TILE(0)
+  {
+    rtos_gpio_init(gpio_ctx);
+    rtos_printf("GPIO initialized on tile %d\n", THIS_XCORE_TILE);
+  }
+#endif
+
 #if appconfGPIO_RPC_ENABLED
 #if ON_TILE(0)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
-    rtos_gpio_init(gpio_ctx);
     rtos_gpio_rpc_host_init(gpio_ctx, &gpio_rpc_config, client_intertile_ctx,
                             1);
+    rtos_printf("GPIO RPC host initialized on tile %d\n", THIS_XCORE_TILE);
   }
 #else
-  { rtos_gpio_rpc_client_init(gpio_ctx, &gpio_rpc_config, intertile1_ctx); }
+  {
+    rtos_gpio_rpc_client_init(gpio_ctx, &gpio_rpc_config, intertile1_ctx);
+    rtos_printf("GPIO RPC client initialized on tile %d\n", THIS_XCORE_TILE);
+  }
 #endif
 #endif
 }
 
 void i2c_init() {
+#if ON_TILE(0)
+  {
+    rtos_i2c_master_init(i2c_master_ctx, PORT_I2C_SCL, 0, 0, PORT_I2C_SDA, 0, 0,
+                         0, 100);
+    rtos_printf("I2C master initialized on tile %d\n", THIS_XCORE_TILE);
+  }
+#endif
+
 #if appconfI2C_RPC_ENABLED
 #if ON_TILE(0)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_i2c_master_rpc_host_init(i2c_master_ctx, &i2c_rpc_config,
                                   client_intertile_ctx, 1);
+    rtos_printf("I2C RPC host initialized on tile %d\n", THIS_XCORE_TILE);
   }
 #else
   {
     rtos_i2c_master_rpc_client_init(i2c_master_ctx, &i2c_rpc_config,
                                     intertile1_ctx);
+    rtos_printf("I2C RPC client initialized on tile %d\n", THIS_XCORE_TILE);
   }
 #endif
 #endif
 }
 
 void spi_init() {
-#if appconfSPI_RPC_ENABLED
 #if ON_TILE(0)
   {
-    rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_spi_master_init(spi_master_ctx, XS1_CLKBLK_1, WIFI_CS_N, WIFI_CLK,
                          WIFI_MOSI, WIFI_MISO);
-
     rtos_spi_master_device_init(
         wifi_device_ctx, spi_master_ctx,
         1, /* WiFi CS pin is on bit 1 of the CS port */
@@ -176,63 +194,85 @@ void spi_init() {
         0,                         /* should this be > 0 if the above is 3-4 ?
                                     */
         1, 0, 0);
+    rtos_printf("SPI master initialized on tile %d\n", THIS_XCORE_TILE);
+  }
+#endif
 
+#if appconfSPI_RPC_ENABLED
+#if ON_TILE(0)
+  {
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_spi_master_rpc_host_init(spi_master_ctx, &wifi_device_ctx, 1,
                                   &spi_rpc_config, client_intertile_ctx, 1);
+    rtos_printf("SPI RPC host initialized on tile %d\n", THIS_XCORE_TILE);
   }
 #else
   {
     rtos_spi_master_rpc_client_init(spi_master_ctx, &wifi_device_ctx, 1,
                                     &spi_rpc_config, intertile1_ctx);
+    rtos_printf("SPI RPC client initialized on tile %d\n", THIS_XCORE_TILE);
   }
 #endif
 #endif
 }
 
 void i2s_init() {
+#if ON_TILE(1)
+  {
+    rtos_i2s_master_init(i2s_ctx, ~(1 << 0), p_i2s_dout, 1, p_i2s_din,
+                         appconfI2S_ADC_ENABLED ? 1 : 0, p_bclk, p_lrclk,
+                         p_mclk, bclk);
+    rtos_printf("I2S master initialized on tile %d\n", THIS_XCORE_TILE);
+  }
+#endif
+
 #if appconfI2S_RPC_ENABLED
 #if ON_TILE(1)
   {
     rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
-    rtos_i2s_master_init(i2s_ctx, ~(1 << 0), p_i2s_dout, 1, p_i2s_din,
-                         appconfI2S_ADC_ENABLED ? 1 : 0, p_bclk, p_lrclk,
-                         p_mclk, bclk);
-
     rtos_i2s_rpc_host_init(i2s_ctx, &i2s_rpc_config, client_intertile_ctx, 1);
+    rtos_printf("I2S RPC host initialized on tile %d\n", THIS_XCORE_TILE);
   }
 #else
   { rtos_i2s_rpc_client_init(i2s_ctx, &i2s_rpc_config, intertile1_ctx); }
+  rtos_printf("I2S RPC client initialized on tile %d\n", THIS_XCORE_TILE);
 #endif
 #endif
 }
 
 void mics_init() {
-#if appconfMIC_ARRAY_RPC_ENABLED
 #if ON_TILE(1)
   {
-    rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_mic_array_init(mic_array_ctx, ~(1 << 0), pdmclk, pdmclk2,
                         appconfAUDIO_CLOCK_FREQUENCY /
                             appconfPDM_CLOCK_FREQUENCY,
                         p_mclk, p_pdm_clk, p_pdm_mics);
+    rtos_printf("Mic array master initialized on tile %d\n", THIS_XCORE_TILE);
+  }
+#endif
 
+#if appconfMIC_ARRAY_RPC_ENABLED
+#if ON_TILE(1)
+  {
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_mic_array_rpc_host_init(mic_array_ctx, &mic_rpc_config,
                                  client_intertile_ctx, 1);
+    rtos_printf("Mic array RPC host initialized on tile %d\n", THIS_XCORE_TILE);
   }
 #else
   {
     rtos_mic_array_rpc_client_init(mic_array_ctx, &mic_rpc_config,
                                    intertile1_ctx);
+    rtos_printf("Mic array RPC client initialized on tile %d\n",
+                THIS_XCORE_TILE);
   }
 #endif
 #endif
 }
 
 void flash_init() {
-#if appconfQSPI_FLASH_RPC_ENABLED
 #if ON_TILE(0)
   {
-    rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_qspi_flash_init(qspi_flash_ctx, XS1_CLKBLK_2, PORT_SQI_CS,
                          PORT_SQI_SCLK, PORT_SQI_SIO,
 
@@ -248,14 +288,25 @@ void flash_init() {
                          0, qspi_io_sample_edge_falling, 0,
 
                          qspi_flash_page_program_1_4_4);
+    rtos_printf("QSPI flash initialized on tile %d\n", THIS_XCORE_TILE);
+  }
+#endif
 
+#if appconfQSPI_FLASH_RPC_ENABLED
+#if ON_TILE(0)
+  {
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile1_ctx};
     rtos_qspi_flash_rpc_host_init(qspi_flash_ctx, &qspi_flash_rpc_config,
                                   client_intertile_ctx, 1);
+    rtos_printf("QSPI flash RPC host initialized on tile %d\n",
+                THIS_XCORE_TILE);
   }
 #else
   {
     rtos_qspi_flash_rpc_client_init(qspi_flash_ctx, &qspi_flash_rpc_config,
                                     intertile1_ctx);
+    rtos_printf("QSPI flash RPC client initialized on tile %d\n",
+                THIS_XCORE_TILE);
   }
 #endif
 #endif
