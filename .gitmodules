@@ -80,6 +80,9 @@
 [submodule "tinyusb_src"]
 	path = modules/rtos/sw_services/usb/thirdparty/tinyusb_src
 	url = git@github.com:hathach/tinyusb_src.git
+[submodule "freertos_getting_started"]
+	path = examples/freertos/getting_started
+	url = git@github.com:xmos/freertos_getting_started.git
 [submodule "lib_src"]
 	path = modules/lib_src
 	url = git@github.com:xmos/lib_src.git
