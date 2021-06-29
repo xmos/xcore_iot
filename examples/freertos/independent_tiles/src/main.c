@@ -110,40 +110,6 @@ void startup_task(void *arg) {
   }
 #endif
 
-#if appconfQSPI_TEST && ON_TILE(QSPI_FLASH_TILE)
-  {
-    const char test_str[] = "hello, world\n";
-    const int len = strlen(test_str) + 1;
-    uint8_t data[len];
-    int erase = 0;
-
-    rtos_printf("The QSPI flash size is %u\n",
-                rtos_qspi_flash_size_get(qspi_flash_ctx));
-
-    rtos_qspi_flash_read(qspi_flash_ctx, data, 0, len);
-    if (data[0] != 0xFF) {
-      rtos_printf("First read: %s", data);
-      erase = 1;
-    } else {
-      rtos_printf("First read appears empty\n");
-    }
-
-    rtos_qspi_flash_lock(qspi_flash_ctx);
-    rtos_qspi_flash_erase(qspi_flash_ctx, 0, len);
-    rtos_qspi_flash_write(qspi_flash_ctx, (const uint8_t *)test_str, 0, len);
-    rtos_qspi_flash_read(qspi_flash_ctx, data, 0, len);
-    rtos_printf("Second read: %s", data);
-
-    if (erase) {
-      rtos_printf("Starting chip erase\n");
-      rtos_qspi_flash_erase(qspi_flash_ctx, 0,
-                            rtos_qspi_flash_size_get(qspi_flash_ctx));
-    }
-    rtos_qspi_flash_unlock(qspi_flash_ctx);
-    rtos_printf("Completed QSPI flash test on tile %d\n", THIS_XCORE_TILE);
-  }
-#endif
-
   vTaskDelete(NULL);
 }
 

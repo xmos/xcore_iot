@@ -66,10 +66,6 @@
 #define appconfWIFI_TEST 1
 #endif
 
-#ifndef appconfQSPI_TEST
-#define appconfQSPI_TEST 0
-#endif
-
 #ifndef appconfSW_MEM_TEST
 #define appconfSW_MEM_TEST 1
 #endif
