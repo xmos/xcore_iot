@@ -140,6 +140,7 @@ void startup_task(void *arg) {
                             rtos_qspi_flash_size_get(qspi_flash_ctx));
     }
     rtos_qspi_flash_unlock(qspi_flash_ctx);
+    rtos_printf("Completed QSPI flash test on tile %d\n", THIS_XCORE_TILE);
   }
 #endif
 
