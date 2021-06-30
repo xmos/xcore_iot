@@ -28,11 +28,10 @@ option(USE_XUD_HIL "Enable to include XUD HIL" FALSE)
 set(THIS_LIB I2C_HIL)
 if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_FLAGS "-Os")
-    set(THIS_PATH lib_i2c)
 
-    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.xc")
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/src/*.xc")
+    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/src/*.S")
 
     set(${THIS_LIB}_SOURCES
         ${${THIS_LIB}_XC_SOURCES}
@@ -43,7 +42,7 @@ if(${USE_${THIS_LIB}})
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
+        "${${THIS_LIB}_DIR}/api"
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()
@@ -57,9 +56,9 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_FLAGS "-Os")
     set(THIS_PATH lib_i2s)
 
-    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.xc")
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/src/*.xc")
+    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/src/*.S")
 
     set(${THIS_LIB}_SOURCES
         ${${THIS_LIB}_XC_SOURCES}
@@ -70,7 +69,7 @@ if(${USE_${THIS_LIB}})
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
+        "${${THIS_LIB}_DIR}/api"
     )
 
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
@@ -116,9 +115,9 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_FLAGS "-O2")
     set(THIS_PATH lib_qspi_io)
 
-    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.xc")
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/src/*.xc")
+    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/src/*.S")
 
     set(${THIS_LIB}_SOURCES
         ${${THIS_LIB}_XC_SOURCES}
@@ -144,9 +143,9 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_FLAGS "-O3")
     set(THIS_PATH lib_spi)
 
-    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.xc")
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/src/*.xc")
+    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/src/*.S")
 
     set(${THIS_LIB}_SOURCES
         ${${THIS_LIB}_XC_SOURCES}
@@ -157,7 +156,7 @@ if(${USE_${THIS_LIB}})
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
+        "${${THIS_LIB}_DIR}/api"
     )
 
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
@@ -175,7 +174,7 @@ if(${USE_${THIS_LIB}})
     file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.xc")
     file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.c")
     file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/*.S")
-    
+
     list(REMOVE_ITEM ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/included/XUD_PidJumpTable.S")
     list(REMOVE_ITEM ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/included/XUD_RxData.S")
     list(REMOVE_ITEM ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/core/included/XUD_Token_In.S")
