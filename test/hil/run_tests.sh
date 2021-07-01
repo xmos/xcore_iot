@@ -3,7 +3,7 @@ set -e
 
 declare -a hil_test_libs=(
     "lib_i2c"
-    # "lib_i2s"
+    "lib_i2s"
     # "lib_qspi_io"
     # "lib_spi"
     )
@@ -26,7 +26,7 @@ popd
 echo "******************"
 echo "* Setup xmostest *"
 echo "******************"
-export PYTHONPATH=$PYTHONPATH:$XMOS_AIOT_SDK_PATH/test/hil/build/tools_xmostest/lib/python
+export PYTHONPATH=$PYTHONPATH:$XCORE_SDK_PATH/test/hil/build/tools_xmostest/lib/python
 
 #**************************
 # Run tests

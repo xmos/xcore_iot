@@ -128,7 +128,7 @@ if(${USE_${THIS_LIB}})
     set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
+        "${${THIS_LIB}_DIR}/api"
     )
 
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")

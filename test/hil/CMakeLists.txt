@@ -5,8 +5,8 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
-if(NOT DEFINED ENV{XMOS_AIOT_SDK_PATH})
-    message(FATAL_ERROR "Environment variable XMOS_AIOT_SDK_PATH must be set")
+if(NOT DEFINED ENV{XCORE_SDK_PATH})
+    message(FATAL_ERROR "Environment variable XCORE_SDK_PATH must be set")
 endif()
 
 ## Fetch dependencies
@@ -21,7 +21,7 @@ FetchContent_Declare(
 FetchContent_Populate(tools_xmostest)
 
 ## Import XMOS toolchain
-include("$ENV{XMOS_AIOT_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 ## Define project
 project(hil_tests)
@@ -30,7 +30,7 @@ set(PROJECT_VERSION 0.5.0)
 ## Enable languages for project
 enable_language(CXX C ASM)
 
-set(HIL_TEST_LIBS "lib_i2c")
+set(HIL_TEST_LIBS "lib_i2c" "lib_i2s")
 
 foreach(lib ${HIL_TEST_LIBS})
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${lib})
