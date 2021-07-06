@@ -1,0 +1,36 @@
+SPI Slave checker started
+Send initial settings
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 128 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 1 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 2 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 3 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 4 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 5 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 6 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 7 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 8 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 9 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 10 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 11 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 12 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 13 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 14 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 15 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 16 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 17 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 18 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 19 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 20 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 21 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 22 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 23 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 24 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 25 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 26 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 27 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 28 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 29 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 30 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 31 kbps \d+ init delay \d+
+Got Settings:cpol [0-1]{1} cpha [0-1]{1} miso [0-1]{1} num_bits 32 kbps \d+ init delay \d+
+Test completed
