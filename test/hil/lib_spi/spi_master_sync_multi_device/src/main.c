@@ -1,6 +1,7 @@
 // Copyright 2015-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include <platform.h>
+#include <string.h>
 #include <xclib.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,6 @@
 #include <xcore/parallel.h>
 #include "spi.h"
 #include "spi_sync_tester.h"
-
 
 port_t p_miso  = XS1_PORT_1A;
 port_t p_ss = XS1_PORT_4A;

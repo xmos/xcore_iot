@@ -29,7 +29,7 @@ static const unsigned bclk_freq_lut[NUM_BCLKS] = {
   1228800
 };
 #else
-#define NUM_BCLKS 10
+#define NUM_BCLKS 12
 #define NUM_BCLKS_TO_CHECK 3
 static const unsigned bclk_freq_lut[NUM_BCLKS] = {
   1228800, 614400, 384000, 192000, 44100,

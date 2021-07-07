@@ -28,7 +28,7 @@ int test_transfer(spi_master_device_t *spi_ctx,
                        NUMBER_OF_TEST_BYTES);
 
     spi_master_start_transaction(spi_ctx);
-    spi_master_transfer(spi_ctx, tx_data, rx, NUMBER_OF_TEST_BYTES);
+    spi_master_transfer(spi_ctx, (uint8_t *)tx_data, (uint8_t *)rx, NUMBER_OF_TEST_BYTES);
     spi_master_end_transaction(spi_ctx);
 
     for (unsigned j=0;j<NUMBER_OF_TEST_BYTES;j++) {
