@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 declare -a hil_test_libs=(
     "lib_i2c"
@@ -51,13 +50,13 @@ done
 tests_end=`date +%s`
 
 #****************************
+# Check results
+#****************************
+pytest test_verify_i2c_results.py test_verify_i2s_results.py test_verify_spi_results.py
+
+#****************************
 # Display time results
 #****************************
 echo "************************"
 echo "Build runtime: $((build_end-build_start))s  Test runtime: $((tests_end-tests_start))s"
 echo "************************"
-
-#****************************
-# Check results
-#****************************
-pytest test_verify_i2c_results.py test_verify_i2s_results.py test_verify_spi_results.py
