@@ -1,5 +1,8 @@
 set(CMAKE_SYSTEM_NAME XMOS)
 
+# CMake versions 3.20 and newer now require the ASM dialect to be specified
+set(ASM_DIALECT "")
+
 if(DEFINED XMOS_TOOLS_PATH)
     set(CMAKE_C_COMPILER "${XMOS_TOOLS_PATH}/xcc")
     set(CMAKE_CXX_COMPILER  "${XMOS_TOOLS_PATH}/xcc")
