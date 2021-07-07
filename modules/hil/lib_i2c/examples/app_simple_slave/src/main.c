@@ -1,4 +1,5 @@
-// Copyright (c) 2018-2020, XMOS Ltd, All rights reserved
+// Copyright 2018-2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* A simple application example used for code snippets in the library
  * documentation.

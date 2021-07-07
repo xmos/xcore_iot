@@ -1,4 +1,5 @@
-// Copyright (c) 2018-2020, XMOS Ltd, All rights reserved
+// Copyright 2018-2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* A simple application example used for code snippets in the library
  * documentation.
@@ -16,7 +17,8 @@ DECLARE_JOB(dummy_thread, (void));
 DECLARE_JOB(my_application, (i2c_master_t*, uint8_t));
 
 // I2C interface ports
-port_t p_i2c = XS1_PORT_4C;
+port_t p_scl = XS1_PORT_1N;
+port_t p_sda = XS1_PORT_1O;
 
 int main(void) {
     static const uint8_t target_device_addr = 0x3c;
@@ -24,8 +26,8 @@ int main(void) {
 
     i2c_master_init(
             &i2c_ctx,
-            p_i2c, 1, 0,
-            p_i2c, 3, 0,
+            p_scl, 0, 0,
+            p_sda, 0, 0,
             0,
             100); /* kbps */
 
