@@ -3,11 +3,15 @@
 #ifndef MULTITILE_SUPPORT_PLATFORM_H
 #define MULTITILE_SUPPORT_PLATFORM_H
 
-#ifdef THIS_XCORE_TILE
-#define ON_TILE(t) (THIS_XCORE_TILE == (t))
+#if __XC__
+#ifndef THIS_XCORE_TILE
+#define ON_TILE(t) (t == t)
 #else
-#error "THIS_XCORE_TILE not defined!"
+#define ON_TILE(t) (THIS_XCORE_TILE == (t))
 #endif
+#else /* __XC__ */
+#define ON_TILE(t) (!defined(THIS_XCORE_TILE) || THIS_XCORE_TILE == (t))
+#endif /* __XC__ */
 
 #include_next <platform.h>
 
