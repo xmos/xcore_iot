@@ -11,6 +11,8 @@ declare -a hil_test_libs=(
 #****************************
 # Build
 #****************************
+build_start=`date +%s`
+
 echo "******************"
 echo "* Build apps     *"
 echo "******************"
@@ -21,6 +23,8 @@ cmake -B build
 pushd .
 cd build && make && make install
 popd
+
+build_end=`date +%s`
 
 #****************************
 # Setup
@@ -33,16 +37,27 @@ export PYTHONPATH=$PYTHONPATH:$XCORE_SDK_PATH/test/hil/build/tools_xmostest/lib/
 #****************************
 # Run tests and copy results
 #****************************
+tests_start=`date +%s`
+
 for lib in ${hil_test_libs[@]}; do
     pushd .
     echo "************************"
     echo "* Running ${lib} tests *"
     echo "************************"
     cd ${lib} && python2 runtests.py
-    cp test_results.csv $XCORE_SDK_PATH/test/hil/results
     popd
 done
+
+tests_end=`date +%s`
+
+#****************************
+# Display time results
+#****************************
+echo "************************"
+echo "Build runtime: $((build_end-build_start))s  Test runtime: $((tests_end-tests_start))s"
+echo "************************"
 
 #****************************
 # Check results
 #****************************
+pytest test_verify_i2c_results.py test_verify_i2s_results.py test_verify_spi_results.py
