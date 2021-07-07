@@ -1,11 +1,13 @@
-// Copyright (c) 2018-2020, XMOS Ltd, All rights reserved
+// Copyright 2018-2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* A simple application example used for code snippets in the library
  * documentation.
  */
 
+#include <xs1.h>
+#include <xcore/clock.h>
 #include "i2s.h"
-
 
 #define SAMPLE_FREQUENCY 192000
 #define MASTER_CLOCK_FREQUENCY 24576000
@@ -39,7 +41,7 @@ port_t p_bclk = XS1_PORT_1M;
 port_t p_lrclk = XS1_PORT_1A;
 port_t p_mclk = XS1_PORT_1B;
 
-clock bclk = XS1_CLKBLK_1;
+xclock_t bclk = XS1_CLKBLK_1;
 
 static void setup_bclock()
 {
@@ -66,4 +68,3 @@ int main(void)
 
     return 0;
 }
-
