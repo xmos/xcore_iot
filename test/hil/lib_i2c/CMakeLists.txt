@@ -1,0 +1,4 @@
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/i2c_master_reg_test)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/i2c_master_test)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/i2c_slave_test)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/i2c_test_repeated_start)

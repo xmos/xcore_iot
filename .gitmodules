@@ -23,18 +23,9 @@
 	path = modules/rtos/sw_services/json/thirdparty/jsmn
 	url = git@github.com:zserge/jsmn.git
 	shallow = true
-[submodule "lib_i2c"]
-	path = modules/hil/lib_i2c
-	url = git@github.com:xmos/lib_i2c.git
-[submodule "lib_i2s"]
-	path = modules/hil/lib_i2s
-	url = git@github.com:xmos/lib_i2s.git
 [submodule "lib_mic_array"]
 	path = modules/hil/lib_mic_array
 	url = git@github.com:xmos/lib_mic_array.git
-[submodule "lib_spi"]
-	path = modules/hil/lib_spi
-	url = git@github.com:xmos/lib_spi.git
 [submodule "wfx-fullMAC-driver"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-fullMAC-driver
 	url = git@github.com:SiliconLabs/wfx-fullMAC-driver.git

@@ -32,6 +32,7 @@
 **/test_results.csv
 **/.venv/**
 .metadata
+*.gtkw
 
 # Test cruft
 **/.pytest_cache/*
