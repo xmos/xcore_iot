@@ -34,7 +34,7 @@ set(USE_TINYUSB TRUE)
 include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
-project(independent_tiles)
+project(device_control)
 set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project

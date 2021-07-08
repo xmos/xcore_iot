@@ -47,7 +47,7 @@ else
     # setup conda to source the SetEnv on activate
     mkdir -p ${CONDA_PREFIX}/etc/conda/activate.d
     touch ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
-    echo "source SetEnv" > ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
+    echo "source ${AI_PATH}/SetEnv" > ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
     # source the SetEnv so the env is setup now
     source ${AI_PATH}/SetEnv
 fi

@@ -30,25 +30,25 @@ TEST_SETUP(dispatch_job) {}
 TEST_TEAR_DOWN(dispatch_job) {}
 
 TEST(dispatch_job, test_create) {
-  dispatch_job_t *ob;
+  dispatch_job_t *job;
 
-  ob = dispatch_job_create(do_dispatch_job_work, NULL);
-  TEST_ASSERT_NOT_NULL(ob);
+  job = dispatch_job_create(do_dispatch_job_work, NULL);
+  TEST_ASSERT_NOT_NULL(job);
 
-  dispatch_job_delete(ob);
+  dispatch_job_delete(job);
 }
 
 TEST(dispatch_job, test_perform) {
-  dispatch_job_t *ob;
+  dispatch_job_t *job;
   test_work_arg_t arg;
 
-  ob = dispatch_job_create(do_dispatch_job_work, &arg);
+  job = dispatch_job_create(do_dispatch_job_work, &arg);
 
-  dispatch_job_perform(ob);
+  dispatch_job_perform(job);
   TEST_ASSERT_EQUAL_INT(0, arg.zero);
   TEST_ASSERT_EQUAL_INT(1, arg.one);
 
-  dispatch_job_delete(ob);
+  dispatch_job_delete(job);
 }
 
 TEST_GROUP_RUNNER(dispatch_job) {

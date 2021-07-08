@@ -29,7 +29,7 @@ Some dependent components are included as git submodules. These can be obtained 
 Documentation
 -------------
 
-See the `Getting Started Guide <https://github.com/xmos/xcore_sdk/blob/develop/documents/quick_start/getting-started.rst>`_ for instructions on installing and using the AI Toolchain Extensions.
+See the `Installation Guide <https://github.com/xmos/xcore_sdk/blob/develop/documents/quick_start/installation.rst>`_ for instructions on installing the SDK.
 
 Contributing
 ------------
