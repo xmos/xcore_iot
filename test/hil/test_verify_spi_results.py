@@ -3,7 +3,6 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 import pytest
-import re
 
 test_results_filename = "lib_spi/test_results.csv"
 
@@ -18,4 +17,5 @@ def test_results():
             assert cnt >= 2 # should be at least 2 lines in each report
             break
 
-        assert "FAIL" in line
+        if cnt != 1:    # Skip header line
+            assert "PASS" in line
