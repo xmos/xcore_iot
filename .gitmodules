@@ -29,10 +29,6 @@
 [submodule "wfx-fullMAC-driver"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-fullMAC-driver
 	url = git@github.com:SiliconLabs/wfx-fullMAC-driver.git
-[submodule "FreeRTOS-SMP-Kernel"]
-	path = modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel
-	url = git@github.com:xmos/FreeRTOS-Kernel.git
-	branch = feature/xcore-smp
 [submodule "FreeRTOS-Kernel"]
 	path = modules/rtos/FreeRTOS/FreeRTOS-Kernel
 	url = git@github.com:xmos/FreeRTOS-Kernel.git
