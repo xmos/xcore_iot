@@ -50,14 +50,17 @@ rtos_osal_status_t rtos_osal_thread_create(
 
 rtos_osal_status_t rtos_osal_thread_core_exclusion_set(rtos_osal_thread_t *thread, uint32_t core_map)
 {
-    vTaskCoreExclusionSet(thread_handle(thread), core_map);
+    vTaskCoreAffinitySet(thread_handle(thread), ~core_map);
 
     return RTOS_OSAL_SUCCESS;
 }
 
 rtos_osal_status_t rtos_osal_thread_core_exclusion_get(rtos_osal_thread_t *thread, uint32_t *core_map)
 {
-    *core_map = vTaskCoreExclusionGet(thread_handle(thread));
+    uint32_t affinity_core_map;
+
+    affinity_core_map = vTaskCoreAffinityGet(thread_handle(thread));
+    *core_map = ~affinity_core_map;
 
     return RTOS_OSAL_SUCCESS;
 }

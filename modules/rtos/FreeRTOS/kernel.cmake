@@ -34,7 +34,7 @@ else()
 endif()
 
 set(${THIS_LIB}_SOURCES
-    "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}/port.xc"
+    "${${THIS_LIB}_DIR}/portable/ThirdParty/xClang/${FREERTOS_PORT}/port.xc"
     "${${THIS_LIB}_DIR}/croutine.c"
     "${${THIS_LIB}_DIR}/event_groups.c"
     "${${THIS_LIB}_DIR}/list.c"
@@ -42,9 +42,9 @@ set(${THIS_LIB}_SOURCES
     "${${THIS_LIB}_DIR}/stream_buffer.c"
     "${${THIS_LIB}_DIR}/tasks.c"
     "${${THIS_LIB}_DIR}/timers.c"
-    "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}/port.c"
+    "${${THIS_LIB}_DIR}/portable/ThirdParty/xClang/${FREERTOS_PORT}/port.c"
     "${${THIS_LIB}_DIR}/portable/MemMang/heap_4.c"
-    "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}/portasm.S"
+    "${${THIS_LIB}_DIR}/portable/ThirdParty/xClang/${FREERTOS_PORT}/portasm.S"
 )
 
 set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
@@ -53,7 +53,7 @@ set_source_files_properties(${${THIS_LIB}_DIR}/tasks.c PROPERTIES COMPILE_FLAGS 
 
 set(${THIS_LIB}_INCLUDES
     "${${THIS_LIB}_DIR}/include"
-    "${${THIS_LIB}_DIR}/portable/XCC/${FREERTOS_PORT}"
+    "${${THIS_LIB}_DIR}/portable/ThirdParty/xClang/${FREERTOS_PORT}"
 )
 
 add_compile_definitions(RTOS_FREERTOS)

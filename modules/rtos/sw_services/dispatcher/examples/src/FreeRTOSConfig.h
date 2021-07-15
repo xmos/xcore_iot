@@ -23,7 +23,7 @@
 #define configUSE_TIME_SLICING 1
 #define configUSE_NEWLIB_REENTRANT 0
 #define configUSE_TASK_PREEMPTION_DISABLE 1
-#define configUSE_CORE_EXCLUSION 1
+#define configUSE_CORE_AFFINITY 1
 #define configENABLE_BACKWARD_COMPATIBILITY                                    \
   1 /* Required for FreeRTOS_TCP_WIN.c TODO: active closed bug, may have been  \
        fixed upstream */
