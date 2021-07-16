@@ -50,7 +50,7 @@ Below is a list of `TensorFlow Lite for Microcontrollers <https://www.tensorflow
 
 .. note:: Additional operators will be optimized in future releases.
 
-.. note:: TensorFlow Lite for Microcontrollers currently supports a limited subset of TensorFlow operations, which impacts the model architectures that it is possible to run. The TensorFlow community is actively working on expanding operation support.  The supported operations can be seen in the file `all_ops_resolver.cc <https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/micro/all_ops_resolver.cc>`_
+.. note:: TensorFlow Lite for Microcontrollers currently supports a limited subset of TensorFlow operations, which impacts the model architectures that it is possible to run. The TensorFlow community is actively working on expanding operation support.  The supported operations can be seen in the file `all_ops_resolver.cc <https://github.com/tensorflow/tflite-micro/blob/main/tensorflow/lite/micro/all_ops_resolver.cc>`_
 
 It is worth noting that our optimizer is a standalone executable with the input and output model in the same format. This means that you can use it even if you have builtin or custom operators in your model. Our optimizer was designed to not alter unknown custom operators by default but be extensible if implementing optimizations for such operators is desired.
 

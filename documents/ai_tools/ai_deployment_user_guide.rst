@@ -100,7 +100,7 @@ While not recommended, it is possible to deploy your model manually.  Understand
 
 You can add up to 128 operators to the ``tflite::MicroMutableOpResolver`` with the ``Add*`` or ``AddCustom`` methods.  However, adding unused operators adds code to the compiled firmware.  We recommend you add only the operators used in your model.  You can use the `Netron <https://lutzroeder.github.io/netron/>`_ visualization tool determine operators required for your model.
 
-The supported ``Add*`` methods for builtin operators can be seen in the file `all_ops_resolver.cc <https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/micro/all_ops_resolver.cc>`_
+The supported ``Add*`` methods for builtin operators can be seen in the file `all_ops_resolver.cc <https://github.com/tensorflow/tflite-micro/blob/main/tensorflow/lite/micro/all_ops_resolver.cc>`_
 
 The code snippet below demostrates examples for calls to ``AddCustom`` for the xcore.ai custom operators.  The ``Add*`` methods can be called in any order.  The operators do not need to be added in the order they appear in the model.  And, an operator only needs to be added once, even if it appears multiple times in your model.
 
