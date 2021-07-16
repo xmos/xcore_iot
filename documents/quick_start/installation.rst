@@ -34,4 +34,10 @@ All code examples require that an environment variable be set that specifies the
 
     $ export XCORE_SDK_PATH=<path to>/xcore_sdk
 
+It is recommended that your `XCORE_SDK_PATH` not include spaces.  However, if this is not possible, you will need to enclose your path environment variable value in quotes.
+
+.. code-block:: console
+
+    $ export XCORE_SDK_PATH="<path with spaces to>/xcore_sdk"
+
 .. note:: You can also add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.

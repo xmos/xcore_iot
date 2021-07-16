@@ -49,6 +49,9 @@ distclean:
 run: $(EXECUTABLE)
 	xrun --xscope $(EXECUTABLE)
 
+# Escape any spaces in the SDK path
+ESCAPED_XCORE_SDK_PATH = $(subst $(null) ,\ ,$(XCORE_SDK_PATH))
+
 # This multitile build support file creates the 
 # recipe for EXECUTABLE
-include $(XCORE_SDK_PATH)/tools/cmake_utils/multitile_build.mk
+include $(ESCAPED_XCORE_SDK_PATH)/tools/cmake_utils/multitile_build.mk
