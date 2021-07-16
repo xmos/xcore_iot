@@ -2,7 +2,7 @@
 Micro Speech
 ############
 
-This example application is the `micro_speech <https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/micro/examples/micro_speech>`__ example from TensorFlow Lite for Microcontrollers.
+This example application is the `micro_speech <https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/micro_speech>`__ example from TensorFlow Lite for Microcontrollers.
 
 ****************
 Supported Boards
@@ -98,5 +98,5 @@ You should notice console output
 Training the model
 ******************
 
-You may wish to retrain this model.  This should rarely be necessary. However, if you would like to learn more about how this model is trained, see: https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/micro/examples/micro_speech/train
+You may wish to retrain this model.  This should rarely be necessary. However, if you would like to learn more about how this model is trained, see: https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/micro_speech/train
 

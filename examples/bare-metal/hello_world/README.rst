@@ -2,7 +2,7 @@
 Hello World
 ###########
 
-This example application is the `hello_world <https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/micro/examples/hello_world>`__ example from TensorFlow Lite for Microcontrollers.
+This example application is the `hello_world <https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/hello_world>`__ example from TensorFlow Lite for Microcontrollers.
 
 *********************
 Building the firmware
@@ -65,5 +65,5 @@ The following command will generate a C source file that contains the TensorFlow
 Training the model
 ******************
 
-You may wish to retrain this model.  This should rarely be necessary. However, if you would like to learn more about how this model is trained, see: https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/micro/examples/hello_world/train
+You may wish to retrain this model.  This should rarely be necessary. However, if you would like to learn more about how this model is trained, see: https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/hello_world/train
 
