@@ -30,6 +30,7 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR')) ||
       (github.event_name == 'schedule' && github.repository == 'xmos/xcore_sdk')
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/xmos/doc_builder:main
       volumes:
