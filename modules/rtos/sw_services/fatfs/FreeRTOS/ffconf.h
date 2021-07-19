@@ -8,7 +8,7 @@
 / Function Configurations
 /---------------------------------------------------------------------------*/
 
-#if __ff_appconf_h_exists__
+#if __has_include("ff_appconf.h")
 /* Allow the application to override any defaults */
 #include "ff_appconf.h"
 #endif
