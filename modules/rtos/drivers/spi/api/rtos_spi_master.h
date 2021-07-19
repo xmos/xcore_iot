@@ -5,7 +5,7 @@
 #define RTOS_SPI_MASTER_H_
 
 /**
- * \defgroup rtos_spi_master_driver
+ * \addtogroup rtos_spi_master_driver rtos_spi_master_driver
  *
  * The public API for using the RTOS SPI master driver.
  * @{
@@ -70,7 +70,7 @@ struct rtos_spi_master_device_struct {
 #include "rtos/drivers/spi/api/rtos_spi_master_rpc.h"
 
 /**
- * \defgroup rtos_spi_master_driver_core
+ * \addtogroup rtos_spi_master_driver_core rtos_spi_master_driver_core
  *
  * The core functions for using an RTOS SPI master driver instance after
  * it has been initialized and started. These functions may be used

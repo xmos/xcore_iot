@@ -1,9 +1,9 @@
 # Makefile to build the Sphinx and Doxygen documentation
-# for the XCoreSDK SDK
+# for the XCore SDK
 #
 
-DOXYGEN_OUTPUT_DIR=doxygen/xml
-BREATHE_PROJECT=XCoreSDKSDK
+DOXYGEN_OUTPUT_DIR=_doxygen/xml
+BREATHE_PROJECT=XCoreSDK
 
 # You can set these variables from the command line, and also
 # from the environment for the first two.
@@ -28,4 +28,3 @@ $(DOXYGEN_OUTPUT_DIR)/index.xml: Doxyfile
 
 livehtml:
 	sphinx-autobuild --host 0.0.0.0 "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-

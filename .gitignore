@@ -24,7 +24,7 @@
 **/_build/
 **/build_*/
 **/run_*.log
-**/doxygen/*
+**/_doxygen/*
 **/pdf/*
 **/html/*
 **/.settings/*

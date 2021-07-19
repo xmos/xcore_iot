@@ -1,61 +1,102 @@
+######################
 Building Documentation
-======================
+######################
 
+Instructions are given below to build the documentation.  The recommended method is using Docker, 
+however, alternative instructions are provided in case using Docker in not an option.
+
+To develop the content of this repository, it is recommended to launch a `sphinx-autobuild`
+server as per the instructions below. Once started, point a web-browser at
+http://127.0.0.1:8000. If running the server within a VM, remember to configure
+port forwarding.
+
+You can now edit the .rst documentation, and your web-browser content will automatically
+update.
+
+************
+Using Docker
+************
+
+=============
 Prerequisites
--------------
+=============
 
-Doxygen
-^^^^^^^^
+Install `Docker <https://www.docker.com/>`_.
+
+Pull the docker container:
+
+.. code-block:: console
+
+    $ docker pull ghcr.io/xmos/doc_builder:main
+
+========
+Building
+========
+
+Build documentation:
+
+.. code-block:: console
+
+    $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make html
+
+Launch sphinx-autobuild server:
+
+.. code-block:: console
+
+    $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make livehtml
+
+Clean documentation:
+
+.. code-block:: console
+
+    $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean
+
+Clean and build documentation with link check:
+
+.. code-block:: console
+
+    $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
+
+********************
+Without Using Docker
+********************
+
+=============
+Prerequisites
+=============
 
 Install `Doxygen <https://www.doxygen.nl/index.html>`_.
 
-Installation will depend on your operating system.
-
-On Debian based systems run:
+Install the required Python packages:
 
 .. code-block:: console
 
-    $ sudo apt install doxygen
+    $ pip install -r requirements.txt
 
-On Fedora run:
-
-.. code-block:: console
-
-    $ sudo dnf install doxygen
-
-
-Python Modules
-^^^^^^^^^^^^^^
-
-Install `Sphinx <https://www.sphinx-doc.org/en/master/>`_.
-
-.. code-block:: console
-
-    $ pip install -U Sphinx
-
-Install `Breathe <https://breathe.readthedocs.io/en/latest/>`_.
-
-.. code-block:: console
-
-    $ pip install -U breathe
-
+========
 Building
---------
+========
 
-To build:
+Build documentation:
 
 .. code-block:: console
 
     $ make html
 
-To build with link checking:
+Launch sphinx-autobuild server:
 
 .. code-block:: console
 
-    $ make clean linkcheck html SPHINXOPTS="-W --keep-going"
+    $ make livehtml
 
-The following command will start a server at http://127.0.0.1:8000 and start watching for changes in the current directory.  When a change is detected, the documentation is rebuilt and any open browser windows are reloaded automatically. KeyboardInterrupt (ctrl+c) will stop the server.
+Clean documentation:
 
 .. code-block:: console
 
-    $ sphinx-autobuild . _build/html
+    $ make clean
+
+Clean and build documentation with link check:
+
+.. code-block:: console
+    
+    $ make clean html linkcheck SPHINXOPTS="-W --keep-going"

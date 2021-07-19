@@ -5,7 +5,7 @@
 #define RTOS_I2S_H_
 
 /**
- * \defgroup rtos_i2s_driver
+ * \addtogroup rtos_i2s_driver rtos_i2s_driver
  *
  * The public API for using the RTOS I2S driver.
  * @{
@@ -153,7 +153,7 @@ struct rtos_i2s_struct{
 #include "rtos/drivers/i2s/api/rtos_i2s_rpc.h"
 
 /**
- * \defgroup rtos_i2s_driver_core
+ * \addtogroup rtos_i2s_driver_core rtos_i2s_driver_core
  *
  * The core functions for using an RTOS I2S driver instance after
  * it has been initialized and started. These functions may be used

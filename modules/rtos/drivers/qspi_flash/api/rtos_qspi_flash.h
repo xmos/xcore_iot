@@ -5,7 +5,7 @@
 #define RTOS_QSPI_FLASH_H_
 
 /**
- * \defgroup rtos_qspi_flash_driver
+ * \addtogroup rtos_qspi_flash_driver rtos_qspi_flash_driver
  *
  * The public API for using the RTOS QSPI flash driver.
  * @{
@@ -59,7 +59,7 @@ struct rtos_qspi_flash_struct {
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash_rpc.h"
 
 /**
- * \defgroup rtos_qspi_flash_driver_core
+ * \addtogroup rtos_qspi_flash_driver_core rtos_qspi_flash_driver_core
  *
  * The core functions for using an RTOS QSPI flash driver instance after
  * it has been initialized and started. These functions may be used

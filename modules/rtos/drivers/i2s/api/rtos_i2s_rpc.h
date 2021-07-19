@@ -5,12 +5,12 @@
 #define RTOS_I2S_RPC_H_
 
 /**
- * \addtogroup rtos_i2s_driver
+ * \addtogroup rtos_i2s_driver rtos_i2s_driver
  * @{
  */
 
 /**
- * \defgroup rtos_i2s_driver_rpc
+ * \addtogroup rtos_i2s_driver_rpc rtos_i2s_driver_rpc
  *
  * The functions for setting up RPC with an RTOS I2S driver instance.
  * @{

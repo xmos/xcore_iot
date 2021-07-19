@@ -5,12 +5,12 @@
 #define RTOS_MIC_ARRAY_RPC_H_
 
 /**
- * \addtogroup rtos_mic_array_driver
+ * \addtogroup rtos_mic_array_driver rtos_mic_array_driver
  * @{
  */
 
 /**
- * \defgroup rtos_mic_array_driver_rpc
+ * \addtogroup rtos_mic_array_driver_rpc rtos_mic_array_driver_rpc
  *
  * The functions for setting up RPC with an RTOS mic array driver instance.
  * @{

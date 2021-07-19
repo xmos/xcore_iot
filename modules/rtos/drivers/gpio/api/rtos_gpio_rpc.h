@@ -5,12 +5,12 @@
 #define RTOS_GPIO_RPC_H_
 
 /**
- * \addtogroup rtos_gpio_driver
+ * \addtogroup rtos_gpio_driver rtos_gpio_driver
  * @{
  */
 
 /**
- * \defgroup rtos_gpio_driver_rpc
+ * \addtogroup rtos_gpio_driver_rpc rtos_gpio_driver_rpc
  *
  * The functions for setting up RPC with an RTOS GPIO driver instance.
  * @{

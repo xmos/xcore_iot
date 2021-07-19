@@ -10,7 +10,7 @@
  */
 
 /**
- * \defgroup rtos_i2c_master_driver_rpc
+ * \addtogroup rtos_i2c_master_driver_rpc rtos_i2c_master_driver_rpc
  *
  * The functions for setting up RPC with an RTOS I2C master driver instance.
  * @{
