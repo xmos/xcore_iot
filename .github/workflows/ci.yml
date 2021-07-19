@@ -36,8 +36,8 @@ jobs:
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
-        with:
-          submodules: recursive
+      - name: Checkout submodules in modules
+        run: git submodule update --init --recursive modules
       - name: Build documentation
         working-directory: ./documents
         run: |
