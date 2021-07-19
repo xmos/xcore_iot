@@ -5,7 +5,7 @@
 #define RTOS_SPI_SLAVE_H_
 
 /**
- * \defgroup rtos_spi_slave_driver
+ * \addtogroup rtos_spi_slave_driver rtos_spi_slave_driver
  *
  * The public API for using the RTOS SPI slave driver.
  * @{

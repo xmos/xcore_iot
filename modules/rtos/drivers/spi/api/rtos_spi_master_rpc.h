@@ -5,12 +5,12 @@
 #define RTOS_SPI_MASTER_RPC_H_
 
 /**
- * \addtogroup rtos_spi_master_driver
+ * \addtogroup rtos_spi_master_driver rtos_spi_master_driver
  * @{
  */
 
 /**
- * \defgroup rtos_spi_master_driver_rpc
+ * \addtogroup rtos_spi_master_driver_rpc rtos_spi_master_driver_rpc
  *
  * The functions for setting up RPC with an RTOS SPI master driver instance.
  * @{

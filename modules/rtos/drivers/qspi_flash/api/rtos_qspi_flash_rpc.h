@@ -5,12 +5,12 @@
 #define RTOS_QSPI_FLASH_RPC_H_
 
 /**
- * \addtogroup rtos_qspi_flash_driver
+ * \addtogroup rtos_qspi_flash_driver rtos_qspi_flash_driver
  * @{
  */
 
 /**
- * \defgroup rtos_qspi_flash_driver_rpc
+ * \addtogroup rtos_qspi_flash_driver_rpc rtos_qspi_flash_driver_rpc
  *
  * The functions for setting up RPC with an RTOS QSPI flash driver instance.
  * @{

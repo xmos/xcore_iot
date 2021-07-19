@@ -5,7 +5,7 @@
 #define RTOS_MIC_ARRAY_H_
 
 /**
- * \defgroup rtos_mic_array_driver
+ * \addtogroup rtos_mic_array_driver rtos_mic_array_driver
  *
  * The public API for using the RTOS mic array driver.
  * @{
@@ -70,7 +70,7 @@ struct rtos_mic_array_struct {
 #include "rtos/drivers/mic_array/api/rtos_mic_array_rpc.h"
 
 /**
- * \defgroup rtos_mic_array_driver_core
+ * \addtogroup rtos_mic_array_driver_core rtos_mic_array_driver_core
  *
  * The core functions for using an RTOS mic array driver instance after
  * it has been initialized and started. These functions may be used

@@ -5,7 +5,7 @@
 #define RTOS_I2C_SLAVE_H_
 
 /**
- * \defgroup rtos_i2c_slave_driver
+ * \addtogroup rtos_i2c_slave_driver rtos_i2c_slave_driver
  *
  * The public API for using the RTOS I2C slave driver.
  * @{

@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 /**
- * \defgroup rtos_swmem_driver
+ * \addtogroup rtos_swmem_driver rtos_swmem_driver
  *
  * The public API for using the RTOS software memory driver.
  * @{

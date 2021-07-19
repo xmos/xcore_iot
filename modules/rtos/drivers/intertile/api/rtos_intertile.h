@@ -17,7 +17,7 @@
 #define RTOS_INTERTILE_H_
 
 /**
- * \defgroup rtos_intertile_driver
+ * \addtogroup rtos_intertile_driver rtos_intertile_driver
  *
  * The public API for using the RTOS intertile driver.
  * @{
@@ -53,7 +53,7 @@ typedef struct {
 } rtos_intertile_address_t;
 
 /**
- * \defgroup rtos_intertile_driver_core
+ * \addtogroup rtos_intertile_driver_core rtos_intertile_driver_core
  *
  * The core functions for using an RTOS intertile driver instance after
  * it has been initialized and started.

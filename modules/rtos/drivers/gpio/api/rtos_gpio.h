@@ -5,7 +5,7 @@
 #define RTOS_GPIO_H_
 
 /**
- * \defgroup rtos_gpio_driver
+ * \addtogroup rtos_gpio_driver rtos_gpio_driver
  *
  * The public API for using the RTOS GPIO driver.
  * @{
@@ -216,7 +216,7 @@ inline rtos_gpio_port_id_t rtos_gpio_port(port_t p)
 }
 
 /**
- * \defgroup rtos_gpio_driver_core
+ * \addtogroup rtos_gpio_driver_core rtos_gpio_driver_core
  *
  * The core functions for using an RTOS GPIO driver instance after
  * it has been initialized and started. These functions may be used

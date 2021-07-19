@@ -5,7 +5,7 @@
 #define RTOS_USB_H_
 
 /**
- * \defgroup rtos_usb_driver
+ * \addtogroup rtos_usb_driver rtos_usb_driver
  *
  * The public API for using the RTOS USB driver.
  * @{

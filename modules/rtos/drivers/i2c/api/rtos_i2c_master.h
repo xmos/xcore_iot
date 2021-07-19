@@ -5,7 +5,7 @@
 #define RTOS_I2C_MASTER_H_
 
 /**
- * \defgroup rtos_i2c_master_driver
+ * \addtogroup rtos_i2c_master_driver rtos_i2c_master_driver
  *
  * The public API for using the RTOS I2C master driver.
  * @{
@@ -52,7 +52,7 @@ struct rtos_i2c_master_struct {
 #include "rtos/drivers/i2c/api/rtos_i2c_master_rpc.h"
 
 /**
- * \defgroup rtos_i2c_master_driver_core
+ * \addtogroup rtos_i2c_master_driver_core rtos_i2c_master_driver_core
  *
  * The core functions for using an RTOS I2C master driver instance after
  * it has been initialized and started. These functions may be used
