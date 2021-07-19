@@ -37,7 +37,14 @@ jobs:
         - ${{ github.workspace }}:/xcore_sdk
       options: -w /xcore_sdk/documents
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          #submodules: recursive
+          submodules: false
+      - name: List
+        run: |
+          ls -al
       - name: Build
         run: |
           make clean html linkcheck SPHINXOPTS="-W --keep-going"
