@@ -33,9 +33,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/xmos/doc_builder:main
-      volumes:
-        - ${{ github.workspace }}:/xcore_sdk
-      options: -w /xcore_sdk/documents
+      #volumes:
+      #  - ${{ github.workspace }}:/xcore_sdk
+      #options: --workdir documents
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
@@ -47,6 +47,7 @@ jobs:
           ls -al
       - name: Build
         run: |
+          cd documents
           make clean html linkcheck SPHINXOPTS="-W --keep-going"
       - name: Package
         run: |
