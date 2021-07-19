@@ -28,16 +28,20 @@ jobs:
     name: Build and package documentation
     if: |
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR')) ||
-      (github.event_name == 'schedule' && github.repository == 'xmos/xcore_sdk')
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/xmos/doc_builder:main
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
-      - name: Checkout submodules in modules
-        run: git submodule update --init --recursive modules
+        #with:
+        #  submodules: recursive
+      #- name: Checkout submodules in modules
+      #  run: git submodule update --init --recursive modules
+      - name: Check for git
+        run: |
+          git --version
       - name: Build documentation
         working-directory: ./documents
         run: |
