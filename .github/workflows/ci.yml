@@ -33,22 +33,22 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/xmos/doc_builder:main
-      #volumes:
-      #  - ${{ github.workspace }}:/xcore_sdk
-      #options: --workdir documents
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
         with:
-          #submodules: recursive
-          submodules: false
-      - name: List
+          submodules: recursive
+      - name: Build documentation
+        working-directory: ./documents
         run: |
-          ls -al
-      - name: Build
-        run: |
-          cd documents
           make clean html linkcheck SPHINXOPTS="-W --keep-going"
-      - name: Package
+      - name: Package documentation artifacts
+        working-directory: ./documents/_build
         run: |
-          echo "TODO: Package up html output!"
+          tar -czf xcore_sdk_docs.tgz html
+      - name: Save documentation artifacts
+        uses: actions/upload-artifact@v2
+        working-directory: ./documents/_build
+        with:
+          name: xcore_sdk_docs
+          path: xcore_sdk_docs.tgz
