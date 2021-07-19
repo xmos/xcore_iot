@@ -24,6 +24,16 @@ env:
   XCORE_SDK_PATH: ${{ github.workspace }}
 
 jobs:
+  debug:
+    name: Debugging
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for git
+        run: |
+          git --version
   documentation:
     name: Build and package documentation
     if: |
