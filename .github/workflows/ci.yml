@@ -1,0 +1,45 @@
+# YAML schema for GitHub Actions:
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+#
+# Helpful YAML parser to clarify YAML syntax:
+# https://yaml-online-parser.appspot.com/
+#
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+#
+# This file contains the workflows that are run prior to merging a pull request.
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'develop'
+
+  # Allow manually triggering of the workflow.
+  workflow_dispatch: {}
+
+env:
+  XCORE_SDK_PATH: ${{ github.workspace }}
+
+jobs:
+  documentation:
+    name: Build and package documentation
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR')) ||
+      (github.event_name == 'schedule' && github.repository == 'xmos/xcore_sdk')
+    container:
+      image: ghcr.io/xmos/doc_builder:main
+      volumes:
+        - ${{ github.workspace }}:/xcore_sdk
+      options: -w /xcore_sdk/documents
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          make clean html linkcheck SPHINXOPTS="-W --keep-going"
+      - name: Package
+        run: |
+          echo "TODO: Package up html output!"
