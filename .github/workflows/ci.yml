@@ -48,7 +48,6 @@ jobs:
           tar -czf xcore_sdk_docs.tgz html
       - name: Save documentation artifacts
         uses: actions/upload-artifact@v2
-        working-directory: ./documents/_build
         with:
           name: xcore_sdk_docs
-          path: xcore_sdk_docs.tgz
+          path: ./documents/_build/xcore_sdk_docs.tgz
