@@ -9,13 +9,9 @@
 #
 # This file contains the workflows that are run prior to merging a pull request.
 
-name: Nightly
+name: Manual Test
 
 on:
-  schedule:
-    # 0am UTC is 5am or 4am ET depending on daylight savings.
-    - cron: '0 0 * * *'
-
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
 
@@ -25,11 +21,11 @@ env:
 jobs:
   build:
     name: Build examples
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'schedule' && github.repository == 'xmos/xcore_sdk')
     steps:
-      - uses: actions/checkout@v2
+      # - name: Checkout SDK
+      #   uses: actions/checkout@v2
+      #   with:
+      #     submodules: recursive
       - name: Build
         run: |
           echo "TODO: Build stuff!"
