@@ -37,12 +37,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      # - name: Checkout submodules in modules
-      #   run: git submodule update --init --recursive modules
+      - name: Pull doc_builder docker container
+        run: docker pull ghcr.io/xmos/doc_builder:main
       - name: Build documentation
         uses: addnab/docker-run-action@v3
         with:
           registry: gcr.io
+          username: ${{ secrets.login }}
           image: xmos/doc_builder:main
           options: -v ${{ github.workspace }}:/xcore_sdk -w /xcore_sdk/documents
           run: |
