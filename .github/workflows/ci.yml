@@ -48,7 +48,7 @@ jobs:
         # with:
         #  submodules: recursive
       - name: Checkout submodules in modules
-       run: git submodule update --init --recursive modules
+        run: git submodule update --init --recursive modules
       # - name: Check for git
       #   run: |
       #     git --version
