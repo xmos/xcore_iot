@@ -1,0 +1,53 @@
+# YAML schema for GitHub Actions:
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+#
+# Helpful YAML parser to clarify YAML syntax:
+# https://yaml-online-parser.appspot.com/
+#
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+#
+# This file contains the workflows that are run prior to merging a pull request.
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'develop'
+
+  # Allow manually triggering of the workflow.
+  workflow_dispatch: {}
+
+env:
+  XCORE_SDK_PATH: ${{ github.workspace }}
+
+jobs:
+  documentation:
+    name: Build and package documentation
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Pull doc_builder container
+        run: |
+          docker pull ghcr.io/xmos/doc_builder:main 
+      - name: Build documentation
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
+      - name: Package documentation artifacts
+        working-directory: ./documents/_build
+        run: |
+          tar -czf xcore_sdk_docs.tgz html
+      - name: Save documentation artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: xcore_sdk_docs
+          path: ./documents/_build/xcore_sdk_docs.tgz
+          retention-days: 5
