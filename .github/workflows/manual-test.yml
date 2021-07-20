@@ -1,0 +1,32 @@
+# YAML schema for GitHub Actions:
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+#
+# Helpful YAML parser to clarify YAML syntax:
+# https://yaml-online-parser.appspot.com/
+#
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+#
+# This file contains the workflows that are run prior to merging a pull request.
+
+name: Manual Test
+
+on:
+  # Allow manually triggering of the workflow.
+  workflow_dispatch: {}
+
+env:
+  XCORE_SDK_PATH: ${{ github.workspace }}
+
+jobs:
+  build:
+    name: Build examples
+    runs-on: ubuntu-latest
+    steps:
+    #   - name: Checkout SDK
+    #     uses: actions/checkout@v2
+    #     with:
+    #       submodules: recursive
+      - name: Build
+        run: |
+          echo "TODO: Build stuff!"
