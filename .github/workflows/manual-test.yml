@@ -22,7 +22,7 @@ jobs:
   build:
     name: Build examples
     runs-on: ubuntu-latest
-    # steps:
+    steps:
     #   - name: Checkout SDK
     #     uses: actions/checkout@v2
     #     with:
