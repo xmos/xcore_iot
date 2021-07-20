@@ -54,7 +54,7 @@ jobs:
           docker pull ghcr.io/xmos/doc_builder:main 
       - name: Build documentation
         run: |
-          docker run --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
+          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
       - name: Package documentation artifacts
         working-directory: ./documents/_build
         run: |
