@@ -24,26 +24,12 @@ env:
   XCORE_SDK_PATH: ${{ github.workspace }}
 
 jobs:
-  # setup:
-  #   name: Setup
-  #   runs-on: ubuntu-latest
-  #   if: |
-  #     github.event_name == 'workflow_dispatch' ||
-  #     (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
-  #   steps:
-  #     - name: Checkout SDK
-  #       uses: actions/checkout@v2
-  #       with:
-  #         submodules: recursive
   documentation:
     name: Build and package documentation
     runs-on: ubuntu-latest
-    # needs: Setup
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
-    # container:
-    #   image: ghcr.io/xmos/doc_builder:main
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
@@ -58,8 +44,6 @@ jobs:
       - name: Package documentation artifacts
         working-directory: ./documents/_build
         run: |
-          ls -la
-          whoami
           tar -czf xcore_sdk_docs.tgz html
       - name: Save documentation artifacts
         uses: actions/upload-artifact@v2
