@@ -21,11 +21,12 @@ env:
 jobs:
   build:
     name: Build examples
-    steps:
-      # - name: Checkout SDK
-      #   uses: actions/checkout@v2
-      #   with:
-      #     submodules: recursive
+    runs-on: ubuntu-latest
+    # steps:
+    #   - name: Checkout SDK
+    #     uses: actions/checkout@v2
+    #     with:
+    #       submodules: recursive
       - name: Build
         run: |
           echo "TODO: Build stuff!"
