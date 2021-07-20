@@ -24,38 +24,41 @@ env:
   XCORE_SDK_PATH: ${{ github.workspace }}
 
 jobs:
-  debug:
-    name: Debugging
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check for git
-        run: |
-          git --version
+  # debug:
+  #   name: Debugging
+  #   if: |
+  #     github.event_name == 'workflow_dispatch' ||
+  #     (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check for git
+  #       run: |
+  #         git --version
   documentation:
     name: Build and package documentation
+    runs-on: ubuntu-latest
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/xmos/doc_builder:main
+    # container:
+    #   image: ghcr.io/xmos/doc_builder:main
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
-        #with:
+        # with:
         #  submodules: recursive
-      #- name: Checkout submodules in modules
-      #  run: git submodule update --init --recursive modules
-      - name: Check for git
-        run: |
-          git --version
+      - name: Checkout submodules in modules
+       run: git submodule update --init --recursive modules
+      # - name: Check for git
+      #   run: |
+      #     git --version
+      # - name: Run doc_builder container
       - name: Build documentation
+        uses: docker://ghcr.io/xmos/doc_builder:main
         working-directory: ./documents
-        run: |
-          make clean html linkcheck SPHINXOPTS="-W --keep-going"
+        with:
+          entrypoint: make
+          args: clean html linkcheck SPHINXOPTS="-W --keep-going"
       - name: Package documentation artifacts
         working-directory: ./documents/_build
         run: |
