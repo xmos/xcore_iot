@@ -24,16 +24,6 @@ env:
   XCORE_SDK_PATH: ${{ github.workspace }}
 
 jobs:
-  # debug:
-  #   name: Debugging
-  #   if: |
-  #     github.event_name == 'workflow_dispatch' ||
-  #     (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check for git
-  #       run: |
-  #         git --version
   documentation:
     name: Build and package documentation
     runs-on: ubuntu-latest
@@ -49,16 +39,14 @@ jobs:
         #  submodules: recursive
       - name: Checkout submodules in modules
         run: git submodule update --init --recursive modules
-      # - name: Check for git
-      #   run: |
-      #     git --version
-      # - name: Run doc_builder container
       - name: Build documentation
-        uses: docker://ghcr.io/xmos/doc_builder:main
-        working-directory: ./documents
+        uses: addnab/docker-run-action@v3
         with:
-          entrypoint: make
-          args: clean html linkcheck SPHINXOPTS="-W --keep-going"
+          registry: ghcr.io
+          image: xmos/doc_builder:main
+          options: -v ${{ github.workspace }}:/xcore_sdk -w /xcore_sdk/documents
+          run: |
+            make clean html linkcheck SPHINXOPTS="-W --keep-going"
       - name: Package documentation artifacts
         working-directory: ./documents/_build
         run: |
