@@ -50,3 +50,4 @@ jobs:
         with:
           name: xcore_sdk_docs
           path: ./documents/_build/xcore_sdk_docs.tgz
+          retention-days: 5
