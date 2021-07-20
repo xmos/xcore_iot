@@ -42,7 +42,7 @@ jobs:
       - name: Build documentation
         uses: addnab/docker-run-action@v3
         with:
-          registry: ghcr.io
+          registry: gcr.io
           image: xmos/doc_builder:main
           options: -v ${{ github.workspace }}:/xcore_sdk -w /xcore_sdk/documents
           run: |
