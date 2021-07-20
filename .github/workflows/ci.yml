@@ -24,31 +24,38 @@ env:
   XCORE_SDK_PATH: ${{ github.workspace }}
 
 jobs:
-  setup:
-    name: Setup
+  # setup:
+  #   name: Setup
+  #   runs-on: ubuntu-latest
+  #   if: |
+  #     github.event_name == 'workflow_dispatch' ||
+  #     (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
+  #   steps:
+  #     - name: Checkout SDK
+  #       uses: actions/checkout@v2
+  #       with:
+  #         submodules: recursive
+  documentation:
+    name: Build and package documentation
     runs-on: ubuntu-latest
+    # needs: Setup
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
+    # container:
+    #   image: ghcr.io/xmos/doc_builder:main
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
         with:
           submodules: recursive
-  documentation:
-    name: Build and package documentation
-    runs-on: ubuntu-latest
-    needs: setup
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
-    container:
-      image: ghcr.io/xmos/doc_builder:main
-    steps:
-      - name: Build documentation
-        working-directory: ./documents
+      - name: Pull doc_builder container
         run: |
-          make clean html linkcheck SPHINXOPTS="-W --keep-going"
+          docker pull ghcr.io/xmos/doc_builder:main 
+      - name: Build documentation
+        run: |
+          ls -la
+          docker run --rm -w /documents -v ${{ github.workspace }}:/ ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
       - name: Package documentation artifacts
         working-directory: ./documents/_build
         run: |
