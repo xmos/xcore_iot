@@ -161,8 +161,9 @@ void rtos_i2c_master_init(
             &i2c_master_ctx->ctx,
             p_scl, scl_bit_position, scl_other_bits_mask,
             p_sda, sda_bit_position, sda_other_bits_mask,
-            tmr,
             kbits_per_second);
+
+    xassert(tmr == 0);
 
     /*
      * TODO: Setting all of these here results in all these functions

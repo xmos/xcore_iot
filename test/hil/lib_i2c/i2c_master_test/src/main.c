@@ -100,7 +100,6 @@ void test() {
             i2c_ctx_ptr,
             p_scl, p_scl_bit_pos, 0,
             p_sda, p_sda_bit_pos, 0,
-            0,
             SPEED); /* kbps */
 
     SETSR(XS1_SR_QUEUE_MASK | XS1_SR_FAST_MASK);

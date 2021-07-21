@@ -27,7 +27,6 @@ int main(void) {
             &i2c_ctx,
             p_i2c, 1, 0,
             p_i2c, 3, 0,
-            0,
             100); /* kbps */
 
     PAR_JOBS (

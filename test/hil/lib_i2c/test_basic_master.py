@@ -39,7 +39,12 @@ def do_master_test(stop, speed, port_setup):
     if speed == 10:
         tester.set_min_testlevel('nightly')
 
+    vcd_args = '-o ' + binary + 'test.vcd'
+    vcd_args += ( ' -tile tile[0] -ports -ports-detailed -instructions'
+    ' -functions -cycles -clock-blocks -pads' )
+
     sim_args = ['--weak-external-drive']
+    #sim_args += [ '--vcd-tracing', vcd_args ]
 
     xmostest.run_on_simulator(resources['xsim'], binary,
                               simthreads = [checker],

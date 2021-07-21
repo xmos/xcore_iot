@@ -37,12 +37,12 @@ def do_test(stop, port_setup):
                                       {'speed' : speed, 'stop' : stop, 'port_setup' : port_setup},
                                      regexp=True)
 
-    # vcd_args = '-o test.vcd'
-    # vcd_args += ( ' -tile tile[0] -ports -ports-detailed -instructions'
-    #   ' -functions -cycles -clock-blocks -pads' )
+    vcd_args = '-o ' + binary + 'test.vcd'
+    vcd_args += ( ' -tile tile[0] -ports -ports-detailed -instructions'
+    ' -functions -cycles -clock-blocks -pads' )
 
     sim_args = ['--weak-external-drive']
-    # sim_args += [ '--vcd-tracing', vcd_args ]
+    #sim_args += [ '--vcd-tracing', vcd_args ]
 
     xmostest.run_on_simulator(resources['xsim'], binary,
                               simthreads = [checker],

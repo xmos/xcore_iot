@@ -46,7 +46,6 @@ void test() {
             i2c_ctx_ptr,
             p_scl, 0, 0,
             p_sda, 0, 0,
-            0,
             400); /* kbps */
 
     SETSR(XS1_SR_QUEUE_MASK | XS1_SR_FAST_MASK);

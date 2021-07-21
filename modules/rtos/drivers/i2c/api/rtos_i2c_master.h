@@ -225,8 +225,7 @@ void rtos_i2c_master_start(
  * \param sda_other_bits_mask A value that is ORed into the port value driven to \p p_sda
  *                            both when SDA is high and low. The bit representing SDA (as
  *                            well as SCL if they share the same port) must be set to 0.
- * \param tmr                 The hardware timer to use for the I2C bus timing. If set to
- *                            0 then a new hardware timer is allocated.
+ * \param tmr                 This is unused and should be set to 0. This will be removed.
  * \param kbits_per_second    The speed of the I2C bus. The maximum value allowed is 400.
  */
 void rtos_i2c_master_init(

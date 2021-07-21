@@ -309,11 +309,11 @@ class I2CMasterChecker(xmostest.SimThread):
         speed_in_kbps = pow(10, 6) / avg_bit_time
         print "Speed = %d Kbps" % int(speed_in_kbps + .5)
         if self._expected_speed != None and \
-          (speed_in_kbps < 0.99 * self._expected_speed):
-           print "ERROR: speed is <1% slower than expected"
+          (speed_in_kbps < 0.90 * self._expected_speed):
+           print "ERROR: speed is 10% or more slower than expected"
 
         if self._expected_speed != None and \
-          (speed_in_kbps > self._expected_speed * 1.05):
+          (speed_in_kbps > self._expected_speed * 1.005):
            print "ERROR: speed is faster than expected"
 
       if self._byte_num == 0:
