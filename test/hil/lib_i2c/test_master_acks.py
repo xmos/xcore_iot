@@ -18,7 +18,7 @@ def do_master_test(stop):
                                              True, True, False,
                                              False, True])
 
-    tester = xmostest.ComparisonTester(open('respected/ack_test_%s.expect' % stop),
+    tester = xmostest.ComparisonTester(open('expected/ack_test_%s.expect' % stop),
                                       'lib_i2c', 'i2c_master_sim_tests',
                                       'ack_test',
                                       {'speed':400, 'stop' : stop},

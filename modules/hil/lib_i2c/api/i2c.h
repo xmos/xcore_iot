@@ -38,18 +38,14 @@ struct i2c_master_struct {
     uint32_t sda_high;
     uint32_t scl_low;
     uint32_t sda_low;
-    hwtimer_t tmr;
-    int tmr_allocated;
-    unsigned kbits_per_second;
 
-    uint32_t bit_time;
-    uint32_t quarter_bit_time;
-    uint32_t half_bit_time;
-    uint32_t three_quarter_bit_time;
-    uint32_t low_period_ticks;
-    uint32_t bus_off_ticks;
+    uint16_t bit_time;
+    uint16_t p_setup_ticks;
+    uint16_t sr_setup_ticks;
+    uint16_t s_hold_ticks;
+    uint16_t low_period_ticks;
+    uint16_t high_period_ticks;
 
-    uint32_t last_fall_time;
     int interrupt_state;
     int stopped;
 };
@@ -138,8 +134,6 @@ void i2c_master_stop_bit_send(
  * \param sda_other_bits_mask A value that is ORed into the port value driven to \p p_sda
  *                            both when SDA is high and low. The bit representing SDA (as
  *                            well as SCL if they share the same port) must be set to 0.
- * \param tmr                 The hardware timer to use for the I2C bus timing. If set to
- *                            0 then a new hardware timer is allocated.
  * \param kbits_per_second    The speed of the I2C bus. The maximum value allowed is 400.
  */
 void i2c_master_init(
@@ -150,7 +144,6 @@ void i2c_master_init(
         const port_t p_sda,
         const uint32_t sda_bit_position,
         const uint32_t sda_other_bits_mask,
-        hwtimer_t tmr,
         const unsigned kbits_per_second);
 
 
