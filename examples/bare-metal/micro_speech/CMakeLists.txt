@@ -84,21 +84,21 @@ set(KISS_FFT_SOURCES
 include("${SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(MICRO_FEATURES_SOURCES
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.c"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_lut.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/window.c"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/window_util.c"
 )
 
 #**********************
@@ -130,10 +130,10 @@ set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal
 #**********************
 
 set(APP_SOURCES
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/feature_provider.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/recognize_commands.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_features_generator.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/feature_provider.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/recognize_commands.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_features_generator.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.cc"
   "${PROJECT_SOURCE_DIR}/app/audio_provider.cc"
   "${PROJECT_SOURCE_DIR}/app/command_responder.cc"
   "${PROJECT_SOURCE_DIR}/app/fifo.c"
@@ -148,10 +148,10 @@ set(APP_SOURCES
 # Test sources
 #*************************************************
 set(TEST_SOURCES
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/system_setup.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/no_micro_features_data.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/yes_micro_features_data.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/system_setup.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/no_micro_features_data.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/yes_micro_features_data.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech/micro_features/micro_model_settings.cc"
   "${PROJECT_SOURCE_DIR}/model/model.cc"
   "${PROJECT_SOURCE_DIR}/test/micro_speech_test.cc"
 )
@@ -161,7 +161,7 @@ set(TEST_SOURCES
 #**********************
 set(COMMON_TARGET_SOURCES
   ${ADDITIONAL_C_SOURCES}
-  ${XCORE_INTERPRETER_SOURCES}
+  ${XCORE_RUNTIME_SOURCES}
 )
 
 target_sources(micro_speech
@@ -180,13 +180,13 @@ target_sources(micro_speech_test
 
 set(COMMON_TARGET_INCLUDES
   ${ADDITIONAL_INCLUDE_DIR}
-  ${XCORE_INTERPRETER_INCLUDES}
+  ${XCORE_RUNTIME_INCLUDES}
   ${KISS_FFT_INCLUDE_DIR}
   ${LIB_DSP_INCLUDE_DIR}
   ${LIB_MIC_ARRAY_INCLUDE_DIR}
   "${LIB_MIC_ARRAY_SOURCE_DIR}/lib_mic_array/src/fir"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/micro_speech"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib"
   "${PROJECT_SOURCE_DIR}/model"
   "${PROJECT_SOURCE_DIR}/app"
 )
