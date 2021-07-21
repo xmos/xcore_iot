@@ -74,3 +74,6 @@
 [submodule "lib_src"]
 	path = modules/lib_src
 	url = git@github.com:xmos/lib_src.git
+[submodule "modules/aif/tflite-micro"]
+	path = modules/aif/tflite-micro
+	url = git@github.com:xmos/tflite-micro.git
