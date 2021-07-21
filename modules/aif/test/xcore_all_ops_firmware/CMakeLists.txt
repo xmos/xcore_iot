@@ -60,15 +60,15 @@ set_target_properties(xcore_all_ops_firmware PROPERTIES OUTPUT_NAME xcore_all_op
 include("${PROJECT_SOURCE_DIR}/../../ai_framework.cmake")
 
 target_sources(xcore_all_ops_firmware
-  PRIVATE ${XCORE_INTERPRETER_SOURCES}
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/all_ops_resolver.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/kernels/ethosu.cc"
+  PRIVATE ${XCORE_RUNTIME_SOURCES}
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/all_ops_resolver.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/kernels/ethosu.cc"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/model_runner.cc"
 )
 
 target_include_directories(xcore_all_ops_firmware
-  PRIVATE ${XCORE_INTERPRETER_INCLUDES}
+  PRIVATE ${XCORE_RUNTIME_INCLUDES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
