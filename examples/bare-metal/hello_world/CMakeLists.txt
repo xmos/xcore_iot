@@ -59,9 +59,9 @@ set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal
 include("${SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(APP_SOURCES
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/main.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/constants.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/constants.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/main.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/constants.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/constants.cc"
   "${PROJECT_SOURCE_DIR}/model.c"
   "${PROJECT_SOURCE_DIR}/output_handler.cc"
   "${PROJECT_SOURCE_DIR}/main_functions.cc"
@@ -69,8 +69,8 @@ set(APP_SOURCES
 
 set(TEST_APP_SOURCES
   ${APP_SOURCES}
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/hello_world_test.cc"
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/output_handler_test.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/hello_world_test.cc"
+  "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world/output_handler_test.cc"
 )
 
 #**********************
@@ -78,14 +78,14 @@ set(TEST_APP_SOURCES
 #**********************
 target_sources(hello_world
   PRIVATE ${ADDITIONAL_C_SOURCES}
-  PRIVATE ${XCORE_INTERPRETER_SOURCES}
+  PRIVATE ${XCORE_RUNTIME_SOURCES}
   PRIVATE ${APP_SOURCES}
 )
 
 target_include_directories(hello_world
   PRIVATE ${ADDITIONAL_INCLUDE_DIR}
-  PRIVATE ${XCORE_INTERPRETER_INCLUDES}
-  PRIVATE "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world"
+  PRIVATE ${XCORE_RUNTIME_INCLUDES}
+  PRIVATE "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/micro/examples/hello_world"
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 

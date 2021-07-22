@@ -3,7 +3,7 @@
 
 #include "inference_engine.h"
 
-#include <platform.h>  // for PLATFORM_REFERENCE_MHZ
+#include <platform.h> // for PLATFORM_REFERENCE_MHZ
 
 #include <cstddef>
 #include <cstdint>
@@ -15,7 +15,6 @@
 #include "tensorflow/lite/micro/kernels/xcore/xcore_profiler.h"
 #include "tensorflow/lite/micro/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "tensorflow/lite/version.h"
 #include "vww.h"
 #include "xcore_device_memory.h"
 
@@ -26,18 +25,21 @@ tflite::micro::xcore::XCoreProfiler *profiler = nullptr;
 constexpr int kTensorArenaSize = 100000;
 uint8_t tensor_arena[kTensorArenaSize];
 
-void invoke() {
+void invoke()
+{
   // Run inference, and report any error
   printf("Running inference...\n");
   TfLiteStatus invoke_status = interpreter->Invoke();
 
-  if (invoke_status != kTfLiteOk) {
+  if (invoke_status != kTfLiteOk)
+  {
     TF_LITE_REPORT_ERROR(reporter, "Invoke failed\n");
   }
 }
 
 void initialize(unsigned char **input, int *input_size, unsigned char **output,
-                int *output_size) {
+                int *output_size)
+{
   // Set up logging
   static tflite::MicroErrorReporter error_reporter;
   reporter = &error_reporter;
@@ -48,7 +50,8 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
   model = tflite::GetModel(vww_model_data);
-  if (model->version() != TFLITE_SCHEMA_VERSION) {
+  if (model->version() != TFLITE_SCHEMA_VERSION)
+  {
     TF_LITE_REPORT_ERROR(reporter,
                          "Model provided is schema version %d not equal "
                          "to supported version %d.",
@@ -78,7 +81,8 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
 
   // Allocate memory from the tensor_arena for the model's tensors.
   TfLiteStatus allocate_tensors_status = interpreter->AllocateTensors();
-  if (allocate_tensors_status != kTfLiteOk) {
+  if (allocate_tensors_status != kTfLiteOk)
+  {
     TF_LITE_REPORT_ERROR(reporter, "AllocateTensors() failed");
     return;
   }
@@ -90,33 +94,52 @@ void initialize(unsigned char **input, int *input_size, unsigned char **output,
   *output_size = interpreter->output(0)->bytes;
 }
 
-void print_profiler_summary() {
+void print_profiler_summary()
+{
   uint32_t count = 0;
-  uint32_t const *times = nullptr;
-  const char *op_name;
   uint32_t total = 0;
   uint32_t time_us = 0;
+  const uint32_t *durations = nullptr;
+  void *v_resolver = nullptr;
+  const char *op_name;
 
-  if (profiler) {
+  if (profiler)
+  {
     count = profiler->GetNumEvents();
-    times = profiler->GetEventDurations();
-  }
+    durations = profiler->GetEventDurations();
 
-  for (size_t i = 0; i < interpreter->operators_size(); ++i) {
-    if (i < count) {
-      tflite::NodeAndRegistration node_and_reg =
-          interpreter->node_and_registration(static_cast<int>(i));
-      const TfLiteRegistration *registration = node_and_reg.registration;
-      if (registration->builtin_code == tflite::BuiltinOperator_CUSTOM) {
-        op_name = registration->custom_name;
-      } else {
-        op_name = tflite::EnumNameBuiltinOperator(
-            tflite::BuiltinOperator(registration->builtin_code));
+    size_t subgraph_idx = 0;
+    const tflite::SubGraph *subgraph = model->subgraphs()->Get(subgraph_idx);
+    auto *opcodes = model->operator_codes();
+    uint32_t operators_size = NumSubgraphOperators(subgraph);
+    const tflite::OpResolver *c_resolver = static_cast<const tflite::OpResolver *>(v_resolver);
+
+    for (size_t i = 0; i < operators_size; ++i)
+    {
+      if (i < count)
+      {
+        const auto *op = subgraph->operators()->Get(i);
+        const size_t index = op->opcode_index();
+        const auto *opcode = opcodes->Get(index);
+        const TfLiteRegistration *registration = nullptr;
+
+        GetRegistrationFromOpCode(opcode, *c_resolver, reporter,
+                                  &registration);
+
+        if (registration->builtin_code == tflite::BuiltinOperator_CUSTOM)
+        {
+          op_name = registration->custom_name;
+        }
+        else
+        {
+          op_name = tflite::EnumNameBuiltinOperator(
+              tflite::BuiltinOperator(registration->builtin_code));
+        }
+        time_us = durations[i] / PLATFORM_REFERENCE_MHZ;
+        total += time_us;
+        printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_us);
       }
-      time_us = times[i] / PLATFORM_REFERENCE_MHZ;
-      total += time_us;
-      printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_us);
     }
+    printf("TOTAL %lu microseconds\n", total);
   }
-  printf("TOTAL %lu microseconds\n", total);
 }

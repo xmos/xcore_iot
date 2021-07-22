@@ -10,8 +10,8 @@
 #define appconfSWMEM_TASK_PRIORITY (configMAX_PRIORITIES - 1)
 
 /* Model Runner */
-#define appconfTENSOR_ARENA_SIZE                                               \
-  (100000) // this is big enough for all test models
+#define appconfTENSOR_ARENA_SIZE \
+  (90000) // this is big enough for all test models
 #define appconfMODEL_RUNNER_TASK_STACK_SIZE (1024)
 
 /* ISR Dispatcher */

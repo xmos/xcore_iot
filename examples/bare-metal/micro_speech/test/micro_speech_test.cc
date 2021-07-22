@@ -20,18 +20,19 @@ limitations under the License.
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/testing/micro_test.h"
 #include "tensorflow/lite/schema/schema_generated.h"
-#include "tensorflow/lite/version.h"
 
 TF_LITE_MICRO_TESTS_BEGIN
 
-TF_LITE_MICRO_TEST(TestInvoke) {
+TF_LITE_MICRO_TEST(TestInvoke)
+{
   // Set up logging.
   tflite::MicroErrorReporter micro_error_reporter;
 
   // Map the model into a usable data structure. This doesn't involve any
   // copying or parsing, it's a very lightweight operation.
-  const tflite::Model* model = ::tflite::GetModel(g_model);
-  if (model->version() != TFLITE_SCHEMA_VERSION) {
+  const tflite::Model *model = ::tflite::GetModel(g_model);
+  if (model->version() != TFLITE_SCHEMA_VERSION)
+  {
     TF_LITE_REPORT_ERROR(&micro_error_reporter,
                          "Model provided is schema version %d not equal "
                          "to supported version %d.\n",
@@ -63,7 +64,7 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   interpreter.AllocateTensors();
 
   // Get information about the memory area to use for the model's input.
-  TfLiteTensor* input = interpreter.input(0);
+  TfLiteTensor *input = interpreter.input(0);
 
   // Make sure the input has the properties we expect.
   TF_LITE_MICRO_EXPECT_NE(nullptr, input);
@@ -74,21 +75,23 @@ TF_LITE_MICRO_TEST(TestInvoke) {
 
   // Copy a spectrogram created from a .wav audio file of someone saying "Yes",
   // into the memory area used for the input.
-  const int8_t* yes_features_data = g_yes_micro_f2e59fea_nohash_1_data;
-  for (size_t i = 0; i < input->bytes; ++i) {
+  const int8_t *yes_features_data = g_yes_micro_f2e59fea_nohash_1_data;
+  for (size_t i = 0; i < input->bytes; ++i)
+  {
     input->data.int8[i] = yes_features_data[i];
   }
 
   // Run the model on this input and make sure it succeeds.
   TfLiteStatus invoke_status = interpreter.Invoke();
-  if (invoke_status != kTfLiteOk) {
+  if (invoke_status != kTfLiteOk)
+  {
     TF_LITE_REPORT_ERROR(&micro_error_reporter, "Invoke failed\n");
   }
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);
 
   // Get the output from the model, and make sure it's the expected size and
   // type.
-  TfLiteTensor* output = interpreter.output(0);
+  TfLiteTensor *output = interpreter.output(0);
   TF_LITE_MICRO_EXPECT_EQ(2, output->dims->size);
   TF_LITE_MICRO_EXPECT_EQ(1, output->dims->data[0]);
   TF_LITE_MICRO_EXPECT_EQ(4, output->dims->data[1]);
@@ -110,14 +113,16 @@ TF_LITE_MICRO_TEST(TestInvoke) {
   TF_LITE_MICRO_EXPECT_GT(yes_score, no_score);
 
   // Now test with a different input, from a recording of "No".
-  const int8_t* no_features_data = g_no_micro_f9643d42_nohash_4_data;
-  for (size_t i = 0; i < input->bytes; ++i) {
+  const int8_t *no_features_data = g_no_micro_f9643d42_nohash_4_data;
+  for (size_t i = 0; i < input->bytes; ++i)
+  {
     input->data.int8[i] = no_features_data[i];
   }
 
   // Run the model on this "No" input.
   invoke_status = interpreter.Invoke();
-  if (invoke_status != kTfLiteOk) {
+  if (invoke_status != kTfLiteOk)
+  {
     TF_LITE_REPORT_ERROR(&micro_error_reporter, "Invoke failed\n");
   }
   TF_LITE_MICRO_EXPECT_EQ(kTfLiteOk, invoke_status);

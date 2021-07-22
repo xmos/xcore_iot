@@ -14,7 +14,7 @@ your application. */
 #define configMAX_PRIORITIES 32
 #define configRUN_MULTIPLE_PRIORITIES 1
 #define configUSE_TASK_PREEMPTION_DISABLE 1
-#define configUSE_CORE_EXCLUSION 1
+#define configUSE_CORE_AFFINITY 1
 #define configMINIMAL_STACK_SIZE (configSTACK_DEPTH_TYPE)256
 #define configMAX_TASK_NAME_LEN 16
 #define configUSE_16_BIT_TICKS 0
@@ -29,8 +29,8 @@ your application. */
 #define configUSE_QUEUE_SETS 1
 #define configUSE_TIME_SLICING 1
 #define configUSE_NEWLIB_REENTRANT 0
-#define configENABLE_BACKWARD_COMPATIBILITY                                    \
-  1 /* Required for FreeRTOS_TCP_WIN.c TODO: active closed bug, may have been  \
+#define configENABLE_BACKWARD_COMPATIBILITY                                   \
+  1 /* Required for FreeRTOS_TCP_WIN.c TODO: active closed bug, may have been \
        fixed upstream */
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 #define configSTACK_DEPTH_TYPE uint32_t
@@ -39,7 +39,7 @@ your application. */
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION 0
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
-#define configTOTAL_HEAP_SIZE 148000
+#define configTOTAL_HEAP_SIZE 138000
 #define configAPPLICATION_ALLOCATED_HEAP 0
 
 /* Hook function related definitions. */
@@ -53,7 +53,7 @@ your application. */
 /* Run time and task stats gathering related definitions. */
 #define configGENERATE_RUN_TIME_STATS 0
 #define configUSE_TRACE_FACILITY 0
-#define configUSE_STATS_FORMATTING_FUNCTIONS                                   \
+#define configUSE_STATS_FORMATTING_FUNCTIONS \
   2 /* Setting to 2 does not include <stdio.h> in tasks.c */
 
 /* Co-routine related definitions. */
