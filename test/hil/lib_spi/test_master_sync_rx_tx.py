@@ -38,7 +38,7 @@ def runtest():
     for full_load in [0, 1]:
         for miso_enabled in [0, 1]:
             for mosi_enabled in [0, 1]:
-                for div in [0, 1, 10]:
+                for div in [4, 8, 80]:
                     for mode in [0, 1, 2, 3]:
                         if not ((miso_enabled == 0) and (mosi_enabled == 0)):
                             do_rx_tx_sync(full_load, miso_enabled, mosi_enabled, div, mode)
