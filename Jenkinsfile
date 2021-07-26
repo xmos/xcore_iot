@@ -11,7 +11,7 @@ pipeline {
     parameters { // Available to modify on the job page within Jenkins if starting a build
         string( // use to try different tools versions
             name: 'TOOLS_VERSION',
-            defaultValue: '15.0.6',
+            defaultValue: '15.1.0',
             description: 'The tools version to build with (check /projects/tools/ReleasesTools/)'
         )
         booleanParam( // use to check results of rolling all conda deps forward
@@ -59,12 +59,6 @@ pipeline {
             when { expression { return params.UPDATE_ALL } }
             steps {
                 sh "conda update --all -y -q -p xcore_sdk_env"
-            }
-        }
-        stage("Build examples") {
-            steps {
-                sh """. /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/${params.TOOLS_VERSION}/SetEnv &&
-                      . activate ./xcore_sdk_env && bash test/build_examples.sh"""
             }
         }
         stage("Install AI Tools") {
