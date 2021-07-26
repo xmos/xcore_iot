@@ -27,9 +27,6 @@ def do_slave_rx_tx(full_load, miso_enable, mosi_enable, mode, in_place):
                                      {'full_load': full_load, 'miso_enable': miso_enable, 'mosi_enable': mosi_enable, 'mode': mode, 'in_place': in_place},
                                      regexp=True)
 
-    if full_load == 0:
-        tester.set_min_testlevel('nightly')
-
     xmostest.run_on_simulator(resources['xsim'], binary,
                               simthreads = [checker],
                               # simargs=['--vcd-tracing', '-o ./spi_slave_rx_tx/trace{load}_{miso}_{mosi}_{m}_{in_place}.vcd -tile tile[0] -pads -functions -clock-blocks -ports-detailed -instructions'.format(load=full_load,miso=miso_enable,mosi=mosi_enable,m=mode,in_place=in_place)],
@@ -39,8 +36,8 @@ def do_slave_rx_tx(full_load, miso_enable, mosi_enable, mode, in_place):
 
 def runtest():
     for full_load in [0, 1]:
-        for miso_enable in [0, 1]:
-            for mosi_enable in [0, 1]:
+        for miso_enable in [1]:
+            for mosi_enable in [1]:
                 for mode in range(0, 4):
                     for in_place in [0, 1]:
                         if not (mosi_enable == 0 and miso_enable == 0):

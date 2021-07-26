@@ -25,8 +25,7 @@ port_t setup_data_port = XS1_PORT_16B;
 port_t setup_resp_port = XS1_PORT_1F;
 
 #define NUMBER_OF_TEST_BYTES 16
-#define KBPS 45000
-// #define KBPS 45454
+#define KBPS 25000
 
 static const uint8_t tx_data[NUMBER_OF_TEST_BYTES] = {
         0xaa, 0x02, 0x04, 0x08, 0x10, 0x20, 0x04, 0x80,
@@ -211,7 +210,7 @@ void end(void *app_data, uint8_t **out_buf, size_t bytes_written, uint8_t **in_b
     //    CPOL, CPHA, MOSI_ENABLED, MISO_ENABLED, data->num_bits, KBPS, 2000);
 
     broadcast_settings(setup_strobe_port, setup_data_port,
-            CPOL, CPHA, MOSI_ENABLED, MISO_ENABLED, data->num_bits, KBPS, 2000);
+            CPOL, CPHA, MOSI_ENABLED, MISO_ENABLED, data->num_bits, KBPS, 3000);
 }
 
 DEFINE_INTERRUPT_PERMITTED(spi_isr_grp, void, app, void)
@@ -231,7 +230,7 @@ DEFINE_INTERRUPT_PERMITTED(spi_isr_grp, void, app, void)
     printf("Send initial settings\n");
     /* First check a multi byte transfer */
     broadcast_settings(setup_strobe_port, setup_data_port,
-            CPOL, CPHA, MOSI_ENABLED, MISO_ENABLED, app_data.num_bits, KBPS, 2000);
+            CPOL, CPHA, MOSI_ENABLED, MISO_ENABLED, app_data.num_bits, KBPS, 3000);
 
     spi_slave(&spi_cbg, p_sclk, MOSI, MISO, p_cs, cb, CPOL, CPHA);
 }

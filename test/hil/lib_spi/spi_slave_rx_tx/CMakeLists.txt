@@ -33,7 +33,7 @@ add_compile_definitions(
 
 set(FULL_LOAD 0 1)
 set(MISO_ENABLED 0 1)
-set(MOSI_ENABLED 0 1)
+set(MOSI_ENABLED 1)
 set(SPI_MODE 0 1 2 3)
 set(IN_PLACE 0 1)
 
