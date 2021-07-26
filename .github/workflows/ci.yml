@@ -11,8 +11,11 @@
 
 name: CI
 
-on: [push, pull_request]
-  branches: [ main, $default-branch ]
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
 
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
