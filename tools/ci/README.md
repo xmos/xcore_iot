@@ -4,11 +4,11 @@
 
 To build the docker container locally, run the following command:
 
-    $ docker build -t ghcr.io/xmos/xcore_sdk_builder:develop .
+    $ docker build -t ghcr.io/xmos/xcore_sdk_builder:latest .
 
 To run the container:
 
-    $ docker run -it ghcr.io/xmos/xcore_sdk_builder:develop
+    $ docker run -it ghcr.io/xmos/xcore_sdk_builder:latest
 
 ## Running Source Checks
 
