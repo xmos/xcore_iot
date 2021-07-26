@@ -22,7 +22,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  TAG: xmos/xcore_sdk_builder:latest
+  IMAGE_NAME: xmos/xcore_sdk_builder
+  TAG: ghcr.io/${{ env.IMAGE_NAME }}:latest
 
 jobs:
   build-and-push-image:
@@ -40,6 +41,11 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v3
+      #   with:
+      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}          
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
