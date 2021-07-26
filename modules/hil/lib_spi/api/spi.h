@@ -290,7 +290,7 @@ typedef void (*slave_transaction_started_t)(void *app_data, uint8_t **out_buf, s
 typedef void (*slave_transaction_ended_t)(void *app_data, uint8_t **out_buf, size_t bytes_written, uint8_t **in_buf, size_t bytes_read, size_t read_bits);
 
 /**
- * This attribute must be specified on all I2C callback functions
+ * This attribute must be specified on all SPI callback functions
  * provided by the application.
  */
 #define SPI_CALLBACK_ATTR __attribute__((fptrgroup("spi_callback")))
@@ -301,10 +301,13 @@ typedef void (*slave_transaction_ended_t)(void *app_data, uint8_t **out_buf, siz
  * prior to passing it to one of the SPI slaves.
  */
 typedef struct {
-    /** Pointer to the application's slave_transaction_started_t function to be called by the I2C device */
+    /** Pointer to the application's slave_transaction_started_t function to be called by the SPI device */
     SPI_CALLBACK_ATTR slave_transaction_started_t slave_transaction_started;
 
-    /** Pointer to the application's slave_transaction_ended_t function to be called by the I2C device */
+    /** Pointer to the application's slave_transaction_ended_t function to be called by the SPI device
+     *  Note: The time spent in this callback must be less than the minimum CS deassertion to reassertion
+     *  time.  If this is violated the first word of the proceeding transaction will be lost.
+     */
     SPI_CALLBACK_ATTR slave_transaction_ended_t slave_transaction_ended;
 
     /** Pointer to application specific data which is passed to each callback. */
@@ -313,6 +316,9 @@ typedef struct {
 
 /**
  * Initializes a SPI slave.
+ *
+ * Note: Verified at 25000 kbps, with a 3000ns CS assertion to first clock
+  *      in all modes.
  *
  * \param spi_cbg     The spi_slave_callback_group_t context to use.
  * \param p_sclk      The SPI slave's SCLK port. Must be a 1-bit port.
