@@ -23,7 +23,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: xmos/xcore_sdk_builder
-  TAG: ghcr.io/${{ env.IMAGE_NAME }}:latest
+  TAG: ghcr.io/xmos/xcore_sdk_builder:latest
 
 jobs:
   build-and-push-image:
