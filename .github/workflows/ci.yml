@@ -14,10 +14,10 @@ name: CI
 on:
   push:
     branches:
-      - develop
+      - 'develop'
   pull_request:
     branches:
-      - develop
+      - 'develop'
 
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
@@ -43,10 +43,6 @@ jobs:
       - name: Build documentation
         run: |
           docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
-      # - name: Package documentation artifacts
-      #   working-directory: ./documents/_build
-      #   run: |
-      #     tar -czf xcore_sdk_docs.tgz html
       - name: Save documentation artifacts
         uses: actions/upload-artifact@v2
         with:

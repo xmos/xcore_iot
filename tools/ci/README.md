@@ -1,12 +1,22 @@
 # Continuous Integration Tools
 
+## Building Docker container
+
+To build the docker container locally, run the following command:
+
+    $ docker build -t ghcr.io/xmos/xcore_sdk_builder:develop .
+
+To run the container:
+
+    $ docker run -it ghcr.io/xmos/xcore_sdk_builder:develop
+
+## Running Source Checks
+
 Source and license checks must currently be performed manually.  The `infr` tools must be installed first.
 
 To install te `infr` tools, run:
 
     $ pip install --src infr -r inf_requirements.txt
-
-## Running Source Checks
 
 ### Source Check
 
