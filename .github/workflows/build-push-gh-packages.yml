@@ -17,6 +17,9 @@ on:
     paths:
       - '/tools/ci/Dockerfile'
 
+  # Allow manually triggering of the workflow.
+  workflow_dispatch: {}
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: xcore_sdk_builder
