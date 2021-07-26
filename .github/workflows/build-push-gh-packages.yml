@@ -10,12 +10,12 @@ on:
     branches:
       - 'develop'
     paths:
-      - '/tools/ci/Dockerfile'
+      - 'tools/ci/Dockerfile'
   pull_request:
     branches:
       - 'develop'
     paths:
-      - '/tools/ci/Dockerfile'
+      - 'tools/ci/Dockerfile'
 
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
