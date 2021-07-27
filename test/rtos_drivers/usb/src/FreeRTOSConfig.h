@@ -20,7 +20,7 @@ your application. */
 #define configMAX_PRIORITIES                    32
 #define configRUN_MULTIPLE_PRIORITIES           1
 #define configUSE_TASK_PREEMPTION_DISABLE       1
-#define configUSE_CORE_EXCLUSION                1
+#define configUSE_CORE_AFFINITY                 1
 #define configMINIMAL_STACK_SIZE                ( configSTACK_DEPTH_TYPE ) 256
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0

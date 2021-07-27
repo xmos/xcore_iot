@@ -9,6 +9,8 @@ on:
   push:
     branches:
       - 'develop'
+    tags:
+      - 'v*'
     paths:
       - 'tools/ci/Dockerfile'
   pull_request:

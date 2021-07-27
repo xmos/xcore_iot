@@ -89,7 +89,6 @@ add_compile_definitions(
 )
 
 ## Select demo
-set(XMOS_TINYUSB_DEMO                            FALSE)
 set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
 set(USE_TINYUSB_DEMO_AUDIO_TEST                  TRUE)
 set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               FALSE)
@@ -105,39 +104,27 @@ set(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST FALSE)
 ## In progress
 set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
 
-if(XMOS_TINYUSB_DEMO)
-    set(DEMO_SOURCES
-        "src/xmos_demo/demo_main.c"
-        "src/xmos_demo/msc_disk_dual.c"
-        "src/xmos_demo/usb_descriptors.c"
-    )
-    set(DEMO_INCLUDES
-        "src/xmos_demo"
-    )
-    add_compile_definitions(MSC_MAX_DISKS=2)
-else()
-    include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
+include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
 
-    set(DEMO_SOURCES ${TINYUSB_DEMO_SOURCES})
-    set(DEMO_INCLUDES ${TINYUSB_DEMO_INCLUDES})
+set(DEMO_SOURCES ${TINYUSB_DEMO_SOURCES})
+set(DEMO_INCLUDES ${TINYUSB_DEMO_INCLUDES})
 
 if(USE_TINYUSB_DEMO_USBTMC)
     add_compile_definitions(BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_FULL_SPEED)
 else()
     add_compile_definitions(BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
 endif()
-endif()
 
 ## Create targets
-if(DEFINED THIS_XCORE_TILE)
-    set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
-    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
+# if(DEFINED THIS_XCORE_TILE)
+#     set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
+#     file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
+#     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
 
-    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
-else()
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
-endif()
+#     add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
+# else()
+#     set(TARGET_NAME "${PROJECT_NAME}.xe")
+# endif()
 
 add_executable(${TARGET_NAME})
 
