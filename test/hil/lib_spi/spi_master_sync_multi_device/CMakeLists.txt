@@ -36,7 +36,7 @@ set(FULL_LOAD 0 1)
 set(MISO_ENABLED 0 1)
 set(MOSI_ENABLED 0 1)
 set(SPI_MODE 0 1 2 3)
-set(DIVS 0 1 10)
+set(DIVS 4 8 80)
 
 set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
@@ -49,26 +49,28 @@ foreach(load ${FULL_LOAD})
         foreach(mosi ${MOSI_ENABLED})
             foreach(mode ${SPI_MODE})
                 foreach(div ${DIVS})
-                    set(TARGET_NAME_NO_EXT "${APP_NAME}_${load}_${miso}_${mosi}_${div}_${mode}")
-                    set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
+                    if(${MISO_ENABLED} OR ${MOSI_ENABLED})
+                        set(TARGET_NAME_NO_EXT "${APP_NAME}_${load}_${miso}_${mosi}_${div}_${mode}")
+                        set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
 
-                    add_executable(${TARGET_NAME})
+                        add_executable(${TARGET_NAME})
 
-                    target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${SPI_HIL_SOURCES})
-                    target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${SPI_HIL_INCLUDES})
+                        target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${SPI_HIL_SOURCES})
+                        target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${SPI_HIL_INCLUDES})
 
-                    target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-                    target_compile_definitions(${TARGET_NAME}
-                                               PRIVATE
-                                                   FULL_LOAD=${load}
-                                                   MISO_ENABLED=${miso}
-                                                   MOSI_ENABLED=${mosi}
-                                                   MODE=${mode}
-                                                   DIV=${div}
-                                                )
+                        target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+                        target_compile_definitions(${TARGET_NAME}
+                                                   PRIVATE
+                                                       FULL_LOAD=${load}
+                                                       MISO_ENABLED=${miso}
+                                                       MOSI_ENABLED=${mosi}
+                                                       MODE=${mode}
+                                                       DIV=${div}
+                                                    )
 
-                    target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-                    install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
+                        target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+                        install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
+                    endif()
                 endforeach()
             endforeach()
         endforeach()

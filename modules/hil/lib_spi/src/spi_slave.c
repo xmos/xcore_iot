@@ -38,7 +38,9 @@ typedef struct internal_ctx {
 __attribute__((always_inline))
 static inline void receive_part_word(internal_ctx_t *ctx, uint32_t in_word, size_t *valid_bits) {
     uint32_t mask;
-    uint32_t diff = ctx->in_buf_end - ctx->in_buf_cur;
+    uint32_t diff = ((ctx->in_buf_cur + 4) <= ctx->in_buf_end)
+                    ? 4
+                    : (ctx->in_buf_end - ctx->in_buf_cur);
 
     if (*valid_bits > 0) {
         asm volatile("mkmsk %0, %1": "=r"(mask) : "r"(*valid_bits));
@@ -118,45 +120,35 @@ static inline void receive_part_word(internal_ctx_t *ctx, uint32_t in_word, size
 }
 
 __attribute__((always_inline))
-static inline void receive_word(internal_ctx_t *ctx, uint32_t in_word) {
-    uint32_t diff = ctx->in_buf_end - ctx->in_buf_cur;
+static void inline receive_word(internal_ctx_t *ctx, uint32_t in_word) {
     in_word = bitrev(in_word);
+    in_word = byterev(in_word);
 
-    switch (diff) {
-        default:
-        case 4:
-            *(ctx->in_buf_cur + 3) = (uint8_t)((in_word>>0) & 0xff);
-        case 3:
-            *(ctx->in_buf_cur + 2) = (uint8_t)((in_word>>8) & 0xff);
-        case 2:
-            *(ctx->in_buf_cur + 1) = (uint8_t)((in_word>>16) & 0xff);
-        case 1:
-            *(ctx->in_buf_cur + 0) = (uint8_t)((in_word>>24) & 0xff);
-        case 0:
+    for (int i=0; i<4; i++)
+    {
+        if (ctx->in_buf_cur >= ctx->in_buf_end) {
             break;
+        } else {
+            *(ctx->in_buf_cur) = (uint8_t)(in_word);
+            in_word >>= 8;
+            ctx->in_buf_cur++;
+        }
     }
-    ctx->in_buf_cur += (diff > 4) ? 4 : diff;
 }
 
 __attribute__((always_inline))
 static inline uint32_t get_next_word(internal_ctx_t *ctx) {
     uint32_t out_word = 0;
-    uint32_t diff = ctx->out_buf_end - ctx->out_buf_cur;
 
-    switch (diff) {
-        default:
-        case 4:
-            out_word |= bitrev( *(ctx->out_buf_cur + 3) <<0);
-        case 3:
-            out_word |= bitrev( *(ctx->out_buf_cur + 2) <<8);
-        case 2:
-            out_word |= bitrev( *(ctx->out_buf_cur + 1) <<16);
-        case 1:
-            out_word |= bitrev( *(ctx->out_buf_cur + 0) <<24);
-        case 0:
+    for (int i=0; i<4; i++)
+    {
+        if (ctx->out_buf_cur >= ctx->out_buf_end) {
             break;
+        } else {
+            out_word |= bitrev(*(ctx->out_buf_cur) << (24 - (8*i)));
+            ctx->out_buf_cur++;
+        }
     }
-    ctx->out_buf_cur += (diff > 4) ? 4 : diff;
 
     return out_word;
 }
@@ -170,9 +162,8 @@ DEFINE_INTERRUPT_CALLBACK(spi_isr_grp, cs_isr, arg)
     port_set_trigger_value(ctx->p_cs, ctx->cs_val);
 
     if (ctx->cs_val == ASSERTED) {
-        if (ctx->p_mosi != 0) {
-            port_clear_buffer(ctx->p_mosi);
-        }
+        port_clear_buffer(ctx->p_mosi);
+
         if (ctx->p_miso != 0) {
             port_clear_buffer(ctx->p_miso);
         }
@@ -189,13 +180,8 @@ DEFINE_INTERRUPT_CALLBACK(spi_isr_grp, cs_isr, arg)
             ctx->out_buf_end = NULL;
         }
 
-        if (ctx->p_mosi != 0) {
-            ctx->in_buf_cur = ctx->in_buf;
-            ctx->in_buf_end = (ctx->in_buf == NULL) ? NULL : (ctx->in_buf  + in_buf_len);
-        } else {
-            ctx->in_buf_cur = NULL;
-            ctx->in_buf_end = NULL;
-        }
+        ctx->in_buf_cur = ctx->in_buf;
+        ctx->in_buf_end = (ctx->in_buf == NULL) ? NULL : (ctx->in_buf  + in_buf_len);
 
         ctx->running = 1;
 
@@ -231,12 +217,10 @@ DEFINE_INTERRUPT_CALLBACK(spi_isr_grp, cs_isr, arg)
         uint32_t bytes_read = 0;
         uint32_t bytes_written = 0;
 
-        if (ctx->p_mosi != 0) {
-            read_bits = port_force_input(ctx->p_mosi, &data);
-            receive_part_word(ctx, data, &read_bits);
-            bytes_read = ctx->in_buf_cur - ctx->in_buf;
-            port_clear_buffer(ctx->p_mosi);
-        }
+        read_bits = port_force_input(ctx->p_mosi, &data);
+        receive_part_word(ctx, data, &read_bits);
+        bytes_read = ctx->in_buf_cur - ctx->in_buf;
+        port_clear_buffer(ctx->p_mosi);
 
         if (ctx->p_miso != 0) {
             bytes_written = ctx->out_buf_cur - ctx->out_buf;
@@ -292,11 +276,9 @@ void spi_slave(
     clock_set_divide(cb_clk, 0);    /* Ensure divide is 0 */
 
     /* Setup the MOSI port */
-    if (p_mosi != 0) {
-        port_enable(p_mosi);
-        port_protocol_in_strobed_slave(p_mosi, p_cs, cb_clk);
-        port_set_transfer_width(p_mosi, 32);
-    }
+    port_enable(p_mosi);
+    port_protocol_in_strobed_slave(p_mosi, p_cs, cb_clk);
+    port_set_transfer_width(p_mosi, 32);
 
     /* Setup the MISO port */
     if (p_miso != 0) {
@@ -328,15 +310,14 @@ void spi_slave(
     interrupt_unmask_all();
 
     while (1) {
-        if (p_mosi != 0) {
-            in_word = port_in(p_mosi);
-        }
+        in_word = port_in(p_mosi);
+
         interrupt_mask_all();
         {
             asm volatile( "" ::: "memory" );
             if (int_ctx.running) {
-                receive_word(&int_ctx, in_word);
                 out_word = get_next_word(&int_ctx);
+                receive_word(&int_ctx, in_word);
             }
         }
         interrupt_unmask_all();
