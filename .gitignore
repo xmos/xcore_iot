@@ -33,6 +33,7 @@
 **/.venv/**
 .metadata
 *.gtkw
+*.swmem
 
 # Test cruft
 **/.pytest_cache/*
