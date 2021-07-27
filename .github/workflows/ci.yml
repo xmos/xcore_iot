@@ -26,12 +26,33 @@ env:
   XCORE_SDK_PATH: ${{ github.workspace }}
 
 jobs:
+  build:
+    name: Build applications
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Pull xcore_sdk_builder container
+        run: |
+          docker pull ghcr.io/xmos/xcore_sdk_builder:latest 
+      
+      - name: Build examples
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk hcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_metal_examples.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk hcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_examples.sh smoke
+
+      - name: Build tests
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk hcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_tests.sh smoke
+
+
   documentation:
     name: Build and package documentation
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
