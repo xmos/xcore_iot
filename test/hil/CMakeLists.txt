@@ -30,7 +30,11 @@ set(PROJECT_VERSION 0.5.0)
 ## Enable languages for project
 enable_language(CXX C ASM)
 
-set(HIL_TEST_LIBS "lib_i2c" "lib_i2s" "lib_spi")
+set(HIL_TEST_LIBS
+    "lib_i2c"
+    "lib_i2s"
+    "lib_spi"
+)
 
 foreach(lib ${HIL_TEST_LIBS})
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${lib})
