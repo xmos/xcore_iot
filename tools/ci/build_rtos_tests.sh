@@ -6,15 +6,15 @@ if [ -z "$1" ] || [ "$1" == "all" ]
 then
     # row format is: "path/to/application BOARD"
     applications=(
-        "repos/xcore_sdk/test/rtos_drivers/hil XCORE-AI-EXPLORER"
-        "repos/xcore_sdk/test/rtos_drivers/hil_add XCORE-AI-EXPLORER"
-        "repos/xcore_sdk/test/rtos_drivers/usb XCORE-AI-EXPLORER"
-        "repos/xcore_sdk/test/rtos_drivers/wifi XCORE-AI-EXPLORER"
+        "test/rtos_drivers/hil XCORE-AI-EXPLORER"
+        "test/rtos_drivers/hil_add XCORE-AI-EXPLORER"
+        "test/rtos_drivers/usb XCORE-AI-EXPLORER"
+        "test/rtos_drivers/wifi XCORE-AI-EXPLORER"
     )
 elif [ "$1" == "smoke" ]
 then
     applications=(
-        "repos/xcore_sdk/test/rtos_drivers/hil XCORE-AI-EXPLORER"
+        "test/rtos_drivers/hil XCORE-AI-EXPLORER"
     )
 else 
     echo "Argument $1 not a supported configuration!"
