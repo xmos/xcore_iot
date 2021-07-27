@@ -1,18 +1,25 @@
-##########
-Dispatcher
-##########
+##################
+Dispatcher Example
+##################
 
-This example application demonstrates how to create a dispatcher, a dispatch group, and utilize them to parallelize the multiplication of two matrices.  The resulting performance is, as one might expect, four times faster using a dispatcher with four worker threads.
+The dispatcher example is demonstrates how to use the dispatcher to parallelize a matrix multiplication operation. Matrix multiplication is a data parallel operation. This means the input matrices can be partitioned and the multiplication operation run on the individual partitions in parallel. A dispatcher is well suited for data parallel problems.
 
-.. note:: The function used in this example to multiply two matrices is for illustrative use only.  It is not the most efficient way to perform a matrix multiplication.  XMOS has optimized libraries specifically for this purpose.
+Note
 
-*********************************
-Building and running the firmware
-*********************************
+The function used in this example to multiply two matrices is for illustrative use only. It is not the most efficient way to perform a matrix multiplication. XMOS has optimized libraries specifically for this purpose.
 
-Run the following commands to build the dispatch_queue firmware:
+***************************
+Building & running examples
+***************************
+
+Run the following commands to build the examples:
 
 .. code-block:: console
 
     $ make
+
+To run the example.
+
+.. code-block:: console
+
     $ make run

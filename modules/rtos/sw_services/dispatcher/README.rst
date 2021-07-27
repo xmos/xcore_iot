@@ -14,12 +14,6 @@ See:
 `api\dispatch_group.h`
 `api\dispatch_job.h`
 
-*************
-Code Examples
-*************
-
-See `examples\README.rst`.
-
 **********
 Unit Tests
 **********
