@@ -14,8 +14,7 @@ then
 elif [ "$1" == "smoke" ]
 then
     applications=(
-        #"test/rtos_drivers/hil XCORE-AI-EXPLORER"
-        "test/rtos_drivers/wifi XCORE-AI-EXPLORER"
+        "test/rtos_drivers/hil XCORE-AI-EXPLORER"
     )
 else 
     echo "Argument $1 not a supported configuration!"
