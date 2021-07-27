@@ -52,6 +52,13 @@ distclean:
 run: $(EXECUTABLE)
 	xrun --xscope $(EXECUTABLE)
 
+fsonly: $(EXECUTABLE)
+	cd filesystem_support && ./flash_image.sh --fs_only ${BOARD}
+
+swmem: $(EXECUTABLE)
+	cd filesystem_support && ./flash_image.sh --fs_swmem ${BOARD}
+
+
 # This multitile build support file c the
 # recipe for EXECUTABLE
 include $(XCORE_SDK_PATH)/tools/cmake_utils/multitile_build.mk

@@ -33,13 +33,6 @@ Supported Boards
 ****************
 
 This example is supported on the XCORE-AI-EXPLORER board.
-Set the $TARGET environment variable to the board that you are using. For example:
-
-.. code-block:: console
-
-    $ export TARGET=XCORE-AI-EXPLORER
-
-The build and run commands shown below will then pick up the correct target automatically.
 
 .. note::
 
@@ -56,14 +49,13 @@ Run make:
 
 .. code-block:: console
 
-    $ make BOARD=$TARGET
+    $ make BOARD=XCORE-AI-EXPLORER
 
 To flash the example images, run the following commands:
 
 .. code-block:: console
 
-    $ cd filesystem_support
-    $ ./flash_image.sh -f
+    $ make fsonly BOARD=XCORE-AI-EXPLORER
 
 Using external flash memory
 ===========================
@@ -78,8 +70,7 @@ To flash the model and example images, run the following commands:
 
 .. code-block:: console
 
-    $ cd filesystem_support
-    $ ./flash_image.sh -s
+    $ make swmem BOARD=XCORE-AI-EXPLORER
 
 Using external DDR memory
 =========================
@@ -96,8 +87,7 @@ To flash the example images, run the following commands:
 
 .. code-block:: console
 
-    $ cd filesystem_support
-    $ ./flash_image.sh -f
+    $ make fsonly BOARD=XCORE-AI-EXPLORER
 
 Running the firmware
 ====================
@@ -107,6 +97,12 @@ Running with hardware.
 .. code-block:: console
 
     $ xrun --xscope bin/cifar10.xe
+
+or
+
+.. code-block:: console
+
+    $ make run
 
 ********************
 Optimizing the model

@@ -36,7 +36,9 @@ set(APP_COMPILER_FLAGS
 )
 set(APP_SOURCES
     "src/main.c"
-    "src/board_init.c"
+    "src/platform/driver_instances.c"
+    "src/platform/platform_init.c"
+    "src/platform/platform_start.c"
     "src/model_runner/cifar10_model_data.c"
     "src/model_runner/cifar10_model_runner.cc"
     "src/model_runner/cifar10_task.c"
@@ -65,14 +67,8 @@ set(CMAKE_CXX_FLAGS  "-std=c++11")
 
 add_executable(${TARGET_NAME})
 
-target_sources(${TARGET_NAME} PRIVATE
-    ${APP_SOURCES}
-    ${XMOS_RTOS_PLATFORM_SOURCES}
-)
-target_include_directories(${TARGET_NAME} PRIVATE
-    ${APP_INCLUDES}
-    ${XMOS_RTOS_PLATFORM_INCLUDES}
-)
+target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
+target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
