@@ -3,22 +3,9 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Build and push the SDK Docker image
+name: Build the SDK Docker container
 
 on:
-  push:
-    branches:
-      - 'develop'
-    tags:
-      - 'v*'
-    paths:
-      - 'tools/ci/Dockerfile'
-  pull_request:
-    branches:
-      - 'develop'
-    paths:
-      - 'tools/ci/Dockerfile'
-
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
 
