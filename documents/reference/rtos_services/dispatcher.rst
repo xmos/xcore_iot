@@ -143,7 +143,7 @@ The following code snippet demonstrates how to create and initialize the ISR wor
 Code Example
 ************
 
-The following example code demonstrates how to create a dispatcher and add jobs that print out "Hello World". To build this and other dispatcher examples, see the `README.rst` in `modules/rtos/sw_services/dispatcher/examples`.
+The following example code demonstrates how to create a dispatcher and add jobs that perform a matrix multiply. To build this and other dispatcher examples, see the `README.rst` in `examples/freertos/dispatcher`.
 
-.. literalinclude:: ../../../modules/rtos/sw_services/dispatcher/examples/src/hello_world.c
+.. literalinclude:: ../../../examples/freertos/dispatcher/src/main.c
   :language: c

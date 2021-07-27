@@ -42,12 +42,12 @@ jobs:
       
       - name: Build examples
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk hcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_metal_examples.sh smoke
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk hcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_examples.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_metal_examples.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_examples.sh smoke
 
       - name: Build tests
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk hcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_tests.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_tests.sh smoke
 
 
   documentation:
