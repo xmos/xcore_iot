@@ -61,7 +61,7 @@
 	url = git@github.com:google/ruy.git
 [submodule "lib_xud"]
 	path = modules/hil/lib_xud
-	url = git@github.com:mbruno-xmos/lib_xud.git
+	url = git@github.com:xmos/lib_xud.git
 [submodule "coreHTTP"]
 	path = modules/rtos/sw_services/http/thirdparty/coreHTTP
 	url = git@github.com:FreeRTOS/coreHTTP.git
