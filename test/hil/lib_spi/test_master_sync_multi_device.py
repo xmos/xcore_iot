@@ -26,9 +26,6 @@ def do_multi_device_sync(full_load, miso_enabled, mosi_enable, div, mode):
                                      'spi_master_sync_multi_device_{load}_{miso}_{mosi}_{div}_{mode}'.format(load=full_load,miso=miso_enabled,mosi=mosi_enable,div=div,mode=mode),
                                      regexp=True)
 
-    if full_load == 0:
-        tester.set_min_testlevel('nightly')
-
     xmostest.run_on_simulator(resources['xsim'], binary,
                               simthreads = [checker],
                               # simargs=['--vcd-tracing', '-o ./spi_master_sync_multi_device/trace.vcd -tile tile[0] -pads -functions'],
