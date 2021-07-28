@@ -53,7 +53,10 @@ set(APP_COMPILER_FLAGS
 
 set(APP_SOURCES
     "src/main.c"
-    "src/board_init.c"
+    "src/app_control/app_control.c"
+    "src/platform/driver_instances.c"
+    "src/platform/platform_init.c"
+    "src/platform/platform_start.c"
     "src/usb_descriptors.c"
 )
 
@@ -70,8 +73,6 @@ endif()
 add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
     XUD_CORE_CLOCK=${SYSCLK_FREQ}
-    PLATFORM_USES_TILE_0=1
-    PLATFORM_USES_TILE_1=1
 )
 
 add_executable(${TARGET_NAME})

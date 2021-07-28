@@ -1,6 +1,5 @@
-# This variable is not used by any other files and is
-# therefore not required. It is used only for setting the
-# EXECUTABLE variable below.
+# This variable is used for setting the EXECUTABLE name
+# and is used for the final binary, as well as any intermediates.
 PROJECT_NAME = cifar10
 
 # BOARD is used by the XMOS RTOS platform .cmake file
@@ -12,11 +11,13 @@ CMAKE_ARGS = -DUSE_SWMEM=${USE_SWMEM} -DUSE_EXTMEM=${USE_EXTMEM}
 # PLATFORM_USES_TILE_0 through PLATFORM_USES_TILE_3 are
 # used by the multitile_build.mk file. If only tile 0 is
 # used then none of these need to be specified.
-# either 1 or true may be used to enable them. If they
+# 1 must be used to enable any other tiles.  If they
 # are not used then they do not need to be specified,
-# but may be set to 0 or false.
-PLATFORM_USES_TILE_0 = true
-PLATFORM_USES_TILE_1 = true
+# but may be set to 0.
+PLATFORM_USES_TILE_0 = 1
+PLATFORM_USES_TILE_1 = 1
+PLATFORM_USES_TILE_2 = 0
+PLATFORM_USES_TILE_3 = 0
 
 # XE_BASE_TILE is used by the multitile_build.mk file.
 # It defaults to 0 if not specified.
@@ -58,7 +59,9 @@ fsonly: $(EXECUTABLE)
 swmem: $(EXECUTABLE)
 	cd filesystem_support && ./flash_image.sh --fs_swmem ${BOARD}
 
+# Escape any spaces in the SDK path
+ESCAPED_XCORE_SDK_PATH = $(subst $(null) ,\ ,$(XCORE_SDK_PATH))
 
-# This multitile build support file c the
+# This multitile build support file creates the
 # recipe for EXECUTABLE
-include $(XCORE_SDK_PATH)/tools/cmake_utils/multitile_build.mk
+include $(ESCAPED_XCORE_SDK_PATH)/tools/cmake_utils/multitile_build.mk

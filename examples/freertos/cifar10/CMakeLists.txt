@@ -52,8 +52,6 @@ add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
     TF_LITE_STATIC_MEMORY=1
     XCORE=1
-    PLATFORM_USES_TILE_0=1
-    PLATFORM_USES_TILE_1=1
 )
 
 if(${USE_SWMEM})
