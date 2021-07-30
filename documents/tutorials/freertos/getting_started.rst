@@ -91,7 +91,7 @@ Many build configuration options can be specified in the application's `CMakeLis
   set(USE_WIFI_MANAGER TRUE)
   set(USE_FATFS TRUE)
 
-See :ref:`build configurations <sdk-build-configurations-label>` for a full set of supported options.
+See :ref:`build configurations <sdk-cmake-variables-label>` for a full set of supported options.
 
 ********************
 New Project Template

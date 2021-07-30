@@ -7,7 +7,7 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
 .. toctree::
    :maxdepth: 1
 
-   getting_started
+   new_project_template
    independent_tiles
    explorer_board
    usb

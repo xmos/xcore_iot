@@ -1,8 +1,8 @@
-.. _sdk-build-configurations-label:
+.. _sdk-cmake-variables-label:
 
-####################
-Build Configurations
-####################
+###############
+CMake Variables
+###############
 
 *************************
 HIL Configuration Options
