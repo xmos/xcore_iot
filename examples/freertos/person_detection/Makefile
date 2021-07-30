@@ -52,12 +52,6 @@ distclean:
 run: $(EXECUTABLE)
 	xrun --xscope $(EXECUTABLE)
 
-fsonly: $(EXECUTABLE)
-	cd filesystem_support && ./flash_image.sh --fs_only ${BOARD}
-
-swmem: $(EXECUTABLE)
-	cd filesystem_support && ./flash_image.sh --fs_swmem ${BOARD}
-
 # Escape any spaces in the SDK path
 ESCAPED_XCORE_SDK_PATH = $(subst $(null) ,\ ,$(XCORE_SDK_PATH))
 
