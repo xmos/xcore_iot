@@ -31,6 +31,8 @@ set(APP_COMPILER_FLAGS
     "-Wxcore-fptrgroup"
     "-Wno-unknown-pragmas"
     "-mcmodel=large"
+    "-MD"
+    "-MT"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
     "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
 )

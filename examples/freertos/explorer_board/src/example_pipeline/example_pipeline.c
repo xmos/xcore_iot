@@ -23,7 +23,7 @@
 #define FRAME_NUM_CHANS 2
 
 #ifndef appconfPRINT_AUDIO_FRAME_POWER
-#define appconfPRINT_AUDIO_FRAME_POWER 0
+#define appconfPRINT_AUDIO_FRAME_POWER 1
 #endif
 
 /*
@@ -198,14 +198,21 @@ void intertile_pipeline_to_tcp_create(
     QueueHandle_t output_queue = xQueueCreate(2, sizeof(void *));
     if( output_queue != NULL )
     {
-        queue_to_tcp_handle_t mic_to_tcp_handle = queue_to_tcp_create( output_queue,
-                                                 appconfQUEUE_TO_TCP_PORT,
-                                                 portMAX_DELAY,
-                                                 pdMS_TO_TICKS( 5000 ),
-                                                 sizeof(int32_t) * appconfAUDIO_FRAME_LENGTH );
+        queue_to_tcp_handle_t mic_to_tcp_handle = queue_to_tcp_create(
+                output_queue,
+                appconfQUEUE_TO_TCP_PORT,
+                portMAX_DELAY,
+                pdMS_TO_TICKS( 5000 ),
+                sizeof(int32_t) * appconfAUDIO_FRAME_LENGTH );
 
-        intertile_pipeline_client_init( host_intertile_ctx, mic_to_tcp_handle->queue, INTERTILE_AUDIOPIPELINE_PORT, INTERTILE_AUDIOPIPELINE_TASK_PRIORITY );
-        queue_to_tcp_stream_create( mic_to_tcp_handle, INTERTILE_AUDIOPIPELINE_TASK_PRIORITY + 1 );
+        intertile_pipeline_client_init(
+                host_intertile_ctx,
+                mic_to_tcp_handle->queue,
+                appconfINTERTILE_AUDIOPIPELINE_PORT,
+                appconfINTERTILE_AUDIOPIPELINE_TASK_PRIORITY );
+        queue_to_tcp_stream_create(
+                mic_to_tcp_handle,
+                (appconfINTERTILE_AUDIOPIPELINE_TASK_PRIORITY + 1) );
     }
 }
 

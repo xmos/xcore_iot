@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Get unix name for determining OS
 UNAME=$(uname)
 
@@ -18,6 +19,7 @@ $MKFS_VFAT_PATH/mkfs.vfat -v -F12 -s1 -S4096 -n xcore_fs fat.fs
 mkdir -p fat_mnt
 
 WF200_FW=$XCORE_SDK_PATH/modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec
+
 # Mount the filesystem
 if [ "$UNAME" == "Linux" ] ; then
     sudo mount -o loop fat.fs fat_mnt
