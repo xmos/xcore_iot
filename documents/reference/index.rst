@@ -3,9 +3,8 @@ API Reference
 #############
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    libraries/index
    rtos_drivers/index
    rtos_services/index
-   contributing

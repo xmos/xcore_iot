@@ -30,7 +30,7 @@ release = "1.0.x"
 
 # -- General configuration ---------------------------------------------------
 
-# NOTE: By default, .png files are favored over .gif.  Reversing the order here in order for anaimated GIFs
+# NOTE: By default, .png files are favored over .gif.  Reversing the order here in order for animated GIFs
 #       to be favored.  See: https://www.sphinx-doc.org/en/master/usage/builders/index.html
 StandaloneHTMLBuilder.supported_image_types = [
     "image/svg+xml",
@@ -39,13 +39,19 @@ StandaloneHTMLBuilder.supported_image_types = [
     "image/jpeg",
 ]
 
+# Setup for figures
+numfig = True
+numfig_secnum_depth = 1
 
 extensions = [
     "sphinx.ext.todo",
     "sphinx_copybutton",
     "sphinx_inline_tabs",
     "breathe",
+    "sphinx.ext.autosectionlabel",
 ]
+
+autosectionlabel_prefix_document = True
 
 # Breathe Configuration
 breathe_projects = {"XCoreSDK": "_doxygen/xml/"}
@@ -57,13 +63,24 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = [
-    "_doxygen",
-    "_build",
-    "_download",
-    "Thumbs.db",
-    ".DS_Store",
-    "README.rst",
-    "requirements.txt",
+    "**/_doxygen",
+    "**/_build",
+    "**/_download",
+    "**/Thumbs.db",
+    "**/.DS_Store",
+    "documents/README.rst",
+    "documents/requirements.txt",
+    "xcore_sdk_venv",
+    "tools",
+    "projects",
+    "test",
+    "modules/rtos/FreeRTOS",
+    "modules/legacy_compat",
+    "modules/lib_otpinfo",
+    "modules/lib_src",
+    "modules/lib_random",
+    "modules/lib_dsp",
+    "modules/lib_mic_array",
 ]
 
 # -- Options for HTML output ---------------------------------------------------
