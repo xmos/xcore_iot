@@ -6,13 +6,6 @@ Libraries
 Peripherals
 ***********
 
-.. toctree::
-   :maxdepth: 1
-   :includehidden:
-
-   ../../../modules/hil/lib_xudrew/lib_xud/doc/rst/the_xud_library
-
-
 *********
 Optimized
 *********
