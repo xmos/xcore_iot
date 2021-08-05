@@ -6,13 +6,13 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
 
 .. toctree::
    :maxdepth: 1
+   :includehidden:
 
-   getting_started
-   independent_tiles
-   explorer_board
-   usb
-   device_control
-   dispatcher
-   cifar10
-   person_detection
-   iot_aws
+   ../../../../examples/freertos/getting_started/README.rst
+   ../../../../examples/freertos/explorer_board/README.rst
+   ../../../../examples/freertos/usb/README.rst
+   ../../../../examples/freertos/device_control/README.rst
+   ../../../../examples/freertos/dispatcher/README.rst
+   ../../../../examples/freertos/cifar10/README.rst
+   ../../../../examples/freertos/person_detection/README.rst
+   ../../../../examples/freertos/iot_aws/README.rst

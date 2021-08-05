@@ -271,6 +271,11 @@ TAB_SIZE               = 4
 
 ALIASES                =
 
+# The following ALIASES were added to make short MATHJAX sequences prettier
+ALIASES += math{1}="@f$\1@f$"
+ALIASES += vector{1}="@f$\bar \1@f$"
+ALIASES += operation{1}="@par Operation Performed:^^@f{align*}{ \1 @f}"
+
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources
 # only. Doxygen will then generate output that is more tailored for C. For
 # instance, some of the names that are used will be different. The list of all
@@ -864,7 +869,12 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../modules/rtos/drivers
+INPUT =
+INPUT += ../modules/rtos/drivers 
+#TODO: someday just add all the HIL modules w/ 
+#INPUT += ../modules/hil
+INPUT += ../modules/hil/lib_xudrew/lib_xud/api ../modules/hil/lib_xudrew/examples/*/api
+INPUT += ../modules/lib_xs3_math 
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -2254,7 +2264,9 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             = ON_TILE(x) __attribute__(x)=
+PREDEFINED = ON_TILE(x) __attribute__(x)=
+PREDEFINED += C_API= EXTERN_C= 
+
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

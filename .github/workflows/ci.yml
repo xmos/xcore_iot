@@ -92,7 +92,7 @@ jobs:
       
       - name: Build documentation
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
+          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="--keep-going"
       
       - name: Save documentation artifacts
         uses: actions/upload-artifact@v2

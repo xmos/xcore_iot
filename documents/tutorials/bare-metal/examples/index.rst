@@ -6,9 +6,10 @@ Several example bare-metal applications are included to illustrate the fundament
 
 .. toctree::
     :maxdepth: 1
- 
-    hello_world
-    cifar10
-    micro_speech
-    visual_wake_words
-    hotdog_not_hotdog
+    :includehidden:
+    
+    ../../../../examples/bare-metal/hello_world/README.rst
+    ../../../../examples/bare-metal/cifar10/README.rst
+    ../../../../examples/bare-metal/micro_speech/README.rst
+    ../../../../examples/bare-metal/visual_wake_words/README.rst
+    ../../../../examples/bare-metal/hotdog_not_hotdog/README.rst
