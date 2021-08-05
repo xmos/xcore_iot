@@ -74,7 +74,7 @@ Running with GPIO and host:
 
 .. code-block:: console
 
-    $ xrun --xscope --xscope-port localhost:10234 ../bin/person_detection.xe
+    $ xrun --xscope --xscope-port localhost:10234 ../bin/person_detect.xe
 
 In a second terminal:
 
