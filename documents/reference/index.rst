@@ -1,6 +1,6 @@
-#############
-API Reference
-#############
+#######
+Modules
+#######
 
 .. toctree::
    :maxdepth: 1

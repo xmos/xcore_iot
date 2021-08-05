@@ -2,9 +2,9 @@
 Libraries
 #########
 
-***
-I/O
-***
+***********
+Peripherals
+***********
 
 .. toctree::
    :maxdepth: 1

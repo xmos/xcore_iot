@@ -81,6 +81,8 @@ exclude_patterns = [
     "modules/lib_random",
     "modules/lib_dsp",
     "modules/lib_mic_array",
+    "modules/hil/lib_mic_array",
+    "modules/hil/lib_xud",
 ]
 
 # -- Options for HTML output ---------------------------------------------------
