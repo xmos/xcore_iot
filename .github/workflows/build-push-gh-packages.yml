@@ -6,7 +6,11 @@
 name: Build the SDK Docker container
 
 on:
-  # Allow manually triggering of the workflow.
+  push:
+    tags:
+      - 'v*'
+
+# Allow manually triggering of the workflow.
   workflow_dispatch: {}
 
 env:
