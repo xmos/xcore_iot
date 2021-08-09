@@ -1,4 +1,2 @@
-Jinja2==2.11.3
-matplotlib>=3.1.1
 -e tools/ai/ai_tools/tflite2xcore
 -e tools/ai/ai_tools/utils/adf/xcore_interpreters

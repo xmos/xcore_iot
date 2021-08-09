@@ -1,0 +1,11 @@
+Jinja2
+jupyter
+jupyter_client
+jupyter_client
+jupyter_console
+jupyter_core
+matplotlib
+nbval
+numpy
+opencv-python
+pytest
