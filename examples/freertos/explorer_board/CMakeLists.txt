@@ -41,12 +41,13 @@ set(APP_COMPILER_FLAGS
 
 set(APP_SOURCES
     "src/main.c"
-    "src/main_0.c"
-    "src/main_1.c"
-    "src/board_init.c"
+    "src/platform/aic3204.c"
+    "src/platform/app_pll_ctrl.c"
+    "src/platform/driver_instances.c"
+    "src/platform/platform_init.c"
+    "src/platform/platform_start.c"
     "src/audio_pipeline/audio_pipeline.c"
     "src/example_pipeline/example_pipeline.c"
-    "src/example_pipeline/dac_init.c"
     "src/gpio_ctrl/gpio_ctrl.c"
     "src/network_demos/network_setup.c"
     "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
@@ -64,16 +65,7 @@ set(APP_SOURCES
 
 set(APP_INCLUDES
     "src"
-    "src/gpio_ctrl"
-    "src/network_demos"
-    "src/queue_to_tcp_stream"
-    "src/thruput_test"
     "src/udp_cli"
-    "src/tls_echo_demo"
-    "src/tls_echo_server"
-    "src/http_demo"
-    "src/mqtt_demo"
-    "src/mem_analysis"
 )
 
 add_compile_definitions(
@@ -87,19 +79,7 @@ add_compile_definitions(
     DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
     SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\)
     MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
-    PLATFORM_USES_TILE_0=1
-    PLATFORM_USES_TILE_1=1
 )
-
-if(DEFINED THIS_XCORE_TILE)
-    set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
-    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-
-    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
-else()
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
-endif()
 
 add_executable(${TARGET_NAME})
 

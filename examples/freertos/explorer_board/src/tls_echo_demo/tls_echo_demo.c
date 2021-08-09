@@ -22,8 +22,8 @@
 #include "mbedtls/debug.h"
 
 /* App headers */
-#include "tls_echo_demo.h"
 #include "app_conf.h"
+#include "tls_echo_demo/tls_echo_demo.h"
 
 const char* DEMO_HOSTNAME = "localhost";
 

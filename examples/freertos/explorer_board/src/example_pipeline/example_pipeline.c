@@ -1,29 +1,26 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include <xcore/hwtimer.h>
-#include <xcore/triggerable.h>
-
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "timers.h"
 #include "queue.h"
 
-#include "app_conf.h"
+/* Library headers */
 #include "dsp_qformat.h"
 
+/* App headers */
+#include "app_conf.h"
 #include "audio_pipeline/audio_pipeline.h"
 #include "example_pipeline/example_pipeline.h"
-
-#include "rtos_interrupt.h"
-#include "queue_to_tcp_stream.h"
-#include "rtos/drivers/rpc/api/rtos_rpc.h"
+#include "queue_to_tcp_stream/queue_to_tcp_stream.h"
+#include "platform/driver_instances.h"
 
 #define FRAME_NUM_CHANS 2
 
 #ifndef appconfPRINT_AUDIO_FRAME_POWER
-#define appconfPRINT_AUDIO_FRAME_POWER 0
+#define appconfPRINT_AUDIO_FRAME_POWER 1
 #endif
 
 /*
@@ -54,8 +51,6 @@
 #define MIN(X, Y) ((X) <= (Y) ? (X) : (Y))
 
 static BaseType_t xStage1_Gain = appconfAUDIO_PIPELINE_STAGE_ONE_GAIN;
-static rtos_intertile_address_t adr;
-static rtos_intertile_address_t* intertile_addr = &adr;
 
 BaseType_t audiopipeline_get_stage1_gain( void )
 {
@@ -93,7 +88,7 @@ void frame_power(int32_t (*audio_frame)[FRAME_NUM_CHANS])
 
 void *example_pipeline_input(void *data)
 {
-    rtos_mic_array_t *mic_array_ctx = data;
+    (void) data;
 
     int32_t (*audio_frame)[FRAME_NUM_CHANS];
 
@@ -110,11 +105,13 @@ void *example_pipeline_input(void *data)
 
 int example_pipeline_output(void *audio_frame, void *data)
 {
-    rtos_i2s_t *i2s_ctx = data;
-    rtos_intertile_t *intertile_ctx = intertile_addr->intertile_ctx;
-    uint8_t intertile_port = intertile_addr->port;
+    (void) data;
 
-    rtos_intertile_tx(intertile_ctx, intertile_port, audio_frame, FRAME_NUM_CHANS * appconfAUDIO_FRAME_LENGTH * sizeof(int32_t));
+    rtos_intertile_tx(
+            intertile_ctx,
+            appconfINTERTILE_AUDIOPIPELINE_PORT,
+            audio_frame,
+            FRAME_NUM_CHANS * appconfAUDIO_FRAME_LENGTH * sizeof(int32_t));
 
     rtos_i2s_tx(
             i2s_ctx,
@@ -146,12 +143,14 @@ static void intertile_audiopipeline_thread(QueueHandle_t output_queue)
 {
     int msg_length;
     int32_t *msg;
-    rtos_intertile_t *intertile_ctx = intertile_addr->intertile_ctx;
-    uint8_t intertile_port = intertile_addr->port;
     int32_t *data = NULL;
 
     for (;;) {
-        msg_length = rtos_intertile_rx(intertile_ctx, intertile_port, (void **) &msg, portMAX_DELAY);
+        msg_length = rtos_intertile_rx(
+                            intertile_ctx,
+                            appconfINTERTILE_AUDIOPIPELINE_PORT,
+                            (void **) &msg,
+                            portMAX_DELAY);
 
         configASSERT(msg_length == FRAME_NUM_CHANS * appconfAUDIO_FRAME_LENGTH * sizeof(int32_t));
 
@@ -171,49 +170,38 @@ static void intertile_audiopipeline_thread(QueueHandle_t output_queue)
     }
 }
 
-void intertile_pipeline_client_init(
-    rtos_intertile_t *host_intertile_ctx,
-    QueueHandle_t output_queue,
-    unsigned intertile_port,
-    unsigned host_task_priority)
+static void intertile_pipeline_client_init(
+    QueueHandle_t output_queue)
 {
-    xassert(intertile_port >= 0);
-
-    intertile_addr->intertile_ctx = host_intertile_ctx;
-    intertile_addr->port = intertile_port;
-
     xTaskCreate((TaskFunction_t) intertile_audiopipeline_thread,
                 "intertile_ap_thread",
                 RTOS_THREAD_STACK_SIZE(intertile_audiopipeline_thread),
                 output_queue,
-                host_task_priority,
+                appconfINTERTILE_AUDIOPIPELINE_TASK_PRIORITY,
                 NULL);
 }
 
-void intertile_pipeline_to_tcp_create(
-    rtos_intertile_t *host_intertile_ctx,
-    unsigned intertile_port,
-    unsigned host_task_priority)
+void intertile_pipeline_to_tcp_create(void)
 {
     QueueHandle_t output_queue = xQueueCreate(2, sizeof(void *));
     if( output_queue != NULL )
     {
-        queue_to_tcp_handle_t mic_to_tcp_handle = queue_to_tcp_create( output_queue,
-                                                 appconfQUEUE_TO_TCP_PORT,
-                                                 portMAX_DELAY,
-                                                 pdMS_TO_TICKS( 5000 ),
-                                                 sizeof(int32_t) * appconfAUDIO_FRAME_LENGTH );
+        queue_to_tcp_handle_t mic_to_tcp_handle = queue_to_tcp_create(
+                output_queue,
+                appconfQUEUE_TO_TCP_PORT,
+                portMAX_DELAY,
+                pdMS_TO_TICKS( 5000 ),
+                sizeof(int32_t) * appconfAUDIO_FRAME_LENGTH );
 
-        intertile_pipeline_client_init( host_intertile_ctx, mic_to_tcp_handle->queue, INTERTILE_AUDIOPIPELINE_PORT, INTERTILE_AUDIOPIPELINE_TASK_PRIORITY );
-        queue_to_tcp_stream_create( mic_to_tcp_handle, INTERTILE_AUDIOPIPELINE_TASK_PRIORITY + 1 );
+        intertile_pipeline_client_init(
+                mic_to_tcp_handle->queue);
+        queue_to_tcp_stream_create(
+                mic_to_tcp_handle,
+                (appconfINTERTILE_AUDIOPIPELINE_TASK_PRIORITY + 1) );
     }
 }
 
-void example_pipeline_init(
-        rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_t *i2s_ctx,
-        rtos_intertile_t *host_intertile_ctx,
-        unsigned intertile_port)
+void example_pipeline_init(UBaseType_t priority)
 {
 	const int stage_count = 2;
 
@@ -227,16 +215,13 @@ void example_pipeline_init(
 			configMINIMAL_STACK_SIZE
 	};
 
-    intertile_addr->intertile_ctx = host_intertile_ctx;
-    intertile_addr->port = intertile_port;
-
 	audio_pipeline_init(
 			example_pipeline_input,
 			example_pipeline_output,
-			mic_array_ctx,
-			i2s_ctx,
+            NULL,
+            NULL,
 			stages,
 			stage_stack_sizes,
-			configMAX_PRIORITIES / 2,
+			priority,
 			stage_count);
 }

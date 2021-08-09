@@ -29,9 +29,6 @@
 #define UDP_COMMAND_INTERPRETER_H
 
 void vStartUDPCommandInterpreterTask( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPriority );
-
-#include "rtos/drivers/intertile/api/rtos_intertile.h"
-
-void vInitializeUDPIntertile( rtos_intertile_t *host_intertile_ctx, unsigned intertile_port );
+void vInitializeUDPIntertile( unsigned intertile_port );
 
 #endif /* UDP_COMMAND_INTERPRETER_H */

@@ -23,7 +23,7 @@
 
 /* App headers */
 #include "app_conf.h"
-#include "http_demo.h"
+#include "http_demo/http_demo.h"
 #include "http_parser.h"
 
 
@@ -258,7 +258,7 @@ static void http_demo( void *arg )
     }
 }
 
-void http_demo_create( UBaseType_t priority )
+void http_demo_create(UBaseType_t priority)
 {
     xTaskCreate( http_demo, "http", portTASK_STACK_DEPTH( http_demo ), NULL , priority, NULL );
 }

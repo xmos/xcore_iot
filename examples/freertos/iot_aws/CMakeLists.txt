@@ -39,7 +39,9 @@ set(APP_COMPILER_FLAGS
 )
 set(APP_SOURCES
     "src/main.c"
-    "src/board_init.c"
+    "src/platform/driver_instances.c"
+    "src/platform/platform_init.c"
+    "src/platform/platform_start.c"
     "src/network_demos/network_setup.c"
     "src/mqtt_demo/mqtt_demo_client.c"
     "src/mem_analysis/mem_analysis.c"
@@ -61,24 +63,12 @@ add_compile_definitions(
     MQTT_TASK=1
     DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
     MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
-    PLATFORM_USES_TILE_0=1
-    PLATFORM_USES_TILE_1=1
 )
 
 if(${VERBOSE})
     add_compile_definitions(SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\))
 else()
     add_compile_definitions(SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR\))
-endif()
-
-if(DEFINED THIS_XCORE_TILE)
-    set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
-    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-
-    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
-else()
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
 endif()
 
 add_executable(${TARGET_NAME})

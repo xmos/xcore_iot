@@ -5,17 +5,28 @@
 #define APP_CONF_H_
 
 /* Intertile Communication Configuration */
-#define I2C_MASTER_RPC_PORT 10
-#define I2C_MASTER_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
+#define appconfI2C_MASTER_RPC_PORT 10
+#define appconfI2C_MASTER_RPC_PRIORITY (configMAX_PRIORITIES/2)
 
-#define GPIO_RPC_PORT 11
-#define GPIO_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
+#define appconfGPIO_RPC_PORT 11
+#define appconfGPIO_RPC_PRIORITY (configMAX_PRIORITIES/2)
 
-#define INTERTILE_AUDIOPIPELINE_PORT 12
-#define INTERTILE_AUDIOPIPELINE_TASK_PRIORITY (configMAX_PRIORITIES-2)
+#define appconfINTERTILE_AUDIOPIPELINE_PORT 12
+#define appconfINTERTILE_AUDIOPIPELINE_TASK_PRIORITY (configMAX_PRIORITIES-2)
 
-#define CLI_RPC_PROCESS_COMMAND_PORT 13
-#define CLI_RPC_PROCESS_COMMAND_TASK_PRIORITY (configMAX_PRIORITIES/2)
+#define appconfCLI_RPC_PROCESS_COMMAND_PORT 13
+#define appconfCLI_RPC_PROCESS_COMMAND_TASK_PRIORITY (configMAX_PRIORITIES/2)
+
+
+/* I/O and interrupt cores for Tile 0 */
+#define appconfI2C_IO_CORE                      3 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfI2C_INTERRUPT_CORE               0 /* Must be kept off I/O cores. */
+
+/* I/O and interrupt cores for Tile 1 */
+#define appconfPDM_MIC_IO_CORE                  1 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfI2S_IO_CORE                      2 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfPDM_MIC_INTERRUPT_CORE           3 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
+#define appconfI2S_INTERRUPT_CORE               4 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
 
 /* Network Demo Configuration */
 #define appconfSOFT_AP_SSID         "xcore.ai"
@@ -27,7 +38,7 @@
 /* Audio Pipeline Configuration */
 #define appconfAUDIO_CLOCK_FREQUENCY            24576000
 #define appconfPDM_CLOCK_FREQUENCY              3072000
-#define appconfPIPELINE_AUDIO_SAMPLE_RATE       48000
+#define appconfPIPELINE_AUDIO_SAMPLE_RATE       16000
 #define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN    42
 #define appconfAUDIO_FRAME_LENGTH            	256
 #define appconfPRINT_AUDIO_FRAME_POWER          0
@@ -84,5 +95,19 @@
 #define appconfWIFI_SETUP_TASK_PRIORITY		    ( configMAX_PRIORITIES/2 - 1 )
 #define appconfWIFI_CONN_MNGR_TASK_PRIORITY     ( configMAX_PRIORITIES - 3 )
 #define appconfWIFI_DHCP_SERVER_TASK_PRIORITY   ( configMAX_PRIORITIES - 3 )
+#define appconfSPI_MASTER_TASK_PRIORITY		    ( configMAX_PRIORITIES - 1 )
+#define appconfQSPI_FLASH_TASK_PRIORITY		    ( configMAX_PRIORITIES - 1 )
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif /* APP_CONF_H_ */

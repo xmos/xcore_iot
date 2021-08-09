@@ -2,8 +2,6 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #define DEBUG_UNIT THRUPUT_TEST
-#include "app_conf.h"
-
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -15,6 +13,7 @@
 /* Library headers */
 
 /* App headers */
+#include "app_conf.h"
 #include "thruput_test.h"
 
 static void thruput_test_sender( void *arg )

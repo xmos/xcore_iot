@@ -31,12 +31,16 @@ set(APP_COMPILER_FLAGS
     "-Wxcore-fptrgroup"
     "-Wno-unknown-pragmas"
     "-mcmodel=large"
+    "-MD"
+    "-MT"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
     "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
 )
 set(APP_SOURCES
     "src/main.c"
-    "src/board_init.c"
+    "src/platform/driver_instances.c"
+    "src/platform/platform_init.c"
+    "src/platform/platform_start.c"
     "src/model_runner/cifar10_model_data.c"
     "src/model_runner/cifar10_model_runner.cc"
     "src/model_runner/cifar10_task.c"
@@ -50,8 +54,6 @@ add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
     TF_LITE_STATIC_MEMORY=1
     XCORE=1
-    PLATFORM_USES_TILE_0=1
-    PLATFORM_USES_TILE_1=1
 )
 
 if(${USE_SWMEM})
@@ -63,26 +65,10 @@ endif()
 ## Set any additional flags only for C++
 set(CMAKE_CXX_FLAGS  "-std=c++11")
 
-if(DEFINED THIS_XCORE_TILE)
-    set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
-    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-
-    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
-else()
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
-endif()
-
 add_executable(${TARGET_NAME})
 
-target_sources(${TARGET_NAME} PRIVATE
-    ${APP_SOURCES}
-    ${XMOS_RTOS_PLATFORM_SOURCES}
-)
-target_include_directories(${TARGET_NAME} PRIVATE
-    ${APP_INCLUDES}
-    ${XMOS_RTOS_PLATFORM_INCLUDES}
-)
+target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
+target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})

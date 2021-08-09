@@ -17,7 +17,8 @@
 
 /* App headers */
 #include "app_conf.h"
-#include "network_setup.h"
+#include "network_demos/network_setup.h"
+#include "platform/driver_instances.h"
 
 #define HWADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define HWADDR_ARG(hwaddr) (hwaddr)[0], (hwaddr)[1], (hwaddr)[2], (hwaddr)[3], (hwaddr)[4], (hwaddr)[5]
@@ -195,18 +196,10 @@ sl_status_t sl_wfx_app_fw_read(uint8_t *data, uint32_t index, uint32_t size)
     }
 }
 
-typedef struct {
-    rtos_spi_master_device_t *wifi_device_ctx;
-    rtos_gpio_t *gpio_ctx;
-} wifi_devices_t;
-
-static void wifi_setup_task(wifi_devices_t *wifi_devs)
+static void wifi_setup_task(void *args)
 {
     const rtos_gpio_port_id_t wifi_wup_rst_port = rtos_gpio_port(WIFI_WUP_RST_N);
     const rtos_gpio_port_id_t wifi_irq_port = rtos_gpio_port(WIFI_WIRQ);
-
-    rtos_spi_master_device_t *wifi_device_ctx = wifi_devs->wifi_device_ctx;
-    rtos_gpio_t *gpio_ctx = wifi_devs->gpio_ctx;
 
     vTaskDelay(pdMS_TO_TICKS(100));
 
@@ -229,17 +222,12 @@ static void wifi_setup_task(wifi_devices_t *wifi_devs)
     vTaskDelete(NULL);
 }
 
-void wifi_start(rtos_spi_master_device_t *wifi_device_ctx, rtos_gpio_t *gpio_ctx)
+void wifi_start(UBaseType_t priority)
 {
-    static wifi_devices_t wifi_devs;
-
-    wifi_devs.wifi_device_ctx = wifi_device_ctx;
-    wifi_devs.gpio_ctx = gpio_ctx;
-
     xTaskCreate((TaskFunction_t) wifi_setup_task,
                 "wifi_setup_task",
                 RTOS_THREAD_STACK_SIZE(wifi_setup_task),
-                &wifi_devs,
-                appconfWIFI_SETUP_TASK_PRIORITY,
+                NULL,
+                priority,
                 NULL);
 }

@@ -83,9 +83,6 @@ add_compile_definitions(
 
     DEBUG_PRINT_ENABLE=1
     XUD_CORE_CLOCK=${SYSCLK_FREQ}
-
-    PLATFORM_USES_TILE_0=1
-    PLATFORM_USES_TILE_1=1
 )
 
 ## Select demo
@@ -116,16 +113,6 @@ else()
 endif()
 
 ## Create targets
-# if(DEFINED THIS_XCORE_TILE)
-#     set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
-#     file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-#     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-
-#     add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
-# else()
-#     set(TARGET_NAME "${PROJECT_NAME}.xe")
-# endif()
-
 add_executable(${TARGET_NAME})
 
 target_sources(

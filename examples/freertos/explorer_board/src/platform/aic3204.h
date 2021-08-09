@@ -1,8 +1,8 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#ifndef SRC_AUDIO_HW_CONFIG_DAC3204_H_
-#define SRC_AUDIO_HW_CONFIG_DAC3204_H_
+#ifndef AIC3204_H_
+#define AIC3204_H_
 
 // TLV320AIC3204 Device I2C Address
 #define AIC3204_I2C_DEVICE_ADDR 0x18
@@ -49,4 +49,6 @@
 #define AIC3204_AN_IN_CHRG    0x47 // Register 71 - Analog Input Quick Charging Config
 #define AIC3204_REF_STARTUP   0x7B // Register 123 - Reference Power Up Config
 
-#endif /* SRC_AUDIO_HW_CONFIG_DAC3204_H_ */
+int aic3204_init(void);
+
+#endif /* AIC3204_H_ */

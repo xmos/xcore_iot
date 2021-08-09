@@ -180,7 +180,15 @@ This will create the ``iot_aws.xe`` binary in the bin folder.
 
 **Step 3**. Before the application can be run, the flash must be populated with a filesystem containing the crypto credentials for TLS and the WiFi connection details.  From the example application root directory, go to filesystem_support.  Paste the certificates and keys downloaded in the **IoT Core** setup of your **Thing** into the ``aws`` folder.  Rename the CA certificate file ``ca.pem`` , the device certificate file ``client.pem``, and the device private key file ``client.key``.  Run the Python script ``wifi_profile.py`` to create the WiFi configuration file.
 
-**Step 4**. With the development board and xTag connected, run the ``flash_image.sh`` bash script.  This will create a filesystem and flash it to the device.
+**Step 4**. With the development board and xTag connected, run:
+
+.. code-block:: console
+
+    $ make flash
+
+Or, manually call the ``flash_image.sh`` script from the filesystem_support folder.
+
+This will create a filesystem and flash it to the device.
 
 .. note:: This script requires sudo, as it mounts and unmounts a disk.
 
@@ -192,6 +200,13 @@ To run the demo navigate to the bin folder and use the command:
 .. code-block:: console
 
     $ xrun iot_aws.xe
+
+
+Or:
+
+.. code-block:: console
+
+    $ make run
 
 For debug output use:
 

@@ -4,7 +4,6 @@
 #ifndef SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_
 #define SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_
 
-
 typedef void * (*audio_pipeline_input_t)(void *data);
 typedef int (*audio_pipeline_output_t)(void *audio_frame_buffer, void *data);
 

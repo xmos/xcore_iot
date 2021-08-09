@@ -22,8 +22,8 @@
 #include "mbedtls/debug.h"
 
 /* App headers */
-#include "tls_echo_server.h"
 #include "app_conf.h"
+#include "tls_echo_server/tls_echo_server.h"
 
 const char* CHECK_HOSTNAME = "demodevice";
 

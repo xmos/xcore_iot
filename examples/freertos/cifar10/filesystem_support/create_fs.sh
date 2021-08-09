@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Get unix name for determining OS
 UNAME=$(uname)
 

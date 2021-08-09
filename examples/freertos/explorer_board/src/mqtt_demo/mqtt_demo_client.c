@@ -2,7 +2,6 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #define DEBUG_UNIT MQTT_DEMO_CLIENT
-#include "app_conf.h"
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -14,12 +13,13 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
 #include "tls_support.h"
 #include "MQTTClient.h"
 
 /* App headers */
-#include "mqtt_demo_client.h"
+#include "app_conf.h"
+#include "mqtt_demo/mqtt_demo_client.h"
+#include "platform/driver_instances.h"
 
 #define MQTT_DEMO_CONNECT_STACK_SIZE 		1500
 #define MQTT_DEMO_CONNECTION_STACK_SIZE 	1200
@@ -27,7 +27,6 @@
 const char* HOSTNAME = "localhost";
 
 static rtos_gpio_port_id_t led_port = 0;
-static rtos_gpio_t* gpio = NULL;
 static uint32_t val = 0;
 
 typedef struct net_conn_args
@@ -40,7 +39,7 @@ typedef struct net_conn_args
 void messageArrived(MessageData* data)
 {
     val ^= 1;
-    rtos_gpio_port_out(gpio, led_port, val);
+    rtos_gpio_port_out(gpio_ctx, led_port, val);
 
 	debug_printf("Message arrived on topic %.*s: %.*s\n", data->topicName->lenstring.len, data->topicName->lenstring.data,
 		data->message->payloadlen, data->message->payload);
@@ -303,14 +302,16 @@ static void mqtt_demo_connect( void* arg )
 	vPortFree( ca );
 }
 
-void mqtt_demo_create( rtos_gpio_t *gpio_ctx, UBaseType_t priority )
+void mqtt_demo_create(UBaseType_t priority)
 {
-    if( gpio_ctx != NULL )
-    {
-        led_port = rtos_gpio_port(PORT_LEDS);
-        rtos_gpio_port_enable(gpio_ctx, led_port);
-        gpio = gpio_ctx;
+    led_port = rtos_gpio_port(PORT_LEDS);
+    rtos_gpio_port_enable(gpio_ctx, led_port);
 
-        xTaskCreate( mqtt_demo_connect, "mqtt_demo", MQTT_DEMO_CONNECT_STACK_SIZE, ( void * ) NULL, priority, NULL );
-    }
+    xTaskCreate(
+            mqtt_demo_connect,
+            "mqtt_demo",
+            MQTT_DEMO_CONNECT_STACK_SIZE,
+            ( void * ) NULL,
+            priority,
+            NULL );
 }
