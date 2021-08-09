@@ -6,5 +6,7 @@ jupyter_console
 jupyter_core
 matplotlib
 numpy
--e tools/ai/ai_tools/tflite2xcore
--e tools/ai/ai_tools/utils/adf/xcore_interpreters
+opencv-python
+PyYAML
+setuptools_scm
+tensorflow==2.4.2
