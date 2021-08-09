@@ -36,10 +36,10 @@ else
     (cd ${XCORE_INTERPRETERS_PATH}; mkdir -p build)
     (cd ${XCORE_INTERPRETERS_PATH}/build; cmake ../ ; make install)
 
-    echo "**********************************"
-    echo "* Installing Python requirements *"
-    echo "**********************************"
-    pip install -r ${AI_PATH}/requirements.txt
+    # echo "**********************************"
+    # echo "* Installing Python requirements *"
+    # echo "**********************************"
+    # pip install -r ${AI_PATH}/requirements.txt
 
     # echo "**************************************"
     # echo "* Updating PATH environment variable *"
