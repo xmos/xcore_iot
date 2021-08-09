@@ -31,19 +31,39 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      
-      - name: Pull xcore_sdk_builder container
-        run: |
-          docker pull ghcr.io/xmos/xcore_sdk_builder:develop 
 
       - name: Install Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
 
+      - name: Checkout AI Tools
+        uses: actions/checkout@v2
+        with:
+          repository: xmos/ai_tools
+          ref: 'cb81a22ba82a06a14dc210799589a24c00c2e24a'
+          path: tools/ai/ai_tools
+          submodules: recursive
+
+      - name: Pull xcore_sdk_builder container
+        run: |
+          docker pull ghcr.io/xmos/xcore_sdk_builder:develop 
+
       - name: Install
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:develop bash -l tools/ai/install.sh
+          ls -l
+          echo "*************"
+          echo "*************"
+          echo "*************"
+          ls -l tools/ai
+          echo "*************"
+          echo "*************"
+          echo "*************"
+          ls -l tools/ai/ai_tools
+          echo "*************"
+          echo "*************"
+          echo "*************"
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:develop bash -l tools/ai/install.sh
 
       - name: Test
         run: |
