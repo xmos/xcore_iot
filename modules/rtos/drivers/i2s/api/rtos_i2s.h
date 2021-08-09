@@ -286,7 +286,7 @@ void rtos_i2s_start(
 /**
  * Initializes an RTOS I2S driver instance in master mode.
  * This must only be called by the tile that owns the driver instance. It should be
- * called before starting the RTOS, and must be called before calling rtos_i2s_master_start()
+ * called before starting the RTOS, and must be called before calling rtos_i2s_start()
  * or any of the core I2S driver functions with this instance.
  *
  * \param i2s_ctx        A pointer to the I2S driver instance to initialize.
@@ -319,7 +319,7 @@ void rtos_i2s_master_init(
  * Initializes an RTOS I2S driver instance in master mode but that uses an externally
  * generated bit clock.
  * This must only be called by the tile that owns the driver instance. It should be
- * called before starting the RTOS, and must be called before calling rtos_i2s_master_start()
+ * called before starting the RTOS, and must be called before calling rtos_i2s_start()
  * or any of the core I2S driver functions with this instance.
  *
  * \param i2s_ctx        A pointer to the I2S driver instance to initialize.
@@ -347,9 +347,9 @@ void rtos_i2s_master_ext_clock_init(
         xclock_t bclk);
 
 /**
- * Initializes an RTOS I2S driver instance in master mode.
+ * Initializes an RTOS I2S driver instance in slave mode.
  * This must only be called by the tile that owns the driver instance. It should be
- * called before starting the RTOS, and must be called before calling rtos_i2s_master_start()
+ * called before starting the RTOS, and must be called before calling rtos_i2s_start()
  * or any of the core I2S driver functions with this instance.
  *
  * \param i2s_ctx        A pointer to the I2S driver instance to initialize.
