@@ -9,3 +9,4 @@ nbval
 numpy
 opencv-python
 pytest
+tensorflow==2.4.2
