@@ -12,10 +12,6 @@
 name: AI Tools
 
 on:
-  pull_request:
-    branches:
-      - 'develop'
-
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
 
@@ -51,18 +47,6 @@ jobs:
 
       - name: Install
         run: |
-          ls -l
-          echo "*************"
-          echo "*************"
-          echo "*************"
-          ls -l tools/ai
-          echo "*************"
-          echo "*************"
-          echo "*************"
-          ls -l tools/ai/ai_tools
-          echo "*************"
-          echo "*************"
-          echo "*************"
           docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:develop bash -l tools/ai/install.sh
 
       - name: Install dependencies

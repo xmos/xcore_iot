@@ -5,8 +5,8 @@ jupyter_client
 jupyter_console
 jupyter_core
 matplotlib
-nbval
 numpy
 opencv-python
-pytest
+PyYAML
+setuptools_scm
 tensorflow==2.4.2

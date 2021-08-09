@@ -1,2 +1,10 @@
+Jinja2
+jupyter
+jupyter_client
+jupyter_client
+jupyter_console
+jupyter_core
+matplotlib
+numpy
 -e tools/ai/ai_tools/tflite2xcore
 -e tools/ai/ai_tools/utils/adf/xcore_interpreters
