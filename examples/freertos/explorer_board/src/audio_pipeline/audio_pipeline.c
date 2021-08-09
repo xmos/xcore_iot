@@ -6,7 +6,9 @@
 #include "task.h"
 #include "queue.h"
 
-#include "audio_pipeline.h"
+/* App headers */
+#include "audio_pipeline/audio_pipeline.h"
+#include "platform/driver_instances.h"
 
 typedef struct {
 	audio_pipeline_input_t input;

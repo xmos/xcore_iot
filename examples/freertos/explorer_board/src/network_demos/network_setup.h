@@ -5,6 +5,6 @@
 #define NETWORK_SETUP_H_
 
 /* Initalize WiFi */
-void wifi_start(rtos_spi_master_device_t *wifi_device_ctx, rtos_gpio_t *gpio_ctx);
+void wifi_start( UBaseType_t priority );
 
 #endif /* NETWORK_SETUP_H_ */

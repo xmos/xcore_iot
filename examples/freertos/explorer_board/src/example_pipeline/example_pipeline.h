@@ -12,21 +12,11 @@ enum {
     SET_GAIN_VAL
 };
 
-void example_pipeline_init(
-        rtos_mic_array_t *mic_array_ctx,
-        rtos_i2s_t *i2s_ctx,
-        rtos_intertile_t *host_intertile_ctx,
-        unsigned intertile_port);
+void example_pipeline_init( UBaseType_t priority );
 
-void intertile_pipeline_to_tcp_create(
-        rtos_intertile_t *host_intertile_ctx,
-        unsigned intertile_port,
-        unsigned host_task_priority);
+void intertile_pipeline_to_tcp_create( void );
 
-void remote_cli_gain_init(
-        rtos_intertile_t *host_intertile_ctx,
-        unsigned intertile_port,
-        unsigned host_task_priority);
+void remote_cli_gain_init( UBaseType_t priority );
 
 BaseType_t audiopipeline_get_stage1_gain( void );
 BaseType_t audiopipeline_set_stage1_gain( BaseType_t xNewGain );

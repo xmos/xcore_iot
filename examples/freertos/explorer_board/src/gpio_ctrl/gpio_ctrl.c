@@ -11,11 +11,11 @@
 #include "timers.h"
 
 /* Library headers */
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
 
 /* App headers */
 #include "app_conf.h"
 #include "example_pipeline/example_pipeline.h"
+#include "platform/driver_instances.h"
 
 RTOS_GPIO_ISR_CALLBACK_ATTR
 static void button_callback(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_t port_id, uint32_t value)
@@ -64,7 +64,7 @@ void vVolumeDownCallback( TimerHandle_t pxTimer )
     volume_down();
 }
 
-void gpio_ctrl(rtos_gpio_t *gpio_ctx)
+void gpio_ctrl(void)
 {
     uint32_t status;
     uint32_t buttons_val;
@@ -138,12 +138,12 @@ void gpio_ctrl(rtos_gpio_t *gpio_ctx)
     }
 }
 
-void gpio_ctrl_create(rtos_gpio_t *gpio_ctx, UBaseType_t priority)
+void gpio_ctrl_create(UBaseType_t priority)
 {
     xTaskCreate((TaskFunction_t) gpio_ctrl,
                 "gpio_ctrl",
                 portTASK_STACK_DEPTH(gpio_ctrl),
-                gpio_ctx,
+                NULL,
                 priority,
                 NULL);
 }

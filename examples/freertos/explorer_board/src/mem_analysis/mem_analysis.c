@@ -1,8 +1,6 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include "app_conf.h"
-
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -14,6 +12,7 @@
 /* Library headers */
 
 /* App headers */
+#include "app_conf.h"
 #include "mem_analysis.h"
 
 static void mem_analysis( void *arg )

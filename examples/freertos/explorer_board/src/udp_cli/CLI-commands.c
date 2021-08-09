@@ -54,18 +54,16 @@ commands. */
 /* App includes */
 #include "udp_cli/CLI-commands.h"
 #include "example_pipeline/example_pipeline.h"
-#include "rtos/drivers/intertile/api/rtos_intertile.h"
+#include "platform/driver_instances.h"
 
 #ifndef  configINCLUDE_TRACE_RELATED_CLI_COMMANDS
 	#define configINCLUDE_TRACE_RELATED_CLI_COMMANDS 0
 #endif
 
-static rtos_intertile_t *intertile_ctx = NULL;
 static unsigned intertile_port = 0;
 
-void vInitializeUDPIntertile( rtos_intertile_t *host_intertile_ctx, unsigned port )
+void vInitializeUDPIntertile( unsigned port )
 {
-    intertile_ctx = host_intertile_ctx;
     intertile_port = port;
 }
 

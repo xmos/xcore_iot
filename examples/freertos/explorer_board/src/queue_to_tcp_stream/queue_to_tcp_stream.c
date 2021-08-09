@@ -2,8 +2,6 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #define DEBUG_UNIT QUEUE_TO_TCP
-#include "app_conf.h"
-
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -14,7 +12,8 @@
 #include "FreeRTOS_Sockets.h"
 
 /* App headers */
-#include "queue_to_tcp_stream.h"
+#include "app_conf.h"
+#include "queue_to_tcp_stream/queue_to_tcp_stream.h"
 
 static void queue_to_tcp_sender(void *arg)
 {

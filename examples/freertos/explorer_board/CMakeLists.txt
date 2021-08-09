@@ -46,12 +46,8 @@ set(APP_SOURCES
     "src/platform/driver_instances.c"
     "src/platform/platform_init.c"
     "src/platform/platform_start.c"
-    # "src/main_0.c"
-    # "src/main_1.c"
-    # "src/board_init.c"
     "src/audio_pipeline/audio_pipeline.c"
     "src/example_pipeline/example_pipeline.c"
-    # "src/example_pipeline/dac_init.c"
     "src/gpio_ctrl/gpio_ctrl.c"
     "src/network_demos/network_setup.c"
     "src/queue_to_tcp_stream/queue_to_tcp_stream.c"
@@ -69,16 +65,7 @@ set(APP_SOURCES
 
 set(APP_INCLUDES
     "src"
-    "src/gpio_ctrl"
-    "src/network_demos"
-    "src/queue_to_tcp_stream"
-    "src/thruput_test"
     "src/udp_cli"
-    "src/tls_echo_demo"
-    "src/tls_echo_server"
-    "src/http_demo"
-    "src/mqtt_demo"
-    "src/mem_analysis"
 )
 
 add_compile_definitions(
