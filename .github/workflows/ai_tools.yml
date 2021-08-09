@@ -12,6 +12,10 @@
 name: AI Tools
 
 on:
+  pull_request:
+    branches:
+      - 'develop'
+
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
 
