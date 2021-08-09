@@ -2,9 +2,9 @@
 Libraries
 #########
 
-***
-I/O
-***
+***********
+Peripherals
+***********
 
 *********
 Optimized
@@ -12,6 +12,7 @@ Optimized
 
 .. toctree::
    :maxdepth: 1
+   :includehidden:
 
-   optimized/lib_xs3_math
+   ../../../modules/lib_xs3_math/lib_xs3_math/doc/index.rst
 

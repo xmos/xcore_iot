@@ -9,20 +9,23 @@ The XCore SDK are officially supported on the following platforms. Unofficial su
 
 .. tab:: Windows
 
+   Windows 10 is supported.
    
-   Official support is provided for Windows 10 with Windows Subsystem for Linux (WSL).  See `Windows Subsystem for Linux Installation Guide for Windows 10 <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`__ to install WSL.  
+   We recommend that Windows users install and use the Windows Subsystem for Linux (WSL) to build the SDK example applications.  See `Windows Subsystem for Linux Installation Guide for Windows 10 <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`__ to install WSL.
 
-   The SDK should also work using other Windows GNU development environments like MinGW or Cygwin.
+   The SDK should also work using other Windows GNU development environments like GNU Make, MinGW or Cygwin.
+
+   **Note, the requirement for a GNU development environment will be removed in a future release.**
 
 .. tab:: Mac
 
-   Operating systems macOS 10.14 (Mojave) and newer are supported. Intel processors only.  Older operating systems are likely to also work, though they are not supported.
+   Operating systems macOS 10.5 (Catalina) and newer are supported. Intel processors only.  Older operating systems are likely to also work, though they are not supported.
 
    A standard C/C++ compiler is required to build applications and libraries on the host PC.  Mac users may use the Xcode command line tools.
 
 .. tab:: Linux
 
-   Officical support is provided for CentOS 7.6.  The SDK also works on many modern Linux distros including Fedora and Ubuntu.
+   Many modern Linux distros including Fedora, Ubuntu, CentOS & Debian are supported.
 
 .. _sdk-prerequisites-label:
 

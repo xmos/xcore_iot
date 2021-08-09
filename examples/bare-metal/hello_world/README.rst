@@ -39,9 +39,9 @@ Run the following command:
 
 You should notice a wave pattern moving back and forth on the LEDs.
 
-.. image:: images/leds.*
+.. image:: images/leds.gif
     :width: 200px
-    :align: left
+    :align: center
 
 ********************
 Optimizing the model

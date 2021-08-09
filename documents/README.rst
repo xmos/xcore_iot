@@ -13,9 +13,9 @@ port forwarding.
 You can now edit the .rst documentation, and your web-browser content will automatically
 update.
 
-************
-Using Docker
-************
+********************
+Building with Docker
+********************
 
 =============
 Prerequisites
@@ -39,27 +39,15 @@ Build documentation:
 
     $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make html
 
-Launch sphinx-autobuild server:
-
-.. code-block:: console
-
-    $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make livehtml
-
-Clean documentation:
-
-.. code-block:: console
-
-    $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean
-
 Clean and build documentation with link check:
 
 .. code-block:: console
 
-    $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
+    $ docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="--keep-going"
 
-********************
-Without Using Docker
-********************
+***********************
+Building Without Docker
+***********************
 
 =============
 Prerequisites
@@ -99,4 +87,17 @@ Clean and build documentation with link check:
 
 .. code-block:: console
     
-    $ make clean html linkcheck SPHINXOPTS="-W --keep-going"
+    $ make clean html linkcheck SPHINXOPTS="--keep-going"
+
+Add `-W` to the `SPHINXOPTS` to turn warnings into errors.
+
+**********************
+Adding a New Component
+**********************
+
+Follow the following steps to add a new component.
+
+- Add an entry for the new component's top-level document to the appropriate TOC in the documents tree.
+- If the new component uses `Doxygen`, append the appropriate path(s) to the INPUT variable in `Doxyfile`.
+- If the new component includes `.rst` files that should **not** be part of the documentation build, append the appropriate 
+path(s) to `exclude_patterns` in `conf.py`.

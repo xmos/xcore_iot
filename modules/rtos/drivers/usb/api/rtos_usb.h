@@ -100,6 +100,7 @@ struct rtos_usb_struct {
     chanend_t c_ep_in_xud[RTOS_USB_ENDPOINT_COUNT_MAX];
     chanend_t c_sof_xud;
     chanend_t c_sof;
+    int sof_interrupt_enabled;
 
     XUD_EpType endpoint_out_type[RTOS_USB_ENDPOINT_COUNT_MAX];
     XUD_EpType endpoint_in_type[RTOS_USB_ENDPOINT_COUNT_MAX];
@@ -245,28 +246,30 @@ static inline void rtos_usb_endpoint_stall_clear(rtos_usb_t *ctx,
  *
  * rtos_usb_init() must be called on this USB driver instance prior to calling this.
  *
- * \param ctx               A pointer to the USB driver instance to start.
- * \param endpoint_count    The number of endpoints that will be used by the application. A single
- *                          endpoint here includes both its IN and OUT endpoints. For example, if the
- *                          application uses EP0_IN, EP0_OUT, EP1_IN, EP2_IN, EP2_OUT, EP3_OUT, then the
- *                          endpoint count specified here should be 4 (endpoint 0 through endpoint 3)
- *                          regardless of the lack of EP1_OUT and EP3_IN. If these two endpoints were used,
- *                          the count would still be 4.\n
- *                          If for whatever reason, the application needs to use a particular endpoint
- *                          number, say only EP6 in addition to EP0, then the count here needs to be 7, even
- *                          though endpoints 1 through 5 are unused. All unused endpoints must be marked as
- *                          disabled in the two endpoint type lists \p endpoint_out_type and \p endpoint_in_type.
- * \param endpoint_out_type A list of the endpoint types for each output endpoint. Index 0 represents the type
- *                          for EP0_OUT, and so on. See XUD_EpType in lib_xud. If the endpoint is unused, it must
- *                          be set to XUD_EPTYPE_DIS.
- * \param endpoint_in_type  A list of the endpoint types for each input endpoint. Index 0 represents the type
- *                          for EP0_IN, and so on. See XUD_EpType in lib_xud. If the endpoint is unused, it must
- *                          be set to XUD_EPTYPE_DIS.
- * \param speed             The speed at which the bus should operate. Either XUD_SPEED_FS or XUD_SPEED_HS. See
- *                          XUD_BusSpeed_t in lib_xud.
- * \param power_source      The source of the device's power. Either bus powered (XUD_PWR_BUS) or self powered
- *                          (XUD_PWR_SELF). See XUD_PwrConfig in lib_xud.
- * \param interrupt_core_id The ID of the core on which to enable the USB interrupts.
+ * \param ctx                   A pointer to the USB driver instance to start.
+ * \param endpoint_count        The number of endpoints that will be used by the application. A single
+ *                              endpoint here includes both its IN and OUT endpoints. For example, if the
+ *                              application uses EP0_IN, EP0_OUT, EP1_IN, EP2_IN, EP2_OUT, EP3_OUT, then the
+ *                              endpoint count specified here should be 4 (endpoint 0 through endpoint 3)
+ *                              regardless of the lack of EP1_OUT and EP3_IN. If these two endpoints were used,
+ *                              the count would still be 4.\n
+ *                              If for whatever reason, the application needs to use a particular endpoint
+ *                              number, say only EP6 in addition to EP0, then the count here needs to be 7, even
+ *                              though endpoints 1 through 5 are unused. All unused endpoints must be marked as
+ *                              disabled in the two endpoint type lists \p endpoint_out_type and \p endpoint_in_type.
+ * \param endpoint_out_type     A list of the endpoint types for each output endpoint. Index 0 represents the type
+ *                              for EP0_OUT, and so on. See XUD_EpType in lib_xud. If the endpoint is unused, it must
+ *                              be set to XUD_EPTYPE_DIS.
+ * \param endpoint_in_type      A list of the endpoint types for each input endpoint. Index 0 represents the type
+ *                              for EP0_IN, and so on. See XUD_EpType in lib_xud. If the endpoint is unused, it must
+ *                              be set to XUD_EPTYPE_DIS.
+ * \param speed                 The speed at which the bus should operate. Either XUD_SPEED_FS or XUD_SPEED_HS. See
+ *                              XUD_BusSpeed_t in lib_xud.
+ * \param power_source          The source of the device's power. Either bus powered (XUD_PWR_BUS) or self powered
+ *                              (XUD_PWR_SELF). See XUD_PwrConfig in lib_xud.
+ * \param interrupt_core_id     The ID of the core on which to enable the USB interrupts.
+ * \param sof_interrupt_core_id The ID of the core on which to enable the SOF interrupt. Set to < 0 to disable
+ *                              the SoF interrupt if it is not needed.
  */
 void rtos_usb_start(
         rtos_usb_t *ctx,
@@ -275,7 +278,8 @@ void rtos_usb_start(
         XUD_EpType endpoint_in_type[],
         XUD_BusSpeed_t speed,
         XUD_PwrConfig power_source,
-        unsigned interrupt_core_id);
+        unsigned interrupt_core_id,
+        int sof_interrupt_core_id);
 
 /**
  * Initializes an RTOS USB driver instance. This must only be called by the tile that

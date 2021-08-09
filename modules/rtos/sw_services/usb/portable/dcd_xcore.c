@@ -14,6 +14,14 @@
 #endif
 
 /*
+ * By default, SOF interrupts will run on the same core
+ * as the other USB interrupts.
+ */
+#ifndef CFG_TUD_XCORE_SOF_INTERRUPT_CORE
+#define CFG_TUD_XCORE_SOF_INTERRUPT_CORE CFG_TUD_XCORE_INTERRUPT_CORE
+#endif
+
+/*
  * By default, the USB I/O thread may run on any
  * core other than 0.
  */
@@ -328,7 +336,8 @@ void dcd_connect(uint8_t rhport)
                    epTypeTableIn,
                    TUD_OPT_HIGH_SPEED ? XUD_SPEED_HS : XUD_SPEED_FS,
                    pwr,
-                   CFG_TUD_XCORE_INTERRUPT_CORE);
+                   CFG_TUD_XCORE_INTERRUPT_CORE,
+                   CFG_TUD_XCORE_SOF_INTERRUPT_CORE);
 }
 
 // Disconnect by disabling internal pull-up resistor on D+/D-

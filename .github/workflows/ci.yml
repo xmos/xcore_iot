@@ -12,9 +12,11 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - 'develop'
   pull_request:
     branches:
-      - 'main'
       - 'develop'
 
   # Allow manually triggering of the workflow.
@@ -24,30 +26,77 @@ env:
   XCORE_SDK_PATH: ${{ github.workspace }}
 
 jobs:
-  documentation:
-    name: Build and package documentation
+  build_metal_examples:
+    name: Build bare-metal examples
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'admitPR'))
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2
         with:
           submodules: recursive
+      
+      - name: Pull xcore_sdk_builder container
+        run: |
+          docker pull ghcr.io/xmos/xcore_sdk_builder:latest 
+      
+      - name: Build
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_metal_examples.sh all
+
+  build_rtos_examples:
+    name: Build RTOS examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Pull xcore_sdk_builder container
+        run: |
+          docker pull ghcr.io/xmos/xcore_sdk_builder:latest 
+      
+      - name: Build
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_examples.sh smoke
+
+  build_rtos_tests:
+    name: Build RTOS tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Pull xcore_sdk_builder container
+        run: |
+          docker pull ghcr.io/xmos/xcore_sdk_builder:latest 
+      
+      - name: Build
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_tests.sh all
+
+  build_documentation:
+    name: Build and package documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
       - name: Pull doc_builder container
         run: |
           docker pull ghcr.io/xmos/doc_builder:main 
+      
       - name: Build documentation
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="-W --keep-going"
-      - name: Package documentation artifacts
-        working-directory: ./documents/_build
-        run: |
-          tar -czf xcore_sdk_docs.tgz html
+          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="--keep-going"
+      
       - name: Save documentation artifacts
         uses: actions/upload-artifact@v2
         with:
           name: xcore_sdk_docs
-          path: ./documents/_build/xcore_sdk_docs.tgz
+          path: ./documents/_build/html
           retention-days: 5

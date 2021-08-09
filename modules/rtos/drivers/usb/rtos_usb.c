@@ -52,7 +52,7 @@ static void usb_xud_thread(rtos_usb_t *ctx)
              ctx->endpoint_count,
              ctx->c_ep_in_xud,
              ctx->endpoint_count,
-             ctx->c_sof_xud,
+             ctx->sof_interrupt_enabled ? ctx->c_sof_xud : 0,
              endpoint_out_type,
              endpoint_in_type,
 #if !XUD_DEV_XS3
@@ -277,7 +277,8 @@ void rtos_usb_start(
         XUD_EpType endpoint_in_type[],
         XUD_BusSpeed_t speed,
         XUD_PwrConfig power_source,
-        unsigned interrupt_core_id)
+        unsigned interrupt_core_id,
+        int sof_interrupt_core_id)
 {
     int i;
     uint32_t core_exclude_map;
@@ -290,10 +291,15 @@ void rtos_usb_start(
 
     /* Ensure that all USB interrupts are enabled on the requested core */
     rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
-    rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
 
-    triggerable_setup_interrupt_callback(ctx->c_sof, ctx, RTOS_INTERRUPT_CALLBACK(usb_sof_isr));
-    triggerable_enable_trigger(ctx->c_sof);
+    if (sof_interrupt_core_id >= 0) {
+        ctx->sof_interrupt_enabled = 1;
+        rtos_osal_thread_core_exclusion_set(NULL, ~(1 << sof_interrupt_core_id));
+        triggerable_setup_interrupt_callback(ctx->c_sof, ctx, RTOS_INTERRUPT_CALLBACK(usb_sof_isr));
+        triggerable_enable_trigger(ctx->c_sof);
+    }
+
+    rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
 
     for (i = 0; i < endpoint_count; i++) {
 

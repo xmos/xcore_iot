@@ -1,23 +1,10 @@
 # This variable is not used by any other files and is
 # therefore not required. It is used only for setting the
 # EXECUTABLE variable below.
-PROJECT_NAME = dispatch_queue
+PROJECT_NAME = dispatcher
 
 # BOARD is used by the XMOS RTOS platform .cmake file
 BOARD ?= XCORE-AI-EXPLORER
-
-# PLATFORM_USES_TILE_0 through PLATFORM_USES_TILE_3 are 
-# used by the multitile_build.mk file. If only tile 0 is
-# used then none of these need to be specified.
-# either 1 or true may be used to enable them. If they
-# are not used then they do not need to be specified,
-# but may be set to 0 or false.
-PLATFORM_USES_TILE_0 = true
-PLATFORM_USES_TILE_1 = false
-
-# XE_BASE_TILE is used by the multitile_build.mk file.
-# It defaults to 0 if not specified.
-XE_BASE_TILE = 0
 
 # BUILD_DIR and OUTPUT_DIR are used by the multitile_build.mk file.
 # If not specified they default to 'build' and 'bin' respectively.
