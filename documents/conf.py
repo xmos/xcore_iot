@@ -85,6 +85,11 @@ exclude_patterns = [
     "modules/hil/lib_xud",
 ]
 
+linkcheck_ignore = [
+    "http://127.0.0.1:\d+/?",
+    "http://localhost:\d+/?",
+]
+
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
