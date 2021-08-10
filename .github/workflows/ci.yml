@@ -24,6 +24,8 @@ on:
 
 env:
   XCORE_SDK_PATH: ${{ github.workspace }}
+  XCORE_SDK_BUILDER: 'ghcr.io/xmos/xcore_sdk_builder:develop'
+  XCORE_DOC_BUILDER: 'ghcr.io/xmos/doc_builder:main'
 
 jobs:
   build_metal_examples:
@@ -37,11 +39,11 @@ jobs:
       
       - name: Pull xcore_sdk_builder container
         run: |
-          docker pull ghcr.io/xmos/xcore_sdk_builder:latest 
+          docker pull ${XCORE_SDK_BUILDER} 
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_metal_examples.sh all
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${XCORE_SDK_BUILDER} bash -l tools/ci/build_metal_examples.sh all
 
   build_rtos_examples:
     name: Build RTOS examples
@@ -54,11 +56,11 @@ jobs:
       
       - name: Pull xcore_sdk_builder container
         run: |
-          docker pull ghcr.io/xmos/xcore_sdk_builder:latest 
+          docker pull ${XCORE_SDK_BUILDER} 
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_examples.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${XCORE_SDK_BUILDER} bash -l tools/ci/build_rtos_examples.sh smoke
 
   build_rtos_tests:
     name: Build RTOS tests
@@ -71,11 +73,34 @@ jobs:
       
       - name: Pull xcore_sdk_builder container
         run: |
-          docker pull ghcr.io/xmos/xcore_sdk_builder:latest 
+          docker pull ${XCORE_SDK_BUILDER} 
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ghcr.io/xmos/xcore_sdk_builder:latest bash -l tools/ci/build_rtos_tests.sh all
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${XCORE_SDK_BUILDER} bash -l tools/ci/build_rtos_tests.sh all
+
+  test_python_install:
+    name: Test Python install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8' 
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tools/install/requirements.txt
+
+      - name: Verify install
+        run: |
+          python test/verify_python_install.py
 
   build_documentation:
     name: Build and package documentation
@@ -88,11 +113,11 @@ jobs:
       
       - name: Pull doc_builder container
         run: |
-          docker pull ghcr.io/xmos/doc_builder:main 
+          docker pull ${XCORE_DOC_BUILDER}
       
       - name: Build documentation
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ghcr.io/xmos/doc_builder:main make clean html linkcheck SPHINXOPTS="--keep-going"
+          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ${XCORE_DOC_BUILDER} make clean html linkcheck SPHINXOPTS="--keep-going"
       
       - name: Save documentation artifacts
         uses: actions/upload-artifact@v2

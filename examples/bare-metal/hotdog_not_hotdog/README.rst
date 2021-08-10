@@ -54,13 +54,7 @@ Running with simulator
 
     $ xsim --xscope "-realtime localhost:10234" bin/hotdog_not_hotdog.xe
 
-Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires the following Python modules:
-
-.. code-block:: console
-
-    $ pip install numpy
-    $ pip install matplotlib
-    $ pip install opencv-python
+Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires Python.  Ensure you have installed Python 3 and the XCore SDK Python requirements.
 
 Sending a test image to the xcore.ai Explorer board using `xscope`.
 

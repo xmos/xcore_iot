@@ -17,7 +17,9 @@ The example reads a test image specified on the command line over JTAG.  Input i
 - ship
 - truck
 
-A Python 3 script is provided that will generate one example image from each of the classes above. This script requires `Tensorflow <https://www.tensorflow.org/>`__ and `Numpy <https://numpy.org/>`__.  If you have already installed the XMOS AI Toolchain extensions then you have these requirements.  Alternatively, you can install using `pip`.  To generate the images run:
+A Python 3 script is provided that will generate one example image from each of the classes above. This script requires Python.  Ensure you have installed Python 3 and the XCore SDK Python requirements.  
+
+To generate the images run:
 
 .. code-block:: console
 

@@ -6,7 +6,7 @@ This example demonstrates how to integrate the xCORE FreeRTOS port with the Tens
 
 The example uses an `ArduCam 2MP Plus OV2640 Mini Module SPI camera <https://www.arducam.com/product/arducam-2mp-spi-camera-b0067-arduino/>`__ to capture a 96x96 8 bit grayscale image.  The application will attempt to classify whether the image contains a person or does not contain a person.
 
-When a person is detected LED 0 turns on.  When a person is not detected LED 0 turns off.  LED 3 toggles after each inference.  Additionally, a Python 3 script is provided to output image and output tensor pairs to the host machine.  This script requires `Numpy <https://numpy.org/>`__ and `Matplotlib <https://matplotlib.org/>`__.
+When a person is detected LED 0 turns on.  When a person is not detected LED 0 turns off.  LED 3 toggles after each inference.  Additionally, a Python script is provided to output image and output tensor pairs to the host machine.  Ensure you have installed Python 3 and the XCore SDK Python requirements.
 
 **************
 Hardware setup
