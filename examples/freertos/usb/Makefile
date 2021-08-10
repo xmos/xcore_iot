@@ -6,6 +6,11 @@ PROJECT_NAME = usb
 BOARD ?= XCORE-AI-EXPLORER
 #BOARD ?= XCORE200-MIC-ARRAY
 
+TINYUSB_DEMO ?= "AUDIO_TEST"
+
+CMAKE_ARGS ?=
+CMAKE_ARGS += -DTINYUSB_DEMO_TO_USE=$(TINYUSB_DEMO)
+
 # PLATFORM_USES_TILE_0 through PLATFORM_USES_TILE_3 are
 # used by the multitile_build.mk file. If only tile 0 is
 # used then none of these need to be specified.
