@@ -29,7 +29,7 @@ C, XC and ASM coding style
 
 Changes to C, C++ or ASM should be consistent with the style of existing C, C++ and ASM code.
 
-`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ is used for formatting code.  In most circumstances, the default settings are safe to use.  However, you will need to configure so includes are not sorting.
+`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ will soon be used for formatting code.
 
 *******************************
 Development Virtual Environment
@@ -47,13 +47,13 @@ Run the following command to activate the Conda environment:
 
 .. code-block:: console
 
-    $ conda activate xcore_sdk_venv
+    $ conda activate <path-to>/xcore_sdk_venv
 
 Install development dependencies:
 
 .. code-block:: console
 
-    $ ./tools/install/contributing.sh
+    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r documents/requirements.txt
 
 *****************
 Building Examples

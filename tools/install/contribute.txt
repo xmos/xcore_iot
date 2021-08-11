@@ -1,5 +1,4 @@
 black
-clang-format
 nbval
 pytest
 pytest-forked
