@@ -57,4 +57,4 @@ jobs:
           
       - name: Test
         run: |
-          cd test/ai && pytest -v test_tflite2xcore_install.py && bash test_notebooks.sh
+          cd test/ai && pytest -v test_tflite2xcore_install.py &&  && bash test_scripts.sh && bash test_notebooks.sh

@@ -55,6 +55,12 @@ Install development dependencies:
 
     $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r documents/requirements.txt
 
+Run the following command to deactivate the Conda environment:
+
+    .. code-block:: console
+    
+        $ conda deactivate
+
 *****************
 Building Examples
 *****************
@@ -73,6 +79,7 @@ Some scripts are provided to build all the example applications.  Run this scrip
 
     $ bash tools/ci/build_metal_examples.sh all
     $ bash tools/ci/build_rtos_examples.sh all
+    $ bash tools/ci/build_rtos_usb_examples.sh all
 
 *************
 Running Tests
