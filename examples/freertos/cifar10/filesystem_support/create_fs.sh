@@ -27,13 +27,13 @@ elif [ "$UNAME" = "Darwin" ] ; then
 fi
 
 # Copy files into filesystem
-#sudo cp test_inputs/airplane.bin fat_mnt/airplane.bin
-#sudo cp test_inputs/bird.bin fat_mnt/bird.bin
-#sudo cp test_inputs/cat.bin fat_mnt/cat.bin
-#sudo cp test_inputs/deer.bin fat_mnt/deer.bin
-#sudo cp test_inputs/frog.bin fat_mnt/frog.bin
-#sudo cp test_inputs/horse.bin fat_mnt/horse.bin
-#sudo cp test_inputs/truck.bin fat_mnt/truck.bin
+sudo cp test_inputs/airplane.bin fat_mnt/airplane.bin
+sudo cp test_inputs/bird.bin fat_mnt/bird.bin
+sudo cp test_inputs/cat.bin fat_mnt/cat.bin
+sudo cp test_inputs/deer.bin fat_mnt/deer.bin
+sudo cp test_inputs/frog.bin fat_mnt/frog.bin
+sudo cp test_inputs/horse.bin fat_mnt/horse.bin
+sudo cp test_inputs/truck.bin fat_mnt/truck.bin
 
 # Unmount the filesystem
 if [ "$UNAME" = "Linux" ] ; then
