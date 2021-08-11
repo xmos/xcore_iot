@@ -8,7 +8,7 @@ Getting Started with FreeRTOS
 RTOS Application Design
 ***********************
 
-A fully functional example application that demonstrates usage of a majority of the available drivers can be found in the SDK under the path `examples/freertos/independent_tiles <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/independent_tiles>`_. In addition to being a reference for how to use most of the drivers, it also serves as one example for how to structure an SMP RTOS application for XCore.
+A fully functional example application that demonstrates usage of a majority of the available drivers can be found in the SDK under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_. This application does not provide a complete example of how to use and share all of the drivers. It is, however, a reference for how to use most of the drivers, it does utilizes many of the software services, and it also serves as an example for how to structure an SMP RTOS application for XCore.
 
 This example application runs two instances of SMP FreeRTOS, one on each of the processor's two tiles. Because each tile has its own memory which is not shared between them, this can be viewed as a single asymmetric multiprocessing (AMP) system that comprises two SMP systems. A FreeRTOS thread that is created on one tile will never be scheduled to run on the other tile. Similarly, an RTOS object that is created on tile tile, such as a queue, can only be accessed by threads and ISRs that run on that tile and never by code running on the other tile.
 
@@ -55,9 +55,6 @@ Each tile then creates the `startup_task()` task and starts the FreeRTOS schedul
 The application may be experimented with by modifying the \*RPC_ENABLED macros in `app_conf.h`, as well as the \*_TILE macros at the top of `driver_instances.c`. RPC here stands for Remote Procedure Call, and is what allows for driver instances to be shared. Provided RPC is enabled for a particular driver, it may be used by either tile and the corresponding \*_TILE macros for it may be set to either tile. However, if RPC is disabled then note that when the corresponding \*_TILE macro is not set to the tile that owns the instance, the application will fail.
 
 Consult the RTOS driver documentation for the details on what exactly each of the RTOS API functions called by this application does.
-
-For a more interesting application that does more than just exercise the RTOS drivers see the example application under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_ This application does not provide as complete an example of how to use and share all of the drivers, but does utilize many of the software services.
-
 
 **************************
 Building RTOS Applications
