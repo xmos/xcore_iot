@@ -62,6 +62,23 @@ jobs:
         run: |
           docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${XCORE_SDK_BUILDER} bash -l tools/ci/build_rtos_examples.sh smoke
 
+  build_rtos_usb_examples:
+    name: Build RTOS USB examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Pull xcore_sdk_builder container
+        run: |
+          docker pull ${XCORE_SDK_BUILDER} 
+      
+      - name: Build
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${XCORE_SDK_BUILDER} bash -l tools/ci/build_rtos_usb_examples.sh smoke
+
   build_rtos_tests:
     name: Build RTOS tests
     runs-on: ubuntu-latest
