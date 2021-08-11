@@ -1,3 +1,5 @@
+#!/bin/sh
+
 mkdir echo_client_certs
 openssl req -newkey rsa:2048 -nodes -x509 -sha256 -out echo_client_certs/server.pem -keyout echo_client_certs/server.key -days 365 -subj "/C=US/ST=NH/L=Hampton/O=XMOS/OU=ENGDEMO/CN=localhost/emailAddress=null"
 
