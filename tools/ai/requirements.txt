@@ -8,3 +8,4 @@ matplotlib
 numpy
 -e tools/ai/ai_tools/tflite2xcore
 -e tools/ai/ai_tools/utils/adf/xcore_interpreters
+-e modules/aif/tools/generate

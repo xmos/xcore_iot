@@ -62,22 +62,9 @@ set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal
 #**********************
 include("${SDK_PATH}/modules/aif/ai_framework.cmake")
 
-set(INFERENCE_ENGINE_SOURCE_DIR
-  "${PROJECT_SOURCE_DIR}/inference_engine/src"
-)
-
-set(INFERENCE_ENGINE_SOURCES
-  ${XCORE_RUNTIME_SOURCES}
-  "${INFERENCE_ENGINE_SOURCE_DIR}/inference_engine.cc"
-  "${INFERENCE_ENGINE_SOURCE_DIR}/hotdog_not_hotdog.c"
-)
-
-set(INFERENCE_ENGINE_INCLUDE_DIRS
-  ${XCORE_RUNTIME_INCLUDES}
-  ${INFERENCE_ENGINE_SOURCE_DIR}
-)
-
 set(APP_SOURCES
+  "${PROJECT_SOURCE_DIR}/model_runner/hotdog_not_hotdog_model_data.c"
+  "${PROJECT_SOURCE_DIR}/model_runner/hotdog_not_hotdog_model_runner.cc"
   "${PROJECT_SOURCE_DIR}/app/main.xc"
   "${PROJECT_SOURCE_DIR}/app/main.c"
 )
@@ -87,14 +74,15 @@ set(APP_SOURCES
 #**********************
 target_sources(hotdog_not_hotdog
   PRIVATE ${ADDITIONAL_C_SOURCES}
-  PRIVATE ${INFERENCE_ENGINE_SOURCES}
+  PRIVATE ${MODEL_RUNNER_SOURCES}
   PRIVATE ${APP_SOURCES}
 )
 
 target_include_directories(hotdog_not_hotdog
   PRIVATE ${ADDITIONAL_INCLUDE_DIR}
-  PRIVATE "${INFERENCE_ENGINE_INCLUDE_DIRS}"
+  PRIVATE "${MODEL_RUNNER_INCLUDES}"
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/app/src"
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/model_runner"
 )
 
 #**********************
