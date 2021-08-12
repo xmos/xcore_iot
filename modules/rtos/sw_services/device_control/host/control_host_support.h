@@ -75,6 +75,8 @@ control_build_spi_data(uint8_t data[SPI_TRANSACTION_MAX_BYTES],
 #endif
 
 #if USE_I2C
+#define I2C_TRANSACTION_MAX_BYTES 256
+#define I2C_DATA_MAX_BYTES (I2C_TRANSACTION_MAX_BYTES - 3)
 static inline size_t
 control_build_i2c_data(uint8_t data[I2C_TRANSACTION_MAX_BYTES],
                        control_resid_t resid, control_cmd_t cmd,
