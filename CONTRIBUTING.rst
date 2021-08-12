@@ -16,20 +16,37 @@ General Guidelines and Philosophy For Contribution
 * Bug fixes also generally require unit tests, because the presence of bugs usually indicates insufficient test coverage.
 * Keep API compatibility in mind when you change code.
 
-*******************
-Python coding style
-*******************
-
-All python code should be `blackened  <https://black.readthedocs.io/en/stable/>`_.
-For convenience, the default workspace settings file under `.vscode/` enables format-on-save, and `black` is also provided in the conda environments.
-
 **************************
 C, XC and ASM coding style
 **************************
 
 Changes to C, C++ or ASM should be consistent with the style of existing C, C++ and ASM code.
 
-`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ will soon be used for formatting code.
+clang-format
+==============
+
+`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ is a tool to format source code according to a set of rules and heuristics. 
+
+clang-format can be used to:
+
+- Reformat a block of code to the SDK style. 
+- Help you follow the XCore SDK coding style.
+
+The SDK's clang-format configuration file is `.clang-format` and is in the root of the xcore_sdk repository. The rules contained in `.clang-format` were originally derived from the Linux Kernel coding style. A few modifications have been made by the XCore SDK authors. Not all code in the XCore SDK follows the `.clang-format` rules.  Some non-compliant code is intentional while some is not.  Non-intentional instances should be addressed when the non-compliant code needs to be enhanced.
+
+For more information about `clang-format` visit:
+
+https://clang.llvm.org/docs/ClangFormat.html
+
+https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+*******************
+Python coding style
+*******************
+
+All python code should be `blackened  <https://black.readthedocs.io/en/stable/>`_.
+
+TODO: Add information about the `black` config file.
 
 *******************************
 Development Virtual Environment
