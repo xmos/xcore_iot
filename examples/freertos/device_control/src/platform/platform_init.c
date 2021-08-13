@@ -8,11 +8,13 @@
 
 static void i2c_slave_init(void)
 {
+#if appconfI2C_CTRL_ENABLED && ON_TILE(I2C_CTRL_TILE_NO)
     rtos_i2c_slave_init(i2c_slave_ctx,
                         ~(1 << 0),
                         PORT_EXPANSION_1, //SCL
                         PORT_EXPANSION_3, //SDA
                         0x42);
+#endif
 }
 
 static void gpio_init(void)
