@@ -58,7 +58,7 @@ It is worth noting that our optimizer is a standalone executable with the input 
 Optimizing Your Model
 *********************
 
-Be sure you have installed the XMOS AI Tools.  If you setup a virtual environment as suggested in the :ref:`Getting Started <ai_tools-setup-virtual-environment-label>` guide, remember to :ref:`activate <ai_tools-activate-virtual-environment-label>` it before proceeding.
+Be sure you have installed the XMOS AI Tools.  If you setup a virtual environment as suggested in the :doc:`AI Tools installation instructions <installing-ai-tools>` guide, remember to activate it before proceeding.
 
 We've provided two paths for you to optimize your model for xcore.ai.
 
