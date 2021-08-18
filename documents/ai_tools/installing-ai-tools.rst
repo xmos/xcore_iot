@@ -54,9 +54,3 @@ The following commands will install all required libraries.
     $ bash install.sh
     $ python -m pip install --upgrade pip
     $ pip install -r requirements.txt
-
-The following commands will add the AI Tool scripts to your PATH:
-
-.. code-block:: console
-
-    $ source tools/ai/SetEnv

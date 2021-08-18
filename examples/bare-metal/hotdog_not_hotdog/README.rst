@@ -74,6 +74,15 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
     $ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
 
+Generating the model runner
+===========================
+
+The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
+
+.. code-block:: console
+
+    $ generate_model_runner.py --input model/model_xcore.tflite --output model_runner --name hotdog_not_hotdog
+
 Converting flatbuffer to source file
 ====================================
 
@@ -81,4 +90,4 @@ The following unix command will generate a C source file that contains the Tenso
 
 .. code-block:: console
 
-    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header inference_engine/src/hotdog_not_hotdog.h --source inference_engine/src/hotdog_not_hotdog.c --variable-name hotdog_not_hotdog
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/hotdog_not_hotdog_model_data.h --source model_runner/hotdog_not_hotdog_model_data.c --variable-name hotdog_not_hotdog

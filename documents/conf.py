@@ -21,12 +21,12 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 
 # -- Project information -----------------------------------------------------
 
-project = u"XCore Software Development Kit"
+project = u"XCore SDK"
 copyright = u"2021, XMOS"
 author = "XMOS"
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.x"
+release = ""
 
 # -- General configuration ---------------------------------------------------
 
@@ -97,9 +97,7 @@ linkcheck_ignore = [
 html_theme = "furo"
 
 html_logo = "images/sdk_logo.png"
-html_theme_options = {
-    "sidebar_hide_name": True,
-}
+html_theme_options = {"sidebar_hide_name": False}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

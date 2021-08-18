@@ -2,7 +2,7 @@
 AI Tests
 ########
 
-The AI test requires that you have the development Conda environment setup (see CONTRIBUTING.md) and have installed the AI Tools (see documents/quick_start/installing-ai-tools.rst).
+The AI test requires that you have the Python development setup (see CONTRIBUTING.rst) and have installed the AI Tools (see documents/quick_start/installing-ai-tools.rst).
 
 ************
 Model Runner
