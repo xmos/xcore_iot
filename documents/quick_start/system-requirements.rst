@@ -4,7 +4,7 @@
 System Requirements
 ###################
 
-The XCore SDK are officially supported on the following platforms. Unofficial support is mentioned where appropriate.
+The XCore SDK is officially supported on the following platforms. Unofficial support is mentioned where appropriate.
 
 
 .. tab:: Windows

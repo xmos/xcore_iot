@@ -4,6 +4,8 @@
 FreeRTOS Application Programming
 ################################
 
+This document is intended to help you become familiar with FreeRTOS application programming on XCore.
+
 *********
 Rationale
 *********
@@ -113,7 +115,7 @@ To help ease development of XCore applications using an SMP RTOS, XMOS provides 
 
 These drivers are all found in the SDK under the path `modules/rtos/drivers <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/drivers>`_.
 
-Documentation on each of these drivers can be found under the :doc:`References/RTOS Drivers<../../reference/rtos_drivers/index>` section in the SDK documentation pages.
+Documentation on each of these drivers can be found under the :doc:`Modules/RTOS Drivers<../../reference/rtos_drivers/index>` section in the SDK documentation pages.
 
 It is worth noting that these drivers utilize a lightweight RTOS abstraction layer, meaning that they are not dependent on FreeRTOS. Conceivably they should work on any SMP RTOS, provided an abstraction layer for it is provided. This abstraction layer is found under the path `modules/rtos/osal <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/osal>`_. At the moment the only available SMP RTOS for XCore is the XMOS SMP FreeRTOS, but more may become available in the future.
 
@@ -121,7 +123,7 @@ It is worth noting that these drivers utilize a lightweight RTOS abstraction lay
 Software Services
 *****************
 
-XMOS also includes some higher level RTOS compatible software services, some of which call the aforementioned drivers. These include, but are not necessarily limited to:
+The SDK also includes some higher level RTOS compatible software services, some of which call the aforementioned drivers. These include, but are not necessarily limited to:
 
 - DHCP server
 - Dispatcher
@@ -134,7 +136,7 @@ XMOS also includes some higher level RTOS compatible software services, some of 
 - USB stack
 - WiFi connection manager
 
-Documentation on several software services can be found under the :doc:`Tutorails/FreeRTOS/Software Services<../../reference/rtos_services/index>` section in the SDK documentation pages.
+Documentation on several software services can be found under the :doc:`Tutorials/FreeRTOS/Software Services<../../reference/rtos_services/index>` section in the SDK documentation pages.
 
 These services are all found in the SDK under the path `modules/rtos/sw_services <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/sw_services>`_.
 
