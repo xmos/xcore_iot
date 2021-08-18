@@ -33,10 +33,6 @@
 	path = modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel
 	url = git@github.com:FreeRTOS/FreeRTOS-Kernel.git
 	branch = smp
-[submodule "FreeRTOS-Kernel"]
-	path = modules/rtos/FreeRTOS/FreeRTOS-Kernel
-	url = git@github.com:xmos/FreeRTOS-Kernel.git
-	branch = feature/xcore
 [submodule "FreeRTOS-Plus-TCP"]
 	path = modules/rtos/FreeRTOS/FreeRTOS-Plus-TCP
 	url = git@github.com:xmos/FreeRTOS-Plus-TCP.git

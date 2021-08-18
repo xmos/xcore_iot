@@ -2,6 +2,52 @@
 Contributing
 ############
 
+************
+Requirements
+************
+
+The following software are required for developing code for the SDK.  Install them using your operating systems package management system.
+
+* `CMake <https://cmake.org/>`__
+* `Doxygen <https://www.doxygen.nl/index.html>`__
+* `Python 3.8 <https://www.python.org/>`__
+
+Install development python packages:
+
+.. code-block:: console
+
+    $ python -m pip install --upgrade pip
+    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r documents/requirements.txt
+
+Python Virtual Environment
+==========================
+
+While not required, we recommend you setup an `Anaconda <https://www.anaconda.com/products/individual/>`_ virtual environment.  If necessary, download and follow Anaconda's installation instructions.
+
+Run the following command to create a Conda environment:
+
+.. code-block:: console
+
+    $ conda create --prefix xcore_sdk_venv python=3.8
+
+Run the following command to activate the Conda environment:
+
+.. code-block:: console
+
+    $ conda activate <path-to>/xcore_sdk_venv
+
+Install development packages:
+
+.. code-block:: console
+
+    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r documents/requirements.txt
+
+Run the following command to deactivate the Conda environment:
+
+    .. code-block:: console
+    
+        $ conda deactivate
+
 *************************************
 Contribution Guidelines and Standards
 *************************************
@@ -47,36 +93,6 @@ Python coding style
 All python code should be `blackened  <https://black.readthedocs.io/en/stable/>`_.
 
 TODO: Add information about the `black` config file.
-
-*******************************
-Development Virtual Environment
-*******************************
-
-While not required, we recommend you setup an `Anaconda <https://www.anaconda.com/products/individual/>`_ virtual environment.  If necessary, download and follow Anaconda's installation instructions.
-
-Run the following command to create a Conda environment:
-
-.. code-block:: console
-
-    $ conda create --prefix xcore_sdk_venv python=3.8
-
-Run the following command to activate the Conda environment:
-
-.. code-block:: console
-
-    $ conda activate <path-to>/xcore_sdk_venv
-
-Install development dependencies:
-
-.. code-block:: console
-
-    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r documents/requirements.txt
-
-Run the following command to deactivate the Conda environment:
-
-    .. code-block:: console
-    
-        $ conda deactivate
 
 *****************
 Building Examples

@@ -2,7 +2,7 @@
 Explorer Board
 ##############
 
-This example application demonstrates various capabilities of the Explorer board using FreeRTOS.  The example uses lib_soc and various libraries to build FreeRTOS applications targetting xCORE.  The application uses I2C, I2S, SPI, flash, mic array, and GPIO devices.  These devices are instantiated in the "bitstream_src" folder.  The FreeRTOS application which sets up drivers to communicate with these devices is contained within the "src" folder.
+This example application demonstrates various capabilities of the Explorer board using FreeRTOS.  The example uses lib_soc and various libraries to build FreeRTOS applications targetting xCORE.  The application uses I2C, I2S, SPI, flash, mic array, and GPIO devices.
 
 The application places FreeRTOS on tile 0.  The peripherals are placed on tile 0 and tile 1 to demonstrate how to connect devices to FreeRTOS regardless of tile placement.
 

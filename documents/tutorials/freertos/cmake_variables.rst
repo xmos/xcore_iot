@@ -23,9 +23,6 @@ Interfaces required by the XCore Hardware Imitation Layer (HIL) can be included 
     * - USE_I2S_HIL
       - TRUE
       - Enable to include I2S HIL
-    * - USE_I2C_HIL
-      - TRUE
-      - Enable to include I2C HIL
     * - USE_MIC_ARRAY_HIL
       - TRUE
       - Enable to include microphone array HIL
