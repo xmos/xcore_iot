@@ -140,5 +140,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: xcore_sdk_docs
-          path: ./documents/_build/html
+          path: ./xcore_sdk/documents/_build/html
           retention-days: 5
