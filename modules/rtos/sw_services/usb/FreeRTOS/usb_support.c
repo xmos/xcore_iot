@@ -15,9 +15,17 @@
 
 static void usb_task(void* args)
 {
+    static bool connected;
     xassert(tusb_inited() && "Tiny USB must first be initialized with usb_manager_init()");
 
-    tud_connect();
+    taskENTER_CRITICAL();
+    if (!connected) {
+        connected = true;
+        taskEXIT_CRITICAL();
+        tud_connect();
+    } else {
+        taskEXIT_CRITICAL();
+    }
 
     while (1) {
         tud_task();
