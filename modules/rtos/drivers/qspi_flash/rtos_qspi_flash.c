@@ -367,7 +367,7 @@ void rtos_qspi_flash_init(
     qspi_flash_ctx_t *qspi_flash_ctx = &ctx->ctx;
     qspi_io_ctx_t *qspi_io_ctx = &qspi_flash_ctx->qspi_io_ctx;
 
-    qspi_flash_ctx->custom_clock_setup = 0;
+    qspi_flash_ctx->custom_clock_setup = 1;
     qspi_flash_ctx->quad_page_program_cmd = quad_page_program_cmd;
     qspi_flash_ctx->source_clock = source_clock;
 
