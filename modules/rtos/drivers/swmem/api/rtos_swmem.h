@@ -45,7 +45,7 @@
  *               words of data. Where this data comes from is up to the
  *               application. One example is from a flash memory.
  *
- * \retval       true if the fill request was satisifed.
+ * \retval       true if the fill request was satisfied.
  * \retval       false if the fill request was not satisfied. This requires that
  *               rtos_swmem_read_request() also be provided.
  */
