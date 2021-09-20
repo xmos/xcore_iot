@@ -22,6 +22,28 @@
 
 static rtos_qspi_flash_t *qspi_flash_ctx = NULL;
 
+bool rtos_swmem_read_request_isr(unsigned offset, uint32_t *buf) {
+  bool ret = true;
+
+  if (qspi_flash_ctx != NULL) {
+
+    /*
+     * Perform the flash read directly in the swmem ISR if possible to reduce
+     * overhead.
+     */
+    if (rtos_qspi_flash_read_ll(qspi_flash_ctx, (uint8_t *)buf, (unsigned)offset,
+                                WORDS_TO_BYTES(SWMEM_FILL_SIZE_WORDS)) != 0) {
+      /*
+       * If the low level flash read is unable to acquire the flash lock then
+       * return false to defer the read to the task handler.
+       */
+      ret = false;
+    }
+  }
+
+  return ret;
+}
+
 void rtos_swmem_read_request(unsigned offset, uint32_t *buf) {
   if (qspi_flash_ctx != NULL) {
     rtos_qspi_flash_read(qspi_flash_ctx, (uint8_t *)buf, (unsigned)offset,
