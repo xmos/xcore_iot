@@ -61,11 +61,13 @@ set(APP_SOURCES
     "src/http_demo/http_demo.c"
     "src/mqtt_demo/mqtt_demo_client.c"
     "src/mem_analysis/mem_analysis.c"
+    ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES}
 )
 
 set(APP_INCLUDES
     "src"
     "src/udp_cli"
+    ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES}
 )
 
 add_compile_definitions(
@@ -79,12 +81,16 @@ add_compile_definitions(
     DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
     SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\)
     MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
+    PLATFORM_USES_TILE_2=0
+    PLATFORM_USES_TILE_3=0
 )
 
-add_executable(${TARGET_NAME})
+create_multitile_target()
 
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
-
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+# target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
+# target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
+#
+# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+# target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
