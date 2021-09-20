@@ -47,7 +47,7 @@ static uint16_t device_control_usb_open(uint8_t rhport, tusb_desc_interface_t co
     control_ret_t dc_ret;
 
     dc_ret = device_control_resources_register(device_control_ctx,
-                                               pdMS_TO_TICKS(100));
+                                               pdMS_TO_TICKS(5000));
 
     if (dc_ret != CONTROL_SUCCESS) {
         rtos_printf("Device control resources failed to register for USB on tile %d\n", THIS_XCORE_TILE);

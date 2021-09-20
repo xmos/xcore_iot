@@ -1,0 +1,16 @@
+# in your Dockerfile
+FROM sphinxdoc/sphinx
+
+ARG DOXYGEN_VERSION=1.9.1
+
+# install apt dependencies
+RUN apt update
+RUN apt-get update && apt-get install -y bison build-essential cmake flex wget
+
+# build and install updated version of doxygen
+RUN wget -O - https://sourceforge.net/projects/doxygen/files/rel-${DOXYGEN_VERSION}/doxygen-${DOXYGEN_VERSION}.src.tar.gz | tar -xz -C /opt
+RUN cd /opt/doxygen-${DOXYGEN_VERSION} && cmake -B build && cmake --build build --target install
+
+WORKDIR /docs
+ADD requirements.txt /docs
+RUN pip3 install -r requirements.txt

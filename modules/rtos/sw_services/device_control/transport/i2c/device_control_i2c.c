@@ -16,7 +16,7 @@ void device_control_i2c_start_cb(rtos_i2c_slave_t *ctx,
 
     rtos_printf("Registering I2C device control resources now\n");
     dc_ret = device_control_resources_register(device_control_ctx,
-                                               pdMS_TO_TICKS(100));
+                                               pdMS_TO_TICKS(5000));
 
     if (dc_ret != CONTROL_SUCCESS) {
         rtos_printf("Device control resources failed to register for I2C on tile %d\n", THIS_XCORE_TILE);

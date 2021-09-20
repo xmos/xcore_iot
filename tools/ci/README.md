@@ -1,14 +1,24 @@
 # Continuous Integration Tools
 
-## Building Docker container
+## Building Docker container for building and testing applications
 
 To build the docker container locally, run the following command:
 
-    $ docker build -t ghcr.io/xmos/xcore_sdk_builder:latest .
+    $ docker build -t ghcr.io/xmos/sdk_app_builder:develop -f Dockerfile.apps .
 
 To run the container:
 
-    $ docker run -it ghcr.io/xmos/xcore_sdk_builder:latest
+    $ docker run -it ghcr.io/xmos/sdk_app_builder:develop
+
+## Building Docker container for building documentation
+
+To build the docker container locally, run the following command:
+
+    $ docker build -t ghcr.io/xmos/sdk_docs_builder:develop -f Dockerfile.docs ../../documents/
+
+To run the container:
+
+    $ docker run -it ghcr.io/xmos/sdk_docs_builder:develop
 
 ## Running Source Checks
 
