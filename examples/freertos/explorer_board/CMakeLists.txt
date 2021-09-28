@@ -21,7 +21,6 @@ include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(explorer_board)
-set(PROJECT_VERSION 0.6.0)
 
 ## Enable languages for project
 enable_language(CXX C ASM)
@@ -81,16 +80,7 @@ add_compile_definitions(
     DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
     SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\)
     MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
-    PLATFORM_USES_TILE_0=1
-    PLATFORM_USES_TILE_1=1
-    PLATFORM_USES_TILE_2=0
-    PLATFORM_USES_TILE_3=0
 )
 
-create_multitile_target()
-
-# target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
-# target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
-#
-# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-# target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+set(RTOS_TILE_LIST 0 1 )
+create_multitile_target(RTOS_TILE_LIST)
