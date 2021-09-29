@@ -71,7 +71,7 @@ Run cmake:
 
 .. code-block:: console
 
-    $ cmake ../ -DBOARD=XCORE-AI-EXPLORER
+    $ cmake ../ -DMULTITILE_BUILD=1 -DBOARD=XCORE-AI-EXPLORER
     $ make
 
 If you plan on running the demo where the Explorer Board connects to a host side echo server, modify ``src/app_conf.h`` to your host computer's IP address.
