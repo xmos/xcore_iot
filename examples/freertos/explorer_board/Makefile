@@ -9,7 +9,7 @@ BOARD ?= XCORE-AI-EXPLORER
 # It defaults to 0 if not specified.
 XE_BASE_TILE = 0
 
-# BUILD_DIR and OUTPUT_DIR are used by the multitile_build.mk file.
+# BUILD_DIR and OUTPUT_DIR are used by the multitile_build.cmake file.
 # If not specified they default to 'build' and 'bin' respectively.
 BUILD_DIR  = build
 OUTPUT_DIR = bin
@@ -36,5 +36,5 @@ flash: $(EXECUTABLE)
 	cd filesystem_support && ./flash_image.sh
 
 $(EXECUTABLE) :
-	cmake -B $(BUILD_DIR) -DMULTITILE_BUILD=1 -DBOARD=XCORE-AI-EXPLORER -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)
+	cmake -B $(BUILD_DIR) -DMULTITILE_BUILD=1 -DBOARD=$(BOARD) -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)
 	cd $(BUILD_DIR) && make -j

@@ -42,6 +42,8 @@ macro(create_multitile_target _LIST_VAR)
 
         target_compile_options(${_THIS_TARGET} PRIVATE ${APP_COMPILER_FLAGS})
         target_compile_definitions(${_THIS_TARGET} PRIVATE THIS_XCORE_TILE=${_TILE})
+
+        target_link_libraries(${_THIS_TARGET} PRIVATE ${APP_LINK_LIBRARIES})
         target_link_options(${_THIS_TARGET} PRIVATE ${APP_COMPILER_FLAGS})
 
         if(NOT ${_TILE} EQUAL ${XE_BASE_TILE})
