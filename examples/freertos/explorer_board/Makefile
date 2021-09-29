@@ -2,9 +2,6 @@
 # and should be equal to the cmake project name
 PROJECT_NAME = explorer_board
 
-# BOARD is used by the XMOS RTOS platform .cmake file
-BOARD ?= XCORE-AI-EXPLORER
-
 # XE_BASE_TILE specifies the tile build that other tiles will be merged into
 # It defaults to 0 if not specified.
 XE_BASE_TILE = 0
@@ -36,5 +33,5 @@ flash: $(EXECUTABLE)
 	cd filesystem_support && ./flash_image.sh
 
 $(EXECUTABLE) :
-	cmake -B $(BUILD_DIR) -DMULTITILE_BUILD=1 -DBOARD=$(BOARD) -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)
+	cmake -B $(BUILD_DIR) -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)
 	cd $(BUILD_DIR) && make -j

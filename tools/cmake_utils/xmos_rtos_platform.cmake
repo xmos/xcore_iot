@@ -33,6 +33,7 @@ include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/board_support/${BOARD}.cmake")
 #********************************
 # Set up for multi-tile builds
 #********************************
+option(MULTITILE_BUILD "Enable to build multitile RTOS" FALSE)
 if(MULTITILE_BUILD)
     include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/multitile_build.cmake")
 endif()

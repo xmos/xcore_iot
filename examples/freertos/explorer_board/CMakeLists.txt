@@ -6,6 +6,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Specify configuration
+set(MULTITILE_BUILD TRUE)
 set(USE_WIFI_MANAGER TRUE)
 set(USE_DHCPD TRUE)
 set(USE_FATFS TRUE)
@@ -15,6 +16,9 @@ set(USE_MQTT TRUE)
 set(USE_SNTPD TRUE)
 set(USE_TLS_SUPPORT TRUE)
 set(USE_TRACE FALSE)
+
+## This app only supports the XCORE-AI-EXPLORER board
+set(BOARD XCORE-AI-EXPLORER)
 
 ## Import XMOS configurations
 include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
