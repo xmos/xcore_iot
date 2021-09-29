@@ -14,6 +14,7 @@ set(USE_JSON_PARSER TRUE)
 set(USE_MQTT TRUE)
 set(USE_SNTPD TRUE)
 set(USE_TLS_SUPPORT TRUE)
+set(USE_CUSTOM_MBEDTLS_CONFIG TRUE)
 
 ## Import XMOS configurations
 include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
@@ -63,6 +64,7 @@ add_compile_definitions(
     MQTT_TASK=1
     DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
     MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
+    MBEDTLS_CONFIG_FILE=\"mbedtls_sample_config.h\"
 )
 
 if(${VERBOSE})
