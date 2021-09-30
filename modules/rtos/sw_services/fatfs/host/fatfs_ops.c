@@ -1,6 +1,7 @@
 // Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
+#include <stdint.h>
 #include <ff.h>
 #include "fatfs_ops.h"
 #include "ramdisk.h"
