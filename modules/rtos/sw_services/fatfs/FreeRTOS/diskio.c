@@ -237,7 +237,7 @@ DRESULT disk_ioctl (
                 break;
 
             case GET_BLOCK_SIZE:
-                *((DWORD *) buff) = QSPI_FLASH_SECTOR_SIZE;
+                *((DWORD *) buff) = 1;
                 res = RES_OK;
                 break;
 
