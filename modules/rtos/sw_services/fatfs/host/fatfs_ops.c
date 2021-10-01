@@ -1,7 +1,6 @@
 // Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
-#include <stdint.h>
 #include <ff.h>
 #include "fatfs_ops.h"
 #include "ramdisk.h"
@@ -86,7 +85,7 @@ int fatfs_dir_up(void)
 
 int fatfs_file_copy(char *name, FILE *fp)
 {
-    uint8_t data[1024];
+    BYTE data[1024];
     size_t bytes_read;
     FIL fil;
     FRESULT res;

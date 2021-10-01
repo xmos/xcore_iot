@@ -95,7 +95,7 @@ DRESULT RAM_disk_ioctl(BYTE cmd,       /* Control code */
         break;
 
     case GET_SECTOR_SIZE:
-        *(WORD *)buff = ramdisk_sector_size;
+        *(WORD *)buff = (WORD) ramdisk_sector_size;
         res = RES_OK;
         break;
 
