@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     }
 
     if (ret == 0) {
-        printf("Filesystem image successfully %s populated with contents of directory %s\n", output_file->filename[0], input_dir->filename[0]);
+        printf("Filesystem image %s successfully populated with contents of directory %s\n", output_file->filename[0], input_dir->filename[0]);
     } else {
         fprintf(stderr, "Failed to create filesystem image %s\n", output_file->filename[0]);
     }
