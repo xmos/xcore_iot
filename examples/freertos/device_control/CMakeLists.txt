@@ -6,6 +6,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Specify configuration
+set(MULTITILE_BUILD TRUE)
 set(USE_XUD_HIL TRUE)
 set(USE_I2C_HIL TRUE)
 set(USE_I2S_HIL FALSE)
@@ -35,7 +36,6 @@ include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(device_control)
-set(PROJECT_VERSION 0.5.0)
 
 ## Enable languages for project
 enable_language(CXX C ASM)
@@ -58,10 +58,12 @@ set(APP_SOURCES
     "src/platform/platform_init.c"
     "src/platform/platform_start.c"
     "src/usb_descriptors.c"
+	${XMOS_RTOS_PLATFORM_SOURCES}
 )
 
 set(APP_INCLUDES
     "src"
+	${XMOS_RTOS_PLATFORM_INCLUDES}
 )
 
 if(${BOARD} STREQUAL "XCORE200-MIC-ARRAY")
@@ -75,10 +77,5 @@ add_compile_definitions(
     XUD_CORE_CLOCK=${SYSCLK_FREQ}
 )
 
-add_executable(${TARGET_NAME})
-
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
-
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+set(RTOS_TILE_LIST 0 1 )
+create_multitile_target(RTOS_TILE_LIST)

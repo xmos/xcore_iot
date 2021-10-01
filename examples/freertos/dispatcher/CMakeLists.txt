@@ -20,7 +20,6 @@ include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 # Define project
 project(dispatcher)
-set(PROJECT_VERSION 1.0.0)
 
 # Enable languages for project
 enable_language(CXX C ASM)
@@ -42,17 +41,19 @@ set(APP_COMPILER_FLAGS
 
 set(APP_SOURCES
   "src/main.c"
+  ${XMOS_RTOS_PLATFORM_SOURCES}
 )
 
 set(APP_INCLUDES
   "src"
+  ${XMOS_RTOS_PLATFORM_INCLUDES}
 )
 
 add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
-    PLATFORM_USES_TILE_0=1
 )
 
+set(TARGET_NAME dispatcher)
 add_executable(${TARGET_NAME})
 
 target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})

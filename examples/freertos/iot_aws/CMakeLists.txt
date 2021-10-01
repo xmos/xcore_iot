@@ -6,6 +6,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Specify configuration
+set(MULTITILE_BUILD TRUE)
 set(USE_WIFI_MANAGER TRUE)
 set(USE_DHCPD TRUE)
 set(USE_FATFS TRUE)
@@ -21,7 +22,6 @@ include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(iot_aws)
-set(PROJECT_VERSION 0.6.0)
 
 ## Enable languages for project
 enable_language(CXX C ASM)
@@ -46,6 +46,7 @@ set(APP_SOURCES
     "src/network_demos/network_setup.c"
     "src/mqtt_demo/mqtt_demo_client.c"
     "src/mem_analysis/mem_analysis.c"
+	${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES}
 )
 
 set(APP_INCLUDES
@@ -53,6 +54,7 @@ set(APP_INCLUDES
     "src/network_demos"
     "src/mqtt_demo"
     "src/mem_analysis"
+	${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES}
 )
 
 add_compile_definitions(
@@ -73,10 +75,5 @@ else()
     add_compile_definitions(SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR\))
 endif()
 
-add_executable(${TARGET_NAME})
-
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES})
-
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+set(RTOS_TILE_LIST 0 1 )
+create_multitile_target(RTOS_TILE_LIST)
