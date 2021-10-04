@@ -7,6 +7,7 @@
 
 #include <xcore/assert.h>
 #include <xcore/interrupt.h>
+#include <xcore/lock.h>
 
 #include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
 
@@ -15,6 +16,94 @@
 #define FLASH_OP_READ  0
 #define FLASH_OP_WRITE 1
 #define FLASH_OP_ERASE 2
+
+extern unsigned __libc_hwlock;
+
+/*
+ * Returns true if the spinlock is
+ * acquired, false if not available.
+ * NOT recursive.
+ */
+static bool spinlock_get(volatile int *lock)
+{
+    bool ret;
+
+    lock_acquire(__libc_hwlock);
+    {
+        if (*lock == 0) {
+            *lock = 1;
+            ret = true;
+        } else {
+            ret = false;
+        }
+    }
+    lock_release(__libc_hwlock);
+
+    return ret;
+}
+
+/*
+ * Releases the lock. It MUST be owned
+ * by the caller.
+ */
+static void spinlock_release(volatile int *lock)
+{
+    *lock = 0;
+}
+
+int rtos_qspi_flash_read_ll(
+        rtos_qspi_flash_t *ctx,
+        uint8_t *data,
+        unsigned address,
+        size_t len)
+{
+    qspi_flash_ctx_t *qspi_flash_ctx = &ctx->ctx;
+    uint32_t irq_mask;
+    bool lock_acquired;
+
+    rtos_printf("Asked to ll read %d bytes at address 0x%08x\n", len, address);
+
+    irq_mask = rtos_interrupt_mask_all();
+    lock_acquired = spinlock_get(&ctx->spinlock);
+
+    while (lock_acquired && len > 0) {
+
+        size_t read_len = MIN(len, RTOS_QSPI_FLASH_READ_CHUNK_SIZE);
+
+        /*
+         * Cap the address at the size of the flash.
+         * This ensures the correction below will work if
+         * address is outside the flash's address space.
+         */
+        if (address >= ctx->flash_size) {
+            address = ctx->flash_size;
+        }
+
+        if (address + read_len > ctx->flash_size) {
+            int original_len = read_len;
+
+            /* Don't read past the end of the flash */
+            read_len = ctx->flash_size - address;
+
+            /* Return all 0xFF bytes for addresses beyond the end of the flash */
+            memset(&data[read_len], 0xFF, original_len - read_len);
+        }
+
+        rtos_printf("Read %d bytes from flash at address 0x%x\n", read_len, address);
+        qspi_flash_read(qspi_flash_ctx, data, address, read_len);
+
+        len -= read_len;
+        data += read_len;
+        address += read_len;
+    }
+
+    if (lock_acquired) {
+        spinlock_release(&ctx->spinlock);
+    }
+    rtos_interrupt_mask_set(irq_mask);
+
+    return lock_acquired ? 0 : -1;
+}
 
 static void read_op(
         rtos_qspi_flash_t *ctx,
@@ -262,14 +351,39 @@ __attribute__((fptrgroup("rtos_qspi_flash_lock_fptr_grp")))
 static void qspi_flash_local_lock(
         rtos_qspi_flash_t *ctx)
 {
-    rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER);
+    bool mutex_owned = (xSemaphoreGetMutexHolder(ctx->mutex.mutex) == xTaskGetCurrentTaskHandle());
+
+    while (rtos_osal_mutex_get(&ctx->mutex, RTOS_OSAL_WAIT_FOREVER) != RTOS_OSAL_SUCCESS);
+
+    if (!mutex_owned) {
+        while (!spinlock_get(&ctx->spinlock));
+    } else {
+        /*
+         * The spinlock is already owned by this thread, so safe
+         * to just increment it to keep track of the recursion.
+         */
+        ctx->spinlock++;
+    }
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_unlock_fptr_grp")))
 static void qspi_flash_local_unlock(
         rtos_qspi_flash_t *ctx)
 {
-    rtos_osal_mutex_put(&ctx->mutex);
+    bool mutex_owned = (xSemaphoreGetMutexHolder(ctx->mutex.mutex) == xTaskGetCurrentTaskHandle());
+
+    if (mutex_owned) {
+        /*
+         * Since the spinlock is already owned by this thread, it is safe
+         * to just decrement it to unwind any recursion. Once it is
+         * decremented down to 0 it will be released. Other threads will
+         * not be able to acquire it until the mutex is also released, but
+         * it will be possible a call to rtos_qspi_flash_read_ll() to
+         * immediately acquire it.
+         */
+        ctx->spinlock--;
+        rtos_osal_mutex_put(&ctx->mutex);
+    }
 }
 
 __attribute__((fptrgroup("rtos_qspi_flash_read_fptr_grp")))

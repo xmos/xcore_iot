@@ -60,7 +60,7 @@ inline int rtos_lock_release(int lock_id)
     if (rtos_locks[lock_id] != -1) {
         #if RTOS_LOCKS_SAFE
             lock_acquire(rtos_locks[lock_id]);
-            xassert(rtos_lock_counters[lock_id] > 0)
+            xassert(rtos_lock_counters[lock_id] > 0);
         #endif
         counter = --rtos_lock_counters[lock_id];
         if (counter == 0) {
