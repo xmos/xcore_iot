@@ -30,16 +30,18 @@ static evict_mask_t dirty_mask;
 // C runtime startup.  This value may be set by the bootloader
 static volatile unsigned int __swmem_address = SWMEM_ADDRESS_UNINITIALISED;
 
-
 DEFINE_RTOS_INTERRUPT_CALLBACK(sw_mem_fill_isr, arg)
 {
     bool handled = false;
     fill_slot = swmem_fill_in_address(swmem_fill_res);
 
     if (rtos_swmem_read_request_isr) {
-        handled = rtos_swmem_read_request_isr((unsigned)(fill_slot - XS1_SWMEM_BASE + __swmem_address), fill_buf);
+        handled = rtos_swmem_read_request_isr(
+                (unsigned)(fill_slot - XS1_SWMEM_BASE + __swmem_address),
+                fill_buf);
         if (handled) {
-            swmem_fill_populate_from_buffer(swmem_fill_res, fill_slot, fill_buf);
+            swmem_fill_populate_from_buffer(swmem_fill_res, fill_slot,
+                                            fill_buf);
         }
     }
 
@@ -51,7 +53,8 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(sw_mem_fill_isr, arg)
         swmem_core_exclude_map = ~(1 << rtos_core_id_get());
 
         triggerable_disable_trigger(swmem_fill_res);
-        rtos_osal_event_group_set_bits(&swmem_event_group, RTOS_SWMEM_READ_FLAG);
+        rtos_osal_event_group_set_bits(&swmem_event_group,
+                                       RTOS_SWMEM_READ_FLAG);
         handled = true;
     }
 
@@ -67,12 +70,15 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(sw_mem_evict_isr, arg)
     swmem_evict_to_buffer(swmem_evict_res, evict_slot, evict_buf);
 
     if (rtos_swmem_write_request_isr) {
-        handled = rtos_swmem_write_request_isr((unsigned)(evict_slot - XS1_SWMEM_BASE + __swmem_address), dirty_mask, evict_buf);
+        handled = rtos_swmem_write_request_isr(
+                (unsigned)(evict_slot - XS1_SWMEM_BASE + __swmem_address),
+                dirty_mask, evict_buf);
     }
 
     if (!handled && rtos_swmem_write_request) {
         triggerable_disable_trigger(swmem_evict_res);
-        rtos_osal_event_group_set_bits(&swmem_event_group, RTOS_SWMEM_WRITE_FLAG);
+        rtos_osal_event_group_set_bits(&swmem_event_group,
+                                       RTOS_SWMEM_WRITE_FLAG);
         handled = true;
     }
 
@@ -88,23 +94,25 @@ static void rtos_swmem_thread(void *arg)
         status = rtos_osal_event_group_get_bits(
                 &swmem_event_group,
                 RTOS_SWMEM_READ_FLAG | RTOS_SWMEM_WRITE_FLAG,
-                RTOS_OSAL_OR_CLEAR,
-                &flags,
-                RTOS_OSAL_WAIT_FOREVER);
+                RTOS_OSAL_OR_CLEAR, &flags, RTOS_OSAL_WAIT_FOREVER);
 
         if (status != RTOS_OSAL_SUCCESS) {
             continue;
         }
 
         if (flags & RTOS_SWMEM_READ_FLAG) {
-            rtos_swmem_read_request((unsigned)(fill_slot - XS1_SWMEM_BASE + __swmem_address), fill_buf);
+            rtos_swmem_read_request(
+                    (unsigned)(fill_slot - XS1_SWMEM_BASE + __swmem_address),
+                    fill_buf);
 
             /*
              * Ensure that swmem_fill_populate_from_buffer() is called on the same
              * core that swmem_fill_in_address() was called on.
              */
-            rtos_osal_thread_core_exclusion_set(&swmem_thread, swmem_core_exclude_map);
-            swmem_fill_populate_from_buffer(swmem_fill_res, fill_slot, fill_buf);
+            rtos_osal_thread_core_exclusion_set(&swmem_thread,
+                                                swmem_core_exclude_map);
+            swmem_fill_populate_from_buffer(swmem_fill_res, fill_slot,
+                                            fill_buf);
 
             /*
              * Allow this thread to run on any core once again
@@ -115,7 +123,9 @@ static void rtos_swmem_thread(void *arg)
         }
 
         if (flags & RTOS_SWMEM_WRITE_FLAG) {
-            rtos_swmem_write_request((unsigned)(evict_slot - XS1_SWMEM_BASE + __swmem_address), dirty_mask, evict_buf);
+            rtos_swmem_write_request(
+                    (unsigned)(evict_slot - XS1_SWMEM_BASE + __swmem_address),
+                    dirty_mask, evict_buf);
             triggerable_enable_trigger(swmem_evict_res);
         }
     }
@@ -124,25 +134,26 @@ static void rtos_swmem_thread(void *arg)
 void rtos_swmem_start(unsigned priority)
 {
     if (!started) {
-
         if (rtos_swmem_read_request || rtos_swmem_write_request) {
-            rtos_osal_event_group_create(&swmem_event_group, "swmem_event_group");
+            rtos_osal_event_group_create(&swmem_event_group,
+                                         "swmem_event_group");
 
             rtos_osal_thread_create(
-                    &swmem_thread,
-                    "rtos_swmem_thread",
-                    (rtos_osal_entry_function_t) rtos_swmem_thread,
-                    NULL,
-                    RTOS_THREAD_STACK_SIZE(rtos_swmem_thread),
-                    priority);
+                    &swmem_thread, "rtos_swmem_thread",
+                    (rtos_osal_entry_function_t)rtos_swmem_thread, NULL,
+                    RTOS_THREAD_STACK_SIZE(rtos_swmem_thread), priority);
         }
 
         if (swmem_fill_res != 0) {
-            triggerable_setup_interrupt_callback(swmem_fill_res, NULL, RTOS_INTERRUPT_CALLBACK(sw_mem_fill_isr));
+            triggerable_setup_interrupt_callback(
+                    swmem_fill_res, NULL,
+                    RTOS_INTERRUPT_CALLBACK(sw_mem_fill_isr));
             triggerable_enable_trigger(swmem_fill_res);
         }
         if (swmem_evict_res != 0) {
-            triggerable_setup_interrupt_callback(swmem_evict_res, NULL, RTOS_INTERRUPT_CALLBACK(sw_mem_evict_isr));
+            triggerable_setup_interrupt_callback(
+                    swmem_evict_res, NULL,
+                    RTOS_INTERRUPT_CALLBACK(sw_mem_evict_isr));
             triggerable_enable_trigger(swmem_evict_res);
         }
 
