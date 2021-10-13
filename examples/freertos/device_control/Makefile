@@ -33,5 +33,5 @@ run: $(EXECUTABLE)
 	xrun --xscope $(EXECUTABLE)
 
 $(EXECUTABLE) :
-    cmake -B $(BUILD_DIR) -DBOARD=$(BOARD) -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)
-    cd $(BUILD_DIR) && make -j
+	cmake -B $(BUILD_DIR) -DBOARD=$(BOARD) -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)
+	cd $(BUILD_DIR) && make -j
