@@ -14,12 +14,32 @@ Building & running examples
 
 Run the following commands to build the examples:
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    $ make
+	.. code-block:: console
 
-To run the example.
+		$ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+		$ cd build
+		$ make
 
-.. code-block:: console
+.. tab:: Windows
 
-    $ make run
+	.. code-block:: XTools CMD prompt
+
+		C:\example_dir> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+		C:\example_dir> cd build
+		C:\example_dir\build> nmake
+		
+To run the example:
+
+.. tab:: Linux and Mac
+
+	.. code-block:: console
+
+		$ xrun --xscope bin/dispatcher.xe
+
+.. tab:: Windows
+
+	.. code-block:: XTools CMD prompt
+
+		C:\example_dir> xrun --xscope bin\dispatcher.xe
