@@ -6,6 +6,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## Specify configuration
+set(MULTITILE_BUILD TRUE)
 set(USE_AIF TRUE)
 set(USE_DISPATCHER TRUE)
 set(USE_DEVICE_MEMORY_SUPPORT TRUE)
@@ -15,7 +16,6 @@ include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
 
 ## Define project
 project(person_detect)
-set(PROJECT_VERSION 0.6.0)
 
 ## Enable languages for project
 enable_language(CXX C ASM)
@@ -42,12 +42,14 @@ set(APP_SOURCES
     "app/model_runner/person_detect_model_runner.cc"
     "app/model_runner/person_detect_model_data.c"
     "app/model_runner/person_detect_task.c"
+	${XMOS_RTOS_PLATFORM_SOURCES}
 )
 set(APP_INCLUDES
     "app"
     "app/ov2640"
     "app/spi_camera"
     "app/model_runner"
+	${XMOS_RTOS_PLATFORM_INCLUDES}
 )
 
 add_compile_definitions(
@@ -64,17 +66,5 @@ endif()
 ## Set any additional flags only for C++
 set(CMAKE_CXX_FLAGS  "-std=c++11")
 
-add_executable(${TARGET_NAME})
-
-target_sources(${TARGET_NAME} PRIVATE
-    ${APP_SOURCES}
-    ${XMOS_RTOS_PLATFORM_SOURCES}
-)
-
-target_include_directories(${TARGET_NAME} PRIVATE
-    ${APP_INCLUDES}
-    ${XMOS_RTOS_PLATFORM_INCLUDES}
-)
-
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+set(RTOS_TILE_LIST 0 1 )
+create_multitile_target(RTOS_TILE_LIST)

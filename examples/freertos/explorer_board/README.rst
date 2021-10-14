@@ -60,29 +60,35 @@ The script will prompt you for WiFi credentials:
 Building the firmware
 *********************
 
-Make a directory for the build.
+.. tab:: Linux and Mac
 
-.. code-block:: console
+	Run cmake:
 
-    $ mkdir build
-    $ cd build
+	.. code-block:: console
 
-Run cmake:
+		$ cmake -B build
+		$ cd build
+		$ make
+		
+.. tab:: Windows
 
-.. code-block:: console
+	Run cmake:
 
-    $ cmake ../ -DBOARD=XCORE-AI-EXPLORER
-    $ make
+	.. code-block:: XTC Tools CMD prompt
+
+		> cmake -G "NMake Makefiles" -B build
+		> cd build
+		> nmake
 
 If you plan on running the demo where the Explorer Board connects to a host side echo server, modify ``src/app_conf.h`` to your host computer's IP address.
 
 .. code-block:: c
 
-    /* Echo demo defines */
-    #define appconfECHO_IP_ADDR_OCTET_0    	10
-    #define appconfECHO_IP_ADDR_OCTET_1    	0
-    #define appconfECHO_IP_ADDR_OCTET_2    	0
-    #define appconfECHO_IP_ADDR_OCTET_3    	253
+	/* Echo demo defines */
+	#define appconfECHO_IP_ADDR_OCTET_0    	10
+	#define appconfECHO_IP_ADDR_OCTET_1    	0
+	#define appconfECHO_IP_ADDR_OCTET_2    	0
+	#define appconfECHO_IP_ADDR_OCTET_3    	253
 
 *Note: Your host computer and the developer kit need to be on the same WiFi network.*
 
@@ -91,9 +97,17 @@ Running the firmware
 
 To run the demo navigate to the bin folder and use the command:
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    $ xrun --xscope XCORE-AI-EXPLORER/explorer_board.xe
+	.. code-block:: console
+
+		$ xrun --xscope bin/explorer_board.xe
+		
+.. tab:: Windows
+
+	.. code-block:: XTC Tools CMD prompt
+
+		> xrun --xscope bin\explorer_board.xe
 
 ****************************
 Running the host application

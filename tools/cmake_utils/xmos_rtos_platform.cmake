@@ -33,16 +33,9 @@ include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/board_support/${BOARD}.cmake")
 #********************************
 # Set up for multi-tile builds
 #********************************
+option(MULTITILE_BUILD "Enable to build multitile RTOS" FALSE)
 if(MULTITILE_BUILD)
-    set(TARGET_NAME ${PROJECT_NAME}.xe)
-    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/${OUTPUT_DIR}/tile${THIS_XCORE_TILE}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/${OUTPUT_DIR}/tile${THIS_XCORE_TILE}")
-
-    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE}
-                            PLATFORM_USES_TILE_0=${PLATFORM_USES_TILE_0}
-                            PLATFORM_USES_TILE_1=${PLATFORM_USES_TILE_1}
-                            PLATFORM_USES_TILE_2=${PLATFORM_USES_TILE_2}
-                            PLATFORM_USES_TILE_3=${PLATFORM_USES_TILE_3})
+    include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/multitile_build.cmake")
 endif()
 
 #**********************

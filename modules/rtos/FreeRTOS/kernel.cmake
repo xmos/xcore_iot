@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(FREERTOS_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-Kernel")
 set(FREERTOS_SMP_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel")
 
 #********************************
@@ -22,16 +21,7 @@ elseif(FREERTOS_PORT STREQUAL "XCORE200")
     set(${THIS_LIB}_FLAGS "-Os -march=xs2a")
 endif()
 
-if(NOT DEFINED FREERTOS_SMP)
-    set(FREERTOS_SMP True)
-    message("${COLOR_CYAN}FreeRTOS SMP used by default.  Set FREERTOS_SMP to False to use single core kernel.${COLOR_RESET}")
-endif()
-
-if(FREERTOS_SMP)
-    set(${THIS_LIB}_DIR ${FREERTOS_SMP_DIR})
-else()
-    set(${THIS_LIB}_DIR ${FREERTOS_DIR})
-endif()
+set(${THIS_LIB}_DIR ${FREERTOS_SMP_DIR})
 
 set(${THIS_LIB}_SOURCES
     "${${THIS_LIB}_DIR}/portable/ThirdParty/xClang/${FREERTOS_PORT}/port.xc"
