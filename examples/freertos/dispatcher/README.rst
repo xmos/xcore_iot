@@ -24,11 +24,11 @@ Run the following commands to build the examples:
 
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
-		C:\example_dir> cd build
-		C:\example_dir\build> nmake
+		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+		> cd build
+		> nmake
 		
 To run the example:
 
@@ -40,6 +40,6 @@ To run the example:
 
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> xrun --xscope bin\dispatcher.xe
+		> xrun --xscope bin\dispatcher.xe

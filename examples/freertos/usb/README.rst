@@ -20,11 +20,11 @@ Run the following commands to build the firmware:
 		
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
-		C:\example_dir> cd build
-		C:\example_dir\build> nmake
+		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+		> cd build
+		> nmake
 		
 To run the example:
 
@@ -36,9 +36,9 @@ To run the example:
 
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> xrun --xscope bin\usb.xe
+		> xrun --xscope bin\usb.xe
 
 By default, the TinyUSB AUDIO_TEST application is built.  Use the `TINYUSB_DEMO` option to build one of the following supported demos.  
 
@@ -66,8 +66,8 @@ For example, to build the MIDI_TEST, run the following command:
 
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER -DTINYUSB_DEMO_TO_USE=MIDI_TEST
-		C:\example_dir> cd build
-		C:\example_dir\build> nmake
+		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER -DTINYUSB_DEMO_TO_USE=MIDI_TEST
+		> cd build
+		> nmake

@@ -180,9 +180,9 @@ In this section, we will configure the demo software to connect to the proper MQ
 		
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
 
 This will create the ``iot_aws.xe`` binary in the bin folder.
 
@@ -213,9 +213,9 @@ To run the demo navigate to the bin folder and use the command:
 
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> xrun iot_aws.xe
+		> xrun iot_aws.xe
 
 For debug output use:
 
@@ -227,6 +227,6 @@ For debug output use:
 
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> xrun --xscope iot_aws.xe
+		> xrun --xscope iot_aws.xe

@@ -74,11 +74,11 @@ Building the firmware
 
 	Run cmake:
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> cmake -G "NMake Makefiles" -B build
-		C:\example_dir> cd build
-		C:\example_dir> nmake
+		> cmake -G "NMake Makefiles" -B build
+		> cd build
+		> nmake
 
 If you plan on running the demo where the Explorer Board connects to a host side echo server, modify ``src/app_conf.h`` to your host computer's IP address.
 
@@ -105,9 +105,9 @@ To run the demo navigate to the bin folder and use the command:
 		
 .. tab:: Windows
 
-	.. code-block:: XTools CMD prompt
+	.. code-block:: XTC Tools CMD prompt
 
-		C:\example_dir> xrun --xscope bin\explorer_board.xe
+		> xrun --xscope bin\explorer_board.xe
 
 ****************************
 Running the host application
