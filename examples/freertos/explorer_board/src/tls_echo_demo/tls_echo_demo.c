@@ -197,7 +197,7 @@ static void tls_echo_receiver( void *arg )
 				/* verify peer cert */
 				if( ( tmpval = mbedtls_ssl_get_verify_result( &ssl_ctx ) ) != 0 )
 				{
-					debug_printf("failed to verify peer cert/n");
+					debug_printf("failed to verify peer cert\n");
 				}
 				else
 				{
