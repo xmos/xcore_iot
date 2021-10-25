@@ -32,11 +32,16 @@ set(APP_COMPILER_FLAGS
 set(APP_SOURCES
     "src/main.c"
     "src/platform/app_pll_ctrl.c"
+    "src/platform/aic3204.c"
+    "src/audio_pipeline/audio_pipeline.c"
+    "src/audio_pipeline/mic_support.c"
 )
 
 set(APP_INCLUDES
     "src"
+    "src/audio_pipeline"
     "src/platform"
+    "src/misc"
 )
 
 set(APP_COMPILE_DEFINITIONS
