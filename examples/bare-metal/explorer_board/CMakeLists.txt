@@ -31,13 +31,16 @@ set(APP_COMPILER_FLAGS
 
 set(APP_SOURCES
     "src/main.c"
+    "src/platform/app_pll_ctrl.c"
 )
 
 set(APP_INCLUDES
     "src"
+    "src/platform"
 )
 
 set(APP_COMPILE_DEFINITIONS
+    "XCORE_UTILS_DEBUG_PRINTF_REMAP=1"
     "DEBUG_PRINT_ENABLE=1"
     "MIC_DUAL_ENABLED=1"
     "PLATFORM_USES_TILE_0=1"

@@ -14,6 +14,7 @@ set(LIB_XS3_MATH_DIR "${MODULES_DIR}/lib_xs3_math")
 set(LEGACY_COMPAT_DIR "${MODULES_DIR}/legacy_compat")
 set(AIF_DIR "${MODULES_DIR}/aif")
 set(DEVICE_MEMORY_SUPPORT_DIR "${MODULES_DIR}/device_memory_support")
+set(UTILS_DIR "${MODULES_DIR}/utils")
 
 #**********************
 # Options
@@ -27,6 +28,7 @@ option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
 option(USE_AIF "Enable to include AI model inference framework" FALSE)
 option(USE_DEVICE_MEMORY_SUPPORT "Enable to include device memory support" FALSE)
+option(USE_UTILS "Enable to include utils" TRUE)
 
 #********************************
 # Gather multitile support sources
@@ -248,6 +250,20 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather utils sources
+#********************************
+set(THIS_LIB UTILS)
+if(${USE_${THIS_LIB}})
+    file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+
+    set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/api"
+    )
+    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
@@ -261,6 +277,7 @@ set(MODULES_SOURCES
     ${LEGACY_COMPAT_SOURCES}
     ${MODEL_RUNNER_SOURCES}
     ${DEVICE_MEMORY_SUPPORT_SOURCES}
+    ${UTILS_SOURCES}
 )
 
 set(MODULES_INCLUDES
@@ -274,6 +291,7 @@ set(MODULES_INCLUDES
     ${MODULES_DIR}
     ${MODEL_RUNNER_INCLUDES}
     ${DEVICE_MEMORY_SUPPORT_INCLUDES}
+    ${UTILS_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES MODULES_SOURCES)
