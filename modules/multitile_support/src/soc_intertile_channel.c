@@ -2,6 +2,7 @@
 
 #include "soc.h"
 
+#include <xcore/chanend.h>
 #include <xcore/assert.h>
 
 chanend_t soc_channel_establish(
