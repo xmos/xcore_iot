@@ -37,9 +37,9 @@ set(THIS_LIB MULTITILE_SUPPORT)
 if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_FLAGS "")
 
-    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/*.xc")
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/*.S")
+    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/src/*.xc")
+    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/src/*.S")
 
     set(${THIS_LIB}_SOURCES
         ${${THIS_LIB}_XC_SOURCES}
@@ -52,7 +52,7 @@ if(${USE_${THIS_LIB}})
     endif()
 
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}"
+        "${${THIS_LIB}_DIR}/api"
     )
     message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
 endif()

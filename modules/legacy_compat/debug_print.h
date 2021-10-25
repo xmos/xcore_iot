@@ -3,11 +3,16 @@
 #ifndef LEGACY_COMPAT_DEBUG_PRINTF
 #define LEGACY_COMPAT_DEBUG_PRINTF
 
-#ifdef RTOS_DEBUG_PRINTF_REMAP
-#undef RTOS_DEBUG_PRINTF_REMAP
+#ifdef XCORE_UTILS_DEBUG_PRINTF_REMAP
+#undef XCORE_UTILS_DEBUG_PRINTF_REMAP
 #endif
-#define RTOS_DEBUG_PRINTF_REMAP 1
+#define XCORE_UTILS_DEBUG_PRINTF_REMAP 1
 
+#ifdef __rtos_printf_h_exists__
 #include "rtos_printf.h"
+#else
+#include "xcore_utils.h"
+#define debug_printf    xcore_utils_printf
+#endif
 
 #endif /* LEGACY_COMPAT_DEBUG_PRINTF */
