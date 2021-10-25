@@ -15,6 +15,7 @@
 /* SDK headers */
 #include "soc.h"
 #include "i2c.h"
+#include "i2c_reg.h"
 
 /* Header for the audio codec chip registers and i2c address */
 #include "aic3204.h"
@@ -47,6 +48,11 @@ static inline int aic3204_reg_write(uint8_t reg, uint8_t val)
 int aic3204_init(i2c_master_t *i2c_master_ctx)
 {
     l_i2c_master_ctx = i2c_master_ctx;
+
+    if (l_i2c_master_ctx == 0) {
+        return -1;
+    }
+
 	if (
 		// Set register page to 0
 		aic3204_reg_write(AIC3204_PAGE_CTRL, 0x00) == 0 &&
