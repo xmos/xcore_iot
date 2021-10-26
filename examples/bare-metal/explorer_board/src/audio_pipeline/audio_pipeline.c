@@ -31,9 +31,9 @@ void ap_stage_a(chanend_t c_input, chanend_t c_output) {
     {
         mic_sample_block = (int32_t *) s_chan_in_word(c_input);
         memcpy(output, mic_sample_block, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS * sizeof(int32_t));
-        debug_printf("a sends\n");
+        // debug_printf("a sends\n");
         frame_power(output);
-        // s_chan_out_buf_word(c_output, (uint32_t*)output, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS);
+        s_chan_out_buf_word(c_output, (uint32_t*)output, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS);
     }
 }
 

@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <xcore/port.h>
 #include <xcore/clock.h>
+#include <xcore/parallel.h>
 
 #define I2S_MAX_DATALINES 8
 #define I2S_CHANS_PER_FRAME 2

@@ -86,7 +86,7 @@ static void i2s_receive(chanend_t *input_c, size_t num_in, const int32_t *i2s_sa
 I2S_CALLBACK_ATTR
 static void i2s_send(chanend_t *input_c, size_t num_out, int32_t *i2s_sample_buf)
 {
-    return;
+    s_chan_in_buf_word(*input_c, (uint32_t*)i2s_sample_buf, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS);
 }
 
 const port_t p_i2s_dout[1] = {
@@ -124,7 +124,7 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     };
 
     PAR_JOBS (
-        // PJOB(mic_dual_pdm_rx_decimate, (l_tile1_ctx->p_pdm_mic, l_tile1_ctx->pdm_decimation_factor, mic_array_third_stage_coefs(l_tile1_ctx->pdm_decimation_factor), mic_array_fir_compensation(l_tile1_ctx->pdm_decimation_factor), s_chan_input.end_a, NULL)),
+        PJOB(mic_dual_pdm_rx_decimate, (l_tile1_ctx->p_pdm_mic, l_tile1_ctx->pdm_decimation_factor, mic_array_third_stage_coefs(l_tile1_ctx->pdm_decimation_factor), mic_array_fir_compensation(l_tile1_ctx->pdm_decimation_factor), s_chan_input.end_a, NULL)),
         PJOB(ap_stage_a, (s_chan_input.end_b, s_chan_ab.end_a)),
         // PJOB(ap_stage_b, (s_chan_ab.end_b, s_chan_bc.end_a)),
         // PJOB(ap_stage_c, (s_chan_bc.end_b, s_chan_output.end_a)),
