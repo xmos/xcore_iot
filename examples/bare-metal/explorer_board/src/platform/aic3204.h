@@ -49,6 +49,7 @@
 #define AIC3204_AN_IN_CHRG    0x47 // Register 71 - Analog Input Quick Charging Config
 #define AIC3204_REF_STARTUP   0x7B // Register 123 - Reference Power Up Config
 
+#include "i2c.h"
 int aic3204_init(i2c_master_t *i2c_master_ctx);
 
 #endif /* AIC3204_H_ */

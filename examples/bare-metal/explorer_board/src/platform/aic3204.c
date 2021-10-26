@@ -14,13 +14,13 @@
 
 /* SDK headers */
 #include "soc.h"
-#include "i2c.h"
-#include "i2c_reg.h"
+#include "xcore_utils.h"
 
 /* Header for the audio codec chip registers and i2c address */
 #include "aic3204.h"
 
 static i2c_master_t *l_i2c_master_ctx = 0;
+
 /*
  * Writes a value to a register in the AIC3204 DAC chip.
  */
@@ -31,8 +31,10 @@ static inline int aic3204_reg_write(uint8_t reg, uint8_t val)
 	ret = write_reg(l_i2c_master_ctx, AIC3204_I2C_DEVICE_ADDR, reg, val);
 
 	if (ret == I2C_REGOP_SUCCESS) {
+        debug_printf("wrote reg 0x%x val 0x%x\n", reg, val);
 		return 0;
 	} else {
+        debug_printf("failed to write reg 0x%x val 0x%x\n", reg, val);
 		return -1;
 	}
 }
@@ -140,6 +142,7 @@ int aic3204_init(i2c_master_t *i2c_master_ctx)
         hwtimer_free(timer);
 
 	} else {
+        debug_printf("Error during DAC configuration\n");
 		return -1;
 	}
 
@@ -162,6 +165,7 @@ int aic3204_init(i2c_master_t *i2c_master_ctx)
 	) {
 		return 0;
 	} else {
+        debug_printf("Error during DAC power up\n");
 		return -1;
 	}
 }

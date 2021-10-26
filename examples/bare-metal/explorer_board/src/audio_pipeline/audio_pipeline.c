@@ -32,7 +32,8 @@ void ap_stage_a(chanend_t c_input, chanend_t c_output) {
         mic_sample_block = (int32_t *) s_chan_in_word(c_input);
         memcpy(output, mic_sample_block, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS * sizeof(int32_t));
         debug_printf("a sends\n");
-        s_chan_out_buf_word(c_output, (uint32_t*)output, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS);
+        frame_power(output);
+        // s_chan_out_buf_word(c_output, (uint32_t*)output, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS);
     }
 }
 
@@ -41,10 +42,10 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output) {
     while(1)
     {
         s_chan_in_buf_word(c_input, (uint32_t*)output, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS);
-        for(int i=0; i<MIC_DUAL_FRAME_SIZE; i++)
-        {
-            output[i][0] *= 2;
-        }
+        // for(int i=0; i<MIC_DUAL_FRAME_SIZE; i++)
+        // {
+        //     output[i][0] *= 2;
+        // }
         debug_printf("b sends\n");
         s_chan_out_buf_word(c_output, (uint32_t*)output, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS);
     }
@@ -56,10 +57,10 @@ void ap_stage_c(chanend_t c_input, chanend_t c_output) {
     {
         s_chan_in_buf_word(c_input, (uint32_t*)output, MIC_DUAL_FRAME_SIZE * MIC_DUAL_NUM_CHANNELS);
 
-        for(int i=0; i<MIC_DUAL_FRAME_SIZE; i++)
-        {
-            output[i][0] *= 2;
-        }
+        // for(int i=0; i<MIC_DUAL_FRAME_SIZE; i++)
+        // {
+        //     output[i][0] *= 2;
+        // }
         frame_power(output);
     }
 }

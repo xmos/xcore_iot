@@ -22,26 +22,7 @@ void mic_array_setup_ddr(
         port_t p_pdm_mics,
         int divide);
 
-inline void frame_power(int32_t (*audio_frame)[MIC_DUAL_NUM_CHANNELS])
-{
-    uint64_t frame_power0 = 0;
-    uint64_t frame_power1 = 0;
-
-    for (int i = 0; i < MIC_DUAL_FRAME_SIZE; ++i) {
-        int64_t smp = audio_frame[i][0];
-        frame_power0 += (smp * smp) >> 31;
-        smp = audio_frame[i][1];
-        frame_power1 += (smp * smp) >> 31;
-    }
-
-    /* divide by appconfMIC_FRAME_LENGTH (2^8) */
-    frame_power0 >>= 8;
-    frame_power1 >>= 8;
-
-    debug_printf("Frame power:\nch0: %d\nch1: %d\n",
-                 MIN(frame_power0, (uint64_t) Q31(F31(INT32_MAX))),
-                 MIN(frame_power0, (uint64_t) Q31(F31(INT32_MAX))));
-}
+void frame_power(int32_t (*audio_frame)[MIC_DUAL_NUM_CHANNELS]);
 
 inline int mic_array_decimation_factor(
         const unsigned pdm_clock_frequency,

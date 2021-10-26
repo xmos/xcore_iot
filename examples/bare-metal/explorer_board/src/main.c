@@ -4,6 +4,7 @@
 /* System headers */
 #include <platform.h>
 #include <xs1.h>
+#include <string.h>
 #include <xcore/assert.h>
 #include <xcore/chanend.h>
 #include <xcore/channel_streaming.h>
@@ -14,50 +15,21 @@
 
 /* SDK headers */
 #include "soc.h"
-#include "i2c.h"
 #include "mic_array.h"
 #include "xcore_utils.h"
 
 /* App headers */
 #include "app_conf.h"
-#include "platform/app_pll_ctrl.h"
 #include "burn.h"
 
 #include "audio_pipeline.h"
 #include "mic_support.h"
 
-#include "aic3204.h"
+#include "tile_support.h"
+#include "platform_init.h"
 
+#include "i2s.h"
 
-// DECLARE_JOB(configure_dac, (chanend_t c));
-
-
-
-// static void tile_common_init(chanend_t c)
-// {
-//     chanend_free(c);
-// }
-
-/** TILE 0 Clock Blocks */
-#define MCLK_CLKBLK   XS1_CLKBLK_4
-
-/** TILE 1 Clock Blocks */
-#define PDM_CLKBLK_1  XS1_CLKBLK_1
-#define PDM_CLKBLK_2  XS1_CLKBLK_2
-#define I2S_CLKBLK    XS1_CLKBLK_3
-
-DECLARE_JOB(i2c_task, (i2c_master_t*));
-
-void i2c_task(i2c_master_t* ctx)
-{
-    port_t codec_rst_port = PORT_CODEC_RST_N;
-    port_enable(codec_rst_port);
-    port_out(codec_rst_port, 0xF);
-
-    aic3204_init(ctx);
-
-    debug_printf("DAC Initialized\n");
-}
 
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
@@ -65,32 +37,15 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     (void)c2;
     (void)c3;
 
-    // tile_common_init(c1);
-    uint32_t test = 0xDEADBEEF;
+    platform_init_tile_0(c1);
 
-    chanend_t c_msg = soc_channel_establish(c1, soc_channel_inout);
-
-    chanend_out_word(c_msg, test);
-    chanend_out_control_token(c_msg, XS1_CT_PAUSE);
-
-    port_enable(PORT_MCLK_IN);
-    clock_enable(MCLK_CLKBLK);
-    clock_set_source_port(MCLK_CLKBLK, PORT_MCLK_IN);
-    port_set_clock(PORT_MCLK_IN, MCLK_CLKBLK);
-    clock_start(MCLK_CLKBLK);
-
-
-    i2c_master_t i2c_ctx;
-    i2c_master_t* i2c_ctx_ptr = &i2c_ctx;
-
-    i2c_master_init(
-            i2c_ctx_ptr,
-            XS1_PORT_1N, 0, 0,
-            XS1_PORT_1O, 0, 0,
-            100); /* kbps */
+    // uint32_t test = 0xDEADBEEF;
+    // chanend_t c_msg = soc_channel_establish(c1, soc_channel_inout);
+    // chanend_out_word(c_msg, test);
+    // chanend_out_control_token(c_msg, XS1_CT_PAUSE);
 
     PAR_JOBS (
-        PJOB(i2c_task, (i2c_ctx_ptr)),
+        PJOB(burn, ()),
         PJOB(burn, ()),
         PJOB(burn, ()),
         PJOB(burn, ()),
@@ -101,48 +56,79 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     );
 }
 
+static int i2s_mclk_bclk_ratio(
+        const unsigned audio_clock_frequency,
+        const unsigned sample_rate)
+{
+    return audio_clock_frequency / (sample_rate * (8 * sizeof(int32_t)) * I2S_CHANS_PER_FRAME);
+}
+
+I2S_CALLBACK_ATTR
+static void i2s_init(chanend_t *input_c, i2s_config_t *i2s_config)
+{
+    i2s_config->mode = I2S_MODE_I2S;
+    i2s_config->mclk_bclk_ratio =  i2s_mclk_bclk_ratio(appconfAUDIO_CLOCK_FREQUENCY, appconfPIPELINE_AUDIO_SAMPLE_RATE);
+}
+
+I2S_CALLBACK_ATTR
+static i2s_restart_t i2s_restart_check(chanend_t *input_c)
+{
+    return I2S_NO_RESTART;
+}
+
+I2S_CALLBACK_ATTR
+static void i2s_receive(chanend_t *input_c, size_t num_in, const int32_t *i2s_sample_buf)
+{
+    return;
+}
+
+
+I2S_CALLBACK_ATTR
+static void i2s_send(chanend_t *input_c, size_t num_out, int32_t *i2s_sample_buf)
+{
+    return;
+}
+
+const port_t p_i2s_dout[1] = {
+        PORT_I2S_DAC_DATA
+};
+const port_t p_bclk = PORT_I2S_BCLK;
+const port_t p_lrclk = PORT_I2S_LRCLK;
+const port_t p_mclk = PORT_MCLK_IN;
+const xclock_t bclk = XS1_CLKBLK_3;
+
+
 void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
     (void)c1;
     (void)c2;
     (void)c3;
 
-    chanend_t c_msg = soc_channel_establish(c0, soc_channel_inout);
+    platform_init_tile_1(c0);
 
-    uint32_t test = chanend_in_word(c_msg);
-
-    debug_printf("tile 1 got 0x%x\n", test);
-
-    port_t p_pdm_mic = PORT_PDM_DATA;
-    port_enable(p_pdm_mic);
-    // port_t p_pdm_clk = XS1_PORT_1G;     // PORT_PDM_CLK
-
-
-    const int pdm_decimation_factor = mic_array_decimation_factor(
-            appconfPDM_CLOCK_FREQUENCY,
-            appconfPIPELINE_AUDIO_SAMPLE_RATE);
-
-    app_pll_init();
-
-    mic_array_setup_ddr(PDM_CLKBLK_1,
-                        PDM_CLKBLK_2,
-                        PORT_MCLK_IN,
-                        PORT_PDM_CLK,
-                        PORT_PDM_DATA,
-                        appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY);
+    // chanend_t c_msg = soc_channel_establish(c0, soc_channel_inout);
+    // uint32_t test = chanend_in_word(c_msg);
+    // debug_printf("tile 1 got 0x%x\n", test);
 
     streaming_channel_t s_chan_input = s_chan_alloc();
-
     streaming_channel_t s_chan_ab = s_chan_alloc();
     streaming_channel_t s_chan_bc = s_chan_alloc();
     streaming_channel_t s_chan_output = s_chan_alloc();
 
+    const i2s_callback_group_t i2s_cbg = {
+            .init = (i2s_init_t) i2s_init,
+            .restart_check = (i2s_restart_check_t) i2s_restart_check,
+            .receive = (i2s_receive_t) i2s_receive,
+            .send = (i2s_send_t) i2s_send,
+            .app_data = &s_chan_ab.end_b,
+    };
+
     PAR_JOBS (
-        PJOB(mic_dual_pdm_rx_decimate, (p_pdm_mic, pdm_decimation_factor, mic_array_third_stage_coefs(pdm_decimation_factor), mic_array_fir_compensation(pdm_decimation_factor), s_chan_input.end_a, NULL)),
+        // PJOB(mic_dual_pdm_rx_decimate, (l_tile1_ctx->p_pdm_mic, l_tile1_ctx->pdm_decimation_factor, mic_array_third_stage_coefs(l_tile1_ctx->pdm_decimation_factor), mic_array_fir_compensation(l_tile1_ctx->pdm_decimation_factor), s_chan_input.end_a, NULL)),
         PJOB(ap_stage_a, (s_chan_input.end_b, s_chan_ab.end_a)),
-        PJOB(ap_stage_b, (s_chan_ab.end_b, s_chan_bc.end_a)),
-        PJOB(ap_stage_c, (s_chan_bc.end_b, s_chan_output.end_a)),
-        PJOB(burn, ()),
+        // PJOB(ap_stage_b, (s_chan_ab.end_b, s_chan_bc.end_a)),
+        // PJOB(ap_stage_c, (s_chan_bc.end_b, s_chan_output.end_a)),
+        PJOB(i2s_master, (&i2s_cbg, p_i2s_dout, 1, NULL, 0, p_bclk, p_lrclk, p_mclk, bclk)),
         PJOB(burn, ()),
         PJOB(burn, ()),
         PJOB(burn, ())
