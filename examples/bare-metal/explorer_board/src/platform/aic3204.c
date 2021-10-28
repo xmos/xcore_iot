@@ -31,7 +31,6 @@ static inline int aic3204_reg_write(uint8_t reg, uint8_t val)
 	ret = write_reg(l_i2c_master_ctx, AIC3204_I2C_DEVICE_ADDR, reg, val);
 
 	if (ret == I2C_REGOP_SUCCESS) {
-        debug_printf("wrote reg 0x%x val 0x%x\n", reg, val);
 		return 0;
 	} else {
         debug_printf("failed to write reg 0x%x val 0x%x\n", reg, val);

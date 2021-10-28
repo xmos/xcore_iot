@@ -37,6 +37,8 @@ set(APP_SOURCES
     "src/platform/mic_support.c"
     "src/platform/tile_support.c"
     "src/platform/platform_init.c"
+    "src/demos/spi_demo.c"
+    "src/demos/gpio_server.c"
 )
 
 set(APP_INCLUDES
@@ -44,6 +46,7 @@ set(APP_INCLUDES
     "src/audio_pipeline"
     "src/platform"
     "src/misc"
+    "src/demos"
 )
 
 set(APP_COMPILE_DEFINITIONS

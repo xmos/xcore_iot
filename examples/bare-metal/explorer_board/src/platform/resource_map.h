@@ -5,7 +5,7 @@
 #define RESOURCE_MAP_H_
 
 /** TILE 0 Clock Blocks */
-// #define UNUSED_CLKBLK   XS1_CLKBLK_1
+#define SPI_CLKBLK      XS1_CLKBLK_1
 // #define UNUSED_CLKBLK   XS1_CLKBLK_2
 // #define UNUSED_CLKBLK   XS1_CLKBLK_3
 #define MCLK_CLKBLK     XS1_CLKBLK_4
