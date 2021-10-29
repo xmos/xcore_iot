@@ -1,4 +1,4 @@
-// Copyright 2019-2021 XMOS LIMITED.
+// Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /*---------------------------------------------------*/
@@ -16,10 +16,7 @@
 #include <stdint.h>
 #include <ctype.h>
 
-#include "rtos_support.h"
-
-#undef rtos_printf
-#undef rtos_vprintf
+#include "xcore_utils.h"
 
 #define LONG64 (LONG_MAX == 9223372036854775807L)
 #define POINTER64 (INTPTR_MAX == 9223372036854775807L)
@@ -250,7 +247,7 @@ static int32_t getnum(char **linep)
 /* the supported formats.                            */
 /*                                                   */
 
-static int rtos_vsnwprintf(char *str, size_t size, int writeout, const char *fmt, va_list ap)
+static int xcore_utils_vsnwprintf(char *str, size_t size, int writeout, const char *fmt, va_list ap)
 {
     int32_t Check;
 #if LONG64
@@ -443,61 +440,61 @@ static int rtos_vsnwprintf(char *str, size_t size, int writeout, const char *fmt
 }
 /*---------------------------------------------------*/
 
-int rtos_snprintf(char *str, size_t size, const char *fmt, ...)
+int xcore_utils_snprintf(char *str, size_t size, const char *fmt, ...)
 {
     int len;
     va_list ap;
 
     va_start(ap, fmt);
-    len = rtos_vsnwprintf(str, size, 0, fmt, ap);
+    len = xcore_utils_vsnwprintf(str, size, 0, fmt, ap);
     va_end(ap);
 
     return len;
 }
 
-int rtos_sprintf(char *str, const char *fmt, ...)
+int xcore_utils_sprintf(char *str, const char *fmt, ...)
 {
     int len;
     va_list ap;
 
     va_start(ap, fmt);
-    len = rtos_vsnwprintf(str, SIZE_MAX, 0, fmt, ap);
+    len = xcore_utils_vsnwprintf(str, SIZE_MAX, 0, fmt, ap);
     va_end(ap);
 
     return len;
 }
 
-#ifndef RTOS_PRINTF_BUFSIZE
+#ifndef XCORE_UTILS_PRINTF_BUFSIZE
 #ifdef DEBUG_PRINTF_BUFSIZE
-#define RTOS_PRINTF_BUFSIZE DEBUG_PRINTF_BUFSIZE
+#define XCORE_UTILS_PRINTF_BUFSIZE DEBUG_PRINTF_BUFSIZE
 #else
-#define RTOS_PRINTF_BUFSIZE 130
+#define XCORE_UTILS_PRINTF_BUFSIZE 130
 #endif
 #endif
 
-int rtos_vprintf(const char *fmt, va_list ap)
+int xcore_utils_vprintf(const char *fmt, va_list ap)
 {
     int len;
     uint32_t mask;
-    char buf[RTOS_PRINTF_BUFSIZE];
+    char buf[XCORE_UTILS_PRINTF_BUFSIZE];
 
-    mask = rtos_interrupt_mask_all();
-    len = rtos_vsnwprintf(buf, RTOS_PRINTF_BUFSIZE, 1, fmt, ap);
+    mask = xcore_utils_interrupt_mask_all();
+    len = xcore_utils_vsnwprintf(buf, XCORE_UTILS_PRINTF_BUFSIZE, 1, fmt, ap);
 
     _write(FD_STDOUT, buf, len);
 
-    rtos_interrupt_mask_set(mask);
+    xcore_utils_interrupt_mask_set(mask);
 
     return len;
 }
 
-int rtos_printf(const char *fmt, ...)
+int xcore_utils_printf(const char *fmt, ...)
 {
     int len;
     va_list ap;
 
     va_start(ap, fmt);
-    len = rtos_vprintf(fmt, ap);
+    len = xcore_utils_vprintf(fmt, ap);
     va_end(ap);
 
     return len;

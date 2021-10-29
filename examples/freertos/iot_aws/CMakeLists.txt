@@ -18,7 +18,7 @@ set(USE_TLS_SUPPORT TRUE)
 set(USE_CUSTOM_MBEDTLS_CONFIG TRUE)
 
 ## Import XMOS configurations
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## Define project
 project(iot_aws)

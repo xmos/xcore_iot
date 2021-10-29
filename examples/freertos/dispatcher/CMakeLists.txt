@@ -16,7 +16,7 @@ set(USE_DISPATCHER TRUE)
 
 # Import XMOS RTOS platform configuration.
 # Must be done after setting the configuration options.
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 # Define project
 project(dispatcher)

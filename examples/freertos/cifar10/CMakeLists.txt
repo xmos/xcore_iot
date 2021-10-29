@@ -13,7 +13,7 @@ set(USE_DISPATCHER TRUE)
 set(USE_DEVICE_MEMORY_SUPPORT TRUE)
 
 ## Import XMOS configurations
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## Define project
 project(cifar10)

@@ -128,6 +128,7 @@
  */
 #define RTOS_INTERRUPT_CALLBACK(intrpt) _XCORE_INTERRUPT_CALLBACK(intrpt)
 
+#include "xcore_utils.h"
 
 /**
  * This function gets the current interrupt mask.
@@ -135,20 +136,7 @@
  *
  * \returns the current interrupt mask.
  */
-inline uint32_t rtos_interrupt_mask_get(void)
-{
-    uint32_t mask;
-
-    asm volatile(
-        "getsr r11," RTOS_STRINGIFY(XS1_SR_IEBLE_MASK) "\n"
-        "mov %0, r11"
-        : "=r"(mask)
-        : /* no inputs */
-        : /* clobbers */ "r11"
-    );
-
-    return mask;
-}
+#define rtos_interrupt_mask_get     xcore_utils_interrupt_mask_get
 
  /**
   * This function masks (disables) all interrupts on the
@@ -158,35 +146,13 @@ inline uint32_t rtos_interrupt_mask_get(void)
   * This value can be passed to rtos_interrupt_mask_set()
   * to restore the interrupt mask to its previous state.
   */
-inline uint32_t rtos_interrupt_mask_all(void)
-{
-    uint32_t mask;
-
-    asm volatile(
-        "getsr r11," RTOS_STRINGIFY(XS1_SR_IEBLE_MASK) "\n"
-        "mov %0, r11\n"
-        "clrsr " RTOS_STRINGIFY(XS1_SR_IEBLE_MASK)
-        : "=r"(mask)
-        : /* no inputs */
-        : /* clobbers */ "r11", "memory"
-    );
-
-    return mask;
-}
+#define rtos_interrupt_mask_all     xcore_utils_interrupt_mask_all
 
 /**
  * This function unmasks (enables) all interrupts on the
  * calling core.
  */
-inline void rtos_interrupt_unmask_all(void)
-{
-    asm volatile(
-        "setsr" RTOS_STRINGIFY(XS1_SR_IEBLE_MASK)
-        : /* no outputs */
-        : /* no inputs */
-        : /* clobbers */ "memory"
-    );
-}
+#define rtos_interrupt_unmask_all    xcore_utils_interrupt_unmask_all
 
 /**
  * This function sets the interrupt mask.
@@ -194,12 +160,7 @@ inline void rtos_interrupt_unmask_all(void)
  *
  * \param mask The value to set the interrupt mask to.
  */
-inline void rtos_interrupt_mask_set(uint32_t mask)
-{
-   if (mask != 0) {
-       rtos_interrupt_unmask_all();
-   }
-}
+#define rtos_interrupt_mask_set    xcore_utils_interrupt_mask_set
 
 /*
  * This function checks to see if it is called from
@@ -207,19 +168,6 @@ inline void rtos_interrupt_mask_set(uint32_t mask)
  *
  * \returns non-zero when called from within an ISR or kcall.
  */
-inline uint32_t rtos_isr_running(void)
-{
-    uint32_t kernel_mode;
-
-    asm volatile(
-        "getsr r11," RTOS_STRINGIFY(XS1_SR_INK_MASK) "\n"
-        "mov %0, r11"
-        : "=r"(kernel_mode)
-        : /* no inputs */
-        : /* clobbers */ "r11"
-    );
-
-    return kernel_mode;
-}
+#define rtos_isr_running    xcore_utils_isr_running
 
 #endif /* RTOS_INTERRUPT_H_ */

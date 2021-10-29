@@ -40,7 +40,7 @@ set(${THIS_LIB}_INCLUDES
     "${${THIS_LIB}_DIR}/${RTOS_CMAKE_RTOS}"
 )
 
-message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 unset(THIS_LIB)
 
 #**********************

@@ -14,7 +14,7 @@ set(USE_XUD_HIL TRUE)
 set(USE_RTOS_USB_DRIVER TRUE)
 
 ## Import XMOS configurations
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## Define project
 project(rtos_drivers_usb)

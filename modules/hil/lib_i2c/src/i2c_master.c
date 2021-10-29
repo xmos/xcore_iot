@@ -11,6 +11,15 @@
 
 #include "i2c.h"
 
+extern uint8_t read_reg(i2c_master_t *ctx, uint8_t device_addr, uint8_t reg, i2c_regop_res_t *result);
+extern uint8_t read_reg8_addr16(i2c_master_t *ctx, uint8_t device_addr, uint16_t reg, i2c_regop_res_t *result);
+extern uint16_t read_reg16_addr8(i2c_master_t *ctx, uint8_t device_addr, uint8_t reg, i2c_regop_res_t *result);
+extern uint16_t read_reg16(i2c_master_t *ctx, uint8_t device_addr, uint16_t reg, i2c_regop_res_t *result);
+extern i2c_regop_res_t write_reg(i2c_master_t *ctx, uint8_t device_addr, uint8_t reg, uint8_t data);
+extern i2c_regop_res_t write_reg8_addr16(i2c_master_t *ctx, uint8_t device_addr, uint16_t reg, uint8_t data);
+extern i2c_regop_res_t write_reg16_addr8(i2c_master_t *ctx, uint8_t device_addr, uint8_t reg, uint16_t data);
+extern i2c_regop_res_t write_reg16(i2c_master_t *ctx, uint8_t device_addr, uint16_t reg, uint16_t data);
+
 #define SDA_LOW     0
 #define SCL_LOW     0
 

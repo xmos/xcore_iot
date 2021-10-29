@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <xcore/port.h>
 #include <xcore/clock.h>
+#include <xcore/parallel.h>
 
 #define I2S_MAX_DATALINES 8
 #define I2S_CHANS_PER_FRAME 2
@@ -153,6 +154,9 @@ typedef struct {
     void *app_data;
 } i2s_callback_group_t;
 
+DECLARE_JOB(i2s_master, (const i2s_callback_group_t *, const port_t *, const size_t, const port_t *, const size_t, const port_t, const port_t, const port_t, const xclock_t));
+DECLARE_JOB(i2s_master_external_clock, (const i2s_callback_group_t *, const port_t *, const size_t, const port_t *, const size_t, const port_t, const port_t, const xclock_t));
+DECLARE_JOB(i2s_slave, (const i2s_callback_group_t *, port_t *, const size_t, port_t *, const size_t, port_t, port_t, xclock_t));
 
 /**
  * I2S master task

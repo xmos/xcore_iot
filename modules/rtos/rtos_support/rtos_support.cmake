@@ -20,7 +20,7 @@ set(${THIS_LIB}_INCLUDES
     "${RTOS_SUPPORT_DIR}/src"
 )
 
-message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 unset(THIS_LIB)
 
 list(REMOVE_DUPLICATES RTOS_SUPPORT_SOURCES)
