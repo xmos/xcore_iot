@@ -9,18 +9,23 @@
 #include "i2c.h"
 #include "i2s.h"
 #include "spi.h"
+#include "qspi_flash.h"
 
 typedef struct tile0_struct tile0_ctx_t;
 struct tile0_struct {
-    chanend_t c_gpio;
+    chanend_t c_from_gpio;
+    chanend_t c_to_gpio;
     spi_master_device_t spi_device_ctx;
     spi_master_t spi_ctx;
     i2c_master_t i2c_ctx;
+    qspi_flash_ctx_t qspi_flash_ctx;
+    qspi_io_ctx_t qspi_io_ctx;
 };
 
 typedef struct tile1_struct tile1_ctx_t;
 struct tile1_struct {
-    chanend_t c_gpio;
+    chanend_t c_from_gpio;
+    chanend_t c_to_gpio;
 
     port_t p_pdm_mic;
     int pdm_decimation_factor;

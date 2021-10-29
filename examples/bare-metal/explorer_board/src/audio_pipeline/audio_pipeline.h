@@ -4,8 +4,11 @@
 #ifndef AUDIO_PIPELINE_H_
 #define AUDIO_PIPELINE_H_
 
+#include <xcore/parallel.h>
+#include <xcore/chanend.h>
+
 DECLARE_JOB(ap_stage_a, (chanend_t, chanend_t));
-DECLARE_JOB(ap_stage_b, (chanend_t, chanend_t));
-DECLARE_JOB(ap_stage_c, (chanend_t, chanend_t));
+DECLARE_JOB(ap_stage_b, (chanend_t, chanend_t, chanend_t));
+DECLARE_JOB(ap_stage_c, (chanend_t, chanend_t, chanend_t));
 
 #endif /* AUDIO_PIPELINE_H_ */

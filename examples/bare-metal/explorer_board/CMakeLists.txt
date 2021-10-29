@@ -36,8 +36,10 @@ set(APP_SOURCES
     "src/platform/aic3204.c"
     "src/platform/mic_support.c"
     "src/platform/tile_support.c"
-    "src/platform/platform_init.c"
+    "src/platform/platform_init_tile0.c"
+    "src/platform/platform_init_tile1.c"
     "src/demos/spi_demo.c"
+    "src/demos/flash_demo.c"
     "src/demos/gpio_server.c"
 )
 

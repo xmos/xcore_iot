@@ -50,6 +50,7 @@
 #define AIC3204_REF_STARTUP   0x7B // Register 123 - Reference Power Up Config
 
 #include "i2c.h"
+
 int aic3204_init(i2c_master_t *i2c_master_ctx);
 
 #endif /* AIC3204_H_ */

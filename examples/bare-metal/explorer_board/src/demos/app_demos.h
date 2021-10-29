@@ -8,8 +8,10 @@
 #include <xcore/chanend.h>
 
 #include "spi.h"
+#include "qspi_flash.h"
 
 DECLARE_JOB(spi_demo, (spi_master_device_t*));
-DECLARE_JOB(gpio_server, (chanend_t));
+DECLARE_JOB(gpio_server, (chanend_t, chanend_t));
+DECLARE_JOB(flash_demo, (qspi_flash_ctx_t *));
 
 #endif /* APP_CONF_H_ */

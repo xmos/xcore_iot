@@ -5,18 +5,12 @@
 #include <platform.h>
 #include <xs1.h>
 #include <xcore/assert.h>
-#include <xcore/chanend.h>
-#include <xcore/channel_streaming.h>
-#include <xcore/parallel.h>
-#include <xcore/port.h>
-#include <xcore/hwtimer.h>
-#include <xcore/triggerable.h>
 
 /* SDK headers */
-#include "soc.h"
 #include "xcore_utils.h"
+#include "i2c.h"
 
-/* Header for the audio codec chip registers and i2c address */
+/* App headers */
 #include "aic3204.h"
 
 static i2c_master_t *l_i2c_master_ctx = 0;

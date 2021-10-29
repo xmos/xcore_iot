@@ -17,6 +17,7 @@
 #include "soc.h"
 #include "mic_array.h"
 #include "xcore_utils.h"
+#include "i2s.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -26,7 +27,6 @@
 #include "mic_support.h"
 #include "tile_support.h"
 #include "platform_init.h"
-#include "i2s.h"
 
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
@@ -35,12 +35,11 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     (void)c3;
 
     platform_init_tile_0(c1);
-    // chanend_free(c1);
 
     PAR_JOBS (
         PJOB(spi_demo, (&tile0_ctx->spi_device_ctx)),
-        PJOB(gpio_server, (tile0_ctx->c_gpio)),
-        PJOB(burn, ()),
+        PJOB(gpio_server, (tile0_ctx->c_from_gpio, tile0_ctx->c_to_gpio)),
+        PJOB(flash_demo, (&tile0_ctx->qspi_flash_ctx)),
         PJOB(burn, ()),
         PJOB(burn, ()),
         PJOB(burn, ()),
@@ -56,7 +55,6 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     (void)c3;
 
     platform_init_tile_1(c0);
-    // chanend_free(c0);
 
     streaming_channel_t s_chan_input = s_chan_alloc();
     streaming_channel_t s_chan_ab = s_chan_alloc();
@@ -68,8 +66,8 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     PAR_JOBS (
         PJOB(mic_dual_pdm_rx_decimate, (tile1_ctx->p_pdm_mic, tile1_ctx->pdm_decimation_factor, mic_array_third_stage_coefs(tile1_ctx->pdm_decimation_factor), mic_array_fir_compensation(tile1_ctx->pdm_decimation_factor), s_chan_input.end_a, NULL)),
         PJOB(ap_stage_a, (s_chan_input.end_b, s_chan_ab.end_a)),
-        PJOB(ap_stage_b, (s_chan_ab.end_b, s_chan_bc.end_a)),
-        PJOB(ap_stage_c, (s_chan_bc.end_b, s_chan_output.end_a)),
+        PJOB(ap_stage_b, (s_chan_ab.end_b, s_chan_bc.end_a, tile1_ctx->c_from_gpio)),
+        PJOB(ap_stage_c, (s_chan_bc.end_b, s_chan_output.end_a, tile1_ctx->c_to_gpio)),
         PJOB(i2s_master, (&tile1_ctx->i2s_cb_group, tile1_ctx->p_i2s_dout, 1, NULL, 0, tile1_ctx->p_bclk, tile1_ctx->p_lrclk, tile1_ctx->p_mclk, tile1_ctx->bclk)),
         PJOB(burn, ()),
         PJOB(burn, ()),

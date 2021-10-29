@@ -6,6 +6,20 @@
 
 #include <xcore/chanend.h>
 
+/** TILE 0 Clock Blocks */
+#define SPI_CLKBLK      XS1_CLKBLK_1
+#define FLASH_CLKBLK    XS1_CLKBLK_2
+#define MCLK_CLKBLK     XS1_CLKBLK_3
+// #define UNUSED_CLKBLK     XS1_CLKBLK_4
+// #define UNUSED_CLKBLK   XS1_CLKBLK_5
+
+/** TILE 1 Clock Blocks */
+#define PDM_CLKBLK_1    XS1_CLKBLK_1
+#define PDM_CLKBLK_2    XS1_CLKBLK_2
+#define I2S_CLKBLK      XS1_CLKBLK_3
+// #define UNUSED_CLKBLK   XS1_CLKBLK_4
+// #define UNUSED_CLKBLK   XS1_CLKBLK_5
+
 void platform_init_tile_0(chanend_t c_other_tile);
 void platform_init_tile_1(chanend_t c_other_tile);
 
