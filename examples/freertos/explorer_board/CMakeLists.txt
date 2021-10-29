@@ -22,7 +22,7 @@ set(USE_CUSTOM_MBEDTLS_CONFIG TRUE)
 set(BOARD XCORE-AI-EXPLORER)
 
 ## Import XMOS configurations
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## Define project
 project(explorer_board)

@@ -54,7 +54,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/api"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -81,7 +81,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -117,7 +117,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/${THIS_PATH}/src/multirate_hifi/asrc"
         "${${THIS_LIB}_DIR}/${THIS_PATH}/src/multirate_hifi/ssrc"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -144,7 +144,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -171,7 +171,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -209,7 +209,7 @@ if(${USE_${THIS_LIB}})
         "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
         "${${THIS_LIB}_DIR}/${THIS_PATH}/src"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -222,7 +222,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -232,7 +232,7 @@ unset(THIS_LIB)
 set(THIS_LIB AIF)
 if(${USE_${THIS_LIB}})
     include("${AIF_DIR}/ai_framework.cmake")
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -246,7 +246,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/rtos"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 
@@ -260,7 +260,7 @@ if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_INCLUDES
         "${${THIS_LIB}_DIR}/api"
     )
-    message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
 

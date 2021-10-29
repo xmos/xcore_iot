@@ -102,7 +102,7 @@ The simplest way to specify commonly used RTOS sources is to include the `xmos_r
 
 .. code-block:: CMake
 
-  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 Then, later in your `CMakeLists.txt` file, set the target sources and includes using the `XMOS_RTOS_PLATFORM_SOURCES` variable and your own `APP_SOURCES` variable.
 
@@ -124,7 +124,7 @@ To include those modules, additional build variables must be set in the `CMakeLi
 
   set(USE_TINYUSB TRUE)
 
-  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 In addition, your application may not use modules that are included by default. Modules can be excluded, potentially speeding up builds. See the example below:
 
@@ -134,6 +134,6 @@ In addition, your application may not use modules that are included by default. 
   set(USE_RTOS_I2S_DRIVER FALSE)
   set(USE_RTOS_SWMEM_DRIVER FALSE)
 
-  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 See :ref:`CMake Variables <sdk-cmake-variables-label>` for the full set of supported build variables, including the default setting for each.

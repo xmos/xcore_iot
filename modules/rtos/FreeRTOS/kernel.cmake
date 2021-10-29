@@ -48,7 +48,7 @@ set(${THIS_LIB}_INCLUDES
 
 add_compile_definitions(RTOS_FREERTOS)
 
-message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 unset(THIS_LIB)
 
 #********************************
@@ -83,7 +83,7 @@ set(${THIS_LIB}_INCLUDES
     "${${THIS_LIB}_PORTABLE_DIR}/NetworkInterface"
 )
 
-message("${COLOR_GREEN}Adding ${THIS_LIB}...${COLOR_RESET}")
+message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 unset(THIS_LIB)
 
 #**********************

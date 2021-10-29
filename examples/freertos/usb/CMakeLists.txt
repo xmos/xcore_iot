@@ -32,7 +32,7 @@ set(USE_TINYUSB TRUE)
 set(USE_DISK_MANAGER_TUSB TRUE)
 
 ## Import XMOS configurations
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_rtos_platform.cmake")
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## Define project
 project(usb)
