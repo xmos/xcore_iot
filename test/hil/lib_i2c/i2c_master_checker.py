@@ -2,7 +2,6 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 import xmostest
 
-# VERBOSE = True
 VERBOSE = False
 
 class I2CMasterChecker(xmostest.SimThread):
@@ -91,6 +90,16 @@ class I2CMasterChecker(xmostest.SimThread):
            (self._expected_speed == 400 and round(time) >  900):
             self.error("Data valid time not respected: %gns" % time)
 
+    def check_hold_start_time(self, time):
+        if (self._expected_speed == 100 and round(time) < 4000) or\
+           (self._expected_speed == 400 and round(time) < 600):
+            self.error("Start hold time less than minimum in spec: %gns" % time)
+
+    def check_setup_start_time(self, time):
+        if (self._expected_speed == 100 and round(time) < 4700) or\
+           (self._expected_speed == 400 and round(time) < 600):
+            self.error("Start bit setup time less than minimum in spec: %gns" % time)
+
     def check_data_setup_time(self, time):
         if (self._expected_speed == 100 and round(time) < 250) or\
            (self._expected_speed == 400 and round(time) < 100):
@@ -99,7 +108,6 @@ class I2CMasterChecker(xmostest.SimThread):
     def check_clock_low_time(self, time):
         if (self._expected_speed == 100 and round(time) < 4700) or\
            (self._expected_speed == 400 and round(time) < 1300):
-            print(int(time))
             self.error("Clock low time less than minimum in spec: %gns" % time)
 
     def check_clock_high_time(self, time):
@@ -148,7 +156,7 @@ class I2CMasterChecker(xmostest.SimThread):
       "NACKED_SELECT"    : ( 0,    1,     "STOPPED",          "STOPPING_0" ),
       "STOPPING_0"       : ( 0,    0,     "STOPPING_1",       "ILLEGAL" ),
       "STOPPING_1"       : ( 1,    0,     "ILLEGAL",          "STOPPED" ),
-      "REPEAT_START"     : ( 0,    1,     "ILLEGAL",          "STARTING" ),
+      "REPEAT_START"     : ( 1,    0,     "DRIVE_BIT",        "ILLEGAL" ),
       "ILLEGAL"          : ( None, None,  "ILLEGAL",          "ILLEGAL" ),
     }
 
@@ -344,14 +352,18 @@ class I2CMasterChecker(xmostest.SimThread):
     def handle_stopped(self):
       pass
 
-    def handle_starting(self):
-      print("Start bit received")
+    def starting_sequence(self):
       self._byte_num = 0
       self.start_read()
       if self._last_sda_change_time is not None:
         self.check_bus_free_time(self.xsi.get_time() - self._last_sda_change_time)
 
     def handle_drive_bit(self):
+      if self._sda_change_time is not None and \
+        (self._prev_state == "STARTING" or self._prev_state == "REPEAT_START") :
+        # Need to check that the start hold time has been respected
+        self.check_hold_start_time(self.xsi.get_time() - self._sda_change_time)
+
       if self._write_data is not None:
         # Drive data being read by master
         self.drive_sda((self._write_data & 0x80) >> 7)
@@ -359,6 +371,10 @@ class I2CMasterChecker(xmostest.SimThread):
         # Simulate external pullup
         self.drive_sda(1)
 
+    def handle_starting(self):
+      print("Start bit received")
+      self.starting_sequence()
+      
     def handle_sample_bit(self):
       if self._read_data is not None:
         # Ensure that the data setup time has been respected
@@ -382,7 +398,9 @@ class I2CMasterChecker(xmostest.SimThread):
       else:
         if self._bit_num != 1:
           self.error("Start bit detected mid-byte")
-        self.set_state("STARTING")
+          self.set_state("STARTING")
+        else:
+          self.set_state("REPEAT_START")
 
     def handle_byte_done(self):
       pass
@@ -416,7 +434,7 @@ class I2CMasterChecker(xmostest.SimThread):
 
       else:
         nack = self.read_sda_value()
-        print("Master sends %s." % ("NACK" if nack else "ACK"));
+        print("Master sends %s." % ("NACK" if nack else "ACK"))
         if nack:
           self.set_state("NACKED")
           print("Waiting for stop/start bit")
@@ -442,10 +460,13 @@ class I2CMasterChecker(xmostest.SimThread):
       pass
 
     def handle_stopping_1(self):
-      print("Stop bit received");
+      print("Stop bit received")
 
     def handle_repeat_start(self):
       print("Repeated start bit received")
+      # Need to check setup time for repeated start has been respected
+      self.check_setup_start_time(self._sda_change_time - self._scl_change_time)
+      self.starting_sequence()
 
     def handle_illegal(self):
       self.error("Illegal state arrived at from {}".format(self._prev_state))

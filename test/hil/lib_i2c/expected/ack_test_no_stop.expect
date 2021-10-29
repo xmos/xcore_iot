@@ -9,7 +9,7 @@ Sending ack
 Byte received: 0xfe
 Speed = \d+ Kbps
 Sending ack
-Start bit received
+Repeated start bit received
 Byte received: 0xf6
 Speed = \d+ Kbps
 Master write transaction started, device address=0x7b
