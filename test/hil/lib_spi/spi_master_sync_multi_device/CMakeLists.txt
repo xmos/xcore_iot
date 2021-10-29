@@ -49,7 +49,7 @@ foreach(load ${FULL_LOAD})
         foreach(mosi ${MOSI_ENABLED})
             foreach(mode ${SPI_MODE})
                 foreach(div ${DIVS})
-                    if(${MISO_ENABLED} OR ${MOSI_ENABLED})
+                    if(${miso} OR ${mosi})
                         set(TARGET_NAME_NO_EXT "${APP_NAME}_${load}_${miso}_${mosi}_${div}_${mode}")
                         set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
 
