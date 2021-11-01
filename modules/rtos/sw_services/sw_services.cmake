@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(SW_SERVICES_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/sw_services")
+set(SW_SERVICES_DIR "${XCORE_SDK_PATH}/modules/rtos/sw_services")
 
 set(WIFI_MANAGER_DIR "${SW_SERVICES_DIR}/wifi_manager")
 set(DHCPD_DIR "${SW_SERVICES_DIR}/dhcpd")
@@ -417,11 +417,11 @@ if(${USE_${THIS_LIB}})
 	    "${${THIS_LIB}_DIR}/portable"
 	    "${${THIS_LIB}_DIR}/thirdparty/tinyusb_src/src"
 	)
-	
+
 	add_compile_definitions(
         USE_TINYUSB=1
     )
-	
+
     message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)

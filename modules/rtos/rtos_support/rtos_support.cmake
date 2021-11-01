@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(RTOS_SUPPORT_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/rtos_support")
+set(RTOS_SUPPORT_DIR "${XCORE_SDK_PATH}/modules/rtos/rtos_support")
 
 #********************************
 # Gather RTOS support sources

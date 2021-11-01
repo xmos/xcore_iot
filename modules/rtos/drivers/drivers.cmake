@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(DRIVERS_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/drivers")
+set(DRIVERS_DIR "${XCORE_SDK_PATH}/modules/rtos/drivers")
 
 set(RTOS_GPIO_DRIVER_DIR "${DRIVERS_DIR}/gpio")
 set(RTOS_I2C_DRIVER_DIR "${DRIVERS_DIR}/i2c")
@@ -169,7 +169,7 @@ if(${USE_${THIS_LIB}})
 
     file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/*.c")
     file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/*.S")
-    
+
     set(${THIS_LIB}_SOURCES
         ${${THIS_LIB}_C_SOURCES}
         ${${THIS_LIB}_ASM_SOURCES}

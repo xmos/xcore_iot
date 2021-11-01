@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 
-if(NOT DEFINED ENV{XCORE_SDK_PATH})
-    message(FATAL_ERROR "Environment var XCORE_SDK_PATH must be set before including xmos_utils.cmake")
-endif()
+set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+message(STATUS "Using SDK at ${XCORE_SDK_PATH}")
 
 #**********************
 # Set up some custom vars
@@ -20,7 +21,7 @@ set(COLOR_WHITE   "${ESC}[37m")
 #********************************
 # Set up compiler
 #********************************
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #********************************
 # Set up hardware target
@@ -28,20 +29,20 @@ include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 if(NOT DEFINED BOARD)
     message(FATAL_ERROR "BOARD must be defined to specify the hardware target.")
 endif()
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/board_support/${BOARD}.cmake")
+include("${XCORE_SDK_PATH}/tools/cmake_utils/board_support/${BOARD}.cmake")
 
 #********************************
 # Set up for multi-tile builds
 #********************************
 option(MULTITILE_BUILD "Enable to build multitile RTOS" FALSE)
 if(MULTITILE_BUILD)
-    include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/multitile_build.cmake")
+    include("${XCORE_SDK_PATH}/tools/cmake_utils/multitile_build.cmake")
 endif()
 
 #**********************
 # Paths
 #**********************
-set(MODULES_DIR "$ENV{XCORE_SDK_PATH}/modules")
+set(MODULES_DIR "${XCORE_SDK_PATH}/modules")
 
 #********************************
 # Gather various sources

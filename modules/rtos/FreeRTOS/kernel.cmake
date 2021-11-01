@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 #**********************
 # Paths
 #**********************
-set(FREERTOS_SMP_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel")
+set(FREERTOS_SMP_DIR "${XCORE_SDK_PATH}/modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel")
 
 #********************************
 # Gather FreeRTOS sources
