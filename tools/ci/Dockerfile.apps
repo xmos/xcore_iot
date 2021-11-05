@@ -3,7 +3,7 @@ FROM ghcr.io/xmos/xcore_builder:main
 # This Dockerfile is for use by the XMOS XCore SDK CI system
 # It provides a minimal environment needed to build applications and run tests
 
-ARG CMAKE_VERSION=3.14.7
+ARG CMAKE_VERSION=3.20.6
 
 # install apt dependencies
 RUN apt update
