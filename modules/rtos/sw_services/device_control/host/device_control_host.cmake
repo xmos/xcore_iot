@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
 option(DEVICE_CONTROL_USE_USB "Device control host uses USB" ON)
 option(DEVICE_CONTROL_USE_RPI_I2C "Device control host uses I2C from a Raspberry Pi " OFF)
