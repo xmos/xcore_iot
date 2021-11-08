@@ -16,7 +16,6 @@ on:
 env:
   REGISTRY: ghcr.io
   SDK_APP_BUILDER: xmos/sdk_app_builder
-  SDK_DOC_BUILDER: xmos/sdk_doc_builder
 
 jobs:
   build-image:
@@ -48,39 +47,6 @@ jobs:
         with:
           context: 'tools/ci'
           file: 'tools/ci/Dockerfile.apps'
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}          
-
-  doc-image:
-    name: Build Docker image for building documentation
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      
-      - name: Login to the Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.SDK_DOC_BUILDER }}
-      
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: 'documents'
-          file: 'tools/ci/Dockerfile.docs'
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}          

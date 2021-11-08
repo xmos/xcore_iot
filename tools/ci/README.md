@@ -8,17 +8,7 @@ To build the docker container locally, run the following command:
 
 To run the container:
 
-    $ docker run -it ghcr.io/xmos/sdk_app_builder:develop
-
-## Building Docker container for building documentation
-
-To build the docker container locally, run the following command:
-
-    $ docker build -t ghcr.io/xmos/sdk_docs_builder:develop -f Dockerfile.docs ../../documents/
-
-To run the container:
-
-    $ docker run -it ghcr.io/xmos/sdk_docs_builder:develop
+    $ docker run -it ghcr.io/xmos/sdk_app_builder:develop bash
 
 ## Running Source Checks
 
