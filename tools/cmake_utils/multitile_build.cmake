@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
 ## create_multitile_target takes the variable name of a list containing the
 ## tiles that have an rtos placed on them.

@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
 #**********************
 # Paths
 #**********************
-set(RTOS_DIR "$ENV{XCORE_SDK_PATH}/modules/rtos")
+set(RTOS_DIR "${XCORE_SDK_PATH}/modules/rtos")
 set(OSAL_DIR "${RTOS_DIR}/osal")
 
 #**********************
