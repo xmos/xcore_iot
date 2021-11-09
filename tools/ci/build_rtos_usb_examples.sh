@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+source ${XCORE_SDK_PATH}/tools/ci/helper_functions.sh
+
 USB_EXAMPLE_PATH="examples/freertos/usb"
 
 # setup configuraitons

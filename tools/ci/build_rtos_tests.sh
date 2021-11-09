@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+source ${XCORE_SDK_PATH}/tools/ci/helper_functions.sh
+
 # setup configuraitons
 if [ -z "$1" ] || [ "$1" == "all" ]
 then
