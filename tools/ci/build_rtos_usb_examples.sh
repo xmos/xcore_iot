@@ -38,11 +38,12 @@ for ((i = 0; i < ${#demos[@]}; i += 1)); do
     read -ra FIELDS <<< ${demos[i]}
     demo="${FIELDS[0]}"
     board="${FIELDS[1]}"
+    path="${XCORE_SDK_PATH}/${USB_EXAMPLE_PATH}"    
     echo '******************************************************'
     echo '* Building' ${demo} 'for' ${board}
     echo '******************************************************'
 
-    (cd ${USB_EXAMPLE_PATH}; make distclean)
-    (cd ${USB_EXAMPLE_PATH}; make -j BOARD=${board} TINYUSB_DEMO=${demo})
+    (cd ${path}; log_errors make distclean)
+    (cd ${path}; log_errors make -j BOARD=${board} TINYUSB_DEMO=${demo})
 done
 
