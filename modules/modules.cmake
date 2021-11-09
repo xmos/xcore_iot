@@ -180,35 +180,8 @@ unset(THIS_LIB)
 #********************************
 set(THIS_LIB LIB_XS3_MATH)
 if(${USE_${THIS_LIB}})
-    set(${THIS_LIB}_FLAGS "-Os")
-
     string(TOLOWER ${THIS_LIB} THIS_PATH)
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/arch/xcore/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/arch/xcore/*.S")
-    file(GLOB_RECURSE ${THIS_LIB}_ADD_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/arch/xcore/*/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ADD_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/arch/xcore/*/*.S")
-    file(GLOB_RECURSE ${THIS_LIB}_BFP_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/bfp/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_BFP_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/bfp/*.S")
-    file(GLOB_RECURSE ${THIS_LIB}_VECT_C_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/vect/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_VECT_ASM_SOURCES "${${THIS_LIB}_DIR}/${THIS_PATH}/src/vect/*.S")
-
-    set(${THIS_LIB}_SOURCES
-        ${${THIS_LIB}_C_SOURCES}
-        ${${THIS_LIB}_ASM_SOURCES}
-        ${${THIS_LIB}_ADD_C_SOURCES}
-        ${${THIS_LIB}_ADD_ASM_SOURCES}
-        ${${THIS_LIB}_BFP_C_SOURCES}
-        ${${THIS_LIB}_BFP_ASM_SOURCES}
-        ${${THIS_LIB}_VECT_C_SOURCES}
-        ${${THIS_LIB}_VECT_ASM_SOURCES}
-    )
-
-    set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
-
-    set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/${THIS_PATH}/api"
-        "${${THIS_LIB}_DIR}/${THIS_PATH}/src"
-    )
+    include("${${THIS_LIB}_DIR}/${THIS_PATH}/lib_xs3_math.cmake")
     message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
