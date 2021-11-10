@@ -44,9 +44,9 @@ Install development packages:
 
 Run the following command to deactivate the Conda environment:
 
-    .. code-block:: console
+.. code-block:: console
     
-        $ conda deactivate
+    $ conda deactivate
 
 *************************************
 Contribution Guidelines and Standards
