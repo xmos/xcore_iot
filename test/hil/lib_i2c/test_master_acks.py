@@ -1,6 +1,6 @@
 # Copyright 2014-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
+import Pyxsim as xmostest
 from i2c_master_checker import I2CMasterChecker
 
 def do_master_test(stop):
