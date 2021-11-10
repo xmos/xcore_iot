@@ -9,4 +9,4 @@ numpy
 opencv-python
 PyYAML
 setuptools_scm
-tensorflow==2.4.4
+tensorflow==2.5.2
