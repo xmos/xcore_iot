@@ -1,10 +1,10 @@
 # Copyright 2014-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
+import logging
+
 from Pyxsim import SimThread
 from typing import Sequence, Optional, Mapping, Tuple
 from numbers import Number
-
-VERBOSE = False
 
 class I2CMasterChecker(SimThread):
     """"
@@ -12,18 +12,22 @@ class I2CMasterChecker(SimThread):
     caused by the master.
     """
 
-    def __init__(self, 
-                 scl_port:str, 
-                 sda_port:str, 
-                 expected_speed:int,
-                 tx_data:Optional[Sequence[int]] = None, 
-                 ack_sequence:Optional[Sequence[bool]] = [], 
-                 clock_stretch:Optional[int] = 0) -> None:
+    def __init__(
+        self, 
+        scl_port: str, 
+        sda_port: str, 
+        expected_speed: int,
+        tx_data: Optional[Sequence[int]] = None, 
+        ack_sequence: Optional[Sequence[bool]] = None, 
+        clock_stretch: Optional[int] = 0
+    ) -> None:
 
         self._scl_port = scl_port
         self._sda_port = sda_port
-        self._tx_data : Sequence[int] = tx_data if tx_data is not None else []
-        self._ack_sequence : Sequence[int] = ack_sequence if ack_sequence is not None else []
+        self._tx_data : Sequence[int] = tx_data if tx_data is not None else []  
+        self._ack_sequence : Sequence[int] = (
+            ack_sequence if ack_sequence is not None else []
+        )
         self._expected_speed = expected_speed
         self._clock_stretch = clock_stretch
 
@@ -92,37 +96,37 @@ class I2CMasterChecker(SimThread):
             # Data change must have been for a previous bit
             return
 
-        if (self._expected_speed == 100 and round(time) > 3450) or\
+        if (self._expected_speed == 100 and round(time) > 3450) or \
            (self._expected_speed == 400 and round(time) >  900):
             self.error(f"Data valid time not respected: {time}ns")
 
     def check_hold_start_time(self, time:Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4000) or\
+        if (self._expected_speed == 100 and round(time) < 4000) or \
            (self._expected_speed == 400 and round(time) < 600):
             self.error(f"Start hold time less than minimum in spec: {time}ns")
 
     def check_setup_start_time(self, time:Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4700) or\
+        if (self._expected_speed == 100 and round(time) < 4700) or \
            (self._expected_speed == 400 and round(time) < 600):
             self.error(f"Start bit setup time less than minimum in spec: {time}ns")
 
     def check_data_setup_time(self, time:Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 250) or\
+        if (self._expected_speed == 100 and round(time) < 250) or \
            (self._expected_speed == 400 and round(time) < 100):
             self.error(f"Data setup time less than minimum in spec: {time}ns")
 
     def check_clock_low_time(self, time:Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4700) or\
+        if (self._expected_speed == 100 and round(time) < 4700) or \
            (self._expected_speed == 400 and round(time) < 1300):
             self.error(f"Clock low time less than minimum in spec: {time}ns")
 
     def check_clock_high_time(self, time:Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4000) or\
+        if (self._expected_speed == 100 and round(time) < 4000) or \
            (self._expected_speed == 400 and round(time) < 900):
             self.error(f"Clock high time less than minimum in spec: {time}ns")
 
     def check_setup_stop_time(self, time:Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4000) or\
+        if (self._expected_speed == 100 and round(time) < 4000) or \
            (self._expected_speed == 400 and round(time) < 600):
             self.error(f"Stop bit setup time less than minimum in spec: {time}ns")
 
@@ -141,9 +145,9 @@ class I2CMasterChecker(SimThread):
             self._tx_data_index += 1
             return data
 
-    states : Mapping[str, Tuple[int, int, str, str]]= {
-      #                      EXPECT     |  Next state on transition of
-      # STATE            :   SCL,  SDA  |  SCL       SDA
+    states: Mapping[str, Tuple[int, int, str, str]] = {
+      #                      EXPECT     | Next state on transition of
+      # STATE            :   SCL,  SDA  |    SCL                 SDA
       #
 
       "STOPPED"          : ( 1,    1,     "ILLEGAL",          "STARTING" ),
@@ -202,8 +206,7 @@ class I2CMasterChecker(SimThread):
           if self.xsi.get_time() >= self._clock_release_time:
             self.drive_scl(1)
             self._clock_release_time = None
-            if VERBOSE:
-              print(f"End clock stretching @ {self.xsi.get_time()}")
+            logging.debug(f"End clock stretching @ {self.xsi.get_time()}")
 
         else:
           # Default case, simply wait for one of the pins to change
@@ -214,8 +217,7 @@ class I2CMasterChecker(SimThread):
 
       time_now = self.xsi.get_time()
 
-      if VERBOSE:
-        print(f"wait_for_change {scl_value},{sda_value} -> {new_scl_value},{new_sda_value} @ {time_now}")
+      logging.debug(f"wait_for_change {scl_value},{sda_value} -> {new_scl_value},{new_sda_value} @ {time_now}")
 
       #
       # SCL changed
@@ -244,8 +246,7 @@ class I2CMasterChecker(SimThread):
         if self._clock_stretch and new_scl_value == 0:
           self.drive_scl(0)
           self._clock_release_time = time_now + self._clock_stretch
-          if VERBOSE:
-            print(f"Start clock stretching @ {self.xsi.get_time()}")
+          logging.debug(f"Start clock stretching @ {self.xsi.get_time()}")
 
       #
       # SDA changed - don't detect simultaneous changes and have the clock
@@ -266,8 +267,7 @@ class I2CMasterChecker(SimThread):
       return scl_changed, sda_changed
 
     def set_state(self, next_state: str) -> None:
-      if VERBOSE:
-        print(f"State: {self._state} -> {next_state} @ {self.xsi.get_time()}")
+      logging.debug(f"State: {self._state} -> {next_state} @ {self.xsi.get_time()}")
       self._prev_state = self._state
       self._state = next_state
 
