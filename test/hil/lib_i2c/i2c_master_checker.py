@@ -6,6 +6,10 @@ from Pyxsim import SimThread
 from typing import Sequence, Optional, Mapping, Tuple
 from numbers import Number
 
+logging.basicConfig(format="{message}")
+logger = logging.getLogger()
+# Change this to logging.DEBUG if you wish to see verbose output
+logger.setLevel(logging.WARNING) 
 
 class I2CMasterChecker(SimThread):
     """ "
@@ -80,7 +84,8 @@ class I2CMasterChecker(SimThread):
         print(f"Checking I2C: SCL={self._scl_port}, SDA={self._sda_port}")
 
     def error(self, message: str) -> None:
-        print(f"ERROR: {message} @ {self.xsi.get_time()}")
+        if logger.isEnabledFor(logging.ERROR):
+            logger.error("ERROR: {0} @ {1}", message, self.xsi.get_time())
 
     def read_port(self, port: str, external_value: int) -> int:
         driving = self.xsi.is_port_driving(port)
@@ -216,7 +221,7 @@ class I2CMasterChecker(SimThread):
                 if self.xsi.get_time() >= self._clock_release_time:
                     self.drive_scl(1)
                     self._clock_release_time = None
-                    logging.debug(f"End clock stretching @ {self.xsi.get_time()}")
+                    logger.debug(f"End clock stretching @ {self.xsi.get_time()}")
 
             else:
                 # Default case, simply wait for one of the pins to change
@@ -227,7 +232,7 @@ class I2CMasterChecker(SimThread):
 
         time_now = self.xsi.get_time()
 
-        logging.debug(
+        logger.debug(
             f"wait_for_change {scl_value},{sda_value} -> {new_scl_value},{new_sda_value} @ {time_now}"
         )
 
@@ -258,7 +263,7 @@ class I2CMasterChecker(SimThread):
             if self._clock_stretch and new_scl_value == 0:
                 self.drive_scl(0)
                 self._clock_release_time = time_now + self._clock_stretch
-                logging.debug(f"Start clock stretching @ {self.xsi.get_time()}")
+                logger.debug(f"Start clock stretching @ {self.xsi.get_time()}")
 
         #
         # SDA changed - don't detect simultaneous changes and have the clock
@@ -279,7 +284,7 @@ class I2CMasterChecker(SimThread):
         return scl_changed, sda_changed
 
     def set_state(self, next_state: str) -> None:
-        logging.debug(f"State: {self._state} -> {next_state} @ {self.xsi.get_time()}")
+        logger.debug(f"State: {self._state} -> {next_state} @ {self.xsi.get_time()}")
         self._prev_state = self._state
         self._state = next_state
 
