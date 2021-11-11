@@ -3,6 +3,7 @@
 from typing import Sequence, Union, Tuple, Literal
 from Pyxsim import SimThread, pyxsim
 
+
 class I2CSlaveChecker(SimThread):
     """
     This simulator thread will act as I2C master, create
@@ -10,11 +11,11 @@ class I2CSlaveChecker(SimThread):
     """
 
     def __init__(
-        self, 
-        scl_port: str, 
-        sda_port: str, 
+        self,
+        scl_port: str,
+        sda_port: str,
         speed: int,
-        tsequence: Sequence[Tuple[Literal["r", "w"], Union[Sequence[int], int]]]
+        tsequence: Sequence[Tuple[Literal["r", "w"], Union[Sequence[int], int]]],
     ) -> None:
         self._scl_port = scl_port
         self._sda_port = sda_port
@@ -23,7 +24,7 @@ class I2CSlaveChecker(SimThread):
         self._bit_time = 1000000 / speed
         print(f"Checking I2C: SCL={self._scl_port}, SDA={self._sda_port}")
 
-    def get_port_val(self, xsi: pyxsim.Xsi, port: str):
+    def get_port_val(self, xsi: pyxsim.Xsi, port: str) -> int:
         """
         Sample port, modelling the pull up
         """
@@ -33,7 +34,7 @@ class I2CSlaveChecker(SimThread):
         else:
             return xsi.sample_port_pins(port)
 
-    def start_bit(self, xsi: pyxsim.Xsi):
+    def start_bit(self, xsi: pyxsim.Xsi) -> None:
         xsi.drive_port_pins(self._scl_port, 1)
         self.wait_until(xsi.get_time() + self._bit_time / 4)
         xsi.drive_port_pins(self._sda_port, 0)
@@ -41,9 +42,7 @@ class I2CSlaveChecker(SimThread):
         xsi.drive_port_pins(self._scl_port, 0)
         self._fall_time = xsi.get_time()
 
-
-
-    def high_pulse(self, xsi: pyxsim.Xsi):
+    def high_pulse(self, xsi: pyxsim.Xsi) -> None:
         self.wait_until(self._fall_time + self._bit_time / 2 + self._bit_time / 32)
         xsi.drive_port_pins(self._scl_port, 1)
         if xsi.is_port_driving(self._scl_port):
@@ -55,7 +54,7 @@ class I2CSlaveChecker(SimThread):
         xsi.drive_port_pins(self._scl_port, 0)
         self._fall_time = new_fall_time
 
-    def high_pulse_sample(self, xsi: pyxsim.Xsi):
+    def high_pulse_sample(self, xsi: pyxsim.Xsi) -> int:
         self.wait_until(self._fall_time + self._bit_time / 2 + self._bit_time / 32)
         if xsi.is_port_driving(self._scl_port):
             self.wait_for_port_pins_change([self._scl_port])
@@ -70,7 +69,7 @@ class I2CSlaveChecker(SimThread):
         self._fall_time = new_fall_time
         return data
 
-    def write(self, xsi: pyxsim.Xsi, byte: int):
+    def write(self, xsi: pyxsim.Xsi, byte: int) -> None:
         print(f"Sending data 0x{byte}")
         for _ in range(8):
             self.wait_until(self._fall_time + self._bit_time / 8)
@@ -84,7 +83,7 @@ class I2CSlaveChecker(SimThread):
         else:
             print("Master received ACK")
 
-    def stop_bit(self, xsi: pyxsim.Xsi):
+    def stop_bit(self, xsi: pyxsim.Xsi) -> None:
         print("Sending stop bit")
         self.wait_until(self._fall_time + self._bit_time / 4)
         xsi.drive_port_pins(self._sda_port, 0)
@@ -94,8 +93,7 @@ class I2CSlaveChecker(SimThread):
         xsi.drive_port_pins(self._sda_port, 1)
         self.wait_until(xsi.get_time() + self._bit_time * 2)
 
-
-    def read(self, xsi: pyxsim.Xsi, ack: int):
+    def read(self, xsi: pyxsim.Xsi, ack: int) -> None:
         byte = 0
         for _ in range(8):
             bit = self.high_pulse_sample(xsi)
@@ -109,8 +107,7 @@ class I2CSlaveChecker(SimThread):
         xsi.drive_port_pins(self._sda_port, ack)
         self.high_pulse(xsi)
 
-
-    def run(self):
+    def run(self) -> None:
         xsi = self.xsi
         xsi.drive_port_pins(self._scl_port, 1)
         xsi.drive_port_pins(self._sda_port, 1)
@@ -127,7 +124,7 @@ class I2CSlaveChecker(SimThread):
                 self.start_bit(xsi)
                 print(f"Starting read transaction to device id 0x{addr}")
                 self.write(xsi, (addr << 1) | 1)
-                for x in range(d-1):
+                for x in range(d - 1):
                     self.read(xsi, 0)
                 self.read(xsi, 1)
                 self.stop_bit(xsi)
