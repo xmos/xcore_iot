@@ -26,31 +26,24 @@ if (DEVICE_CONTROL_USE_USB)
     add_compile_definitions(USE_USB=1)
     list(APPEND DEVICE_CONTROL_SOURCES "${DEVICE_CONTROL_PATH}/device_access_usb.c")
 
-	# This may still be needed for linux and mac, but does not seem necessary for Windows
-    # Find libusb, generate error on failure
-    # find_package(LibUSB)
-    # if (NOT ${LibUSB_FOUND})
-        # message(FATAL_ERROR "LibUSB not found.")
-    # endif ()
-	
-	# Discern OS for libusb library location
-	if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-		link_directories("$ENV{XCORE_SDK_PATH}/modules/thirdparty/libusb/OSX64")
-		set(libusb-1.0_INCLUDE_DIRS "$ENV{XCORE_SDK_PATH}/modules/thirdparty/libusb/OSX64")
-		set(LINK_LIBS ${LINK_LIBS} usb-1.0.0)
-	elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-		find_package(PkgConfig)
-		pkg_check_modules(libusb-1.0 REQUIRED libusb-1.0)
-		set(LINK_LIBS ${LINK_LIBS} usb-1.0)
-	elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		link_directories("$ENV{XCORE_SDK_PATH}/modules/thirdparty/libusb/Win32")
-		set(libusb-1.0_INCLUDE_DIRS "$ENV{XCORE_SDK_PATH}/modules/thirdparty/libusb/Win32")
-		set(LINK_LIBS ${LINK_LIBS} libusb)
-	endif()
-		
-		list(APPEND DEVICE_CONTROL_LIBRARIES ${LINK_LIBS})
-		list(APPEND DEVICE_CONTROL_INCLUDES ${libusb-1.0_INCLUDE_DIRS})
-    
+    # Discern OS for libusb library location
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        link_directories("$ENV{XCORE_SDK_PATH}/modules/thirdparty/libusb/OSX64")
+        set(libusb-1.0_INCLUDE_DIRS "$ENV{XCORE_SDK_PATH}/modules/thirdparty/libusb/OSX64")
+        set(LINK_LIBS ${LINK_LIBS} usb-1.0.0)
+    elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+        find_package(PkgConfig)
+        pkg_check_modules(libusb-1.0 REQUIRED libusb-1.0)
+        set(LINK_LIBS ${LINK_LIBS} usb-1.0)
+    elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+        link_directories("$ENV{XCORE_SDK_PATH}/modules/thirdparty/libusb/Win32")
+        set(libusb-1.0_INCLUDE_DIRS "$ENV{XCORE_SDK_PATH}/modules/thirdparty/libusb/Win32")
+        set(LINK_LIBS ${LINK_LIBS} libusb)
+    endif()
+
+        list(APPEND DEVICE_CONTROL_LIBRARIES ${LINK_LIBS})
+        list(APPEND DEVICE_CONTROL_INCLUDES ${libusb-1.0_INCLUDE_DIRS})
+
 elseif (DEVICE_CONTROL_USE_RPI_I2C)
 
     message(STATUS "Building for RPi I2C")
