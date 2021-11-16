@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(avona_control LANGUAGES C)
+project(fatfs_mkimage LANGUAGES C)
 set(TARGET_NAME fatfs_mkimage)
 
 # Disable in-source build.
