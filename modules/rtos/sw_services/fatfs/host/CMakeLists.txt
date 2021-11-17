@@ -11,20 +11,32 @@ endif()
 # Tell cmake where to install things
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE PATH "" FORCE)
 
+# Some source files are in the parent directory
+set(FATFS_HOST_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET FATFS_HOST_PATH PARENT_PATH FATFS_HOST_PATH)
+message(STATUS "Using src files at ${FATFS_HOST_PATH}")
+
+# Output application to the parent directory
+set(FATFS_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR})
+cmake_path(GET FATFS_INSTALL_DIR PARENT_PATH FATFS_INSTALL_DIR)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${FATFS_INSTALL_DIR})
+
 set(APP_SOURCES
-    "fatfs_mkimage.c"
-    "fatfs_ops.c"
-    "directory_add.c"
-    "diskio.c"
-    "ramdisk.c"
-    "ffsystem.c"
-    "argtable/argtable3.c"
-    "../thirdparty/src/ff.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/fatfs_mkimage.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/fatfs_ops.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/directory_add.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/diskio.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/ramdisk.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/ffsystem.c"
+    "${CMAKE_CURRENT_LIST_DIR}/argtable/argtable3.c"
+    "${FATFS_HOST_PATH}/thirdparty/src/ff.c"
 )
 
 set(APP_INCLUDES
     "."
-    "../thirdparty/api/"
+    "${FATFS_HOST_PATH}/thirdparty/api/"
+    "${CMAKE_CURRENT_LIST_DIR}/src/"
+    "${CMAKE_CURRENT_LIST_DIR}/"
 )
 
 add_executable(${TARGET_NAME})
