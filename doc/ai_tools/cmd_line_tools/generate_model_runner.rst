@@ -1,4 +1,4 @@
- .. _generate_model_runner-manpage:
+.. _generate_model_runner-manpage:
 
 .. program:: generate_model_runner.py
 
