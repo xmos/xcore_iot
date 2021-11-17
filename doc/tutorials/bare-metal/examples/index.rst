@@ -8,8 +8,9 @@ Several example bare-metal applications are included to illustrate the fundament
     :maxdepth: 1
     :includehidden:
     
-    ../../../../examples/bare-metal/hello_world/README.rst
-    ../../../../examples/bare-metal/cifar10/cifar10.rst
-    ../../../../examples/bare-metal/micro_speech/README.rst
-    ../../../../examples/bare-metal/visual_wake_words/README.rst
-    ../../../../examples/bare-metal/hotdog_not_hotdog/README.rst
+    explorer_board.rst
+    hello_world.rst
+    cifar10.rst
+    micro_speech.rst
+    visual_wake_words.rst
+    hotdog_not_hotdog.rst

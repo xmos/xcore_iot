@@ -8,11 +8,11 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
    :maxdepth: 1
    :includehidden:
 
-   ../../../../examples/freertos/getting_started/README.rst
-   ../../../../examples/freertos/explorer_board/README.rst
-   ../../../../examples/freertos/usb/README.rst
-   ../../../../examples/freertos/device_control/README.rst
-   ../../../../examples/freertos/dispatcher/README.rst
-   ../../../../examples/freertos/cifar10/README.rst
-   ../../../../examples/freertos/person_detection/README.rst
-   ../../../../examples/freertos/iot_aws/README.rst
+   getting_started.rst
+   explorer_board.rst
+   usb.rst
+   device_control.rst
+   dispatcher.rst
+   cifar10.rst
+   person_detection.rst
+   iot_aws.rst

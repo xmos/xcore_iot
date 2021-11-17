@@ -174,15 +174,15 @@ In this section, we will configure the demo software to connect to the proper MQ
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ cmake -B build -DBOARD=XCORE-AI-EXPLORER
-		
-.. tab:: Windows
+        $ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+        
+.. tab:: Windows XTC Tools CMD prompt
 
-	.. code-block:: XTC Tools CMD prompt
+    .. code-block:: console
 
-		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
 
 This will create the ``iot_aws.xe`` binary in the bin folder.
 
@@ -205,28 +205,12 @@ Running the firmware
 
 To run the demo navigate to the bin folder and use the command:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ xrun iot_aws.xe
-
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> xrun iot_aws.xe
+    $ xrun iot_aws.xe
 
 For debug output use:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ xrun --xscope iot_aws.xe
-
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> xrun --xscope iot_aws.xe
+    $ xrun --xscope iot_aws.xe
