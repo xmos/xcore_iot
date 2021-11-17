@@ -19,8 +19,8 @@ It also provides sprintf and snprintf functions.
 **/
 
 /**
- * Remaps all calls to debug_printf() to rtos_printf().
- * When this is on, files should not include both rtos_support.h
+ * Remaps all calls to debug_printf() to xcore_utils_printf().
+ * When this is on, files should not include both xcore_utils.h
  * and debug_print.h.
  */
 #define XCORE_UTILS_DEBUG_PRINTF_REMAP 1
@@ -54,7 +54,7 @@ It also provides sprintf and snprintf functions.
 #define XCORE_UTILS_DEBUG_PRINTF_REMAP 0
 #endif
 
-/* remap calls to debug_printf to rtos_printf */
+/* remap calls to debug_printf to xcore_utils_printf */
 #if XCORE_UTILS_DEBUG_PRINTF_REMAP
 
     #ifdef _debug_printf_h_
@@ -138,7 +138,7 @@ int xcore_utils_printf(const char *fmt, ...);
 
 #if DEBUG_PRINT_ENABLE0
 #define xcore_utils_vprintf(...) xcore_utils_vprintf(__VA_ARGS__)
-#define xcore_utils_printf(...) xcore_utils_printf(__VA_ARGS__)
+#define xcore_utils_printf(...)  xcore_utils_printf(__VA_ARGS__)
 #else
 #define xcore_utils_vprintf(...)
 #define xcore_utils_printf(...)
