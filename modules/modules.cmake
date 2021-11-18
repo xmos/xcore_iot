@@ -15,7 +15,6 @@ set(LEGACY_COMPAT_DIR "${MODULES_DIR}/legacy_compat")
 set(AIF_DIR "${MODULES_DIR}/aif")
 set(DEVICE_MEMORY_SUPPORT_DIR "${MODULES_DIR}/device_memory_support")
 set(UTILS_DIR "${MODULES_DIR}/utils")
-set(L2_CACHE_DIR "${MODULES_DIR}/l2_cache_dev/l2_cache")
 
 #**********************
 # Options
@@ -239,24 +238,6 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
-#********************************
-# Gather utils sources
-#********************************
-set(THIS_LIB L2_CACHE)
-if(${USE_${THIS_LIB}})
-    file(GLOB_RECURSE ${THIS_LIB}_CPP_SOURCES "${${THIS_LIB}_DIR}/src/*.cpp")
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/src/*.S")
-    set_source_files_properties( ${${THIS_LIB}_ASM_SOURCES} PROPERTIES LANGUAGE ASM )
-    set(${THIS_LIB}_SOURCES ${${THIS_LIB}_CPP_SOURCES} ${${THIS_LIB}_C_SOURCES} ${${THIS_LIB}_ASM_SOURCES})
-
-    set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/src"
-    )
-    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
-endif()
-unset(THIS_LIB)
-
 #**********************
 # set user variables
 #**********************
@@ -271,7 +252,6 @@ set(MODULES_SOURCES
     ${MODEL_RUNNER_SOURCES}
     ${DEVICE_MEMORY_SUPPORT_SOURCES}
     ${UTILS_SOURCES}
-    ${L2_CACHE_SOURCES}
 )
 
 set(MODULES_INCLUDES
@@ -286,7 +266,6 @@ set(MODULES_INCLUDES
     ${MODEL_RUNNER_INCLUDES}
     ${DEVICE_MEMORY_SUPPORT_INCLUDES}
     ${UTILS_INCLUDES}
-    ${L2_CACHE_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES MODULES_SOURCES)
