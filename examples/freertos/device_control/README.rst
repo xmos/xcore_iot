@@ -12,30 +12,22 @@ Run the following commands to build the dispatch_queue firmware:
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ cmake -B build -DBOARD=XCORE-AI-EXPLORER
-		$ cd build
-		$ make
+        $ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cd build
+        $ make
 
-.. tab:: Windows
+.. tab:: Windows XTC Tools CMD prompt
 
-	.. code-block:: XTC Tools CMD prompt
+    .. code-block:: console
 
-		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
-		> cd build
-		> nmake
-		
+        $ cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cd build
+        $ nmake
+        
 To run the example:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ xrun --xscope bin/device_control.xe
-
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> xrun --xscope bin\device_control.xe
+    $ xrun --xscope bin/device_control.xe
