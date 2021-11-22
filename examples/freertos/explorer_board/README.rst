@@ -105,7 +105,13 @@ To run the demo navigate to the bin folder and use the command:
 Running the host application
 ****************************
 
-In a second console you can run the example_host script to demo various actions.
+In a second console you can run the example_host script to demo various actions.  Note, this script is only supported on Linux and macOS.  
+
+The example_host script requires `ncat`, `pv`, and `SoX <http://sox.sourceforge.net/>`_ .  `ncat` and `pv` can be installed on macOS with the following:
+
+.. code-block:: console
+
+    $ brew install nmap pv
 
 Thruput Test
 ============
