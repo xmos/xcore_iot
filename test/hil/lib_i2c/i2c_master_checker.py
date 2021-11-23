@@ -6,7 +6,7 @@ from Pyxsim import SimThread
 from typing import Sequence, Optional, Mapping, Tuple
 from numbers import Number
 
-logging.basicConfig(format="{message}")
+logging.basicConfig(format="%(message)s")
 logger = logging.getLogger()
 # Change this to logging.DEBUG if you wish to see verbose output
 logger.setLevel(logging.WARNING) 
@@ -85,7 +85,7 @@ class I2CMasterChecker(SimThread):
 
     def error(self, message: str) -> None:
         if logger.isEnabledFor(logging.ERROR):
-            logger.error("ERROR: {0} @ {1}", message, self.xsi.get_time())
+            logger.error(f"ERROR: {message} @ {self.xsi.get_time()}")
 
     def read_port(self, port: str, external_value: int) -> int:
         driving = self.xsi.is_port_driving(port)
@@ -126,44 +126,44 @@ class I2CMasterChecker(SimThread):
             # Data change must have been for a previous bit
             return
 
-        if (self._expected_speed == 100 and round(time) > 3450) or (
-            self._expected_speed == 400 and round(time) > 900
+        if (self._expected_speed == 100 and round(time) > 3450000) or (
+            self._expected_speed == 400 and round(time) > 900000
         ):
             self.error(f"Data valid time not respected: {time}ns")
 
     def check_hold_start_time(self, time: Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4000) or (
-            self._expected_speed == 400 and round(time) < 600
+        if (self._expected_speed == 100 and round(time) < 4000000) or (
+            self._expected_speed == 400 and round(time) < 600000
         ):
             self.error(f"Start hold time less than minimum in spec: {time}ns")
 
     def check_setup_start_time(self, time: Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4700) or (
-            self._expected_speed == 400 and round(time) < 600
+        if (self._expected_speed == 100 and round(time) < 4700000) or (
+            self._expected_speed == 400 and round(time) < 600000
         ):
             self.error(f"Start bit setup time less than minimum in spec: {time}ns")
 
     def check_data_setup_time(self, time: Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 250) or (
-            self._expected_speed == 400 and round(time) < 100
+        if (self._expected_speed == 100 and round(time) < 250000) or (
+            self._expected_speed == 400 and round(time) < 100000
         ):
             self.error(f"Data setup time less than minimum in spec: {time}ns")
 
     def check_clock_low_time(self, time: Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4700) or (
-            self._expected_speed == 400 and round(time) < 1300
+        if (self._expected_speed == 100 and round(time) < 4700000) or (
+            self._expected_speed == 400 and round(time) < 1300000
         ):
             self.error(f"Clock low time less than minimum in spec: {time}ns")
 
     def check_clock_high_time(self, time: Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4000) or (
-            self._expected_speed == 400 and round(time) < 900
+        if (self._expected_speed == 100 and round(time) < 4000000) or (
+            self._expected_speed == 400 and round(time) < 900000
         ):
             self.error(f"Clock high time less than minimum in spec: {time}ns")
 
     def check_setup_stop_time(self, time: Number) -> None:
-        if (self._expected_speed == 100 and round(time) < 4000) or (
-            self._expected_speed == 400 and round(time) < 600
+        if (self._expected_speed == 100 and round(time) < 4000000) or (
+            self._expected_speed == 400 and round(time) < 600000
         ):
             self.error(f"Stop bit setup time less than minimum in spec: {time}ns")
 
@@ -171,8 +171,8 @@ class I2CMasterChecker(SimThread):
         """
         Check the time from the STOP to the START condition
         """
-        if (self._expected_speed == 100 and round(time) < 4700) or (
-            self._expected_speed == 400 and round(time) < 1300
+        if (self._expected_speed == 100000 and round(time) < 4700000) or (
+            self._expected_speed == 400 and round(time) < 1300000
         ):
             self.error(f"STOP to START time less than minimum in spec: {time}ns")
 
@@ -327,7 +327,7 @@ class I2CMasterChecker(SimThread):
 
     def byte_done(self) -> None:
         if self._read_data is not None:
-            print(f"Byte received: 0x{self._read_data}")
+            print(f"Byte received: 0x{self._read_data:x}")
             self._drive_ack = 1
         else:
             # Reads are acked by the master
@@ -336,7 +336,7 @@ class I2CMasterChecker(SimThread):
 
         if self._bit_times:
             avg_bit_time = sum(self._bit_times) / len(self._bit_times)
-            speed_in_kbps = pow(10, 6) / avg_bit_time
+            speed_in_kbps = pow(10, 9) / avg_bit_time
             print(f"Speed = {int(speed_in_kbps + .5)} Kbps")
             if self._expected_speed != None and (
                 speed_in_kbps < 0.90 * self._expected_speed
@@ -357,7 +357,7 @@ class I2CMasterChecker(SimThread):
             # Determine whether it is starting a read or write
             mode = self._read_data & 0x1
             print(
-                f"Master {'write' if mode == 0 else 'read'} transaction started, device address=0x{self._read_data >> 1}"
+                f"Master {'write' if mode == 0 else 'read'} transaction started, device address=0x{self._read_data >> 1:x}"
             )
 
             if mode == 0:
