@@ -1,57 +1,70 @@
 # Copyright 2014-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
+import Pyxsim as px
+import pytest
+from typing import Mapping
 from i2c_master_checker import I2CMasterChecker
-import os
 
-def do_test(stop, port_setup):
-    resources = xmostest.request_resource("xsim")
-    speed = 400
+speed_args = {"400kbps": 400,
+              "100kbps": 100,
+              "10kbps": 10}
 
-    binary = 'i2c_master_test/bin/i2c_master_test_rx_tx_%(speed)d_%(stop)s_%(port_setup)d/i2c_master_test_rx_tx_%(speed)d_%(stop)s_%(port_setup)d.xe' % {
-        'speed'      : speed,
-        'stop'       : stop,
-        'port_setup' : port_setup
-    }
+port_setup_args = {"SCL:1b,SDA:1b": 0,
+                   "SCL:8b,SDA:8b,shared": 1,
+                   "SCL:8b,SDA:8b": 2,
+                   "SCL:1b,SDA:8b,overlap": 3,
+                   "SCL:8b,SDA:1b,overlap": 4}
 
-    port_map = [["tile[0]:XS1_PORT_1A", "tile[0]:XS1_PORT_1B"],     # Test 1b port SCL 1b port SDA
-                ["tile[0]:XS1_PORT_8A.1", "tile[0]:XS1_PORT_8A.3"], # Test 8b port shared by SCL and SDA
-                ["tile[0]:XS1_PORT_8A", "tile[0]:XS1_PORT_8B"],     # Test 8b port SCL 8b port SDA
-                ["tile[0]:XS1_PORT_1M", "tile[0]:XS1_PORT_8D.1"],   # Test 1b port SCL with overlapping 8b port SDA
-                ["tile[0]:XS1_PORT_8D.1", "tile[0]:XS1_PORT_1M"]]   # Test 8b port SCL with overlapping 1b port SDA
+stop_args = {"stop": "stop",
+             "no_stop": "no_stop"}
 
-    checker = I2CMasterChecker(port_map[port_setup][0],
-                               port_map[port_setup][1],
-                               tx_data = [0x99, 0x3A, 0xff],
-                               expected_speed=170,
-                               clock_stretch=5000,
-                               ack_sequence=[True, True, False,
-                                             True,
-                                             True,
-                                             True, True, True, False,
-                                             True, False])
+@pytest.mark.parametrize("port_setup", port_setup_args.values(), ids=port_setup_args.keys())
+@pytest.mark.parametrize("stop", stop_args.values(), ids=stop_args.keys())
+@pytest.mark.parametrize("speed", speed_args.values(), ids=speed_args.keys())
+# capfd here is an inbuilt test fixture allowing access to stdout and stderr
+def test_basic_master(build, capfd, nightly, stop, speed, port_setup):
+    # Only do 400kbps unless it's a nightly
+    if (speed == 400) or nightly:
+        id_string = f"{speed}_{stop}_{port_setup}"
+        # It is assumed that this is of the form <arbitrary>/bin/<unique>/.../<executable>.xe,
+        # and that <arbitrary> contains the CMakeLists.txt file for all test executables.
+        binary = f'i2c_master_test/bin/{id_string}/i2c_master_test_rx_tx_{id_string}.xe'
 
-    tester = xmostest.ComparisonTester(open('expected/master_test_%s.expect' % stop),
-                                     'lib_i2c', 'i2c_master_sim_tests',
-                                      'clock_stretch',
-                                      {'speed' : speed, 'stop' : stop, 'port_setup' : port_setup},
-                                     regexp=True)
+        port_map = [["tile[0]:XS1_PORT_1A", "tile[0]:XS1_PORT_1B"],     # Test 1b port SCL 1b port SDA
+                    ["tile[0]:XS1_PORT_8A.1", "tile[0]:XS1_PORT_8A.3"], # Test 8b port shared by SCL and SDA
+                    ["tile[0]:XS1_PORT_8A", "tile[0]:XS1_PORT_8B"],     # Test 8b port SCL 8b port SDA
+                    ["tile[0]:XS1_PORT_1M", "tile[0]:XS1_PORT_8D.1"],   # Test 1b port SCL with overlapping 8b port SDA
+                    ["tile[0]:XS1_PORT_8D.1", "tile[0]:XS1_PORT_1M"]]   # Test 8b port SCL with overlapping 1b port SDA
 
-    vcd_args = '-o ' + binary + 'test.vcd'
-    vcd_args += ( ' -tile tile[0] -ports -ports-detailed -instructions'
-    ' -functions -cycles -clock-blocks -pads' )
+        checker = I2CMasterChecker(port_map[port_setup][0],
+                                port_map[port_setup][1],
+                                tx_data = [0x99, 0x3A, 0xff],
+                                expected_speed = 170,
+                                clock_stretch = 5000000,
+                                ack_sequence=[True, True, False,
+                                                True,
+                                                True,
+                                                True, True, True, False,
+                                                True, False])
 
-    sim_args = ['--weak-external-drive']
-    #sim_args += [ '--vcd-tracing', vcd_args ]
+        tester = px.testers.PytestComparisonTester(f'expected/master_test_{stop}.expect',
+                                                regexp = True,
+                                                ordered = True)
 
-    xmostest.run_on_simulator(resources['xsim'], binary,
-                              simthreads = [checker],
-                              simargs=sim_args,
-                              suppress_multidrive_messages = True,
-                              tester = tester)
+        sim_args = ['--weak-external-drive']
 
-def runtest():
-  for stop in ['stop', 'no_stop']:
-      # for speed in [400, 100, 10]:
-      for port_setup in [0, 1, 2, 3, 4]:
-            do_test(stop, port_setup)
+        # The environment here should be set up with variables defined in the 
+        # CMakeLists.txt file to define the build
+
+        build(directory = binary, 
+                env = {"PORT_SETUPS":port_setup, "SPEEDS":speed, "STOPS":stop},
+                bin_child = id_string)
+
+        px.run_with_pyxsim(binary,
+                        simthreads = [checker],
+                        simargs = sim_args)
+        # The first two lines of this test are not reflected in the expectation file
+        # and vary based on the test; cut them out.
+        outcapture = capfd.readouterr().out.split("\n")[2:]
+
+        tester.run(outcapture)
