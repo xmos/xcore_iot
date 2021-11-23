@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+project(i2c_master_test)
 
 ## Import hil source
 set(USE_I2C_HIL TRUE)
@@ -9,6 +10,9 @@ set(USE_MIC_ARRAY_HIL FALSE)
 set(USE_XUD_HIL FALSE)
 
 include("$ENV{XCORE_SDK_PATH}/modules/hil/hil.cmake")
+
+## Import XMOS configurations
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 set(APP_NAME i2c_master_test)
 
@@ -31,13 +35,26 @@ add_compile_definitions(
     DEBUG_PRINT_ENABLE=1
 )
 
-set(PORT_SETUPS 0 1 2 3 4)
-set(SPEEDS 10 100 400)
-set(STOPS stop no_stop)
+if(NOT DEFINED ENV{PORT_SETUPS})
+    set(PORT_SETUPS 0 1 2 3 4)
+else()
+    set(PORT_SETUPS $ENV{PORT_SETUPS})
+endif()
+if(NOT DEFINED ENV{SPEEDS})
+    set(SPEEDS 10 100 400)
+else()
+    set(SPEEDS $ENV{SPEEDS})
+endif()
+if(NOT DEFINED ENV{STOPS})
+    set(STOPS stop no_stop)
+else()
+    set(STOPS $ENV{STOPS})
+endif()
+
 set(stop_val 1)
 set(no_stop_val 0)
 
-set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin/test")
 
 #**********************
 # Setup targets
