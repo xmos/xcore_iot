@@ -1,0 +1,6 @@
+breathe
+furo
+Sphinx
+sphinx-copybutton
+sphinx-inline-tabs
+sphinx-autobuild
