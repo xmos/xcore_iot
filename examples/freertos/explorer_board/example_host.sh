@@ -3,6 +3,7 @@
 function trace_help() {
     echo "Options:"
     echo "--ncaplay / -n IP RATE: Connect to a stream over TCP and pipe into aplay"
+    echo "--ncsox / -ns IP RATE: Connect to a stream over TCP and pipe into sox"
     echo "--playto / -p IP FILENAME : Send raw signed int 32, 16kHz audio"
     echo "--udpcli  / -u IP : Connect to CLI"
     echo "--thruput / -t IP : Run the throughput test"
@@ -41,6 +42,9 @@ then
     if [ "$1" == "--ncaplay" ] || [ "$1" == "-n" ]
     then
         ncat --recv-only $2 54321 | aplay  --format=S32_LE --rate=$3 --file-type=raw --buffer-size=14000
+    elif [ "$1" == "--ncsox" ] || [ "$1" == "-ns" ]
+    then
+        ncat --recv-only $2 54321 | play --endian little --bits 32 --encoding signed-integer --rate=$3 --type raw -
     elif [ "$1" == "--playto" ] || [ "$1" == "-p" ]
     then
         cat $3 | ncat $2 12345

@@ -9,12 +9,12 @@ This is the user guide for the `XCore Software Development Kit <https://github.c
 .. toctree::
    :maxdepth: 2
 
-   documents/quick_start/index
-   documents/tutorials/index
-   documents/reference/index
-   documents/ai_tools/index
-   documents/contributing
-   documents/copyright
+   doc/quick_start/index
+   doc/tutorials/index
+   doc/reference/index
+   doc/ai_tools/index
+   doc/contributing
+   doc/copyright
 
 .. only:: html
 

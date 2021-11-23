@@ -46,15 +46,15 @@ Run cmake:
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ cmake -B build -DBOARD=XCORE-AI-EXPLORER
-		
-.. tab:: Windows
+        $ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+        
+.. tab:: Windows XTC Tools CMD prompt
 
-	.. code-block:: XTC Tools CMD prompt
+    .. code-block:: console
 
-		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
 
 Using external DDR memory
 =========================
@@ -74,44 +74,22 @@ This demo can be run with only GPIO or GPIO and host output.
 
 Running with GPIO only:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ xrun --xscope ../bin/person_detection.xe
-		
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> xrun --xscope bin\person_detection.xe
-
+    $ xrun --xscope ../bin/person_detection.xe
+        
 Running with GPIO and host:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
+    $ xrun --xscope --xscope-port localhost:10234 ../bin/person_detect.xe
 
-		$ xrun --xscope --xscope-port localhost:10234 ../bin/person_detect.xe
+In a second terminal:
 
-	In a second terminal:
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ python image_viewer.py
-		
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> xrun --xscope --xscope-port localhost:10234 bin\person_detect.xe
-		
-	In a second XTools CMD prompt
-	
-	.. code-block:: XTC Tools CMD prompt
-	
-		> python3 image_viewer.py
-
+    $ python image_viewer.py
+        
 Once the host script connects to the xscope server the image and associated output tensor values will be displayed.
 
 .. image:: images/person.png
@@ -127,58 +105,31 @@ Optimizing the model
 
 Unoptimized and optimized models are included with the example.
 
-.. tab:: Linux and Mac
 
-	First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
+First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
-	.. code-block:: console
+.. code-block:: console
 
-		$ xformer.py --analyze -par 5 model/person_detect_quant.tflite model/person_detect_xcore.tflite
+    $ xformer.py --analyze -par 5 model/person_detect_quant.tflite model/person_detect_xcore.tflite
 
-	Generating the model runner
-	===========================
+Generating the model runner
+===========================
 
-	The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
+The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
 
-	.. code-block:: console
+.. code-block:: console
 
-		$ generate_model_runner.py --input model/person_detect_xcore.tflite --output app/model_runner --name person_detect
+    $ generate_model_runner.py --input model/person_detect_xcore.tflite --output app/model_runner --name person_detect
 
-	Converting flatbuffer to source file
-	====================================
+Converting flatbuffer to source file
+====================================
 
-	If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
+If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
 
-	.. code-block:: console
+.. code-block:: console
 
-		$ convert_tflite_to_c_source.py --input model/person_detect_xcore.tflite --header app/model_runner/person_detect_model.h --source app/model_runner/person_detect_model.c --variable-name person_detect
-		
-.. tab:: Windows
-
-	First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> python3 xformer.py --analyze -par 5 model\person_detect_quant.tflite model\person_detect_xcore.tflite
-
-	Generating the model runner
-	===========================
-
-	The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
-
-	.. code-block::  XTC Tools CMD prompt
-
-		> python3 generate_model_runner.py --input model\person_detect_xcore.tflite --output app\model_runner --name person_detect
-
-	Converting flatbuffer to source file
-	====================================
-
-	If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
-
-	.. code-block::  XTC Tools CMD prompt
-
-		> python3 convert_tflite_to_c_source.py --input model\person_detect_xcore.tflite --header app\model_runner\person_detect_model.h --source app\model_runner\person_detect_model.c --variable-name person_detect
-
+    $ convert_tflite_to_c_source.py --input model/person_detect_xcore.tflite --header app/model_runner/person_detect_model.h --source app/model_runner/person_detect_model.c --variable-name person_detect
+        
 ******************
 Training the model
 ******************
