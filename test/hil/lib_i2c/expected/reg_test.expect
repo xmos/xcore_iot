@@ -87,7 +87,7 @@ Sending ack
 Byte received: 0x21
 Speed = \d+ Kbps
 Sending ack
-Repeated tart bit received
+Repeated start bit received
 Byte received: 0x8b
 Speed = \d+ Kbps
 Master read transaction started, device address=0x45

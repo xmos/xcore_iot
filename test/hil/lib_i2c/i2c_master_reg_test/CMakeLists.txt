@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+project(i2c_master_reg_test)
 
 ## Import hil source
 set(USE_I2C_HIL TRUE)
@@ -9,6 +10,9 @@ set(USE_MIC_ARRAY_HIL FALSE)
 set(USE_XUD_HIL FALSE)
 
 include("$ENV{XCORE_SDK_PATH}/modules/hil/hil.cmake")
+
+## Import XMOS configurations
+include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 set(APP_NAME i2c_master_reg_test)
 
