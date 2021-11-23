@@ -21,7 +21,7 @@ class I2CSlaveChecker(SimThread):
         self._sda_port = sda_port
         self._tsequence = tsequence
         self._speed = speed
-        self._bit_time = 1000000 / speed
+        self._bit_time = 1000000000 / speed
         print(f"Checking I2C: SCL={self._scl_port}, SDA={self._sda_port}")
 
     def get_port_val(self, xsi: pyxsim.Xsi, port: str) -> int:
@@ -70,7 +70,7 @@ class I2CSlaveChecker(SimThread):
         return data
 
     def write(self, xsi: pyxsim.Xsi, byte: int) -> None:
-        print(f"Sending data 0x{byte}")
+        print(f"Sending data 0x{byte:x}")
         for _ in range(8):
             self.wait_until(self._fall_time + self._bit_time / 8)
             bit = (byte >> 7) & 1
@@ -98,7 +98,7 @@ class I2CSlaveChecker(SimThread):
         for _ in range(8):
             bit = self.high_pulse_sample(xsi)
             byte = (byte << 1) | bit
-        print(f"Received byte 0x{byte}")
+        print(f"Received byte 0x{byte:x}")
         self.wait_until(self._fall_time + self._bit_time / 8)
         if ack == 0:
             print("Master sending ACK")
@@ -111,18 +111,18 @@ class I2CSlaveChecker(SimThread):
         xsi = self.xsi
         xsi.drive_port_pins(self._scl_port, 1)
         xsi.drive_port_pins(self._sda_port, 1)
-        self.wait_until(xsi.get_time() + 30000)
+        self.wait_until(xsi.get_time() + 30000000)
         for (typ, addr, d) in self._tsequence:
             if typ == "w":
                 self.start_bit(xsi)
-                print(f"Starting write transaction to device id 0x{addr}")
+                print(f"Starting write transaction to device id 0x{addr:x}")
                 self.write(xsi, (addr << 1) | 0)
                 for x in d:
                     self.write(xsi, x)
                 self.stop_bit(xsi)
             elif typ == "r":
                 self.start_bit(xsi)
-                print(f"Starting read transaction to device id 0x{addr}")
+                print(f"Starting read transaction to device id 0x{addr:x}")
                 self.write(xsi, (addr << 1) | 1)
                 for x in range(d - 1):
                     self.read(xsi, 0)
