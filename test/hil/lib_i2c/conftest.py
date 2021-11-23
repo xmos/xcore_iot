@@ -7,7 +7,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def build():
-    def _builder(directory: str, env: Mapping, bin_child: str =""):
+    def _builder(directory: str, env: Mapping = None, bin_child: str = ""):
         if bin_child and not bin_child.endswith("/"):
             bin_child += "/"
         px.cmake_build(directory, bin_child, env)
