@@ -54,79 +54,59 @@ endif()
 set(stop_val 1)
 set(no_stop_val 0)
 
-set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin/test")
+set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 #**********************
 # Setup targets
 #**********************
 
-foreach(port_setup ${PORT_SETUPS})
-    foreach(speed ${SPEEDS})
-        foreach(stop ${STOPS})
-            set(TARGET_NAME_NO_EXT "${APP_NAME}_rx_tx_${speed}_${stop}_${port_setup}")
-            set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
+if(NOT DEFINED ENV{ACK_TEST})
+    foreach(port_setup ${PORT_SETUPS})
+        foreach(speed ${SPEEDS})
+            foreach(stop ${STOPS})
+                set(TARGET_NAME_NO_EXT "${APP_NAME}_rx_tx_${speed}_${stop}_${port_setup}")
+                set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
 
-            add_executable(${TARGET_NAME})
+                add_executable(${TARGET_NAME})
 
-            target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${I2C_HIL_SOURCES})
-            target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${I2C_HIL_INCLUDES})
+                target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${I2C_HIL_SOURCES})
+                target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${I2C_HIL_INCLUDES})
 
-            target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-            target_compile_definitions(${TARGET_NAME}
-                                       PRIVATE
-                                           SPEED=${speed}
-                                           STOP=${${stop}_val}
-                                           PORT_SETUP=${port_setup}
-                                           ENABLE_TX=1
-                                           ENABLE_RX=1
-                                        )
+                target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+                target_compile_definitions(${TARGET_NAME}
+                                        PRIVATE
+                                            SPEED=${speed}
+                                            STOP=${${stop}_val}
+                                            PORT_SETUP=${port_setup}
+                                            ENABLE_TX=1
+                                            ENABLE_RX=1
+                                            )
 
-            target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-            install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
+                target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+                install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
+            endforeach()
         endforeach()
     endforeach()
-endforeach()
+else()
+    foreach(stop ${STOPS})
+        set(TARGET_NAME_NO_EXT "${APP_NAME}_tx_only_${stop}")
+        set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
+        add_executable(${TARGET_NAME})
 
-#**********************
+        target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${I2C_HIL_SOURCES})
+        target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${I2C_HIL_INCLUDES})
 
-set(TARGET_NAME_NO_EXT "${APP_NAME}_tx_only_stop")
-set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
-add_executable(${TARGET_NAME})
+        target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+        target_compile_definitions(${TARGET_NAME}
+                                PRIVATE
+                                    SPEED=400
+                                    STOP=${${stop}_val}
+                                    PORT_SETUP=0
+                                    ENABLE_TX=1
+                                    ENABLE_RX=0
+                                    )
 
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${I2C_HIL_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${I2C_HIL_INCLUDES})
-
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_compile_definitions(${TARGET_NAME}
-                           PRIVATE
-                               SPEED=400
-                               STOP=1
-                               PORT_SETUP=0
-                               ENABLE_TX=1
-                               ENABLE_RX=0
-                            )
-
-target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
-
-#**********************
-
-set(TARGET_NAME_NO_EXT "${APP_NAME}_tx_only_no_stop")
-set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
-add_executable(${TARGET_NAME})
-
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${I2C_HIL_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${I2C_HIL_INCLUDES})
-
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_compile_definitions(${TARGET_NAME}
-                           PRIVATE
-                               SPEED=400
-                               STOP=0
-                               PORT_SETUP=0
-                               ENABLE_TX=1
-                               ENABLE_RX=0
-                            )
-
-target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
+        target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+        install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
+    endforeach()
+endif()
