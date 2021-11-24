@@ -39,8 +39,4 @@ def test_master_acks(build, capfd, stop):
                     simthreads = [checker],
                     simargs = sim_args)
 
-    # The first two lines of this test are not reflected in the expectation file
-    # and vary based on the test; cut them out.
-    outcapture = capfd.readouterr().out.split("\n")[2:]
-
-    tester.run(outcapture)
+    tester.run(capfd.readouterr().out)
