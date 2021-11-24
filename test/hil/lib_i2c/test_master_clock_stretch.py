@@ -1,8 +1,8 @@
 # Copyright 2014-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
+
 import Pyxsim as px
 import pytest
-from typing import Mapping
 from i2c_master_checker import I2CMasterChecker
 
 speed_args = {"400kbps": 400}
@@ -20,7 +20,7 @@ stop_args = {"stop": "stop",
 @pytest.mark.parametrize("stop", stop_args.values(), ids=stop_args.keys())
 @pytest.mark.parametrize("speed", speed_args.values(), ids=speed_args.keys())
 # capfd here is an inbuilt test fixture allowing access to stdout and stderr
-def test_master_clock_stretch(build, capfd, nightly, stop, speed, port_setup):
+def test_master_clock_stretch(build, capfd, stop, speed, port_setup):
     id_string = f"{speed}_{stop}_{port_setup}"
     # It is assumed that this is of the form <arbitrary>/bin/<unique>/.../<executable>.xe,
     # and that <arbitrary> contains the CMakeLists.txt file for all test executables.

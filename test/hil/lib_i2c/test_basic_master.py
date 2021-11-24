@@ -2,7 +2,6 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 import Pyxsim as px
 import pytest
-from typing import Mapping
 from i2c_master_checker import I2CMasterChecker
 
 speed_args = {"400kbps": 400,
