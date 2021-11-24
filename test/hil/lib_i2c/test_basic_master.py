@@ -22,47 +22,48 @@ stop_args = {"stop": "stop",
 @pytest.mark.parametrize("speed", speed_args.values(), ids=speed_args.keys())
 # capfd here is an inbuilt test fixture allowing access to stdout and stderr
 def test_basic_master(build, capfd, nightly, stop, speed, port_setup):
-    # Only do 10kbps in a nightly
-    if (speed != 10) or nightly:
-        id_string = f"{speed}_{stop}_{port_setup}"
-        # It is assumed that this is of the form <arbitrary>/bin/<unique>/.../<executable>.xe,
-        # and that <arbitrary> contains the CMakeLists.txt file for all test executables.
-        binary = f'i2c_master_test/bin/{id_string}/i2c_master_test_rx_tx_{id_string}.xe'
+    if (speed == 10) and not nightly:
+        pytest.skip("10kbps only tested with --nightly option")
 
-        port_map = [["tile[0]:XS1_PORT_1A", "tile[0]:XS1_PORT_1B"],     # Test 1b port SCL 1b port SDA
-                    ["tile[0]:XS1_PORT_8A.1", "tile[0]:XS1_PORT_8A.3"], # Test 8b port shared by SCL and SDA
-                    ["tile[0]:XS1_PORT_8A", "tile[0]:XS1_PORT_8B"],     # Test 8b port SCL 8b port SDA
-                    ["tile[0]:XS1_PORT_1M", "tile[0]:XS1_PORT_8D.1"],   # Test 1b port SCL with overlapping 8b port SDA
-                    ["tile[0]:XS1_PORT_8D.1", "tile[0]:XS1_PORT_1M"]]   # Test 8b port SCL with overlapping 1b port SDA
+    id_string = f"{speed}_{stop}_{port_setup}"
+    # It is assumed that this is of the form <arbitrary>/bin/<unique>/.../<executable>.xe,
+    # and that <arbitrary> contains the CMakeLists.txt file for all test executables.
+    binary = f'i2c_master_test/bin/{id_string}/i2c_master_test_rx_tx_{id_string}.xe'
 
-        checker = I2CMasterChecker(port_map[port_setup][0],
-                                port_map[port_setup][1],
-                                tx_data = [0x99, 0x3A, 0xff],
-                                expected_speed = speed,
-                                ack_sequence=[True, True, False,
-                                                True,
-                                                True,
-                                                True, True, True, False,
-                                                True, False])
+    port_map = [["tile[0]:XS1_PORT_1A", "tile[0]:XS1_PORT_1B"],     # Test 1b port SCL 1b port SDA
+                ["tile[0]:XS1_PORT_8A.1", "tile[0]:XS1_PORT_8A.3"], # Test 8b port shared by SCL and SDA
+                ["tile[0]:XS1_PORT_8A", "tile[0]:XS1_PORT_8B"],     # Test 8b port SCL 8b port SDA
+                ["tile[0]:XS1_PORT_1M", "tile[0]:XS1_PORT_8D.1"],   # Test 1b port SCL with overlapping 8b port SDA
+                ["tile[0]:XS1_PORT_8D.1", "tile[0]:XS1_PORT_1M"]]   # Test 8b port SCL with overlapping 1b port SDA
 
-        tester = px.testers.PytestComparisonTester(f'expected/master_test_{stop}.expect',
-                                                regexp = True,
-                                                ordered = True)
+    checker = I2CMasterChecker(port_map[port_setup][0],
+                            port_map[port_setup][1],
+                            tx_data = [0x99, 0x3A, 0xff],
+                            expected_speed = speed,
+                            ack_sequence=[True, True, False,
+                                            True,
+                                            True,
+                                            True, True, True, False,
+                                            True, False])
 
-        sim_args = ['--weak-external-drive']
+    tester = px.testers.PytestComparisonTester(f'expected/master_test_{stop}.expect',
+                                            regexp = True,
+                                            ordered = True)
 
-        # The environment here should be set up with variables defined in the 
-        # CMakeLists.txt file to define the build
+    sim_args = ['--weak-external-drive']
 
-        build(directory = binary, 
-                env = {"PORT_SETUPS":port_setup, "SPEEDS":speed, "STOPS":stop},
-                bin_child = id_string)
+    # The environment here should be set up with variables defined in the 
+    # CMakeLists.txt file to define the build
 
-        px.run_with_pyxsim(binary,
-                        simthreads = [checker],
-                        simargs = sim_args)
-        # The first two lines of this test are not reflected in the expectation file
-        # and vary based on the test; cut them out.
-        outcapture = capfd.readouterr().out.split("\n")[2:]
+    build(directory = binary, 
+            env = {"PORT_SETUPS":port_setup, "SPEEDS":speed, "STOPS":stop},
+            bin_child = id_string)
 
-        tester.run(outcapture)
+    px.run_with_pyxsim(binary,
+                    simthreads = [checker],
+                    simargs = sim_args)
+    # The first two lines of this test are not reflected in the expectation file
+    # and vary based on the test; cut them out.
+    outcapture = capfd.readouterr().out.split("\n")[2:]
+
+    tester.run(outcapture)
