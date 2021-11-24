@@ -36,13 +36,3 @@ def test_reg_ops(build, capfd):
     outcapture = capfd.readouterr().out.split("\n")[2:]
 
     tester.run(outcapture)
-
-ack_sequence=[False, # NACK header
-                                             True, True, False, # NACK before data
-                                             True, False, # NACK before data
-                                             True, False, # NACK before data
-                                             False, # NACK address
-                                             True, False, # NACK before data
-                                             True, False, # NACK before data
-                                             True, True, False # NACK before data
-                                            ]
