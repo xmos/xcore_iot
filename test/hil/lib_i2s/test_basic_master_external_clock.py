@@ -1,18 +1,21 @@
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
-from i2s_master_checker import I2SMasterChecker
-from i2s_master_checker import Clock
-import os
+from i2s_master_checker import I2SMasterChecker, Clock
+import Pyxsim as px
+import pytest
 
-def do_master_test(num_in, num_out, testlevel):
+num_in_out_args = {"4ch_in,4ch_out": (4, 4),
+                   "1ch_in,1ch_out": (1, 1),
+                   "4ch_in,0ch_out": (4, 0),
+                   "0ch_in,4ch_out": (0, 4)}
 
-    resources = xmostest.request_resource("xsim")
-
-    binary = 'i2s_master_external_clock_test/bin/i2s_master_external_clock_test_{tl}_{i}{o}/i2s_master_external_clock_test_{tl}_{i}{o}.xe'.format(i=num_in, o=num_out,tl=testlevel)
+@pytest.mark.parametrize(("num_in", "num_out"), num_in_out_args.values(), ids=num_in_out_args.keys())
+def test_basic_master_external_clock(build, capfd, nightly, num_in, num_out):
+    test_level = "nightly" if nightly else "smoke"
+    id_string = f"{test_level}_{num_in}_{num_out}"
+    binary = f'i2s_master_external_clock_test/bin/{id_string}/i2s_master_external_clock_test_{id_string}.xe'
 
     clk = Clock("tile[0]:XS1_PORT_1A")
-
 
     checker = I2SMasterChecker(
         "tile[0]:XS1_PORT_1B",
@@ -25,22 +28,16 @@ def do_master_test(num_in, num_out, testlevel):
          clk,
          False) # Don't check the bclk stops precisely as the hardware can't do that
 
-    tester = xmostest.ComparisonTester(open('expected/master_test.expect'),
-                                       'lib_i2s', 'i2s_master_sim_tests',
-                                       'external_clk_%s'%testlevel, {'num_in':num_in, 'num_out':num_out},ignore=["CONFIG:.*"])
+    tester = px.testers.PytestComparisonTester('expected/master_test.expect',
+                                            regexp = True,
+                                            ordered = True,
+                                            ignore = ["CONFIG:.*?"])
+                                            
+    build(directory = binary, 
+            env = {"NUMS_IN_OUT":f'{num_in};{num_out}', "TEST_LEVEL":f'{test_level}'},
+            bin_child = id_string)
 
-    tester.set_min_testlevel(testlevel)
+    px.run_with_pyxsim(binary,
+                        simthreads = [clk, checker])
 
-    xmostest.run_on_simulator(resources['xsim'], binary,
-                              simthreads = [clk, checker],
-                              simargs=[],
-                              # simargs=['--trace-to', 'sim.log', '--vcd-tracing', '-o ./i2s_master_test/trace.vcd -tile tile[0] -ports-detailed -functions'],
-                              suppress_multidrive_messages = True,
-                              tester = tester)
-
-def runtest():
-   do_master_test(4, 4, "smoke")
-   do_master_test(1, 1, "smoke")
-   do_master_test(4, 0, "smoke")
-   do_master_test(0, 4, "smoke")
-   do_master_test(4, 4, "nightly")
+    tester.run(capfd.readouterr().out)

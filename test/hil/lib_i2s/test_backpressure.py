@@ -1,38 +1,41 @@
 # Copyright 2016-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
-from i2s_master_checker import I2SMasterChecker
-from i2s_master_checker import Clock
-import os
+import pytest
+import Pyxsim as px
+import subprocess
 
-def do_test(sample_rate, num_channels, receive_increment, send_increment, testlevel):
+sample_rate_args = {"768kbps": 768000,
+                    "384kbps": 384000,
+                    "192kbps": 192000}
 
-    resources = xmostest.request_resource("xsim")
+num_channels_args = {"1ch": 1,
+                     "2ch": 2,
+                     "3ch": 3,
+                     "4ch": 4}
 
-    binary = 'backpressure_test/bin/backpressure_test_{sr}_{nc}_{ri}_{si}/backpressure_test_{sr}_{nc}_{ri}_{si}.xe'.format(
-      sr=sample_rate, nc=num_channels, ri=receive_increment, si=send_increment)
+rx_tx_inc_args = {"rx_delay_inc_50ns,tx_delay_inc_50ns": (5, 5),
+                  "rx_delay_inc_0ns,tx_delay_inc_100ns": (0, 10),
+                  "rx_delay_inc_100ns,tx_delay_inc_0ns": (10, 0)}
 
-    tester = xmostest.ComparisonTester(
-      open('expected/backpressure_test.expect'),
-       'lib_i2s', 'i2s_backpressure_tests', 'backpressure_%s'%testlevel,
-       {'sample_rate':sample_rate,
-        'num_channels':num_channels,
-        'receive_increment':receive_increment,
-        'send_increment':send_increment})
+@pytest.mark.parametrize("sample_rate", sample_rate_args.values(), ids=sample_rate_args.keys())
+@pytest.mark.parametrize("num_channels", num_channels_args.values(), ids=num_channels_args.keys())
+@pytest.mark.parametrize(("receive_increment", "send_increment"), rx_tx_inc_args.values(), ids=rx_tx_inc_args.keys())
+def test_backpressure(build, nightly, capfd, sample_rate, num_channels, receive_increment, send_increment):
+    if (num_channels != 4) and not nightly:
+        pytest.skip("Only run 4 channel tests unless it is a nightly")
 
-    tester.set_min_testlevel(testlevel)
+    id_string = f"{sample_rate}_{num_channels}_{receive_increment}_{send_increment}"
 
-    xmostest.run_on_simulator(resources['xsim'], binary,
-                              simargs=['--xscope', '-offline xscope.xmt'],
-                              # simargs=['--xscope', '-offline xscope.xmt', '--trace-to', 'sim.log', '--vcd-tracing', '-o ./backpressure_test/trace.vcd -tile tile[0] -ports-detailed -functions'],
-                              loopback=[{'from': 'tile[0]:XS1_PORT_1G',
-                                         'to': 'tile[0]:XS1_PORT_1A'}],
-                              suppress_multidrive_messages=True,
-                              tester=tester)
+    binary = f'backpressure_test/bin/{id_string}/backpressure_test_{id_string}.xe'
 
-def runtest():
-  for sample_rate in [768000, 384000, 192000]:
-    for num_channels in [1, 2, 3, 4]:
-      do_test(sample_rate, num_channels, 5,  5, "smoke" if (num_channels == 4) else "nightly")
-      do_test(sample_rate, num_channels, 0, 10, "smoke" if (num_channels == 4) else "nightly")
-      do_test(sample_rate, num_channels, 10, 0, "smoke" if (num_channels == 4) else "nightly")
+    tester = px.testers.PytestComparisonTester('expected/backpressure_test.expect',
+                                            regexp = True,
+                                            ordered = True)
+
+    build(directory = binary, 
+            env = {"SAMPLE_RATES":sample_rate, "CHANS":num_channels, "RX_TX_INCS":f"{receive_increment};{send_increment}"},
+            bin_child = id_string)
+
+    subprocess.run(("xsim", binary, "--plugin", "LoopbackPort.dll", "-port tile[0] XS1_PORT_1G 1 0 -port tile[0] XS1_PORT_1A 1 0"))
+                    
+    tester.run(capfd.readouterr().out)

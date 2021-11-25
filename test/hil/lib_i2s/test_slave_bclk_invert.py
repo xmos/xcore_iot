@@ -1,15 +1,17 @@
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
 from i2s_slave_checker import I2SSlaveChecker
-from i2s_slave_checker import Clock
-import os
+from i2s_master_checker import Clock
+import pytest
+import Pyxsim as px
 
-def do_slave_test(num_in, num_out, testlevel):
+num_in_out_args = {"2ch_in,2ch_out": (2, 2)}
 
-    resources = xmostest.request_resource("xsim")
-
-    binary = 'i2s_slave_test/bin/i2s_slave_test_{tl}_{i}{o}_inv/i2s_slave_test_{tl}_{i}{o}_inv.xe'.format(i=num_in, o=num_out, tl=testlevel)
+@pytest.mark.parametrize(("num_in", "num_out"), num_in_out_args.values(), ids=num_in_out_args.keys())
+def test_slave_bclk_invert(build, capfd, nightly, num_in, num_out):
+    test_level = "nightly" if nightly else "smoke"
+    id_string = f"{test_level}_{num_in}_{num_out}"
+    binary = f'i2s_slave_test/bin/{id_string}_inv/i2s_slave_test_{id_string}_inv.xe'
 
     clk = Clock("tile[0]:XS1_PORT_1A")
 
@@ -24,21 +26,16 @@ def do_slave_test(num_in, num_out, testlevel):
          clk,
          invert_bclk = True)
 
-    tester = xmostest.ComparisonTester(open('expected/bclk_invert.expect'),
-                                     'lib_i2s', 'i2s_slave_sim_tests',
-                                     'slave_bclk_invert_%s'%testlevel,
-                                     {'num_in':num_in, 'num_out':num_out},
-                                       regexp=True,
-                                       ignore=["CONFIG:.*"])
+    tester = px.testers.PytestComparisonTester('expected/bclk_invert.expect',
+                                            regexp = True,
+                                            ordered = True,
+                                            ignore = ["CONFIG:.*?"])
+                                            
+    build(directory = binary, 
+            env = {"NUMS_IN_OUT":f'{num_in};{num_out}', "TEST_LEVEL":f'{test_level}', "INVERT":"1"},
+            bin_child = f"{id_string}_inv")
 
-    tester.set_min_testlevel(testlevel)
+    px.run_with_pyxsim(binary,
+                        simthreads = [clk, checker])
 
-    xmostest.run_on_simulator(resources['xsim'], binary,
-                              simthreads = [clk, checker],
-                              #simargs=['--vcd-tracing', '-o ./i2s_slave_test/trace.vcd -tile tile[0] -ports-detailed'],
-                              suppress_multidrive_messages = True,
-                              tester = tester)
-
-def runtest():
-    do_slave_test(2, 2, "smoke")
-    do_slave_test(2, 2, "nightly")
+    tester.run(capfd.readouterr().out)

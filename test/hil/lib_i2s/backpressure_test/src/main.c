@@ -48,7 +48,7 @@ port_t p_din [4] = {XS1_PORT_1I, XS1_PORT_1J, XS1_PORT_1K, XS1_PORT_1L};
 xclock_t mclk = XS1_CLKBLK_1;
 xclock_t bclk = XS1_CLKBLK_2;
 
-static volatile int receive_delay = 0;
+static volatile int receive_delay = 5000;
 static volatile int send_delay = 0;
 
 void i2s_init(void *app_data, i2s_config_t *i2s_config)
