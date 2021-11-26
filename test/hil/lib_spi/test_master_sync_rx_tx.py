@@ -1,15 +1,46 @@
 #!/usr/bin/env python
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
 from spi_master_checker import SPIMasterChecker
-import os
+import Pyxsim as px
+import pytest
 
-def do_rx_tx_sync(full_load, miso_enabled, mosi_enable, div, mode):
-    resources = xmostest.request_resource("xsim")
+mode_args = {"mode_0": 0,
+             "mode_1": 1,
+             "mode_2": 2,
+             "mode_3": 3}
 
-    binary = "spi_master_sync_rx_tx/bin/spi_master_sync_rx_tx_{load}_{miso}_{mosi}_{div}_{mode}/spi_master_sync_rx_tx_{load}_{miso}_{mosi}_{div}_{mode}.xe".format(load=full_load,miso=miso_enabled,mosi=mosi_enable,div=div,mode=mode)
+div_args = {"divider_4x": 4,
+            "divider_8x": 8,
+            "divider_80x": 80}
 
+mosi_enabled_args = {"mosi_disabled": 0,
+                    "mosi_enabled": 1}
+
+miso_enabled_args = {"miso_disabled": 0,
+                    "miso_enabled": 1}
+
+full_load_args = {"not_fully_loaded": 0,
+                  "fully_loaded": 1}
+
+# If neither miso or mosi are enabled, deselect the test
+def uncollect_if(mode, div, mosi_enabled, miso_enabled, full_load):
+    if not (mosi_enabled or miso_enabled):
+        return True
+
+@pytest.mark.uncollect_if(func=uncollect_if)
+@pytest.mark.parametrize("mode", mode_args.values(), ids=mode_args.keys())
+@pytest.mark.parametrize("div", div_args.values(), ids=div_args.keys())
+@pytest.mark.parametrize("mosi_enabled", mosi_enabled_args.values(), ids=mosi_enabled_args.keys())
+@pytest.mark.parametrize("miso_enabled", miso_enabled_args.values(), ids=miso_enabled_args.keys())
+@pytest.mark.parametrize("full_load", full_load_args.values(), ids=full_load_args.keys())
+def test_master_sync_rx_tx(build, capfd, nightly, full_load, miso_enabled, mosi_enabled, div, mode):
+    if not nightly and not full_load:
+        pytest.skip("Only test non-full_load nightly")
+
+    id_string = f"{full_load}_{miso_enabled}_{mosi_enabled}_{div}_{mode}"
+
+    binary = f"spi_master_sync_rx_tx/bin/{id_string}/spi_master_sync_rx_tx_{id_string}.xe"
 
     checker = SPIMasterChecker("tile[0]:XS1_PORT_1C",
                                "tile[0]:XS1_PORT_1D",
@@ -18,27 +49,19 @@ def do_rx_tx_sync(full_load, miso_enabled, mosi_enable, div, mode):
                                "tile[0]:XS1_PORT_1E",
                                "tile[0]:XS1_PORT_16B")
 
-    tester = xmostest.ComparisonTester(open('expected/master_sync.expect'),
-                                     'lib_spi',
-                                     'spi_master_sim_tests',
-                                     'spi_master_sync_rx_tx_{load}_{miso}_{mosi}_{div}_{mode}'.format(load=full_load,miso=miso_enabled,mosi=mosi_enable,div=div,mode=mode),
-                                     regexp=True)
+    tester = px.testers.PytestComparisonTester('expected/master_sync.expect',
+                                            regexp = True,
+                                            ordered = True)
+                                            
+    build(directory = binary, 
+            env = {"FULL_LOAD":f'{full_load}', 
+                   "MISO_ENABLED":f'{miso_enabled}',
+                   "MOSI_ENABLED":f'{mosi_enabled}',
+                   "SPI_MODE":f'{mode}',
+                   "DIVS":f'{div}'},
+            bin_child = id_string)
 
-    if full_load == 0:
-        tester.set_min_testlevel('nightly')
+    px.run_with_pyxsim(binary,
+                       simthreads = [checker])
 
-    xmostest.run_on_simulator(resources['xsim'], binary,
-                              simthreads = [checker],
-                              simargs=[],
-                              # simargs=['--vcd-tracing', '-o ./spi_master_sync_rx_tx/trace{load}_{miso}_{mosi}_{div}_{mode}.vcd -tile tile[0] -pads -functions -clock-blocks -ports-detailed -instructions'.format(load=full_load,miso=miso_enabled,mosi=mosi_enable,div=div,mode=mode)],
-                              suppress_multidrive_messages = False,
-                              tester = tester)
-
-def runtest():
-    for full_load in [0, 1]:
-        for miso_enabled in [0, 1]:
-            for mosi_enabled in [0, 1]:
-                for div in [4, 8, 80]:
-                    for mode in [0, 1, 2, 3]:
-                        if not ((miso_enabled == 0) and (mosi_enabled == 0)):
-                            do_rx_tx_sync(full_load, miso_enabled, mosi_enabled, div, mode)
+    tester.run(capfd.readouterr().out)

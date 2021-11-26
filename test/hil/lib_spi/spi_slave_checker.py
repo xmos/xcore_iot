@@ -1,13 +1,20 @@
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
+import Pyxsim as px
 
-class SPISlaveChecker(xmostest.SimThread):
+class SPISlaveChecker(px.SimThread):
     """"
     This simulator thread will act as SPI slave and check any transactions
     caused by the master.
     """
-    def __init__(self, sck_port, mosi_port, miso_port, ss_port, setup_strobe_port, setup_data_port, setup_resp_port):
+    def __init__(self, 
+                 sck_port: str, 
+                 mosi_port: str, 
+                 miso_port: str, 
+                 ss_port: str, 
+                 setup_strobe_port: str, 
+                 setup_data_port: str, 
+                 setup_resp_port: str) -> None:
         self._miso_port = miso_port
         self._mosi_port = mosi_port
         self._sck_port = sck_port
@@ -16,19 +23,19 @@ class SPISlaveChecker(xmostest.SimThread):
         self._setup_data_port = setup_data_port
         self._setup_resp_port = setup_resp_port
 
-    def get_setup_data(self, xsi, setup_strobe_port, setup_data_port):
+    def get_setup_data(self, 
+                       xsi: px.pyxsim.Xsi, 
+                       setup_strobe_port: str, 
+                       setup_data_port: str) -> int:
         self.wait_for_port_pins_change([setup_strobe_port])
         self.wait_for_port_pins_change([setup_strobe_port])
         return xsi.sample_port_pins(setup_data_port)
 
     def run(self):
-        xsi = self.xsi
-
-        sck_value = xsi.sample_port_pins(self._sck_port)
-        ss_value = xsi.sample_port_pins(self._ss_port)
+        xsi: px.pyxsim.Xsi = self.xsi
         xsi.drive_port_pins(self._ss_port,1)
 
-        print "SPI Slave checker started"
+        print("SPI Slave checker started")
         while True:
             #first do the setup rx
             strobe_val = xsi.sample_port_pins(self._setup_strobe_port)
@@ -42,13 +49,13 @@ class SPISlaveChecker(xmostest.SimThread):
             expected_miso_enabled = self.get_setup_data(xsi, self._setup_strobe_port, self._setup_data_port)
             expected_num_bits = self.get_setup_data(xsi, self._setup_strobe_port, self._setup_data_port)
             kbps = self.get_setup_data(xsi, self._setup_strobe_port, self._setup_data_port)
-            initial_clock_delay = self.get_setup_data(xsi, self._setup_strobe_port, self._setup_data_port)
-            print "Got Settings:cpol %d cpha %d miso %d num_bits %d kbps %d init delay %d " % (expected_cpol, expected_cpha, expected_miso_enabled, expected_num_bits, kbps, initial_clock_delay)
+            initial_clock_delay = self.get_setup_data(xsi, self._setup_strobe_port, self._setup_data_port) * 1000
+            print(f"Got Settings:cpol {expected_cpol} cpha {expected_cpha} miso {expected_miso_enabled} num_bits {expected_num_bits} kbps {kbps} init delay {initial_clock_delay} ")
 
             # drive initial values while slave starts up for the first time
             xsi.drive_port_pins(self._sck_port, expected_cpol)
             xsi.drive_port_pins(self._ss_port, 1)
-            self.wait_until(xsi.get_time() + 10000)
+            self.wait_until(xsi.get_time() + 10000000)
 
             xsi.drive_port_pins(self._sck_port, expected_cpol)
             xsi.drive_port_pins(self._ss_port, 0)
@@ -64,7 +71,7 @@ class SPISlaveChecker(xmostest.SimThread):
             total_bit_count = 0
             byte_count = 0
 
-            half_clock = 1000000/(2*kbps)
+            half_clock = 1000000000/(2*kbps)
             error = 0
 
             while total_bit_count < expected_num_bits:
@@ -87,7 +94,7 @@ class SPISlaveChecker(xmostest.SimThread):
                     if expected_miso_enabled:
                         if rx_byte != rx_data[byte_count]:
                             error = 1
-                            print "rx got:%02x expected:%02x  %d" % (rx_byte,rx_data[byte_count], byte_count)
+                            print(f"frx got:{rx_byte:02x} expected:{rx_data[byte_count]:02x}  {byte_count}")
                     rx_byte = 0
                     byte_count = byte_count + 1
                     if byte_count*8 < expected_num_bits:
@@ -97,7 +104,7 @@ class SPISlaveChecker(xmostest.SimThread):
             if bit_count and expected_miso_enabled:
                 if rx_byte != rx_data[byte_count]>>(8-bit_count):
                     error = 1
-                    print "sub bit rx got:%02x expected:%02x  %d" % (rx_byte,rx_data[byte_count]>>(8-bit_count), byte_count)
+                    print(f"sub bit rx got:{rx_byte:02x} expected:{rx_data[byte_count]>>(8-bit_count):02x}  {byte_count}")
             self.wait_until(xsi.get_time() + half_clock)
 
             xsi.drive_port_pins(self._sck_port, expected_cpol)
