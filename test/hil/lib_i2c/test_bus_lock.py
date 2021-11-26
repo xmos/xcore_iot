@@ -1,16 +1,19 @@
 # Copyright 2014-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 import Pyxsim as px
+from pathlib import Path
 from i2c_master_checker import I2CMasterChecker
 
-def test_bus_lock(build, capfd):
-    binary = 'i2c_test_locks/bin/i2c_test_locks.xe' 
+def test_i2c_bus_lock(build, capfd, request):
+    cwd = Path(request.fspath).parent
+
+    binary = f'{cwd}/i2c_test_locks/bin/i2c_test_locks.xe' 
 
     checker = I2CMasterChecker("tile[0]:XS1_PORT_1A",
                                "tile[0]:XS1_PORT_1B",
                                expected_speed = 400)
 
-    tester = px.testers.PytestComparisonTester('expected/lock_test.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/lock_test.expect',
                                                 regexp = True,
                                                 ordered = True)
 

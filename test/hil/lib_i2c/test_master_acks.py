@@ -2,17 +2,19 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 import Pyxsim as px
 import pytest
+from pathlib import Path
 from i2c_master_checker import I2CMasterChecker
 
 stop_args = {"stop": "stop",
              "no_stop": "no_stop"}
              
 @pytest.mark.parametrize("stop", stop_args.values(), ids=stop_args.keys())
-def test_master_acks(build, capfd, stop):
+def test_i2c_master_acks(build, capfd, request, stop):
 
     # It is assumed that this is of the form <arbitrary>/bin/<unique>/.../<executable>.xe,
     # and that <arbitrary> contains the CMakeLists.txt file for all test executables.
-    binary = f'i2c_master_test/bin/ack_{stop}/i2c_master_test_tx_only_{stop}.xe'
+    cwd = Path(request.fspath).parent
+    binary = f'{cwd}/i2c_master_test/bin/ack_{stop}/i2c_master_test_tx_only_{stop}.xe'
 
     checker = I2CMasterChecker("tile[0]:XS1_PORT_1A",
                                "tile[0]:XS1_PORT_1B",
@@ -22,7 +24,7 @@ def test_master_acks(build, capfd, stop):
                                              True, True, False,
                                              False, True])
 
-    tester = px.testers.PytestComparisonTester(f'expected/ack_test_{stop}.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/ack_test_{stop}.expect',
                                                 regexp = True,
                                                 ordered = True)
 

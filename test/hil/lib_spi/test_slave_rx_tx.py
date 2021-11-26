@@ -2,6 +2,7 @@
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 from spi_slave_checker import SPISlaveChecker
+from pathlib import Path
 import Pyxsim as px
 import pytest
 
@@ -33,10 +34,12 @@ def uncollect_if(mode, full_load, mosi_enabled, miso_enabled, in_place):
 @pytest.mark.parametrize("mosi_enabled", mosi_enabled_args.values(), ids=mosi_enabled_args.keys())
 @pytest.mark.parametrize("miso_enabled", miso_enabled_args.values(), ids=miso_enabled_args.keys())
 @pytest.mark.parametrize("full_load", full_load_args.values(), ids=full_load_args.keys())
-def test_slave_rx_tx(build, capfd, full_load, miso_enabled, mosi_enabled, in_place, mode):
+def test_spi_slave_rx_tx(build, capfd, request, full_load, miso_enabled, mosi_enabled, in_place, mode):
     id_string = f"{full_load}_{miso_enabled}_{mosi_enabled}_{mode}_{in_place}"
 
-    binary = f"spi_slave_rx_tx/bin/{id_string}/spi_slave_rx_tx_{id_string}.xe"
+    cwd = Path(request.fspath).parent
+
+    binary = f"{cwd}/spi_slave_rx_tx/bin/{id_string}/spi_slave_rx_tx_{id_string}.xe"
 
     checker = SPISlaveChecker("tile[0]:XS1_PORT_1C",
                               "tile[0]:XS1_PORT_1D",
@@ -46,7 +49,7 @@ def test_slave_rx_tx(build, capfd, full_load, miso_enabled, mosi_enabled, in_pla
                               "tile[0]:XS1_PORT_16B",
                               "tile[0]:XS1_PORT_1F")
 
-    tester = px.testers.PytestComparisonTester('expected/slave.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/slave.expect',
                                             regexp = True,
                                             ordered = True,
                                             suppress_multidrive_messages = False)

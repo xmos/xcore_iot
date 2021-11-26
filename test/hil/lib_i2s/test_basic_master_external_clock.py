@@ -1,6 +1,7 @@
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 from i2s_master_checker import I2SMasterChecker, Clock
+from pathlib import Path
 import Pyxsim as px
 import pytest
 
@@ -10,10 +11,11 @@ num_in_out_args = {"4ch_in,4ch_out": (4, 4),
                    "0ch_in,4ch_out": (0, 4)}
 
 @pytest.mark.parametrize(("num_in", "num_out"), num_in_out_args.values(), ids=num_in_out_args.keys())
-def test_basic_master_external_clock(build, capfd, nightly, num_in, num_out):
+def test_i2s_basic_master_external_clock(build, capfd, nightly, request, num_in, num_out):
     test_level = "nightly" if nightly else "smoke"
     id_string = f"{test_level}_{num_in}_{num_out}"
-    binary = f'i2s_master_external_clock_test/bin/{id_string}/i2s_master_external_clock_test_{id_string}.xe'
+    cwd = Path(request.fspath).parent
+    binary = f'{cwd}/i2s_master_external_clock_test/bin/{id_string}/i2s_master_external_clock_test_{id_string}.xe'
 
     clk = Clock("tile[0]:XS1_PORT_1A")
 
@@ -28,7 +30,7 @@ def test_basic_master_external_clock(build, capfd, nightly, num_in, num_out):
          clk,
          False) # Don't check the bclk stops precisely as the hardware can't do that
 
-    tester = px.testers.PytestComparisonTester('expected/master_test.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/master_test.expect',
                                             regexp = True,
                                             ordered = True,
                                             ignore = ["CONFIG:.*?"])

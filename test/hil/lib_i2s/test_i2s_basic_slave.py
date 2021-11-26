@@ -1,8 +1,10 @@
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-from i2s_master_checker import I2SMasterChecker, Clock
-import Pyxsim as px
+from i2s_slave_checker import I2SSlaveChecker
+from i2s_master_checker import Clock
+from pathlib import Path
 import pytest
+import Pyxsim as px
 
 num_in_out_args = {"4ch_in,4ch_out": (4, 4),
                    "1ch_in,1ch_out": (1, 1),
@@ -10,14 +12,15 @@ num_in_out_args = {"4ch_in,4ch_out": (4, 4),
                    "0ch_in,4ch_out": (0, 4)}
 
 @pytest.mark.parametrize(("num_in", "num_out"), num_in_out_args.values(), ids=num_in_out_args.keys())
-def test_basic_master(build, capfd, nightly, num_in, num_out):
+def test_i2s_basic_slave(build, capfd, nightly, request, num_in, num_out):
     test_level = "nightly" if nightly else "smoke"
     id_string = f"{test_level}_{num_in}_{num_out}"
-    binary = f'i2s_master_test/bin/{id_string}/i2s_master_test_{id_string}.xe'
+    cwd = Path(request.fspath).parent
+    binary = f'{cwd}/i2s_slave_test/bin/{id_string}/i2s_slave_test_{id_string}.xe'
 
     clk = Clock("tile[0]:XS1_PORT_1A")
 
-    checker = I2SMasterChecker(
+    checker = I2SSlaveChecker(
         "tile[0]:XS1_PORT_1B",
         "tile[0]:XS1_PORT_1C",
         ["tile[0]:XS1_PORT_1H","tile[0]:XS1_PORT_1I","tile[0]:XS1_PORT_1J", "tile[0]:XS1_PORT_1K"],
@@ -25,10 +28,9 @@ def test_basic_master(build, capfd, nightly, num_in, num_out):
         "tile[0]:XS1_PORT_1L",
         "tile[0]:XS1_PORT_16A",
         "tile[0]:XS1_PORT_1M",
-         clk,
-         False) # Don't check the bclk stops precisely as the hardware can't do that
+         clk)
 
-    tester = px.testers.PytestComparisonTester('expected/master_test.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/slave_test.expect',
                                             regexp = True,
                                             ordered = True,
                                             ignore = ["CONFIG:.*?"])

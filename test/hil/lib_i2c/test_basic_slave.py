@@ -2,6 +2,7 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 import Pyxsim as px
 import pytest
+from pathlib import Path
 from i2c_slave_checker import I2CSlaveChecker
 
 speed_args = {"400kbps": 400,
@@ -9,12 +10,13 @@ speed_args = {"400kbps": 400,
               "10kbps": 10}
 
 @pytest.mark.parametrize("speed", speed_args.values(), ids=speed_args.keys())
-def test_basic_slave(build, capfd, nightly, speed):
-    
+def test_i2c_basic_slave(build, capfd, request, nightly, speed):
     if (speed != 400) and not nightly:
         pytest.skip("Speeds other than 400kbps only tested with option --nightly")
 
-    binary = f'i2c_slave_test/bin/{speed}/i2c_slave_test.xe'
+    cwd = Path(request.fspath).parent
+
+    binary = f'{cwd}/i2c_slave_test/bin/{speed}/i2c_slave_test.xe'
 
     checker = I2CSlaveChecker("tile[0]:XS1_PORT_1A",
                             "tile[0]:XS1_PORT_1B",
@@ -27,7 +29,7 @@ def test_basic_slave(build, capfd, nightly, speed):
                             ("w", 0x3c, [0x22, 0xff])],
                             speed = speed)
 
-    tester = px.testers.PytestComparisonTester('expected/basic_slave_test.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/basic_slave_test.expect',
                                             regexp = True,
                                             ordered = True)
 

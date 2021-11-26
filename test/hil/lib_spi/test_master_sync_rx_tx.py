@@ -2,6 +2,7 @@
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 from spi_master_checker import SPIMasterChecker
+from pathlib import Path
 import Pyxsim as px
 import pytest
 
@@ -34,13 +35,15 @@ def uncollect_if(mode, div, mosi_enabled, miso_enabled, full_load):
 @pytest.mark.parametrize("mosi_enabled", mosi_enabled_args.values(), ids=mosi_enabled_args.keys())
 @pytest.mark.parametrize("miso_enabled", miso_enabled_args.values(), ids=miso_enabled_args.keys())
 @pytest.mark.parametrize("full_load", full_load_args.values(), ids=full_load_args.keys())
-def test_master_sync_rx_tx(build, capfd, nightly, full_load, miso_enabled, mosi_enabled, div, mode):
+def test_spi_master_sync_rx_tx(build, capfd, nightly, request, full_load, miso_enabled, mosi_enabled, div, mode):
     if not nightly and not full_load:
         pytest.skip("Only test non-full_load nightly")
 
     id_string = f"{full_load}_{miso_enabled}_{mosi_enabled}_{div}_{mode}"
 
-    binary = f"spi_master_sync_rx_tx/bin/{id_string}/spi_master_sync_rx_tx_{id_string}.xe"
+    cwd = Path(request.fspath).parent
+
+    binary = f"{cwd}/spi_master_sync_rx_tx/bin/{id_string}/spi_master_sync_rx_tx_{id_string}.xe"
 
     checker = SPIMasterChecker("tile[0]:XS1_PORT_1C",
                                "tile[0]:XS1_PORT_1D",
@@ -49,7 +52,7 @@ def test_master_sync_rx_tx(build, capfd, nightly, full_load, miso_enabled, mosi_
                                "tile[0]:XS1_PORT_1E",
                                "tile[0]:XS1_PORT_16B")
 
-    tester = px.testers.PytestComparisonTester('expected/master_sync.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/master_sync.expect',
                                             regexp = True,
                                             ordered = True)
                                             

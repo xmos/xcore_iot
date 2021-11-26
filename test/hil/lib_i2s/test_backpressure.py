@@ -3,6 +3,7 @@
 import pytest
 import Pyxsim as px
 import subprocess
+from pathlib import Path
 
 sample_rate_args = {"768kbps": 768000,
                     "384kbps": 384000,
@@ -20,15 +21,17 @@ rx_tx_inc_args = {"rx_delay_inc_50ns,tx_delay_inc_50ns": (5, 5),
 @pytest.mark.parametrize("sample_rate", sample_rate_args.values(), ids=sample_rate_args.keys())
 @pytest.mark.parametrize("num_channels", num_channels_args.values(), ids=num_channels_args.keys())
 @pytest.mark.parametrize(("receive_increment", "send_increment"), rx_tx_inc_args.values(), ids=rx_tx_inc_args.keys())
-def test_backpressure(build, nightly, capfd, sample_rate, num_channels, receive_increment, send_increment):
+def test_i2s_backpressure(build, nightly, capfd, request, sample_rate, num_channels, receive_increment, send_increment):
     if (num_channels != 4) and not nightly:
         pytest.skip("Only run 4 channel tests unless it is a nightly")
 
     id_string = f"{sample_rate}_{num_channels}_{receive_increment}_{send_increment}"
 
-    binary = f'backpressure_test/bin/{id_string}/backpressure_test_{id_string}.xe'
+    cwd = Path(request.fspath).parent
 
-    tester = px.testers.PytestComparisonTester('expected/backpressure_test.expect',
+    binary = f'{cwd}/backpressure_test/bin/{id_string}/backpressure_test_{id_string}.xe'
+
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/backpressure_test.expect',
                                             regexp = True,
                                             ordered = True)
 

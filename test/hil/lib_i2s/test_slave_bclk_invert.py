@@ -2,16 +2,18 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 from i2s_slave_checker import I2SSlaveChecker
 from i2s_master_checker import Clock
+from pathlib import Path
 import pytest
 import Pyxsim as px
 
 num_in_out_args = {"2ch_in,2ch_out": (2, 2)}
 
 @pytest.mark.parametrize(("num_in", "num_out"), num_in_out_args.values(), ids=num_in_out_args.keys())
-def test_slave_bclk_invert(build, capfd, nightly, num_in, num_out):
+def test_i2s_slave_bclk_invert(build, capfd, nightly, request, num_in, num_out):
     test_level = "nightly" if nightly else "smoke"
     id_string = f"{test_level}_{num_in}_{num_out}"
-    binary = f'i2s_slave_test/bin/{id_string}_inv/i2s_slave_test_{id_string}_inv.xe'
+    cwd = Path(request.fspath).parent
+    binary = f'{cwd}/i2s_slave_test/bin/{id_string}_inv/i2s_slave_test_{id_string}_inv.xe'
 
     clk = Clock("tile[0]:XS1_PORT_1A")
 
@@ -26,7 +28,7 @@ def test_slave_bclk_invert(build, capfd, nightly, num_in, num_out):
          clk,
          invert_bclk = True)
 
-    tester = px.testers.PytestComparisonTester('expected/bclk_invert.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/bclk_invert.expect',
                                             regexp = True,
                                             ordered = True,
                                             ignore = ["CONFIG:.*?"])

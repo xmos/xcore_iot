@@ -23,9 +23,6 @@ def pytest_collection_modifyitems(config, items):
         config.hook.pytest_deselected(items=removed)
         items[:] = kept
 
-
-
-
 def pytest_addoption(parser):
     parser.addoption("--nightly", action="store_true")
 
