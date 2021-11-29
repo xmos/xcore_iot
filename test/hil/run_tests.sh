@@ -31,7 +31,7 @@ build_end=`date +%s`
 echo "******************"
 echo "* Setup xmostest *"
 echo "******************"
-export PYTHONPATH=$PYTHONPATH:$XCORE_SDK_PATH/test/hil/build/tools_xmostest/lib/python
+export PYTHONPATH=$PYTHONPATH:$(pwd)/build/tools_xmostest/lib/python
 
 #****************************
 # Run tests and copy results
