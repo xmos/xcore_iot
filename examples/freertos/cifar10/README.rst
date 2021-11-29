@@ -25,19 +25,19 @@ To generate the images run:
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ cd filesystem_support/test_inputs
-		$ ./make_test_tensors.py
-		$ cd ../..
-		
-.. tab:: Windows
+        $ cd filesystem_support/test_inputs
+        $ ./make_test_tensors.py
+        $ cd ../..
+        
+.. tab:: Windows XTC Tools CMD prompt
 
-	.. code-block:: XTC Tools CMD prompt
-	
-		> cd filesystem_support\test_inputs
-		> python3 make_test_tensors.py
-		> cd..\..
+    .. code-block:: console
+    
+        $ cd filesystem_support\test_inputs
+        $ python3 make_test_tensors.py
+        $ cd..\..
 
 For background information on the CIFAR-10 dataset, please read `Learning Multiple Layers of Features from Tiny Images <https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf>`__, Alex Krizhevsky, 2009.
 
@@ -60,27 +60,27 @@ Using SRAM memory
 
 .. tab:: Linux and Mac
 
-	Run make:
+    Run make:
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ cmake -B build -DBOARD=XCORE-AI-EXPLORER
-		$ cd build
-		$ make
+        $ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cd build
+        $ make
 
-	To flash the example images, run the following commands:
+    To flash the example images, run the following commands:
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ make fsonly BOARD=XCORE-AI-EXPLORER
-		
-.. tab:: Windows
+        $ make fsonly BOARD=XCORE-AI-EXPLORER
+        
+.. tab:: Windows XTC Tools CMD prompt
 
-	.. code-block:: XTC Tools CMD prompt
-	
-		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
-		> cd build
-		> nmake
+    .. code-block:: console
+    
+        $ cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cd build
+        $ nmake
 
 Using external flash memory
 ===========================
@@ -89,17 +89,17 @@ To build with the model stored in flash, replace the call to make above with the
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ make BOARD=$TARGET USE_SWMEM=1
+        $ make BOARD=$TARGET USE_SWMEM=1
 
 To flash the model and example images, run the following commands:
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ make swmem BOARD=XCORE-AI-EXPLORER
+        $ make swmem BOARD=XCORE-AI-EXPLORER
 
 Using external DDR memory
 =========================
@@ -110,35 +110,27 @@ To build with the model stored in LPDDR, replace the call to make above with the
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ make BOARD=$TARGET USE_EXTMEM=1
-		
+        $ make BOARD=$TARGET USE_EXTMEM=1
+        
 To flash the example images, run the following commands:
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ make fsonly BOARD=XCORE-AI-EXPLORER
+        $ make fsonly BOARD=XCORE-AI-EXPLORER
 
 Running the firmware
 ====================
 
 Running with hardware.
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ xrun --xscope bin/cifar10.xe
-		
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> xrun --xscope bin\cifar10.xe
-
+    $ xrun --xscope bin/cifar10.xe
+        
 ********************
 Optimizing the model
 ********************
@@ -147,48 +139,25 @@ Unoptimized and optimized models are included with the example.
 
 First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
-		
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> python3 xformer.py --analyze -par 5 model\model_quant.tflite model\model_xcore.tflite
+    $ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
+        
 
 Generating the model runner
 ===========================
 
 The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ generate_model_runner.py --input model/model_xcore.tflite --output src/model_runner --name cifar10
-
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> python3 generate_model_runner.py --input model\model_xcore.tflite --output src\model_runner --name cifar10
-		
+    $ generate_model_runner.py --input model/model_xcore.tflite --output src/model_runner --name cifar10
+        
 Converting flatbuffer to source file
 ====================================
 
 If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/cifar10_model_data.h --source model_runner/cifar10_model_data.c --variable-name cifar10
-
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> python3 convert_tflite_to_c_source.py --input model\model_xcore.tflite --header model_runner\cifar10_model_data.h --source model_runner\cifar10_model_data.c --variable-name cifar10
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/cifar10_model_data.h --source model_runner/cifar10_model_data.c --variable-name cifar10

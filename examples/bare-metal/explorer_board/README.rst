@@ -34,11 +34,11 @@ Building the firmware
 
         $ make install
 
-.. tab:: Windows
+.. tab:: Windows XTC Tools CMD prompt
 
     Run cmake:
 
-    .. code-block:: XTC Tools CMD prompt
+    .. code-block:: console
 
         > cmake -G "NMake Makefiles" -B build
         > cd build
@@ -55,14 +55,6 @@ Running the firmware
 
 To run the demo navigate to the bin folder and use the command:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-    .. code-block:: console
-
-        $ xrun --xscope bin/explorer_board.xe
-
-.. tab:: Windows
-
-    .. code-block:: XTC Tools CMD prompt
-
-        > xrun --xscope bin\explorer_board.xe
+    $ xrun --xscope bin/explorer_board.xe

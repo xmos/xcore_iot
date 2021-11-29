@@ -9,7 +9,7 @@
 #
 # This file contains the workflows that are run prior to merging a pull request.
 
-name: CI
+name: Build
 
 on:
   push:
@@ -95,51 +95,3 @@ jobs:
       - name: Build
         run: |
           docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${SDK_APP_BUILDER} bash -l tools/ci/build_rtos_tests.sh all
-
-  test_python_install:
-    name: Test Python install
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout SDK
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8' 
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r tools/install/requirements.txt
-
-      - name: Verify install
-        run: |
-          python test/verify_python_install.py
-
-  build_documentation:
-    name: Build and package documentation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout SDK
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      
-      - name: Pull SDK_DOC_BUILDER container
-        run: |
-          docker pull ${SDK_DOC_BUILDER}
-      
-      - name: Build documentation
-        run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk/documents -v ${{ github.workspace }}:/xcore_sdk ${SDK_DOC_BUILDER} make clean html linkcheck SPHINXOPTS="--keep-going"
-      
-      - name: Save documentation artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: xcore_sdk_docs
-          path: documents/_build
-          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn` 
-          retention-days: 5

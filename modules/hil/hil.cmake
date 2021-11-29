@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
 #**********************
 # Paths
 #**********************
-set(HIL_DIR "$ENV{XCORE_SDK_PATH}/modules/hil")
+set(HIL_DIR "${XCORE_SDK_PATH}/modules/hil")
 
 set(I2C_HIL_DIR "${HIL_DIR}/lib_i2c")
 set(I2S_HIL_DIR "${HIL_DIR}/lib_i2s")

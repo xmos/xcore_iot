@@ -1,0 +1,54 @@
+# YAML schema for GitHub Actions:
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+#
+# Helpful YAML parser to clarify YAML syntax:
+# https://yaml-online-parser.appspot.com/
+#
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+#
+# This file contains the workflows that are run prior to merging a pull request.
+
+name: Documentation
+
+on:
+  push:
+    branches:
+      - 'develop'
+  pull_request:
+    branches:
+      - 'develop'
+
+  # Allow manually triggering of the workflow.
+  workflow_dispatch: {}
+
+env:
+  XCORE_SDK_PATH: ${{ github.workspace }}
+  SDK_APP_BUILDER: 'ghcr.io/xmos/sdk_app_builder:develop'
+  SDK_DOC_BUILDER: 'ghcr.io/xmos/sdk_doc_builder:develop'
+
+jobs:
+  build_documentation:
+    name: Build and package documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Pull SDK_DOC_BUILDER container
+        run: |
+          docker pull ${SDK_DOC_BUILDER}
+      
+      - name: Build documentation
+        run: |
+          docker run --rm -t -u "$(id -u):$(id -g)" -v ${{ github.workspace }}:/build -e REPO:/build -e EXCLUDE_PATTERNS=/build/doc/exclude_patterns.inc -e DOXYGEN_INCLUDE=/build/doc/Doxyfile.inc -e DOXYGEN_INPUT=ignore ghcr.io/xmos/doc_builder:main
+
+      - name: Save documentation artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: xcore_sdk_docs
+          path: doc/_build/latest/html
+          if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn` 
+          retention-days: 5

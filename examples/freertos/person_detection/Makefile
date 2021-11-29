@@ -20,7 +20,7 @@ OUTPUT_DIR = bin
 # This value should not be modified
 EXECUTABLE = $(OUTPUT_DIR)/$(PROJECT_NAME).xe
 
-.PHONY: all clean distclean run
+.PHONY: all clean distclean run $(EXECUTABLE)
 
 all: $(EXECUTABLE)
 

@@ -62,33 +62,33 @@ Building the firmware
 
 .. tab:: Linux and Mac
 
-	Run cmake:
+    Run cmake:
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ cmake -B build
-		$ cd build
-		$ make
-		
-.. tab:: Windows
+        $ cmake -B build
+        $ cd build
+        $ make
+        
+.. tab:: Windows XTC Tools CMD prompt
 
-	Run cmake:
+    Run cmake:
 
-	.. code-block:: XTC Tools CMD prompt
+    .. code-block:: console
 
-		> cmake -G "NMake Makefiles" -B build
-		> cd build
-		> nmake
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake
 
 If you plan on running the demo where the Explorer Board connects to a host side echo server, modify ``src/app_conf.h`` to your host computer's IP address.
 
 .. code-block:: c
 
-	/* Echo demo defines */
-	#define appconfECHO_IP_ADDR_OCTET_0    	10
-	#define appconfECHO_IP_ADDR_OCTET_1    	0
-	#define appconfECHO_IP_ADDR_OCTET_2    	0
-	#define appconfECHO_IP_ADDR_OCTET_3    	253
+    /* Echo demo defines */
+    #define appconfECHO_IP_ADDR_OCTET_0    	10
+    #define appconfECHO_IP_ADDR_OCTET_1    	0
+    #define appconfECHO_IP_ADDR_OCTET_2    	0
+    #define appconfECHO_IP_ADDR_OCTET_3    	253
 
 *Note: Your host computer and the developer kit need to be on the same WiFi network.*
 
@@ -97,23 +97,21 @@ Running the firmware
 
 To run the demo navigate to the bin folder and use the command:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-	.. code-block:: console
-
-		$ xrun --xscope bin/explorer_board.xe
-		
-.. tab:: Windows
-
-	.. code-block:: XTC Tools CMD prompt
-
-		> xrun --xscope bin\explorer_board.xe
-
+    $ xrun --xscope bin/explorer_board.xe
+        
 ****************************
 Running the host application
 ****************************
 
-In a second console you can run the example_host script to demo various actions.
+In a second console you can run the example_host script to demo various actions.  Note, this script is only supported on Linux and macOS.  
+
+The example_host script requires `ncat`, `pv`, and `SoX <http://sox.sourceforge.net/>`_ .  `ncat` and `pv` can be installed on macOS with the following:
+
+.. code-block:: console
+
+    $ brew install nmap pv
 
 Thruput Test
 ============
