@@ -8,7 +8,7 @@ set(USE_QSPI_IO_HIL FALSE)
 set(USE_MIC_ARRAY_HIL FALSE)
 set(USE_XUD_HIL FALSE)
 
-include("$ENV{XCORE_SDK_PATH}/modules/hil/hil.cmake")
+include("${XCORE_SDK_PATH}/modules/hil/hil.cmake")
 
 set(APP_NAME i2c_master_test)
 
