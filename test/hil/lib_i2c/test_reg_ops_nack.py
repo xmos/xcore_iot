@@ -4,7 +4,7 @@ import Pyxsim as px
 from pathlib import Path
 from i2c_master_checker import I2CMasterChecker
 
-def test_i2c_reg_ops(build, capfd, request):
+def test_i2c_reg_ops_nack(build, capfd, request):
     cwd = Path(request.fspath).parent
     binary = f'{cwd}/i2c_master_reg_test/bin/i2c_master_reg_test.xe'
 
