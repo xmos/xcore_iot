@@ -9,7 +9,7 @@ set(USE_QSPI_IO_HIL FALSE)
 set(USE_MIC_ARRAY_HIL FALSE)
 set(USE_XUD_HIL FALSE)
 
-include("$ENV{XCORE_SDK_PATH}/modules/hil/hil.cmake")
+include("${XCORE_SDK_PATH}/modules/hil/hil.cmake")
 
 ## Import XMOS configurations
 include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
