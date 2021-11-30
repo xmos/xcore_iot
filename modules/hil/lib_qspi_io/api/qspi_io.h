@@ -374,6 +374,10 @@ inline void qspi_io_start_transaction(qspi_io_ctx_t *ctx,
 	/* ensure pullups are disabled during output */
 	QSPI_IO_RESOURCE_SETCI(ctx->sio_port, XS1_SETC_DRIVE_DRIVE);
 
+	/*** FOR CES DEMO TO WORK WITH SPI SLAVE ***/
+	port_set_clock(ctx->sclk_port, ctx->clock_block);
+	port_set_out_clock(ctx->sclk_port);
+
 	port_out(ctx->sio_port, first_word);
 	port_out(ctx->cs_port, 1);
 	clock_start(ctx->clock_block);
@@ -851,6 +855,11 @@ inline void qspi_io_end_transaction(const qspi_io_ctx_t *ctx)
 
 	port_sync(ctx->cs_port);
 	clock_stop(ctx->clock_block);
+
+	/*** FOR CES DEMO TO WORK WITH SPI SLAVE ***/
+	port_set_clock(ctx->sclk_port, XS1_CLKBLK_REF);
+	port_set_inout_data(ctx->sclk_port);
+	(void) port_in(ctx->sclk_port);
 
 	/*
 	 * Ensure the SIO port is back to being sampled on the falling

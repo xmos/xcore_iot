@@ -81,7 +81,9 @@ void qspi_io_init(const qspi_io_ctx_t *ctx,
 
 	/* Setup the SCLK port */
 	port_enable(ctx->sclk_port);
-	port_set_clock(ctx->sclk_port, ctx->clock_block);
-	port_set_out_clock(ctx->sclk_port);
+
+	/*** FOR CES DEMO TO WORK WITH SPI SLAVE ***/
+	//port_set_clock(ctx->sclk_port, ctx->clock_block);
+	//port_set_out_clock(ctx->sclk_port);
 }
 
