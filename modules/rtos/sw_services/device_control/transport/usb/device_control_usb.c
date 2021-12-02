@@ -1,6 +1,8 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+#define DEBUG_UNIT DEVICE_CONTROL_USB
+
 #include <platform.h>
 #include <stdlib.h>
 #include <stdbool.h>

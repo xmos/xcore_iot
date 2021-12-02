@@ -1,6 +1,8 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+#define DEBUG_UNIT DEVICE_CONTROL_I2C
+
 #include <platform.h>
 
 #include "rtos/drivers/i2c/api/rtos_i2c_slave.h"
