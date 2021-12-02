@@ -3,3 +3,4 @@ nbval
 pytest
 pytest-forked
 pytest-xdist
+-e ../../test/modules/test_support

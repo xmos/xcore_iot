@@ -2,6 +2,12 @@
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 from i2s_master_checker import Clock
 import Pyxsim as px
+from functools import partial
+
+# We need to disable output buffering for this test to work on MacOS; this has
+# no effect on Linux systems. Let's redefine print once to avoid putting the 
+# same argument everywhere.
+print = partial(print, flush=True)
 
 
 class I2SSlaveChecker(px.SimThread):
