@@ -11,7 +11,7 @@ set(MIC_ARRAY_HIL_DIR "${HIL_DIR}/lib_mic_array")
 set(SPI_HIL_DIR "${HIL_DIR}/lib_spi")
 set(QSPI_IO_HIL_DIR "${HIL_DIR}/lib_qspi_io")
 set(XUD_HIL_DIR "${HIL_DIR}/lib_xud")
-set(L2_CACHE_DIR "${MODULES_DIR}/l2_cache_dev/l2_cache")
+set(L2_CACHE_HIL_DIR "${HIL_DIR}/lib_l2_cache")
 
 #**********************
 # Options
@@ -227,15 +227,8 @@ unset(THIS_LIB)
 #********************************
 set(THIS_LIB L2_CACHE_HIL)
 if(${USE_${THIS_LIB}})
-    file(GLOB_RECURSE ${THIS_LIB}_CPP_SOURCES "${${THIS_LIB}_DIR}/src/*.cpp")
-    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
-    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/src/*.S")
-    set_source_files_properties( ${${THIS_LIB}_ASM_SOURCES} PROPERTIES LANGUAGE ASM )
-    set(${THIS_LIB}_SOURCES ${${THIS_LIB}_CPP_SOURCES} ${${THIS_LIB}_C_SOURCES} ${${THIS_LIB}_ASM_SOURCES})
-
-    set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/src"
-    )
+    string(TOLOWER ${THIS_LIB} THIS_PATH)
+    include("${${THIS_LIB}_DIR}/lib_l2_cache/lib_l2_cache.cmake")
     message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()
 unset(THIS_LIB)
@@ -250,7 +243,7 @@ set(HIL_SOURCES
     ${QSPI_IO_HIL_SOURCES}
     ${SPI_HIL_SOURCES}
     ${XUD_HIL_SOURCES}
-    ${L2_CACHE_HIL_SOURCES}
+    ${LIB_L2_CACHE_SOURCES}
 )
 
 set(HIL_INCLUDES
@@ -260,7 +253,7 @@ set(HIL_INCLUDES
     ${QSPI_IO_HIL_INCLUDES}
     ${SPI_HIL_INCLUDES}
     ${XUD_HIL_INCLUDES}
-    ${L2_CACHE_HIL_INCLUDES}
+    ${LIB_L2_CACHE_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES HIL_SOURCES)
