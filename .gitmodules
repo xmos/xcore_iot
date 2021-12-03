@@ -73,3 +73,6 @@
 [submodule "modules/aif/tflite-micro"]
 	path = modules/aif/tflite-micro
 	url = git@github.com:xmos/tflite-micro.git
+[submodule "modules/hil/l2_cache"]
+	path = modules/hil/l2_cache
+	url = git@github.com:xmos/lib_l2_cache.git
