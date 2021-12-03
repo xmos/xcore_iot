@@ -26,12 +26,12 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_i2s_isr, arg)
     isr_action = s_chan_in_byte(ctx->c_i2s_isr.end_b);
 
     if (isr_action & ISR_RESUME_SEND_BM) {
-        rtos_printf("send put\n");
+        //rtos_printf("send put\n");
         rtos_osal_semaphore_put(&ctx->send_sem);
     }
 
     if (isr_action & ISR_RESUME_RECV_BM) {
-        rtos_printf("recv put\n");
+        //rtos_printf("recv put\n");
         rtos_osal_semaphore_put(&ctx->recv_sem);
     }
 }
@@ -61,7 +61,7 @@ static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *i2s_sampl
             memcpy(&ctx->recv_buffer.buf[ctx->recv_buffer.write_index], i2s_sample_buf, num_in * sizeof(int32_t));
             buffer_words_written = num_in;
         } else {
-            // rtos_printf("i2s rx overrun\n");
+            rtos_printf("i2s rx overrun\n");
         }
     } else {
         /*
@@ -107,7 +107,7 @@ static void i2s_send(rtos_i2s_t *ctx, size_t num_out, int32_t *i2s_sample_buf)
             memcpy(i2s_sample_buf, &ctx->send_buffer.buf[ctx->send_buffer.read_index], num_out * sizeof(int32_t));
             buffer_words_read = num_out;
         } else {
-            // rtos_printf("i2s tx underrun\n");
+            rtos_printf("i2s tx underrun\n");
         }
     } else {
         /*
@@ -239,7 +239,7 @@ static size_t i2s_local_rx(rtos_i2s_t *ctx,
     }
 
     if (ctx->recv_blocked) {
-        rtos_printf("recv get\n");
+        //rtos_printf("recv get\n");
         if (rtos_osal_semaphore_get(&ctx->recv_sem, timeout) == RTOS_OSAL_SUCCESS) {
             ctx->recv_blocked = 0;
         }
@@ -291,7 +291,7 @@ static size_t i2s_local_tx(rtos_i2s_t *ctx,
     }
 
     if (ctx->send_blocked) {
-        rtos_printf("send get\n");
+        //rtos_printf("send get\n");
         if (rtos_osal_semaphore_get(&ctx->send_sem, timeout) == RTOS_OSAL_SUCCESS) {
             ctx->send_blocked = 0;
         }
