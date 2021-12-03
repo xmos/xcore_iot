@@ -25,8 +25,11 @@ distclean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(OUTPUT_DIR)
 
+flash: $(EXECUTABLE)
+	cd $(BUILD_DIR) && make flash
+
 run: $(EXECUTABLE)
-	xrun --xscope $(EXECUTABLE)
+	cd $(BUILD_DIR) && make run
 
 $(EXECUTABLE) :
 	cmake -B $(BUILD_DIR) -DBOARD=${BOARD} -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)

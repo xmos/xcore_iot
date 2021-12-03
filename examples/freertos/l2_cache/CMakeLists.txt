@@ -97,3 +97,10 @@ add_custom_target( flash
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/
 )
 add_dependencies(flash ${TARGET_NAME})
+
+
+add_custom_target( run
+  COMMAND xrun --xscope ${TARGET_NAME}.xe
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/
+)
+add_dependencies(run ${TARGET_NAME})

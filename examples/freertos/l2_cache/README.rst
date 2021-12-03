@@ -33,4 +33,5 @@ To run the example:
 
 .. code-block:: console
 
-    $ xrun --xscope bin/l2_cache.xe
+    $ make flash
+    $ make run
