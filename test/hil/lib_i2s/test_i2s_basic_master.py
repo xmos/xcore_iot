@@ -11,11 +11,11 @@ num_in_out_args = {"4ch_in,4ch_out": (4, 4),
                    "0ch_in,4ch_out": (0, 4)}
 
 @pytest.mark.parametrize(("num_in", "num_out"), num_in_out_args.values(), ids=num_in_out_args.keys())
-def test_i2s_basic_master_external_clock(build, capfd, nightly, request, num_in, num_out):
+def test_i2s_basic_master(build, capfd, nightly, request, num_in, num_out):
     test_level = "nightly" if nightly else "smoke"
     id_string = f"{test_level}_{num_in}_{num_out}"
     cwd = Path(request.fspath).parent
-    binary = f'{cwd}/i2s_master_external_clock_test/bin/{id_string}/i2s_master_external_clock_test_{id_string}.xe'
+    binary = f'{cwd}/i2s_master_test/bin/{id_string}/i2s_master_test_{id_string}.xe'
 
     clk = Clock("tile[0]:XS1_PORT_1A")
 

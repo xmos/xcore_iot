@@ -73,3 +73,7 @@
 [submodule "modules/aif/tflite-micro"]
 	path = modules/aif/tflite-micro
 	url = git@github.com:xmos/tflite-micro.git
+[submodule "test/modules/test_support"]
+	path = test/modules/test_support
+	url = git@github.com:ACascarino/test_support.git
+	branch = cmake_additions

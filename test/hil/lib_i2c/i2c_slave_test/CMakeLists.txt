@@ -8,6 +8,19 @@ set(USE_QSPI_IO_HIL FALSE)
 set(USE_MIC_ARRAY_HIL FALSE)
 set(USE_XUD_HIL FALSE)
 
+## If XCORE_SDK_PATH is not already defined, then we're running this test 
+## independently. Set XCORE_SDK_PATH to 4 parents upwards, set the toolchain, 
+## and set the project directive.
+if(NOT DEFINED XCORE_SDK_PATH)
+    set(XCORE_SDK_PATH ${CMAKE_CURRENT_LIST_DIR})
+    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+    include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+    project(i2c_slave_test)
+endif()
+
 include("${XCORE_SDK_PATH}/modules/hil/hil.cmake")
 
 set(APP_NAME i2c_slave_test)

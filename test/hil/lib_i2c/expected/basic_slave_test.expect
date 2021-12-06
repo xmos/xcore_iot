@@ -1,3 +1,5 @@
+Checking I2C: SCL=.*?, SDA=.*?
+Making .*?
 Starting write transaction to device id 0x3c
 Sending data 0x78
 xCORE got start of write transaction

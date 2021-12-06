@@ -1,3 +1,5 @@
+Checking I2C: SCL=.*?, SDA=.*?
+Making .*?
 Start bit received
 Byte received: 0x66
 Speed = \d+ Kbps

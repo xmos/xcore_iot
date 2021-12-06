@@ -1,13 +1,12 @@
 # Copyright 2014-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
+import Pyxsim as px
+from pathlib import Path
 from i2c_master_checker import I2CMasterChecker
-import os
 
-def do_test():
-    resources = xmostest.request_resource("xsim")
-
-    binary = 'i2c_master_reg_test/bin/i2c_master_reg_test.xe'
+def test_i2c_reg_ops(build, capfd, request):
+    cwd = Path(request.fspath).parent
+    binary = f'{cwd}/i2c_master_reg_test/bin/i2c_master_reg_test.xe'
 
     checker = I2CMasterChecker("tile[0]:XS1_PORT_1A",
                                "tile[0]:XS1_PORT_1B",
@@ -22,17 +21,16 @@ def do_test():
                                              True, True, True, True,
                                              True, True, True])
 
-    tester = xmostest.ComparisonTester(open('expected/reg_test.expect'),
-                                       'lib_i2c', 'i2c_master_sim_tests',
-                                       'reg_ops_test',
-                                       {},
-                                       regexp=True)
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/reg_test.expect',
+                                                regexp = True,
+                                                ordered = True)
 
-    xmostest.run_on_simulator(resources['xsim'], binary,
-                              simthreads=[checker],
-                              simargs=['--weak-external-drive'],
-                              suppress_multidrive_messages=True,
-                              tester=tester)
+    sim_args = ['--weak-external-drive']
 
-def runtest():
-    do_test()
+    build(binary)
+
+    px.run_with_pyxsim(binary,
+                    simthreads = [checker],
+                    simargs = sim_args)
+                    
+    tester.run(capfd.readouterr().out)

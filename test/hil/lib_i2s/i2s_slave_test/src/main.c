@@ -22,7 +22,7 @@ xclock_t bclk = XS1_CLKBLK_1;
 
 #define I2S_LOOPBACK_LATENCY 1
 
-#if defined(SMOKE)
+#if SMOKE == 1
 #define NUM_BCLKS 1
 #define NUM_BCLKS_TO_CHECK 1
 static const unsigned bclk_freq_lut[NUM_BCLKS] = {
@@ -148,7 +148,7 @@ i2s_restart_t i2s_restart_check(void *app_data)
 
 void i2s_init(void *app_data, i2s_config_t *i2s_config)
 {
-#if SLAVE_INVERT_BCLK
+#if SLAVE_INVERT_BCLK == 1
     i2s_config->slave_bclk_polarity = I2S_SLAVE_SAMPLE_ON_BCLK_FALLING;
 #else
     i2s_config->slave_bclk_polarity = I2S_SLAVE_SAMPLE_ON_BCLK_RISING;

@@ -5,17 +5,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
-## Fetch dependencies
-include(FetchContent)
-
-FetchContent_Declare(
-  tools_xmostest
-  GIT_REPOSITORY git@github.com:xmos/tools_xmostest.git
-  GIT_TAG        1e2d0097624e0df9c92981d2fc652fda3f81b9e2
-  SOURCE_DIR     tools_xmostest
-)
-FetchContent_Populate(tools_xmostest)
-
 ## Get the SDK root
 set(XCORE_SDK_PATH ${CMAKE_CURRENT_LIST_DIR})
 cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
