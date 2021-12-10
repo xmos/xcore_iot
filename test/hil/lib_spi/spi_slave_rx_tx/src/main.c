@@ -28,7 +28,7 @@ port_t setup_resp_port = XS1_PORT_1F;
 #define KBPS 25000
 
 #ifndef INITIAL_CLOCK_DELAY
-#define INITIAL_CLOCK_DELAY 3000
+#define INITIAL_CLOCK_DELAY 2000
 #endif
 
 static const uint8_t tx_data[NUMBER_OF_TEST_BYTES] = {

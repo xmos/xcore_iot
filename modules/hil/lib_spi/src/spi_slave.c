@@ -140,13 +140,29 @@ __attribute__((always_inline))
 static inline uint32_t get_next_word(internal_ctx_t *ctx) {
     uint32_t out_word = 0;
 
-    for (int i=0; i<4; i++)
+    if (ctx->out_buf_cur < ctx->out_buf_end)
     {
-        if (ctx->out_buf_cur >= ctx->out_buf_end) {
-            break;
-        } else {
-            out_word |= bitrev(*(ctx->out_buf_cur) << (24 - (8*i)));
-            ctx->out_buf_cur++;
+        out_word = *(uint32_t*)ctx->out_buf_cur;
+        out_word = bitrev(out_word);
+        out_word = byterev(out_word);
+        switch(ctx->out_buf_end - ctx->out_buf_cur)
+        {
+            default:
+            case 4:
+                ctx->out_buf_cur += 4;
+                break;
+            case 3:
+                out_word &= 0xFFFFFF00;
+                ctx->out_buf_cur += 3;
+                break;
+            case 2:
+                out_word &= 0xFFFF0000;
+                ctx->out_buf_cur += 2;
+                break;
+            case 1:
+                out_word &= 0xFF000000;
+                ctx->out_buf_cur += 1;
+                break;
         }
     }
 
