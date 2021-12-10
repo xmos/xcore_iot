@@ -42,8 +42,7 @@ set(APP_COMPILER_FLAGS
 
 set(APP_SOURCES
   "src/main.c"
-  "src/benchmark_code.c"
-  "src/benchmark_data.c"
+  "src/example_code.c"
   "src/print_info.c"
   ${XMOS_RTOS_PLATFORM_SOURCES}
 )
@@ -60,12 +59,8 @@ add_compile_definitions(
     # L2_CACHE_DEBUG_ON=1
 )
 
-include("${CMAKE_CURRENT_SOURCE_DIR}/src/mbedTLS/mbedTLS.cmake")
-include("${CMAKE_CURRENT_SOURCE_DIR}/src/tflite-micro/tflite-micro.cmake")
-
 # Prevent optimizing these. We want them to take up space.
-set_source_files_properties(src/benchmark_code.c PROPERTIES COMPILE_FLAGS -O0)
-set_source_files_properties(src/benchmark_data.c PROPERTIES COMPILE_FLAGS -O0)
+set_source_files_properties(src/example_code.c PROPERTIES COMPILE_FLAGS -O0)
 
 set(TARGET_NAME l2_cache)
 add_executable(${TARGET_NAME})
@@ -73,15 +68,11 @@ add_executable(${TARGET_NAME})
 target_sources(${TARGET_NAME}
     PRIVATE ${APP_SOURCES}
     PRIVATE ${XMOS_RTOS_PLATFORM_SOURCES}
-    PRIVATE ${MBEDTLS_SOURCES}
-    PRIVATE ${TFLITE_MICRO_SOURCES}
 )
 
 target_include_directories(${TARGET_NAME}
     PRIVATE ${APP_INCLUDES}
     PRIVATE ${XMOS_RTOS_PLATFORM_INCLUDES}
-    PRIVATE ${MBEDTLS_INCLUDES}
-    PRIVATE ${TFLITE_MICRO_INCLUDES}
 )
 
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})

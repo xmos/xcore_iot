@@ -1,11 +1,8 @@
-##################
+################
 l2_cache Example
-##################
+################
 
-The l2_cache example is demonstrates how to use the l2_cache
-Note
-
-The function used in this example to multiply two matrices is for illustrative use only. It is not the most efficient way to perform a matrix multiplication. XMOS has optimized libraries specifically for this purpose.
+The l2_cache example is demonstrates how to use the l2_cache.
 
 ***************************
 Building & running examples
