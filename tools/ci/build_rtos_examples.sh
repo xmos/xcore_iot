@@ -16,6 +16,7 @@ then
         "examples/freertos/device_control XCORE200-MIC-ARRAY"
         "examples/freertos/getting_started XCORE-AI-EXPLORER"
         "examples/freertos/dispatcher XCORE-AI-EXPLORER"
+        "examples/freertos/l2_cache XCORE-AI-EXPLORER"
     )
 elif [ "$1" == "smoke" ]
 then
