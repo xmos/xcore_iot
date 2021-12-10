@@ -1,14 +1,20 @@
 # Copyright 2014-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
+import Pyxsim as px
+import pytest
+from pathlib import Path
 from i2c_master_checker import I2CMasterChecker
 
-def do_master_test(stop):
-    resources = xmostest.request_resource("xsim")
+stop_args = {"stop": "stop",
+             "no_stop": "no_stop"}
+             
+@pytest.mark.parametrize("stop", stop_args.values(), ids=stop_args.keys())
+def test_i2c_master_acks(build, capfd, request, stop):
 
-    binary = 'i2c_master_test/bin/i2c_master_test_tx_only_%(stop)s/i2c_master_test_tx_only_%(stop)s.xe' % {
-      'stop' : stop,
-    }
+    # It is assumed that this is of the form <arbitrary>/bin/<unique>/.../<executable>.xe,
+    # and that <arbitrary> contains the CMakeLists.txt file for all test executables.
+    cwd = Path(request.fspath).parent
+    binary = f'{cwd}/i2c_master_test/bin/ack_{stop}/i2c_master_test_tx_only_{stop}.xe'
 
     checker = I2CMasterChecker("tile[0]:XS1_PORT_1A",
                                "tile[0]:XS1_PORT_1B",
@@ -18,18 +24,21 @@ def do_master_test(stop):
                                              True, True, False,
                                              False, True])
 
-    tester = xmostest.ComparisonTester(open('expected/ack_test_%s.expect' % stop),
-                                      'lib_i2c', 'i2c_master_sim_tests',
-                                      'ack_test',
-                                      {'speed':400, 'stop' : stop},
-                                      regexp=True)
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/ack_test_{stop}.expect',
+                                                regexp = True,
+                                                ordered = True)
 
-    xmostest.run_on_simulator(resources['xsim'], binary,
-                              simthreads = [checker],
-                              simargs=['--weak-external-drive'],
-                              suppress_multidrive_messages = True,
-                              tester = tester)
+    sim_args = ['--weak-external-drive']
 
-def runtest():
-    for stop in ['stop', 'no_stop']:
-        do_master_test(stop)
+    # The environment here should be set up with variables defined in the 
+    # CMakeLists.txt file to define the build
+
+    build(directory = binary, 
+            env = {"STOPS":stop, "ACK_TEST":True},
+            bin_child = f"ack_{stop}")
+
+    px.run_with_pyxsim(binary,
+                    simthreads = [checker],
+                    simargs = sim_args)
+
+    tester.run(capfd.readouterr().out)

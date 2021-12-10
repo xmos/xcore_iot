@@ -30,6 +30,7 @@
 **/.settings/*
 .metadata
 **/test_results.csv
+**/test_results.xml
 **/.venv/**
 .metadata
 *.gtkw

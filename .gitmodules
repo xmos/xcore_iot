@@ -76,3 +76,7 @@
 [submodule "modules/hil/l2_cache"]
 	path = modules/hil/lib_l2_cache
 	url = git@github.com:xmos/lib_l2_cache.git
+[submodule "test/modules/test_support"]
+	path = test/modules/test_support
+	url = git@github.com:ACascarino/test_support.git
+	branch = cmake_additions

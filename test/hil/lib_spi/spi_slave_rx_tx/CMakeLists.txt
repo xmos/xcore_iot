@@ -8,7 +8,20 @@ set(USE_QSPI_IO_HIL FALSE)
 set(USE_MIC_ARRAY_HIL FALSE)
 set(USE_XUD_HIL FALSE)
 
-include("$ENV{XCORE_SDK_PATH}/modules/hil/hil.cmake")
+## If XCORE_SDK_PATH is not already defined, then we're running this test 
+## independently. Set XCORE_SDK_PATH to 4 parents upwards, set the toolchain, 
+## and set the project directive.
+if(NOT DEFINED XCORE_SDK_PATH)
+    set(XCORE_SDK_PATH ${CMAKE_CURRENT_LIST_DIR})
+    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+    include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+    project(spi_slave_rx_tx)
+endif()
+
+include("${XCORE_SDK_PATH}/modules/hil/hil.cmake")
 
 set(APP_NAME spi_slave_rx_tx)
 
@@ -31,11 +44,35 @@ add_compile_definitions(
     ""
 )
 
-set(FULL_LOAD 0 1)
-set(MISO_ENABLED 0 1)
-set(MOSI_ENABLED 1)
-set(SPI_MODE 0 1 2 3)
-set(IN_PLACE 0 1)
+if(NOT DEFINED ENV{FULL_LOAD})
+    set(FULL_LOAD 0 1)
+else()
+    set(FULL_LOAD $ENV{FULL_LOAD})
+endif()
+
+if(NOT DEFINED ENV{MISO_ENABLED})
+    set(MISO_ENABLED 0 1)
+else()
+    set(MISO_ENABLED $ENV{MISO_ENABLED})
+endif()
+
+if(NOT DEFINED ENV{MOSI_ENABLED})
+    set(MOSI_ENABLED 0 1)
+else()
+    set(MOSI_ENABLED $ENV{MOSI_ENABLED})
+endif()
+
+if(NOT DEFINED ENV{SPI_MODE})
+    set(SPI_MODE 0 1 2 3)
+else()
+    set(SPI_MODE $ENV{SPI_MODE})
+endif()
+
+if(NOT DEFINED ENV{IN_PLACE})
+    set(IN_PLACE 0 1)
+else()
+    set(IN_PLACE $ENV{IN_PLACE})
+endif()
 
 set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 

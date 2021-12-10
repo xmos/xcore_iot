@@ -1,16 +1,45 @@
 #!/usr/bin/env python
 # Copyright 2015-2021 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
-import xmostest
 from spi_slave_checker import SPISlaveChecker
-import os
+from pathlib import Path
+import Pyxsim as px
+import pytest
 
+mode_args = {"mode_0": 0,
+             "mode_1": 1,
+             "mode_2": 2,
+             "mode_3": 3}
 
-def do_slave_rx_tx(full_load, miso_enable, mosi_enable, mode, in_place):
+in_place_args = {"not_in_place": 0,
+                 "in_place": 1}
 
-    resources = xmostest.request_resource("xsim")
+mosi_enabled_args = {"mosi_disabled": 0,
+                    "mosi_enabled": 1}
 
-    binary = "spi_slave_rx_tx/bin/spi_slave_rx_tx_{load}_{miso}_{mosi}_{m}_{in_place}/spi_slave_rx_tx_{load}_{miso}_{mosi}_{m}_{in_place}.xe".format(load=full_load,miso=miso_enable,mosi=mosi_enable,m=mode,in_place=in_place)
+miso_enabled_args = {"miso_disabled": 0,
+                    "miso_enabled": 1}
+
+full_load_args = {"not_fully_loaded": 0,
+                  "fully_loaded": 1}
+
+# If mosi disabled, deselect the test
+def uncollect_if(mode, full_load, mosi_enabled, miso_enabled, in_place):
+    if not (mosi_enabled):
+        return True
+
+@pytest.mark.uncollect_if(func=uncollect_if)
+@pytest.mark.parametrize("mode", mode_args.values(), ids=mode_args.keys())
+@pytest.mark.parametrize("in_place", in_place_args.values(), ids=in_place_args.keys())
+@pytest.mark.parametrize("mosi_enabled", mosi_enabled_args.values(), ids=mosi_enabled_args.keys())
+@pytest.mark.parametrize("miso_enabled", miso_enabled_args.values(), ids=miso_enabled_args.keys())
+@pytest.mark.parametrize("full_load", full_load_args.values(), ids=full_load_args.keys())
+def test_spi_slave_rx_tx(build, capfd, request, full_load, miso_enabled, mosi_enabled, in_place, mode):
+    id_string = f"{full_load}_{miso_enabled}_{mosi_enabled}_{mode}_{in_place}"
+
+    cwd = Path(request.fspath).parent
+
+    binary = f"{cwd}/spi_slave_rx_tx/bin/{id_string}/spi_slave_rx_tx_{id_string}.xe"
 
     checker = SPISlaveChecker("tile[0]:XS1_PORT_1C",
                               "tile[0]:XS1_PORT_1D",
@@ -20,25 +49,21 @@ def do_slave_rx_tx(full_load, miso_enable, mosi_enable, mode, in_place):
                               "tile[0]:XS1_PORT_16B",
                               "tile[0]:XS1_PORT_1F")
 
-    tester = xmostest.ComparisonTester(open('expected/slave.expect'),
-                                     'lib_spi',
-                                     'spi_slave_sim_tests',
-                                     'rx_tx_slave_{load}_{miso}_{mosi}_{m}_{in_place}.xe'.format(load=full_load,miso=miso_enable,mosi=mosi_enable,m=mode,in_place=in_place),
-                                     {'full_load': full_load, 'miso_enable': miso_enable, 'mosi_enable': mosi_enable, 'mode': mode, 'in_place': in_place},
-                                     regexp=True)
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/slave.expect',
+                                            regexp = True,
+                                            ordered = True,
+                                            suppress_multidrive_messages = False)
+                                            
+    build(directory = binary, 
+            env = {"FULL_LOAD":f'{full_load}', 
+                   "MISO_ENABLED":f'{miso_enabled}',
+                   "MOSI_ENABLED":f'{mosi_enabled}',
+                   "SPI_MODE":f'{mode}',
+                   "IN_PLACE":f'{in_place}'},
+            bin_child = id_string)
 
-    xmostest.run_on_simulator(resources['xsim'], binary,
-                              simthreads = [checker],
-                              # simargs=['--vcd-tracing', '-o ./spi_slave_rx_tx/trace{load}_{miso}_{mosi}_{m}_{in_place}.vcd -tile tile[0] -pads -functions -clock-blocks -ports-detailed -instructions'.format(load=full_load,miso=miso_enable,mosi=mosi_enable,m=mode,in_place=in_place)],
-                              simargs=[],
-                              suppress_multidrive_messages = False,
-                              tester = tester)
+    px.run_with_pyxsim(binary,
+                       simthreads = [checker]
+                       )
 
-def runtest():
-    for full_load in [0, 1]:
-        for miso_enable in [1]:
-            for mosi_enable in [1]:
-                for mode in range(0, 4):
-                    for in_place in [0, 1]:
-                        if not (mosi_enable == 0 and miso_enable == 0):
-                            do_slave_rx_tx(full_load, miso_enable, mosi_enable, mode, in_place)
+    tester.run(capfd.readouterr().out)
