@@ -11,6 +11,7 @@ set(MIC_ARRAY_HIL_DIR "${HIL_DIR}/lib_mic_array")
 set(SPI_HIL_DIR "${HIL_DIR}/lib_spi")
 set(QSPI_IO_HIL_DIR "${HIL_DIR}/lib_qspi_io")
 set(XUD_HIL_DIR "${HIL_DIR}/lib_xud")
+set(L2_CACHE_HIL_DIR "${HIL_DIR}/lib_l2_cache")
 
 #**********************
 # Options
@@ -21,6 +22,7 @@ option(USE_MIC_ARRAY_HIL "Enable to include microphone array HIL" TRUE)
 option(USE_SPI_HIL "Enable to include SPI HIL" TRUE)
 option(USE_QSPI_IO_HIL "Enable to include QSPI HIL" TRUE)
 option(USE_XUD_HIL "Enable to include XUD HIL" FALSE)
+option(USE_L2_CACHE_HIL "Enable to include L2 CACHE HIL" FALSE)
 
 #********************************
 # Gather I2C sources
@@ -220,6 +222,17 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather l2 cache hil sources
+#********************************
+set(THIS_LIB L2_CACHE_HIL)
+if(${USE_${THIS_LIB}})
+    string(TOLOWER ${THIS_LIB} THIS_PATH)
+    include("${${THIS_LIB}_DIR}/lib_l2_cache/lib_l2_cache.cmake")
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # Set user variables
 #**********************
@@ -230,6 +243,7 @@ set(HIL_SOURCES
     ${QSPI_IO_HIL_SOURCES}
     ${SPI_HIL_SOURCES}
     ${XUD_HIL_SOURCES}
+    ${LIB_L2_CACHE_SOURCES}
 )
 
 set(HIL_INCLUDES
@@ -239,6 +253,7 @@ set(HIL_INCLUDES
     ${QSPI_IO_HIL_INCLUDES}
     ${SPI_HIL_INCLUDES}
     ${XUD_HIL_INCLUDES}
+    ${LIB_L2_CACHE_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES HIL_SOURCES)

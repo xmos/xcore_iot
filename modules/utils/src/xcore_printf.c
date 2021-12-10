@@ -465,13 +465,14 @@ int xcore_utils_sprintf(char *str, const char *fmt, ...)
 }
 
 #ifndef XCORE_UTILS_PRINTF_BUFSIZE
-#ifdef DEBUG_PRINTF_BUFSIZE
-#define XCORE_UTILS_PRINTF_BUFSIZE DEBUG_PRINTF_BUFSIZE
-#else
-#define XCORE_UTILS_PRINTF_BUFSIZE 130
-#endif
+#  ifdef DEBUG_PRINTF_BUFSIZE
+#    define XCORE_UTILS_PRINTF_BUFSIZE DEBUG_PRINTF_BUFSIZE
+#  else
+#    define XCORE_UTILS_PRINTF_BUFSIZE 130
+#  endif
 #endif
 
+#if DEBUG_PRINT_ENABLE0
 int xcore_utils_vprintf(const char *fmt, va_list ap)
 {
     int len;
@@ -499,3 +500,4 @@ int xcore_utils_printf(const char *fmt, ...)
 
     return len;
 }
+#endif

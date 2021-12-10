@@ -17,6 +17,7 @@ set(RTOS_SWMEM_DRIVER_DIR "${DRIVERS_DIR}/swmem")
 set(RTOS_QSPI_FLASH_DRIVER_DIR "${DRIVERS_DIR}/qspi_flash")
 set(RTOS_TRACE_DRIVER_DIR "${DRIVERS_DIR}/trace")
 set(RTOS_WIFI_DRIVER_DIR "${DRIVERS_DIR}/wifi")
+set(RTOS_L2_CACHE_DRIVER_DIR "${DRIVERS_DIR}/l2_cache")
 
 #**********************
 # Options
@@ -33,6 +34,7 @@ option(USE_RTOS_SWMEM_DRIVER "Enable to include RTOS SWMem driver" TRUE)
 option(USE_RTOS_QSPI_FLASH_DRIVER "Enable to include RTOS QSPI flash driver" TRUE)
 option(USE_RTOS_TRACE_DRIVER "Enable to include RTOS trace driver" TRUE)
 option(USE_RTOS_WIFI_DRIVER "Enable to include RTOS WiFi driver" TRUE)
+option(USE_RTOS_L2_CACHE_DRIVER "Enable to include RTOS L2 Cache driver" FALSE)
 
 #********************************
 # Gather GPIO sources
@@ -282,6 +284,24 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather l2_cache sources
+#********************************
+set(THIS_LIB RTOS_L2_CACHE_DRIVER)
+if(${USE_${THIS_LIB}})
+    set(${THIS_LIB}_FLAGS "-Os")
+
+    file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/*.c")
+
+    set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+    set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/api"
+    )
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
@@ -297,6 +317,7 @@ set(DRIVERS_RTOS_SOURCES
     ${RTOS_SWMEM_DRIVER_SOURCES}
     ${RTOS_QSPI_FLASH_DRIVER_SOURCES}
     ${RTOS_TRACE_DRIVER_SOURCES}
+    ${RTOS_L2_CACHE_DRIVER_SOURCES}
 )
 
 set(DRIVERS_RTOS_INCLUDES
@@ -311,6 +332,7 @@ set(DRIVERS_RTOS_INCLUDES
     ${RTOS_SWMEM_DRIVER_INCLUDES}
     ${RTOS_QSPI_FLASH_DRIVER_INCLUDES}
     ${RTOS_TRACE_DRIVER_INCLUDES}
+    ${RTOS_L2_CACHE_DRIVER_INCLUDES}
     ${DRIVERS_DIR}
 )
 

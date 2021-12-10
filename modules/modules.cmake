@@ -29,6 +29,7 @@ option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS 
 option(USE_AIF "Enable to include AI model inference framework" FALSE)
 option(USE_DEVICE_MEMORY_SUPPORT "Enable to include device memory support" FALSE)
 option(USE_UTILS "Enable to include utils" TRUE)
+option(USE_L2_CACHE "Enable to include utils" FALSE)
 
 #********************************
 # Gather multitile support sources
