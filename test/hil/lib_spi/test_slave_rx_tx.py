@@ -6,6 +6,8 @@ from pathlib import Path
 import Pyxsim as px
 import pytest
 
+DEBUG_MODE = 0
+
 mode_args = {"mode_0": 0,
              "mode_1": 1,
              "mode_2": 2,
@@ -53,17 +55,23 @@ def test_spi_slave_rx_tx(build, capfd, request, full_load, miso_enabled, mosi_en
                                             regexp = True,
                                             ordered = True,
                                             suppress_multidrive_messages = False)
-                                            
-    build(directory = binary, 
-            env = {"FULL_LOAD":f'{full_load}', 
+
+    build(directory = binary,
+            env = {"FULL_LOAD":f'{full_load}',
                    "MISO_ENABLED":f'{miso_enabled}',
                    "MOSI_ENABLED":f'{mosi_enabled}',
                    "SPI_MODE":f'{mode}',
                    "IN_PLACE":f'{in_place}'},
             bin_child = id_string)
 
-    px.run_with_pyxsim(binary,
-                       simthreads = [checker]
-                       )
+    if DEBUG_MODE:
+        with capfd.disabled():
+            px.run_with_pyxsim(binary,
+                               simthreads = [checker]
+                               )
+    else:
+        px.run_with_pyxsim(binary,
+                           simthreads = [checker]
+                           )
 
-    tester.run(capfd.readouterr().out)
+        tester.run(capfd.readouterr().out)

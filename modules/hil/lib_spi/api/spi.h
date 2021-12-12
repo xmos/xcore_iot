@@ -317,8 +317,9 @@ typedef struct {
 /**
  * Initializes a SPI slave.
  *
- * Note: Verified at 25000 kbps, with a 3000ns CS assertion to first clock
-  *      in all modes.
+ * Note: Verified at 25000 kbps, with a 2000ns CS assertion to first clock
+ *       in all modes.  The CS to first clock minimum delay will vary based
+ *       on the duration of the slave_transaction_started callback.
  *
  * \param spi_cbg     The spi_slave_callback_group_t context to use.
  * \param p_sclk      The SPI slave's SCLK port. Must be a 1-bit port.
