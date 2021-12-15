@@ -98,14 +98,6 @@ TODO: Add information about the `black` config file.
 Building Examples
 *****************
 
-To build the examples, the `XCORE_SDK_PATH` environment variable must be set.
-
-.. code-block:: console
-
-    $ export XCORE_SDK_PATH=<path to>/xcore_sdk
-
-You can also add this export command to your `.profile` or `.bash_profile` script. This way the environment variable will be set in a new terminal window.
-
 Some scripts are provided to build all the example applications.  Run this script with:
 
 .. code-block:: console
@@ -117,6 +109,14 @@ Some scripts are provided to build all the example applications.  Run this scrip
 *************
 Running Tests
 *************
+
+Tests for most components in the SDK are located in the `test` folder.  This includes tests for:
+
+.. toctree::
+   :maxdepth: 1
+
+   test/hil
+   test/rtos_drivers
 
 A script is provided to run all the tests on a connected xcore.ai device.  Run this script with:
 

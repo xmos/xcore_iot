@@ -1,24 +1,24 @@
-################
+#####################
 RTOS Driver USB Tests
-################
+#####################
 
 This test is designed to perform basic regression tests of the RTOS USB driver.
 
 This test assume that the associated RTOS and HILs used have been verified by their own localized separate testing and that the rtos_drivers tests are passing.
 
-This test should be run whenever the code or submodules in 'modules\rtos' or 'modules\hil' are changed.
+This test should be run whenever the code or submodules in `modules\rtos` or `modules\hil` are changed.
 
-*****************
+**************
 Hardware Setup
-*****************
+**************
 
 The target hardware for these this is the XCORE-AI-EXPLORER board.
 
-*****************
+**********
 Host Setup
-*****************
+**********
 
-These tests require alsa-utils for the aplay and arecord utilities.
+These tests require alsa-utils for the `aplay` and `arecord` utilities.
 
 Example for Debian:
 
@@ -26,9 +26,9 @@ Example for Debian:
 
     $ apt-get install alsa-utils
 
-*****************
+*************
 Running Tests
-*****************
+*************
 
 This test requires 2 scripts to be run manually.
 

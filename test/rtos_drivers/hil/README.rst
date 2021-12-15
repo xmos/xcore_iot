@@ -1,6 +1,6 @@
-################
+#################
 RTOS Driver Tests
-################
+#################
 
 The RTOS driver tests are designed to regression test RTOS driver behavior for the following drivers:
 
@@ -14,11 +14,11 @@ The RTOS driver tests are designed to regression test RTOS driver behavior for t
 
 These tests assume that the associated RTOS and HILs used have been verified by their own localized separate testing.
 
-These tests should be run whenever the code or submodules in 'modules\rtos' or 'modules\hil' are changed.
+These tests should be run whenever the code or submodules in `modules\rtos` or `modules\hil` are changed.
 
-*****************
+**************
 Hardware Setup
-*****************
+***************
 
 The target hardware for these tests is the XCORE-AI-EXPLORER board.
 
@@ -36,9 +36,9 @@ I2S BCLK      BCLK : X0D22
 I2S LRCLK     LRCLK : X0D23
 ============  ================
 
-*****************
+*************
 Running Tests
-*****************
+*************
 
 Run the tests with the following command:
 
