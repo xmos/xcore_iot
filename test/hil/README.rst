@@ -9,13 +9,13 @@ The HIL module tests are designed to regression test behavior for the following 
 - spi
 - qspi
 
-These tests should be run whenever the code or submodules in `modules\hil` is changed.
+These tests should be run whenever the code or submodules in ``modules\hil`` is changed.
 
 **************
 Hardware Setup
 **************
 
-No hardware is needed for these tests as they all run using the `xsim` XCore simulator that is installed with the XTC Tools.
+No hardware is needed for these tests as they all run using the ``xsim`` XCore simulator that is installed with the XTC Tools.
 
 *************
 Running Tests

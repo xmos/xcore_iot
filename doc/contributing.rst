@@ -78,7 +78,7 @@ clang-format can be used to:
 - Reformat a block of code to the SDK style. 
 - Help you follow the XCore SDK coding style.
 
-The SDK's clang-format configuration file is `.clang-format` and is in the root of the xcore_sdk repository. The rules contained in `.clang-format` were originally derived from the Linux Kernel coding style. A few modifications have been made by the XCore SDK authors. Not all code in the XCore SDK follows the `.clang-format` rules.  Some non-compliant code is intentional while some is not.  Non-intentional instances should be addressed when the non-compliant code needs to be enhanced.
+The SDK's clang-format configuration file is `.clang-format` and is in the root of the xcore_sdk repository. The rules contained in ``.clang-format`` were originally derived from the Linux Kernel coding style. A few modifications have been made by the XCore SDK authors. Not all code in the XCore SDK follows the ``.clang-format`` rules.  Some non-compliant code is intentional while some is not.  Non-intentional instances should be addressed when the non-compliant code needs to be enhanced.
 
 For more information about `clang-format` visit:
 
@@ -92,7 +92,7 @@ Python coding style
 
 All python code should be `blackened  <https://black.readthedocs.io/en/stable/>`_.
 
-TODO: Add information about the `black` config file.
+TODO: Add information about the ``black`` config file.
 
 *****************
 Building Examples
@@ -110,19 +110,14 @@ Some scripts are provided to build all the example applications.  Run this scrip
 Running Tests
 *************
 
-Tests for most components in the SDK are located in the `test` folder.  This includes tests for:
+Tests for most components in the SDK are located in the ``test`` folder.  This includes tests for:
 
 .. toctree::
    :maxdepth: 1
 
    test/hil
    test/rtos_drivers
-
-A script is provided to run all the tests on a connected xcore.ai device.  Run this script with:
-
-.. code-block:: console
-
-    $ bash test/run_tests.sh
+   test/examples
 
 ****************
 Development Tips
