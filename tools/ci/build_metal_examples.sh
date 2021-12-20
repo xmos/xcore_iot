@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source ${XCORE_SDK_PATH}/tools/ci/helper_functions.sh
+source tools/ci/helper_functions.sh
 
 function readable_run {
     if output=$("$@" 2>&1); then
@@ -40,12 +40,11 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
     application="${FIELDS[0]}"
     board="${FIELDS[1]}"
-    path="${XCORE_SDK_PATH}/${application}"
     echo '******************************************************'
     echo '* Building' ${application} 'for' ${board}
     echo '******************************************************'
 
-    (cd ${path}; rm -rf build_${board})
-    (cd ${path}; mkdir -p build_${board})
-    (cd ${path}/build_${board}; log_errors cmake ../ -DBOARD=${board}; log_errors make -j install)
+    (cd ${application}; rm -rf build_${board})
+    (cd ${application}; mkdir -p build_${board})
+    (cd ${application}/build_${board}; log_errors cmake ../ -DBOARD=${board}; log_errors make -j install)
 done

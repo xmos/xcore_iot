@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source ${XCORE_SDK_PATH}/tools/ci/helper_functions.sh
+source tools/ci/helper_functions.sh
 
 USB_EXAMPLE_PATH="examples/freertos/usb"
 
@@ -40,12 +40,11 @@ for ((i = 0; i < ${#demos[@]}; i += 1)); do
     read -ra FIELDS <<< ${demos[i]}
     demo="${FIELDS[0]}"
     board="${FIELDS[1]}"
-    path="${XCORE_SDK_PATH}/${USB_EXAMPLE_PATH}"    
     echo '******************************************************'
     echo '* Building' ${demo} 'for' ${board}
     echo '******************************************************'
 
-    (cd ${path}; log_errors make distclean)
-    (cd ${path}; log_errors make -j BOARD=${board} TINYUSB_DEMO=${demo})
+    (cd ${application}; log_errors make distclean)
+    (cd ${application}; log_errors make -j BOARD=${board} TINYUSB_DEMO=${demo})
 done
 

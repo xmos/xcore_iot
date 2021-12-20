@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-source ${XCORE_SDK_PATH}/tools/ci/helper_functions.sh
+source tools/ci/helper_functions.sh
 
 # setup configuraitons
 if [ -z "$1" ] || [ "$1" == "all" ]
@@ -29,11 +29,10 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
     application="${FIELDS[0]}"
     board="${FIELDS[1]}"
-    path="${XCORE_SDK_PATH}/${application}"
     echo '******************************************************'
     echo '* Building' ${application} 'for' ${board}
     echo '******************************************************'
 
-    (cd ${path}; log_errors make distclean)
-    (cd ${path}; log_errors make -j BOARD=${board})
+    (cd ${application}; log_errors make distclean)
+    (cd ${application}; log_errors make -j BOARD=${board})
 done
