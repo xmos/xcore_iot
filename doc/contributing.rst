@@ -62,9 +62,9 @@ General Guidelines and Philosophy For Contribution
 * Bug fixes also generally require unit tests, because the presence of bugs usually indicates insufficient test coverage.
 * Keep API compatibility in mind when you change code.
 
-**************************
-C, XC and ASM coding style
-**************************
+***************************
+C, C++ and ASM coding style
+***************************
 
 Changes to C, C++ or ASM should be consistent with the style of existing C, C++ and ASM code.
 
