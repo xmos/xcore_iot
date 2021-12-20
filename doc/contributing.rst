@@ -113,11 +113,15 @@ Running Tests
 Tests for most components in the SDK are located in the ``test`` folder.  This includes tests for:
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
+    :includehidden:
 
-   test/hil
-   test/rtos_drivers
-   test/examples
+    test/hil
+    test/rtos_drivers/hil
+    test/rtos_drivers/hil_add
+    test/rtos_drivers/usb
+    test/rtos_drivers/wifi
+    test/examples
 
 ****************
 Development Tips

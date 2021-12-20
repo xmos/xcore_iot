@@ -18,7 +18,7 @@ These tests should be run whenever the code or submodules in ``modules\rtos`` or
 
 **************
 Hardware Setup
-***************
+**************
 
 The target hardware for these tests is the XCORE-AI-EXPLORER board.
 

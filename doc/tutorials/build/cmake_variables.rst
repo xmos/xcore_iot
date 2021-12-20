@@ -4,9 +4,14 @@
 CMake Variables
 ###############
 
-*************************
-HIL Configuration Options
-*************************
+*****************************
+General Configuration Options
+*****************************
+
+The following configuration options can be set in bare-metal or RTOS applications. 
+
+Hardware Imitation Layer (HIL)
+==============================
 
 Interfaces required by the XCore Hardware Imitation Layer (HIL) can be included or excluded with the following options.
 
@@ -35,11 +40,46 @@ Interfaces required by the XCore Hardware Imitation Layer (HIL) can be included 
     * - USE_XUD_HIL
       - FALSE
       - Enable to include XUD HIL
+    * - USE_L2_CACHE_HIL
+      - FALSE
+      - Enable to include L2 Cache HIL
 
+Additional Libraries and Components
+===================================
 
-*********************************
-RTOS Driver Configuration Options
-*********************************
+Several additional libraries and components can be included or excluded with the following options.
+
+.. list-table:: Additional Configuration Options
+    :widths: 25 10 50
+    :header-rows: 1
+
+    * - Option
+      - Default
+      - Description
+    * - USE_LIB_XS3_MATH
+      - FALSE
+      - Enable to include lib_xs3_math
+    * - USE_LIB_RANDOM
+      - TRUE
+      - Enable to include lib_random
+    * - USE_LIB_DSP
+      - TRUE
+      - Enable to include lib_dsp
+    * - USE_LEGACY_COMPAT
+      - TRUE
+      - Enable to include legacy compatibility layer for XMOS libraries
+    * - USE_DEVICE_MEMORY_SUPPORT
+      - FALSE
+      - Enable to include support for ExtMem or SwMem device memory
+
+**************************
+RTOS Configuration Options
+**************************
+
+The following configuration options can be set in RTOS applications.  
+
+RTOS Drivers
+============
 
 RTOS drivers can be included or excluded with the following options.
 
@@ -68,6 +108,9 @@ RTOS drivers can be included or excluded with the following options.
     * - USE_RTOS_MIC_ARRAY_DRIVER
       - TRUE
       - Enable to include RTOS microphone array driver
+    * - USE_RTOS_L2_CACHE_DRIVER
+      - FALSE
+      - Enable to include RTOS L2 Cache driver
     * - USE_RTOS_RPC_DRIVER
       - TRUE
       - Enable to include RTOS intertile remote procedure call driver
@@ -87,11 +130,10 @@ RTOS drivers can be included or excluded with the following options.
       - TRUE
       - Enable to include RTOS trace driver
 
-***********************************
-Miscellaneous Configuration Options
-***********************************
+RTOS Middleware
+===============
 
-Several middleware components and libraries can be included or excluded with the following options.
+RTOS middleware components and libraries can be included or excluded with the following options.
 
 .. list-table:: Miscellaneous Configuration Options
     :widths: 25 10 50
@@ -118,38 +160,12 @@ Several middleware components and libraries can be included or excluded with the
     * - USE_DISPATCHER
       - FALSE
       - Enable to use Dispatcher
-    * - USE_LIB_RANDOM
-      - TRUE
-      - Enable to include lib_random
-    * - USE_LIB_XS3_MATH
-      - FALSE
-      - Enable to include lib_xs3_math
 
-**********************************
-AI Inference Configuration Options
-**********************************
 
-Several AI inference libraries can be included or excluded with the following options.
+RTOS IoT Libraries
+==================
 
-.. list-table:: AI Inference Configuration Options
-    :widths: 25 10 50
-    :header-rows: 1
-
-    * - Option
-      - Default
-      - Description
-    * - USE_AIF
-      - FALSE
-      - Enable to include the AI model Inference Framework libraries
-    * - USE_DEVICE_MEMORY_SUPPORT
-      - FALSE
-      - Enable to include support for models stored in ExtMem or SwMem device memory
-
-*************************
-IoT Configuration Options
-*************************
-
-Several IoT libraries can be included or excluded with the following options.
+RTOS IoT libraries can be included or excluded with the following options.
 
 .. list-table:: IoT Configuration Options
     :widths: 25 10 50
@@ -186,25 +202,3 @@ Several IoT libraries can be included or excluded with the following options.
       - FALSE
       - Enable to use an alternate mbedtls_config.h
 
-************************************
-Legacy Library Configuration Options
-************************************
-
-Several legacy libraries can be included or excluded with the following options.
-
-.. list-table:: Legacy Library Configuration Options
-    :widths: 25 10 50
-    :header-rows: 1
-
-    * - Option
-      - Default
-      - Description
-    * - USE_LIB_DSP
-      - TRUE
-      - Enable to include lib_dsp
-    * - USE_LIB_LOGGING
-      - TRUE
-      - Enable to include lib_logging
-    * - USE_LEGACY_COMPAT
-      - TRUE
-      - Enable to include legacy compatibility layer for XMOS libraries
