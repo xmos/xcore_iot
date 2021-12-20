@@ -68,9 +68,6 @@ Several additional libraries and components can be included or excluded with the
     * - USE_LEGACY_COMPAT
       - TRUE
       - Enable to include legacy compatibility layer for XMOS libraries
-    * - USE_DEVICE_MEMORY_SUPPORT
-      - FALSE
-      - Enable to include support for ExtMem or SwMem device memory
 
 **************************
 RTOS Configuration Options

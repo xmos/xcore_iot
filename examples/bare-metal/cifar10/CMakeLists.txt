@@ -5,7 +5,7 @@ set(SDK_PATH $ENV{XCORE_SDK_PATH})
 #**********************
 # Setup XMOS toolchain
 #**********************
-
+set(USE_DEVICE_MEMORY_SUPPORT TRUE)
 include("${SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************

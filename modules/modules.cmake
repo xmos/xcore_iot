@@ -25,7 +25,6 @@ option(USE_LIB_RANDOM "Enable to include lib_random" TRUE)
 option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not used
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
 option(USE_AIF "Enable to include AI model inference framework" FALSE)
-option(USE_DEVICE_MEMORY_SUPPORT "Enable to include device memory support" FALSE)
 option(USE_UTILS "Enable to include utils" TRUE)
 option(USE_L2_CACHE "Enable to include utils" FALSE)
 
@@ -182,20 +181,6 @@ endif()
 unset(THIS_LIB)
 
 #********************************
-# Gather device memory support sources
-#********************************
-set(THIS_LIB DEVICE_MEMORY_SUPPORT)
-if(${USE_${THIS_LIB}})
-    set(${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/rtos/xcore_device_memory.c")
-
-    set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}/rtos"
-    )
-    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
-endif()
-unset(THIS_LIB)
-
-#********************************
 # Gather utils sources
 #********************************
 set(THIS_LIB UTILS)
@@ -221,7 +206,6 @@ set(MODULES_SOURCES
     ${LIB_XS3_MATH_SOURCES}
     ${LEGACY_COMPAT_SOURCES}
     ${MODEL_RUNNER_SOURCES}
-    ${DEVICE_MEMORY_SUPPORT_SOURCES}
     ${UTILS_SOURCES}
 )
 
@@ -235,7 +219,6 @@ set(MODULES_INCLUDES
     ${LEGACY_COMPAT_INCLUDES}
     ${MODULES_DIR}
     ${MODEL_RUNNER_INCLUDES}
-    ${DEVICE_MEMORY_SUPPORT_INCLUDES}
     ${UTILS_INCLUDES}
 )
 

@@ -10,7 +10,6 @@ set(MULTITILE_BUILD TRUE)
 set(USE_FATFS TRUE)
 set(USE_AIF TRUE)
 set(USE_DISPATCHER TRUE)
-set(USE_DEVICE_MEMORY_SUPPORT TRUE)
 
 ## Import XMOS configurations
 include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
@@ -36,6 +35,10 @@ set(APP_COMPILER_FLAGS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
     "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
 )
+
+#**********************
+# Additional support sources
+#**********************
 set(APP_SOURCES
     "src/main.c"
     "src/platform/driver_instances.c"
@@ -44,11 +47,13 @@ set(APP_SOURCES
     "src/model_runner/cifar10_model_data.c"
     "src/model_runner/cifar10_model_runner.cc"
     "src/model_runner/cifar10_task.c"
+    "${XCORE_SDK_PATH}/modules/device_memory_support/rtos/xcore_device_memory.c"
 	${XMOS_RTOS_PLATFORM_SOURCES}
 )
 set(APP_INCLUDES
     "src"
     "src/model_runner"
+    "${XCORE_SDK_PATH}/modules/device_memory_support/rtos"
 	${XMOS_RTOS_PLATFORM_INCLUDES}
 )
 

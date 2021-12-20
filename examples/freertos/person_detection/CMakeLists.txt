@@ -9,7 +9,6 @@ endif()
 set(MULTITILE_BUILD TRUE)
 set(USE_AIF TRUE)
 set(USE_DISPATCHER TRUE)
-set(USE_DEVICE_MEMORY_SUPPORT TRUE)
 
 ## Import XMOS configurations
 include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
@@ -42,13 +41,15 @@ set(APP_SOURCES
     "app/model_runner/person_detect_model_runner.cc"
     "app/model_runner/person_detect_model_data.c"
     "app/model_runner/person_detect_task.c"
-	${XMOS_RTOS_PLATFORM_SOURCES}
+    "${XCORE_SDK_PATH}/modules/device_memory_support/rtos/xcore_device_memory.c"
+    ${XMOS_RTOS_PLATFORM_SOURCES}
 )
 set(APP_INCLUDES
     "app"
     "app/ov2640"
     "app/spi_camera"
     "app/model_runner"
+    "${XCORE_SDK_PATH}/modules/device_memory_support/rtos"
 	${XMOS_RTOS_PLATFORM_INCLUDES}
 )
 
