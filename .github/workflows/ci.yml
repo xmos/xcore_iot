@@ -41,7 +41,7 @@ jobs:
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_metal_examples.sh all
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_metal_examples.sh all
 
   build_rtos_examples:
     name: Build RTOS examples
@@ -58,7 +58,7 @@ jobs:
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_examples.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_examples.sh smoke
 
   build_rtos_usb_examples:
     name: Build RTOS USB examples
@@ -75,7 +75,7 @@ jobs:
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh smoke
 
   build_rtos_tests:
     name: Build RTOS tests
@@ -92,4 +92,4 @@ jobs:
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
