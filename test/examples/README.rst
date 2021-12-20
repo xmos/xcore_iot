@@ -18,9 +18,9 @@ Running Tests
 
 First, build all the example applications.
 
-Run the tests with the following command from the root of the repository:
+Run the tests with the following command:
 
 .. code-block:: console
 
-    $ ./test/examples/run_examples_tests.sh
+    $ ./run_examples_tests.sh
 

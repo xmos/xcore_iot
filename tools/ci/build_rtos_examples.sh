@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-source tools/ci/helper_functions.sh
+XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
+
+source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 
 # setup configuraitons
 if [ -z "$1" ] || [ "$1" == "all" ]
@@ -36,10 +38,11 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
     application="${FIELDS[0]}"
     board="${FIELDS[1]}"
+    path="${XCORE_SDK_ROOT}/${application}"
     echo '******************************************************'
     echo '* Building' ${application} 'for' ${board}
     echo '******************************************************'
 
-    (cd ${application}; log_errors make distclean)
-    (cd ${application}; log_errors make -j BOARD=${board})
+    (cd ${path}; log_errors make distclean)
+    (cd ${path}; log_errors make -j BOARD=${board})
 done
