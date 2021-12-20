@@ -5,14 +5,6 @@ XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
 source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 
-function readable_run {
-    if output=$("$@" 2>&1); then
-        echo "'$@' completed successfully at $(date)"
-    else
-        echo "$output"
-    fi    
-}
-
 # setup configuraitons
 if [ -z "$1" ] || [ "$1" == "all" ]
 then

@@ -10,5 +10,6 @@ function log_errors {
         echo "'$@' completed successfully!"
     else
         echo "$log"
+        return 1
     fi    
 }
