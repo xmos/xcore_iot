@@ -5,6 +5,6 @@ Tutorials
 .. toctree::
    :maxdepth: 2
 
-   build/index
+   build_system/index
    freertos/index
    bare-metal/index

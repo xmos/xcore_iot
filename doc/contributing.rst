@@ -6,10 +6,8 @@ Contributing
 Requirements
 ************
 
-The following software are required for developing code for the SDK.  Install them using your operating systems package management system.
+The following software is required for developing code for the SDK.  Install them using your operating systems package management system.
 
-* `CMake <https://cmake.org/>`__
-* `Doxygen <https://www.doxygen.nl/index.html>`__
 * `Python 3.8 <https://www.python.org/>`__
 
 Install development python packages:
@@ -122,6 +120,31 @@ Tests for most components in the SDK are located in the ``test`` folder.  This i
     test/rtos_drivers/usb
     test/rtos_drivers/wifi
     test/examples
+
+**************
+Adding Modules
+**************
+
+If adding a new module to the SDK, the following table may be helpful in determining where the add the module.  If you locate the new module incorrectly, the SDK development team will advice on where and how to relocate it.
+
+.. list-table:: Module Path Descriptions
+    :widths: 50 50
+    :header-rows: 1
+
+    * - Path
+      - Description
+    * - modules/modules.cmake
+      - General purpose modules
+    * - modules/hil/hil.cmake
+      - HIL libraries
+    * - modules/rtos/rtos.cmake
+      - RTOS modules
+    * - modules/rtos/drivers/hil.cmake
+      - RTOS drivers
+    * - modules/rtos/FreeRTOS/kernel.cmake
+      - FreeRTOS kernel
+    * - modules/rtos/sw_services/sw_services.cmake
+      - RTOS software services and middleware
 
 ****************
 Development Tips
