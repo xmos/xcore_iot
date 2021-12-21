@@ -8,6 +8,7 @@ setlocal enabledelayedexpansion
 
 
 :: build program for fresh executables
+rm -rf bin
 rm -rf build
 cmake -B build -G "NMake Makefiles"
 cd build
