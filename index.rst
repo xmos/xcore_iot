@@ -12,7 +12,6 @@ This is the user guide for the `XCore Software Development Kit <https://github.c
    doc/quick_start/index
    doc/tutorials/index
    doc/reference/index
-   doc/ai_tools/index
    doc/contributing
    doc/copyright
 

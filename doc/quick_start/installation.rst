@@ -40,8 +40,8 @@ It is recommended that your `XCORE_SDK_PATH` not include spaces.  However, if th
 
 .. note:: Linux and MacOS users can add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.  Windows users can add the XCORE_SDK_PATH to the System Properties.
 
-Step 3. Install Python and Python Requirements
-==============================================
+Optional Step 3. Install Python and Python Requirements
+=======================================================
 
 The SDK does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, Python 3 is needed, we recommend and test with Python 3.8.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
 
@@ -59,8 +59,8 @@ Then use `pip` to install the required modules.
 
     $ pip install -r tools/install/requirements.txt
 
-Step 4. Start Your First Application
-====================================
+Start Your First Application
+============================
 
 Follow the :doc:`Tutorials <../tutorials/index>` and begin your first project.
     

@@ -1,15 +1,9 @@
 #!/bin/bash
 set -e
 
-source ${XCORE_SDK_PATH}/tools/ci/helper_functions.sh
+XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
-function readable_run {
-    if output=$("$@" 2>&1); then
-        echo "'$@' completed successfully at $(date)"
-    else
-        echo "$output"
-    fi    
-}
+source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 
 # setup configuraitons
 if [ -z "$1" ] || [ "$1" == "all" ]
@@ -40,7 +34,7 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
     application="${FIELDS[0]}"
     board="${FIELDS[1]}"
-    path="${XCORE_SDK_PATH}/${application}"
+    path="${XCORE_SDK_ROOT}/${application}"
     echo '******************************************************'
     echo '* Building' ${application} 'for' ${board}
     echo '******************************************************'

@@ -7,5 +7,4 @@ FreeRTOS
 
    application_programming
    getting_started
-   cmake_variables
    examples/index

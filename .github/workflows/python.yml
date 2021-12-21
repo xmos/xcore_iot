@@ -30,9 +30,6 @@ on:
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
 
-env:
-  XCORE_SDK_PATH: ${{ github.workspace }}
-
 jobs:
   verify_python_packages_install:
     name: Install & verify Python packages

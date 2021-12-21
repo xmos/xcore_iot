@@ -6,10 +6,8 @@ Contributing
 Requirements
 ************
 
-The following software are required for developing code for the SDK.  Install them using your operating systems package management system.
+The following software is required for developing code for the SDK.  Install them using your operating systems package management system.
 
-* `CMake <https://cmake.org/>`__
-* `Doxygen <https://www.doxygen.nl/index.html>`__
 * `Python 3.8 <https://www.python.org/>`__
 
 Install development python packages:
@@ -62,9 +60,9 @@ General Guidelines and Philosophy For Contribution
 * Bug fixes also generally require unit tests, because the presence of bugs usually indicates insufficient test coverage.
 * Keep API compatibility in mind when you change code.
 
-**************************
-C, XC and ASM coding style
-**************************
+***************************
+C, C++ and ASM coding style
+***************************
 
 Changes to C, C++ or ASM should be consistent with the style of existing C, C++ and ASM code.
 
@@ -78,7 +76,7 @@ clang-format can be used to:
 - Reformat a block of code to the SDK style. 
 - Help you follow the XCore SDK coding style.
 
-The SDK's clang-format configuration file is `.clang-format` and is in the root of the xcore_sdk repository. The rules contained in `.clang-format` were originally derived from the Linux Kernel coding style. A few modifications have been made by the XCore SDK authors. Not all code in the XCore SDK follows the `.clang-format` rules.  Some non-compliant code is intentional while some is not.  Non-intentional instances should be addressed when the non-compliant code needs to be enhanced.
+The SDK's clang-format configuration file is `.clang-format` and is in the root of the xcore_sdk repository. The rules contained in ``.clang-format`` were originally derived from the Linux Kernel coding style. A few modifications have been made by the XCore SDK authors. Not all code in the XCore SDK follows the ``.clang-format`` rules.  Some non-compliant code is intentional while some is not.  Non-intentional instances should be addressed when the non-compliant code needs to be enhanced.
 
 For more information about `clang-format` visit:
 
@@ -92,19 +90,11 @@ Python coding style
 
 All python code should be `blackened  <https://black.readthedocs.io/en/stable/>`_.
 
-TODO: Add information about the `black` config file.
+TODO: Add information about the ``black`` config file.
 
 *****************
 Building Examples
 *****************
-
-To build the examples, the `XCORE_SDK_PATH` environment variable must be set.
-
-.. code-block:: console
-
-    $ export XCORE_SDK_PATH=<path to>/xcore_sdk
-
-You can also add this export command to your `.profile` or `.bash_profile` script. This way the environment variable will be set in a new terminal window.
 
 Some scripts are provided to build all the example applications.  Run this script with:
 
@@ -118,11 +108,43 @@ Some scripts are provided to build all the example applications.  Run this scrip
 Running Tests
 *************
 
-A script is provided to run all the tests on a connected xcore.ai device.  Run this script with:
+Tests for most components in the SDK are located in the ``test`` folder.  This includes tests for:
 
-.. code-block:: console
+.. toctree::
+    :maxdepth: 1
+    :includehidden:
 
-    $ bash test/run_tests.sh
+    test/hil
+    test/rtos_drivers/hil
+    test/rtos_drivers/hil_add
+    test/rtos_drivers/usb
+    test/rtos_drivers/wifi
+    test/examples
+
+**************
+Adding Modules
+**************
+
+If adding a new module to the SDK, the following table may be helpful in determining where the add the module.  If you locate the new module incorrectly, the SDK development team will advice on where and how to relocate it.
+
+.. list-table:: Module Path Descriptions
+    :widths: 50 50
+    :header-rows: 1
+
+    * - Path
+      - Description
+    * - modules/modules.cmake
+      - General purpose modules
+    * - modules/hil/hil.cmake
+      - HIL libraries
+    * - modules/rtos/rtos.cmake
+      - RTOS modules
+    * - modules/rtos/drivers/hil.cmake
+      - RTOS drivers
+    * - modules/rtos/FreeRTOS/kernel.cmake
+      - FreeRTOS kernel
+    * - modules/rtos/sw_services/sw_services.cmake
+      - RTOS software services and middleware
 
 ****************
 Development Tips

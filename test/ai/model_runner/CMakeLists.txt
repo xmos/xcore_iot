@@ -31,11 +31,9 @@ set(USE_RTOS_WIFI_DRIVER FALSE)
 set(USE_RTOS_TRACE_DRIVER FALSE)
 set(USE_MULTITILE_SUPPORT FALSE)
 set(USE_LIB_DSP FALSE)
-set(USE_LIB_LOGGING FALSE)
 set(USE_LIB_RANDOM FALSE)
 set(USE_LEGACY_COMPAT TRUE)
 set(USE_AIF TRUE)
-set(USE_DEVICE_MEMORY_SUPPORT TRUE)
 set(USE_DISPATCHER TRUE)
 
 # Import XMOS RTOS platform configuration.
@@ -95,11 +93,13 @@ target_sources(model_runner
   "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/test_model_data.c"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/test_model_runner.cc"
+  "${XCORE_SDK_PATH}/modules/device_memory_support/rtos/xcore_device_memory.c"
 )
 
 target_include_directories(model_runner
   PRIVATE ${XMOS_RTOS_PLATFORM_INCLUDES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  PRIVATE "${XCORE_SDK_PATH}/modules/device_memory_support/rtos"
 )
 
 install(TARGETS model_runner DESTINATION ${INSTALL_DIR})
