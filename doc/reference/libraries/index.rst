@@ -6,6 +6,12 @@ Libraries
 Peripherals
 ***********
 
+.. toctree::
+   :maxdepth: 1
+   :includehidden:
+
+   hil/i2c.rst
+
 *********
 Optimized
 *********
