@@ -165,7 +165,7 @@ void i2c_master_init(
  */
 void i2c_master_shutdown(i2c_master_t *ctx);
 
-/**@}*/
+/**@}*/ // END: addtogroup hil_i2c_master
 
 /**
  * \addtogroup hil_i2c_slave hil_i2c_slave
@@ -335,7 +335,7 @@ void i2c_slave(const i2c_callback_group_t *const i2c_cbg,
                port_t p_sda,
                uint8_t device_addr);
 
-/**@}*/
+/**@}*/ // END: addtogroup hil_i2c_slave
 
 #include "i2c_reg.h"
 

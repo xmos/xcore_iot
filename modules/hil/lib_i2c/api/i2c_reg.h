@@ -7,6 +7,13 @@
 #include "i2c.h"
 
 /**
+ * \addtogroup hil_i2c_register hil_i2c_register
+ *
+ * The public API for using the RTOS I2C slave driver.
+ * @{
+ */
+
+/**
  * This type is used by the supplementary I2C register read/write functions to
  * report back on whether the operation was a success or not.
  */
@@ -24,15 +31,15 @@ typedef enum {
  * register address followed reading the register data from the
  * device at the specified device address.
  *
- * Note that no stop bit is transmitted between the write and the read.
+ * \note No stop bit is transmitted between the write and the read.
  * The operation is performed as one transaction using a repeated start.
  *
  * \param ctx         A pointer to the I2C master context to use.
  * \param device_addr The address of the device to read from.
  * \param reg         The address of the register to read from.
  * \param result      Indicates whether the read completed successfully. Will
- *                    be set to ``I2C_REGOP_DEVICE_NACK`` if the slave NACKed,
- *                    and ``I2C_REGOP_SUCCESS`` on successful completion of the
+ *                    be set to #I2C_REGOP_DEVICE_NACK if the slave NACKed,
+ *                    and #I2C_REGOP_SUCCESS on successful completion of the
  *                    read.
  *
  * \returns           The value of the register.
@@ -71,15 +78,15 @@ inline uint8_t read_reg(
  * register address followed reading the register data from the
  * device at the specified device address.
  *
- * Note that no stop bit is transmitted between the write and the read.
+ * \note No stop bit is transmitted between the write and the read.
  * The operation is performed as one transaction using a repeated start.
  *
  * \param ctx         A pointer to the I2C master context to use.
  * \param device_addr The address of the device to read from.
  * \param reg         The address of the register to read from.
  * \param result      Indicates whether the read completed successfully. Will
- *                    be set to ``I2C_REGOP_DEVICE_NACK`` if the slave NACKed,
- *                    and ``I2C_REGOP_SUCCESS`` on successful completion of the
+ *                    be set to #I2C_REGOP_DEVICE_NACK if the slave NACKed,
+ *                    and #I2C_REGOP_SUCCESS on successful completion of the
  *                    read.
  *
  * \returns           The value of the register.
@@ -118,15 +125,15 @@ inline uint8_t read_reg8_addr16(
  * register address followed reading the register data from the
  * device at the specified device address.
  *
- * Note that no stop bit is transmitted between the write and the read.
+ * \note No stop bit is transmitted between the write and the read.
  * The operation is performed as one transaction using a repeated start.
  *
  * \param ctx         A pointer to the I2C master context to use.
  * \param device_addr The address of the device to read from.
  * \param reg         The address of the register to read from.
  * \param result      Indicates whether the read completed successfully. Will
- *                    be set to ``I2C_REGOP_DEVICE_NACK`` if the slave NACKed,
- *                    and ``I2C_REGOP_SUCCESS`` on successful completion of the
+ *                    be set to #I2C_REGOP_DEVICE_NACK if the slave NACKed,
+ *                    and #I2C_REGOP_SUCCESS on successful completion of the
  *                    read.
  *
  * \returns           The value of the register.
@@ -165,15 +172,15 @@ inline uint16_t read_reg16_addr8(
  * register address followed reading the register data from the
  * device at the specified device address.
  *
- * Note that no stop bit is transmitted between the write and the read.
+ * \note No stop bit is transmitted between the write and the read.
  * The operation is performed as one transaction using a repeated start.
  *
  * \param ctx         A pointer to the I2C master context to use.
  * \param device_addr The address of the device to read from.
  * \param reg         The address of the register to read from.
  * \param result      Indicates whether the read completed successfully. Will
- *                    be set to ``I2C_REGOP_DEVICE_NACK`` if the slave NACKed,
- *                    and ``I2C_REGOP_SUCCESS`` on successful completion of the
+ *                    be set to #I2C_REGOP_DEVICE_NACK if the slave NACKed,
+ *                    and #I2C_REGOP_SUCCESS on successful completion of the
  *                    read.
  *
  * \returns           The value of the register.
@@ -217,9 +224,9 @@ inline uint16_t read_reg16(
  * \param reg          The address of the register to write to.
  * \param data         The 8-bit value to write.
  *
- * \retval             ``I2C_REGOP_DEVICE_NACK`` if the address is NACKed.
- * \retval             ``I2C_REGOP_INCOMPLETE`` if not all data was ACKed.
- * \retval             ``I2C_REGOP_SUCCESS`` on successful completion of the write.
+ * \returns            #I2C_REGOP_DEVICE_NACK if the address is NACKed.
+ * \returns            #I2C_REGOP_INCOMPLETE if not all data was ACKed.
+ * \returns            #I2C_REGOP_SUCCESS on successful completion of the write.
  */
 inline i2c_regop_res_t write_reg(
         i2c_master_t *ctx,
@@ -255,10 +262,10 @@ inline i2c_regop_res_t write_reg(
  * \param reg          The address of the register to write to.
  * \param data         The 8-bit value to write.
  *
- * \retval             ``I2C_REGOP_DEVICE_NACK`` if the address is NACKed.
- * \retval             ``I2C_REGOP_INCOMPLETE`` if not all data was ACKed.
- * \retval             ``I2C_REGOP_SUCCESS`` on successful completion of the write.
- */
+ * \returns            #I2C_REGOP_DEVICE_NACK if the address is NACKed.
+ * \returns            #I2C_REGOP_INCOMPLETE if not all data was ACKed.
+ * \returns            #I2C_REGOP_SUCCESS on successful completion of the write.
+*/
 inline i2c_regop_res_t write_reg8_addr16(
         i2c_master_t *ctx,
         uint8_t device_addr,
@@ -293,9 +300,9 @@ inline i2c_regop_res_t write_reg8_addr16(
  * \param reg          The address of the register to write to.
  * \param data         The 16-bit value to write.
  *
- * \retval             ``I2C_REGOP_DEVICE_NACK`` if the address is NACKed.
- * \retval             ``I2C_REGOP_INCOMPLETE`` if not all data was ACKed.
- * \retval             ``I2C_REGOP_SUCCESS`` on successful completion of the write.
+ * \returns            #I2C_REGOP_DEVICE_NACK if the address is NACKed.
+ * \returns            #I2C_REGOP_INCOMPLETE if not all data was ACKed.
+ * \returns            #I2C_REGOP_SUCCESS on successful completion of the write.
  */
 inline i2c_regop_res_t write_reg16_addr8(
         i2c_master_t *ctx,
@@ -331,9 +338,9 @@ inline i2c_regop_res_t write_reg16_addr8(
  * \param reg          The address of the register to write to.
  * \param data         The 16-bit value to write.
  *
- * \retval             ``I2C_REGOP_DEVICE_NACK`` if the address is NACKed.
- * \retval             ``I2C_REGOP_INCOMPLETE`` if not all data was ACKed.
- * \retval             ``I2C_REGOP_SUCCESS`` on successful completion of the write.
+ * \returns            #I2C_REGOP_DEVICE_NACK if the address is NACKed.
+ * \returns            #I2C_REGOP_INCOMPLETE if not all data was ACKed.
+ * \returns            #I2C_REGOP_SUCCESS on successful completion of the write.
  */
 inline i2c_regop_res_t write_reg16(
         i2c_master_t *ctx,
@@ -355,5 +362,7 @@ inline i2c_regop_res_t write_reg16(
     }
     return reg_res;
 }
+
+/**@}*/ // END: addtogroup hil_i2c_register
 
 #endif
