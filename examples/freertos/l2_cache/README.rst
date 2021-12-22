@@ -1,8 +1,8 @@
 ################
-l2_cache Example
+L2 Cache Example
 ################
 
-The l2_cache example is demonstrates how to use the l2_cache.
+The L2 cache example demonstrates how to use the software defined L2 cache.
 
 ***************************
 Building & running examples
