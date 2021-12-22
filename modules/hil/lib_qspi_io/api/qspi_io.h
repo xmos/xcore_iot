@@ -13,6 +13,13 @@
 #include <xcore/clock.h>
 
 /**
+ * \addtogroup hil_qspi_io hil_qspi_io
+ *
+ * The public API for using HIL QSPI I/O.
+ * @{
+ */
+
+/**
  * Enum type used to set which SCLK edge SIO is sampled on.
  */
 typedef enum {
@@ -894,4 +901,4 @@ void qspi_io_deinit(const qspi_io_ctx_t *ctx);
 void qspi_io_init(const qspi_io_ctx_t *ctx,
                   qspi_io_source_clock_t source_clock);
 
-
+/**@}*/ // END: addtogroup hil_qspi_io

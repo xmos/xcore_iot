@@ -9,6 +9,13 @@
 #include <stdbool.h>
 #include "qspi_io.h"
 
+/**
+ * \addtogroup hil_qspi_flash hil_qspi_flash
+ *
+ * The public API for using HIL QSPI flash I/O.
+ * @{
+ */
+
 #if !defined(QSPI_FLASH_SANITY_CHECKS)
 /**
  * When QSPI_FLASH_SANITY_CHECKS is true then some
@@ -512,3 +519,4 @@ void qspi_flash_deinit(qspi_flash_ctx_t *ctx);
  */
 void qspi_flash_init(qspi_flash_ctx_t *ctx);
 
+/**@}*/ // END: addtogroup hil_qspi_flash

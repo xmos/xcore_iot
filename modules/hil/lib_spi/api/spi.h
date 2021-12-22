@@ -3,7 +3,7 @@
 #pragma once
 
 /** \file
- *  \brief API for QSPI I/O
+ *  \brief API for SPI I/O
  */
 
 /**
@@ -37,6 +37,13 @@ inline void spi_io_port_outpw(
 {
     asm volatile("outpw res[%0], %1, %2" : : "r" (__p), "r" (__w), "r" (__bpw));
 }
+
+/**
+ * \addtogroup hil_spi_master hil_spi_master
+ *
+ * The public API for using the HIL SPI master.
+ * @{
+ */
 
 /**
  * Enum type representing the different options
@@ -295,6 +302,15 @@ typedef void (*slave_transaction_ended_t)(void *app_data, uint8_t **out_buf, siz
  */
 #define SPI_CALLBACK_ATTR __attribute__((fptrgroup("spi_callback")))
 
+/**@}*/ // END: addtogroup hil_spi_master
+
+/**
+ * \addtogroup hil_spi_slave hil_spi_slave
+ *
+ * The public API for using the HIL SPI slave.
+ * @{
+ */
+
 /**
  * Callback group representing callback events that can occur during the
  * operation of the SPI slave task. Must be initialized by the application
@@ -317,9 +333,9 @@ typedef struct {
 /**
  * Initializes a SPI slave.
  *
- * Note: Verified at 25000 kbps, with a 2000ns CS assertion to first clock
- *       in all modes.  The CS to first clock minimum delay will vary based
- *       on the duration of the slave_transaction_started callback.
+ * \note Verified at 25000 kbps, with a 2000ns CS assertion to first clock
+ * in all modes.  The CS to first clock minimum delay will vary based on the 
+ * duration of the slave_transaction_started callback.
  *
  * \param spi_cbg     The spi_slave_callback_group_t context to use.
  * \param p_sclk      The SPI slave's SCLK port. Must be a 1-bit port.
@@ -339,3 +355,5 @@ void spi_slave(
         xclock_t clk,
         int cpol,
         int cpha);
+
+/**@}*/ // END: addtogroup hil_spi_slave

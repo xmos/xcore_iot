@@ -9,6 +9,13 @@
 #include <xcore/hwtimer.h>
 
 /**
+ * \addtogroup hil_i2c_master hil_i2c_master
+ *
+ * The public API for using the RTOS I2C slave driver.
+ * @{
+ */
+
+/**
  * Status codes for I2C master operations
  */
 typedef enum {
@@ -69,8 +76,7 @@ struct i2c_master_struct {
  *                        be omitted. In this case, no other task can use
  *                        the component until a stop bit has been sent.
  *
- * \retval               ``I2C_ACK`` if the write was acknowledged by the device.
- * \retval               ``I2C_NACK``otherwise.
+ * \returns               #I2C_ACK if the write was acknowledged by the device, #I2C_NACK otherwise.
  */
 i2c_res_t i2c_master_write(
         i2c_master_t *ctx,
@@ -94,8 +100,7 @@ i2c_res_t i2c_master_write(
  *                        be omitted. In this case, no other task can use
  *                        the component until a stop bit has been sent.
  *
- * \retval               ``I2C_ACK`` if the read was acknowledged by the device.
- * \retval               ``I2C_NACK``otherwise.
+ * \returns               #I2C_ACK if the read was acknowledged by the device, #I2C_NACK otherwise.
  */
 i2c_res_t i2c_master_read(
         i2c_master_t *ctx,
@@ -160,15 +165,24 @@ void i2c_master_init(
  */
 void i2c_master_shutdown(i2c_master_t *ctx);
 
+/**@}*/ // END: addtogroup hil_i2c_master
+
+/**
+ * \addtogroup hil_i2c_slave hil_i2c_slave
+ *
+ * The public API for using the HIL I2C slave.
+ * @{
+ */
+
 
 /**
  * I2C Slave Response
  *
  *  This type is used to describe the I2C slave response.
  */
-typedef enum i2c_slave_ack_t {
-    I2C_SLAVE_ACK,  /**<< ACK to accept request */
-    I2C_SLAVE_NACK, /**<< NACK to ignore request */
+typedef enum i2c_slave_ack {
+    I2C_SLAVE_ACK,  /**< ACK to accept request */
+    I2C_SLAVE_NACK, /**< NACK to ignore request */
 } i2c_slave_ack_t;
 
 /**
@@ -185,8 +199,8 @@ typedef enum i2c_slave_ack_t {
  *                 by the application. Used to share data between
  *                 the callback functions and the application.
  *
- * \returns        The callback must return either ``I2C_SLAVE_ACK``
- *                 or ``I2C_SLAVE_NACK``.
+ * \returns        The callback must return either #I2C_SLAVE_ACK
+ *                 or #I2C_SLAVE_NACK.
  */
 typedef i2c_slave_ack_t (*ack_read_request_t)(void *app_data);
 
@@ -204,8 +218,8 @@ typedef i2c_slave_ack_t (*ack_read_request_t)(void *app_data);
  *                 by the application. Used to share data between
  *                 the callback functions and the application.
  *
- * \returns        The callback must return either ``I2C_SLAVE_ACK``
- *                 or ``I2C_SLAVE_NACK``.
+ * \returns        The callback must return either #I2C_SLAVE_ACK
+ *                 or #I2C_SLAVE_NACK.
  */
 typedef i2c_slave_ack_t (*ack_write_request_t)(void *app_data);
 
@@ -234,8 +248,8 @@ typedef uint8_t (*master_requires_data_t)(void *app_data);
  *                 the callback functions and the application.
  * \param data     The byte of data received from the bus master.
  *
- * \returns        The callback must return either ``I2C_SLAVE_ACK``
- *                 or ``I2C_SLAVE_NACK``.
+ * \returns        The callback must return either #I2C_SLAVE_ACK
+ *                 or #I2C_SLAVE_NACK.
  */
 typedef i2c_slave_ack_t (*master_sent_data_t)(void *app_data, uint8_t data);
 
@@ -320,6 +334,8 @@ void i2c_slave(const i2c_callback_group_t *const i2c_cbg,
                port_t p_scl,
                port_t p_sda,
                uint8_t device_addr);
+
+/**@}*/ // END: addtogroup hil_i2c_slave
 
 #include "i2c_reg.h"
 

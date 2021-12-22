@@ -9,6 +9,13 @@
 #include <xcore/clock.h>
 #include <xcore/parallel.h>
 
+/**
+ * \addtogroup hil_i2s_core hil_i2s_core
+ *
+ * The public API for using the HIL I2S core.
+ * @{
+ */
+
 #define I2S_MAX_DATALINES 8
 #define I2S_CHANS_PER_FRAME 2
 
@@ -17,7 +24,7 @@
  *
  * This type is used to describe the I2S mode.
  */
-typedef enum i2s_mode_t {
+typedef enum i2s_mode {
     I2S_MODE_I2S,            /**< The LR clock transitions ahead of the data by one bit clock. */
     I2S_MODE_LEFT_JUSTIFIED, /**< The LR clock and data are phase aligned. */
 } i2s_mode_t;
@@ -29,7 +36,7 @@ typedef enum i2s_mode_t {
  * edge of bit clock and sample them on rising edge of bit clock. Some
  * masters have it the other way around.
  */
-typedef enum i2s_slave_bclk_polarity_t {
+typedef enum i2s_slave_bclk_polarity {
     I2S_SLAVE_SAMPLE_ON_BCLK_RISING,   /**< Toggle falling, sample rising (default if not set) */
     I2S_SLAVE_SAMPLE_ON_BCLK_FALLING,  /**< Toggle rising, sample falling */
 } i2s_slave_bclk_polarity_t;
@@ -39,7 +46,7 @@ typedef enum i2s_slave_bclk_polarity_t {
  *
  * This structure describes the configuration of an I2S bus.
  */
-typedef struct i2s_config_t {
+typedef struct i2s_config {
   unsigned mclk_bclk_ratio;                       /**< The ratio between the master clock and bit clock signals. */
   i2s_mode_t mode;                                /**< The mode of the LR clock. */
   i2s_slave_bclk_polarity_t slave_bclk_polarity;  /**< Slave bit clock polarity. */
@@ -50,7 +57,7 @@ typedef struct i2s_config_t {
  *
  * Restart commands that can be signalled to the I2S or TDM component.
  */
-typedef enum i2s_restart_t {
+typedef enum i2s_restart {
   I2S_NO_RESTART = 0,      /**< Do not restart. */
   I2S_RESTART,             /**< Restart the bus (causes the I2S/TDM to stop and a new init callback to occur allowing reconfiguration of the BUS). */
   I2S_SHUTDOWN             /**< Shutdown. This will cause the I2S/TDM component to exit. */
@@ -84,8 +91,8 @@ typedef void (*i2s_init_t)(void *app_data, i2s_config_t *i2s_config);
  *                  data specific to each I2S task instance.
  *
  * \return          The return value should be set to
- *                  ``I2S_NO_RESTART``, ``I2S_RESTART`` or
- *                  ``I2S_SHUTDOWN``.
+ *                  #I2S_NO_RESTART, #I2S_RESTART or
+ *                  #I2S_SHUTDOWN.
  */
 typedef i2s_restart_t (*i2s_restart_check_t)(void *app_data);
 
@@ -154,9 +161,18 @@ typedef struct {
     void *app_data;
 } i2s_callback_group_t;
 
+/**@}*/ // END: addtogroup hil_i2s_core
+
 DECLARE_JOB(i2s_master, (const i2s_callback_group_t *, const port_t *, const size_t, const port_t *, const size_t, const port_t, const port_t, const port_t, const xclock_t));
 DECLARE_JOB(i2s_master_external_clock, (const i2s_callback_group_t *, const port_t *, const size_t, const port_t *, const size_t, const port_t, const port_t, const xclock_t));
 DECLARE_JOB(i2s_slave, (const i2s_callback_group_t *, port_t *, const size_t, port_t *, const size_t, port_t, port_t, xclock_t));
+
+/**
+ * \addtogroup hil_i2s_master hil_i2s_master
+ *
+ * The public API for using the HIL I2S master.
+ * @{
+ */
 
 /**
  * I2S master task
@@ -228,6 +244,15 @@ void i2s_master_external_clock(
         const port_t p_lrclk,
         const xclock_t bclk);
 
+/**@}*/ // END: addtogroup hil_i2s_master
+
+/**
+ * \addtogroup hil_i2s_slave hil_i2s_slave
+ *
+ * The public API for using the HIL I2S slave.
+ * @{
+ */
+
 /**
  * I2S slave task
  *
@@ -260,5 +285,7 @@ void i2s_slave(
         port_t p_bclk,
         port_t p_lrclk,
         xclock_t bclk);
+
+/**@}*/ // END: addtogroup hil_i2s_slave
 
 #endif // _i2s_h_
