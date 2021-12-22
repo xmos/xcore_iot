@@ -77,11 +77,9 @@ The project template `README <https://github.com/xmos/freertos_getting_started#r
 Building RTOS Applications
 **************************
 
-RTOS applications using the SDK are built using `CMake`. The SDK provides many drivers and services, all of which have `.cmake` files which can be included by the application's `CMakeLists.txt` file. The application's CMakeLists can specify precisely which drivers and software services within the SDK should be included through the use of various CMake options.
+RTOS applications using the SDK are built using `CMake`. The SDK provides many drivers and services, all of which can be included by the application's `CMakeLists.txt` file. The application's CMakeLists can specify precisely which drivers and software services within the SDK should be included through the use of various CMake options.  
 
-The example applications also provide a GNU Make Makefile that actually runs CMake and then runs make with the generated CMake makefiles. This is done to automate the steps that must be taken to build for more than one tile. The Makefile actually runs CMake once per tile. Each tile is built independently, and the two resulting binaries are then stitched together by the Makefile.
-
-By simply running:
+The example applications also provide a GNU Make Makefile that actually runs CMake and then runs make with the generated CMake makefiles. This is done by simply running:
 
 .. code-block:: console
 
@@ -94,6 +92,8 @@ in the example application directories, all the steps necessary to build the ent
   $ make run
 
 will run it on the board with xscope enabled so that all debug output from the application will be routed to the terminal.
+
+All applications have a README file with additional instructions on how to setup, build and run the application.  See the :doc:`FreeRTOS Examples <examples/index>` page for a list of all example applications.
 
 Including the RTOS Platform
 ===========================
@@ -108,15 +108,15 @@ Then, later in your `CMakeLists.txt` file, set the target sources and includes u
 
 .. code-block:: CMake
 
-  target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
-  target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
+  target_sources(my_target_name PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
+  target_include_directories(my_target_name PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
 
-The `CMakeLists.txt` files in the FreeRTOS example applications is a great place to look for how this is implemented in a real project. 
+See the :ref:`Build System <sdk-build_system-label>` page for more information on the CMake-based build system.  The `CMakeLists.txt` files in the FreeRTOS example applications are another great places to see for how this is implemented in a realistic project.
 
 Build Variables
 ===============
 
-Including the `xmos_rtos_platform.cmake` is all that most applications need to implement.  However, your application may use modules that are not included by default.
+Including the `xmos_rtos_platform.cmake` is all that most applications need to implement.  However, your application may use modules that are not enabled by default.
 
 To include those modules, additional build variables must be set in the `CMakeLists.txt` file before including `xmos_rtos_platform.cmake`. See the example below:
 

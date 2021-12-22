@@ -1,3 +1,5 @@
+.. _sdk-build_system-label:
+
 .. include:: ../../substitutions.rst
 
 ############
