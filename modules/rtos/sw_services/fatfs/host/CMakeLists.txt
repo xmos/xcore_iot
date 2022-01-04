@@ -9,16 +9,39 @@ if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 # Tell cmake where to install things
-set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE PATH "" FORCE)
+# set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE PATH "" FORCE)
 
 # Some source files are in the parent directory
 set(FATFS_HOST_PATH "${CMAKE_CURRENT_LIST_DIR}")
 cmake_path(GET FATFS_HOST_PATH PARENT_PATH FATFS_HOST_PATH)
 message(STATUS "Using src files at ${FATFS_HOST_PATH}")
 
-# Output application to the parent directory
-set(FATFS_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR})
-cmake_path(GET FATFS_INSTALL_DIR PARENT_PATH FATFS_INSTALL_DIR)
+# Get the XCore SDK root directory
+execute_process(COMMAND git rev-parse --show-toplevel OUTPUT_VARIABLE XCORE_SDK_ROOT)
+# remove any crlf
+string(STRIP ${XCORE_SDK_ROOT} XCORE_SDK_ROOT)
+
+# Retrieve version number to create directory
+file(READ ${XCORE_SDK_ROOT}/settings.json JSON_STRING)
+# Get the "version" value from the JSON element
+string(JSON VERSION_VAL GET ${JSON_STRING} ${IDX} version)
+
+# Determine OS, set up output dirs
+if(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+    set(FATFS_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+    set(FATFS_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    set(FATFS_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\SDK\\${VERSION_VAL}\\bin")
+endif()
+
+make_directory(${FATFS_INSTALL_DIR})
+
+# # # Output application to the parent directory
+# # set(FATFS_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR})
+# # cmake_path(GET FATFS_INSTALL_DIR PARENT_PATH FATFS_INSTALL_DIR)
+# # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${FATFS_INSTALL_DIR})
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${FATFS_INSTALL_DIR})
 
 set(APP_SOURCES
