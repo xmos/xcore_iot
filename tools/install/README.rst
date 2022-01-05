@@ -11,6 +11,8 @@ Building the Host Application
 
 To build this application, run the following command:
 
+Note: Linux users require proper permissions for installation to the /opt/ directory.
+
 .. tab:: Linux and MacOS
 
     .. code-block:: console
