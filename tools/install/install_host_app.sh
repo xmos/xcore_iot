@@ -7,6 +7,8 @@ else
     INSTALL_SCRIPT_PATH=$PWD
     HOSTAPP_PATH=${XCORE_SDK_PATH}/modules/rtos/sw_services/fatfs/host
     
+    echo $INSTALL_SCRIPT_PATH
+    echo $HOSTAPP_PATH
     cd ${HOSTAPP_PATH}
     rm -rf bin
     rm -rf build
