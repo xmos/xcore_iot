@@ -40,10 +40,10 @@ To verify this application has built, run:
 
     .. code-block:: console
 
-        $ fatfs_mkimage.exe --help
+        $ fatfs_mkimage --help
         
 .. tab:: Windows
 
     .. code-block:: x86 native tools command prompt
     
-        > fatfs_mkimage.exe --help
+        > fatfs_mkimage --help
