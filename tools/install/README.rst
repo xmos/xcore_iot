@@ -32,6 +32,8 @@ Note: Windows users must run the x86 native tools command prompt from Visual Stu
 Verify Installation
 *******************
 
+Note: Users on any OS must add a system environment variable of the installation folder to PATH.
+
 To verify this application has built, run:
 
 .. tab:: Linux and MacOS
