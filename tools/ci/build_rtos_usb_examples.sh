@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-source ${XCORE_SDK_PATH}/tools/ci/helper_functions.sh
+XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
+
+source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 
 USB_EXAMPLE_PATH="examples/freertos/usb"
 
@@ -40,7 +42,7 @@ for ((i = 0; i < ${#demos[@]}; i += 1)); do
     read -ra FIELDS <<< ${demos[i]}
     demo="${FIELDS[0]}"
     board="${FIELDS[1]}"
-    path="${XCORE_SDK_PATH}/${USB_EXAMPLE_PATH}"    
+    path="${XCORE_SDK_ROOT}/${USB_EXAMPLE_PATH}"    
     echo '******************************************************'
     echo '* Building' ${demo} 'for' ${board}
     echo '******************************************************'

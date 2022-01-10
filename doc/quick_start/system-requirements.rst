@@ -11,11 +11,9 @@ The XCore SDK is officially supported on the following platforms. Unofficial sup
 
    Windows 10 is supported.
    
-   We recommend that Windows users install and use the Windows Subsystem for Linux (WSL) to build the SDK example applications.  See `Windows Subsystem for Linux Installation Guide for Windows 10 <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`__ to install WSL.
+   Windows users can also use the Windows Subsystem for Linux (WSL).  See `Windows Subsystem for Linux Installation Guide for Windows 10 <https://docs.microsoft.com/en-us/windows/wsl/install-win10>`__ to install WSL.
 
    The SDK should also work using other Windows GNU development environments like GNU Make, MinGW or Cygwin.
-
-   **Note, the requirement for a GNU development environment will be removed in a future release.**
 
 .. tab:: Mac
 

@@ -25,4 +25,5 @@ XCORE
    :maxdepth: 1
 
    swmem
+   l2_cache
    intertile

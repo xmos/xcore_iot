@@ -13,6 +13,7 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
    usb.rst
    device_control.rst
    dispatcher.rst
+   l2_cache.rst
    cifar10.rst
    person_detection.rst
    iot_aws.rst

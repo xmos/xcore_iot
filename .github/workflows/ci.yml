@@ -23,9 +23,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  XCORE_SDK_PATH: ${{ github.workspace }}
-  SDK_APP_BUILDER: 'ghcr.io/xmos/sdk_app_builder:develop'
-  SDK_DOC_BUILDER: 'ghcr.io/xmos/sdk_doc_builder:develop'
+  SDK_BUILDER_IMAGE: 'ghcr.io/xmos/sdk_app_builder:develop'
 
 jobs:
   build_metal_examples:
@@ -37,13 +35,13 @@ jobs:
         with:
           submodules: recursive
       
-      - name: Pull SDK_APP_BUILDER container
+      - name: Pull SDK builder image
         run: |
-          docker pull ${SDK_APP_BUILDER} 
+          docker pull ${SDK_BUILDER_IMAGE} 
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${SDK_APP_BUILDER} bash -l tools/ci/build_metal_examples.sh all
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_metal_examples.sh all
 
   build_rtos_examples:
     name: Build RTOS examples
@@ -54,13 +52,13 @@ jobs:
         with:
           submodules: recursive
       
-      - name: Pull SDK_APP_BUILDER container
+      - name: Pull SDK builder image
         run: |
-          docker pull ${SDK_APP_BUILDER} 
+          docker pull ${SDK_BUILDER_IMAGE} 
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${SDK_APP_BUILDER} bash -l tools/ci/build_rtos_examples.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_examples.sh smoke
 
   build_rtos_usb_examples:
     name: Build RTOS USB examples
@@ -71,13 +69,13 @@ jobs:
         with:
           submodules: recursive
       
-      - name: Pull SDK_APP_BUILDER container
+      - name: Pull SDK builder image
         run: |
-          docker pull ${SDK_APP_BUILDER} 
+          docker pull ${SDK_BUILDER_IMAGE} 
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${SDK_APP_BUILDER} bash -l tools/ci/build_rtos_usb_examples.sh smoke
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh smoke
 
   build_rtos_tests:
     name: Build RTOS tests
@@ -88,9 +86,9 @@ jobs:
         with:
           submodules: recursive
       
-      - name: Pull SDK_APP_BUILDER container
+      - name: Pull SDK builder image
         run: |
-          docker pull ${SDK_APP_BUILDER} 
+          docker pull ${SDK_BUILDER_IMAGE} 
       
       - name: Build
         run: |

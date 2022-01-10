@@ -3,11 +3,19 @@
 PROJECT_NAME = XCore SDK
 PROJECT_BRIEF = "XCore Software Development Kit"
 
-INPUT += ../modules/rtos/drivers 
-INPUT += ../modules/lib_xs3_math 
-#TODO: someday just add all the HIL modules w/ 
-#INPUT += ../modules/hil
+# HIL library APIs
+INPUT += ../modules/hil/lib_i2c/api
+INPUT += ../modules/hil/lib_i2s/api
+INPUT += ../modules/hil/lib_qspi_io/api
+INPUT += ../modules/hil/lib_spi/api
+#INPUT += ../modules/hil/lib_l2_cache/api
 #INPUT += ../modules/hil/lib_xud/api ../modules/hil/lib_xud/examples/*/api
+
+# Other library APIs
+INPUT += ../modules/lib_xs3_math 
+
+# RTOS driver APIs
+INPUT += ../modules/rtos/drivers 
 
 PREDEFINED = C_API= EXTERN_C= __attribute__((weak))=
 
