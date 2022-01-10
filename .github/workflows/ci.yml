@@ -95,3 +95,20 @@ jobs:
       - name: Build
         run: |
           docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${SDK_APP_BUILDER} bash -l tools/ci/build_rtos_tests.sh all
+
+  build_host_apps:
+    name: Build host applications
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Pull SDK_APP_BUILDER container
+        run: |
+          docker pull ${SDK_APP_BUILDER} 
+      
+      - name: Build
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk -e XCORE_SDK_PATH=/xcore_sdk -v ${XCORE_SDK_PATH}:/xcore_sdk ${SDK_APP_BUILDER} bash -l tools/ci/install_host_apps.sh
