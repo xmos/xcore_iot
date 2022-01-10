@@ -17,7 +17,7 @@ cd ${INSTALL_SCRIPT_PATH}
 # alert user where it is
 echo
 echo
-echo "Utility executables for fatfs_mkimage created at /opt/xmos/SDK/version/bin/."
+echo "Utility executables created at /opt/xmos/SDK/version/bin/."
 echo "Please add to the PATH system environment variable."
 echo
 echo "Then, test with: fatfs_mkimage --help"

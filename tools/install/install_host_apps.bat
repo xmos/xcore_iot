@@ -35,7 +35,7 @@ set "%jsonString:, =" & set "%"
 :: alert user where it is
 echo.
 echo.
-echo Utility executables for fatfs_mkimage created at "%USERPROFILE%\.xmos\SDK\%version%\bin\".
+echo Utility executables created at "%USERPROFILE%\.xmos\SDK\%version%\bin\".
 echo Please add to the PATH system environment variable.
 echo.
 echo Then, test with fatfs_mkimage.exe --help

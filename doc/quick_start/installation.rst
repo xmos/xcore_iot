@@ -40,7 +40,37 @@ It is recommended that your `XCORE_SDK_PATH` not include spaces.  However, if th
 
 .. note:: Linux and MacOS users can add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.  Windows users can add the XCORE_SDK_PATH to the System Properties.
 
-Optional Step 3. Install Python and Python Requirements
+Step 3. Install Host Applications
+=================================
+
+The SDK includes utilities that run on the PC host.  Run the following command to build and install these utilities:
+
+.. tab:: Linux and MacOS
+
+    Linux users require proper permissions for installation to the ``/opt/`` directory.  You may need to run the commands as ``sudo``. 
+
+    .. code-block:: console
+    
+        $ bash tools/install/install_host_app.sh
+
+    This command installs the applications at ``/opt/xmos/SDK/<sdk version>/bin/`` directory.  You may wish to append this directory to your ``PATH`` variable.
+
+    .. code-block:: console
+
+        $ export PATH=$PATH:/opt/xmos/SDK/<sdk_version>/bin/
+
+.. tab:: Windows
+
+    Windows users must run the x86 native tools command prompt from Visual Studio
+
+    .. code-block:: x86 native tools command prompt
+    
+        $ tools/install/install_host_app.bat
+
+    This command installs the applications at ``<USERPROFILE>\.xmos\SDK\<sdk version>\bin\`` directory.  You may wish to add this directory to your ``PATH`` variable.
+
+
+Optional Step 4. Install Python and Python Requirements
 =======================================================
 
 The SDK does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, Python 3 is needed, we recommend and test with Python 3.8.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
