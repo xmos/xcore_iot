@@ -9,7 +9,9 @@ This is the FAT file system image creation tool. This tool creates a FAT filesys
 Building the Application
 ************************
 
-To build this application, run the following commands:
+This application is typically built and installed from tools/install.  
+
+However, if you are modifying the application, it is possible to build the project using CMake. To build this application, run the following commands:
 
 .. tab:: Linux and MacOS
 
@@ -19,31 +21,14 @@ To build this application, run the following commands:
         $ cd build
         $ make -j
 
+Note: You may need to run the ``make -j`` command as ``sudo``.  
+
 Note: Windows users must run the x86 native tools command prompt from Visual Studio
 
 .. tab:: Windows
 
     .. code-block:: x86 native tools command prompt
     
-        > cmake -G "NMake Makefiles" -B build
-        > cd build
-        > nmake
-
-
-*******************
-Verify Installation
-*******************
-
-To verify this application has built, ascend from the build/ directory to its parent and run:
-
-.. tab:: Linux and MacOS
-
-    .. code-block:: console
-
-        $ fatfs_mkimage.exe --help
-        
-.. tab:: Windows
-
-    .. code-block:: x86 native tools command prompt
-    
-        > fatfs_mkimage --help
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake
