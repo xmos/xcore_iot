@@ -18,7 +18,7 @@ macro(create_multitile_target _LIST_VAR)
     endif()
 
     add_custom_target(${PROJECT_NAME}.xe
-        ALL     mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/${OUTPUT_DIR}
+        ALL ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/${OUTPUT_DIR}
         COMMAND cp ${CMAKE_BINARY_DIR}/intermediates/${XE_BASE_TILE}.xe ${CMAKE_CURRENT_SOURCE_DIR}/${OUTPUT_DIR}/${PROJECT_NAME}.xe
         DEPENDS
             "${CMAKE_BINARY_DIR}/intermediates/${XE_BASE_TILE}.xe"
@@ -48,7 +48,7 @@ macro(create_multitile_target _LIST_VAR)
 
         if(NOT ${_TILE} EQUAL ${XE_BASE_TILE})
             add_custom_target(TMP_TARGET_${_TILE}.xe
-                ALL     mkdir -p ${CMAKE_BINARY_DIR}/intermediates/${_TILE}
+                ALL ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/intermediates/${_TILE}
                 COMMAND xobjdump --split --split-dir ${CMAKE_BINARY_DIR}/intermediates/${_TILE} ${CMAKE_BINARY_DIR}/intermediates/${_THIS_TARGET}
                 COMMAND xobjdump ${CMAKE_BINARY_DIR}/intermediates/${XE_BASE_TILE}.xe -r 0,${_TILE},${CMAKE_BINARY_DIR}/intermediates/${_TILE}/image_n0c${_TILE}_2.elf
                 DEPENDS
