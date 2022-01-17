@@ -9,7 +9,7 @@
 #
 # This file contains the workflows that are run prior to merging a pull request.
 
-name: Build
+name: CI
 
 on:
   push:

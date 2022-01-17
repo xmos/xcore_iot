@@ -26,6 +26,7 @@
 !doc/tutorials/build_system/
 **/run_*.log
 **/_doxygen/*
+**/_templates/*
 **/pdf/*
 **/html/*
 **/.settings/*

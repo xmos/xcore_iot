@@ -153,68 +153,6 @@ struct rtos_i2s_struct{
 #include "rtos/drivers/i2s/api/rtos_i2s_rpc.h"
 
 /**
- * \addtogroup rtos_i2s_driver_core rtos_i2s_driver_core
- *
- * The core functions for using an RTOS I2S driver instance after
- * it has been initialized and started. These functions may be used
- * by both the host and any client tiles that RPC has been enabled for.
- * @{
- */
-
-/**
- * Receives sample frames from the I2S interface.
- *
- * This function will block until new frames are available.
- *
- * \param ctx            A pointer to the I2S driver instance to use.
- * \param i2s_sample_buf A buffer to copy the received sample frames into.
- * \param frame_count    The number of frames to receive from the buffer.
- *                       This must be less than or equal to the size of the
- *                       input buffer specified to rtos_i2s_start().
- * \param timeout        The amount of time to wait before the requested number
- *                       of frames becomes available.
- *
- * \returns              The number of frames actually received into \p i2s_sample_buf.
- */
-inline size_t rtos_i2s_rx(
-        rtos_i2s_t *ctx,
-        int32_t *i2s_sample_buf,
-        size_t frame_count,
-        unsigned timeout)
-{
-    return ctx->rx(ctx, i2s_sample_buf, frame_count, timeout);
-}
-
-/**
- * Transmits sample frames out to the I2S interface.
- *
- * The samples are stored into a buffer and are not necessarily sent out to the
- * I2S interface before this function returns.
- *
- * \param ctx            A pointer to the I2S driver instance to use.
- * \param i2s_sample_buf A buffer containing the sample frames to transmit out
- *                       to the I2S interface.
- * \param frame_count    The number of frames to transmit out from the buffer.
- *                       This must be less than or equal to the size of the
- *                       output buffer specified to rtos_i2s_start().
- * \param timeout        The amount of time to wait before there is enough
- *                       space in the send buffer to accept the frames to be
- *                       transmitted.
- *
- * \returns              The number of frames actually stored into the buffer.
- */
-inline size_t rtos_i2s_tx(
-        rtos_i2s_t *ctx,
-        int32_t *i2s_sample_buf,
-        size_t frame_count,
-        unsigned timeout)
-{
-    return ctx->tx(ctx, i2s_sample_buf, frame_count, timeout);
-}
-
-/**@}*/
-
-/**
  * Helper function to calculate the MCLK/BCLK ratio given the
  * audio clock frequency at the master clock pin and the
  * desired sample rate.
@@ -284,6 +222,75 @@ void rtos_i2s_start(
         unsigned interrupt_core_id);
 
 /**
+ * \addtogroup rtos_i2s_driver_core rtos_i2s_driver_core
+ *
+ * The core functions for using an RTOS I2S driver instance after
+ * it has been initialized and started. These functions may be used
+ * by both the host and any client tiles that RPC has been enabled for.
+ * @{
+ */
+
+/**
+ * Receives sample frames from the I2S interface.
+ *
+ * This function will block until new frames are available.
+ *
+ * \param ctx            A pointer to the I2S driver instance to use.
+ * \param i2s_sample_buf A buffer to copy the received sample frames into.
+ * \param frame_count    The number of frames to receive from the buffer.
+ *                       This must be less than or equal to the size of the
+ *                       input buffer specified to rtos_i2s_start().
+ * \param timeout        The amount of time to wait before the requested number
+ *                       of frames becomes available.
+ *
+ * \returns              The number of frames actually received into \p i2s_sample_buf.
+ */
+inline size_t rtos_i2s_rx(
+        rtos_i2s_t *ctx,
+        int32_t *i2s_sample_buf,
+        size_t frame_count,
+        unsigned timeout)
+{
+    return ctx->rx(ctx, i2s_sample_buf, frame_count, timeout);
+}
+
+/**
+ * Transmits sample frames out to the I2S interface.
+ *
+ * The samples are stored into a buffer and are not necessarily sent out to the
+ * I2S interface before this function returns.
+ *
+ * \param ctx            A pointer to the I2S driver instance to use.
+ * \param i2s_sample_buf A buffer containing the sample frames to transmit out
+ *                       to the I2S interface.
+ * \param frame_count    The number of frames to transmit out from the buffer.
+ *                       This must be less than or equal to the size of the
+ *                       output buffer specified to rtos_i2s_start().
+ * \param timeout        The amount of time to wait before there is enough
+ *                       space in the send buffer to accept the frames to be
+ *                       transmitted.
+ *
+ * \returns              The number of frames actually stored into the buffer.
+ */
+inline size_t rtos_i2s_tx(
+        rtos_i2s_t *ctx,
+        int32_t *i2s_sample_buf,
+        size_t frame_count,
+        unsigned timeout)
+{
+    return ctx->tx(ctx, i2s_sample_buf, frame_count, timeout);
+}
+
+/**@}*/
+
+/**
+ * \addtogroup rtos_i2s_master_driver rtos_i2s_master_driver
+ *
+ * The public API for using the RTOS I2S slave driver.
+ * @{
+ */
+
+/**
  * Initializes an RTOS I2S driver instance in master mode.
  * This must only be called by the tile that owns the driver instance. It should be
  * called before starting the RTOS, and must be called before calling rtos_i2s_start()
@@ -346,6 +353,16 @@ void rtos_i2s_master_ext_clock_init(
         port_t p_lrclk,
         xclock_t bclk);
 
+/**@}*/
+
+
+/**
+ * \addtogroup rtos_i2s_slave_driver rtos_i2s_slave_driver
+ *
+ * The public API for using the RTOS I2S slave driver.
+ * @{
+ */
+
 /**
  * Initializes an RTOS I2S driver instance in slave mode.
  * This must only be called by the tile that owns the driver instance. It should be
@@ -375,6 +392,8 @@ void rtos_i2s_slave_init(
         port_t p_bclk,
         port_t p_lrclk,
         xclock_t bclk);
+
+/**@}*/
 
 /**@}*/
 

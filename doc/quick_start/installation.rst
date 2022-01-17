@@ -63,7 +63,7 @@ The SDK includes utilities that run on the PC host.  Run the following command t
 
     Windows users must run the x86 native tools command prompt from Visual Studio
 
-    .. code-block:: x86 native tools command prompt
+    .. code-block:: console
     
         $ tools/install/install_host_app.bat
 
