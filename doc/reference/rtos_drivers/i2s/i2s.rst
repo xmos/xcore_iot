@@ -1,15 +1,22 @@
-.. include:: ../../substitutions.rst
+.. include:: ../../../substitutions.rst
 
-########################
-|I2S| Master RTOS Driver
-########################
+#################
+|I2S| RTOS Driver
+#################
 
-This driver can be used to instantiate and control an |I2S| master I/O interface on XCore in an RTOS application.
+This driver can be used to instantiate and control an |I2S| master or slave mode I/O interface on XCore in an RTOS application.
 
 ******************
 Initialization API
 ******************
 The following structures and functions are used to initialize and start an |I2S| driver instance.
+
+.. toctree::
+   :maxdepth: 2
+   :includehidden:
+
+   i2s_master.rst
+   i2s_slave.rst
 
 .. doxygengroup:: rtos_i2s_driver
    :content-only:

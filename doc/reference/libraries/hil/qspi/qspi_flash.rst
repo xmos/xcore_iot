@@ -1,24 +1,11 @@
-.. include:: ../../../substitutions.rst
+.. include:: ../../../../substitutions.rst
 
-################
-QSPI HIL Library
-################
+**********
+QSPI Flash
+**********
 
-A software defined QSPI (quad serial peripheral interface) library that allows you to read and write to a QSPI peripheral via the XCore ports.
-
-All QSPI functions can be accessed via the ``qspi_flash.h`` or ``qspi_io.h`` header:
-
-.. code-block:: c
-   
-   #include <qspi_flash.h>
-   #include <qspi_io.h>
-
-*****
-Flash
-*****
-
-Flash Usage
-===========
+QSPI Flash Usage
+================
 
 The following code snippet demonstrates the basic usage of an QSPI flash device.
 
@@ -61,23 +48,10 @@ The following code snippet demonstrates the basic usage of an QSPI flash device.
    // Read some data
    qspi_flash_read(&qspi_flash_ctx, *data, 0x64, 4);
 
-Flash API
-=========
+QSPI Flash API
+==============
 
 The following structures and functions are used to QSPI flash I/O.
 
 .. doxygengroup:: hil_qspi_flash
    :content-only:
-
-***
-I/O
-***
-
-I/O API
-=======
-
-The following structures and functions are used for low-level QSPI I/O.
-
-.. doxygengroup:: hil_qspi_io
-   :content-only:
-
