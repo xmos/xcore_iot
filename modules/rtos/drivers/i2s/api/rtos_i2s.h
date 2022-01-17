@@ -36,6 +36,61 @@
 typedef struct rtos_i2s_struct rtos_i2s_t;
 
 /**
+ * Function pointer type for application provided RTOS I2S send filter callback functions.
+ *
+ * These callback functions are called when an I2S driver instance needs output the next
+ * audio frame to its interface. By default, audio frames in the driver's send buffer are
+ * output directly to its interface. However, this gives the application an opportunity to
+ * override this and provide filtering.
+ *
+ * These functions must not block.
+ *
+ * \param ctx               A pointer to the associated I2C slave driver instance.
+ * \param app_data          A pointer to application specific data provided
+ *                          by the application. Used to share data between
+ *                          this callback function and the application.
+ * \param i2s_frame         A pointer to the buffer where the callback should
+ *                          write the next frame to send.
+ * \param i2s_frame_size    The number of samples that should be written to
+ *                          \p i2s_frame.
+ * \param send_buf          A pointer to the next frame in the driver's send
+ *                          buffer. The callback should use this as the input
+ *                          to its filter.
+ * \param samples_available The number of samples available in \p send_buf.
+ *
+ * \returns the number of samples read out of \p send_buf.
+ */
+typedef size_t (*rtos_i2s_send_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *send_buf, size_t samples_available);
+
+/**
+ * Function pointer type for application provided RTOS I2S receive filter callback functions.
+ *
+ * These callback functions are called when an I2S driver instance has received the next audio
+ * frame from its interface. By default, audio frames received from the driver's interface are
+ * put directly into its receive buffer. However, this gives the application an opportunity to
+ * override this and provide filtering.
+ *
+ * These functions must not block.
+ *
+ * \param ctx                A pointer to the associated I2C slave driver instance.
+ * \param app_data           A pointer to application specific data provided
+ *                           by the application. Used to share data between
+ *                           this callback function and the application.
+ * \param i2s_frame          A pointer to the buffer where the callback should
+ *                           read the next received frame from The callback should
+ *                           use this as the input to its filter.
+ * \param i2s_frame_size     The number of samples that should be read from
+ *                           \p i2s_frame.
+ * \param receive_buf        A pointer to the next frame in the driver's send
+ *                           buffer. The callback should use this as the input
+ *                           to its filter.
+ * \param sample_spaces_free The number of sample spaces free in \p receive_buf.
+ *
+ * \returns the number of samples written to \p receive_buf.
+ */
+typedef size_t (*rtos_i2s_receive_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *receive_buf, size_t sample_spaces_free);
+
+/**
  * Struct representing an RTOS I2S driver instance.
  *
  * The members in this struct should not be accessed directly.
@@ -94,61 +149,6 @@ struct rtos_i2s_struct{
     } recv_buffer;
     uint8_t isr_cmd;
 };
-
-/**
- * Function pointer type for application provided RTOS I2S send filter callback functions.
- *
- * These callback functions are called when an I2S driver instance needs output the next
- * audio frame to its interface. By default, audio frames in the driver's send buffer are
- * output directly to its interface. However, this gives the application an opportunity to
- * override this and provide filtering.
- *
- * These functions must not block.
- *
- * \param ctx               A pointer to the associated I2C slave driver instance.
- * \param app_data          A pointer to application specific data provided
- *                          by the application. Used to share data between
- *                          this callback function and the application.
- * \param i2s_frame         A pointer to the buffer where the callback should
- *                          write the next frame to send.
- * \param i2s_frame_size    The number of samples that should be written to
- *                          \p i2s_frame.
- * \param send_buf          A pointer to the next frame in the driver's send
- *                          buffer. The callback should use this as the input
- *                          to its filter.
- * \param samples_available The number of samples available in \p send_buf.
- *
- * \returns the number of samples read out of \p send_buf.
- */
-typedef size_t (*rtos_i2s_send_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *send_buf, size_t samples_available);
-
-/**
- * Function pointer type for application provided RTOS I2S receive filter callback functions.
- *
- * These callback functions are called when an I2S driver instance has received the next audio
- * frame from its interface. By default, audio frames received from the driver's interface are
- * put directly into its receive buffer. However, this gives the application an opportunity to
- * override this and provide filtering.
- *
- * These functions must not block.
- *
- * \param ctx                A pointer to the associated I2C slave driver instance.
- * \param app_data           A pointer to application specific data provided
- *                           by the application. Used to share data between
- *                           this callback function and the application.
- * \param i2s_frame          A pointer to the buffer where the callback should
- *                           read the next received frame from The callback should
- *                           use this as the input to its filter.
- * \param i2s_frame_size     The number of samples that should be read from
- *                           \p i2s_frame.
- * \param receive_buf        A pointer to the next frame in the driver's send
- *                           buffer. The callback should use this as the input
- *                           to its filter.
- * \param sample_spaces_free The number of sample spaces free in \p receive_buf.
- *
- * \returns the number of samples written to \p receive_buf.
- */
-typedef size_t (*rtos_i2s_receive_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *receive_buf, size_t sample_spaces_free);
 
 #include "rtos/drivers/i2s/api/rtos_i2s_rpc.h"
 
