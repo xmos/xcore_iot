@@ -6,10 +6,15 @@
 
 setlocal enabledelayedexpansion
 
-:: build program for fresh executables
+:: install script is located in the current directory
 set INSTALL_SCRIPT_PATH=%CD%
-set HOSTAPP_PATH=%XCORE_SDK_PATH%/modules/rtos/sw_services/fatfs/host
+:: build files reside here:
+FOR /F "tokens=* USEBACKQ" %%F IN (`git rev-parse --show-toplevel`) DO (
+SET XCORE_SDK_REPO_PATH=%%F
+)
+set HOSTAPP_PATH=%XCORE_SDK_REPO_PATH%/modules/rtos/sw_services/fatfs/host
 
+:: build program for new executables
 cd %HOSTAPP_PATH%
 rm -rf bin
 rm -rf build
