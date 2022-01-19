@@ -5,11 +5,19 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
+#**********************
+# Get path to XCore SDK
+#**********************
+set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+
 ## This app only supports the XCORE-AI-EXPLORER board
 set(BOARD XCORE-AI-EXPLORER)
 
 ## Import XMOS configurations
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
+include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## Define project
 project(explorer_board)

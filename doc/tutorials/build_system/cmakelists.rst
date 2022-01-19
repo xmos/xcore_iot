@@ -6,6 +6,26 @@ Example CMakeLists.txt
 
    CMake is powerful tool that provides the developer a great deal of flexibility in how their projects are built.  As a result, CMakeLists.txt files in the example applications may vary from the examples below.
 
+****************
+Locating the SDK
+****************
+
+Applications that depend on the SDK will need to specify the fully-qualified path to the xcore_sdk directory. One way to accomplish this, and the method used in the ``CMakeLists.txt`` files below, is to set the following environment variable:
+
+.. code-block:: console
+
+    $ export XCORE_SDK_PATH=<path to>/xcore_sdk
+
+It is recommended that your `XCORE_SDK_PATH` not include spaces.  However, if this is not possible, you will need to enclose your path environment variable value in quotes.
+
+.. code-block:: console
+
+    $ export XCORE_SDK_PATH="<path with spaces to>/xcore_sdk"
+
+.. note:: Linux and MacOS users can add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.  Windows users can add the XCORE_SDK_PATH to the System Properties.
+
+Another option not shown is to specify the path the SDK as a `cmake` command-line variable.  
+
 **********
 Bare-Metal
 **********

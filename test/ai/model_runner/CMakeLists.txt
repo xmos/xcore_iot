@@ -7,11 +7,17 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
+
+
 #**********************
 # Setup project
 #**********************
 set(BOARD XCORE-AI-EXPLORER)
-set(SDK_PATH $ENV{XCORE_SDK_PATH})
+
+set(SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET SDK_PATH PARENT_PATH SDK_PATH)
+cmake_path(GET SDK_PATH PARENT_PATH SDK_PATH)
+cmake_path(GET SDK_PATH PARENT_PATH SDK_PATH)
 
 # Specify configuration
 set(USE_I2C_HIL FALSE)
@@ -38,7 +44,7 @@ set(USE_DISPATCHER TRUE)
 
 # Import XMOS RTOS platform configuration.
 # Must be done after setting the configuration options.
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
+include("${SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 project(model_runner VERSION 1.0.0)
 

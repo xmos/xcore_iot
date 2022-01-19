@@ -1,12 +1,18 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(SDK_PATH $ENV{XCORE_SDK_PATH})
+#**********************
+# Get path to XCore SDK
+#**********************
+set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
 
 #**********************
 # Setup XMOS toolchain
 #**********************
 set(USE_DEVICE_MEMORY_SUPPORT TRUE)
-include("${SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -58,14 +64,14 @@ target_compile_options(cifar10 PRIVATE ${BUILD_FLAGS})
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "${SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
+  "${XCORE_SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal")
+set(ADDITIONAL_INCLUDE_DIR "${XCORE_SDK_PATH}/modules/device_memory_support/bare-metal")
 
 #**********************
 # APP sources
 #**********************
-include("${SDK_PATH}/modules/aif/ai_framework.cmake")
+include("${XCORE_SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(APP_SOURCES
   "${PROJECT_SOURCE_DIR}/model_runner/cifar10_model_data.c"

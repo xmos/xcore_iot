@@ -71,8 +71,6 @@ New Project Template
 A minimal example application that can be used as a template to begin a new project can be found in the SDK under the path 
 `examples/freertos/getting_started <https://github.com/xmos/freertos_getting_started>`_
 
-The project template `README <https://github.com/xmos/freertos_getting_started#readme>`__ explains how to create a new project using the template.
-
 **************************
 Building RTOS Applications
 **************************

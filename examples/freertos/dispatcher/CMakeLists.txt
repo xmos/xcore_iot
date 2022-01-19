@@ -14,9 +14,17 @@ endif()
 # Specify configuration
 set(USE_DISPATCHER TRUE)
 
+#**********************
+# Get path to XCore SDK
+#**********************
+set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+
 # Import XMOS RTOS platform configuration.
 # Must be done after setting the configuration options.
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
+include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 # Define project
 project(dispatcher)

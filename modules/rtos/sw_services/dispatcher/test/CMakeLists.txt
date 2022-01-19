@@ -15,10 +15,20 @@ endif()
 set(MULTITILE_BUILD FALSE)
 set(USE_DISPATCHER TRUE)
 
+
+# Get path to XCore SDK
+set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+
 # Import XMOS RTOS platform configuration.
 # Must be done after setting the configuration options.
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
-include("$ENV{XCORE_SDK_PATH}/modules/rtos/rtos.cmake")
+include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${XCORE_SDK_PATH}/modules/modules.cmake")
+include("${XCORE_SDK_PATH}/modules/rtos/rtos.cmake")
 
 project(dispatcher_tests VERSION 1.0.0)
 
@@ -63,6 +73,7 @@ target_sources(dispatcher_tests
   PRIVATE ${RTOS_SUPPORT_SOURCES}
   PRIVATE ${OSAL_SOURCES}
   PRIVATE ${DISPATCHER_SOURCES}
+  PRIVATE ${UTILS_SOURCES}
   PRIVATE ${UNITY_SOURCES}
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c"
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/test_dispatch_job.c"
@@ -76,6 +87,7 @@ target_include_directories(dispatcher_tests
   PRIVATE ${RTOS_SUPPORT_INCLUDES}
   PRIVATE ${OSAL_INCLUDES}
   PRIVATE ${DISPATCHER_INCLUDES}
+  PRIVATE ${UTILS_INCLUDES}
   PRIVATE ${UNITY_INCLUDES}
   PRIVATE "src"
 )
