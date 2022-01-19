@@ -2,15 +2,7 @@
 FreeRTOS Getting Started
 ########################
 
-This is the simplest buildable multitile FreeRTOS project for XCore. We encourage you to use this `project template <https://github.com/xmos/freertos_getting_started>`_ for new projects. To start your own project:
-
-1. Click **Use this template**.
-2. Use the **Owner** drop-down menu, and select the account you want to own the repository.
-3. Type a name for your repository, and an optional description.
-4. Choose a repository visibility.  For more information, see `"About repository visibility" <https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/about-repository-visibility>`_.
-5. Click **Create repository from template**.
-
-Alternatively, you can copy the contents of this folder to your computer and begin developing.
+This is the simplest buildable multitile FreeRTOS project for XCore. We encourage you to use this as a template for new projects. To start your own project copy the contents of this folder to your computer and begin developing.
 
 ****************
 Project Contents

@@ -11,10 +11,14 @@ set(MULTITILE_BUILD TRUE)
 
 ## Import XMOS RTOS platform configuration.
 ## Must be done after setting the configuration options.
+
+## TODO: Set the path to your XCORE_SDK_PATH
 set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
 cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
 cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
 cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+
+## Include the xmos platform
 include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## TODO: Set your project definition here
