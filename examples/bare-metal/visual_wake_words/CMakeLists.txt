@@ -58,14 +58,14 @@ target_compile_options(vww PRIVATE ${BUILD_FLAGS})
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "${SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
+  "${XCORE_SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal")
+set(ADDITIONAL_INCLUDE_DIR "${XCORE_SDK_PATH}/modules/device_memory_support/bare-metal")
 
 #**********************
 # APP sources
 #**********************
-include("${SDK_PATH}/modules/aif/ai_framework.cmake")
+include("${XCORE_SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(APP_SOURCES
   "${PROJECT_SOURCE_DIR}/model_runner/vww_model_data.c"
