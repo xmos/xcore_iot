@@ -68,8 +68,7 @@ Additional code examples are provided on the :doc:`FreeRTOS Examples <examples/i
 New Project Template
 ********************
 
-A minimal example application that can be used as a template to begin a new project can be found in the SDK under the path 
-`examples/freertos/getting_started <https://github.com/xmos/freertos_getting_started>`_
+A minimal example application that can be used as a template to begin a new project can be found in the SDK under the path ``examples/freertos/getting_started``.
 
 **************************
 Building RTOS Applications
