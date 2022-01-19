@@ -1,11 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(SDK_PATH $ENV{XCORE_SDK_PATH})
+#**********************
+# Get path to XCore SDK
+#**********************
+set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
 
 #**********************
 # Setup XMOS toolchain
 #**********************
-include("${SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
+include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
 
 #**********************
 # Project
@@ -25,7 +31,7 @@ enable_language(CXX C ASM)
 
 set(KISS_FFT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/kissfft")
 
-set(RTOS_SUPPORT_DIR "${SDK_PATH}/modules")
+set(RTOS_SUPPORT_DIR "${XCORE_SDK_PATH}/modules")
 
 set(LIB_DSP_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/lib_dsp/lib_dsp/api")
 set(LIB_MIC_ARRAY_INCLUDE_DIR "${RTOS_SUPPORT_DIR}/legacy_compat/lib_mic_array/lib_mic_array/api")
@@ -81,7 +87,7 @@ set(KISS_FFT_SOURCES
 # micro_features sources
 #**********************
 
-include("${SDK_PATH}/modules/aif/ai_framework.cmake")
+include("${XCORE_SDK_PATH}/modules/aif/ai_framework.cmake")
 
 set(MICRO_FEATURES_SOURCES
   "${TFLITE_MICRO_SOURCE_DIR}/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
@@ -121,9 +127,9 @@ set(LIB_MIC_ARRAY_SOURCES
 # Additional support sources
 #**********************
 set(ADDITIONAL_C_SOURCES
-  "${SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
+  "${XCORE_SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
 )
-set(ADDITIONAL_INCLUDE_DIR "${SDK_PATH}/modules/device_memory_support/bare-metal")
+set(ADDITIONAL_INCLUDE_DIR "${XCORE_SDK_PATH}/modules/device_memory_support/bare-metal")
 
 #**********************
 # APP sources

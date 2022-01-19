@@ -31,8 +31,16 @@ set(USE_FATFS TRUE)
 set(USE_TINYUSB TRUE)
 set(USE_DISK_MANAGER_TUSB TRUE)
 
+#**********************
+# Get path to XCore SDK
+#**********************
+set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
+
 ## Import XMOS configurations
-include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
+include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## Define project
 project(usb)

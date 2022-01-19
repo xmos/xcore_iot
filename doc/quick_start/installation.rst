@@ -23,24 +23,7 @@ Clone the XCore SDK repository with the following command:
 
     $ git clone --recurse-submodules https://github.com/xmos/xcore_sdk.git
 
-Step 2. Set up Environment Variable
-===================================
-
-All code examples require that an environment variable be set that specifies the fully-qualified path to the xcore_sdk directory. Set the following environment variable:
-
-.. code-block:: console
-
-    $ export XCORE_SDK_PATH=<path to>/xcore_sdk
-
-It is recommended that your `XCORE_SDK_PATH` not include spaces.  However, if this is not possible, you will need to enclose your path environment variable value in quotes.
-
-.. code-block:: console
-
-    $ export XCORE_SDK_PATH="<path with spaces to>/xcore_sdk"
-
-.. note:: Linux and MacOS users can add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.  Windows users can add the XCORE_SDK_PATH to the System Properties.
-
-Step 3. Install Host Applications
+Step 2. Install Host Applications
 =================================
 
 The SDK includes utilities that run on the PC host.  Run the following command to build and install these utilities:
@@ -70,7 +53,7 @@ The SDK includes utilities that run on the PC host.  Run the following command t
     This command installs the applications at ``<USERPROFILE>\.xmos\SDK\<sdk version>\bin\`` directory.  You may wish to add this directory to your ``PATH`` variable.
 
 
-Optional Step 4. Install Python and Python Requirements
+Optional Step 3. Install Python and Python Requirements
 =======================================================
 
 The SDK does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, Python 3 is needed, we recommend and test with Python 3.8.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
