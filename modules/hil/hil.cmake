@@ -12,6 +12,7 @@ set(SPI_HIL_DIR "${HIL_DIR}/lib_spi")
 set(QSPI_IO_HIL_DIR "${HIL_DIR}/lib_qspi_io")
 set(XUD_HIL_DIR "${HIL_DIR}/lib_xud")
 set(L2_CACHE_HIL_DIR "${HIL_DIR}/lib_l2_cache")
+set(CLOCK_CONTROL_HIL_DIR "${HIL_DIR}/lib_clock_control")
 
 #**********************
 # Options
@@ -23,6 +24,7 @@ option(USE_SPI_HIL "Enable to include SPI HIL" TRUE)
 option(USE_QSPI_IO_HIL "Enable to include QSPI HIL" TRUE)
 option(USE_XUD_HIL "Enable to include XUD HIL" FALSE)
 option(USE_L2_CACHE_HIL "Enable to include L2 CACHE HIL" FALSE)
+option(USE_CLOCK_CONTROL_HIL "Enable to include clock control HIL" TRUE)
 
 #********************************
 # Gather I2C sources
@@ -233,6 +235,32 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather clock control hil sources
+#********************************
+set(THIS_LIB CLOCK_CONTROL_HIL)
+if(${USE_${THIS_LIB}})
+    set(${THIS_LIB}_FLAGS "-Os")
+
+    file(GLOB_RECURSE ${THIS_LIB}_XC_SOURCES "${${THIS_LIB}_DIR}/src/*.xc")
+    file(GLOB_RECURSE ${THIS_LIB}_C_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+    file(GLOB_RECURSE ${THIS_LIB}_ASM_SOURCES "${${THIS_LIB}_DIR}/src/*.S")
+
+    set(${THIS_LIB}_SOURCES
+        ${${THIS_LIB}_XC_SOURCES}
+        ${${THIS_LIB}_C_SOURCES}
+        ${${THIS_LIB}_ASM_SOURCES}
+    )
+
+    set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+
+    set(${THIS_LIB}_INCLUDES
+        "${${THIS_LIB}_DIR}/api"
+    )
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # Set user variables
 #**********************
@@ -244,6 +272,7 @@ set(HIL_SOURCES
     ${SPI_HIL_SOURCES}
     ${XUD_HIL_SOURCES}
     ${LIB_L2_CACHE_SOURCES}
+    ${CLOCK_CONTROL_HIL_SOURCES}
 )
 
 set(HIL_INCLUDES
@@ -254,6 +283,7 @@ set(HIL_INCLUDES
     ${SPI_HIL_INCLUDES}
     ${XUD_HIL_INCLUDES}
     ${LIB_L2_CACHE_INCLUDES}
+    ${CLOCK_CONTROL_HIL_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES HIL_SOURCES)
