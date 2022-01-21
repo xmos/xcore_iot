@@ -1,53 +1,26 @@
 #!/bin/sh
 
-# Get unix name for determining OS
-UNAME=$(uname)
+XCORE_SDK_REPO_PATH=$(git rev-parse --show-toplevel)
+WF200_FW=$XCORE_SDK_REPO_PATH/modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec
 
-# Create an empty 1 MiB file
-dd if=/dev/zero of=fat.fs bs=1024 count=1024
+# Create directory for intended files 
+tmp_dir=$(mktemp -d)
+fat_mnt_dir=$tmp_dir
+mkdir -p $fat_mnt_dir
 
-if [ "$UNAME" = "Linux" ] ; then
-    MKFS_VFAT_PATH=/sbin
-    sudo umount -q fat_mnt
-elif [ "$UNAME" = "Darwin" ] ; then
-    MKFS_VFAT_PATH=/usr/local/sbin
-    hdiutil detach fat_mnt
-fi
-
-# Create an empty FAT filesystem in it
-$MKFS_VFAT_PATH/mkfs.vfat -v -F12 -s1 -S4096 -n xcore_fs fat.fs
-
-mkdir -p fat_mnt
-
-WF200_FW=$XCORE_SDK_PATH/modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec
-
-# Mount the filesystem
-if [ "$UNAME" = "Linux" ] ; then
-    sudo mount -o loop fat.fs fat_mnt
-elif [ "$UNAME" = "Darwin" ] ; then
-    hdiutil attach -imagekey diskimage-class=CRawDiskImage -mountpoint fat_mnt fat.fs
-fi
-
-# Copy files into filesystem
-sudo mkdir fat_mnt/firmware
-sudo mkdir fat_mnt/crypto
-sudo mkdir fat_mnt/wifi
-sudo cp aws/ca.pem fat_mnt/crypto/ca.pem
-sudo cp aws/client.pem fat_mnt/crypto/cert.pem
-sudo cp aws/client.key fat_mnt/crypto/key.pem
-sudo cp $WF200_FW fat_mnt/firmware/wf200.sec
+# Copy files into filesystem directory
+mkdir $fat_mnt_dir/firmware
+mkdir $fat_mnt_dir/crypto
+mkdir $fat_mnt_dir/wifi
+cp aws/ca.pem $fat_mnt_dir/crypto/ca.pem
+cp aws/client.pem $fat_mnt_dir/crypto/cert.pem
+cp aws/client.key $fat_mnt_dir/crypto/key.pem
+cp $WF200_FW $fat_mnt_dir/firmware/wf200.sec
 
 if [ ! -f networks.dat ]; then
     ./wifi_profile.py
 fi
-sudo cp networks.dat fat_mnt/wifi
+cp networks.dat $fat_mnt_dir/wifi
 
-# Unmount the filesystem
-if [ "$UNAME" = "Linux" ] ; then
-    sudo umount fat_mnt
-elif [ "$UNAME" = "Darwin" ] ; then
-    hdiutil detach fat_mnt
-fi
-
-# Cleanup
-sudo rm -rf fat_mnt
+# Run fatfs_mkimage on the directory to create filesystem file
+fatfs_mkimage --input=$tmp_dir --output=fat.fs
