@@ -1,8 +1,8 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#ifndef DEVICE_CONTROL_H_
-#define DEVICE_CONTROL_H_
+#ifndef DEVICE_CONTROL_SHARED_H_
+#define DEVICE_CONTROL_SHARED_H_
 
 #include <stdint.h>
 #include <stddef.h>
@@ -124,4 +124,4 @@ typedef enum {
 
 /**@}*/
 
-#endif /* DEVICE_CONTROL_H_ */
+#endif /* DEVICE_CONTROL_SHARED_H_ */
