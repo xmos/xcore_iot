@@ -4,6 +4,5 @@
 # importing several requirements to verify the install
 
 import numpy
-import tensorflow
 import matplotlib
 from PIL import Image
