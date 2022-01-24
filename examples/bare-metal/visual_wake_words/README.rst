@@ -58,34 +58,3 @@ Sending a test image to the xcore.ai Explorer board using `xscope`. The `test_im
 .. code-block:: console
 
     $ ./test_image.py path/to/image
-
-********************
-Optimizing the model
-********************
-
-An unoptimized model is included with the example.
-
-First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
-
-.. code-block:: console
-
-    $ xformer.py --analyze -par 5 model/model_quant.tflite model/model_xcore.tflite
-
-Generating the model runner
-===========================
-
-The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
-
-.. code-block:: console
-
-    $ generate_model_runner.py --input model/model_xcore.tflite --output model_runner --name vww
-
-Converting flatbuffer to source file
-====================================
-
-The following unix command will generate a C source file that contains the TensorFlow Lite model as a char array.
-
-.. code-block:: console
-
-    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/vww_model_data.h --source model_runner/vww_model_data.c --variable-name vww
-

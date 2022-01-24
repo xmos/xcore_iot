@@ -10,8 +10,6 @@ if [ -z "$1" ] || [ "$1" == "all" ]
 then
     # row format is: "path/to/application BOARD"
     applications=(
-        "examples/freertos/cifar10 XCORE-AI-EXPLORER"
-        "examples/freertos/cifar10 OSPREY-BOARD"
         "examples/freertos/explorer_board XCORE-AI-EXPLORER"
         "examples/freertos/iot_aws XCORE-AI-EXPLORER"
         "examples/freertos/person_detection XCORE-AI-EXPLORER"
@@ -25,8 +23,8 @@ then
     applications=(
         "examples/freertos/getting_started XCORE-AI-EXPLORER"
         "examples/freertos/explorer_board XCORE-AI-EXPLORER"
-        "examples/freertos/cifar10 XCORE-AI-EXPLORER"
         "examples/freertos/device_control XCORE200-MIC-ARRAY"
+        "examples/freertos/person_detection XCORE-AI-EXPLORER"
     )
 else 
     echo "Argument $1 not a supported configuration!"
