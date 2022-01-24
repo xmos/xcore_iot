@@ -125,7 +125,7 @@ Tests for most components in the SDK are located in the ``test`` folder.  This i
 Adding Modules
 **************
 
-If adding a new module to the SDK, the following table may be helpful in determining where the add the module.  If you locate the new module incorrectly, the SDK development team will advice on where and how to relocate it.
+If adding a new module to the SDK, the following table may be helpful in determining where to add the module.  If you locate the new module incorrectly, the SDK development team will advise on where and how to relocate it.
 
 .. list-table:: Module Path Descriptions
     :widths: 50 50
