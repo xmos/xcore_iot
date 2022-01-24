@@ -19,6 +19,7 @@ list(APPEND CMAKE_MODULE_PATH ${DEVICE_CONTROL_PATH}/.cmake)
 
 set(DEVICE_CONTROL_INCLUDES
     "${DEVICE_CONTROL_PATH}"
+    "${SDK_ROOT_PATH}/modules/rtos/sw_services/device_control/api"
 )
 
 set(DEVICE_CONTROL_SOURCES

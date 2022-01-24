@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
-#include "device_control.h"
+#include "device_control_shared.h"
 
 #if USE_XSCOPE
 static inline size_t

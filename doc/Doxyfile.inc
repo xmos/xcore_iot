@@ -3,6 +3,8 @@
 PROJECT_NAME = XCore SDK
 PROJECT_BRIEF = "XCore Software Development Kit"
 
+PREDEFINED = __DOXYGEN__=1 C_API= EXTERN_C= __attribute__((weak))=
+
 # HIL library APIs
 INPUT += ../modules/hil/lib_i2c/api
 INPUT += ../modules/hil/lib_i2s/api
@@ -17,7 +19,8 @@ INPUT += ../modules/lib_xs3_math
 # RTOS driver APIs
 INPUT += ../modules/rtos/drivers 
 
-PREDEFINED = C_API= EXTERN_C= __attribute__((weak))=
+# RTOS SW Services
+INPUT += ../modules/rtos/sw_services/device_control/host ../modules/rtos/sw_services/device_control/api 
 
 USE_MATHJAX = YES
 MATHJAX_FORMAT = HTML-CSS
