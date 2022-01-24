@@ -17,6 +17,7 @@ set(SNTPD_DIR "${SW_SERVICES_DIR}/sntpd")
 set(TLS_SUPPORT_DIR "${SW_SERVICES_DIR}/tls_support")
 set(TINYUSB_DIR "${SW_SERVICES_DIR}/usb")
 set(DISPATCHER_DIR "${SW_SERVICES_DIR}/dispatcher")
+set(CONCURRENCY_SUPPORT_DIR "${SW_SERVICES_DIR}/concurrency_support")
 
 #**********************
 # Options
@@ -35,6 +36,7 @@ option(USE_CUSTOM_MBEDTLS_CONFIG "Enable to provide an alternate mbedtls_config.
 option(USE_TINYUSB "Enable to use TinyUSB" FALSE)
 option(USE_DISK_MANAGER_TUSB "Enable to use RAM and Flash disk manager" FALSE)
 option(USE_DISPATCHER "Enable to use Dispatcher" FALSE)
+option(USE_CONCURRENCY_SUPPORT "Enable to use concurrency support" TRUE)
 
 #********************************
 # Gather wifi manager sources
@@ -450,6 +452,26 @@ if(${USE_${THIS_LIB}})
 endif()
 unset(THIS_LIB)
 
+#********************************
+# Gather concurrency support sources
+#********************************
+set(THIS_LIB CONCURRENCY_SUPPORT)
+if(${USE_${THIS_LIB}})
+	set(${THIS_LIB}_FLAGS "-Os")
+
+	file(GLOB_RECURSE ${THIS_LIB}_SOURCES "${${THIS_LIB}_DIR}/src/*.c")
+
+    if(${${THIS_LIB}_FLAGS})
+       set_source_files_properties(${${THIS_LIB}_SOURCES} PROPERTIES COMPILE_FLAGS ${${THIS_LIB}_FLAGS})
+    endif()
+
+	set(${THIS_LIB}_INCLUDES
+	    "${${THIS_LIB}_DIR}/api"
+	)
+    message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
+endif()
+unset(THIS_LIB)
+
 #**********************
 # set user variables
 #**********************
@@ -459,6 +481,7 @@ set(SW_SERVICES_SOURCES
     ${JSON_PARSER_SOURCES}
     ${TINYUSB_SOURCES}
     ${DISPATCHER_SOURCES}
+    ${CONCURRENCY_SUPPORT_SOURCES}
 )
 
 set(SW_SERVICES_INCLUDES
@@ -467,6 +490,7 @@ set(SW_SERVICES_INCLUDES
     ${JSON_PARSER_INCLUDES}
     ${TINYUSB_INCLUDES}
     ${DISPATCHER_INCLUDES}
+    ${CONCURRENCY_SUPPORT_INCLUDES}
 )
 
 list(REMOVE_DUPLICATES SW_SERVICES_SOURCES)
