@@ -40,9 +40,6 @@
 [submodule "wfx-firmware"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware
 	url = git@github.com:SiliconLabs/wfx-firmware.git
-[submodule "modules/legacy_compat/lib_mic_array"]
-	path = modules/legacy_compat/lib_mic_array
-	url = git@github.com:xmos/lib_mic_array.git
 [submodule "modules/aif/lib_nn"]
 	path = modules/aif/lib_nn
 	url = git@github.com:xmos/lib_nn.git
