@@ -11,12 +11,8 @@ then
     # row format is: "path/to/application BOARD"
     applications=(
         "examples/bare-metal/explorer_board XCORE-AI-EXPLORER"
-        "examples/bare-metal/hello_world XCORE-AI-EXPLORER"
-        "examples/bare-metal/cifar10 XCORE-AI-EXPLORER"
-        "examples/bare-metal/hotdog_not_hotdog XCORE-AI-EXPLORER"
         "examples/bare-metal/visual_wake_words XCORE-AI-EXPLORER"
-        "examples/bare-metal/micro_speech XCORE-AI-EXPLORER"
-        "examples/bare-metal/micro_speech OSPREY-BOARD"
+
     )
 elif [ "$1" == "smoke" ]
 then

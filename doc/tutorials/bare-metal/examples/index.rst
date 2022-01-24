@@ -9,8 +9,4 @@ Several example bare-metal applications are included to illustrate the fundament
     :includehidden:
     
     explorer_board.rst
-    hello_world.rst
-    cifar10.rst
-    micro_speech.rst
     visual_wake_words.rst
-    hotdog_not_hotdog.rst
