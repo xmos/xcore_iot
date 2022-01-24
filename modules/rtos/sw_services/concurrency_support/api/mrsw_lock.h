@@ -5,7 +5,7 @@
 #define MRSW_LOCK_H_
 
 /**
- * \addtogroup rtos_mic_array_driver rtos_mic_array_driver
+ * \addtogroup multiple_reader_single_writer_lock multiple_reader_single_writer_lock
  *
  * The public API for using the multiple reader single writer lock implementation.
  * @{
@@ -80,8 +80,11 @@ rtos_osal_status_t mrsw_lock_create(mrsw_lock_t *ctx, char *name, mrsw_lock_type
  */
 rtos_osal_status_t mrsw_lock_delete(mrsw_lock_t *ctx);
 
-/*
- * Reader API
+/**
+ * \addtogroup multiple_reader_single_writer_lock_reader multiple_reader_single_writer_lock_reader
+ *
+ * The core functions for using an MRSW lock as a reader
+ * @{
  */
 
 /**
@@ -108,8 +111,13 @@ rtos_osal_status_t mrsw_lock_reader_get(mrsw_lock_t *ctx, unsigned timeout);
  */
 rtos_osal_status_t mrsw_lock_reader_put(mrsw_lock_t *ctx);
 
-/*
- * Writer API
+/**@}*/
+
+/**
+ * \addtogroup multiple_reader_single_writer_lock_writer multiple_reader_single_writer_lock_writer
+ *
+ * The core functions for using an MRSW lock as a writer
+ * @{
  */
 
 /**
@@ -134,6 +142,8 @@ rtos_osal_status_t mrsw_lock_writer_get(mrsw_lock_t *ctx, unsigned timeout);
  *               RTOS_OSAL_ERROR otherwise
  */
 rtos_osal_status_t mrsw_lock_writer_put(mrsw_lock_t *ctx);
+
+/**@}*/
 
 /**@}*/
 
