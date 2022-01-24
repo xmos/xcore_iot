@@ -13,6 +13,7 @@
 
 #include "rtos/osal/api/rtos_osal.h"
 #include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos/sw_services/concurrency_support/api/mrsw_lock.h"
 
 /**
  * Typedef to the RTOS Clock Control driver instance struct.
@@ -73,7 +74,12 @@ struct rtos_clock_control_struct {
     __attribute__((fptrgroup("rtos_clock_control_release_local_lock_fptr_grp")))
     void (*release_local_lock)(rtos_clock_control_t *);
 
-    rtos_osal_mutex_t local_lock;
+    /**
+     * MRSW lock used to provide concurrency between local and remote tiles.
+     * Local lock uses are "readers".  Remote tile lock uses are as "writer"
+     * Setup as writer preferred.
+     */
+    mrsw_lock_t local_lock;
     rtos_osal_mutex_t lock; /* Only used by RPC client */
 };
 
