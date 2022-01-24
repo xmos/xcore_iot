@@ -5,6 +5,14 @@
 #define DEVICE_CONTROL_H_
 
 #include <stdint.h>
+#include <stddef.h>
+
+/**
+ * \defgroup device_control_shared
+ *
+ * The shared API for using the device control library on the device and host
+ * @{
+ */
 
 /**
  * This is the version of control protocol. Used to check compatibility
@@ -92,5 +100,28 @@ typedef enum {
  */
 #define CONTROL_GET_LAST_COMMAND_STATUS CONTROL_CMD_SET_READ(1)
 
+/**
+ * The mode value to use when initializing a device control instance
+ * that is on the same tile as its associated transport layer. These
+ * may be connected to device control instances on other tiles that
+ * have been initialized with DEVICE_CONTROL_CLIENT_MODE.
+ */
+#define DEVICE_CONTROL_HOST_MODE   0
+
+/**
+ * The mode value to use when initializing a device control instance
+ * that is not on the same tile as its associated transport layer.
+ * These must be connected to a device control instance on another tile
+ * that has been initialized with DEVICE_CONTROL_HOST_MODE.
+ */
+#define DEVICE_CONTROL_CLIENT_MODE 1
+
+/**
+ * This attribute must be specified on all device control command handler callback functions
+ * provided by the application.
+ */
+#define DEVICE_CONTROL_CALLBACK_ATTR __attribute__((fptrgroup("device_control_cb_fptr_grp")))
+
+/**@}*/
 
 #endif /* DEVICE_CONTROL_H_ */
