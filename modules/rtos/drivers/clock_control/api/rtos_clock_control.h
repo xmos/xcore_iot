@@ -11,6 +11,8 @@
  * @{
  */
 
+#include "xcore_clock_control.h"
+
 #include "rtos/osal/api/rtos_osal.h"
 #include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
 #include "rtos/sw_services/concurrency_support/api/mrsw_lock.h"
@@ -27,7 +29,6 @@ typedef struct rtos_clock_control_struct rtos_clock_control_t;
  */
 struct rtos_clock_control_struct {
     rtos_driver_rpc_t *rpc_config;
-    chanend_t rpc_interrupt_c[RTOS_DRIVER_RPC_MAX_CLIENT_TILES];
 
     __attribute__((fptrgroup("rtos_clock_control_set_ref_clk_div_fptr_grp")))
     void (*set_ref_clk_div)(rtos_clock_control_t *, unsigned);
@@ -236,7 +237,7 @@ inline void rtos_clock_control_scale_links(
  * \param start_addr   The starting link address
  * \param end_addr     The ending address
  */
-void rtos_clock_control_reset_links(
+inline void rtos_clock_control_reset_links(
         rtos_clock_control_t *ctx,
         unsigned start_addr,
         unsigned end_addr)
@@ -302,7 +303,7 @@ inline void rtos_clock_control_get_node_pll_ratio(
  *
  * \param ctx          A pointer to the clock control driver instance to use.
  */
-void rtos_clock_control_get_local_lock(
+inline void rtos_clock_control_get_local_lock(
         rtos_clock_control_t *ctx)
 {
     ctx->get_local_lock(ctx);
@@ -314,7 +315,7 @@ void rtos_clock_control_get_local_lock(
  *
  * \param ctx          A pointer to the clock control driver instance to use.
  */
-void rtos_clock_control_release_local_lock(
+inline void rtos_clock_control_release_local_lock(
         rtos_clock_control_t *ctx)
 {
     ctx->release_local_lock(ctx);

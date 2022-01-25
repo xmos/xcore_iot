@@ -4,15 +4,15 @@
 #include <xcore/assert.h>
 
 #include "rtos/drivers/clock_control/api/rtos_clock_control.h"
-#include "rtos/sw_services/concurrency_support/api/mrsw_lock.h"
-#include "xcore_clock_control.h"
 
 __attribute__((fptrgroup("rtos_clock_control_set_ref_clk_div_fptr_grp")))
 static void clock_control_local_set_ref_clk_div(
         rtos_clock_control_t *ctx,
         unsigned divider)
 {
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     set_local_node_ref_clk_div(divider);
+    rtos_osal_mutex_put(&ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_clock_control_set_processor_clk_div_fptr_grp")))
@@ -20,7 +20,9 @@ static void clock_control_local_set_processor_clk_div(
         rtos_clock_control_t *ctx,
         unsigned divider)
 {
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     set_local_tile_processor_clk_div(divider);
+    rtos_osal_mutex_put(&ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_clock_control_set_switch_clk_div_fptr_grp")))
@@ -28,7 +30,9 @@ static void clock_control_local_set_switch_clk_div(
         rtos_clock_control_t *ctx,
         unsigned divider)
 {
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     set_local_node_switch_clk_div(divider);
+    rtos_osal_mutex_put(&ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_clock_control_get_ref_clk_div_fptr_grp")))
@@ -80,7 +84,9 @@ static void clock_control_local_set_node_pll_ratio(
         unsigned mul,
         unsigned post_div)
 {
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     set_local_node_pll_ratio(pre_div, mul, post_div);
+    rtos_osal_mutex_put(&ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_clock_control_get_node_pll_ratio_fptr_grp")))
@@ -101,7 +107,9 @@ static void clock_control_local_scale_links(
         unsigned delay_intra,
         unsigned delay_inter)
 {
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     scale_links(start_addr, end_addr, delay_intra, delay_inter);
+    rtos_osal_mutex_put(&ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_clock_control_reset_links_fptr_grp")))
@@ -110,7 +118,9 @@ static void clock_control_local_reset_links(
         unsigned start_addr,
         unsigned end_addr)
 {
+    rtos_osal_mutex_get(&ctx->lock, RTOS_OSAL_WAIT_FOREVER);
     reset_local_links(start_addr, end_addr);
+    rtos_osal_mutex_put(&ctx->lock);
 }
 
 __attribute__((fptrgroup("rtos_clock_control_get_local_lock_fptr_grp")))
@@ -131,7 +141,11 @@ void rtos_clock_control_start(
         rtos_clock_control_t *ctx)
 {
     mrsw_lock_create(&ctx->local_lock, "clkctrl_lock", MRSW_WRITER_PREFERRED);
+    rtos_osal_mutex_create(&ctx->lock, "clock_control_lock", RTOS_OSAL_RECURSIVE);
 
+    if (ctx->rpc_config != NULL && ctx->rpc_config->rpc_host_start != NULL) {
+        ctx->rpc_config->rpc_host_start(ctx->rpc_config);
+    }
 }
 
 void rtos_clock_control_init(
