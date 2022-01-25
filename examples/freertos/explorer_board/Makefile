@@ -33,5 +33,5 @@ flash: $(EXECUTABLE)
 	cd filesystem_support && ./flash_image.sh
 
 $(EXECUTABLE) :
-	cmake -B $(BUILD_DIR) -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)
+	cmake -B $(BUILD_DIR) -DMULTITILE_BUILD=1 -DXE_BASE_TILE=$(XE_BASE_TILE) -DOUTPUT_DIR=$(OUTPUT_DIR)
 	cd $(BUILD_DIR) && make -j

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright (c) 2021-2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
 #include <platform.h>
@@ -10,9 +10,14 @@
 
 static void gpio_start(void)
 {
-    rtos_gpio_rpc_config(gpio_ctx, appconfGPIO_RPC_PORT, appconfGPIO_RPC_PRIORITY);
+    rtos_gpio_rpc_config(gpio_ctx_t0, appconfGPIO_T0_RPC_PORT, appconfGPIO_RPC_PRIORITY);
+    rtos_gpio_rpc_config(gpio_ctx_t1, appconfGPIO_T1_RPC_PORT, appconfGPIO_RPC_PRIORITY);
+
 #if ON_TILE(0)
-    rtos_gpio_start(gpio_ctx);
+    rtos_gpio_start(gpio_ctx_t0);
+#endif
+#if ON_TILE(1)
+    rtos_gpio_start(gpio_ctx_t1);
 #endif
 }
 
