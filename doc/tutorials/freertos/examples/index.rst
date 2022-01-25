@@ -14,5 +14,5 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
    device_control.rst
    dispatcher.rst
    l2_cache.rst
-   person_detection.rst
+   cifar10.rst
    iot_aws.rst
