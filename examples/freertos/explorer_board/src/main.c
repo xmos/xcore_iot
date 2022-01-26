@@ -1,4 +1,4 @@
-// Copyright 2019-2021 XMOS LIMITED.
+// Copyright 2019-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* System headers */
@@ -8,29 +8,17 @@
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "queue.h"
-#include "FreeRTOS_IP.h"
-#include "FreeRTOS_Sockets.h"
-#include "FreeRTOS_DHCP.h"
 
 /* Library headers */
 #include "fs_support.h"
-#include "sntpd.h"
-#include "tls_support.h"
 
 /* App headers */
 #include "app_conf.h"
 #include "platform/platform_init.h"
 #include "platform/driver_instances.h"
-#include "network_demos/network_setup.h"
-#include "UDPCommandInterpreter.h"
-#include "thruput_test/thruput_test.h"
-#include "tls_echo_demo/tls_echo_demo.h"
-#include "tls_echo_server/tls_echo_server.h"
-#include "http_demo/http_demo.h"
-#include "mqtt_demo/mqtt_demo_client.h"
 #include "mem_analysis/mem_analysis.h"
-#include "queue_to_tcp_stream/queue_to_tcp_stream.h"
 #include "example_pipeline/example_pipeline.h"
+#include "filesystem/filesystem_demo.h"
 #include "gpio_ctrl/gpio_ctrl.h"
 
 void vApplicationMallocFailedHook( void )
@@ -54,36 +42,8 @@ void startup_task(void *arg)
     /* Initialize filesystem  */
     rtos_fatfs_init(qspi_flash_ctx);
 
-    /* Initialize WiFi */
-    wifi_start(appconfWIFI_SETUP_TASK_PRIORITY);
-
-    /* Create intertile audio frame receiver */
-    intertile_pipeline_to_tcp_create();
-
-    /* Initialize TLS  */
-    tls_platform_init();
-
-    /* Create the thruput test */
-    thruput_test_create(appconfTHRUPUT_TEST_TASK_PRIORITY);
-
-    /* Create SNTPD */
-    sntp_create(appconfSNTPD_TASK_PRIORITY);
-
-    /* Create UDP CLI */
-    vStartUDPCommandInterpreterTask( portTASK_STACK_DEPTH( vUDPCommandInterpreterTask ), appconfCLI_UDP_PORT, appconfCLI_TASK_PRIORITY );
-    vInitializeUDPIntertile( appconfCLI_RPC_PROCESS_COMMAND_PORT );
-
-    /* Create TLS echo demo */
-	tls_echo_demo_create( appconfTLS_ECHO_TASK_PRIORITY );
-
-    /* Create TLS echo demo */
-	tls_echo_server_create( appconfTLS_ECHO_SERVER_PRIORITY );
-
-    /* Create HTTP demo */
-	http_demo_create(appconfHTTP_TASK_PRIORITY);
-
-    /* Create MQTT demo*/
-    mqtt_demo_create(appconfMQTT_TASK_PRIORITY);
+    /* Create the filesystem demol task */
+    filesystem_demo_create(appconfFILESYSTEM_DEMO_TASK_PRIORITY);
 #endif
 
 #if ON_TILE(1)
@@ -92,7 +52,6 @@ void startup_task(void *arg)
 
     /* Create audio pipeline */
     example_pipeline_init(appconfAUDIO_PIPELINE_TASK_PRIORITY);
-    remote_cli_gain_init(appconfCLI_RPC_PROCESS_COMMAND_TASK_PRIORITY);
 #endif
 
 	for (;;) {
@@ -108,7 +67,7 @@ static void tile_common_init(chanend_t c)
 
     xTaskCreate((TaskFunction_t) startup_task,
                 "startup_task",
-                configMINIMAL_STACK_SIZE * 10,
+                RTOS_THREAD_STACK_SIZE(startup_task),
                 NULL,
                 appconfSTARTUP_TASK_PRIORITY,
                 NULL);
