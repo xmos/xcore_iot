@@ -2,35 +2,17 @@
 Explorer Board
 ##############
 
-This example application demonstrates various capabilities of the Explorer board using FreeRTOS.  The example uses lib_soc and various libraries to build FreeRTOS applications targetting xCORE.  The application uses I2C, I2S, SPI, flash, mic array, and GPIO devices.
+This example application demonstrates various capabilities of the Explorer board using FreeRTOS.  The example uses lib_soc and various libraries to build FreeRTOS applications targeting xCORE.  The application uses I2C, I2S, SPI, flash, mic array, and GPIO devices.
 
 The FreeRTOS application creates a single stage audio pipeline which applies a variable gain. The output audio is sent to the DAC and can be listened to via the 3.5mm audio jack. The audio gain can be adjusted via GPIO, where button A is volume up and button B is volume down.
-
-****************
-Filesystem setup
-****************
-
-Before the demo can be run, the filesystem must be configured and flashed.
-
-Note, macOS users will need to install `dosfstools`.
-
-.. code-block:: console
-
-    $ brew install dosfstools
-
-Flash the filesystem by running the script:
-
-.. code-block:: console
-
-    $ ./flash_image.sh
 
 *********************
 Building the firmware
 *********************
 
-.. tab:: Linux and Mac
+Run the following commands to build the explorer_board firmware:
 
-    Run cmake:
+.. tab:: Linux and Mac
 
     .. code-block:: console
 
@@ -40,18 +22,32 @@ Building the firmware
 
 .. tab:: Windows XTC Tools CMD prompt
 
-    Run cmake:
-
     .. code-block:: console
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
         $ nmake
 
+After building the firmware, create the filesystem and flash the device with the following commands:
+
+.. tab:: Linux and MacOS
+
+    .. code-block:: console
+
+        $ cd filesystem_support
+        $ ./flash_image.sh
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ cd filesystem_support
+        $ flash_image.bat
+
 Running the firmware
 ====================
 
-To run the demo navigate to the bin folder and use the command:
+From the root folder of the explorer_board application run:
 
 .. code-block:: console
 
