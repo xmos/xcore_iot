@@ -1,6 +1,6 @@
-============
-AWS IoT Core
-============
+===
+IoT
+===
 
 Combined with Alexa Voice Service (AVS) and AWS Lambda, this demo allows you to quickly control GPIO using a custom Alexa Skill.  This example provides instructions on how to configure the development board, create your Alexa skill, and tie an Alexa skill intent to AWS IoT Core using a Lambda function.
 

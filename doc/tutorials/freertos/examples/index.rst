@@ -15,4 +15,4 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
    dispatcher.rst
    l2_cache.rst
    cifar10.rst
-   iot_aws.rst
+   iot.rst

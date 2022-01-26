@@ -11,7 +11,7 @@ then
     # row format is: "path/to/application BOARD"
     applications=(
         "examples/freertos/explorer_board XCORE-AI-EXPLORER"
-        "examples/freertos/iot_aws XCORE-AI-EXPLORER"
+        "examples/freertos/iot XCORE-AI-EXPLORER"
         "examples/freertos/cifar10 XCORE-AI-EXPLORER"
         "examples/freertos/cifar10 OSPREY-BOARD"
         "examples/freertos/device_control XCORE200-MIC-ARRAY"
