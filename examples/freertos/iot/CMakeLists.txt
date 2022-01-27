@@ -29,7 +29,7 @@ cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
 include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
 
 ## Define project
-project(iot_aws)
+project(iot)
 
 ## Enable languages for project
 enable_language(CXX C ASM)
