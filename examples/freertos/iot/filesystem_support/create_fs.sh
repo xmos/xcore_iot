@@ -3,7 +3,7 @@
 XCORE_SDK_REPO_PATH=$(git rev-parse --show-toplevel)
 WF200_FW=$XCORE_SDK_REPO_PATH/modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec
 
-# Create directory for intended files 
+# Create directory for intended files
 tmp_dir=$(mktemp -d)
 fat_mnt_dir=$tmp_dir
 mkdir -p $fat_mnt_dir
@@ -12,9 +12,11 @@ mkdir -p $fat_mnt_dir
 mkdir $fat_mnt_dir/firmware
 mkdir $fat_mnt_dir/crypto
 mkdir $fat_mnt_dir/wifi
-cp aws/ca.pem $fat_mnt_dir/crypto/ca.pem
-cp aws/client.pem $fat_mnt_dir/crypto/cert.pem
-cp aws/client.key $fat_mnt_dir/crypto/key.pem
+
+cp mqtt_broker_certs/ca.crt $fat_mnt_dir/crypto/ca.pem
+cp mqtt_broker_certs/client.crt $fat_mnt_dir/crypto/cert.pem
+cp mqtt_broker_certs/client.key $fat_mnt_dir/crypto/key.pem
+
 cp $WF200_FW $fat_mnt_dir/firmware/wf200.sec
 
 if [ ! -f networks.dat ]; then
