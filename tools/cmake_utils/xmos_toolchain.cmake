@@ -1,4 +1,4 @@
-set(CMAKE_SYSTEM_NAME XMOS)
+set(CMAKE_SYSTEM_NAME XCORE)
 
 # CMake versions 3.20 and newer now require the ASM dialect to be specified
 set(ASM_DIALECT "")
