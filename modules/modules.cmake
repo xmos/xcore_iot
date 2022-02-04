@@ -25,7 +25,7 @@ option(USE_LIB_RANDOM "Enable to include lib_random" TRUE)
 option(USE_LIB_XS3_MATH "Enable to include lib_xs3_math" FALSE)  # Currently not used
 option(USE_LEGACY_COMPAT "Enable to include legacy compatibility layer for XMOS libraries" TRUE)
 option(USE_AIF "Enable to include AI model inference framework" FALSE)
-option(USE_UTILS "Enable to include utils" TRUE)
+option(USE_UTILS "Enable to include utils" FALSE)
 option(USE_L2_CACHE "Enable to include utils" FALSE)
 
 #********************************

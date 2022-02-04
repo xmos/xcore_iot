@@ -1,11 +1,11 @@
-set(CMAKE_SYSTEM_NAME XMOS)
+set(CMAKE_SYSTEM_NAME XCORE)
 
 # CMake versions 3.20 and newer now require the ASM dialect to be specified
 set(ASM_DIALECT "")
 
 # XMOS_TOOLS_PATH can be used to build with multiple versions of the XTC Tools
-#  This should not be confused with XMOS_TOOL_PATH (no "S") which is set in the 
-#  XTC Tools environment and points to the tools version installed. 
+#  This should not be confused with XMOS_TOOL_PATH (no "S") which is set in the
+#  XTC Tools environment and points to the tools version installed.
 if(DEFINED XMOS_TOOLS_PATH)
     set(CMAKE_C_COMPILER "${XMOS_TOOLS_PATH}/xcc")
     set(CMAKE_CXX_COMPILER  "${XMOS_TOOLS_PATH}/xcc")
