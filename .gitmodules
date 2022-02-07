@@ -1,8 +1,8 @@
 [submodule "lib_dsp"]
-	path = modules/lib_dsp
+	path = modules/lib_dsp/lib_dsp
 	url = git@github.com:xmos/lib_dsp.git
 [submodule "lib_xs3_math"]
-	path = modules/lib_xs3_math
+	path = modules/lib_xs3_math/lib_xs3_math
 	url = git@github.com:xmos/lib_xs3_math.git
 	shallow = true
 [submodule "lib_otpinfo"]
@@ -24,7 +24,7 @@
 	url = git@github.com:zserge/jsmn.git
 	shallow = true
 [submodule "lib_mic_array"]
-	path = modules/hil/lib_mic_array
+	path = modules/hil/lib_mic_array/lib_mic_array
 	url = git@github.com:xmos/lib_mic_array.git
 [submodule "wfx-fullMAC-driver"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-fullMAC-driver
@@ -53,7 +53,7 @@
 	path = modules/aif/ruy
 	url = git@github.com:google/ruy.git
 [submodule "lib_xud"]
-	path = modules/hil/lib_xud
+	path = modules/hil/lib_xud/lib_xud
 	url = git@github.com:xmos/lib_xud.git
 [submodule "coreHTTP"]
 	path = modules/rtos/sw_services/http/thirdparty/coreHTTP
@@ -68,7 +68,7 @@
 	path = modules/aif/tflite-micro
 	url = git@github.com:xmos/tflite-micro.git
 [submodule "modules/hil/l2_cache"]
-	path = modules/hil/lib_l2_cache
+	path = modules/hil/lib_l2_cache/lib_l2_cache
 	url = git@github.com:xmos/lib_l2_cache.git
 [submodule "test/modules/test_support"]
 	path = test/modules/test_support

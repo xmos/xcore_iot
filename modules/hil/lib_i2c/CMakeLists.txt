@@ -27,23 +27,23 @@ set(LIB_PRIVATE_SOURCES  "")
 list(APPEND LIB_PUBLIC_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
 ## Create library target
-add_library(xcore_sdk_utils STATIC)
-target_sources(xcore_sdk_utils
+add_library(xcore_sdk_hil_lib_i2c STATIC)
+target_sources(xcore_sdk_hil_lib_i2c
     PUBLIC
         ${LIB_PUBLIC_SOURCES}
     PRIVATE
         ${LIB_PRIVATE_SOURCES}
 )
-target_include_directories(xcore_sdk_utils
+target_include_directories(xcore_sdk_hil_lib_i2c
     PUBLIC
         ${LIB_PUBLIC_INCLUDES}
     PRIVATE
         ${LIB_PRIVATE_INCLUDES}
 )
-target_compile_options(xcore_sdk_utils
+target_compile_options(xcore_sdk_hil_lib_i2c
     PRIVATE
         ${LIB_COMPILE_FLAGS}
 )
 
 ## Create an alias
-add_library(sdk::utils ALIAS xcore_sdk_utils)
+add_library(sdk::hil::lib_i2c ALIAS xcore_sdk_hil_lib_i2c)

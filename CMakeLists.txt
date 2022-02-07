@@ -6,11 +6,11 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
 endif()
 
 ## in the future will just pass this in
-include(tools/cmake_utils/xmos_toolchain.cmake)
+include(tools/cmake_utils/xmos_xs3a_toolchain.cmake)
 include(tools/cmake_utils/create_multitile_target.cmake)
 
 ## Project declaration
-project(XCORE_SDK_PATH)
+project(xcore_sdk)
 
 ## Enable languages for project
 enable_language(CXX C ASM)
@@ -20,6 +20,7 @@ option(BUILD_TESTS    "Build test applications"    OFF)
 option(BUILD_EXAMPLES "Build example applications" OFF)
 option(BUILD_HOST     "Build host applications"    OFF)
 
+## TODO REMOVE
 set(XCORE_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(modules)

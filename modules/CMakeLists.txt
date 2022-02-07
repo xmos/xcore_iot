@@ -1,14 +1,29 @@
 
 # add_subdirectory(aif)
 # add_subdirectory(device_memory_support)
-# add_subdirectory(hil)
-# add_subdirectory(legacy_compat)
-# # add_subdirectory(lib_dsp)
-# # add_subdirectory(lib_otpinfo)
-# # add_subdirectory(lib_random)
-# # add_subdirectory(lib_src)
-# # add_subdirectory(lib_xs3_math)
-# add_subdirectory(multitile_support)
-# add_subdirectory(rtos)
-# # add_subdirectory(thirdparty)
+add_subdirectory(hil)
+add_subdirectory(legacy_compat)
+add_subdirectory(lib_dsp)
+# add_subdirectory(lib_otpinfo)
+# add_subdirectory(lib_random)
+# add_subdirectory(lib_src)
+add_subdirectory(lib_xs3_math)
+add_subdirectory(multitile_support)
+add_subdirectory(rtos)
+# add_subdirectory(thirdparty)
 add_subdirectory(utils)
+
+
+
+## Create an aggregate of hil libraries
+add_library(xcore_sdk INTERFACE)
+target_link_libraries(xcore_sdk
+    INTERFACE
+        sdk::hil
+        sdk::lib_dsp
+        sdk::legacy_compat
+        sdk::lib_xs3_math
+        sdk::multitile_support
+        sdk::utils
+        sdk::rtos_freertos
+)

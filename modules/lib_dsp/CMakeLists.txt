@@ -1,9 +1,9 @@
 
 ## Source files
-file(GLOB_RECURSE LIB_C_SOURCES   src/*.c )
-file(GLOB_RECURSE LIB_CXX_SOURCES src/*.cc)
-file(GLOB_RECURSE LIB_XC_SOURCES  src/*.xc)
-file(GLOB_RECURSE LIB_ASM_SOURCES src/*.S )
+file(GLOB_RECURSE LIB_C_SOURCES   lib_dsp/lib_dsp/src/*.c )
+file(GLOB_RECURSE LIB_CXX_SOURCES lib_dsp/lib_dsp/src/*.cc)
+file(GLOB_RECURSE LIB_XC_SOURCES  lib_dsp/lib_dsp/src/*.xc)
+file(GLOB_RECURSE LIB_ASM_SOURCES lib_dsp/lib_dsp/src/*.S )
 
 ## cmake doesn't recognize .S files as assembly by default
 set_source_files_properties(LIB_ASM_SOURCES PROPERTIES LANGUAGE ASM)
@@ -15,8 +15,8 @@ set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
 set(LIB_COMPILE_FLAGS "")
 
 ## Includes files
-set(LIB_PUBLIC_INCLUDES  api)
-set(LIB_PRIVATE_INCLUDES src)
+set(LIB_PUBLIC_INCLUDES  lib_dsp/lib_dsp/api)
+set(LIB_PRIVATE_INCLUDES lib_dsp/lib_dsp/src)
 
 ## Gather library sources
 set(SOURCES_XCORE ${LIB_ASM_SOURCES})
@@ -27,23 +27,27 @@ set(LIB_PRIVATE_SOURCES  "")
 list(APPEND LIB_PUBLIC_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
 ## Create library target
-add_library(xcore_sdk_utils STATIC)
-target_sources(xcore_sdk_utils
+add_library(xcore_sdk_lib_dsp STATIC)
+target_sources(xcore_sdk_lib_dsp
     PUBLIC
         ${LIB_PUBLIC_SOURCES}
     PRIVATE
         ${LIB_PRIVATE_SOURCES}
 )
-target_include_directories(xcore_sdk_utils
+target_include_directories(xcore_sdk_lib_dsp
     PUBLIC
         ${LIB_PUBLIC_INCLUDES}
     PRIVATE
         ${LIB_PRIVATE_INCLUDES}
 )
-target_compile_options(xcore_sdk_utils
+target_compile_options(xcore_sdk_lib_dsp
     PRIVATE
         ${LIB_COMPILE_FLAGS}
 )
+target_link_libraries(xcore_sdk_lib_dsp
+    PUBLIC
+        sdk::legacy_compat
+)
 
 ## Create an alias
-add_library(sdk::utils ALIAS xcore_sdk_utils)
+add_library(sdk::lib_dsp ALIAS xcore_sdk_lib_dsp)

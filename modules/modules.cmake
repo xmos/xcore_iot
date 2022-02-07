@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.20)
 set(MODULES_DIR "${XCORE_SDK_PATH}/modules")
 
 set(MULTITILE_SUPPORT_DIR "${MODULES_DIR}/multitile_support")
-set(LIB_DSP_DIR "${MODULES_DIR}/lib_dsp")
+set(LIB_DSP_DIR "${MODULES_DIR}/lib_dsp/lib_dsp")
 set(LIB_SRC_DIR "${MODULES_DIR}/lib_src")
 set(LIB_RANDOM_DIR "${MODULES_DIR}/lib_random")
 set(LIB_XS3_MATH_DIR "${MODULES_DIR}/lib_xs3_math")
@@ -164,7 +164,7 @@ set(THIS_LIB LEGACY_COMPAT)
 if(${USE_${THIS_LIB}})
     set(${THIS_LIB}_SOURCES "")
     set(${THIS_LIB}_INCLUDES
-        "${${THIS_LIB}_DIR}"
+        "${${THIS_LIB}_DIR}/api"
     )
     message("${COLOR_GREEN}Gathering ${THIS_LIB}...${COLOR_RESET}")
 endif()

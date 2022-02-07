@@ -7,11 +7,11 @@ set(HIL_DIR "${XCORE_SDK_PATH}/modules/hil")
 
 set(I2C_HIL_DIR "${HIL_DIR}/lib_i2c")
 set(I2S_HIL_DIR "${HIL_DIR}/lib_i2s")
-set(MIC_ARRAY_HIL_DIR "${HIL_DIR}/lib_mic_array")
+set(MIC_ARRAY_HIL_DIR "${HIL_DIR}/lib_mic_array/lib_mic_array")
 set(SPI_HIL_DIR "${HIL_DIR}/lib_spi")
 set(QSPI_IO_HIL_DIR "${HIL_DIR}/lib_qspi_io")
-set(XUD_HIL_DIR "${HIL_DIR}/lib_xud")
-set(L2_CACHE_HIL_DIR "${HIL_DIR}/lib_l2_cache")
+set(XUD_HIL_DIR "${HIL_DIR}/lib_xud/lib_xud")
+set(L2_CACHE_HIL_DIR "${HIL_DIR}/lib_l2_cache/lib_l2_cache")
 set(CLOCK_CONTROL_HIL_DIR "${HIL_DIR}/lib_clock_control")
 
 #**********************

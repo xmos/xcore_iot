@@ -16,7 +16,6 @@ set(MODULES_DIR "${XCORE_SDK_PATH}/modules")
 #********************************
 include("${MODULES_DIR}/hil/hil.cmake")
 include("${MODULES_DIR}/rtos/rtos.cmake")
-include("${MODULES_DIR}/thirdparty/thirdparty.cmake")
 include("${MODULES_DIR}/modules.cmake")
 
 ## Set XMOS application variables
@@ -47,7 +46,6 @@ set(APP_SOURCES
     "src/filesystem/filesystem_demo.c"
     ${HIL_SOURCES}
     ${MODULES_SOURCES}
-    ${THIRDPARTY_SOURCES}
     ${RTOS_SOURCES}
 )
 
@@ -55,7 +53,6 @@ set(APP_INCLUDES
     "src"
     ${HIL_INCLUDES}
     ${MODULES_INCLUDES}
-    ${THIRDPARTY_INCLUDES}
     ${RTOS_INCLUDES}
 )
 
@@ -73,11 +70,12 @@ set(APP_COMPILE_DEFINITIONS
 
 set(APP_LINK_OPTIONS
     "-lquadspi"
+    "-report"
     "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
 )
 
-set(APP_LINK_LIBRARIES utils)
+# set(APP_LINK_LIBRARIES utils)
 
 #**********************
 # targets
@@ -88,7 +86,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PRIVATE ${APP_COMPILE_DEFINITIONS} PLATFORM_USES_TILE_0=1 PLATFORM_USES_TILE_1=1 THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PRIVATE utils)
+target_link_libraries(${TARGET_NAME} PRIVATE xcore_sdk)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
@@ -98,7 +96,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PRIVATE ${APP_COMPILE_DEFINITIONS} PLATFORM_USES_TILE_0=1 PLATFORM_USES_TILE_1=1 THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PRIVATE utils)
+target_link_libraries(${TARGET_NAME} PRIVATE xcore_sdk)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
 unset(TARGET_NAME)
 

@@ -1,9 +1,9 @@
 
 ## Source files
-file(GLOB_RECURSE LIB_C_SOURCES   src/*.c )
-file(GLOB_RECURSE LIB_CXX_SOURCES src/*.cc)
-file(GLOB_RECURSE LIB_XC_SOURCES  src/*.xc)
-file(GLOB_RECURSE LIB_ASM_SOURCES src/*.S )
+file(GLOB_RECURSE LIB_C_SOURCES   lib_l2_cache/lib_l2_cache/src/*.c )
+file(GLOB_RECURSE LIB_CXX_SOURCES lib_l2_cache/lib_l2_cache/src/*.cc)
+file(GLOB_RECURSE LIB_XC_SOURCES  lib_l2_cache/lib_l2_cache/src/*.xc)
+file(GLOB_RECURSE LIB_ASM_SOURCES lib_l2_cache/lib_l2_cache/src/*.S )
 
 ## cmake doesn't recognize .S files as assembly by default
 set_source_files_properties(LIB_ASM_SOURCES PROPERTIES LANGUAGE ASM)
@@ -15,8 +15,8 @@ set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
 set(LIB_COMPILE_FLAGS "")
 
 ## Includes files
-set(LIB_PUBLIC_INCLUDES  api)
-set(LIB_PRIVATE_INCLUDES src)
+set(LIB_PUBLIC_INCLUDES  lib_l2_cache/lib_l2_cache/api)
+set(LIB_PRIVATE_INCLUDES lib_l2_cache/lib_l2_cache/src)
 
 ## Gather library sources
 set(SOURCES_XCORE ${LIB_ASM_SOURCES})
@@ -27,23 +27,27 @@ set(LIB_PRIVATE_SOURCES  "")
 list(APPEND LIB_PUBLIC_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
 ## Create library target
-add_library(xcore_sdk_utils STATIC)
-target_sources(xcore_sdk_utils
+add_library(xcore_sdk_hil_lib_l2_cache STATIC)
+target_sources(xcore_sdk_hil_lib_l2_cache
     PUBLIC
         ${LIB_PUBLIC_SOURCES}
     PRIVATE
         ${LIB_PRIVATE_SOURCES}
 )
-target_include_directories(xcore_sdk_utils
+target_include_directories(xcore_sdk_hil_lib_l2_cache
     PUBLIC
         ${LIB_PUBLIC_INCLUDES}
     PRIVATE
         ${LIB_PRIVATE_INCLUDES}
 )
-target_compile_options(xcore_sdk_utils
+target_compile_options(xcore_sdk_hil_lib_l2_cache
     PRIVATE
         ${LIB_COMPILE_FLAGS}
 )
+target_link_libraries(xcore_sdk_hil_lib_l2_cache
+    PUBLIC
+        sdk::utils
+)
 
 ## Create an alias
-add_library(sdk::utils ALIAS xcore_sdk_utils)
+add_library(sdk::hil::lib_l2_cache ALIAS xcore_sdk_hil_lib_l2_cache)

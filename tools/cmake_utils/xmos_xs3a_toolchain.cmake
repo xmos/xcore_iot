@@ -1,4 +1,4 @@
-set(CMAKE_SYSTEM_NAME XCORE)
+set(CMAKE_SYSTEM_NAME XCORE_XS3A)
 
 # CMake versions 3.20 and newer now require the ASM dialect to be specified
 set(ASM_DIALECT "")
@@ -44,8 +44,9 @@ set(CMAKE_C_COMPILER_FORCED TRUE)
 set(CMAKE_CXX_COMPILER_FORCED TRUE)
 set(CMAKE_ASM_COMPILER_FORCED TRUE)
 
-set(CMAKE_C_FLAGS "" CACHE STRING "C Compiler Base Flags" FORCE)
-set(CMAKE_CXX_FLAGS "-std=c++11" CACHE STRING "C++ Compiler Base Flags" FORCE)
+set(CMAKE_C_FLAGS "-march=xs3a" CACHE STRING "C Compiler Base Flags" FORCE)
+set(CMAKE_CXX_FLAGS "-march=xs3a" "-std=c++11" CACHE STRING "C++ Compiler Base Flags" FORCE)
+set(CMAKE_ASM_FLAGS "-march=xs3a" CACHE STRING "ASM Compiler Base Flags" FORCE)
 set(CMAKE_EXE_LINKER_FLAGS "" CACHE INTERNAL "" FORCE)
 
 set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/xc_override.cmake")

@@ -1,0 +1,21 @@
+
+## Create library target
+add_library(xcore_sdk_rtos_drivers_i2c STATIC)
+target_sources(xcore_sdk_rtos_drivers_i2c
+    PUBLIC
+        src/rtos_i2c_master.c
+        src/rtos_i2c_master_rpc.c
+        src/rtos_i2c_slave.c
+)
+target_include_directories(xcore_sdk_rtos_drivers_i2c
+    PUBLIC
+        api
+)
+target_link_libraries(xcore_sdk_rtos_drivers_i2c
+    PUBLIC
+        sdk::hil::lib_i2c
+        sdk::rtos::osal
+)
+
+## Create an alias
+add_library(sdk::rtos::drivers::i2c ALIAS xcore_sdk_rtos_drivers_i2c)
