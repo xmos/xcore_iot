@@ -1,10 +1,4 @@
 
-
-
-set(USE_FATFS TRUE)
-set(BOARD "XCORE-AI-EXPLORER")
-
-
 ## Set XMOS application variables
 set(APP_COMPILER_FLAGS
     "-Os"
@@ -15,8 +9,7 @@ set(APP_COMPILER_FLAGS
     "-mcmodel=large"
     "-Wno-xcore-fptrgroup"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
-    "-march=xs3a"
+    "${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn"
 )
 
 set(APP_SOURCES
@@ -52,11 +45,9 @@ set(APP_COMPILE_DEFINITIONS
 set(APP_LINK_OPTIONS
     "-lquadspi"
     "-report"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
+    "${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
 )
-
-# set(APP_LINK_LIBRARIES utils)
 
 #**********************
 # targets
