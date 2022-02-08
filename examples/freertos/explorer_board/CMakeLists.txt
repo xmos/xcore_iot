@@ -72,19 +72,4 @@ target_link_libraries(${TARGET_NAME} PRIVATE xcore_sdk)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
 unset(TARGET_NAME)
 
-## create_multitile_target(TARGET_NAME explorer_board_tile0 explorer_board_tile1)
-
-## Hard code a target for now
-add_custom_target(explorer_board
-    ALL
-    COMMAND xobjdump --split --split-dir ${CMAKE_BINARY_DIR}/examples/freertos/explorer_board explorer_board_tile1
-    COMMAND xobjdump ${CMAKE_BINARY_DIR}/examples/freertos/explorer_board/explorer_board_tile0 -r 0,1,${CMAKE_BINARY_DIR}/examples/freertos/explorer_board/image_n0c1_2.elf
-    COMMAND cp ${CMAKE_BINARY_DIR}/examples/freertos/explorer_board/explorer_board_tile0 explorer_board.xe
-    DEPENDS
-        explorer_board_tile0
-        explorer_board_tile1
-    BYPRODUCTS
-        #TODO
-    COMMENT "Merging tile ${_TILE} into ${XE_BASE_TILE}.xe"
-    VERBATIM
-)
+merge_binaries(explorer_board explorer_board_tile0 explorer_board_tile1 0)
