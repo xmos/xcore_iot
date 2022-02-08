@@ -1,16 +1,16 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_drivers_rpc STATIC)
+add_library(xcore_sdk_rtos_drivers_rpc INTERFACE)
 target_sources(xcore_sdk_rtos_drivers_rpc
-    PUBLIC
+    INTERFACE
         src/rtos_rpc.c
 )
 target_include_directories(xcore_sdk_rtos_drivers_rpc
-    PUBLIC
+    INTERFACE
         api
 )
 target_link_libraries(xcore_sdk_rtos_drivers_rpc
-    PUBLIC
+    INTERFACE
         sdk::rtos::osal
 )
 

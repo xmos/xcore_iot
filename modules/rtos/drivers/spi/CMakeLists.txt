@@ -1,18 +1,18 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_drivers_spi STATIC)
+add_library(xcore_sdk_rtos_drivers_spi INTERFACE)
 target_sources(xcore_sdk_rtos_drivers_spi
-    PUBLIC
+    INTERFACE
         src/rtos_spi_master.c
         src/rtos_spi_master_rpc.c
         src/rtos_spi_slave.c
 )
 target_include_directories(xcore_sdk_rtos_drivers_spi
-    PUBLIC
+    INTERFACE
         api
 )
 target_link_libraries(xcore_sdk_rtos_drivers_spi
-    PUBLIC
+    INTERFACE
         sdk::hil::lib_spi
         sdk::rtos::osal
 )

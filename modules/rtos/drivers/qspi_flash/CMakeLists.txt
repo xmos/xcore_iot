@@ -1,17 +1,17 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_drivers_qspi_io STATIC)
+add_library(xcore_sdk_rtos_drivers_qspi_io INTERFACE)
 target_sources(xcore_sdk_rtos_drivers_qspi_io
-    PUBLIC
+    INTERFACE
         src/rtos_qspi_flash.c
         src/rtos_qspi_flash_rpc.c
 )
 target_include_directories(xcore_sdk_rtos_drivers_qspi_io
-    PUBLIC
+    INTERFACE
         api
 )
 target_link_libraries(xcore_sdk_rtos_drivers_qspi_io
-    PUBLIC
+    INTERFACE
         sdk::hil::lib_qspi_io
         sdk::rtos::osal
 )

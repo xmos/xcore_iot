@@ -13,8 +13,8 @@
 
 #include "qspi_flash.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
 
 #define RTOS_QSPI_FLASH_READ_CHUNK_SIZE (24*1024)
 
@@ -57,7 +57,7 @@ struct rtos_qspi_flash_struct {
     volatile int spinlock;
 };
 
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash_rpc.h"
+#include "rtos_qspi_flash_rpc.h"
 
 /**
  * \addtogroup rtos_qspi_flash_driver_core rtos_qspi_flash_driver_core

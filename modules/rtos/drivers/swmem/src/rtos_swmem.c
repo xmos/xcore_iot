@@ -6,7 +6,7 @@
 #include <xcore/triggerable.h>
 
 #include "rtos_interrupt.h"
-#include "rtos/drivers/swmem/api/rtos_swmem.h"
+#include "rtos_swmem.h"
 
 static swmem_fill_t swmem_fill_res;
 static swmem_evict_t swmem_evict_res;

@@ -44,6 +44,10 @@ target_compile_options(xcore_sdk_hil_lib_qspi_io
     PRIVATE
         ${LIB_COMPILE_FLAGS}
 )
+target_link_libraries(xcore_sdk_hil_lib_qspi_io
+    PUBLIC
+        sdk::utils
+)
 
 ## Create an alias
 add_library(sdk::hil::lib_qspi_io ALIAS xcore_sdk_hil_lib_qspi_io)

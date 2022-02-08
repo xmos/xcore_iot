@@ -3,7 +3,7 @@
 
 #include <xcore/assert.h>
 
-#include "rtos/drivers/clock_control/api/rtos_clock_control.h"
+#include "rtos_clock_control.h"
 
 __attribute__((fptrgroup("rtos_clock_control_set_ref_clk_div_fptr_grp")))
 static void clock_control_local_set_ref_clk_div(

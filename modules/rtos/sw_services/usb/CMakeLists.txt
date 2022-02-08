@@ -4,9 +4,9 @@ file(GLOB_RECURSE TUSB_COMMON_SOURCES thirdparty/tinyusb_src/src/common/*.c)
 file(GLOB_RECURSE TUSB_DEVICE_SOURCES thirdparty/tinyusb_src/src/device/*.c)
 
 ## Create library target
-add_library(xcore_sdk_rtos_sw_services_usb STATIC)
+add_library(xcore_sdk_rtos_sw_services_usb INTERFACE)
 target_sources(xcore_sdk_rtos_sw_services_usb
-    PUBLIC
+    INTERFACE
         ${TUSB_ROOT_SOURCES}
         ${TUSB_CLASS_SOURCES}
         ${TUSB_COMMON_SOURCES}
@@ -16,13 +16,13 @@ target_sources(xcore_sdk_rtos_sw_services_usb
         FreeRTOS/usb_support.c
 )
 target_include_directories(xcore_sdk_rtos_sw_services_usb
-    PUBLIC
+    INTERFACE
         api
         portable
         thirdparty/tinyusb_src/src
 )
 target_link_libraries(xcore_sdk_rtos_sw_services_usb
-    PUBLIC
+    INTERFACE
         sdk::rtos::osal
         sdk::rtos::drivers::usb
         sdk::rtos::FreeRTOS_SMP

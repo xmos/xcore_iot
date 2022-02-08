@@ -9,8 +9,7 @@
 #include <xcore/triggerable.h>
 
 #include "rtos_interrupt.h"
-
-#include "rtos/drivers/mic_array/api/rtos_mic_array.h"
+#include "rtos_mic_array.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 

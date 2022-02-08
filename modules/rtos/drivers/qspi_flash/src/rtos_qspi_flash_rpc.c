@@ -4,9 +4,8 @@
 #include <string.h>
 #include <xcore/assert.h>
 
-#include "rtos/drivers/rpc/api/rtos_rpc.h"
-
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
+#include "rtos_rpc.h"
+#include "rtos_qspi_flash.h"
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 

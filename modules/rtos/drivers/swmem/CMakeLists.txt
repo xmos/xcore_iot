@@ -1,16 +1,16 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_drivers_swmem STATIC)
+add_library(xcore_sdk_rtos_drivers_swmem INTERFACE)
 target_sources(xcore_sdk_rtos_drivers_swmem
-    PUBLIC
+    INTERFACE
         src/rtos_swmem.c
 )
 target_include_directories(xcore_sdk_rtos_drivers_swmem
-    PUBLIC
+    INTERFACE
         api
 )
 target_link_libraries(xcore_sdk_rtos_drivers_swmem
-    PUBLIC
+    INTERFACE
         sdk::rtos::osal
 )
 

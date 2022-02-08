@@ -15,8 +15,8 @@
 #include <xcore/port.h>
 #include "i2s.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
 
 /**
  * This attribute must be specified on all RTOS I2S send filter callback functions
@@ -150,7 +150,7 @@ struct rtos_i2s_struct{
     uint8_t isr_cmd;
 };
 
-#include "rtos/drivers/i2s/api/rtos_i2s_rpc.h"
+#include "rtos_i2s_rpc.h"
 
 /**
  * Helper function to calculate the MCLK/BCLK ratio given the

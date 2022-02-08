@@ -14,8 +14,8 @@
 #include <xcore/channel_streaming.h>
 #include "spi.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
 
 /**
  * This attribute must be specified on all RTOS SPI slave callback functions

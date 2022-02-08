@@ -14,7 +14,7 @@
 		#undef NDEBUG
 	#endif
 #endif
-#include "debug_print.h"
+#include "xcore_utils.h"
 #include <xcore/assert.h>
 #include <xcore/hwtimer.h>
 
@@ -132,7 +132,7 @@ bool qspi_flash_write_in_progress(qspi_flash_ctx_t *ctx)
 {
 	uint8_t status_reg;
 	qspi_flash_read_register(ctx, ctx->busy_poll_cmd, &status_reg, 1);
-	
+
 	return ((status_reg >> ctx->busy_poll_bit) & 1) != ctx->busy_poll_ready_value;
 }
 
@@ -333,7 +333,7 @@ static void qspi_flash_read_calc(const int xip,
 	/* The first input should occur on either the fourth
 	 * byte, or the last byte, whichever is first. */
 	const size_t first_input_byte = len > 4 ? 4 : len;
-	
+
 #if FOUR_BYTE_ADDRESS_SUPPORT
     if (xip) {
         *cycles = (four_byte_address ? 8 : 6) + /* 6 or 8 cycles for address */
@@ -404,7 +404,7 @@ inline void qspi_flash_read_i(qspi_flash_ctx_t *ctx,
 	qspi_io_ctx_t *qspi_io_ctx = &ctx->qspi_io_ctx;
 	size_t cycles;
 	size_t input_cycle;
-	
+
 	qspi_flash_read_calc(xip,
 #if FOUR_BYTE_ADDRESS_SUPPORT
                          four_byte_address,

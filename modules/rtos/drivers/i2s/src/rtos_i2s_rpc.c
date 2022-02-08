@@ -1,9 +1,8 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include "rtos/drivers/rpc/api/rtos_rpc.h"
-
-#include "rtos/drivers/i2s/api/rtos_i2s.h"
+#include "rtos_rpc.h"
+#include "rtos_i2s.h"
 
 enum {
     fcode_rx,

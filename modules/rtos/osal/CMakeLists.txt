@@ -1,20 +1,5 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_osal INTERFACE)
-target_include_directories(xcore_sdk_rtos_osal
-    INTERFACE
-        api
-)
-target_link_libraries(xcore_sdk_rtos_osal
-    INTERFACE
-        sdk::rtos::rtos_support
-)
-
-## Create an alias
-add_library(sdk::rtos::osal ALIAS xcore_sdk_rtos_osal)
-
-
-## Create FreeRTOS library target
 add_library(xcore_sdk_rtos_osal_freertos INTERFACE)
 target_sources(xcore_sdk_rtos_osal_freertos
     INTERFACE
@@ -28,13 +13,14 @@ target_sources(xcore_sdk_rtos_osal_freertos
 )
 target_include_directories(xcore_sdk_rtos_osal_freertos
     INTERFACE
+        api
         FreeRTOS
 )
 target_link_libraries(xcore_sdk_rtos_osal_freertos
     INTERFACE
-        sdk::rtos::osal
+        sdk::rtos::rtos_support
         sdk::rtos::FreeRTOS_SMP
 )
 
 ## Create an alias
-add_library(sdk::rtos::osal_freertos ALIAS xcore_sdk_rtos_osal_freertos)
+add_library(sdk::rtos::osal ALIAS xcore_sdk_rtos_osal_freertos)

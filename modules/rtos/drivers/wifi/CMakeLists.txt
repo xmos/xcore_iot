@@ -1,9 +1,9 @@
 set(WIFI_CHIP sl_wf200)
 
 ## Create library target
-add_library(xcore_sdk_rtos_drivers_wifi STATIC)
+add_library(xcore_sdk_rtos_drivers_wifi INTERFACE)
 target_sources(xcore_sdk_rtos_drivers_wifi
-    PUBLIC
+    INTERFACE
         ${WIFI_CHIP}/FreeRTOS/sl_wfx_host_spi.c
         ${WIFI_CHIP}/FreeRTOS/sl_wfx_host_task.c
         ${WIFI_CHIP}/FreeRTOS/sl_wfx_host.c
@@ -16,7 +16,7 @@ target_sources(xcore_sdk_rtos_drivers_wifi
 
 )
 target_include_directories(xcore_sdk_rtos_drivers_wifi
-    PUBLIC
+    INTERFACE
         api
         ${WIFI_CHIP}
         ${WIFI_CHIP}/FreeRTOS
@@ -27,11 +27,11 @@ target_include_directories(xcore_sdk_rtos_drivers_wifi
 
 )
 target_compile_options(xcore_sdk_rtos_drivers_wifi
-    PRIVATE
+    INTERFACE
         "-USL_WFX_USE_SECURE_LINK"
 )
 target_link_libraries(xcore_sdk_rtos_drivers_wifi
-    PUBLIC
+    INTERFACE
         sdk::rtos::osal
         sdk::rtos::FreeRTOS-Plus-TCP
 )

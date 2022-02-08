@@ -14,8 +14,8 @@
 #include <xcore/channel_streaming.h>
 #include "i2c.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
 
 /**
  * The maximum number of bytes that a the RTOS I2C slave driver can receive from a master

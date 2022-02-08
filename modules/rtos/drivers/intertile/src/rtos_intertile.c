@@ -6,8 +6,7 @@
 #include <xcore/interrupt.h>
 
 #include "rtos_interrupt.h"
-
-#include "rtos/drivers/intertile/api/rtos_intertile.h"
+#include "rtos_intertile.h"
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_intertile_isr, arg)
 {

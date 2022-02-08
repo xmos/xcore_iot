@@ -6,7 +6,7 @@
 #include <xcore/assert.h>
 #include <xcore/interrupt.h>
 
-#include "rtos/drivers/spi/api/rtos_spi_master.h"
+#include "rtos_spi_master.h"
 
 #define SPI_OP_START 0
 #define SPI_OP_XFER  1

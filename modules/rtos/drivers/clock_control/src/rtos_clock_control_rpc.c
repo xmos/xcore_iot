@@ -3,9 +3,8 @@
 
 #include <xcore/assert.h>
 
-#include "rtos/drivers/rpc/api/rtos_rpc.h"
-
-#include "rtos/drivers/clock_control/api/rtos_clock_control.h"
+#include "rtos_rpc.h"
+#include "rtos_clock_control.h"
 
 enum {
     fcode_set_ref_clk_div,

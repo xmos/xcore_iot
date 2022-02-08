@@ -4,19 +4,6 @@
 set(USE_FATFS TRUE)
 set(BOARD "XCORE-AI-EXPLORER")
 
-set(FREERTOS_PORT "XCOREAI")
-
-#**********************
-# Paths
-#**********************
-set(MODULES_DIR "${XCORE_SDK_PATH}/modules")
-
-#********************************
-# Gather various sources
-#********************************
-include("${MODULES_DIR}/hil/hil.cmake")
-include("${MODULES_DIR}/rtos/rtos.cmake")
-include("${MODULES_DIR}/modules.cmake")
 
 ## Set XMOS application variables
 set(APP_COMPILER_FLAGS
@@ -44,16 +31,10 @@ set(APP_SOURCES
     "src/gpio_ctrl/gpio_ctrl.c"
     "src/mem_analysis/mem_analysis.c"
     "src/filesystem/filesystem_demo.c"
-    ${HIL_SOURCES}
-    ${MODULES_SOURCES}
-    ${RTOS_SOURCES}
 )
 
 set(APP_INCLUDES
     "src"
-    ${HIL_INCLUDES}
-    ${MODULES_INCLUDES}
-    ${RTOS_INCLUDES}
 )
 
 set(APP_COMPILE_DEFINITIONS

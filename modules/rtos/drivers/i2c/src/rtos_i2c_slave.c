@@ -6,8 +6,7 @@
 #include <xcore/triggerable.h>
 
 #include "rtos_interrupt.h"
-
-#include "rtos/drivers/i2c/api/rtos_i2c_slave.h"
+#include "rtos_i2c_slave.h"
 
 #define RX_CB_CODE       0
 #define TX_START_CB_CODE 1

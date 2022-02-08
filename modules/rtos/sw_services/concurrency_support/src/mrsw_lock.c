@@ -5,10 +5,8 @@
 
 #include <xcore/assert.h>
 
-#include "rtos/osal/api/rtos_osal.h"
-
+#include "rtos_osal.h"
 #include "rtos_printf.h"
-
 #include "concurrency_support.h"
 
 #define MRSW_FLAG 1

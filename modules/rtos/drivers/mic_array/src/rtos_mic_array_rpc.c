@@ -1,9 +1,8 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include "rtos/drivers/rpc/api/rtos_rpc.h"
-
-#include "rtos/drivers/mic_array/api/rtos_mic_array.h"
+#include "rtos_rpc.h"
+#include "rtos_mic_array.h"
 
 __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_remote_rx(

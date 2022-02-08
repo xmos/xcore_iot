@@ -5,8 +5,8 @@
 
 #include "rtos_interrupt.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/l2_cache/api/rtos_l2_cache.h"
+#include "rtos_osal.h"
+#include "rtos_l2_cache.h"
 #include "l2_cache.h"
 
 static void rtos_l2_cache_thread(rtos_l2_cache_t *ctx)

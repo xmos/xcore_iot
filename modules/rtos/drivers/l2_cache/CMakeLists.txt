@@ -1,16 +1,16 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_drivers_l2_cache STATIC)
+add_library(xcore_sdk_rtos_drivers_l2_cache INTERFACE)
 target_sources(xcore_sdk_rtos_drivers_l2_cache
-    PUBLIC
+    INTERFACE
         src/rtos_l2_cache.c
 )
 target_include_directories(xcore_sdk_rtos_drivers_l2_cache
-    PUBLIC
+    INTERFACE
         api
 )
 target_link_libraries(xcore_sdk_rtos_drivers_l2_cache
-    PUBLIC
+    INTERFACE
         sdk::hil::lib_l2_cache
         sdk::rtos::osal
 )

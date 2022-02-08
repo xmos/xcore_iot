@@ -5,7 +5,7 @@
 #include <xcore/triggerable.h>
 #include <xcore/assert.h>
 
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "rtos_gpio.h"
 
 #define INTERRUPT_DISABLED        0
 #define INTERRUPT_ENABLED         1

@@ -1,8 +1,8 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_sw_services_fatfs STATIC)
+add_library(xcore_sdk_rtos_sw_services_fatfs INTERFACE)
 target_sources(xcore_sdk_rtos_sw_services_fatfs
-    PUBLIC
+    INTERFACE
         FreeRTOS/diskio.c
         FreeRTOS/ffsystem.c
         FreeRTOS/fs_support.c
@@ -10,12 +10,12 @@ target_sources(xcore_sdk_rtos_sw_services_fatfs
         thirdparty/src/ffunicode.c
 )
 target_include_directories(xcore_sdk_rtos_sw_services_fatfs
-    PUBLIC
+    INTERFACE
         FreeRTOS
         thirdparty/api
 )
 target_link_libraries(xcore_sdk_rtos_sw_services_fatfs
-    PUBLIC
+    INTERFACE
         sdk::rtos::osal
         sdk::rtos::drivers::qspi_io
         sdk::rtos::FreeRTOS_SMP

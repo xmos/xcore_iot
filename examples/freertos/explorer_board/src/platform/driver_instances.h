@@ -4,13 +4,13 @@
 #ifndef DRIVER_INSTANCES_H_
 #define DRIVER_INSTANCES_H_
 
-#include "rtos/drivers/intertile/api/rtos_intertile.h"
-#include "rtos/drivers/mic_array/api/rtos_mic_array.h"
-#include "rtos/drivers/i2c/api/rtos_i2c_master.h"
-#include "rtos/drivers/i2s/api/rtos_i2s.h"
-#include "rtos/drivers/spi/api/rtos_spi_master.h"
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "rtos_intertile.h"
+#include "rtos_mic_array.h"
+#include "rtos_i2c_master.h"
+#include "rtos_i2s.h"
+#include "rtos_spi_master.h"
+#include "rtos_qspi_flash.h"
+#include "rtos_gpio.h"
 
 #define FLASH_TILE_NO      0
 #define I2C_TILE_NO        0

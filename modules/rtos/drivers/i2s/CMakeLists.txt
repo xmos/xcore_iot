@@ -1,17 +1,17 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_drivers_i2s STATIC)
+add_library(xcore_sdk_rtos_drivers_i2s INTERFACE)
 target_sources(xcore_sdk_rtos_drivers_i2s
-    PUBLIC
+    INTERFACE
         src/rtos_i2s.c
         src/rtos_i2s_rpc.c
 )
 target_include_directories(xcore_sdk_rtos_drivers_i2s
-    PUBLIC
+    INTERFACE
         api
 )
 target_link_libraries(xcore_sdk_rtos_drivers_i2s
-    PUBLIC
+    INTERFACE
         sdk::hil::lib_i2s
         sdk::rtos::osal
 )

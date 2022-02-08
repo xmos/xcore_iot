@@ -10,8 +10,7 @@
 #include <xcore/triggerable.h>
 
 #include "rtos_interrupt.h"
-
-#include "rtos/drivers/i2s/api/rtos_i2s.h"
+#include "rtos_i2s.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 

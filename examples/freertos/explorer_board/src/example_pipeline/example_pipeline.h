@@ -4,8 +4,8 @@
 #ifndef SRC_EXAMPLE_PIPELINE_H_
 #define SRC_EXAMPLE_PIPELINE_H_
 
-#include "rtos/drivers/mic_array/api/rtos_mic_array.h"
-#include "rtos/drivers/i2s/api/rtos_i2s.h"
+#include "rtos_mic_array.h"
+#include "rtos_i2s.h"
 
 enum {
     GET_GAIN_VAL = 1,

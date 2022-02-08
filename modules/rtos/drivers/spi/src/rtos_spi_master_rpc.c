@@ -1,9 +1,8 @@
 // Copyright 2020-2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include "rtos/drivers/rpc/api/rtos_rpc.h"
-
-#include "rtos/drivers/spi/api/rtos_spi_master.h"
+#include "rtos_rpc.h"
+#include "rtos_spi_master.h"
 
 enum {
     fcode_transaction_start,

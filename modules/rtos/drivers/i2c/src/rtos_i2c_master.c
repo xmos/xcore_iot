@@ -3,7 +3,7 @@
 
 #define DEBUG_UNIT RTOS_I2C
 
-#include "rtos/drivers/i2c/api/rtos_i2c_master.h"
+#include "rtos_i2c_master.h"
 
 __attribute__((fptrgroup("rtos_i2c_master_write_fptr_grp")))
 static i2c_res_t i2c_master_local_write(

@@ -1,18 +1,18 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_drivers_i2c STATIC)
+add_library(xcore_sdk_rtos_drivers_i2c INTERFACE)
 target_sources(xcore_sdk_rtos_drivers_i2c
-    PUBLIC
+    INTERFACE
         src/rtos_i2c_master.c
         src/rtos_i2c_master_rpc.c
         src/rtos_i2c_slave.c
 )
 target_include_directories(xcore_sdk_rtos_drivers_i2c
-    PUBLIC
+    INTERFACE
         api
 )
 target_link_libraries(xcore_sdk_rtos_drivers_i2c
-    PUBLIC
+    INTERFACE
         sdk::hil::lib_i2c
         sdk::rtos::osal
 )

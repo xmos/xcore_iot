@@ -1,6 +1,6 @@
 
 ## Source files
-file(GLOB_RECURSE LIB_C_SOURCES   lib_xs3_math/lib_xs3_math/src/*.c )
+file(GLOB_RECURSE LIB_C_SOURCES   lib_xs3_math/lib_xs3_math/src/bfp/*.c )
 file(GLOB_RECURSE LIB_CXX_SOURCES lib_xs3_math/lib_xs3_math/src/*.cc)
 file(GLOB_RECURSE LIB_XC_SOURCES  lib_xs3_math/lib_xs3_math/src/*.xc)
 file(GLOB_RECURSE LIB_ASM_SOURCES lib_xs3_math/lib_xs3_math/src/*.S )
@@ -15,7 +15,14 @@ set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
 set(LIB_COMPILE_FLAGS "-Os")
 
 ## Includes files
-set(LIB_PUBLIC_INCLUDES  lib_xs3_math/lib_xs3_math/api lib_xs3_math/lib_xs3_math/api/bfp lib_xs3_math/lib_xs3_math/api/scalar lib_xs3_math/lib_xs3_math/api/vect)
+set(LIB_PUBLIC_INCLUDES
+    lib_xs3_math/lib_xs3_math/api
+    lib_xs3_math/lib_xs3_math/api/bfp
+    lib_xs3_math/lib_xs3_math/api/scalar
+    lib_xs3_math/lib_xs3_math/api/vect
+    lib_xs3_math/lib_xs3_math/src/arch/xcore
+    lib_xs3_math/lib_xs3_math/src/etc/xs3_fft_lut
+)
 set(LIB_PRIVATE_INCLUDES lib_xs3_math/lib_xs3_math/src)
 
 ## Gather library sources

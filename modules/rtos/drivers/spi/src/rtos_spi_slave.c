@@ -7,8 +7,7 @@
 #include <xcore/triggerable.h>
 
 #include "rtos_interrupt.h"
-
-#include "rtos/drivers/spi/api/rtos_spi_slave.h"
+#include "rtos_spi_slave.h"
 
 #define XFER_DONE_CB_CODE       0
 

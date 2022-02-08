@@ -6,9 +6,8 @@
 #include <xcore/assert.h>
 
 #include "rtos_interrupt.h"
-
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
-#include "rtos/drivers/rpc/api/rtos_rpc.h"
+#include "rtos_gpio.h"
+#include "rtos_rpc.h"
 
 RTOS_GPIO_ISR_CALLBACK_ATTR
 static void rtos_gpio_rpc_host_isr(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_t port_id, uint32_t value)
