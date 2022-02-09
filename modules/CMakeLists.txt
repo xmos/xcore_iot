@@ -15,9 +15,9 @@ add_subdirectory(utils)
 
 
 
-## Create an aggregate of hil libraries
-add_library(xcore_sdk INTERFACE)
-target_link_libraries(xcore_sdk
+## Create an aggregate of core libraries
+add_library(xcore_sdk_core INTERFACE)
+target_link_libraries(xcore_sdk_core
     INTERFACE
         sdk::hil
         sdk::lib_dsp
@@ -25,5 +25,26 @@ target_link_libraries(xcore_sdk
         sdk::lib_xs3_math
         sdk::multitile_support
         sdk::utils
-        sdk::rtos_freertos
 )
+
+add_library(sdk::core ALIAS xcore_sdk_core)
+
+# ## Create an aggregate of iot libraries
+# add_library(xcore_sdk_iot INTERFACE)
+# target_link_libraries(xcore_sdk_iot
+#     INTERFACE
+#         sdk::rtos_freertos
+#         sdk::wifi
+# )
+#
+# add_library(sdk::iot ALIAS xcore_sdk_iot)
+#
+# ## Create an aggregate of rtos usb libraries
+# add_library(xcore_sdk_rtos_usb INTERFACE)
+# target_link_libraries(xcore_sdk_rtos_usb
+#     INTERFACE
+#         sdk::rtos_freertos
+#         sdk::usb
+# )
+#
+# add_library(sdk::rtos_usb ALIAS xcore_sdk_rtos_usb)
