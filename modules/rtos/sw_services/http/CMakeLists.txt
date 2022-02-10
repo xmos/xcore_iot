@@ -1,18 +1,14 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_sw_services_concurrency_support STATIC)
-target_sources(xcore_sdk_rtos_sw_services_concurrency_support
-    PUBLIC
-        src/mrsw_lock.c
+add_library(xcore_sdk_rtos_sw_services_http INTERFACE)
+target_sources(xcore_sdk_rtos_sw_services_http
+    INTERFACE
+        thirdparty/coreHTTP/source/dependency/3rdparty/http_parser/http_parser.c
 )
-target_include_directories(xcore_sdk_rtos_sw_services_concurrency_support
-    PUBLIC
-        api
-)
-target_link_libraries(xcore_sdk_rtos_sw_services_concurrency_support
-    PUBLIC
-        sdk::rtos::osal
+target_include_directories(xcore_sdk_rtos_sw_services_http
+    INTERFACE
+        thirdparty/coreHTTP/source/dependency/3rdparty/http_parser
 )
 
 ## Create an alias
-add_library(sdk::rtos::drivers::concurrency_support ALIAS xcore_sdk_rtos_sw_services_concurrency_support)
+add_library(sdk::rtos::sw_services::http ALIAS xcore_sdk_rtos_sw_services_http)

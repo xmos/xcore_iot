@@ -1,9 +1,9 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #include <platform.h>
 
-#include "rtos/drivers/i2c/api/rtos_i2c_slave.h"
+#include "rtos_i2c_slave.h"
 
 #include "rtos_printf.h"
 #include "device_control.h"

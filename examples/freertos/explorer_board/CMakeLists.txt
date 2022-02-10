@@ -1,8 +1,12 @@
-
-
+#**********************
+# Gather Sources
+#**********************
 file(GLOB_RECURSE APP_SOURCES   src/*.c )
 set(APP_INCLUDES src)
 
+#**********************
+# Flags
+#**********************
 set(APP_COMPILER_FLAGS
     -Os
     -g
@@ -16,11 +20,12 @@ set(APP_COMPILER_FLAGS
 )
 set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
-    XCOREAI_EXPLORER=1
     PLATFORM_SUPPORTS_TILE_0=1
     PLATFORM_SUPPORTS_TILE_1=1
     PLATFORM_SUPPORTS_TILE_2=0
     PLATFORM_SUPPORTS_TILE_3=0
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
     USB_TILE_NO=0
     USB_TILE=tile[USB_TILE_NO]
     XE_BASE_TILE=0
@@ -35,13 +40,13 @@ set(APP_LINK_OPTIONS
 )
 
 #**********************
-# targets
+# Tile Targets
 #**********************
 set(TARGET_NAME explorer_board_tile0)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PRIVATE ${APP_COMPILE_DEFINITIONS} PLATFORM_USES_TILE_0=1 PLATFORM_USES_TILE_1=1 THIS_XCORE_TILE=0)
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
@@ -51,16 +56,26 @@ set(TARGET_NAME explorer_board_tile1)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PRIVATE ${APP_COMPILE_DEFINITIONS} PLATFORM_USES_TILE_0=1 PLATFORM_USES_TILE_1=1 THIS_XCORE_TILE=1)
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
 unset(TARGET_NAME)
 
+#**********************
+# Merge binaries
+#**********************
 merge_binaries(explorer_board explorer_board_tile0 explorer_board_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
 create_run_target(explorer_board)
 create_debug_target(explorer_board)
 
+#**********************
+# Filesystem support targets
+#**********************
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     add_custom_command(
         OUTPUT explorer_board_fat.fs
@@ -73,7 +88,6 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
         VERBATIM
     )
 else()
-    message(FATAL_ERROR ${CMAKE_HOST_SYSTEM_NAME})
     add_custom_command(
         OUTPUT explorer_board_fat.fs
         COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/fs && cp ./demo.txt $fat_mnt_dir/fs/demo.txt && fatfs_mkimage --input=$tmp_dir --output=explorer_board_fat.fs"

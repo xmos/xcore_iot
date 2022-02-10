@@ -1,18 +1,23 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_sw_services_concurrency_support INTERFACE)
-target_sources(xcore_sdk_rtos_sw_services_concurrency_support
+add_library(xcore_sdk_rtos_sw_services_dhcp INTERFACE)
+target_sources(xcore_sdk_rtos_sw_services_dhcp
     INTERFACE
-        src/mrsw_lock.c
+        src/dhcpd.c
 )
-target_include_directories(xcore_sdk_rtos_sw_services_concurrency_support
+target_include_directories(xcore_sdk_rtos_sw_services_dhcp
     INTERFACE
         api
+        FreeRTOS
 )
-target_link_libraries(xcore_sdk_rtos_sw_services_concurrency_support
+target_link_libraries(xcore_sdk_rtos_sw_services_dhcp
     INTERFACE
-        sdk::rtos::osal
+        sdk::rtos::FreeRTOS-Plus-TCP
+)
+target_compile_definitions(xcore_sdk_rtos_sw_services_dhcp
+    INTERFACE
+        USE_DHCPD=1
 )
 
 ## Create an alias
-add_library(sdk::rtos::drivers::concurrency_support ALIAS xcore_sdk_rtos_sw_services_concurrency_support)
+add_library(sdk::rtos::sw_services::dhcp ALIAS xcore_sdk_rtos_sw_services_dhcp)

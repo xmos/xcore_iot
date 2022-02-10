@@ -4,30 +4,44 @@ Device Control
 
 This example application demonstrates how to use device control over USB and I2C.
 
-*********************************
-Building and running the firmware
-*********************************
+*********************
+Building the firmware
+*********************
 
-Run the following commands to build the dispatch_queue firmware:
+Run the following commands to build the device_control firmware:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -B build
         $ cd build
-        $ make
+        $ make device_control
 
 .. tab:: Windows XTC Tools CMD prompt
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake
-        
-To run the example:
+        $ nmake device_control
+
+*********************
+Running the firmware
+*********************
+
+From the xcore_sdk build folder run:
 
 .. code-block:: console
 
-    $ xrun --xscope bin/device_control.xe
+    $ make run_device_control
+
+*********************
+Debugging the firmware with xgdb
+*********************
+
+From the xcore_sdk build folder run:
+
+.. code-block:: console
+
+    $ make debug_device_control

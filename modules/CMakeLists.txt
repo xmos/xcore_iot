@@ -10,9 +10,8 @@ add_subdirectory(lib_dsp)
 add_subdirectory(lib_xs3_math)
 add_subdirectory(multitile_support)
 add_subdirectory(rtos)
-# add_subdirectory(thirdparty)
+add_subdirectory(thirdparty)
 add_subdirectory(utils)
-
 
 
 ## Create an aggregate of core libraries
@@ -29,22 +28,22 @@ target_link_libraries(xcore_sdk_core
 
 add_library(sdk::core ALIAS xcore_sdk_core)
 
-# ## Create an aggregate of iot libraries
-# add_library(xcore_sdk_iot INTERFACE)
-# target_link_libraries(xcore_sdk_iot
-#     INTERFACE
-#         sdk::rtos_freertos
-#         sdk::wifi
-# )
-#
-# add_library(sdk::iot ALIAS xcore_sdk_iot)
-#
-# ## Create an aggregate of rtos usb libraries
-# add_library(xcore_sdk_rtos_usb INTERFACE)
-# target_link_libraries(xcore_sdk_rtos_usb
-#     INTERFACE
-#         sdk::rtos_freertos
-#         sdk::usb
-# )
-#
-# add_library(sdk::rtos_usb ALIAS xcore_sdk_rtos_usb)
+## Create an aggregate of iot libraries
+add_library(xcore_sdk_iot INTERFACE)
+target_link_libraries(xcore_sdk_iot
+    INTERFACE
+        sdk::rtos_freertos
+        sdk::rtos::wifi
+)
+
+add_library(sdk::iot ALIAS xcore_sdk_iot)
+
+## Create an aggregate of rtos usb libraries
+add_library(xcore_sdk_rtos_usb INTERFACE)
+target_link_libraries(xcore_sdk_rtos_usb
+    INTERFACE
+        sdk::rtos_freertos
+        sdk::rtos::sw_services::usb
+)
+
+add_library(sdk::rtos_usb ALIAS xcore_sdk_rtos_usb)

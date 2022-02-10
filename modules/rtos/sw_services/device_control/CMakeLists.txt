@@ -1,18 +1,65 @@
 
 ## Create library target
-add_library(xcore_sdk_rtos_sw_services_concurrency_support INTERFACE)
-target_sources(xcore_sdk_rtos_sw_services_concurrency_support
+add_library(xcore_sdk_rtos_sw_services_device_control INTERFACE)
+target_sources(xcore_sdk_rtos_sw_services_device_control
     INTERFACE
-        src/mrsw_lock.c
+        src/device_control.c
+        src/resource_table.c
+        transport/i2c/device_control_i2c.c
+        transport/usb/device_control_usb.c
 )
-target_include_directories(xcore_sdk_rtos_sw_services_concurrency_support
+target_include_directories(xcore_sdk_rtos_sw_services_device_control
     INTERFACE
         api
+        transport/i2c
+        transport/usb
 )
-target_link_libraries(xcore_sdk_rtos_sw_services_concurrency_support
+target_link_libraries(xcore_sdk_rtos_sw_services_device_control
     INTERFACE
         sdk::rtos::osal
+        sdk::rtos::drivers::i2c
+        sdk::rtos::drivers::spi
+        sdk::rtos::sw_services::usb
 )
 
 ## Create an alias
-add_library(sdk::rtos::drivers::concurrency_support ALIAS xcore_sdk_rtos_sw_services_concurrency_support)
+add_library(sdk::rtos::sw_services::device_control ALIAS xcore_sdk_rtos_sw_services_device_control)
+
+
+## Host app
+
+# Discern OS for libusb library location
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    link_directories("host/libusb/OSX64")
+    set(libusb-1.0_INCLUDE_DIRS "host/libusb/OSX64")
+    set(LINK_LIBS usb-1.0.0)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    find_package(PkgConfig)
+    pkg_check_modules(libusb-1.0 REQUIRED libusb-1.0)
+    set(LINK_LIBS usb-1.0)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    link_directories("host/libusb/Win32")
+    set(libusb-1.0_INCLUDE_DIRS "host/libusb/Win32")
+    set(LINK_LIBS libusb)
+endif()
+
+add_library(xcore_sdk_rtos_sw_services_device_control_host_usb INTERFACE)
+target_sources(xcore_sdk_rtos_sw_services_device_control_host_usb
+    INTERFACE
+        host/util.c
+        host/device_access_usb.c
+)
+target_include_directories(xcore_sdk_rtos_sw_services_device_control_host_usb
+    INTERFACE
+        api
+        host
+        ${libusb-1.0_INCLUDE_DIRS}
+)
+target_compile_definitions(xcore_sdk_rtos_sw_services_device_control_host_usb INTERFACE USE_USB=1)
+target_link_libraries(xcore_sdk_rtos_sw_services_device_control_host_usb
+    INTERFACE
+        ${LINK_LIBS}
+)
+
+## Create an alias
+add_library(sdk::device_control_host_usb ALIAS xcore_sdk_rtos_sw_services_device_control_host_usb)

@@ -7,7 +7,6 @@ endif()
 
 ## in the future will just pass this in
 include(tools/cmake_utils/xmos_xs3a_toolchain.cmake)
-include(tools/cmake_utils/xmos_macros.cmake)
 
 ## Project declaration
 project(xcore_sdk)
@@ -17,20 +16,14 @@ enable_language(CXX C ASM)
 
 ## Project options
 option(BUILD_TESTS    "Build test applications"    OFF)
-option(BUILD_EXAMPLES "Build example applications" OFF)
 option(BUILD_HOST     "Build host applications"    OFF)
 
-## TODO REMOVE
-set(XCORE_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+## Import some helpful macros
+include(tools/cmake_utils/xmos_macros.cmake)
 
+## Add various targets
 add_subdirectory(modules)
-
-if(BUILD_EXAMPLES)
-# add_subdirectory(examples)
-message(WARNING "BUILD_EXAMPLES not yet implemented")
-endif()
-## for testing build the explorer board example
-add_subdirectory(examples/freertos/explorer_board)
+add_subdirectory(examples)
 
 if(BUILD_TESTS)
 # add_subdirectory(test)

@@ -1,71 +1,51 @@
-cmake_minimum_required(VERSION 3.20)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src)
 
 #**********************
-# Disable in-source build.
-#**********************
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
-
-#**********************
-# Setup project
-#**********************
-
-# Specify configuration
-set(USE_DISPATCHER TRUE)
-
-#**********************
-# Get path to XCore SDK
-#**********************
-set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-
-# Import XMOS RTOS platform configuration.
-# Must be done after setting the configuration options.
-include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-# Define project
-project(dispatcher)
-
-# Enable languages for project
-enable_language(CXX C ASM)
-
-#**********************
-# Build flags
+# Flags
 #**********************
 set(APP_COMPILER_FLAGS
-  "-mcmodel=large"
-  "-fxscope"
-  "-Wno-xcore-fptrgroup"
-  "-Wno-unknown-pragmas"
-  "-report"
-  "-march=xs3a"
-  "-Os"
-  "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
-  "${CMAKE_CURRENT_SOURCE_DIR}/config.xscope"
+    -Os
+    -g
+    -report
+    -fxscope
+    -mcmodel=large
+    -Wno-xcore-fptrgroup
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
-
-set(APP_SOURCES
-  "src/main.c"
-  ${XMOS_RTOS_PLATFORM_SOURCES}
-)
-
-set(APP_INCLUDES
-  "src"
-  ${XMOS_RTOS_PLATFORM_INCLUDES}
-)
-
-add_compile_definitions(
+set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
+    PLATFORM_SUPPORTS_TILE_0=1
+    PLATFORM_SUPPORTS_TILE_1=1
+    PLATFORM_SUPPORTS_TILE_2=0
+    PLATFORM_SUPPORTS_TILE_3=0
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=0
 )
 
-set(TARGET_NAME dispatcher)
-add_executable(${TARGET_NAME})
+set(APP_LINK_OPTIONS
+    -report
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+)
 
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
+#**********************
+# Tile Targets
+#**********************
+add_executable(dispatcher EXCLUDE_FROM_ALL)
+target_sources(dispatcher PUBLIC ${APP_SOURCES})
+target_include_directories(dispatcher PUBLIC ${APP_INCLUDES})
+target_compile_definitions(dispatcher PRIVATE ${APP_COMPILE_DEFINITIONS})
+target_compile_options(dispatcher PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(dispatcher PUBLIC sdk::core sdk::rtos_freertos)
+target_link_options(dispatcher PRIVATE ${APP_LINK_OPTIONS})
 
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(dispatcher)
+create_debug_target(dispatcher)

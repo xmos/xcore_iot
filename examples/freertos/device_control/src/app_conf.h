@@ -5,7 +5,7 @@
 
 #define appconfGPIO_RPC_PORT 0
 
-#define appconfI2C_CTRL_ENABLED 1
+#define appconfI2C_CTRL_ENABLED 0
 #define appconfUSB_CTRL_ENABLED 1
 #define appconf_CONTROL_SERVICER_COUNT 2
 #define appconfDEVICE_CONTROL_I2C_PORT 1

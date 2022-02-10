@@ -34,6 +34,8 @@ target_link_libraries(xcore_sdk_rtos_drivers_wifi
     INTERFACE
         sdk::rtos::osal
         sdk::rtos::FreeRTOS-Plus-TCP
+        sdk::rtos::drivers::gpio
+        sdk::rtos::drivers::spi
 )
 
 ## Create an alias

@@ -20,6 +20,10 @@ target_link_libraries(xcore_sdk_rtos_sw_services_fatfs
         sdk::rtos::drivers::qspi_io
         sdk::rtos::FreeRTOS_SMP
 )
+target_compile_definitions(xcore_sdk_rtos_sw_services_fatfs
+    INTERFACE
+        USE_FATFS=1
+)
 
 ## Create an alias
 add_library(sdk::rtos::sw_services::fatfs ALIAS xcore_sdk_rtos_sw_services_fatfs)
