@@ -61,7 +61,7 @@ merge_binaries(explorer_board explorer_board_tile0 explorer_board_tile1 1)
 create_run_target(explorer_board)
 create_debug_target(explorer_board)
 
-if(WIN32)
+if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     add_custom_command(
         OUTPUT explorer_board_fat.fs
         COMMAND echo "Not yet implemented"
@@ -73,6 +73,7 @@ if(WIN32)
         VERBATIM
     )
 else()
+    message(FATAL_ERROR ${CMAKE_HOST_SYSTEM_NAME})
     add_custom_command(
         OUTPUT explorer_board_fat.fs
         COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/fs && cp ./demo.txt $fat_mnt_dir/fs/demo.txt && fatfs_mkimage --input=$tmp_dir --output=explorer_board_fat.fs"
