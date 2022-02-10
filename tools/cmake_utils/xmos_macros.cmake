@@ -11,8 +11,8 @@ macro(merge_binaries _OUTPUT_TARGET_NAME _BASE_TARGET _OTHER_TARGET _TILE_NUM_TO
     get_target_property(BASE_TILE_NAME    ${_BASE_TARGET}  NAME)
     get_target_property(OTHER_TILE_NAME   ${_OTHER_TARGET} NAME)
 
-    file(MAKE_DIRECTORY ${OTHER_TILE_NAME}_split)
     add_custom_target(${_OUTPUT_TARGET_NAME}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${OTHER_TILE_NAME}_split
         COMMAND xobjdump --split --split-dir ${OTHER_TILE_NAME}_split ${OTHER_TILE_NAME}.xe
         COMMAND xobjdump ${BASE_TILE_NAME}.xe -r 0,${_TILE_NUM_TO_MERGE},${OTHER_TILE_NAME}_split/image_n0c${_TILE_NUM_TO_MERGE}_2.elf
         COMMAND cp ${BASE_TILE_NAME}.xe ${_OUTPUT_TARGET_NAME}.xe
@@ -20,18 +20,11 @@ macro(merge_binaries _OUTPUT_TARGET_NAME _BASE_TARGET _OTHER_TARGET _TILE_NUM_TO
             ${_BASE_TARGET}
             ${_OTHER_TARGET}
         BYPRODUCTS
-            ${OTHER_TILE_NAME}_split/config.xml
-            ${OTHER_TILE_NAME}_split/image_n0c0.elf
-            ${OTHER_TILE_NAME}_split/image_n0c1.elf
-            ${OTHER_TILE_NAME}_split/program_info.txt
-            ${OTHER_TILE_NAME}_split/image_n0c0_2.elf
-            ${OTHER_TILE_NAME}_split/image_n0c1_2.elf
-            ${OTHER_TILE_NAME}_split/platform_def.xn
-            ${OTHER_TILE_NAME}_split/xscope.xscope
+            ${OTHER_TILE_NAME}_split
         WORKING_DIRECTORY
             ${BASE_TILE_DIR}
         COMMENT
-            "Merging tile ${_TILE_NUM_TO_MERGE} of ${_OTHER_TARGET}.xe into ${_BASE_TARGET}.xe to create ${_OUTPUT_TARGET_NAME}.xe"
+            "Merge tile ${_TILE_NUM_TO_MERGE} of ${_OTHER_TARGET}.xe into ${_BASE_TARGET}.xe to create ${_OUTPUT_TARGET_NAME}.xe"
         VERBATIM
     )
     set_target_properties(${_OUTPUT_TARGET_NAME} PROPERTIES BINARY_DIR ${BASE_TILE_DIR})

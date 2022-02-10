@@ -7,7 +7,7 @@ endif()
 
 ## in the future will just pass this in
 include(tools/cmake_utils/xmos_xs3a_toolchain.cmake)
-include(tools/cmake_utils/create_multitile_target.cmake)
+include(tools/cmake_utils/xmos_macros.cmake)
 
 ## Project declaration
 project(xcore_sdk)

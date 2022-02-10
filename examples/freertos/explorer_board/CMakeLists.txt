@@ -60,3 +60,35 @@ unset(TARGET_NAME)
 merge_binaries(explorer_board explorer_board_tile0 explorer_board_tile1 1)
 create_run_target(explorer_board)
 create_debug_target(explorer_board)
+
+if(WIN32)
+    add_custom_command(
+        OUTPUT explorer_board_fat.fs
+        COMMAND echo "Not yet implemented"
+        DEPENDS explorer_board
+        COMMENT
+            "Create filesystem"
+        WORKING_DIRECTORY
+            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+        VERBATIM
+    )
+else()
+    add_custom_command(
+        OUTPUT explorer_board_fat.fs
+        COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/fs && cp ./demo.txt $fat_mnt_dir/fs/demo.txt && fatfs_mkimage --input=$tmp_dir --output=explorer_board_fat.fs"
+        DEPENDS explorer_board
+        COMMENT
+            "Create filesystem"
+        WORKING_DIRECTORY
+            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+        VERBATIM
+    )
+endif()
+
+add_custom_target(flash_fs_explorer_board
+    COMMAND xflash --quad-spi-clock 50MHz --factory explorer_board.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/explorer_board_fat.fs
+    DEPENDS explorer_board_fat.fs
+    COMMENT
+        "Flash filesystem"
+    VERBATIM
+)
