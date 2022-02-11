@@ -1,9 +1,14 @@
 
 ## Source files
-file(GLOB_RECURSE LIB_C_SOURCES   lib_xs3_math/lib_xs3_math/src/bfp/*.c )
+file(GLOB_RECURSE LIB_C_SOURCES
+    lib_xs3_math/lib_xs3_math/src/bfp/*.c
+    lib_xs3_math/lib_xs3_math/src/vect/*.c
+    lib_xs3_math/lib_xs3_math/src/scalar/*.c
+)
 file(GLOB_RECURSE LIB_CXX_SOURCES lib_xs3_math/lib_xs3_math/src/*.cc)
 file(GLOB_RECURSE LIB_XC_SOURCES  lib_xs3_math/lib_xs3_math/src/*.xc)
 file(GLOB_RECURSE LIB_ASM_SOURCES lib_xs3_math/lib_xs3_math/src/*.S )
+list(APPEND LIB_C_SOURCES    lib_xs3_math/lib_xs3_math/src/etc/xs3_fft_lut/xs3_fft_lut.c)
 
 ## cmake doesn't recognize .S files as assembly by default
 set_source_files_properties(LIB_ASM_SOURCES PROPERTIES LANGUAGE ASM)

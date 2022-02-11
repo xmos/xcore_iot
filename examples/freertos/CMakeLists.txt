@@ -1,4 +1,4 @@
-# add_subdirectory(cifar10)
+add_subdirectory(cifar10)
 add_subdirectory(device_control)
 add_subdirectory(dispatcher)
 add_subdirectory(explorer_board)

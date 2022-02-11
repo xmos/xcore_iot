@@ -37,6 +37,8 @@
 .metadata
 *.gtkw
 *.swmem
+*.bin
+*.fs
 
 # Test cruft
 **/.pytest_cache/*

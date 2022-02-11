@@ -6,10 +6,10 @@
 	url = git@github.com:xmos/lib_xs3_math.git
 	shallow = true
 [submodule "lib_otpinfo"]
-	path = modules/lib_otpinfo
+	path = modules/lib_otpinfo/lib_otpinfo
 	url = git@github.com:xmos/lib_otpinfo.git
 [submodule "lib_random"]
-	path = modules/lib_random
+	path = modules/lib_random/lib_random
 	url = git@github.com:xmos/lib_random.git
 [submodule "mbedtls"]
 	path = modules/rtos/sw_services/tls_support/thirdparty/mbedtls
@@ -62,7 +62,7 @@
 	path = modules/rtos/sw_services/usb/thirdparty/tinyusb_src
 	url = git@github.com:hathach/tinyusb_src.git
 [submodule "lib_src"]
-	path = modules/lib_src
+	path = modules/lib_src/lib_src
 	url = git@github.com:xmos/lib_src.git
 [submodule "modules/aif/tflite-micro"]
 	path = modules/aif/tflite-micro

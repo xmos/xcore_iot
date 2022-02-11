@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include "xcore_device_memory.h"
 
@@ -18,8 +18,8 @@
 #if USE_SWMEM
 #include <xcore/swmem_fill.h>
 
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
-#include "rtos/drivers/swmem/api/rtos_swmem.h"
+#include "rtos_qspi_flash.h"
+#include "rtos_swmem.h"
 
 static rtos_qspi_flash_t *qspi_flash_ctx = NULL;
 
@@ -28,18 +28,24 @@ bool rtos_swmem_read_request_isr(unsigned offset, uint32_t *buf)
     bool ret = true;
 
     if (qspi_flash_ctx != NULL) {
-        /*
-         * Perform the flash read directly in the swmem ISR if possible to reduce
-         * overhead.
-         */
-        if (rtos_qspi_flash_read_ll(
-                    qspi_flash_ctx, (uint8_t *)buf, (unsigned)offset,
-                    WORDS_TO_BYTES(SWMEM_FILL_SIZE_WORDS)) != 0) {
-            /*
-             * If the low level flash read is unable to acquire the flash lock then
-             * return false to defer the read to the task handler.
-             */
-            ret = false;
+        if (qspi_flash_ctx->rpc_config != NULL) {
+            if(qspi_flash_ctx->rpc_config->rpc_host_start != NULL) {
+                /*
+                 * Perform the flash read directly in the swmem ISR if possible to reduce
+                 * overhead.  This can only be done on if swmem and flash are on the same tile.
+                 */
+                if (rtos_qspi_flash_read_ll(
+                            qspi_flash_ctx, (uint8_t *)buf, (unsigned)offset,
+                            WORDS_TO_BYTES(SWMEM_FILL_SIZE_WORDS)) != 0) {
+                    /*
+                     * If the low level flash read is unable to acquire the flash lock then
+                     * return false to defer the read to the task handler.
+                     */
+                    ret = false;
+                }
+            } else {
+                ret = false;
+            }
         }
     }
 

@@ -45,7 +45,7 @@ set(CMAKE_CXX_COMPILER_FORCED TRUE)
 set(CMAKE_ASM_COMPILER_FORCED TRUE)
 
 set(CMAKE_C_FLAGS "-march=xs3a" CACHE STRING "C Compiler Base Flags" FORCE)
-set(CMAKE_CXX_FLAGS "-march=xs3a" "-std=c++11" CACHE STRING "C++ Compiler Base Flags" FORCE)
+set(CMAKE_CXX_FLAGS "-march=xs3a -std=c++11" CACHE STRING "C++ Compiler Base Flags" FORCE)
 set(CMAKE_ASM_FLAGS "-march=xs3a" CACHE STRING "ASM Compiler Base Flags" FORCE)
 set(CMAKE_EXE_LINKER_FLAGS "" CACHE INTERNAL "" FORCE)
 set(CMAKE_EXECUTABLE_SUFFIX_C   .xe CACHE INTERNAL "" FORCE)
