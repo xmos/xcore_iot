@@ -40,6 +40,26 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
+set(TARGET_NAME cifar10_sram_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::aif_model_runner_freertos)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME cifar10_sram_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::aif_model_runner_freertos)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
 set(TARGET_NAME cifar10_extmem_tile0)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
@@ -83,12 +103,15 @@ unset(TARGET_NAME)
 #**********************
 # Merge binaries
 #**********************
+merge_binaries(cifar10_sram cifar10_sram_tile0 cifar10_sram_tile1 1)
 merge_binaries(cifar10_extmem cifar10_extmem_tile0 cifar10_extmem_tile1 1)
 merge_binaries(cifar10_swmem cifar10_swmem_tile0 cifar10_swmem_tile1 1)
 
 #**********************
 # Create run and debug targets
 #**********************
+create_run_target(cifar10_sram)
+create_debug_target(cifar10_sram)
 create_run_target(cifar10_extmem)
 create_debug_target(cifar10_extmem)
 create_run_target(cifar10_swmem)
@@ -132,6 +155,14 @@ else()
         VERBATIM
     )
 endif()
+
+add_custom_target(flash_fs_cifar10_sram
+    COMMAND xflash --quad-spi-clock 50MHz --factory cifar10_sram.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/cifar10_fat.fs
+    DEPENDS cifar10_fat.fs
+    COMMENT
+        "Flash filesystem"
+    VERBATIM
+)
 
 add_custom_target(flash_fs_cifar10_extmem
     COMMAND xflash --quad-spi-clock 50MHz --factory cifar10_extmem.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/cifar10_fat.fs
