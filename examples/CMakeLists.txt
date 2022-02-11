@@ -1,2 +1,10 @@
 add_subdirectory(bare-metal)
-add_subdirectory(freertos)
+
+add_subdirectory(freertos/cifar10)
+add_subdirectory(freertos/device_control)
+add_subdirectory(freertos/dispatcher)
+add_subdirectory(freertos/explorer_board)
+add_subdirectory(freertos/getting_started)
+# add_subdirectory(freertos/iot)
+add_subdirectory(freertos/l2_cache)
+# add_subdirectory(freertos/usb)

@@ -5,7 +5,7 @@ L2 Cache Example
 The L2 cache example demonstrates how to use the software defined L2 cache.
 
 ***************************
-Building & running examples
+Building the firmware
 ***************************
 
 Run the following commands to build the examples:
@@ -14,21 +14,59 @@ Run the following commands to build the examples:
 
     .. code-block:: console
 
-        $ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -B build
         $ cd build
-        $ make
+        $ make l2_cache
 
 .. tab:: Windows XTC Tools CMD prompt
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake
+        $ nmake l2_cache
 
-To run the example:
 
-.. code-block:: console
+********************************
+Setting up the hardware
+********************************
 
-    $ make flash
-    $ make run
+Before running the firmware, the swmem must be flashed.
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make flash_l2_cache_swmem
+
+.. tab:: Windows XTC Tools CMD prompt
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake flash_l2_cache_swmem
+
+********************************
+Running the firmware
+********************************
+
+Running with hardware.
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make run_l2_cache
+
+.. tab:: Windows XTC Tools CMD prompt
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake run_l2_cache
