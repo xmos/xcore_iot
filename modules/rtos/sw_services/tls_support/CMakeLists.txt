@@ -96,6 +96,7 @@ target_link_libraries(xcore_sdk_rtos_sw_services_tls
     INTERFACE
         sdk::rtos::FreeRTOS-Plus-TCP
         sdk::rtos::sw_services::fatfs
+        sdk::lib_random
 )
 
 ## Create an alias

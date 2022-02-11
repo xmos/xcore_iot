@@ -1,13 +1,13 @@
-// Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright (c) 2021-2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
 #ifndef DRIVER_INSTANCES_H_
 #define DRIVER_INSTANCES_H_
 
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
-#include "rtos/drivers/intertile/api/rtos_intertile.h"
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
-#include "rtos/drivers/spi/api/rtos_spi_master.h"
+#include "rtos_gpio.h"
+#include "rtos_intertile.h"
+#include "rtos_qspi_flash.h"
+#include "rtos_spi_master.h"
 
 #define FLASH_TILE_NO      0
 

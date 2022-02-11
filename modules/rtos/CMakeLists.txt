@@ -86,7 +86,7 @@ target_link_libraries(xcore_sdk_rtos_wifi
         sdk::rtos::drivers::wifi
         sdk::rtos::FreeRTOS-Plus-TCP
         sdk::rtos::sw_services
-        sdk::rtos::sw_services::dhcpd
+        sdk::rtos::sw_services::dhcp
         sdk::rtos::sw_services::http
         sdk::rtos::sw_services::json
         sdk::rtos::sw_services::mqtt

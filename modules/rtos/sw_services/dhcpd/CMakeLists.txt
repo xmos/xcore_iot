@@ -3,7 +3,7 @@
 add_library(xcore_sdk_rtos_sw_services_dhcp INTERFACE)
 target_sources(xcore_sdk_rtos_sw_services_dhcp
     INTERFACE
-        src/dhcpd.c
+        FreeRTOS/dhcpd.c
 )
 target_include_directories(xcore_sdk_rtos_sw_services_dhcp
     INTERFACE
