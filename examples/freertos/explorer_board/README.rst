@@ -40,7 +40,7 @@ From the xcore_sdk build folder, create the filesystem and flash the device with
 
     .. code-block:: console
 
-        $ make flash_fs_explorer_board
+        $ nmake flash_fs_explorer_board
 
 *********************
 Running the firmware
@@ -48,9 +48,18 @@ Running the firmware
 
 From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and MacOS
 
-    $ make run_explorer_board
+    .. code-block:: console
+
+        $ make run_explorer_board
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake run_explorer_board
+
 
 *********************
 Debugging the firmware with xgdb
@@ -58,6 +67,14 @@ Debugging the firmware with xgdb
 
 From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and MacOS
 
-    $ make debug_explorer_board
+    .. code-block:: console
+
+        $ make debug_explorer_board
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake debug_explorer_board

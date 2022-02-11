@@ -36,9 +36,18 @@ Running the firmware
 
 From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and MacOS
 
-    $ make run_dispatcher
+    .. code-block:: console
+
+        $ make run_dispatcher
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake run_dispatcher
+
 
 *********************
 Debugging the firmware with xgdb
@@ -46,6 +55,14 @@ Debugging the firmware with xgdb
 
 From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and MacOS
 
-    $ make debug_dispatcher
+    .. code-block:: console
+
+        $ make debug_dispatcher
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake debug_dispatcher

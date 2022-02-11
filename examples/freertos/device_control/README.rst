@@ -32,9 +32,17 @@ Running the firmware
 
 From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and MacOS
 
-    $ make run_device_control
+    .. code-block:: console
+
+        $ make run_device_control
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake run_device_control
 
 *********************
 Debugging the firmware with xgdb
@@ -42,6 +50,14 @@ Debugging the firmware with xgdb
 
 From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and MacOS
 
-    $ make debug_device_control
+    .. code-block:: console
+
+        $ make debug_device_control
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake debug_device_control
