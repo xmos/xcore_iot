@@ -78,8 +78,12 @@ create_debug_target(explorer_board)
 #**********************
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     add_custom_command(
-        OUTPUT explorer_board_fat.fs
-        COMMAND echo "Not yet implemented"
+        OUTPUT explorer_board_fat.fxscopeOUTPUT explorer_board_fat.fs
+        COMMAND ${CMAKE_COMMAND} -E make_directory %temp%/fatmktmp/fs
+        COMMAND ${CMAKE_COMMAND} -E copy demo.txt %temp%/fatmktmp/fs/demo.txt
+        COMMAND fatfs_mkimage --input=%temp%/fatmktmp --output=explorer_board_fat.fs
+        DEPENDS explorer_board
+        BYPRODUCTS %temp%/fatmktmp/fs/demo.txt
         DEPENDS explorer_board
         COMMENT
             "Create filesystem"
