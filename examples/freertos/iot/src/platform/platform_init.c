@@ -41,11 +41,14 @@ static void flash_init(void)
 
 static void gpio_init(void)
 {
+#if ON_TILE(0)
     rtos_gpio_init(gpio_ctx);
+#endif
 }
 
 static void spi_init(void)
 {
+#if ON_TILE(0)
     rtos_spi_master_init(
             spi_master_ctx,
             SPI_CLKBLK,
@@ -66,6 +69,7 @@ static void spi_init(void)
             1,
             0,
             0);
+#endif
 }
 
 void platform_init(chanend_t other_tile_c)
