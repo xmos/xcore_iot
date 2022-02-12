@@ -283,10 +283,10 @@ static void mqtt_demo_connect( void* arg )
 			configASSERT(0); /* Failed to initialize ssl context */
 		}
 
-		if( ( mbedtls_ssl_set_hostname( ssl_ctx, HOSTNAME ) ) != 0 )
-		{
-			configASSERT( 0 ); /* set hostname failed */
-		}
+		// if( ( mbedtls_ssl_set_hostname( ssl_ctx, HOSTNAME ) ) != 0 )
+		// {
+		// 	configASSERT( 0 ); /* set hostname failed */
+		// }
 
 		mbedtls_ssl_set_bio( ssl_ctx, tls_ctx, tls_send, tls_recv, NULL );
 
