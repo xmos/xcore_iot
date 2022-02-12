@@ -4,7 +4,7 @@ IoT
 
 This example demonstrates how to control GPIO using MQTT.
 
-.. note:: 
+.. note::
 
     This example application is currently only supported on Linux or Mac.
 
@@ -12,10 +12,10 @@ This example demonstrates how to control GPIO using MQTT.
 Networking configuration
 ************************
 
-In this example, we demonstrate using the Eclipse Mosquitto MQTT broker.  Ensure that you have installed Mosquitto by following the instructions 
+In this example, we demonstrate using the Eclipse Mosquitto MQTT broker.  Ensure that you have installed Mosquitto by following the instructions
 here: https://mosquitto.org/download/.
 
-.. note:: 
+.. note::
 
     You can modify the example code to connect to a different MQTT broker.  When doing so, you will also need to modify the filesystem setup scripts before running them.  THis is to ensure that the correct client certificate, private key, and CA certificate are flashed.  See ``filesystem_support/create_fs.sh`` and the instructions for setting up the filesystem below.
 
@@ -31,26 +31,35 @@ Lastly, in ``appconf.h``, set ``appconfMQTT_HOSTNAME`` to your MQTT broker IP ad
 
     #define appconfMQTT_HOSTNAME "your endpoint here"
 
-****************
-Filesystem setup
-****************
+*********************
+Building the firmware
+*********************
+
+Run the following commands in the xcore_sdk root folder:
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make iot
+
+********************************
+Setting up the hardware
+********************************
 
 Before the demo can be run, the filesystem must be configured and flashed.
 
-To create certificates for the demos run:
+.. tab:: Linux and Mac
 
-.. code-block:: console
+    .. code-block:: console
 
-    $ cd filesystem_support
-    $ ./make_certs.sh
+        $ cmake -B build
+        $ cd build
+        $ make flash_fs_iot
 
-If certificates have previously been created run:
-
-.. code-block:: console
-
-    $ ./flash_image.sh
-
-The script will prompt you for WiFi credentials:
+The script will create TLS credentials and prompt you for WiFi credentials:
 
 .. code-block:: console
 
@@ -59,31 +68,23 @@ The script will prompt you for WiFi credentials:
     Enter the security (0=open, 1=WEP, 2=WPA):
     Add another WiFi network? (y/n):
 
-.. note:: 
+.. note::
 
-    Once a WiFi profile has been created it will automatically be used.  If you need to change the profile, delete ``networks.dat`` and rerun ``flash_image.sh``.
+    Once a WiFi profile has been created it will automatically be used.  If you need to change the profile, delete ``networks.dat``.
 
-*********************
-Building the firmware
-*********************
-
-Run cmake:
-
-.. code-block:: console
-
-    $ cmake -B build
-    $ cd build
-    $ make
-
-
+********************************
 Running the firmware
-====================
+********************************
 
-From the root folder of the iot example run:
+From the sdk root folder the iot example run with:
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    $ xrun --xscope bin/iot.xe
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make run_iot
 
 *********************
 Testing MQTT Messages
@@ -98,6 +99,8 @@ From the root folder of the iot example run:
 
     $ cd mosquitto
     $ mosquitto -v -c mosquitto.conf
+
+Note: You may need to modify permissions of the cryptocredentials for mosquitto to use them.
 
 Sending messages
 ================
