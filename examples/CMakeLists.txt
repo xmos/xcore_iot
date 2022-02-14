@@ -1,5 +1,8 @@
-add_subdirectory(bare-metal)
+## Bare metal examples
+add_subdirectory(bare-metal/explorer_board)
+add_subdirectory(bare-metal/visual_wake_words)
 
+## FreeRTOS examples
 add_subdirectory(freertos/cifar10)
 add_subdirectory(freertos/device_control)
 add_subdirectory(freertos/dispatcher)

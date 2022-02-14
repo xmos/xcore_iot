@@ -10,46 +10,65 @@ This example demonstrates how to receive input data using `xscope`.
 Building the firmware
 *********************
 
-Make a directory for the build.
+Run the following commands in the xcore_sdk root folder to build the dispatcher firmware:
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    $ mkdir build
-    $ cd build
+    .. code-block:: console
 
-Run cmake:
+        $ cmake -B build
+        $ cd build
+        $ make vwv_bare_metal
 
-.. code-block:: console
+.. tab:: Windows XTC Tools CMD prompt
 
-    $ cmake ../
-    $ make
+    .. code-block:: console
 
-To install, run:
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake vwv_bare_metal
 
-.. code-block:: console
-
-    $ make install
-
-Now return back the application directory:
-
-.. code-block:: console
-
-    $ cd ..
-
+*********************
 Running the firmware
-====================
+*********************
 
 Running with hardware
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    $ xrun --xscope-port localhost:10234 bin/vww.xe
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make run_vwv_bare_metal
+
+.. tab:: Windows XTC Tools CMD prompt
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake run_vwv_bare_metal
 
 Running with simulator
 
 .. code-block:: console
 
-    $ xsim --xscope "-realtime localhost:10234" bin/vww.xe
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make xsim_vwv_bare_metal
+
+.. tab:: Windows XTC Tools CMD prompt
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake xsim_vwv_bare_metal
 
 The firmware will now wait until a data is sent from a host application. Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires Python.  Ensure you have installed Python 3 and the XCore SDK Python requirements.
 
