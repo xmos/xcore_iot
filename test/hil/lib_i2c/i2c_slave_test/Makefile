@@ -1,3 +1,2 @@
-# Intentionally blank for implicit xmostest calls to xmake.
-# Binaries should be created using cmake
 all:
+	cd ../../../.. && rm -rf build_tests && mkdir build_tests && cd build_tests && cmake ./.. && $(MAKE) $@

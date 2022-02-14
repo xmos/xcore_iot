@@ -5,28 +5,31 @@ XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
 source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 
-# setup configuraitons
+# setup configurations
 if [ -z "$1" ] || [ "$1" == "all" ]
 then
-    # row format is: "path/to/application BOARD"
+    # row format is: "make_target BOARD"
     applications=(
-        "examples/freertos/explorer_board XCORE-AI-EXPLORER"
-        "examples/freertos/iot XCORE-AI-EXPLORER"
-        "examples/freertos/cifar10 XCORE-AI-EXPLORER"
-        "examples/freertos/cifar10 OSPREY-BOARD"
-        "examples/freertos/device_control XCORE200-MIC-ARRAY"
-        "examples/freertos/getting_started XCORE-AI-EXPLORER"
-        "examples/freertos/dispatcher XCORE-AI-EXPLORER"
-        "examples/freertos/l2_cache XCORE-AI-EXPLORER"
+        "example_freertos_cifar10_extmem XCORE-AI-EXPLORER"
+        "example_freertos_cifar10_sram XCORE-AI-EXPLORER"
+        "example_freertos_cifar10_swmem XCORE-AI-EXPLORER"
+        "example_freertos_device_control XCORE-AI-EXPLORER"
+        "example_freertos_dispatcher XCORE-AI-EXPLORER"
+        "example_freertos_explorer_board XCORE-AI-EXPLORER"
+        "example_freertos_getting_started XCORE-AI-EXPLORER"
+        "example_freertos_iot XCORE-AI-EXPLORER"
+        "example_freertos_l2_cache XCORE-AI-EXPLORER"
     )
 elif [ "$1" == "smoke" ]
 then
     applications=(
-        "examples/freertos/getting_started XCORE-AI-EXPLORER"
-        "examples/freertos/explorer_board XCORE-AI-EXPLORER"
-        "examples/freertos/cifar10 XCORE-AI-EXPLORER"
+        "example_freertos_cifar10_extmem XCORE-AI-EXPLORER"
+        "example_freertos_cifar10_sram XCORE-AI-EXPLORER"
+        "example_freertos_cifar10_swmem XCORE-AI-EXPLORER"
+        "example_freertos_explorer_board XCORE-AI-EXPLORER"
+        "example_freertos_getting_started XCORE-AI-EXPLORER"
     )
-else 
+else
     echo "Argument $1 not a supported configuration!"
     exit
 fi
@@ -36,11 +39,12 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
     application="${FIELDS[0]}"
     board="${FIELDS[1]}"
-    path="${XCORE_SDK_ROOT}/${application}"
+    path="${XCORE_SDK_ROOT}"
     echo '******************************************************'
     echo '* Building' ${application} 'for' ${board}
     echo '******************************************************'
 
-    (cd ${path}; log_errors make distclean)
-    (cd ${path}; log_errors make -j BOARD=${board})
+    (cd ${path}; rm -rf build_${board})
+    (cd ${path}; mkdir -p build_${board})
+    (cd ${path}/build_${board}; log_errors cmake ../ -DBOARD=${board}; log_errors make ${application} -j)
 done
