@@ -11,17 +11,17 @@ Building the firmware
 To build the firmware, run make, specifying the desired usb demo firmware.
 
 Recipe options are:
-- usb_tusb_demo_audio_test
-- usb_tusb_demo_cdc_dual_ports
-- usb_tusb_demo_cdc_msc
-- usb_tusb_demo_dfu_runtime
-- usb_tusb_demo_hid_composite
-- usb_tusb_demo_hid_generic_inout
-- usb_tusb_demo_hid_multiple_interface
-- usb_tusb_demo_midi_test
-- usb_tusb_demo_msc_dual_lun
-- usb_tusb_demo_usbtmc
-- usb_tusb_demo_webusb_serial
+- example_freertos_usb_tusb_demo_audio_test
+- example_freertos_usb_tusb_demo_cdc_dual_ports
+- example_freertos_usb_tusb_demo_cdc_msc
+- example_freertos_usb_tusb_demo_dfu_runtime
+- example_freertos_usb_tusb_demo_hid_composite
+- example_freertos_usb_tusb_demo_hid_generic_inout
+- example_freertos_usb_tusb_demo_hid_multiple_interface
+- example_freertos_usb_tusb_demo_midi_test
+- example_freertos_usb_tusb_demo_msc_dual_lun
+- example_freertos_usb_tusb_demo_usbtmc
+- example_freertos_usb_tusb_demo_webusb_serial
 
 Per example, to build the midi test demo, run:
 
@@ -31,7 +31,7 @@ Per example, to build the midi test demo, run:
 
         $ cmake -B build
         $ cd build
-        $ make usb_tusb_demo_midi_test
+        $ make example_freertos_usb_tusb_demo_midi_test
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -39,7 +39,7 @@ Per example, to build the midi test demo, run:
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake usb_tusb_demo_midi_test
+        $ nmake example_freertos_usb_tusb_demo_midi_test
 
 *********************************
 Running the firmware
@@ -47,18 +47,18 @@ Running the firmware
 To run the firmware, run make, specifying the desired usb demo firmware.
 
 Recipe options are:
-- run_usb_tusb_demo_audio_test
-- run_usb_tusb_demo_cdc_dual_ports
-- run_usb_tusb_demo_cdc_msc
-- run_usb_tusb_demo_dfu_runtime
-- run_usb_tusb_demo_hid_composite
-- run_usb_tusb_demo_hid_generic_inout
-- run_usb_tusb_demo_hid_multiple_interface
-- run_usb_tusb_demo_midi_test
-- run_usb_tusb_demo_msc_dual_lun
-- run_usb_tusb_demo_usbtmc
-- run_usb_tusb_demo_webusb_serial
-- run_vwv_bare_metal
+- run_example_freertos_usb_tusb_demo_audio_test
+- run_example_freertos_usb_tusb_demo_cdc_dual_ports
+- run_example_freertos_usb_tusb_demo_cdc_msc
+- run_example_freertos_usb_tusb_demo_dfu_runtime
+- run_example_freertos_usb_tusb_demo_hid_composite
+- run_example_freertos_usb_tusb_demo_hid_generic_inout
+- run_example_freertos_usb_tusb_demo_hid_multiple_interface
+- run_example_freertos_usb_tusb_demo_midi_test
+- run_example_freertos_usb_tusb_demo_msc_dual_lun
+- run_example_freertos_usb_tusb_demo_usbtmc
+- run_example_freertos_usb_tusb_demo_webusb_serial
+
 
 Per example, to run the midi test demo, run:
 
@@ -68,7 +68,7 @@ Per example, to run the midi test demo, run:
 
         $ cmake -B build
         $ cd build
-        $ make run_usb_tusb_demo_midi_test
+        $ make run_example_freertos_usb_tusb_demo_midi_test
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -76,4 +76,4 @@ Per example, to run the midi test demo, run:
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake run_usb_tusb_demo_midi_test
+        $ nmake run_example_freertos_usb_tusb_demo_midi_test

@@ -42,16 +42,16 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
-add_executable(explorer_board_bare_metal EXCLUDE_FROM_ALL)
-target_sources(explorer_board_bare_metal PUBLIC ${APP_SOURCES})
-target_include_directories(explorer_board_bare_metal PUBLIC ${APP_INCLUDES})
-target_compile_definitions(explorer_board_bare_metal PRIVATE ${APP_COMPILE_DEFINITIONS})
-target_compile_options(explorer_board_bare_metal PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(explorer_board_bare_metal PUBLIC sdk::core)
-target_link_options(explorer_board_bare_metal PRIVATE ${APP_LINK_OPTIONS})
+add_executable(example_bare_metal_explorer_board EXCLUDE_FROM_ALL)
+target_sources(example_bare_metal_explorer_board PUBLIC ${APP_SOURCES})
+target_include_directories(example_bare_metal_explorer_board PUBLIC ${APP_INCLUDES})
+target_compile_definitions(example_bare_metal_explorer_board PRIVATE ${APP_COMPILE_DEFINITIONS})
+target_compile_options(example_bare_metal_explorer_board PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(example_bare_metal_explorer_board PUBLIC sdk::core)
+target_link_options(example_bare_metal_explorer_board PRIVATE ${APP_LINK_OPTIONS})
 
 #**********************
 # Create run and debug targets
 #**********************
-create_run_target(explorer_board_bare_metal)
-create_debug_target(explorer_board_bare_metal)
+create_run_target(example_bare_metal_explorer_board)
+create_debug_target(example_bare_metal_explorer_board)

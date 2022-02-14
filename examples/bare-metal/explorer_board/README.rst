@@ -24,7 +24,7 @@ Building the firmware
 
         $ cmake -B build
         $ cd build
-        $ make explorer_board_bare_metal
+        $ make example_bare_metal_explorer_board
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -32,7 +32,7 @@ Building the firmware
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake explorer_board_bare_metal
+        $ nmake example_bare_metal_explorer_board
 
 *********************
 Running the firmware
@@ -44,13 +44,13 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make run_explorer_board_bare_metal
+        $ make run_example_bare_metal_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_explorer_board_bare_metal
+        $ nmake run_example_bare_metal_explorer_board
 
 
 *********************
@@ -63,10 +63,10 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make debug_explorer_board_bare_metal
+        $ make debug_example_bare_metal_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake debug_explorer_board_bare_metal
+        $ nmake debug_example_bare_metal_explorer_board

@@ -37,7 +37,7 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
-set(TARGET_NAME vwv_bare_metal)
+set(TARGET_NAME example_bare_metal_vwv)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -50,17 +50,17 @@ unset(TARGET_NAME)
 #**********************
 # Create run targets
 #**********************
-add_custom_target(run_vwv_bare_metal
-  COMMAND xrun --xscope-port localhost:10234 vwv_bare_metal.xe
-  DEPENDS vwv_bare_metal
+add_custom_target(run_example_bare_metal_vwv
+  COMMAND xrun --xscope-port localhost:10234 example_bare_metal_vwv.xe
+  DEPENDS example_bare_metal_vwv
   COMMENT
     "Run application"
   VERBATIM
 )
 
-add_custom_target(xsim_vwv_bare_metal
-  COMMAND xsim --xscope "-realtime localhost:10234" vwv_bare_metal.xe
-  DEPENDS vwv_bare_metal
+add_custom_target(xsim_example_bare_metal_vwv
+  COMMAND xsim --xscope "-realtime localhost:10234" example_bare_metal_vwv.xe
+  DEPENDS example_bare_metal_vwv
   COMMENT
     "Run application"
   VERBATIM

@@ -40,7 +40,7 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
-set(TARGET_NAME cifar10_sram_tile0)
+set(TARGET_NAME example_freertos_cifar10_sram_tile0)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -50,7 +50,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::ai
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME cifar10_sram_tile1)
+set(TARGET_NAME example_freertos_cifar10_sram_tile1)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -60,7 +60,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::ai
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME cifar10_extmem_tile0)
+set(TARGET_NAME example_freertos_cifar10_extmem_tile0)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -70,7 +70,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::ai
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME cifar10_extmem_tile1)
+set(TARGET_NAME example_freertos_cifar10_extmem_tile1)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -80,7 +80,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::ai
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME cifar10_swmem_tile0)
+set(TARGET_NAME example_freertos_cifar10_swmem_tile0)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -90,7 +90,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::ai
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME cifar10_swmem_tile1)
+set(TARGET_NAME example_freertos_cifar10_swmem_tile1)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -103,31 +103,31 @@ unset(TARGET_NAME)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(cifar10_sram cifar10_sram_tile0 cifar10_sram_tile1 1)
-merge_binaries(cifar10_extmem cifar10_extmem_tile0 cifar10_extmem_tile1 1)
-merge_binaries(cifar10_swmem cifar10_swmem_tile0 cifar10_swmem_tile1 1)
+merge_binaries(example_freertos_cifar10_sram example_freertos_cifar10_sram_tile0 example_freertos_cifar10_sram_tile1 1)
+merge_binaries(example_freertos_cifar10_extmem example_freertos_cifar10_extmem_tile0 example_freertos_cifar10_extmem_tile1 1)
+merge_binaries(example_freertos_cifar10_swmem example_freertos_cifar10_swmem_tile0 example_freertos_cifar10_swmem_tile1 1)
 
 #**********************
 # Create run and debug targets
 #**********************
-create_run_target(cifar10_sram)
-create_debug_target(cifar10_sram)
-create_run_target(cifar10_extmem)
-create_debug_target(cifar10_extmem)
-create_run_target(cifar10_swmem)
-create_debug_target(cifar10_swmem)
+create_run_target(example_freertos_cifar10_sram)
+create_debug_target(example_freertos_cifar10_sram)
+create_run_target(example_freertos_cifar10_extmem)
+create_debug_target(example_freertos_cifar10_extmem)
+create_run_target(example_freertos_cifar10_swmem)
+create_debug_target(example_freertos_cifar10_swmem)
 
 #**********************
 # Extract swmem
 #**********************
 add_custom_command(
-    TARGET cifar10_swmem POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory cifar10_swmem_split
-    COMMAND xobjdump --strip cifar10_swmem.xe
-    COMMAND xobjdump --split --split-dir cifar10_swmem_split cifar10_swmem.xb
+    TARGET example_freertos_cifar10_swmem POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory example_freertos_cifar10_swmem_split
+    COMMAND xobjdump --strip example_freertos_cifar10_swmem.xe
+    COMMAND xobjdump --split --split-dir example_freertos_cifar10_swmem_split example_freertos_cifar10_swmem.xb
     BYPRODUCTS
-        cifar10_swmem.xb
-        cifar10_swmem_split
+        example_freertos_cifar10_swmem.xb
+        example_freertos_cifar10_swmem_split
     VERBATIM
 )
 
@@ -156,16 +156,16 @@ else()
     )
 endif()
 
-add_custom_target(flash_fs_cifar10_sram
-    COMMAND xflash --quad-spi-clock 50MHz --factory cifar10_sram.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/cifar10_fat.fs
+add_custom_target(flash_fs_example_freertos_cifar10_sram
+    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_cifar10_sram.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/cifar10_fat.fs
     DEPENDS cifar10_fat.fs
     COMMENT
         "Flash filesystem"
     VERBATIM
 )
 
-add_custom_target(flash_fs_cifar10_extmem
-    COMMAND xflash --quad-spi-clock 50MHz --factory cifar10_extmem.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/cifar10_fat.fs
+add_custom_target(flash_fs_example_freertos_cifar10_extmem
+    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_cifar10_extmem.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/cifar10_fat.fs
     DEPENDS cifar10_fat.fs
     COMMENT
         "Flash filesystem"
@@ -173,19 +173,19 @@ add_custom_target(flash_fs_cifar10_extmem
 )
 
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
-    add_custom_target(flash_fs_cifar10_swmem
+    add_custom_target(flash_fs_example_freertos_cifar10_swmem
         COMMAND echo "Not yet implemented"
-        DEPENDS cifar10_fat.fs cifar10_swmem
+        DEPENDS cifar10_fat.fs example_freertos_cifar10_swmem
         COMMENT
             "Flash filesystem and swmem"
         VERBATIM
     )
 else()
-    add_custom_target(flash_fs_cifar10_swmem
-        COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/cifar10_swmem_split/image_n0c1.swmem filesystem_support/flash_image.bin
+    add_custom_target(flash_fs_example_freertos_cifar10_swmem
+        COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/example_freertos_cifar10_swmem_split/image_n0c1.swmem filesystem_support/flash_image.bin
         COMMAND cat filesystem_support/cifar10_fat.fs | dd of=filesystem_support/flash_image.bin bs=1 seek=1048576 conv=notrunc
         COMMAND xflash --write-all filesystem_support/flash_image.bin --target-file XCORE-AI-EXPLORER.xn
-        DEPENDS cifar10_fat.fs cifar10_swmem
+        DEPENDS cifar10_fat.fs example_freertos_cifar10_swmem
         WORKING_DIRECTORY
             ${CMAKE_CURRENT_LIST_DIR}
         COMMENT

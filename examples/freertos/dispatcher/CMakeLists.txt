@@ -36,16 +36,16 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
-add_executable(dispatcher EXCLUDE_FROM_ALL)
-target_sources(dispatcher PUBLIC ${APP_SOURCES})
-target_include_directories(dispatcher PUBLIC ${APP_INCLUDES})
-target_compile_definitions(dispatcher PRIVATE ${APP_COMPILE_DEFINITIONS})
-target_compile_options(dispatcher PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(dispatcher PUBLIC sdk::core sdk::rtos_freertos)
-target_link_options(dispatcher PRIVATE ${APP_LINK_OPTIONS})
+add_executable(example_freertos_dispatcher EXCLUDE_FROM_ALL)
+target_sources(example_freertos_dispatcher PUBLIC ${APP_SOURCES})
+target_include_directories(example_freertos_dispatcher PUBLIC ${APP_INCLUDES})
+target_compile_definitions(example_freertos_dispatcher PRIVATE ${APP_COMPILE_DEFINITIONS})
+target_compile_options(example_freertos_dispatcher PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(example_freertos_dispatcher PUBLIC sdk::core sdk::rtos_freertos)
+target_link_options(example_freertos_dispatcher PRIVATE ${APP_LINK_OPTIONS})
 
 #**********************
 # Create run and debug targets
 #**********************
-create_run_target(dispatcher)
-create_debug_target(dispatcher)
+create_run_target(example_freertos_dispatcher)
+create_debug_target(example_freertos_dispatcher)

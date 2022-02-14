@@ -66,7 +66,7 @@ Run the following commands in the xcore_sdk root folder to build the cifar10 fir
 
         $ cmake -B build
         $ cd build
-        $ make cifar10_sram
+        $ make example_freertos_cifar10_sram
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -74,7 +74,7 @@ Run the following commands in the xcore_sdk root folder to build the cifar10 fir
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake cifar10_sram
+        $ nmake example_freertos_cifar10_sram
 
 
 Using external flash memory
@@ -88,7 +88,7 @@ To build with the model stored in flash, replace the call to make above with the
 
         $ cmake -B build
         $ cd build
-        $ make cifar10_swmem
+        $ make example_freertos_cifar10_swmem
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -96,7 +96,7 @@ To build with the model stored in flash, replace the call to make above with the
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake cifar10_swmem
+        $ nmake example_freertos_cifar10_swmem
 
 Using external DDR memory
 =========================
@@ -109,7 +109,7 @@ If your board supports LPDDR, you may also place your neural network in the exte
 
         $ cmake -B build
         $ cd build
-        $ make cifar10_extmem
+        $ make example_freertos_cifar10_extmem
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -117,7 +117,7 @@ If your board supports LPDDR, you may also place your neural network in the exte
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake cifar10_extmem
+        $ nmake example_freertos_cifar10_extmem
 
 ********************************
 Setting up the hardware
@@ -134,7 +134,7 @@ Using SRAM memory
 
         $ cmake -B build
         $ cd build
-        $ make flash_cifar10_sram
+        $ make flash_fs_example_freertos_cifar10_sram
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -142,7 +142,7 @@ Using SRAM memory
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake flash_cifar10_sram
+        $ nmake flash_fs_example_freertos_cifar10_sram
 
 
 Using external flash memory
@@ -154,7 +154,7 @@ Using external flash memory
 
         $ cmake -B build
         $ cd build
-        $ make flash_cifar10_swmem
+        $ make flash_fs_example_freertos_cifar10_swmem
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -162,7 +162,7 @@ Using external flash memory
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake flash_cifar10_swmem
+        $ nmake flash_fs_example_freertos_cifar10_swmem
 
 
 Using external DDR memory
@@ -174,7 +174,7 @@ Using external DDR memory
 
         $ cmake -B build
         $ cd build
-        $ make flash_cifar10_extmem
+        $ make flash_fs_example_freertos_cifar10_extmem
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -182,7 +182,7 @@ Using external DDR memory
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake flash_cifar10_extmem
+        $ nmake flash_fs_example_freertos_cifar10_extmem
 
 ********************************
 Running the firmware
@@ -200,7 +200,7 @@ Using SRAM memory
 
         $ cmake -B build
         $ cd build
-        $ make run_cifar10_sram
+        $ make run_example_freertos_cifar10_sram
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -208,7 +208,7 @@ Using SRAM memory
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake run_cifar10_sram
+        $ nmake run_example_freertos_cifar10_sram
 
 
 Using external flash memory
@@ -220,7 +220,7 @@ Using external flash memory
 
         $ cmake -B build
         $ cd build
-        $ make run_cifar10_swmem
+        $ make run_example_freertos_cifar10_swmem
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -228,7 +228,7 @@ Using external flash memory
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake run_cifar10_swmem
+        $ nmake run_example_freertos_cifar10_swmem
 
 
 Using external DDR memory
@@ -240,7 +240,7 @@ Using external DDR memory
 
         $ cmake -B build
         $ cd build
-        $ make run_cifar10_extmem
+        $ make run_example_freertos_cifar10_extmem
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -248,4 +248,4 @@ Using external DDR memory
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake run_cifar10_extmem
+        $ nmake run_example_freertos_cifar10_extmem

@@ -43,7 +43,7 @@ Run the following commands in the xcore_sdk root folder:
 
         $ cmake -B build
         $ cd build
-        $ make iot
+        $ make example_freertos_iot
 
 ********************************
 Setting up the hardware
@@ -57,7 +57,7 @@ Before the demo can be run, the filesystem must be configured and flashed.
 
         $ cmake -B build
         $ cd build
-        $ make flash_fs_iot
+        $ make flash_fs_example_freertos_iot
 
 The script will create TLS credentials and prompt you for WiFi credentials:
 
@@ -84,7 +84,7 @@ From the sdk root folder the iot example run with:
 
         $ cmake -B build
         $ cd build
-        $ make run_iot
+        $ make run_example_freertos_iot
 
 *********************
 Testing MQTT Messages

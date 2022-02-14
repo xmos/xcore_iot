@@ -18,7 +18,7 @@ Run the following commands in the xcore_sdk root folder to build the explorer_bo
 
         $ cmake -B build
         $ cd build
-        $ make explorer_board
+        $ make example_freertos_explorer_board
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -26,7 +26,7 @@ Run the following commands in the xcore_sdk root folder to build the explorer_bo
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake explorer_board
+        $ nmake example_freertos_explorer_board
 
 From the xcore_sdk build folder, create the filesystem and flash the device with the following command:
 
@@ -34,13 +34,13 @@ From the xcore_sdk build folder, create the filesystem and flash the device with
 
     .. code-block:: console
 
-        $ make flash_fs_explorer_board
+        $ make flash_fs_example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake flash_fs_explorer_board
+        $ nmake flash_fs_example_freertos_explorer_board
 
 *********************
 Running the firmware
@@ -52,13 +52,13 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make run_explorer_board
+        $ make run_example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_explorer_board
+        $ nmake run_example_freertos_explorer_board
 
 
 *********************
@@ -71,10 +71,10 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make debug_explorer_board
+        $ make debug_example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake debug_explorer_board
+        $ nmake debug_example_freertos_explorer_board

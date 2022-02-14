@@ -18,7 +18,7 @@ Run the following commands in the xcore_sdk root folder to build the dispatcher 
 
         $ cmake -B build
         $ cd build
-        $ make vwv_bare_metal
+        $ make example_bare_metal_vwv
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -26,7 +26,7 @@ Run the following commands in the xcore_sdk root folder to build the dispatcher 
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake vwv_bare_metal
+        $ nmake example_bare_metal_vwv
 
 *********************
 Running the firmware
@@ -40,7 +40,7 @@ Running with hardware
 
         $ cmake -B build
         $ cd build
-        $ make run_vwv_bare_metal
+        $ make run_example_bare_metal_vwv
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -48,7 +48,7 @@ Running with hardware
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake run_vwv_bare_metal
+        $ nmake run_example_bare_metal_vwv
 
 Running with simulator
 
@@ -60,7 +60,7 @@ Running with simulator
 
         $ cmake -B build
         $ cd build
-        $ make xsim_vwv_bare_metal
+        $ make xsim_example_bare_metal_vwv
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -68,7 +68,7 @@ Running with simulator
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake xsim_vwv_bare_metal
+        $ nmake xsim_example_bare_metal_vwv
 
 The firmware will now wait until a data is sent from a host application. Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires Python.  Ensure you have installed Python 3 and the XCore SDK Python requirements.
 

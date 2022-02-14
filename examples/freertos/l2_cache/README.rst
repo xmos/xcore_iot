@@ -16,7 +16,7 @@ Run the following commands to build the examples:
 
         $ cmake -B build
         $ cd build
-        $ make l2_cache
+        $ make example_freertos_l2_cache
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -24,7 +24,7 @@ Run the following commands to build the examples:
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake l2_cache
+        $ nmake example_freertos_l2_cache
 
 
 ********************************
@@ -39,7 +39,7 @@ Before running the firmware, the swmem must be flashed.
 
         $ cmake -B build
         $ cd build
-        $ make flash_l2_cache_swmem
+        $ make flash_example_freertos_l2_cache_swmem
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -47,7 +47,7 @@ Before running the firmware, the swmem must be flashed.
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake flash_l2_cache_swmem
+        $ nmake flash_example_freertos_l2_cache_swmem
 
 ********************************
 Running the firmware
@@ -61,7 +61,7 @@ Running with hardware.
 
         $ cmake -B build
         $ cd build
-        $ make run_l2_cache
+        $ make run_example_freertos_l2_cache
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -69,4 +69,4 @@ Running with hardware.
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake run_l2_cache
+        $ nmake run_example_freertos_l2_cache

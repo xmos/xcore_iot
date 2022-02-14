@@ -16,7 +16,7 @@ Run the following commands in the xcore_sdk root folder to build the getting_sta
 
         $ cmake -B build
         $ cd build
-        $ make getting_started
+        $ make example_freertos_getting_started
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -24,7 +24,7 @@ Run the following commands in the xcore_sdk root folder to build the getting_sta
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake getting_started
+        $ nmake example_freertos_getting_started
 
 *********************
 Running the firmware
@@ -36,13 +36,13 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make run_getting_started
+        $ make run_example_freertos_getting_started
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_getting_started
+        $ nmake run_example_freertos_getting_started
 
 *********************
 Debugging the firmware with xgdb
@@ -54,10 +54,10 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make debug_getting_started
+        $ make debug_example_freertos_getting_started
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake debug_getting_started
+        $ nmake debug_example_freertos_getting_started
