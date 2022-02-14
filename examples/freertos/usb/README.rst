@@ -2,64 +2,78 @@
 USB
 ###
 
-This example application demonstrates how to use USB device classes.  The application build one of several `TinyUSB <https://docs.tinyusb.org/en/latest/>`__ demonstration applications.  
+This example application demonstrates how to use USB device classes.  The application build one of several `TinyUSB <https://docs.tinyusb.org/en/latest/>`__ demonstration applications.
 
 *********************************
-Building and running the firmware
+Building the firmware
 *********************************
 
-Run the following commands to build the firmware:
+To build the firmware, run make, specifying the desired usb demo firmware.
+
+Recipe options are:
+- usb_tusb_demo_audio_test
+- usb_tusb_demo_cdc_dual_ports
+- usb_tusb_demo_cdc_msc
+- usb_tusb_demo_dfu_runtime
+- usb_tusb_demo_hid_composite
+- usb_tusb_demo_hid_generic_inout
+- usb_tusb_demo_hid_multiple_interface
+- usb_tusb_demo_midi_test
+- usb_tusb_demo_msc_dual_lun
+- usb_tusb_demo_usbtmc
+- usb_tusb_demo_webusb_serial
+
+Per example, to build the midi test demo, run:
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ cmake -B build -DBOARD=XCORE-AI-EXPLORER
-		$ cd build
-		$ make
-		
+        $ cmake -B build
+        $ cd build
+        $ make usb_tusb_demo_midi_test
+
 .. tab:: Windows XTC Tools CMD prompt
 
-	.. code-block:: console
+    .. code-block:: console
 
-		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
-		> cd build
-		> nmake
-		
-To run the example:
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake usb_tusb_demo_midi_test
 
-.. code-block:: console
+*********************************
+Running the firmware
+*********************************
+To run the firmware, run make, specifying the desired usb demo firmware.
 
-	$ xrun --xscope bin/usb.xe
+Recipe options are:
+- run_usb_tusb_demo_audio_test
+- run_usb_tusb_demo_cdc_dual_ports
+- run_usb_tusb_demo_cdc_msc
+- run_usb_tusb_demo_dfu_runtime
+- run_usb_tusb_demo_hid_composite
+- run_usb_tusb_demo_hid_generic_inout
+- run_usb_tusb_demo_hid_multiple_interface
+- run_usb_tusb_demo_midi_test
+- run_usb_tusb_demo_msc_dual_lun
+- run_usb_tusb_demo_usbtmc
+- run_usb_tusb_demo_webusb_serial
+- run_vwv_bare_metal
 
-By default, the TinyUSB AUDIO_TEST application is built.  Use the `TINYUSB_DEMO` option to build one of the following supported demos.  
-
-- AUDIO_TEST
-- HID_COMPOSITE_TEST
-- WEBUSB_SERIAL
-- MIDI_TEST
-- USBTMC
-- CDC_MSC_TEST
-- MSC_DUAL_LUN
-- DFU_RUNTIME_TEST
-- CDC_DUAL_PORTS_TEST
-- HID_GENERIC_INOUT_TEST
-- HID_MULTIPLE_INTERFACE_TEST
-
-For example, to build the MIDI_TEST, run the following command:
+Per example, to run the midi test demo, run:
 
 .. tab:: Linux and Mac
 
-	.. code-block:: console
+    .. code-block:: console
 
-		$ cmake -B build -DBOARD=XCORE-AI-EXPLORER -DTINYUSB_DEMO_TO_USE=MIDI_TEST
-		$ cd build
-		$ make
+        $ cmake -B build
+        $ cd build
+        $ make run_usb_tusb_demo_midi_test
 
 .. tab:: Windows XTC Tools CMD prompt
 
-	.. code-block:: console
+    .. code-block:: console
 
-		> cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER -DTINYUSB_DEMO_TO_USE=MIDI_TEST
-		> cd build
-		> nmake
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake run_usb_tusb_demo_midi_test

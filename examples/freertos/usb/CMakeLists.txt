@@ -1,160 +1,544 @@
-cmake_minimum_required(VERSION 3.20)
-
-# Disable in-source build.
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
-
-## Specify configuration
-set(MULTITILE_BUILD TRUE)
-set(USE_XUD_HIL TRUE)
-set(USE_I2C_HIL FALSE)
-set(USE_I2S_HIL FALSE)
-set(USE_MIC_ARRAY_HIL TRUE)
-set(USE_SPI_HIL FALSE)
-set(USE_QSPI_IO_HIL TRUE)
-
-set(USE_RTOS_GPIO_DRIVER TRUE)
-set(USE_RTOS_I2C_DRIVER FALSE)
-set(USE_RTOS_I2S_DRIVER FALSE)
-set(USE_RTOS_INTERTILE_DRIVER TRUE)
-set(USE_RTOS_MIC_ARRAY_DRIVER TRUE)
-set(USE_RTOS_RPC_DRIVER TRUE)
-set(USE_RTOS_SPI_DRIVER FALSE)
-set(USE_RTOS_USB_DRIVER TRUE)
-set(USE_RTOS_SWMEM_DRIVER FALSE)
-set(USE_RTOS_QSPI_FLASH_DRIVER TRUE)
-set(USE_RTOS_TRACE_DRIVER TRUE)
-set(USE_RTOS_WIFI_DRIVER FALSE)
-
-set(USE_FATFS TRUE)
-set(USE_TINYUSB TRUE)
-set(USE_DISK_MANAGER_TUSB TRUE)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src)
 
 #**********************
-# Get path to XCore SDK
+# Flags
 #**********************
-set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-
-## Import XMOS configurations
-include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-## Define project
-project(usb)
-
-## Enable languages for project
-enable_language(CXX C ASM)
-
-## Set app vars
 set(APP_COMPILER_FLAGS
-    "-Os"
-    "-g"
-    "-report"
-    "-fxscope"
-    "-mcmodel=large"
-    "-Wno-xcore-fptrgroup"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
+    -Os
+    -g
+    -report
+    -fxscope
+    -lquadspi
+    -mcmodel=large
+    -Wno-xcore-fptrgroup
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
-
-set(APP_SOURCES
-    "src/main.c"
-    "src/main_0.c"
-    "src/main_1.c"
-    "src/board_init.c"
-    "src/endpoint0.c"
-	${XMOS_RTOS_PLATFORM_SOURCES}
-	${DEMO_SOURCES}
-)
-
-set(APP_INCLUDES
-    "src"
-    "src/usb"
-	${XMOS_RTOS_PLATFORM_INCLUDES}
-	${DEMO_INCLUDES}
-)
-
-if(${BOARD} STREQUAL "XCORE200-MIC-ARRAY")
-    set(SYSCLK_FREQ 500)
-else()
-    set(SYSCLK_FREQ 700)
-endif()
-
-add_compile_definitions(
+set(APP_COMPILE_DEFINITIONS
     CFG_TUSB_MCU=OPT_MCU_NONE
     CFG_TUSB_OS=OPT_OS_CUSTOM
     BOARD_DEVICE_RHPORT_NUM=0
     CFG_TUD_EP_MAX=12  ## RTOS_USB_ENDPOINT_COUNT_MAX
     CFG_TUD_TASK_QUEUE_SZ=8
-
     CFG_TUSB_DEBUG_PRINTF=rtos_printf
     CFG_TUSB_DEBUG=0
 
     DEBUG_PRINT_ENABLE=1
-    XUD_CORE_CLOCK=${SYSCLK_FREQ}
+    PLATFORM_SUPPORTS_TILE_0=1
+    PLATFORM_SUPPORTS_TILE_1=1
+    PLATFORM_SUPPORTS_TILE_2=0
+    PLATFORM_SUPPORTS_TILE_3=0
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
+    USB_TILE_NO=0
+    USB_TILE=tile[USB_TILE_NO]
+    XE_BASE_TILE=0
+    XUD_CORE_CLOCK=600
+    XCOREAI_EXPLORER=1
 )
 
-## Set all demos to false before selecting
-set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST          FALSE)
-set(USE_TINYUSB_DEMO_AUDIO_TEST                  FALSE)
-set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               FALSE)
-set(USE_TINYUSB_DEMO_MIDI_TEST                   FALSE)
-set(USE_TINYUSB_DEMO_USBTMC                      FALSE)
-set(USE_TINYUSB_DEMO_CDC_MSC_TEST                FALSE)
-set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                FALSE)
-set(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            FALSE)
-set(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         FALSE)
-set(USE_TINYUSB_DEMO_HID_GENERIC_INOUT_TEST      FALSE)
-set(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST FALSE)
-## In progress
-set(USE_TINYUSB_DEMO_UAC2_HEADSET                FALSE)
+set(APP_LINK_OPTIONS
+    -lquadspi
+    -report
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+)
 
-## Select demo
-IF(${TINYUSB_DEMO_TO_USE} MATCHES "HID_COMPOSITE_TEST")
-     set(USE_TINYUSB_DEMO_HID_COMPOSITE_TEST         TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "AUDIO_TEST")
-    set(USE_TINYUSB_DEMO_AUDIO_TEST                  TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "WEBUSB_SERIAL")
-    set(USE_TINYUSB_DEMO_WEBUSB_SERIAL               TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "MIDI_TEST")
-    set(USE_TINYUSB_DEMO_MIDI_TEST                   TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "USBTMC")
-    set(USE_TINYUSB_DEMO_USBTMC                      TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "CDC_MSC_TEST")
-    set(USE_TINYUSB_DEMO_CDC_MSC_TEST                TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "MSC_DUAL_LUN")
-    set(USE_TINYUSB_DEMO_MSC_DUAL_LUN                TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "DFU_RUNTIME_TEST")
-    set(USE_TINYUSB_DEMO_DFU_RUNTIME_TEST            TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "CDC_DUAL_PORTS_TEST")
-    set(USE_TINYUSB_DEMO_CDC_DUAL_PORTS_TEST         TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "HID_GENERIC_INOUT_TEST")
-    set(USE_TINYUSB_DEMO_HID_GENERIC_INOUT_TEST      TRUE)
-ELSEIF(${TINYUSB_DEMO_TO_USE} MATCHES "HID_MULTIPLE_INTERFACE_TEST")
-    set(USE_TINYUSB_DEMO_HID_MULTIPLE_INTERFACE_TEST TRUE)
-ELSE()
-    message(FATAL_ERROR "${TINYUSB_DEMO_TO_USE} is not a TinyUSB demo")
-ENDIF()
+#**********************
+# Audio Test Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/audio_test/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/audio_test/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_audio_test_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
 
-message(STATUS "Selected ${TINYUSB_DEMO_TO_USE} TinyUSB demo")
+set(TARGET_NAME usb_tusb_demo_audio_test_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
 
-##NOTE: demo must be selected before including tinyusb_demos.cmake
-include("${CMAKE_SOURCE_DIR}/src/tinyusb_demos/tinyusb_demos.cmake")
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_audio_test usb_tusb_demo_audio_test_tile0 usb_tusb_demo_audio_test_tile1 1)
 
-set(DEMO_SOURCES ${TINYUSB_DEMO_SOURCES})
-set(DEMO_INCLUDES ${TINYUSB_DEMO_INCLUDES})
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_audio_test)
+create_debug_target(usb_tusb_demo_audio_test)
 
-list(APPEND APP_SOURCES ${DEMO_SOURCES})
-list(APPEND APP_INCLUDES ${DEMO_INCLUDES})
 
-if(USE_TINYUSB_DEMO_USBTMC)
-    add_compile_definitions(BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_FULL_SPEED)
-else()
-    add_compile_definitions(BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-endif()
+#**********************
+# CDC Dual Ports Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/cdc_dual_ports/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/cdc_dual_ports/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_cdc_dual_ports_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
 
-set(RTOS_TILE_LIST 0 1 )
-create_multitile_target(RTOS_TILE_LIST)
+set(TARGET_NAME usb_tusb_demo_cdc_dual_ports_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_cdc_dual_ports usb_tusb_demo_cdc_dual_ports_tile0 usb_tusb_demo_cdc_dual_ports_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_cdc_dual_ports)
+create_debug_target(usb_tusb_demo_cdc_dual_ports)
+
+
+#**********************
+# CDC MSC Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/cdc_msc/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/cdc_msc/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_cdc_msc_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_cdc_msc_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_cdc_msc usb_tusb_demo_cdc_msc_tile0 usb_tusb_demo_cdc_msc_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_cdc_msc)
+create_debug_target(usb_tusb_demo_cdc_msc)
+
+
+#**********************
+# DFU Runtime Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/dfu_runtime/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/dfu_runtime/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED
+                               DFU_DEMO=1
+)
+set(TARGET_NAME usb_tusb_demo_dfu_runtime_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_dfu_runtime_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_dfu_runtime usb_tusb_demo_dfu_runtime_tile0 usb_tusb_demo_dfu_runtime_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_dfu_runtime)
+create_debug_target(usb_tusb_demo_dfu_runtime)
+
+
+#**********************
+# HID Composite Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/hid_composite/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/hid_composite/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_hid_composite_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_hid_composite_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_hid_composite usb_tusb_demo_hid_composite_tile0 usb_tusb_demo_hid_composite_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_hid_composite)
+create_debug_target(usb_tusb_demo_hid_composite)
+
+
+#**********************
+# HID Generic In/Out Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/hid_generic_inout/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/hid_generic_inout/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_hid_generic_inout_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_hid_generic_inout_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_hid_generic_inout usb_tusb_demo_hid_generic_inout_tile0 usb_tusb_demo_hid_generic_inout_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_hid_generic_inout)
+create_debug_target(usb_tusb_demo_hid_generic_inout)
+
+
+#**********************
+# HID Multiple Interface Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/hid_multiple_interface/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/hid_multiple_interface/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_hid_multiple_interface_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_hid_multiple_interface_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_hid_multiple_interface usb_tusb_demo_hid_multiple_interface_tile0 usb_tusb_demo_hid_multiple_interface_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_hid_multiple_interface)
+create_debug_target(usb_tusb_demo_hid_multiple_interface)
+
+
+#**********************
+# MIDI Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/midi_test/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/midi_test/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_midi_test_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_midi_test_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_midi_test usb_tusb_demo_midi_test_tile0 usb_tusb_demo_midi_test_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_midi_test)
+create_debug_target(usb_tusb_demo_midi_test)
+
+
+#**********************
+# MSC Dual Disk Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/msc_dual_lun/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/msc_dual_lun/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_msc_dual_lun_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_msc_dual_lun_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_msc_dual_lun usb_tusb_demo_msc_dual_lun_tile0 usb_tusb_demo_msc_dual_lun_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_msc_dual_lun)
+create_debug_target(usb_tusb_demo_msc_dual_lun)
+
+
+# Incomplete
+# #**********************
+# # UAC2 Headset Tile Targets
+# #**********************
+# file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/uac2_headset/src/*.c )
+# set(DEMO_INCLUDES              tinyusb_demos/uac2_headset/src/)
+# set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+# set(TARGET_NAME usb_tusb_demo_uac2_headset_tile0)
+# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+# unset(TARGET_NAME)
+#
+# set(TARGET_NAME usb_tusb_demo_uac2_headset_tile1)
+# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+# unset(TARGET_NAME)
+# unset(DEMO_SOURCES)
+# unset(DEMO_INCLUDES)
+# unset(DEMO_COMPILE_DEFINITIONS)
+#
+# #**********************
+# # Merge binaries
+# #**********************
+# merge_binaries(usb_tusb_demo_uac2_headset usb_tusb_demo_uac2_headset_tile0 usb_tusb_demo_uac2_headset_tile1 1)
+#
+# #**********************
+# # Create run and debug targets
+# #**********************
+# create_run_target(usb_tusb_demo_uac2_headset)
+# create_debug_target(usb_tusb_demo_uac2_headset)
+
+
+
+#**********************
+# USBTMC Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/usbtmc/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/usbtmc/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_FULL_SPEED)
+set(TARGET_NAME usb_tusb_demo_usbtmc_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_usbtmc_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_usbtmc usb_tusb_demo_usbtmc_tile0 usb_tusb_demo_usbtmc_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_usbtmc)
+create_debug_target(usb_tusb_demo_usbtmc)
+
+
+#**********************
+# Webusb serial Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/webusb_serial/src/*.c )
+set(DEMO_INCLUDES              tinyusb_demos/webusb_serial/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME usb_tusb_demo_webusb_serial_tile0)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME usb_tusb_demo_webusb_serial_tile1)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(usb_tusb_demo_webusb_serial usb_tusb_demo_webusb_serial_tile0 usb_tusb_demo_webusb_serial_tile1 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(usb_tusb_demo_webusb_serial)
+create_debug_target(usb_tusb_demo_webusb_serial)
