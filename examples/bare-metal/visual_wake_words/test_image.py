@@ -24,6 +24,15 @@ INPUT_ZERO_POINT = -128
 OUTPUT_SCALE = 1 / 256
 OUTPUT_ZERO_POINT = -128
 
+def quantize(arr, scale, zero_point, dtype):
+    t = np.round(np.float32(arr) / np.float32(scale)).astype(np.int32) + zero_point
+    return np.clip(t, np.iinfo(dtype).min, np.iinfo(dtype).max).astype(dtype)
+
+
+def dequantize(arr, scale, zero_point):
+    return np.float32(arr.astype(np.int32) - np.int32(zero_point)) * np.float32(scale)
+
+
 PRINT_CALLBACK = ctypes.CFUNCTYPE(
     None, ctypes.c_ulonglong, ctypes.c_uint, ctypes.c_char_p
 )
@@ -77,9 +86,6 @@ class Endpoint(object):
         for i in range(0, len(blob), CHUNK_SIZE):
             self.publish(blob[i : i + CHUNK_SIZE])
             time.sleep(SLEEP_DURATION)
-
-
-from tflite2xcore.utils import quantize, dequantize
 
 ep = Endpoint()
 raw_img = None
