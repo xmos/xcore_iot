@@ -35,21 +35,3 @@ I2S ADCD      ADC_DAT : X0D13
 I2S BCLK      BCLK : X0D22
 I2S LRCLK     LRCLK : X0D23
 ============  ================
-
-*************
-Running Tests
-*************
-
-Run the tests with the following command:
-
-.. code-block:: console
-
-    $ ./build_and_run_tests.sh
-
-Alternatively, if the firmware is built separately, the tests alone can be run with the following command:
-
-.. code-block:: console
-
-    $ ./run_tests.sh
-
-This test is primarily used by the CI system.  However, it may be useful for developers when modifying the SDK.

@@ -4,8 +4,8 @@
 #ifndef DRIVER_INSTANCES_H_
 #define DRIVER_INSTANCES_H_
 
-#include "rtos/drivers/intertile/api/rtos_intertile.h"
-#include "rtos/drivers/clock_control/api/rtos_clock_control.h"
+#include "rtos_intertile.h"
+#include "rtos_clock_control.h"
 
 extern rtos_intertile_t *intertile_ctx;
 extern rtos_clock_control_t *cc_ctx_t0;

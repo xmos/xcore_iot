@@ -34,6 +34,11 @@ target_link_libraries(xcore_sdk_iot
     INTERFACE
         sdk::rtos_freertos
         sdk::rtos::wifi
+        sdk::rtos::sw_services::http
+        sdk::rtos::sw_services::json
+        sdk::rtos::sw_services::mqtt
+        sdk::rtos::sw_services::sntpd
+        sdk::rtos::sw_services::tls_support
 )
 
 add_library(sdk::iot ALIAS xcore_sdk_iot)

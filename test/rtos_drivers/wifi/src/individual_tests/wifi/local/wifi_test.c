@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* System headers */
@@ -14,7 +14,7 @@
 #include "ff.h"
 #include "sl_wfx_iot_wifi.h"
 #include "wifi.h"
-#include "rtos/osal/api/rtos_osal.h"
+#include "rtos_osal.h"
 
 /* App headers */
 #include "app_conf.h"

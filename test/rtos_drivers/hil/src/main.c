@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* System headers */
@@ -10,13 +10,13 @@
 #include "queue.h"
 
 /* Library headers */
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
-#include "rtos/drivers/i2c/api/rtos_i2c_master.h"
-#include "rtos/drivers/i2c/api/rtos_i2c_slave.h"
-#include "rtos/drivers/i2s/api/rtos_i2s.h"
-#include "rtos/drivers/intertile/api/rtos_intertile.h"
-#include "rtos/drivers/mic_array/api/rtos_mic_array.h"
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
+#include "rtos_gpio.h"
+#include "rtos_i2c_master.h"
+#include "rtos_i2c_slave.h"
+#include "rtos_i2s.h"
+#include "rtos_intertile.h"
+#include "rtos_mic_array.h"
+#include "rtos_qspi_flash.h"
 
 /* App headers */
 #include "app_conf.h"

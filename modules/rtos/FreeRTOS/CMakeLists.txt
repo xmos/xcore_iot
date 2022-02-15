@@ -54,6 +54,7 @@ target_include_directories(xcore_sdk_rtos_freertos_plus_tcp
 target_link_libraries(xcore_sdk_rtos_freertos_plus_tcp
     INTERFACE
         sdk::rtos::FreeRTOS_SMP
+        sdk::lib_random
 )
 
 ## Create an alias
