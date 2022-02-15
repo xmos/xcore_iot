@@ -15,7 +15,7 @@ project(xcore_sdk)
 enable_language(CXX C ASM)
 
 ## Project options
-option(BUILD_HOST     "Build host applications"    OFF)
+option(CI_TESTING     "Enable CI test applications"  OFF)
 
 ## Import some helpful macros
 include(tools/cmake_utils/xmos_macros.cmake)
@@ -23,9 +23,7 @@ include(tools/cmake_utils/xmos_macros.cmake)
 ## Add various targets
 add_subdirectory(modules)
 add_subdirectory(examples)
-add_subdirectory(test)
 
-if(BUILD_HOST)
-# add_subdirectory(test)
-message(WARNING "BUILD_HOST not yet implemented")
+if(CI_TESTING)
+    add_subdirectory(test)
 endif()

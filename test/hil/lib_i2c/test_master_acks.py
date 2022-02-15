@@ -14,7 +14,7 @@ def test_i2c_master_acks(build, capfd, request, stop):
     # It is assumed that this is of the form <arbitrary>/bin/<unique>/.../<executable>.xe,
     # and that <arbitrary> contains the CMakeLists.txt file for all test executables.
     cwd = Path(request.fspath).parent
-    binary = f'{cwd}/i2c_master_test/bin/ack_{stop}/test_hil_i2c_master_test_tx_only_{stop}.xe'
+    binary = f'{cwd}/i2c_master_test/bin/test_hil_i2c_master_test_tx_only_{stop}.xe'
 
     checker = I2CMasterChecker("tile[0]:XS1_PORT_1A",
                                "tile[0]:XS1_PORT_1B",
@@ -33,9 +33,11 @@ def test_i2c_master_acks(build, capfd, request, stop):
     # The environment here should be set up with variables defined in the
     # CMakeLists.txt file to define the build
 
-    build(directory = binary,
-            env = {"STOPS":stop, "ACK_TEST":True},
-            bin_child = f"ack_{stop}")
+
+    ## Temporarily building externally, see hil/build_lib_i2c_tests.sh
+    # build(directory = binary,
+    #         env = {"STOPS":stop, "ACK_TEST":True},
+    #         bin_child = f"ack_{stop}")
 
     px.run_with_pyxsim(binary,
                     simthreads = [checker],

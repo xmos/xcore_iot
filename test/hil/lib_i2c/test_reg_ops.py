@@ -27,7 +27,8 @@ def test_i2c_reg_ops(build, capfd, request):
 
     sim_args = ['--weak-external-drive']
 
-    build(binary)
+    ## Temporarily building externally, see hil/build_lib_i2c_tests.sh
+    # build(binary)
 
     px.run_with_pyxsim(binary,
                     simthreads = [checker],

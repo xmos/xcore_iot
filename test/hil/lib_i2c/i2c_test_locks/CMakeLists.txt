@@ -8,15 +8,9 @@ set(APP_INCLUDES src)
 # Flags
 #**********************
 set(APP_COMPILER_FLAGS
-    -O2
-    -g
-    -report
+    -Os
     -target=XCORE-AI-EXPLORER
 )
-set(APP_COMPILE_DEFINITIONS
-    DEBUG_PRINT_ENABLE=1
-)
-
 set(APP_LINK_OPTIONS
     -report
     -target=XCORE-AI-EXPLORER

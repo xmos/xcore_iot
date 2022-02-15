@@ -1,9 +1,9 @@
 
 ## Add HIL tests
 add_subdirectory(hil/lib_i2c)
-# add_subdirectory(hil/lib_i2s)
+add_subdirectory(hil/lib_i2s)
 # add_subdirectory(hil/lib_qspi_io)
-# add_subdirectory(hil/lib_spi)
+add_subdirectory(hil/lib_spi)
 
 ## Add rtos drivers system tests
 # add_subdirectory(rtos_drivers/clock_control)

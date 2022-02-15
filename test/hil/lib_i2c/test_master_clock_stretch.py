@@ -26,7 +26,7 @@ def test_i2c_master_clock_stretch(build, capfd, request, stop, speed, port_setup
     # It is assumed that this is of the form <arbitrary>/bin/<unique>/.../<executable>.xe,
     # and that <arbitrary> contains the CMakeLists.txt file for all test executables.
     cwd = Path(request.fspath).parent
-    binary = f'{cwd}/i2c_master_test/bin/{id_string}/test_hil_i2c_master_test_rx_tx_{id_string}.xe'
+    binary = f'{cwd}/i2c_master_test/bin/test_hil_i2c_master_test_{id_string}.xe'
 
     port_map = [["tile[0]:XS1_PORT_1A", "tile[0]:XS1_PORT_1B"],     # Test 1b port SCL 1b port SDA
                 ["tile[0]:XS1_PORT_8A.1", "tile[0]:XS1_PORT_8A.3"], # Test 8b port shared by SCL and SDA
@@ -54,9 +54,11 @@ def test_i2c_master_clock_stretch(build, capfd, request, stop, speed, port_setup
     # The environment here should be set up with variables defined in the
     # CMakeLists.txt file to define the build
 
-    build(directory = binary,
-            env = {"PORT_SETUPS":port_setup, "SPEEDS":speed, "STOPS":stop},
-            bin_child = id_string)
+
+    ## Temporarily building externally, see hil/build_lib_i2c_tests.sh
+    # build(directory = binary,
+    #         env = {"PORT_SETUPS":port_setup, "SPEEDS":speed, "STOPS":stop},
+    #         bin_child = id_string)
 
     px.run_with_pyxsim(binary,
                     simthreads = [checker],

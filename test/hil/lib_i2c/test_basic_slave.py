@@ -16,7 +16,7 @@ def test_i2c_basic_slave(build, capfd, request, nightly, speed):
 
     cwd = Path(request.fspath).parent
 
-    binary = f'{cwd}/i2c_slave_test/bin/{speed}/test_hil_i2c_slave_test.xe'
+    binary = f'{cwd}/i2c_slave_test/bin/test_hil_i2c_slave_test.xe'
 
     checker = I2CSlaveChecker("tile[0]:XS1_PORT_1A",
                             "tile[0]:XS1_PORT_1B",
@@ -40,8 +40,10 @@ def test_i2c_basic_slave(build, capfd, request, nightly, speed):
     # used in the Python harness, not in the resultant xe, therefore it is
     # not passed to the build system.
 
-    build(directory = binary,
-            bin_child = f"{speed}")
+
+    ## Temporarily building externally, see hil/build_lib_i2c_tests.sh
+    # build(directory = binary,
+    #         bin_child = f"{speed}")
 
     px.run_with_pyxsim(binary,
                     simthreads = [checker],

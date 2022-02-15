@@ -1,99 +1,61 @@
-cmake_minimum_required(VERSION 3.20)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src)
 
-## Import hil source
-set(USE_I2C_HIL FALSE)
-set(USE_I2S_HIL TRUE)
-set(USE_SPI_HIL FALSE)
-set(USE_QSPI_IO_HIL FALSE)
-set(USE_MIC_ARRAY_HIL FALSE)
-set(USE_XUD_HIL FALSE)
-
-## If XCORE_SDK_PATH is not already defined, then we're running this test 
-## independently. Set XCORE_SDK_PATH to 4 parents upwards, set the toolchain, 
-## and set the project directive.
-if(NOT DEFINED XCORE_SDK_PATH)
-    set(XCORE_SDK_PATH ${CMAKE_CURRENT_LIST_DIR})
-    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-    include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
-    project(i2s_master_test)
-endif()
-
-include("${XCORE_SDK_PATH}/modules/hil/hil.cmake")
-
-set(APP_NAME i2s_master_test)
-
+#**********************
+# Flags
+#**********************
 set(APP_COMPILER_FLAGS
-    "-O3"
-    "-g"
-    "-report"
-    "-target=XCORE-AI-EXPLORER"
+    -Os
+    -target=XCORE-AI-EXPLORER
+)
+set(APP_LINK_OPTIONS
+    -report
+    -target=XCORE-AI-EXPLORER
 )
 
-set(APP_SOURCES
-    "src/main.c"
-)
-
-set(APP_INCLUDES
-    "src"
-)
-
-add_compile_definitions(
-    DEBUG_PRINT_ENABLE=1
-)
-
+#**********************
+# Tile Targets
+#**********************
 if(NOT DEFINED ENV{NUMS_IN_OUT})
-    set(NUMS_IN_OUT "4;4" "1;1" "0:4" "4:0")
+    set(NUMS_IN_OUT "4;4" "1;1" "0;4" "4;0")
 else()
     set(NUMS_IN_OUT $ENV{NUMS_IN_OUT})
 endif()
-
 if(NOT DEFINED ENV{TEST_LEVEL})
-    set(SMOKE 1)
+    set(STOPS stop no_stop)
 else()
-    if($ENV{TEST_LEVEL} STREQUAL "smoke")
-        set(SMOKE 1)
-    elseif($ENV{TEST_LEVEL} STREQUAL "nightly")
-        set(SMOKE 0)
-    endif()
+    set(STOPS $ENV{STOPS})
 endif()
 
-if(SMOKE EQUAL 1)
-    set(TEST_LEVEL "smoke")
-else()
-    set(TEST_LEVEL "nightly")
-endif()
-
-set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+set(TEST_LEVELS 0 1)  ## 1 == smoke, 0 == nightly
 
 #**********************
 # Setup targets
 #**********************
-
 list(LENGTH NUMS_IN_OUT NUMS_IN_OUT_LEN)
 math(EXPR num_pairs "${NUMS_IN_OUT_LEN} / 2")
 
 foreach(i RANGE 1 ${num_pairs})
     list(POP_FRONT NUMS_IN_OUT num_in num_out)
-    
-    set(TARGET_NAME_NO_EXT "${APP_NAME}_${TEST_LEVEL}_${num_in}_${num_out}")
-    set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
-
-    add_executable(${TARGET_NAME})
-
-    target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${I2S_HIL_SOURCES})
-    target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${I2S_HIL_INCLUDES})
-
-    target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-    target_compile_definitions(${TARGET_NAME}
-                                PRIVATE
-                                    NUM_OUT=${num_out}
-                                    NUM_IN=${num_in}
-                                    SMOKE=${SMOKE}
-                                )
-
-    target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-    install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
+    foreach(test_level ${TEST_LEVELS})
+        set(TARGET_NAME "test_hil_i2s_master_test_${test_level}_${num_in}_${num_out}")
+        add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+        target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+        target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+        target_compile_definitions(${TARGET_NAME}
+            PRIVATE
+                ${APP_COMPILE_DEFINITIONS}
+                NUM_OUT=${num_out}
+                NUM_IN=${num_in}
+                SMOKE=${test_level}
+        )
+        target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+        target_link_libraries(${TARGET_NAME} PUBLIC sdk::hil::lib_i2s)
+        target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+        set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
+        unset(TARGET_NAME)
+    endforeach()
 endforeach()

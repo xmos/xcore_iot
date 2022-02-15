@@ -29,16 +29,17 @@ def test_i2s_backpressure(build, nightly, capfd, request, sample_rate, num_chann
 
     cwd = Path(request.fspath).parent
 
-    binary = f'{cwd}/backpressure_test/bin/{id_string}/backpressure_test_{id_string}.xe'
+    binary = f'{cwd}/backpressure_test/bin/test_hil_backpressure_test_{id_string}.xe'
 
     tester = px.testers.PytestComparisonTester(f'{cwd}/expected/backpressure_test.expect',
                                             regexp = True,
                                             ordered = True)
 
-    build(directory = binary, 
-            env = {"SAMPLE_RATES":sample_rate, "CHANS":num_channels, "RX_TX_INCS":f"{receive_increment};{send_increment}"},
-            bin_child = id_string)
+    ## Temporarily building externally, see hil/build_lib_i2s_tests.sh
+    # build(directory = binary,
+    #         env = {"SAMPLE_RATES":sample_rate, "CHANS":num_channels, "RX_TX_INCS":f"{receive_increment};{send_increment}"},
+    #         bin_child = id_string)
 
     subprocess.run(("xsim", binary, "--plugin", "LoopbackPort.dll", "-port tile[0] XS1_PORT_1G 1 0 -port tile[0] XS1_PORT_1A 1 0"))
-                    
+
     tester.run(capfd.readouterr().out)
