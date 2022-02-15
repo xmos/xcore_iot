@@ -106,7 +106,7 @@ try:
         # Normalize to range 0..1. Needed for quantize function
         img_array = (img_array - img_array.min()) / img_array.ptp()
 
-        img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT)
+        img_array = quantize(img_array, INPUT_SCALE, INPUT_ZERO_POINT, np.uint8)
         raw_img = img_array.flatten().tobytes()
 
         ep.send_blob(raw_img)
