@@ -43,7 +43,7 @@ def test_spi_master_sync_rx_tx(build, capfd, nightly, request, full_load, miso_e
 
     cwd = Path(request.fspath).parent
 
-    binary = f"{cwd}/spi_master_sync_rx_tx/bin/{id_string}/spi_master_sync_rx_tx_{id_string}.xe"
+    binary = f"{cwd}/spi_master_sync_rx_tx/bin/test_hil_spi_master_sync_rx_tx_{id_string}.xe"
 
     checker = SPIMasterChecker("tile[0]:XS1_PORT_1C",
                                "tile[0]:XS1_PORT_1D",
@@ -55,14 +55,15 @@ def test_spi_master_sync_rx_tx(build, capfd, nightly, request, full_load, miso_e
     tester = px.testers.PytestComparisonTester(f'{cwd}/expected/master_sync.expect',
                                             regexp = True,
                                             ordered = True)
-                                            
-    build(directory = binary, 
-            env = {"FULL_LOAD":f'{full_load}', 
-                   "MISO_ENABLED":f'{miso_enabled}',
-                   "MOSI_ENABLED":f'{mosi_enabled}',
-                   "SPI_MODE":f'{mode}',
-                   "DIVS":f'{div}'},
-            bin_child = id_string)
+
+    ## Temporarily building externally, see hil/build_lib_spi_tests.sh
+    # build(directory = binary,
+    #         env = {"FULL_LOAD":f'{full_load}',
+    #                "MISO_ENABLED":f'{miso_enabled}',
+    #                "MOSI_ENABLED":f'{mosi_enabled}',
+    #                "SPI_MODE":f'{mode}',
+    #                "DIVS":f'{div}'},
+    #         bin_child = id_string)
 
     px.run_with_pyxsim(binary,
                        simthreads = [checker])
