@@ -10,15 +10,16 @@ if [ -z "$1" ] || [ "$1" == "all" ]
 then
     # row format is: "make_target BOARD"
     applications=(
-        "test/rtos_drivers/hil XCORE-AI-EXPLORER"
-        "test/rtos_drivers/hil_add XCORE-AI-EXPLORER"
-        "test/rtos_drivers/usb XCORE-AI-EXPLORER"
-        "test/rtos_drivers/wifi XCORE-AI-EXPLORER"
+        "test_rtos_driver_clock_control_test XCORE-AI-EXPLORER"
+        "test_rtos_driver_hil XCORE-AI-EXPLORER"
+        "test_rtos_driver_hil_add XCORE-AI-EXPLORER"
+        "test_rtos_driver_usb XCORE-AI-EXPLORER"
+        "test_rtos_driver_wifi XCORE-AI-EXPLORER"
     )
 elif [ "$1" == "smoke" ]
 then
     applications=(
-        "test/rtos_drivers/hil XCORE-AI-EXPLORER"
+        "test_rtos_driver_hil XCORE-AI-EXPLORER"
     )
 else
     echo "Argument $1 not a supported configuration!"
@@ -38,5 +39,5 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
 
     (cd ${path}; rm -rf build_${board})
     (cd ${path}; mkdir -p build_${board})
-    (cd ${path}/build_${board}; log_errors cmake ../ -DBOARD=${board}; log_errors make ${application} -j)
+    (cd ${path}/build_ci_${board}; log_errors cmake ../ -DBOARD=${board} -DCI_TESTING=ON; log_errors make ${application} -j)
 done
