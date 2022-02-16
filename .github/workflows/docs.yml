@@ -47,6 +47,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: xcore_sdk_docs
-          path: doc/_build/latest/html
+          path: doc/_build/html
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn` 
           retention-days: 5
