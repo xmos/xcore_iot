@@ -80,6 +80,10 @@ Run the following commands in the xcore_sdk root folder to build the cifar10 fir
 Using external flash memory
 ===========================
 
+.. note::
+
+    There is no Windows support for using external flash memory.
+
 To build with the model stored in flash, replace the call to make above with the following:
 
 .. tab:: Linux and Mac
@@ -90,13 +94,6 @@ To build with the model stored in flash, replace the call to make above with the
         $ cd build
         $ make example_freertos_cifar10_swmem
 
-.. tab:: Windows XTC Tools CMD prompt
-
-    .. code-block:: console
-
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
-        $ nmake example_freertos_cifar10_swmem
 
 Using external DDR memory
 =========================
@@ -156,14 +153,6 @@ Using external flash memory
         $ cd build
         $ make flash_fs_example_freertos_cifar10_swmem
 
-.. tab:: Windows XTC Tools CMD prompt
-
-    .. code-block:: console
-
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
-        $ nmake flash_fs_example_freertos_cifar10_swmem
-
 
 Using external DDR memory
 =========================
@@ -221,14 +210,6 @@ Using external flash memory
         $ cmake -B build
         $ cd build
         $ make run_example_freertos_cifar10_swmem
-
-.. tab:: Windows XTC Tools CMD prompt
-
-    .. code-block:: console
-
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
-        $ nmake run_example_freertos_cifar10_swmem
 
 
 Using external DDR memory
