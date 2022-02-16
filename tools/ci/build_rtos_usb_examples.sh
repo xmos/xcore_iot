@@ -8,27 +8,27 @@ source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 # setup configurations
 if [ -z "$1" ] || [ "$1" == "all" ]
 then
-    # row format is: "make_target BOARD"
+    # row format is: "make_target BOARD toolchain"
     demos=(
-        "example_freertos_usb_tusb_demo_audio_test XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_cdc_dual_ports XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_cdc_msc XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_dfu_runtime XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_hid_composite XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_hid_generic_inout XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_hid_multiple_interface XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_midi_test XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_msc_dual_lun XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_usbtmc XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_webusb_serial XCORE-AI-EXPLORER"
+        "example_freertos_usb_tusb_demo_audio_test              XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_cdc_dual_ports          XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_cdc_msc                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_dfu_runtime             XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_hid_composite           XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_hid_generic_inout       XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_hid_multiple_interface  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_midi_test               XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_msc_dual_lun            XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_usbtmc                  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_webusb_serial           XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
     )
 elif [ "$1" == "smoke" ]
 then
     demos=(
-        "example_freertos_usb_tusb_demo_audio_test XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_dfu_runtime XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_midi_test XCORE-AI-EXPLORER"
-        "example_freertos_usb_tusb_demo_hid_generic_inout XCORE-AI-EXPLORER"
+        "example_freertos_usb_tusb_demo_audio_test         XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_dfu_runtime        XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_midi_test          XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_hid_generic_inout  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
     )
 else
     echo "Argument $1 not a supported configuration!"
@@ -40,6 +40,7 @@ for ((i = 0; i < ${#demos[@]}; i += 1)); do
     read -ra FIELDS <<< ${demos[i]}
     demo="${FIELDS[0]}"
     board="${FIELDS[1]}"
+    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[2]}"
     path="${XCORE_SDK_ROOT}"
     echo '******************************************************'
     echo '* Building' ${demo} 'for' ${board}
@@ -47,5 +48,5 @@ for ((i = 0; i < ${#demos[@]}; i += 1)); do
 
     (cd ${path}; rm -rf build_${board})
     (cd ${path}; mkdir -p build_${board})
-    (cd ${path}/build_${board}; log_errors cmake ../ -DBOARD=${board}; log_errors make ${demo} -j)
+    (cd ${path}/build_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board}; log_errors make ${demo} -j)
 done

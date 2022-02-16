@@ -5,9 +5,6 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
 endif()
 
-## in the future will just pass this in
-include(tools/cmake_utils/xmos_xs3a_toolchain.cmake)
-
 ## Project declaration
 project(xcore_sdk)
 
