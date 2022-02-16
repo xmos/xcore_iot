@@ -1,4 +1,5 @@
 
+add_subdirectory(board_support)
 add_subdirectory(drivers/clock_control)
 add_subdirectory(drivers/gpio)
 add_subdirectory(drivers/i2c)

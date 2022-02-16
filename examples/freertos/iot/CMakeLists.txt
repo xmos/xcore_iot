@@ -29,14 +29,9 @@ set(APP_COMPILE_DEFINITIONS
     SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR\)
     MIC_DUAL_ENABLED=1
     MQTT_TASK=1
-    PLATFORM_SUPPORTS_TILE_0=1
-    PLATFORM_SUPPORTS_TILE_1=1
-    PLATFORM_SUPPORTS_TILE_2=0
-    PLATFORM_SUPPORTS_TILE_3=0
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
     XE_BASE_TILE=0
-    XCOREAI_EXPLORER=1
 )
 
 set(APP_LINK_OPTIONS
@@ -49,30 +44,30 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
-set(TARGET_NAME example_freertos_iot_tile0)
+set(TARGET_NAME tile0_example_freertos_iot)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::iot)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::iot sdk::rtos_bsp::xcore_ai_explorer)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_iot_tile1)
+set(TARGET_NAME tile1_example_freertos_iot)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::iot)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::iot sdk::rtos_bsp::xcore_ai_explorer)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_iot example_freertos_iot_tile0 example_freertos_iot_tile1 1)
+merge_binaries(example_freertos_iot tile0_example_freertos_iot tile1_example_freertos_iot 1)
 
 #**********************
 # Create run and debug targets

@@ -3,7 +3,7 @@
 
 #include <platform.h>
 
-#include "app_conf.h"
+#include "platform_conf.h"
 #include "platform/app_pll_ctrl.h"
 #include "platform/driver_instances.h"
 
@@ -141,6 +141,19 @@ static void spi_init(void)
             WIFI_CLK,
             WIFI_MOSI,
             WIFI_MISO);
+
+    rtos_spi_master_device_init(
+            wifi_device_ctx,
+            spi_master_ctx,
+            1, /* WiFi CS pin is on bit 1 of the CS port */
+            SPI_MODE_0,
+            spi_master_source_clock_ref,
+            0, /* 50 MHz */
+            spi_master_sample_delay_2, /* what should this be? 2? 3? 4? */
+            0, /* should this be > 0 if the above is 3-4 ? */
+            1,
+            0,
+            0);
 #endif
 }
 

@@ -54,7 +54,7 @@ set(APP_LINK_OPTIONS
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/audio_test/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/audio_test/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_audio_test_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_audio_test)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -64,7 +64,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_audio_test_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_audio_test)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -80,7 +80,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_audio_test example_freertos_usb_tusb_demo_audio_test_tile0 example_freertos_usb_tusb_demo_audio_test_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_audio_test tile0_example_freertos_usb_tusb_demo_audio_test tile1_example_freertos_usb_tusb_demo_audio_test 1)
 
 #**********************
 # Create run and debug targets
@@ -95,7 +95,7 @@ create_debug_target(example_freertos_usb_tusb_demo_audio_test)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/cdc_dual_ports/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/cdc_dual_ports/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_cdc_dual_ports_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_cdc_dual_ports)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -105,7 +105,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_cdc_dual_ports_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_cdc_dual_ports)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -121,7 +121,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_cdc_dual_ports example_freertos_usb_tusb_demo_cdc_dual_ports_tile0 example_freertos_usb_tusb_demo_cdc_dual_ports_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_cdc_dual_ports tile0_example_freertos_usb_tusb_demo_cdc_dual_ports tile1_example_freertos_usb_tusb_demo_cdc_dual_ports 1)
 
 #**********************
 # Create run and debug targets
@@ -136,7 +136,7 @@ create_debug_target(example_freertos_usb_tusb_demo_cdc_dual_ports)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/cdc_msc/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/cdc_msc/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_cdc_msc_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_cdc_msc)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -146,7 +146,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_cdc_msc_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_cdc_msc)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -162,7 +162,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_cdc_msc example_freertos_usb_tusb_demo_cdc_msc_tile0 example_freertos_usb_tusb_demo_cdc_msc_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_cdc_msc tile0_example_freertos_usb_tusb_demo_cdc_msc tile1_example_freertos_usb_tusb_demo_cdc_msc 1)
 
 #**********************
 # Create run and debug targets
@@ -179,7 +179,7 @@ set(DEMO_INCLUDES              tinyusb_demos/dfu_runtime/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED
                                DFU_DEMO=1
 )
-set(TARGET_NAME example_freertos_usb_tusb_demo_dfu_runtime_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_dfu_runtime)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -189,7 +189,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_dfu_runtime_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_dfu_runtime)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -205,7 +205,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_dfu_runtime example_freertos_usb_tusb_demo_dfu_runtime_tile0 example_freertos_usb_tusb_demo_dfu_runtime_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_dfu_runtime tile0_example_freertos_usb_tusb_demo_dfu_runtime tile1_example_freertos_usb_tusb_demo_dfu_runtime 1)
 
 #**********************
 # Create run and debug targets
@@ -220,7 +220,7 @@ create_debug_target(example_freertos_usb_tusb_demo_dfu_runtime)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/hid_composite/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/hid_composite/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_hid_composite_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_hid_composite)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -230,7 +230,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_hid_composite_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_hid_composite)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -246,7 +246,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_hid_composite example_freertos_usb_tusb_demo_hid_composite_tile0 example_freertos_usb_tusb_demo_hid_composite_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_hid_composite tile0_example_freertos_usb_tusb_demo_hid_composite tile1_example_freertos_usb_tusb_demo_hid_composite 1)
 
 #**********************
 # Create run and debug targets
@@ -261,7 +261,7 @@ create_debug_target(example_freertos_usb_tusb_demo_hid_composite)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/hid_generic_inout/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/hid_generic_inout/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_hid_generic_inout_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_hid_generic_inout)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -271,7 +271,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_hid_generic_inout_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_hid_generic_inout)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -287,7 +287,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_hid_generic_inout example_freertos_usb_tusb_demo_hid_generic_inout_tile0 example_freertos_usb_tusb_demo_hid_generic_inout_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_hid_generic_inout tile0_example_freertos_usb_tusb_demo_hid_generic_inout tile1_example_freertos_usb_tusb_demo_hid_generic_inout 1)
 
 #**********************
 # Create run and debug targets
@@ -302,7 +302,7 @@ create_debug_target(example_freertos_usb_tusb_demo_hid_generic_inout)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/hid_multiple_interface/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/hid_multiple_interface/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_hid_multiple_interface_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_hid_multiple_interface)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -312,7 +312,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_hid_multiple_interface_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_hid_multiple_interface)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -328,7 +328,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_hid_multiple_interface example_freertos_usb_tusb_demo_hid_multiple_interface_tile0 example_freertos_usb_tusb_demo_hid_multiple_interface_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_hid_multiple_interface tile0_example_freertos_usb_tusb_demo_hid_multiple_interface tile1_example_freertos_usb_tusb_demo_hid_multiple_interface 1)
 
 #**********************
 # Create run and debug targets
@@ -343,7 +343,7 @@ create_debug_target(example_freertos_usb_tusb_demo_hid_multiple_interface)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/midi_test/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/midi_test/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_midi_test_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_midi_test)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -353,7 +353,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_midi_test_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_midi_test)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -369,7 +369,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_midi_test example_freertos_usb_tusb_demo_midi_test_tile0 example_freertos_usb_tusb_demo_midi_test_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_midi_test tile0_example_freertos_usb_tusb_demo_midi_test tile1_example_freertos_usb_tusb_demo_midi_test 1)
 
 #**********************
 # Create run and debug targets
@@ -384,7 +384,7 @@ create_debug_target(example_freertos_usb_tusb_demo_midi_test)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/msc_dual_lun/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/msc_dual_lun/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_msc_dual_lun_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_msc_dual_lun)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -394,7 +394,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_msc_dual_lun_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_msc_dual_lun)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -410,7 +410,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_msc_dual_lun example_freertos_usb_tusb_demo_msc_dual_lun_tile0 example_freertos_usb_tusb_demo_msc_dual_lun_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_msc_dual_lun tile0_example_freertos_usb_tusb_demo_msc_dual_lun tile1_example_freertos_usb_tusb_demo_msc_dual_lun 1)
 
 #**********************
 # Create run and debug targets
@@ -426,7 +426,7 @@ create_debug_target(example_freertos_usb_tusb_demo_msc_dual_lun)
 # file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/uac2_headset/src/*.c )
 # set(DEMO_INCLUDES              tinyusb_demos/uac2_headset/src/)
 # set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-# set(TARGET_NAME example_freertos_usb_tusb_demo_uac2_headset_tile0)
+# set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_uac2_headset)
 # add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 # target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 # target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -436,7 +436,7 @@ create_debug_target(example_freertos_usb_tusb_demo_msc_dual_lun)
 # target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 # unset(TARGET_NAME)
 #
-# set(TARGET_NAME example_freertos_usb_tusb_demo_uac2_headset_tile1)
+# set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_uac2_headset)
 # add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 # target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 # target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -452,7 +452,7 @@ create_debug_target(example_freertos_usb_tusb_demo_msc_dual_lun)
 # #**********************
 # # Merge binaries
 # #**********************
-# merge_binaries(example_freertos_usb_tusb_demo_uac2_headset example_freertos_usb_tusb_demo_uac2_headset_tile0 example_freertos_usb_tusb_demo_uac2_headset_tile1 1)
+# merge_binaries(example_freertos_usb_tusb_demo_uac2_headset tile0_example_freertos_usb_tusb_demo_uac2_headset tile1_example_freertos_usb_tusb_demo_uac2_headset 1)
 #
 # #**********************
 # # Create run and debug targets
@@ -468,7 +468,7 @@ create_debug_target(example_freertos_usb_tusb_demo_msc_dual_lun)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/usbtmc/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/usbtmc/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_FULL_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_usbtmc_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_usbtmc)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -478,7 +478,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_usbtmc_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_usbtmc)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -494,7 +494,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_usbtmc example_freertos_usb_tusb_demo_usbtmc_tile0 example_freertos_usb_tusb_demo_usbtmc_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_usbtmc tile0_example_freertos_usb_tusb_demo_usbtmc tile1_example_freertos_usb_tusb_demo_usbtmc 1)
 
 #**********************
 # Create run and debug targets
@@ -509,7 +509,7 @@ create_debug_target(example_freertos_usb_tusb_demo_usbtmc)
 file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/webusb_serial/src/*.c )
 set(DEMO_INCLUDES              tinyusb_demos/webusb_serial/src/)
 set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME example_freertos_usb_tusb_demo_webusb_serial_tile0)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_webusb_serial)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -519,7 +519,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_usb_tusb_demo_webusb_serial_tile1)
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_webusb_serial)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
@@ -535,7 +535,7 @@ unset(DEMO_COMPILE_DEFINITIONS)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_usb_tusb_demo_webusb_serial example_freertos_usb_tusb_demo_webusb_serial_tile0 example_freertos_usb_tusb_demo_webusb_serial_tile1 1)
+merge_binaries(example_freertos_usb_tusb_demo_webusb_serial tile0_example_freertos_usb_tusb_demo_webusb_serial tile1_example_freertos_usb_tusb_demo_webusb_serial 1)
 
 #**********************
 # Create run and debug targets

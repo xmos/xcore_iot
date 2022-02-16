@@ -3,7 +3,7 @@
 
 #include <platform.h>
 
-#include "app_conf.h"
+#include "platform_conf.h"
 #include "platform/driver_instances.h"
 #include "platform/aic3204.h"
 #include "fs_support.h"

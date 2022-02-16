@@ -12,6 +12,9 @@ rtos_qspi_flash_t *qspi_flash_ctx = &qspi_flash_ctx_s;
 static rtos_spi_master_t spi_master_ctx_s;
 rtos_spi_master_t *spi_master_ctx = &spi_master_ctx_s;
 
+static rtos_spi_master_device_t wifi_device_ctx_s;
+rtos_spi_master_device_t *wifi_device_ctx = &wifi_device_ctx_s;
+
 static rtos_gpio_t gpio_ctx_t0_s;
 rtos_gpio_t *gpio_ctx_t0 = &gpio_ctx_t0_s;
 

@@ -48,7 +48,7 @@ void startup_task(void *arg)
     rtos_fatfs_init(qspi_flash_ctx);
 
     /* Initialize WiFi */
-    wifi_start(wifi_device_ctx, gpio_ctx);
+    wifi_start(wifi_device_ctx, gpio_ctx_t0);
 
     /* Initialize TLS  */
     tls_platform_init();
@@ -57,7 +57,7 @@ void startup_task(void *arg)
     sntp_create(appconfSNTPD_TASK_PRIORITY);
 
     /* Create MQTT demo*/
-    mqtt_demo_create(gpio_ctx, appconfMQTT_TASK_PRIORITY);
+    mqtt_demo_create(gpio_ctx_t0, appconfMQTT_TASK_PRIORITY);
 #endif
 
 	for (;;) {

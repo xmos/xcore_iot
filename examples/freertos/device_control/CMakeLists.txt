@@ -40,7 +40,7 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
-set(TARGET_NAME example_freertos_device_control_tile0)
+set(TARGET_NAME tile0_example_freertos_device_control)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -50,7 +50,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rt
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME example_freertos_device_control_tile1)
+set(TARGET_NAME tile1_example_freertos_device_control)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
@@ -63,7 +63,7 @@ unset(TARGET_NAME)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_device_control example_freertos_device_control_tile0 example_freertos_device_control_tile1 1)
+merge_binaries(example_freertos_device_control tile0_example_freertos_device_control tile1_example_freertos_device_control 1)
 
 #**********************
 # Create run and debug targets
