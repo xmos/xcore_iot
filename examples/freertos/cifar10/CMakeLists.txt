@@ -137,7 +137,16 @@ add_custom_command(
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     add_custom_command(
         OUTPUT cifar10_fat.fs
-        COMMAND echo "Not yet implemented"
+        COMMAND ${CMAKE_COMMAND} -E make_directory %temp%/fatmktmp/fs
+        COMMAND ${CMAKE_COMMAND} -E copy test_inputs/airplane.bin %temp%/fatmktmp/airplane.bin
+        COMMAND ${CMAKE_COMMAND} -E copy test_inputs/bird.bin %temp%/fatmktmp/bird.bin
+        COMMAND ${CMAKE_COMMAND} -E copy test_inputs/cat.bin %temp%/fatmktmp/cat.bin
+        COMMAND ${CMAKE_COMMAND} -E copy test_inputs/deer.bin %temp%/fatmktmp/deer.bin
+        COMMAND ${CMAKE_COMMAND} -E copy test_inputs/frog.bin %temp%/fatmktmp/frog.bin
+        COMMAND ${CMAKE_COMMAND} -E copy test_inputs/horse.bin %temp%/fatmktmp/horse.bin
+        COMMAND ${CMAKE_COMMAND} -E copy test_inputs/truck.bin %temp%/fatmktmp/truck.bin
+        COMMAND fatfs_mkimage --input=%temp%/fatmktmp --output=cifar10_fat.fs
+        BYPRODUCTS %temp%/fatmktmp
         COMMENT
             "Create filesystem"
         WORKING_DIRECTORY
