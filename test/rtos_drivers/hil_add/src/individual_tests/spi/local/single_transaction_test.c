@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* System headers */
@@ -9,8 +9,8 @@
 #include "FreeRTOS.h"
 
 /* Library headers */
-#include "rtos/drivers/spi/api/rtos_spi_master.h"
-#include "rtos/drivers/spi/api/rtos_spi_slave.h"
+#include "rtos_spi_master.h"
+#include "rtos_spi_slave.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -55,7 +55,7 @@ static int main_test(spi_test_ctx_t *ctx)
     #if ON_TILE(SPI_MASTER_TILE)
     {
         vTaskDelay(pdMS_TO_TICKS(10));
-        
+
         uint8_t in_buf[SPI_TEST_BUF_SIZE] = {0};
         local_printf("MASTER transaction");
 

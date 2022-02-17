@@ -10,7 +10,7 @@ The FreeRTOS application creates a single stage audio pipeline which applies a v
 Building the firmware
 *********************
 
-Run the following commands to build the explorer_board firmware:
+Run the following commands in the xcore_sdk root folder to build the explorer_board firmware:
 
 .. tab:: Linux and Mac
 
@@ -18,7 +18,7 @@ Run the following commands to build the explorer_board firmware:
 
         $ cmake -B build
         $ cd build
-        $ make
+        $ make example_freertos_explorer_board
 
 .. tab:: Windows XTC Tools CMD prompt
 
@@ -26,29 +26,55 @@ Run the following commands to build the explorer_board firmware:
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake
+        $ nmake example_freertos_explorer_board
 
-After building the firmware, create the filesystem and flash the device with the following commands:
+From the xcore_sdk build folder, create the filesystem and flash the device with the following command:
 
 .. tab:: Linux and MacOS
 
     .. code-block:: console
 
-        $ cd filesystem_support
-        $ ./flash_image.sh
+        $ make flash_fs_example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cd filesystem_support
-        $ flash_image.bat
+        $ nmake flash_fs_example_freertos_explorer_board
 
+*********************
 Running the firmware
-====================
+*********************
 
-From the root folder of the explorer_board application run:
+From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and MacOS
 
-    $ xrun --xscope bin/explorer_board.xe
+    .. code-block:: console
+
+        $ make run_example_freertos_explorer_board
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake run_example_freertos_explorer_board
+
+
+*********************
+Debugging the firmware with xgdb
+*********************
+
+From the xcore_sdk build folder run:
+
+.. tab:: Linux and MacOS
+
+    .. code-block:: console
+
+        $ make debug_example_freertos_explorer_board
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake debug_example_freertos_explorer_board

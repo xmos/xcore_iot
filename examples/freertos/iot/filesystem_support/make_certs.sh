@@ -8,7 +8,7 @@ mkdir $OUTPUT
 # See: https://mosquitto.org/man/mosquitto-tls-7.html
 
 # Generate a certificate authority certificate and key
-openssl genrsa -nodes -sha256 -out $OUTPUT/ca.key 2048
+openssl genrsa -out $OUTPUT/ca.key 2048
 openssl req -new -x509 -days $DURATION -key $OUTPUT/ca.key -out $OUTPUT/ca.crt -subj "/C=US/ST=NH/L=Hampton/O=XMOS/OU=Eng/CN=ca/emailAddress=null"
 
 # Generate a server key without encryption

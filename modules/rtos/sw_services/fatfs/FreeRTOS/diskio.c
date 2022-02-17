@@ -10,7 +10,7 @@
 #include "ff.h"            /* Obtains integer types */
 #include "diskio.h"        /* Declarations of disk functions */
 
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
+#include "rtos_qspi_flash.h"
 
 #ifndef QSPI_FLASH_FILESYSTEM_START_ADDRESS
 #define QSPI_FLASH_FILESYSTEM_START_ADDRESS 0x100000

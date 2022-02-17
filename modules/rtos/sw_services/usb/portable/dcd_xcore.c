@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #define DEBUG_UNIT TUSB_DCD
@@ -31,7 +31,7 @@
 
 TU_ATTR_WEAK bool tud_xcore_sof_cb(uint8_t rhport);
 
-#include <rtos/drivers/usb/api/rtos_usb.h>
+#include "rtos_usb.h"
 
 static rtos_usb_t usb_ctx;
 

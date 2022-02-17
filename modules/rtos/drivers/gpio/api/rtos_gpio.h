@@ -13,8 +13,8 @@
 
 #include <xcore/port.h>
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
 
 /**
  * Enumerator type representing each available GPIO port.
@@ -133,7 +133,7 @@ struct rtos_gpio_struct {
     rtos_osal_mutex_t lock; /* Only used by RPC client */
 };
 
-#include "rtos/drivers/gpio/api/rtos_gpio_rpc.h"
+#include "rtos_gpio_rpc.h"
 
 /**
  * Helper function to convert an xcore I/O port resource ID

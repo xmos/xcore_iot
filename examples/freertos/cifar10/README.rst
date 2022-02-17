@@ -30,11 +30,11 @@ To generate the images run:
         $ cd filesystem_support/test_inputs
         $ ./make_test_tensors.py
         $ cd ../..
-        
+
 .. tab:: Windows XTC Tools CMD prompt
 
     .. code-block:: console
-    
+
         $ cd filesystem_support\test_inputs
         $ python3 make_test_tensors.py
         $ cd..\..
@@ -58,32 +58,31 @@ Building the firmware
 Using SRAM memory
 =================
 
+Run the following commands in the xcore_sdk root folder to build the cifar10 firmware:
+
 .. tab:: Linux and Mac
 
-    Run make:
-
     .. code-block:: console
 
-        $ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -B build
         $ cd build
-        $ make
+        $ make example_freertos_cifar10_sram
 
-    To flash the example images, run the following commands:
-
-    .. code-block:: console
-
-        $ make fsonly BOARD=XCORE-AI-EXPLORER
-        
 .. tab:: Windows XTC Tools CMD prompt
 
     .. code-block:: console
-    
-        $ cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+
+        $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake
+        $ nmake example_freertos_cifar10_sram
+
 
 Using external flash memory
 ===========================
+
+.. note::
+
+    There is no Windows support for using external flash memory.
 
 To build with the model stored in flash, replace the call to make above with the following:
 
@@ -91,43 +90,143 @@ To build with the model stored in flash, replace the call to make above with the
 
     .. code-block:: console
 
-        $ make BOARD=$TARGET USE_SWMEM=1
+        $ cmake -B build
+        $ cd build
+        $ make example_freertos_cifar10_swmem
 
-To flash the model and example images, run the following commands:
-
-.. tab:: Linux and Mac
-
-    .. code-block:: console
-
-        $ make swmem BOARD=XCORE-AI-EXPLORER
 
 Using external DDR memory
 =========================
 
-If your board supports LPDDR, you may also place your neural network in the external DDR memory.  Currently, only the Explorer Board supports LPDDR.
-
-To build with the model stored in LPDDR, replace the call to make above with the following:
+If your board supports LPDDR, you may also place your neural network in the external DDR memory.
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ make BOARD=$TARGET USE_EXTMEM=1
-        
-To flash the example images, run the following commands:
+        $ cmake -B build
+        $ cd build
+        $ make example_freertos_cifar10_extmem
 
-.. tab:: Linux and Mac
+.. tab:: Windows XTC Tools CMD prompt
 
     .. code-block:: console
 
-        $ make fsonly BOARD=XCORE-AI-EXPLORER
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake example_freertos_cifar10_extmem
 
-Running the firmware
+********************************
+Setting up the hardware
+********************************
+
+Before running the firmware, the filesystem containing the images must be flashed.  After the images have been generated, by following the instructions above:
+
+Using SRAM memory
 ====================
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make flash_fs_example_freertos_cifar10_sram
+
+.. tab:: Windows XTC Tools CMD prompt
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake flash_fs_example_freertos_cifar10_sram
+
+
+Using external flash memory
+====================
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make flash_fs_example_freertos_cifar10_swmem
+
+
+Using external DDR memory
+=========================
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make flash_fs_example_freertos_cifar10_extmem
+
+.. tab:: Windows XTC Tools CMD prompt
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake flash_fs_example_freertos_cifar10_extmem
+
+********************************
+Running the firmware
+********************************
 
 Running with hardware.
 
-.. code-block:: console
 
-    $ xrun --xscope bin/cifar10.xe
-        
+Using SRAM memory
+====================
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make run_example_freertos_cifar10_sram
+
+.. tab:: Windows XTC Tools CMD prompt
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake run_example_freertos_cifar10_sram
+
+
+Using external flash memory
+====================
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make run_example_freertos_cifar10_swmem
+
+
+Using external DDR memory
+=========================
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make run_example_freertos_cifar10_extmem
+
+.. tab:: Windows XTC Tools CMD prompt
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake run_example_freertos_cifar10_extmem

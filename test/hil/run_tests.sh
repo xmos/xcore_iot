@@ -15,6 +15,10 @@ tests_start=`date +%s`
 for lib in ${hil_test_libs[@]}; do
     pushd .
     echo "************************"
+    echo "* Building ${lib} tests *"
+    echo "************************"
+    ./build_${lib}_tests.sh
+    echo "************************"
     echo "* Running ${lib} tests *"
     echo "************************"
     cd ${lib} && pytest --junitxml="test_results.xml"
@@ -26,7 +30,7 @@ tests_end=`date +%s`
 #****************************
 # Check results
 #****************************
-pytest test_verify_results.py 
+pytest test_verify_results.py
 
 #****************************
 # Display time results

@@ -15,7 +15,7 @@ Install development python packages:
 .. code-block:: console
 
     $ python -m pip install --upgrade pip
-    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r documents/requirements.txt
+    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r doc/requirements.txt
 
 Python Virtual Environment
 ==========================
@@ -38,12 +38,12 @@ Install development packages:
 
 .. code-block:: console
 
-    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r documents/requirements.txt
+    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r doc/requirements.txt
 
 Run the following command to deactivate the Conda environment:
 
 .. code-block:: console
-    
+
     $ conda deactivate
 
 *************************************
@@ -69,11 +69,11 @@ Changes to C, C++ or ASM should be consistent with the style of existing C, C++ 
 clang-format
 ==============
 
-`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ is a tool to format source code according to a set of rules and heuristics. 
+`clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ is a tool to format source code according to a set of rules and heuristics.
 
 clang-format can be used to:
 
-- Reformat a block of code to the SDK style. 
+- Reformat a block of code to the SDK style.
 - Help you follow the XCore SDK coding style.
 
 The SDK's clang-format configuration file is `.clang-format` and is in the root of the xcore_sdk repository. The rules contained in ``.clang-format`` were originally derived from the Linux Kernel coding style. A few modifications have been made by the XCore SDK authors. Not all code in the XCore SDK follows the ``.clang-format`` rules.  Some non-compliant code is intentional while some is not.  Non-intentional instances should be addressed when the non-compliant code needs to be enhanced.

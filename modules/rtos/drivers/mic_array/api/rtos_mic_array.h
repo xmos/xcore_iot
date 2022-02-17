@@ -16,8 +16,8 @@
 #include <xcore/port.h>
 #include "mic_array.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
 
 /**
  * The number of microphones in the mic array.
@@ -67,7 +67,7 @@ struct rtos_mic_array_struct {
     } recv_buffer;
 };
 
-#include "rtos/drivers/mic_array/api/rtos_mic_array_rpc.h"
+#include "rtos_mic_array_rpc.h"
 
 /**
  * \addtogroup rtos_mic_array_driver_core rtos_mic_array_driver_core

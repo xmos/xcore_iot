@@ -13,7 +13,7 @@
 
 #include <xcore/channel.h>
 
-#include "rtos/osal/api/rtos_osal.h"
+#include "rtos_osal.h"
 #include "l2_cache.h"
 
 /**

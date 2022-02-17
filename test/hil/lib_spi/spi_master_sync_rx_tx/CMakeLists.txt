@@ -1,50 +1,24 @@
-cmake_minimum_required(VERSION 3.20)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src)
 
-## Import hil source
-set(USE_I2C_HIL FALSE)
-set(USE_I2S_HIL FALSE)
-set(USE_SPI_HIL TRUE)
-set(USE_QSPI_IO_HIL FALSE)
-set(USE_MIC_ARRAY_HIL FALSE)
-set(USE_XUD_HIL FALSE)
-
-## If XCORE_SDK_PATH is not already defined, then we're running this test 
-## independently. Set XCORE_SDK_PATH to 4 parents upwards, set the toolchain, 
-## and set the project directive.
-if(NOT DEFINED XCORE_SDK_PATH)
-    set(XCORE_SDK_PATH ${CMAKE_CURRENT_LIST_DIR})
-    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-    cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-    include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
-    project(spi_master_sync_rx_tx)
-endif()
-
-include("${XCORE_SDK_PATH}/modules/hil/hil.cmake")
-
-set(APP_NAME spi_master_sync_rx_tx)
-
+#**********************
+# Flags
+#**********************
 set(APP_COMPILER_FLAGS
-    "-O2"
-    "-g"
-    "-report"
-    "-target=XCORE-AI-EXPLORER"
+    -Os
+    -target=XCORE-AI-EXPLORER
+)
+set(APP_LINK_OPTIONS
+    -report
+    -target=XCORE-AI-EXPLORER
 )
 
-set(APP_SOURCES
-    "src/main.c"
-)
-
-set(APP_INCLUDES
-    "src"
-    "${XCORE_SDK_PATH}/test/hil/lib_spi/lib_spi_master_tester/src"
-)
-
-add_compile_definitions(
-    ""
-)
-
+#**********************
+# Tile Targets
+#**********************
 if(NOT DEFINED ENV{FULL_LOAD})
     set(FULL_LOAD 0 1)
 else()
@@ -75,38 +49,33 @@ else()
     set(DIVS $ENV{DIVS})
 endif()
 
-set(INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-
 #**********************
 # Setup targets
 #**********************
-
 foreach(load ${FULL_LOAD})
     foreach(miso ${MISO_ENABLED})
         foreach(mosi ${MOSI_ENABLED})
             foreach(mode ${SPI_MODE})
                 foreach(div ${DIVS})
                     if(${miso} OR ${mosi})
-                        set(TARGET_NAME_NO_EXT "${APP_NAME}_${load}_${miso}_${mosi}_${div}_${mode}")
-                        set(TARGET_NAME "${TARGET_NAME_NO_EXT}.xe")
-
-                        add_executable(${TARGET_NAME})
-
-                        target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${SPI_HIL_SOURCES})
-                        target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${SPI_HIL_INCLUDES})
-
-                        target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+                        set(TARGET_NAME "test_hil_spi_master_sync_rx_tx_${load}_${miso}_${mosi}_${div}_${mode}")
+                        add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+                        target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+                        target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
                         target_compile_definitions(${TARGET_NAME}
-                                                   PRIVATE
-                                                       FULL_LOAD=${load}
-                                                       MISO_ENABLED=${miso}
-                                                       MOSI_ENABLED=${mosi}
-                                                       MODE=${mode}
-                                                       DIV=${div}
-                                                    )
-
-                        target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-                        install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_DIR}/${TARGET_NAME_NO_EXT})
+                            PRIVATE
+                                ${APP_COMPILE_DEFINITIONS}
+                                FULL_LOAD=${load}
+                                MISO_ENABLED=${miso}
+                                MOSI_ENABLED=${mosi}
+                                MODE=${mode}
+                                DIV=${div}
+                        )
+                        target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+                        target_link_libraries(${TARGET_NAME} PUBLIC sdk::hil::lib_spi test_hil_lib_spi_master_tester)
+                        target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+                        set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
+                        unset(TARGET_NAME)
                     endif()
                 endforeach()
             endforeach()

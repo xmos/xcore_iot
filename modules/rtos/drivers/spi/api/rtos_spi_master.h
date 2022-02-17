@@ -13,8 +13,8 @@
 
 #include "spi.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
 
 /**
  * Typedef to the RTOS SPI master driver instance struct.
@@ -67,7 +67,7 @@ struct rtos_spi_master_device_struct {
     spi_master_device_t dev_ctx;
 };
 
-#include "rtos/drivers/spi/api/rtos_spi_master_rpc.h"
+#include "rtos_spi_master_rpc.h"
 
 /**
  * \addtogroup rtos_spi_master_driver_core rtos_spi_master_driver_core

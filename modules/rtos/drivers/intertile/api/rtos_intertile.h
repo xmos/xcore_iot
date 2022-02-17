@@ -26,7 +26,7 @@
 #include <xcore/channel.h>
 #include <xcore/channel_transaction.h>
 
-#include "rtos/osal/api/rtos_osal.h"
+#include "rtos_osal.h"
 
 /**
  * Struct representing an RTOS intertile driver instance.

@@ -13,8 +13,8 @@
 
 #include "i2c.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
 
 /**
  * Typedef to the RTOS I2C master driver instance struct.
@@ -49,7 +49,7 @@ struct rtos_i2c_master_struct {
     rtos_osal_mutex_t lock;
 };
 
-#include "rtos/drivers/i2c/api/rtos_i2c_master_rpc.h"
+#include "rtos_i2c_master_rpc.h"
 
 /**
  * \addtogroup rtos_i2c_master_driver_core rtos_i2c_master_driver_core

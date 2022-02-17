@@ -8,30 +8,61 @@ Note
 
 The function used in this example to multiply two matrices is for illustrative use only. It is not the most efficient way to perform a matrix multiplication. XMOS has optimized libraries specifically for this purpose.
 
-***************************
-Building & running examples
-***************************
+*********************
+Building the firmware
+*********************
 
-Run the following commands to build the examples:
+Run the following commands in the xcore_sdk root folder to build the dispatcher firmware:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -B build
         $ cd build
-        $ make
+        $ make example_freertos_dispatcher
 
 .. tab:: Windows XTC Tools CMD prompt
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DBOARD=XCORE-AI-EXPLORER
+        $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake
-        
-To run the example:
+        $ nmake example_freertos_dispatcher
 
-.. code-block:: console
+*********************
+Running the firmware
+*********************
 
-    $ xrun --xscope bin/dispatcher.xe
+From the xcore_sdk build folder run:
+
+.. tab:: Linux and MacOS
+
+    .. code-block:: console
+
+        $ make run_example_freertos_dispatcher
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake run_example_freertos_dispatcher
+
+
+*********************
+Debugging the firmware with xgdb
+*********************
+
+From the xcore_sdk build folder run:
+
+.. tab:: Linux and MacOS
+
+    .. code-block:: console
+
+        $ make debug_example_freertos_dispatcher
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake debug_example_freertos_dispatcher

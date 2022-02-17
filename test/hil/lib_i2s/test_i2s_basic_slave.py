@@ -13,10 +13,10 @@ num_in_out_args = {"4ch_in,4ch_out": (4, 4),
 
 @pytest.mark.parametrize(("num_in", "num_out"), num_in_out_args.values(), ids=num_in_out_args.keys())
 def test_i2s_basic_slave(build, capfd, nightly, request, num_in, num_out):
-    test_level = "nightly" if nightly else "smoke"
+    test_level = "0" if nightly else "1"
     id_string = f"{test_level}_{num_in}_{num_out}"
     cwd = Path(request.fspath).parent
-    binary = f'{cwd}/i2s_slave_test/bin/{id_string}/i2s_slave_test_{id_string}.xe'
+    binary = f'{cwd}/i2s_slave_test/bin/test_hil_i2s_slave_test_{id_string}.xe'
 
     clk = Clock("tile[0]:XS1_PORT_1A")
 
@@ -34,10 +34,11 @@ def test_i2s_basic_slave(build, capfd, nightly, request, num_in, num_out):
                                             regexp = True,
                                             ordered = True,
                                             ignore = ["CONFIG:.*?"])
-                                            
-    build(directory = binary, 
-            env = {"NUMS_IN_OUT":f'{num_in};{num_out}', "TEST_LEVEL":f'{test_level}'},
-            bin_child = id_string)
+
+    ## Temporarily building externally, see hil/build_lib_i2s_tests.sh
+    # build(directory = binary,
+    #         env = {"NUMS_IN_OUT":f'{num_in};{num_out}', "TEST_LEVEL":f'{test_level}'},
+    #         bin_child = id_string)
 
     px.run_with_pyxsim(binary,
                         simthreads = [clk, checker])

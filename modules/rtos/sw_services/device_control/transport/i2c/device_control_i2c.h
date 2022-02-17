@@ -1,10 +1,10 @@
-// Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright (c) 2021-2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
 #ifndef I2C_DEVICE_CONTROL_H_
 #define I2C_DEVICE_CONTROL_H_
 
-#include "rtos/drivers/i2c/api/rtos_i2c_slave.h"
+#include "rtos_i2c_slave.h"
 #include "device_control.h"
 
 void device_control_i2c_start_cb(rtos_i2c_slave_t *ctx,

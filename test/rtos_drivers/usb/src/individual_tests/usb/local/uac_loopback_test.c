@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /*
@@ -36,7 +36,7 @@
 #include "stream_buffer.h"
 
 /* Library headers */
-#include "rtos/drivers/usb/api/rtos_usb.h"
+#include "rtos_usb.h"
 #include "tusb.h"
 
 /* App headers */

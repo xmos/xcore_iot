@@ -1,4 +1,4 @@
-// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the 
+// Copyright 2020 XMOS LIMITED. This Software is subject to the terms of the
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #include <string.h>
@@ -12,8 +12,8 @@
 #include "semphr.h"
 
 /* driver headers */
-#include "rtos/drivers/spi/api/rtos_spi_master.h"
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "rtos_spi_master.h"
+#include "rtos_gpio.h"
 
 void sl_wfx_host_task_rx_notify(BaseType_t *xYieldRequired);
 void sl_wfx_host_task_stop(void);

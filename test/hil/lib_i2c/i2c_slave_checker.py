@@ -5,7 +5,7 @@ from Pyxsim import SimThread, pyxsim
 from functools import partial
 
 # We need to disable output buffering for this test to work on MacOS; this has
-# no effect on Linux systems. Let's redefine print once to avoid putting the 
+# no effect on Linux systems. Let's redefine print once to avoid putting the
 # same argument everywhere.
 print = partial(print, flush=True)
 

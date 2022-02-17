@@ -13,7 +13,7 @@
  * @{
  */
 
-#include "rtos/osal/api/rtos_osal.h"
+#include "rtos_osal.h"
 
 /**
  * Flag indicating that software memory reads should be enabled.

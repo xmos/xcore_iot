@@ -4,9 +4,9 @@
 #ifndef DRIVER_INSTANCES_H_
 #define DRIVER_INSTANCES_H_
 
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
-#include "rtos/drivers/i2c/api/rtos_i2c_slave.h"
-#include "rtos/drivers/intertile/api/rtos_intertile.h"
+#include "rtos_gpio.h"
+#include "rtos_i2c_slave.h"
+#include "rtos_intertile.h"
 
 extern rtos_gpio_t *gpio_ctx;
 extern rtos_i2c_slave_t *i2c_slave_ctx;

@@ -1,73 +1,74 @@
-cmake_minimum_required(VERSION 3.20)
+#**********************
+# Individual tests
+#**********************
+set(SPI_TEST  1)
 
-# Disable in-source build.
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src)
 
-## Get path to XCore SDK
-set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-
-## Import XMOS configurations
-include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-## Define project
-project(rtos_drivers)
-set(PROJECT_VERSION 0.6.0)
-
-## Enable languages for project
-enable_language(CXX C ASM)
-
-## Set XMOS application variables
+#**********************
+# Flags
+#**********************
 set(APP_COMPILER_FLAGS
-    "-Os"
-    "-g"
-    "-report"
-    "-fxscope"
-    "-lquadspi"
-    "-mcmodel=large"
-    "-Wno-xcore-fptrgroup"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
+    -Os
+    -g
+    -report
+    -fxscope
+    -lquadspi
+    -mcmodel=large
+    -Wno-xcore-fptrgroup
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
-
-set(APP_SOURCES
-    "src/main.c"
-    "src/board_init.c"
-)
-
-set(APP_INCLUDES
-    "src"
-)
-
-add_compile_definitions(
+set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
-    RUN_SPI_TESTS=${SPI_TEST}
-
+    PLATFORM_SUPPORTS_TILE_0=1
+    PLATFORM_SUPPORTS_TILE_1=1
+    PLATFORM_SUPPORTS_TILE_2=0
+    PLATFORM_SUPPORTS_TILE_3=0
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
+    USB_TILE_NO=0
+    USB_TILE=tile[USB_TILE_NO]
+    XE_BASE_TILE=0
+    XUD_CORE_CLOCK=600
+    RUN_SPI_TESTS=${SPI_TEST}
 )
 
-if(DEFINED THIS_XCORE_TILE)
-    set(TARGET_NAME "${PROJECT_NAME}_${THIS_XCORE_TILE}.xe")
-    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tile${THIS_XCORE_TILE}")
+set(APP_LINK_OPTIONS
+    -lquadspi
+    -report
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+)
 
-    add_compile_definitions(THIS_XCORE_TILE=${THIS_XCORE_TILE})
-else()
-    set(TARGET_NAME "${PROJECT_NAME}.xe")
-endif()
-
-## Gather test sources
-file(GLOB_RECURSE INDIVIDUAL_TEST_SOURCES "src/individual_tests/*.c")
-
-add_executable(${TARGET_NAME})
-
-target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES} ${INDIVIDUAL_TEST_SOURCES})
-target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
-
+#**********************
+# Tile Targets
+#**********************
+set(TARGET_NAME tile0_test_rtos_driver_hil_add)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_test_rtos_driver_hil_add)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
+unset(TARGET_NAME)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(test_rtos_driver_hil_add tile0_test_rtos_driver_hil_add tile1_test_rtos_driver_hil_add 1)

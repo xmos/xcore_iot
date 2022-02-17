@@ -4,7 +4,7 @@
 #define DEBUG_UNIT SFDP
 
 #include "sfdp.h"
-#include "debug_print.h"
+#include "xcore_utils.h"
 
 size_t sfdp_flash_size_kbytes(sfdp_info_t *sfdp_info)
 {

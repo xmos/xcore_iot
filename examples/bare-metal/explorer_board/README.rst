@@ -20,41 +20,53 @@ Building the firmware
 
 .. tab:: Linux and Mac
 
-    Run cmake:
-
     .. code-block:: console
 
         $ cmake -B build
         $ cd build
-        $ make
-
-    To install, run:
-
-    .. code-block:: console
-
-        $ make install
+        $ make example_bare_metal_explorer_board
 
 .. tab:: Windows XTC Tools CMD prompt
 
-    Run cmake:
-
     .. code-block:: console
 
-        > cmake -G "NMake Makefiles" -B build
-        > cd build
-        > nmake
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake example_bare_metal_explorer_board
 
-    To install, run:
-
-    .. code-block:: console
-
-        $ nmake install
-
+*********************
 Running the firmware
-====================
+*********************
 
-To run the demo navigate to the bin folder and use the command:
+From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and MacOS
 
-    $ xrun --xscope bin/explorer_board.xe
+    .. code-block:: console
+
+        $ make run_example_bare_metal_explorer_board
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake run_example_bare_metal_explorer_board
+
+
+*********************
+Debugging the firmware with xgdb
+*********************
+
+From the xcore_sdk build folder run:
+
+.. tab:: Linux and MacOS
+
+    .. code-block:: console
+
+        $ make debug_example_bare_metal_explorer_board
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake debug_example_bare_metal_explorer_board

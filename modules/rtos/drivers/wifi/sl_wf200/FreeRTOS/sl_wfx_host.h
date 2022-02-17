@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the 
+// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #ifndef SL_WFX_HOST_H_
@@ -7,8 +7,8 @@
 #include "FreeRTOS.h"
 #include "event_groups.h"
 
-#include "rtos/drivers/spi/api/rtos_spi_master.h"
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "rtos_spi_master.h"
+#include "rtos_gpio.h"
 
 /**
  * To be used with sl_wfx_host_gpio() to set the value

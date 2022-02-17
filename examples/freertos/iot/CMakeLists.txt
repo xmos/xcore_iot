@@ -1,87 +1,131 @@
-cmake_minimum_required(VERSION 3.20)
-
-# Disable in-source build.
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
-
-## Specify configuration
-set(MULTITILE_BUILD TRUE)
-set(USE_WIFI_MANAGER TRUE)
-set(USE_DHCPD TRUE)
-set(USE_FATFS TRUE)
-set(USE_HTTP_PARSER TRUE)
-set(USE_JSON_PARSER TRUE)
-set(USE_MQTT TRUE)
-set(USE_SNTPD TRUE)
-set(USE_TLS_SUPPORT TRUE)
-set(USE_CUSTOM_MBEDTLS_CONFIG TRUE)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src src/network_demos src/mqtt_demo src/mem_analysis)
 
 #**********************
-# Get path to XCore SDK
+# Flags
 #**********************
-set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-
-## Import XMOS configurations
-include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-## Define project
-project(iot)
-
-## Enable languages for project
-enable_language(CXX C ASM)
-
-## Set XMOS application variables
 set(APP_COMPILER_FLAGS
-    "-Os"
-    "-g"
-    "-report"
-    "-fxscope"
-    "-lquadspi"
-    "-mcmodel=large"
-    "-Wno-xcore-fptrgroup"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
+    -Os
+    -g
+    -report
+    -fxscope
+    -lquadspi
+    -mcmodel=large
+    -Wno-xcore-fptrgroup
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
-set(APP_SOURCES
-    "src/main.c"
-    "src/platform/driver_instances.c"
-    "src/platform/platform_init.c"
-    "src/platform/platform_start.c"
-    "src/network_demos/network_setup.c"
-    "src/mqtt_demo/mqtt_demo_client.c"
-    "src/mem_analysis/mem_analysis.c"
-	${XMOS_RTOS_PLATFORM_WITH_NETWORKING_SOURCES}
-)
-
-set(APP_INCLUDES
-    "src"
-    "src/network_demos"
-    "src/mqtt_demo"
-    "src/mem_analysis"
-	${XMOS_RTOS_PLATFORM_WITH_NETWORKING_INCLUDES}
-)
-
-add_compile_definitions(
+set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
     DEBUG_PRINT_ENABLE_IOT_WIFI=1
     DEBUG_PRINT_ENABLE_WIFI_CONN_MGR=1
     DEBUG_PRINT_ENABLE_MQTT_DEMO_CLIENT=1
-    MIC_DUAL_ENABLED=1
-    MQTT_TASK=1
     DEBUG_PRINT_ENABLE_LIB_SOC_SW_WIFI=1
     MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
     MBEDTLS_CONFIG_FILE=\"mbedtls_sample_config.h\"
+    SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR\)
+    MIC_DUAL_ENABLED=1
+    MQTT_TASK=1
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
+    XE_BASE_TILE=0
 )
 
-if(${VERBOSE})
-    add_compile_definitions(SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR|SL_WFX_DEBUG_INIT\))
+set(APP_LINK_OPTIONS
+    -lquadspi
+    -report
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+)
+
+#**********************
+# Tile Targets
+#**********************
+set(TARGET_NAME tile0_example_freertos_iot)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::iot sdk::rtos_bsp::xcore_ai_explorer)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_example_freertos_iot)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::iot sdk::rtos_bsp::xcore_ai_explorer)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(example_freertos_iot tile0_example_freertos_iot tile1_example_freertos_iot 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(example_freertos_iot)
+create_debug_target(example_freertos_iot)
+
+#**********************
+# Filesystem support targets
+#**********************
+if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
+    message(STATUS "examples/freertos/example_freertos_iot is only available for Linux and Mac")
 else()
-    add_compile_definitions(SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR\))
+    find_package( Python3 COMPONENTS Interpreter )
+
+    add_custom_command(
+        OUTPUT networks.dat
+        COMMAND ${Python3_EXECUTABLE} wifi_profile.py
+        WORKING_DIRECTORY
+            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+        BYPRODUCTS
+            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/networks.dat
+        COMMENT "Create wifi profiles file"
+        USES_TERMINAL
+        VERBATIM
+    )
+
+    add_custom_command(
+        OUTPUT mqtt_broker_certs
+        COMMAND bash make_certs.sh
+        WORKING_DIRECTORY
+            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+        BYPRODUCTS
+            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs
+        COMMENT "Create crypto credential files"
+        USES_TERMINAL
+        VERBATIM
+    )
+
+    add_custom_command(
+        OUTPUT example_freertos_iot_fat.fs
+        COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/firmware && mkdir $fat_mnt_dir/crypto && mkdir $fat_mnt_dir/wifi && cp mqtt_broker_certs/ca.crt $fat_mnt_dir/crypto/ca.pem && cp mqtt_broker_certs/client.crt $fat_mnt_dir/crypto/cert.pem && cp mqtt_broker_certs/client.key $fat_mnt_dir/crypto/key.pem && cp ${CMAKE_SOURCE_DIR}/modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec $fat_mnt_dir/firmware/wf200.sec && cp networks.dat $fat_mnt_dir/wifi/networks.dat && fatfs_mkimage --input=$tmp_dir --output=example_freertos_iot_fat.fs"
+        DEPENDS
+            example_freertos_iot
+            networks.dat
+            mqtt_broker_certs
+        COMMENT
+            "Create filesystem"
+        WORKING_DIRECTORY
+            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+        VERBATIM
+    )
 endif()
 
-set(RTOS_TILE_LIST 0 1 )
-create_multitile_target(RTOS_TILE_LIST)
+add_custom_target(flash_fs_example_freertos_iot
+    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_iot.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/example_freertos_iot_fat.fs
+    DEPENDS example_freertos_iot_fat.fs
+    COMMENT
+        "Flash filesystem"
+    VERBATIM
+)

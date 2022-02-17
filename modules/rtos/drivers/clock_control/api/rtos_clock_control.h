@@ -13,9 +13,9 @@
 
 #include "xcore_clock_control.h"
 
-#include "rtos/osal/api/rtos_osal.h"
-#include "rtos/drivers/rpc/api/rtos_driver_rpc.h"
-#include "rtos/sw_services/concurrency_support/api/mrsw_lock.h"
+#include "rtos_osal.h"
+#include "rtos_driver_rpc.h"
+#include "mrsw_lock.h"
 
 /**
  * Typedef to the RTOS Clock Control driver instance struct.
@@ -84,7 +84,7 @@ struct rtos_clock_control_struct {
     rtos_osal_mutex_t lock; /* Only used by RPC client */
 };
 
-#include "rtos/drivers/clock_control/api/rtos_clock_control_rpc.h"
+#include "rtos_clock_control_rpc.h"
 
 /**
  * \addtogroup rtos_clock_control_driver_core rtos_clock_control_driver_core

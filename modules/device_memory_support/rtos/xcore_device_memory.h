@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #ifndef XCORE_DEVICE_MEMORY_H_
 #define XCORE_DEVICE_MEMORY_H_
@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
+#include "rtos_qspi_flash.h"
 
 /**
  * Initialize and start the SwMem driver.

@@ -1,53 +1,68 @@
-cmake_minimum_required(VERSION 3.20)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src)
 
-# Disable in-source build.
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
-
-## Specify configuration
-
-## Import XMOS configurations
-if(DEFINED XCORE_SDK_PATH)
-    include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-else()
-    include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-endif()
-
-## Define project
-project(clock_control_test)
-
-## Enable languages for project
-enable_language(CXX C ASM)
-
+#**********************
+# Flags
+#**********************
 set(APP_COMPILER_FLAGS
-    "-Os"
-    "-g"
-    "-report"
-    "-fxscope"
-    "-mcmodel=large"
-    "-Wno-xcore-fptrgroup"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
+    -Os
+    -g
+    -report
+    -fxscope
+    -lquadspi
+    -mcmodel=large
+    -Wno-xcore-fptrgroup
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
-
-set(APP_SOURCES
-    "src/main.c"
-    "src/platform/driver_instances.c"
-    "src/platform/platform_init.c"
-    "src/platform/platform_start.c"
-    ${XMOS_RTOS_PLATFORM_SOURCES}
-)
-
-set(APP_INCLUDES
-    "src"
-    "src/platform"
-    ${XMOS_RTOS_PLATFORM_INCLUDES}
-)
-
-add_compile_definitions(
+set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
+    PLATFORM_SUPPORTS_TILE_0=1
+    PLATFORM_SUPPORTS_TILE_1=1
+    PLATFORM_SUPPORTS_TILE_2=0
+    PLATFORM_SUPPORTS_TILE_3=0
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
+    USB_TILE_NO=0
+    USB_TILE=tile[USB_TILE_NO]
+    XE_BASE_TILE=0
+    XUD_CORE_CLOCK=600
 )
 
-set(RTOS_TILE_LIST 0 1)
-create_multitile_target(RTOS_TILE_LIST)
+set(APP_LINK_OPTIONS
+    -lquadspi
+    -report
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+)
+
+#**********************
+# Tile Targets
+#**********************
+set(TARGET_NAME tile0_test_rtos_driver_clock_control_test)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_test_rtos_driver_clock_control_test)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
+unset(TARGET_NAME)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(test_rtos_driver_clock_control_test tile0_test_rtos_driver_clock_control_test tile1_test_rtos_driver_clock_control_test 1)

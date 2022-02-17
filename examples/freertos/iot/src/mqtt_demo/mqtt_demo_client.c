@@ -1,4 +1,4 @@
-// Copyright 2020-2021 XMOS LIMITED.
+// Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #define DEBUG_UNIT MQTT_DEMO_CLIENT
@@ -14,7 +14,7 @@
 #include "FreeRTOS_Sockets.h"
 
 /* Library headers */
-#include "rtos/drivers/gpio/api/rtos_gpio.h"
+#include "rtos_gpio.h"
 #include "tls_support.h"
 #include "MQTTClient.h"
 
@@ -283,10 +283,10 @@ static void mqtt_demo_connect( void* arg )
 			configASSERT(0); /* Failed to initialize ssl context */
 		}
 
-		if( ( mbedtls_ssl_set_hostname( ssl_ctx, HOSTNAME ) ) != 0 )
-		{
-			configASSERT( 0 ); /* set hostname failed */
-		}
+		// if( ( mbedtls_ssl_set_hostname( ssl_ctx, HOSTNAME ) ) != 0 )
+		// {
+		// 	configASSERT( 0 ); /* set hostname failed */
+		// }
 
 		mbedtls_ssl_set_bio( ssl_ctx, tls_ctx, tls_send, tls_recv, NULL );
 

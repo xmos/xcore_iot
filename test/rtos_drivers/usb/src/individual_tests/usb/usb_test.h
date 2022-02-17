@@ -1,11 +1,11 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #ifndef USB_TEST_H_
 #define USB_TEST_H_
 
 #include "rtos_test/rtos_test_utils.h"
-#include "rtos/drivers/usb/api/rtos_usb.h"
+#include "rtos_usb.h"
 
 #define usb_printf( FMT, ... )       module_printf("USB", FMT, ##__VA_ARGS__)
 

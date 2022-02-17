@@ -1,97 +1,67 @@
-cmake_minimum_required(VERSION 3.20)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   app/*.c app/*.xc model_runner/*.c model_runner/*.cc)
+set(APP_INCLUDES app model_runner)
 
 #**********************
-# Get path to XCore SDK
+# Flags
 #**********************
-set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-
-#**********************
-# Setup XMOS toolchain
-#**********************
-include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_toolchain.cmake")
-
-#**********************
-# Project
-#**********************
-
-# Disable in-source build.
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
-
-project(vww VERSION 1.0.0)
-
-enable_language(CXX C ASM)
-
-#**********************
-# Build flags
-#**********************
-
-add_executable(vww)
-
-# Optimization
-# -DNDEBUG                        # define this to remove debug and profiling
-# -DTF_LITE_STRIP_ERROR_STRINGS   # define this to remove logging
-
-set(BUILD_FLAGS
-  "-target=XCORE-AI-EXPLORER"
-  "-fxscope"
-  "${CMAKE_CURRENT_SOURCE_DIR}/config.xscope"
-  "-mcmodel=large"
-  "-Wno-xcore-fptrgroup"
-  "-Wno-unknown-pragmas"
-  "-report"
-  "-DTF_LITE_STATIC_MEMORY"
-  "-DXCORE"
-  "-Os"
+set(APP_COMPILER_FLAGS
+    -Os
+    -g
+    -report
+    -fxscope
+    -lquadspi
+    -mcmodel=large
+    -Wno-xcore-fptrgroup
+    ${CMAKE_CURRENT_SOURCE_DIR}/config.xscope
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
-target_link_options(vww PRIVATE ${BUILD_FLAGS} -lquadspi -w)
-set_target_properties(vww PROPERTIES OUTPUT_NAME vww.xe)
-
-target_compile_options(vww PRIVATE ${BUILD_FLAGS})
-
-
-#**********************
-# Additional support sources
-#**********************
-set(ADDITIONAL_C_SOURCES
-  "${XCORE_SDK_PATH}/modules/device_memory_support/bare-metal/xcore_device_memory.c"
+set(APP_COMPILE_DEFINITIONS
+    DEBUG_PRINT_ENABLE=1
+    TF_LITE_STATIC_MEMORY=1
+    XCORE=1
+    # NDEBUG                        # define this to remove debug and profiling
+    # TF_LITE_STRIP_ERROR_STRINGS   # define this to remove logging
 )
-set(ADDITIONAL_INCLUDE_DIR "${XCORE_SDK_PATH}/modules/device_memory_support/bare-metal")
 
-#**********************
-# APP sources
-#**********************
-include("${XCORE_SDK_PATH}/modules/aif/ai_framework.cmake")
-
-set(APP_SOURCES
-  "${PROJECT_SOURCE_DIR}/model_runner/vww_model_data.c"
-  "${PROJECT_SOURCE_DIR}/model_runner/vww_model_runner.cc"
-  "${PROJECT_SOURCE_DIR}/app/main.xc"
-  "${PROJECT_SOURCE_DIR}/app/main.c"
+set(APP_LINK_OPTIONS
+    -lquadspi
+    -w
+    -report
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+    ${CMAKE_CURRENT_SOURCE_DIR}/config.xscope
 )
 
 #**********************
-# targets
+# Tile Targets
 #**********************
-target_sources(vww
-  PRIVATE ${ADDITIONAL_C_SOURCES}
-  PRIVATE ${MODEL_RUNNER_SOURCES}
-  PRIVATE ${APP_SOURCES}
-)
-
-target_include_directories(vww
-  PRIVATE ${ADDITIONAL_INCLUDE_DIR}
-  PRIVATE "${MODEL_RUNNER_INCLUDES}"
-  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/app/src"
-  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/model_runner"
-)
+set(TARGET_NAME example_bare_metal_vwv)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS})
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::aif_model_runner_bare_metal)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
 
 #**********************
-# install
+# Create run targets
 #**********************
-set(INSTALL_DIR "${PROJECT_SOURCE_DIR}/bin")
-install(TARGETS vww DESTINATION ${INSTALL_DIR})
+add_custom_target(run_example_bare_metal_vwv
+  COMMAND xrun --xscope-port localhost:10234 example_bare_metal_vwv.xe
+  DEPENDS example_bare_metal_vwv
+  COMMENT
+    "Run application"
+  VERBATIM
+)
+
+add_custom_target(xsim_example_bare_metal_vwv
+  COMMAND xsim --xscope "-realtime localhost:10234" example_bare_metal_vwv.xe
+  DEPENDS example_bare_metal_vwv
+  COMMENT
+    "Run application"
+  VERBATIM
+)

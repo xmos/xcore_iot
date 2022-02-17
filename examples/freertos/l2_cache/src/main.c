@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright 2021-2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
 #include <xcore/hwtimer.h>
@@ -6,8 +6,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "rtos/drivers/qspi_flash/api/rtos_qspi_flash.h"
-#include "rtos/drivers/l2_cache/api/rtos_l2_cache.h"
+#include "rtos_qspi_flash.h"
+#include "rtos_l2_cache.h"
 
 #include "l2_cache.h"
 

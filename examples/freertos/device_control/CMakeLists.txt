@@ -1,89 +1,72 @@
-cmake_minimum_required(VERSION 3.20)
-
-# Disable in-source build.
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
-
-## Specify configuration
-set(MULTITILE_BUILD TRUE)
-set(USE_XUD_HIL TRUE)
-set(USE_I2C_HIL TRUE)
-set(USE_I2S_HIL FALSE)
-set(USE_MIC_ARRAY_HIL FALSE)
-set(USE_SPI_HIL FALSE)
-set(USE_QSPI_IO_HIL FALSE)
-
-set(USE_RTOS_GPIO_DRIVER TRUE)
-set(USE_RTOS_I2C_DRIVER TRUE)
-set(USE_RTOS_I2S_DRIVER FALSE)
-set(USE_RTOS_INTERTILE_DRIVER TRUE)
-set(USE_RTOS_MIC_ARRAY_DRIVER FALSE)
-set(USE_RTOS_RPC_DRIVER TRUE)
-set(USE_RTOS_SPI_DRIVER FALSE)
-set(USE_RTOS_USB_DRIVER TRUE)
-set(USE_RTOS_SWMEM_DRIVER FALSE)
-set(USE_RTOS_QSPI_FLASH_DRIVER FALSE)
-set(USE_RTOS_TRACE_DRIVER FALSE)
-set(USE_RTOS_WIFI_DRIVER FALSE)
-
-set(USE_DEVICE_CONTROL TRUE)
-set(USE_TINYUSB TRUE)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src)
 
 #**********************
-# Get path to XCore SDK
+# Flags
 #**********************
-set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-
-## Import XMOS RTOS platform configuration.
-## Must be done after setting the configuration options.
-include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-## Define project
-project(device_control)
-
-## Enable languages for project
-enable_language(CXX C ASM)
-
 set(APP_COMPILER_FLAGS
-    "-Os"
-    "-g"
-    "-report"
-    "-fxscope"
-    "-mcmodel=large"
-    "-Wno-xcore-fptrgroup"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
+    -Os
+    -g
+    -report
+    -fxscope
+    -mcmodel=large
+    -Wno-xcore-fptrgroup
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
-
-set(APP_SOURCES
-    "src/main.c"
-    "src/app_control/app_control.c"
-    "src/platform/driver_instances.c"
-    "src/platform/platform_init.c"
-    "src/platform/platform_start.c"
-    "src/usb_descriptors.c"
-	${XMOS_RTOS_PLATFORM_SOURCES}
-)
-
-set(APP_INCLUDES
-    "src"
-	${XMOS_RTOS_PLATFORM_INCLUDES}
-)
-
-if(${BOARD} STREQUAL "XCORE200-MIC-ARRAY")
-    set(SYSCLK_FREQ 500)
-else()
-    set(SYSCLK_FREQ 700)
-endif()
-
-add_compile_definitions(
+set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
-    XUD_CORE_CLOCK=${SYSCLK_FREQ}
+    PLATFORM_SUPPORTS_TILE_0=1
+    PLATFORM_SUPPORTS_TILE_1=1
+    PLATFORM_SUPPORTS_TILE_2=0
+    PLATFORM_SUPPORTS_TILE_3=0
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
+    USB_TILE_NO=0
+    USB_TILE=tile[USB_TILE_NO]
+    XE_BASE_TILE=0
+    XUD_CORE_CLOCK=600
 )
 
-set(RTOS_TILE_LIST 0 1 )
-create_multitile_target(RTOS_TILE_LIST)
+set(APP_LINK_OPTIONS
+    -report
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+)
+
+#**********************
+# Tile Targets
+#**********************
+set(TARGET_NAME tile0_example_freertos_device_control)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_example_freertos_device_control)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
+unset(TARGET_NAME)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(example_freertos_device_control tile0_example_freertos_device_control tile1_example_freertos_device_control 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(example_freertos_device_control)
+create_debug_target(example_freertos_device_control)

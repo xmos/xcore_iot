@@ -41,7 +41,7 @@ def test_spi_slave_rx_tx(build, capfd, request, full_load, miso_enabled, mosi_en
 
     cwd = Path(request.fspath).parent
 
-    binary = f"{cwd}/spi_slave_rx_tx/bin/{id_string}/spi_slave_rx_tx_{id_string}.xe"
+    binary = f"{cwd}/spi_slave_rx_tx/bin/test_hil_spi_slave_rx_tx_{id_string}.xe"
 
     checker = SPISlaveChecker("tile[0]:XS1_PORT_1C",
                               "tile[0]:XS1_PORT_1D",
@@ -56,13 +56,14 @@ def test_spi_slave_rx_tx(build, capfd, request, full_load, miso_enabled, mosi_en
                                             ordered = True,
                                             suppress_multidrive_messages = False)
 
-    build(directory = binary,
-            env = {"FULL_LOAD":f'{full_load}',
-                   "MISO_ENABLED":f'{miso_enabled}',
-                   "MOSI_ENABLED":f'{mosi_enabled}',
-                   "SPI_MODE":f'{mode}',
-                   "IN_PLACE":f'{in_place}'},
-            bin_child = id_string)
+    ## Temporarily building externally, see hil/build_lib_spi_tests.sh
+    # build(directory = binary,
+    #         env = {"FULL_LOAD":f'{full_load}',
+    #                "MISO_ENABLED":f'{miso_enabled}',
+    #                "MOSI_ENABLED":f'{mosi_enabled}',
+    #                "SPI_MODE":f'{mode}',
+    #                "IN_PLACE":f'{in_place}'},
+    #         bin_child = id_string)
 
     if DEBUG_MODE:
         with capfd.disabled():

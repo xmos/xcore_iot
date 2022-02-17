@@ -1,69 +1,68 @@
-cmake_minimum_required(VERSION 3.20)
+#**********************
+# Gather Sources
+#**********************
+file(GLOB_RECURSE APP_SOURCES   src/*.c )
+set(APP_INCLUDES src src/platform)
 
-# Disable in-source build.
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
-
-## TODO: Specify configuration here
-set(MULTITILE_BUILD TRUE)
-#set(USE_RTOS_GPIO_DRIVER TRUE)
-
-## Import XMOS RTOS platform configuration.
-## Must be done after setting the configuration options.
-
-## TODO: Set the path to your XCORE_SDK_PATH
-set(XCORE_SDK_PATH "${CMAKE_CURRENT_LIST_DIR}")
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-cmake_path(GET XCORE_SDK_PATH PARENT_PATH XCORE_SDK_PATH)
-
-## Include the xmos platform
-include("${XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-## TODO: Set your project definition here
-project(getting_started)
-
-## Enable languages for project
-enable_language(CXX C ASM)
-
-## TODO: Modify the compiler flags as needed
+#**********************
+# Flags
+#**********************
 set(APP_COMPILER_FLAGS
-    "-Os"
-    "-g"
-    "-report"
-    "-fxscope"
-    "-mcmodel=large"
-    "-Wno-xcore-fptrgroup"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
+    -Os
+    -g
+    -report
+    -fxscope
+    -mcmodel=large
+    -Wno-xcore-fptrgroup
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
-
-set(APP_SOURCES
-    "src/main.c"
-    "src/platform/platform_init.c"
-    "src/platform/platform_start.c"
-    "src/platform/driver_instances.c"
-	${XMOS_RTOS_PLATFORM_SOURCES}
-    ## TODO: Add your other sources here
-)
-
-set(APP_INCLUDES
-    "src"
-    "src/platform"
-	${XMOS_RTOS_PLATFORM_INCLUDES}
-)
-
-if(${BOARD} STREQUAL "XCORE200-MIC-ARRAY")
-    set(SYSCLK_FREQ 500)
-else()
-    set(SYSCLK_FREQ 700)
-endif()
-
-## TODO: Modify the compile definitions as needed
-add_compile_definitions(
+set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
+    PLATFORM_SUPPORTS_TILE_0=1
+    PLATFORM_SUPPORTS_TILE_1=1
+    PLATFORM_SUPPORTS_TILE_2=0
+    PLATFORM_SUPPORTS_TILE_3=0
+    PLATFORM_USES_TILE_0=1
+    PLATFORM_USES_TILE_1=1
 )
 
-set(RTOS_TILE_LIST 0 1 )
-create_multitile_target(RTOS_TILE_LIST)
+set(APP_LINK_OPTIONS
+    -report
+    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+)
+
+#**********************
+# Tile Targets
+#**********************
+set(TARGET_NAME tile0_example_freertos_getting_started)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_example_freertos_getting_started)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
+unset(TARGET_NAME)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(example_freertos_getting_started tile0_example_freertos_getting_started tile1_example_freertos_getting_started 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(example_freertos_getting_started)
+create_debug_target(example_freertos_getting_started)

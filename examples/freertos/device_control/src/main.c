@@ -1,4 +1,4 @@
-// Copyright 2020-2021 XMOS LIMITED.
+// Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* System headers */
@@ -117,6 +117,7 @@ static void tile_common_init(chanend_t c)
     xassert(ctrl_ret == CONTROL_SUCCESS);
 
 #if appconfUSB_CTRL_ENABLED && ON_TILE(USB_TILE_NO)
+    usb_manager_init();
     usb_manager_start(appconfUSB_DEVICE_CTRL_TASK_PRIORITY);
 #endif
 
