@@ -2,7 +2,7 @@
 ## Create library target
 add_library(xcore_sdk_device_memory_support_bare_metal STATIC)
 target_sources(xcore_sdk_device_memory_support_bare_metal
-    PUBLIC
+    PRIVATE
         bare-metal/xcore_device_memory.c
 )
 target_include_directories(xcore_sdk_device_memory_support_bare_metal

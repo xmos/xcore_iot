@@ -19,12 +19,11 @@ set(LIB_PUBLIC_INCLUDES  lib_dsp/lib_dsp/api)
 set(LIB_PRIVATE_INCLUDES lib_dsp/lib_dsp/src)
 
 ## Gather library sources
-set(SOURCES_XCORE ${LIB_ASM_SOURCES})
-set(LIB_PUBLIC_SOURCES   ${LIB_C_SOURCES} ${LIB_CXX_SOURCES} ${LIB_XC_SOURCES})
-set(LIB_PRIVATE_SOURCES  "")
+set(LIB_PUBLIC_SOURCES   "")
+set(LIB_PRIVATE_SOURCES  ${LIB_C_SOURCES} ${LIB_CXX_SOURCES} ${LIB_XC_SOURCES})
 
 ## Append platform specific sources
-list(APPEND LIB_PUBLIC_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
+list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
 ## Create library target
 add_library(xcore_sdk_lib_dsp STATIC)

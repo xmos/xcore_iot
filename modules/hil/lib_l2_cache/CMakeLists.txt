@@ -19,12 +19,11 @@ set(LIB_PUBLIC_INCLUDES  lib_l2_cache/lib_l2_cache/api)
 set(LIB_PRIVATE_INCLUDES lib_l2_cache/lib_l2_cache/src)
 
 ## Gather library sources
-set(SOURCES_XCORE ${LIB_ASM_SOURCES})
-set(LIB_PUBLIC_SOURCES   ${LIB_C_SOURCES} ${LIB_CXX_SOURCES} ${LIB_XC_SOURCES})
-set(LIB_PRIVATE_SOURCES  "")
+set(LIB_PUBLIC_SOURCES   "")
+set(LIB_PRIVATE_SOURCES  ${LIB_C_SOURCES} ${LIB_CXX_SOURCES} ${LIB_XC_SOURCES})
 
 ## Append platform specific sources
-list(APPEND LIB_PUBLIC_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
+list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
 ## Create library target
 add_library(xcore_sdk_hil_lib_l2_cache STATIC)

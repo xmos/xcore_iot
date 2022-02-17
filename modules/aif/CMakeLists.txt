@@ -54,14 +54,14 @@ set_source_files_properties(LIB_NN_SOURCES_ASM PROPERTIES LANGUAGE ASM)
 set(XCORE_XS3A_SOURCES ${LIB_NN_SOURCES_ASM})
 
 ## Gather library sources
-set(LIB_PUBLIC_SOURCES   ${LIB_NN_SOURCES_C})
+set(LIB_PRIVATE_SOURCES   ${LIB_NN_SOURCES_C})
 
 ## Append platform specific sources
-list(APPEND LIB_PUBLIC_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
+list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
 target_sources(xcore_sdk_aif_lib_nn
-    PUBLIC
-        ${LIB_PUBLIC_SOURCES}
+    PRIVATE
+        ${LIB_PRIVATE_SOURCES}
 )
 target_include_directories(xcore_sdk_aif_lib_nn
     PUBLIC
