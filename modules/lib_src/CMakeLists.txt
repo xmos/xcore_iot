@@ -22,7 +22,7 @@ list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 add_library(xcore_sdk_lib_src STATIC)
 target_sources(xcore_sdk_lib_src
     PUBLIC
-        ${LIB_PUBLIC_SOURCES}
+        ${LIB_PRIVATE_SOURCES}
 )
 target_include_directories(xcore_sdk_lib_src
     PUBLIC
