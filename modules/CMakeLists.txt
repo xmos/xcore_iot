@@ -13,42 +13,43 @@ add_subdirectory(rtos)
 add_subdirectory(thirdparty)
 add_subdirectory(utils)
 
+if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS2A))
+    ## Create an aggregate of core libraries
+    add_library(xcore_sdk_core INTERFACE)
+    target_link_libraries(xcore_sdk_core
+        INTERFACE
+            sdk::hil
+            sdk::lib_dsp
+            sdk::legacy_compat
+            sdk::lib_xs3_math
+            sdk::multitile_support
+            sdk::utils
+    )
 
-## Create an aggregate of core libraries
-add_library(xcore_sdk_core INTERFACE)
-target_link_libraries(xcore_sdk_core
-    INTERFACE
-        sdk::hil
-        sdk::lib_dsp
-        sdk::legacy_compat
-        sdk::lib_xs3_math
-        sdk::multitile_support
-        sdk::utils
-)
+    add_library(sdk::core ALIAS xcore_sdk_core)
 
-add_library(sdk::core ALIAS xcore_sdk_core)
+    ## Create an aggregate of iot libraries
+    add_library(xcore_sdk_iot INTERFACE)
+    target_link_libraries(xcore_sdk_iot
+        INTERFACE
+            sdk::rtos_freertos
+            sdk::rtos::wifi
+            sdk::rtos::sw_services::http
+            sdk::rtos::sw_services::json
+            sdk::rtos::sw_services::mqtt
+            sdk::rtos::sw_services::sntpd
+            sdk::rtos::sw_services::tls_support
+    )
 
-## Create an aggregate of iot libraries
-add_library(xcore_sdk_iot INTERFACE)
-target_link_libraries(xcore_sdk_iot
-    INTERFACE
-        sdk::rtos_freertos
-        sdk::rtos::wifi
-        sdk::rtos::sw_services::http
-        sdk::rtos::sw_services::json
-        sdk::rtos::sw_services::mqtt
-        sdk::rtos::sw_services::sntpd
-        sdk::rtos::sw_services::tls_support
-)
+    add_library(sdk::iot ALIAS xcore_sdk_iot)
 
-add_library(sdk::iot ALIAS xcore_sdk_iot)
+    ## Create an aggregate of rtos usb libraries
+    add_library(xcore_sdk_rtos_usb INTERFACE)
+    target_link_libraries(xcore_sdk_rtos_usb
+        INTERFACE
+            sdk::rtos_freertos
+            sdk::rtos::sw_services::usb
+    )
 
-## Create an aggregate of rtos usb libraries
-add_library(xcore_sdk_rtos_usb INTERFACE)
-target_link_libraries(xcore_sdk_rtos_usb
-    INTERFACE
-        sdk::rtos_freertos
-        sdk::rtos::sw_services::usb
-)
-
-add_library(sdk::rtos_usb ALIAS xcore_sdk_rtos_usb)
+    add_library(sdk::rtos_usb ALIAS xcore_sdk_rtos_usb)
+endif()

@@ -3,18 +3,9 @@ cmake_minimum_required(VERSION 3.20)
 project(fatfs_mkimage LANGUAGES C)
 set(TARGET_NAME fatfs_mkimage)
 
-# Disable in-source build.
-if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-    message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-endif()
-
-# Tell cmake where to install things
-# set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install CACHE PATH "" FORCE)
-
 # Some source files are in the parent directory
 set(FATFS_HOST_PATH "${CMAKE_CURRENT_LIST_DIR}")
 cmake_path(GET FATFS_HOST_PATH PARENT_PATH FATFS_HOST_PATH)
-message(STATUS "Using src files at ${FATFS_HOST_PATH}")
 
 # Get the XCore SDK root directory
 execute_process(COMMAND git rev-parse --show-toplevel OUTPUT_VARIABLE XCORE_SDK_ROOT)
@@ -34,9 +25,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     set(FATFS_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\SDK\\${VERSION_VAL}\\bin")
 endif()
-message(STATUS "installing to ${FATFS_INSTALL_DIR}")
-file(MAKE_DIRECTORY ${FATFS_INSTALL_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${FATFS_INSTALL_DIR})
 
 set(APP_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/src/fatfs_mkimage.c"
@@ -60,6 +48,7 @@ add_executable(${TARGET_NAME})
 
 target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES})
+install(TARGETS ${TARGET_NAME} DESTINATION ${FATFS_INSTALL_DIR})
 
 if ((CMAKE_C_COMPILER_ID STREQUAL "Clang") OR (CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
     message(STATUS "Configuring for Clang")
