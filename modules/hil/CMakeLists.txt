@@ -8,17 +8,19 @@ add_subdirectory(lib_qspi_io)
 add_subdirectory(lib_spi)
 add_subdirectory(lib_xud)
 
-## Create an aggregate of hil libraries
-add_library(xcore_sdk_hil INTERFACE)
-target_link_libraries(xcore_sdk_hil
-    INTERFACE
-        sdk::hil::lib_clock_control
-        sdk::hil::lib_i2c
-        sdk::hil::lib_i2s
-        sdk::hil::lib_l2_cache
-        sdk::hil::lib_mic_array
-        sdk::hil::lib_qspi_io
-        sdk::hil::lib_spi
-        sdk::hil::lib_xud
-)
-add_library(sdk::hil ALIAS xcore_sdk_hil)
+if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS2A))
+    ## Create an aggregate of hil libraries
+    add_library(xcore_sdk_hil INTERFACE)
+    target_link_libraries(xcore_sdk_hil
+        INTERFACE
+            sdk::hil::lib_clock_control
+            sdk::hil::lib_i2c
+            sdk::hil::lib_i2s
+            $<$<PLATFORM_ID:XCORE_XS3A>:sdk::hil::lib_l2_cache>
+            sdk::hil::lib_mic_array
+            sdk::hil::lib_qspi_io
+            sdk::hil::lib_spi
+            sdk::hil::lib_xud
+    )
+    add_library(sdk::hil ALIAS xcore_sdk_hil)
+endif()

@@ -15,6 +15,7 @@ set_source_files_properties(LIB_ASM_SOURCES PROPERTIES LANGUAGE ASM)
 
 ## Assume all asm is XS3A for now
 set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
+list(APPEND XCORE_XS3A_SOURCES ${LIB_XC_SOURCES})
 
 ## Set any local library compile options
 set(LIB_COMPILE_FLAGS "-Os")
@@ -32,7 +33,7 @@ set(LIB_PRIVATE_INCLUDES lib_xs3_math/lib_xs3_math/src)
 
 ## Gather library sources
 set(LIB_PUBLIC_SOURCES   "")
-set(LIB_PRIVATE_SOURCES  ${LIB_C_SOURCES} ${LIB_CXX_SOURCES} ${LIB_XC_SOURCES})
+set(LIB_PRIVATE_SOURCES  ${LIB_C_SOURCES} ${LIB_CXX_SOURCES})
 
 ## Append platform specific sources
 list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
@@ -57,7 +58,7 @@ target_compile_options(xcore_sdk_lib_xs3_math
 )
 target_link_libraries(xcore_sdk_lib_xs3_math
     PUBLIC
-        sdk::legacy_compat
+        $<$<PLATFORM_ID:XCORE_XS3A>:sdk::legacy_compat>
 )
 
 ## Create an alias
