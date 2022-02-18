@@ -34,9 +34,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     set(FATFS_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\SDK\\${VERSION_VAL}\\bin")
 endif()
-message(STATUS "installing to ${FATFS_INSTALL_DIR}")
-file(MAKE_DIRECTORY ${FATFS_INSTALL_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${FATFS_INSTALL_DIR})
 
 set(APP_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/src/fatfs_mkimage.c"
@@ -60,6 +57,7 @@ add_executable(${TARGET_NAME})
 
 target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES})
+install(TARGETS ${TARGET_NAME} DESTINATION ${FATFS_INSTALL_DIR})
 
 if ((CMAKE_C_COMPILER_ID STREQUAL "Clang") OR (CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
     message(STATUS "Configuring for Clang")
