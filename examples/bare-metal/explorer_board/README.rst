@@ -26,7 +26,7 @@ Building the firmware
         $ cd build
         $ make example_bare_metal_explorer_board
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -34,13 +34,13 @@ Building the firmware
         $ cd build
         $ nmake example_bare_metal_explorer_board
 
-*********************
+********************
 Running the firmware
-*********************
+********************
 
 From the xcore_sdk build folder run:
 
-.. tab:: Linux and MacOS
+.. tab:: Linux and Mac
 
     .. code-block:: console
 
@@ -53,13 +53,13 @@ From the xcore_sdk build folder run:
         $ nmake run_example_bare_metal_explorer_board
 
 
-*********************
+********************************
 Debugging the firmware with xgdb
-*********************
+********************************
 
 From the xcore_sdk build folder run:
 
-.. tab:: Linux and MacOS
+.. tab:: Linux and Mac
 
     .. code-block:: console
 

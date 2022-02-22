@@ -45,9 +45,9 @@ Run the following commands in the xcore_sdk root folder:
         $ cd build
         $ make example_freertos_iot
 
-********************************
+***********************
 Setting up the hardware
-********************************
+***********************
 
 Before the demo can be run, the filesystem must be configured and flashed.
 
@@ -72,9 +72,9 @@ The script will create TLS credentials and prompt you for WiFi credentials:
 
     Once a WiFi profile has been created it will automatically be used.  If you need to change the profile, delete ``networks.dat``.
 
-********************************
+********************
 Running the firmware
-********************************
+********************
 
 From the sdk root folder the iot example run with:
 

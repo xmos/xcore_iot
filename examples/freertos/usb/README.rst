@@ -4,9 +4,9 @@ USB
 
 This example application demonstrates how to use USB device classes.  The application build one of several `TinyUSB <https://docs.tinyusb.org/en/latest/>`__ demonstration applications.
 
-*********************************
+*********************
 Building the firmware
-*********************************
+*********************
 
 To build the firmware, run make, specifying the desired usb demo firmware.
 
@@ -33,7 +33,7 @@ Per example, to build the midi test demo, run:
         $ cd build
         $ make example_freertos_usb_tusb_demo_midi_test
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -41,9 +41,10 @@ Per example, to build the midi test demo, run:
         $ cd build
         $ nmake example_freertos_usb_tusb_demo_midi_test
 
-*********************************
+********************
 Running the firmware
-*********************************
+********************
+
 To run the firmware, run make, specifying the desired usb demo firmware.
 
 Recipe options are:
@@ -70,7 +71,7 @@ Per example, to run the midi test demo, run:
         $ cd build
         $ make run_example_freertos_usb_tusb_demo_midi_test
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 

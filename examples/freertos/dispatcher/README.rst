@@ -22,7 +22,7 @@ Run the following commands in the xcore_sdk root folder to build the dispatcher 
         $ cd build
         $ make example_freertos_dispatcher
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -30,13 +30,13 @@ Run the following commands in the xcore_sdk root folder to build the dispatcher 
         $ cd build
         $ nmake example_freertos_dispatcher
 
-*********************
+********************
 Running the firmware
-*********************
+********************
 
 From the xcore_sdk build folder run:
 
-.. tab:: Linux and MacOS
+.. tab:: Linux and Mac
 
     .. code-block:: console
 
@@ -49,13 +49,13 @@ From the xcore_sdk build folder run:
         $ nmake run_example_freertos_dispatcher
 
 
-*********************
+********************************
 Debugging the firmware with xgdb
-*********************
+********************************
 
 From the xcore_sdk build folder run:
 
-.. tab:: Linux and MacOS
+.. tab:: Linux and Mac
 
     .. code-block:: console
 
