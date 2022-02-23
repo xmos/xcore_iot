@@ -18,7 +18,7 @@ Run the following commands to build the device_control firmware:
         $ cd build
         $ make example_freertos_device_control
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -26,13 +26,13 @@ Run the following commands to build the device_control firmware:
         $ cd build
         $ nmake example_freertos_device_control
 
-*********************
+********************
 Running the firmware
-*********************
+********************
 
 From the xcore_sdk build folder run:
 
-.. tab:: Linux and MacOS
+.. tab:: Linux and Mac
 
     .. code-block:: console
 
@@ -44,13 +44,13 @@ From the xcore_sdk build folder run:
 
         $ nmake run_example_freertos_device_control
 
-*********************
+********************************
 Debugging the firmware with xgdb
-*********************
+********************************
 
 From the xcore_sdk build folder run:
 
-.. tab:: Linux and MacOS
+.. tab:: Linux and Mac
 
     .. code-block:: console
 

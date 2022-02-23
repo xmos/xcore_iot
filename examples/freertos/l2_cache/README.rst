@@ -4,9 +4,9 @@ L2 Cache Example
 
 The L2 cache example demonstrates how to use the software defined L2 cache.
 
-***************************
+*********************
 Building the firmware
-***************************
+*********************
 
 Run the following commands to build the examples:
 
@@ -18,7 +18,7 @@ Run the following commands to build the examples:
         $ cd build
         $ make example_freertos_l2_cache
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -27,9 +27,9 @@ Run the following commands to build the examples:
         $ nmake example_freertos_l2_cache
 
 
-********************************
+***********************
 Setting up the hardware
-********************************
+***********************
 
 Before running the firmware, the swmem must be flashed.
 
@@ -41,7 +41,7 @@ Before running the firmware, the swmem must be flashed.
         $ cd build
         $ make flash_example_freertos_l2_cache_swmem
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -49,9 +49,9 @@ Before running the firmware, the swmem must be flashed.
         $ cd build
         $ nmake flash_example_freertos_l2_cache_swmem
 
-********************************
+********************
 Running the firmware
-********************************
+********************
 
 Running with hardware.
 
@@ -63,7 +63,7 @@ Running with hardware.
         $ cd build
         $ make run_example_freertos_l2_cache
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 

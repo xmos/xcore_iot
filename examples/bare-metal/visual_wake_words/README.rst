@@ -20,7 +20,7 @@ Run the following commands in the xcore_sdk root folder to build the dispatcher 
         $ cd build
         $ make example_bare_metal_vwv
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -28,9 +28,9 @@ Run the following commands in the xcore_sdk root folder to build the dispatcher 
         $ cd build
         $ nmake example_bare_metal_vwv
 
-*********************
+********************
 Running the firmware
-*********************
+********************
 
 Running with hardware
 
@@ -42,7 +42,7 @@ Running with hardware
         $ cd build
         $ make run_example_bare_metal_vwv
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -62,7 +62,7 @@ Running with simulator
         $ cd build
         $ make xsim_example_bare_metal_vwv
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 

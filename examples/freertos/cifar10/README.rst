@@ -31,7 +31,7 @@ To generate the images run:
         $ ./make_test_tensors.py
         $ cd ../..
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -55,8 +55,8 @@ This example is supported on the XCORE-AI-EXPLORER board.
 Building the firmware
 *********************
 
-Using SRAM memory
-=================
+Building SRAM memory configuration
+==================================
 
 Run the following commands in the xcore_sdk root folder to build the cifar10 firmware:
 
@@ -68,7 +68,7 @@ Run the following commands in the xcore_sdk root folder to build the cifar10 fir
         $ cd build
         $ make example_freertos_cifar10_sram
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -77,8 +77,8 @@ Run the following commands in the xcore_sdk root folder to build the cifar10 fir
         $ nmake example_freertos_cifar10_sram
 
 
-Using external flash memory
-===========================
+Building external flash memory configuration
+============================================
 
 .. note::
 
@@ -95,8 +95,8 @@ To build with the model stored in flash, replace the call to make above with the
         $ make example_freertos_cifar10_swmem
 
 
-Using external DDR memory
-=========================
+Building external DDR memory configuration
+==========================================
 
 If your board supports LPDDR, you may also place your neural network in the external DDR memory.
 
@@ -108,7 +108,7 @@ If your board supports LPDDR, you may also place your neural network in the exte
         $ cd build
         $ make example_freertos_cifar10_extmem
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -116,14 +116,14 @@ If your board supports LPDDR, you may also place your neural network in the exte
         $ cd build
         $ nmake example_freertos_cifar10_extmem
 
-********************************
+***********************
 Setting up the hardware
-********************************
+***********************
 
 Before running the firmware, the filesystem containing the images must be flashed.  After the images have been generated, by following the instructions above:
 
-Using SRAM memory
-====================
+Flashing SRAM memory configuration
+==================================
 
 .. tab:: Linux and Mac
 
@@ -133,7 +133,7 @@ Using SRAM memory
         $ cd build
         $ make flash_fs_example_freertos_cifar10_sram
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -142,8 +142,8 @@ Using SRAM memory
         $ nmake flash_fs_example_freertos_cifar10_sram
 
 
-Using external flash memory
-====================
+Flashing external flash memory configuration
+============================================
 
 .. tab:: Linux and Mac
 
@@ -154,8 +154,8 @@ Using external flash memory
         $ make flash_fs_example_freertos_cifar10_swmem
 
 
-Using external DDR memory
-=========================
+Flashing external DDR memory configuration
+==========================================
 
 .. tab:: Linux and Mac
 
@@ -165,7 +165,7 @@ Using external DDR memory
         $ cd build
         $ make flash_fs_example_freertos_cifar10_extmem
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -173,15 +173,15 @@ Using external DDR memory
         $ cd build
         $ nmake flash_fs_example_freertos_cifar10_extmem
 
-********************************
+********************
 Running the firmware
-********************************
+********************
 
 Running with hardware.
 
 
-Using SRAM memory
-====================
+Running SRAM memory configuration
+=================================
 
 .. tab:: Linux and Mac
 
@@ -191,7 +191,7 @@ Using SRAM memory
         $ cd build
         $ make run_example_freertos_cifar10_sram
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
@@ -200,8 +200,8 @@ Using SRAM memory
         $ nmake run_example_freertos_cifar10_sram
 
 
-Using external flash memory
-====================
+Running external flash memory configuration
+===========================================
 
 .. tab:: Linux and Mac
 
@@ -212,8 +212,8 @@ Using external flash memory
         $ make run_example_freertos_cifar10_swmem
 
 
-Using external DDR memory
-=========================
+Running external DDR memory configuration
+=========================================
 
 .. tab:: Linux and Mac
 
@@ -223,7 +223,7 @@ Using external DDR memory
         $ cd build
         $ make run_example_freertos_cifar10_extmem
 
-.. tab:: Windows XTC Tools CMD prompt
+.. tab:: Windows
 
     .. code-block:: console
 
