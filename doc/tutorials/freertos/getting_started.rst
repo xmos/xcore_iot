@@ -10,7 +10,7 @@ This document is intended to help you start your first FreeRTOS application on X
 RTOS Application Design
 ***********************
 
-A fully functional example application that can be found in the SDK under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_. This application does not provide a complete example of how to use all of the RTOS drivers. It is, however, a reference for how to use most of the drivers, it does utilizes many of the software services, and it also serves as an example for how to structure an SMP RTOS application for XCore.
+A fully functional example application that can be found in the SDK under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_. This application does not provide a complete example of how to use all of the RTOS drivers. It is, however, a reference for how to use most of the drivers, it does utilizes many of the software services, and it also serves as an example for how to structure an SMP RTOS application for XCore.  Additional code to initialize the SoC platform for this example is provided by a board support library `modules/rtos/board_support/XCORE-AI-EXPLORER/platform <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/board_support/XCORE-AI-EXPLORER/platform>`_
 
 This example application runs two instances of SMP FreeRTOS, one on each of the processor's two tiles. Because each tile has its own memory which is not shared between them, this can be viewed as a single asymmetric multiprocessing (AMP) system that comprises two SMP systems. A FreeRTOS thread that is created on one tile will never be scheduled to run on the other tile. Similarly, an RTOS object that is created on a tile, such as a queue, can only be accessed by threads and ISRs that run on that tile and never by code running on the other tile.
 
@@ -68,69 +68,16 @@ Additional code examples are provided on the :doc:`FreeRTOS Examples <examples/i
 New Project Template
 ********************
 
-A minimal example application that can be used as a template to begin a new project can be found in the SDK under the path ``examples/freertos/getting_started``.
+A minimal example application that can be used as a template to begin a new project can be found in the SDK under the path `examples/freertos/getting_started <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/getting_started>`_.
 
 **************************
 Building RTOS Applications
 **************************
 
-RTOS applications using the SDK are built using `CMake`. The SDK provides many drivers and services, all of which can be included by the application's `CMakeLists.txt` file. The application's CMakeLists can specify precisely which drivers and software services within the SDK should be included through the use of various CMake options.  
+RTOS applications using the SDK are built using `CMake`. The SDK provides many libraries, drivers and software services, all of which can be included by the application's ``CMakeLists.txt`` file. The application's CMakeLists can specify precisely which drivers and software services within the SDK should be included through the use of various CMake target aliases.  
 
-The example applications also provide a GNU Make Makefile that actually runs CMake and then runs make with the generated CMake makefiles. This is done by simply running:
+See :ref:`Build System <sdk-build_system-label>` for more information on the SDK's build system.  
 
-.. code-block:: console
+See :ref:`Target Aliases <sdk-cmake-target-aliases>` for more information on the SDK's build system target aliases.  
 
-  $ make -j
-
-in the example application directories, all the steps necessary to build the entire application are taken, and a single binary that includes both tiles will be found under the bin directory. If the XCore board is connected to the computer via an xTag, running:
-
-.. code-block:: console
-
-  $ make run
-
-will run it on the board with xscope enabled so that all debug output from the application will be routed to the terminal.
-
-All applications have a README file with additional instructions on how to setup, build and run the application.  See the :doc:`FreeRTOS Examples <examples/index>` page for a list of all example applications.
-
-Including the RTOS Platform
-===========================
-
-The simplest way to specify commonly used RTOS sources is to include the `xmos_rtos_platform.cmake` in your applications `CMakeLists.txt` file.
-
-.. code-block:: CMake
-
-  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-Then, later in your `CMakeLists.txt` file, set the target sources and includes using the `XMOS_RTOS_PLATFORM_SOURCES` variable and your own `APP_SOURCES` variable.
-
-.. code-block:: CMake
-
-  target_sources(my_target_name PRIVATE ${APP_SOURCES} ${XMOS_RTOS_PLATFORM_SOURCES})
-  target_include_directories(my_target_name PRIVATE ${APP_INCLUDES} ${XMOS_RTOS_PLATFORM_INCLUDES})
-
-See the :ref:`Build System <sdk-build_system-label>` page for more information on the CMake-based build system.  The `CMakeLists.txt` files in the FreeRTOS example applications are another great places to see for how this is implemented in a realistic project.
-
-Build Variables
-===============
-
-Including the `xmos_rtos_platform.cmake` is all that most applications need to implement.  However, your application may use modules that are not enabled by default.
-
-To include those modules, additional build variables must be set in the `CMakeLists.txt` file before including `xmos_rtos_platform.cmake`. See the example below:
-
-.. code-block:: CMake
-
-  set(USE_TINYUSB TRUE)
-
-  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-In addition, your application may not use modules that are included by default. Modules can be excluded, potentially speeding up builds. See the example below:
-
-.. code-block:: CMake
-
-  set(USE_TINYUSB TRUE)
-  set(USE_RTOS_I2S_DRIVER FALSE)
-  set(USE_RTOS_SWMEM_DRIVER FALSE)
-
-  include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-See :ref:`CMake Variables <sdk-cmake-variables-label>` for the full set of supported build variables, including the default setting for each.
+All SDK example applications have a README file with additional instructions on how to setup, build and run the application.  In addition, they contain  ``CMakeLists.txt`` files that can be used as starting point for a new application.  See the :doc:`FreeRTOS Examples <examples/index>` page for a list of all example applications.
