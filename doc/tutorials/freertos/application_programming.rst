@@ -47,6 +47,7 @@ To help ease development of XCore applications using an SMP RTOS, XMOS provides 
   - QSPI flash
   - SPI
   - USB
+  - Clock control
 
 - XCore features
 

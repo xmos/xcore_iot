@@ -4,27 +4,7 @@ Example CMakeLists.txt
 
 .. note::
 
-   CMake is powerful tool that provides the developer a great deal of flexibility in how their projects are built.  As a result, CMakeLists.txt files in the example applications may vary from the examples below.
-
-****************
-Locating the SDK
-****************
-
-Applications that depend on the SDK will need to specify the fully-qualified path to the xcore_sdk directory. One way to accomplish this, and the method used in the ``CMakeLists.txt`` files below, is to set the following environment variable:
-
-.. code-block:: console
-
-    $ export XCORE_SDK_PATH=<path to>/xcore_sdk
-
-It is recommended that your `XCORE_SDK_PATH` not include spaces.  However, if this is not possible, you will need to enclose your path environment variable value in quotes.
-
-.. code-block:: console
-
-    $ export XCORE_SDK_PATH="<path with spaces to>/xcore_sdk"
-
-.. note:: Linux and MacOS users can add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.  Windows users can add the XCORE_SDK_PATH to the System Properties.
-
-Another option not shown is to specify the path the SDK as a `cmake` command-line variable.  
+   CMake is powerful tool that provides the developer a great deal of flexibility in how their projects are built.  As a result, CMakeLists.txt files in the example applications may vary from the examples below.  This example can be used as a starting point for your bare-metal application.  Or, you may choose to copy a ``CMakeLists.txt`` from one of the applications in the SDK that closely resembles your application.
 
 **********
 Bare-Metal
@@ -34,132 +14,123 @@ Below is an example ``CMakeLists.txt`` that shows both required and conventional
 
 .. code-block:: cmake
 
-    ## Set the minimum required version of cmake for your project
-    ##   This is not strictly required, however, it is a good practice
-    cmake_minimum_required(VERSION 3.20)
-
-    ## Disable in-source builds
-    ##   This is not strictly required, however, it is a good practice
-    if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-        message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-    endif()
-
-    ## Specify target board
-    ##   Projects can target multiple boards.  If this is the case for oyur project, 
-    ##   you can specify the board during the CMake configure step:
-    ##   $ cmake ../ -DBOARD=XCORE-AI-EXPLORER
-    set(BOARD XCORE-AI-EXPLORER)
-
-    ## Optionally specify configuration options
-    ##   See the XCore SDK documentation for the set of supported options
-    set(MULTITILE_BUILD TRUE)
-    set(USE_XUD_HIL TRUE)
-
-    ## Include XMOS platform configuration
-    ##   NOTE: This must be done *after* setting the board and configuration options
-    include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-    ## Set your project definition
-    ##   NOTE: This must be done *after* including the XMOS platform
-    project(my_project)
-
-    ## Enable the languages for your project
-    enable_language(CXX C ASM)
-
-    ## Set compiler flags as needed
-    ##   Your flags may vary but below are some typical flags
-    set(APP_COMPILER_FLAGS
-        "-Os"
-        "-report"
-        "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
-   )
-
-   ## Specify your sources
-   ##   NOTE: Be sure to add XMOS_PLATFORM_SOURCES to the list
-   set(APP_SOURCES
-      "main.c"
-      ${XMOS_PLATFORM_SOURCES}
-   )
-
-   ## Specify your includes
-   ##   NOTE: Be sure to add XMOS_PLATFORM_INCLUDES to the list
+   ## Specify your application sources and includes
+   file(GLOB_RECURSE APP_SOURCES   src/*.c )
    set(APP_INCLUDES
-      ${XMOS_PLATFORM_INCLUDES}
+      src
+      src/audio_pipeline
+      src/platform
+      src/misc
+      src/demos
    )
 
-   ## Optionally specify compile definitions as needed
-   add_compile_definitions(
+   ## Specify your compiler flags
+   set(APP_COMPILER_FLAGS
+      -Os
+      -g
+      -report
+      -fxscope
+      -mcmodel=large
+      -Wno-xcore-fptrgroup
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+      ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+   )
+
+   ## Specify any compile definitions
+   set(APP_COMPILE_DEFINITIONS
       DEBUG_PRINT_ENABLE=1
+      PLATFORM_SUPPORTS_TILE_0=1
+      PLATFORM_SUPPORTS_TILE_1=1
+      PLATFORM_SUPPORTS_TILE_2=0
+      PLATFORM_SUPPORTS_TILE_3=0
+      PLATFORM_USES_TILE_0=1
+      PLATFORM_USES_TILE_1=1
    )
 
-   set(TILE_LIST 0 1)
-   create_multitile_target(TILE_LIST)
+   ## Set your link options
+   set(APP_LINK_OPTIONS
+      -report
+      ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+   )
+
+   ## Create your targets
+   add_executable(my_app EXCLUDE_FROM_ALL)
+   target_sources(my_app PUBLIC ${APP_SOURCES})
+   target_include_directories(my_app PUBLIC ${APP_INCLUDES})
+   target_compile_definitions(my_app PRIVATE ${APP_COMPILE_DEFINITIONS})
+   target_compile_options(my_app PRIVATE ${APP_COMPILER_FLAGS})
+   target_link_libraries(my_app PUBLIC sdk::core)
+   target_link_options(my_app PRIVATE ${APP_LINK_OPTIONS})
+
+   ## Optionally create run and debug targets
+   create_run_target(my_app)
+   create_debug_target(my_app)
 
 ********
 FreeRTOS
 ********
 
-Below is an example ``CMakeLists.txt`` that shows both required and conventional commands for a basic FreeRTOS project.  For a FreeRTOS project, only a few modifications need to be made to the ``CMakeLists.txt`` example above.
+Below is an example ``CMakeLists.txt`` that shows both required and conventional commands for a basic FreeRTOS project.  This example can be used as a starting point for your FreeRTOS application.  Or, you may choose to copy a ``CMakeLists.txt`` from one of the applications in the SDK that closely resembles your application.
 
 .. code-block:: cmake
 
-    ## Set the minimum required version of cmake for your project
-    ##   This is not strictly required, however, it is a good practice
-    cmake_minimum_required(VERSION 3.20)
+   ## Specify your application sources and includes
+   file(GLOB_RECURSE APP_SOURCES   src/*.c )
+   set(APP_INCLUDES src src/platform)
 
-    ## Disable in-source builds
-    ##   This is not strictly required, however, it is a good practice
-    if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-        message(FATAL_ERROR "In-source build is not allowed! Please specify a build folder.\n\tex:cmake -B build")
-    endif()
-
-    ## Specify target board
-    ##   Projects can target multiple boards.  If this is the case for oyur project, 
-    ##   you can specify the board during the CMake configure step:
-    ##   $ cmake ../ -DBOARD=XCORE-AI-EXPLORER
-    set(BOARD XCORE-AI-EXPLORER)
-
-    ## Optionally specify configuration options
-    ##   See the XCore SDK documentation for the set of supported options
-    set(MULTITILE_BUILD TRUE)
-    set(USE_XUD_HIL TRUE)
-
-    ## Include XMOS platform configuration
-    ##   NOTE: This must be done *after* setting the board and configuration options
-    include("$ENV{XCORE_SDK_PATH}/tools/cmake_utils/xmos_platform.cmake")
-
-    ## Set your project definition
-    ##   NOTE: This must be done *after* including the XMOS platform
-    project(my_project)
-
-    ## Enable the languages for your project
-    enable_language(CXX C ASM)
-
-    ## Set compiler flags as needed
-    ##   Your flags may vary but below are some typical flags
-    set(APP_COMPILER_FLAGS
-        "-Os"
-        "-report"
-        "${CMAKE_CURRENT_SOURCE_DIR}/${BOARD}.xn"
+   ## Specify your compiler flags
+   set(APP_COMPILER_FLAGS
+      -Os
+      -report
+      -fxscope
+      -mcmodel=large
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+      ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
    )
 
-   ## Specify your sources
-   ##   NOTE: Be sure to add XMOS_RTOS_PLATFORM_SOURCES to the list
-   set(APP_SOURCES
-      "main.c"
-      ${XMOS_RTOS_PLATFORM_SOURCES}
-   )
-
-   ## Specify your includes
-   ##   NOTE: Be sure to add XMOS_RTOS_PLATFORM_INCLUDES to the list
-   set(APP_INCLUDES
-      ${XMOS_RTOS_PLATFORM_INCLUDES}
-   )
-
-   ## Optionally specify compile definitions as needed
-   add_compile_definitions(
+   ## Specify any compile definitions
+   set(APP_COMPILE_DEFINITIONS
       DEBUG_PRINT_ENABLE=1
+      PLATFORM_SUPPORTS_TILE_0=1
+      PLATFORM_SUPPORTS_TILE_1=1
+      PLATFORM_SUPPORTS_TILE_2=0
+      PLATFORM_SUPPORTS_TILE_3=0
+      PLATFORM_USES_TILE_0=1
+      PLATFORM_USES_TILE_1=1
    )
 
-   set(RTOS_TILE_LIST 0 1)
-   create_multitile_target(RTOS_TILE_LIST)
+   ## Set your link options
+   set(APP_LINK_OPTIONS
+      -report
+      ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
+   )
+
+   ## Create your targets
+   set(TARGET_NAME tile0_my_app)
+   add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+   target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+   target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+   target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+   target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+   target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+   target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+   unset(TARGET_NAME)
+
+   set(TARGET_NAME tile1_my_app)
+   add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+   target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+   target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+   target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+   target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+   target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+   target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
+   unset(TARGET_NAME)
+
+   ## Merge tile0 and tile1 binaries
+   merge_binaries(my_app tile0_my_app tile1_my_app 1)
+
+   ## Optionally create run and debug targets
+   create_run_target(my_app)
+   create_debug_target(my_app)
