@@ -52,7 +52,6 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     )
     target_link_libraries(xcore_sdk_hil_lib_mic_array
         PUBLIC
-            sdk::lib_dsp
             sdk::legacy_compat
     )
 

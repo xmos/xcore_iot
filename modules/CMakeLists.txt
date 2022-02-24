@@ -3,7 +3,6 @@ add_subdirectory(aif)
 add_subdirectory(device_memory_support)
 add_subdirectory(hil)
 add_subdirectory(legacy_compat)
-add_subdirectory(lib_dsp)
 add_subdirectory(lib_otpinfo)
 add_subdirectory(lib_random)
 add_subdirectory(lib_src)
@@ -19,7 +18,6 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     target_link_libraries(xcore_sdk_core
         INTERFACE
             sdk::hil
-            sdk::lib_dsp
             sdk::legacy_compat
             sdk::lib_xs3_math
             sdk::multitile_support
