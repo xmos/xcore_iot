@@ -26,7 +26,6 @@ set(LIB_PUBLIC_INCLUDES
     lib_xs3_math/lib_xs3_math/api/bfp
     lib_xs3_math/lib_xs3_math/api/scalar
     lib_xs3_math/lib_xs3_math/api/vect
-    lib_xs3_math/lib_xs3_math/src/arch/xcore
     lib_xs3_math/lib_xs3_math/src/etc/xs3_fft_lut
 )
 set(LIB_PRIVATE_INCLUDES lib_xs3_math/lib_xs3_math/src)
@@ -36,7 +35,14 @@ set(LIB_PUBLIC_SOURCES   "")
 set(LIB_PRIVATE_SOURCES  ${LIB_C_SOURCES} ${LIB_CXX_SOURCES})
 
 ## Append platform specific sources
-list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
+if(CMAKE_SYSTEM_NAME STREQUAL XCORE_XS3A)
+    list(APPEND LIB_PRIVATE_SOURCES ${XCORE_XS3A_SOURCES})
+    list(APPEND LIB_PUBLIC_INCLUDES lib_xs3_math/lib_xs3_math/src/arch/xcore)
+else()
+    file(GLOB_RECURSE X86_SOURCES lib_xs3_math/lib_xs3_math/src/arch/ref/*.c)
+    list(APPEND LIB_PRIVATE_SOURCES ${X86_SOURCES})
+    list(APPEND LIB_PUBLIC_INCLUDES lib_xs3_math/lib_xs3_math/src/arch/ref)
+endif()
 
 ## Create library target
 add_library(xcore_sdk_lib_xs3_math STATIC)
