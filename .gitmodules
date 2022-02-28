@@ -1,6 +1,3 @@
-[submodule "lib_dsp"]
-	path = modules/lib_dsp/lib_dsp
-	url = git@github.com:xmos/lib_dsp.git
 [submodule "lib_xs3_math"]
 	path = modules/lib_xs3_math/lib_xs3_math
 	url = git@github.com:xmos/lib_xs3_math.git

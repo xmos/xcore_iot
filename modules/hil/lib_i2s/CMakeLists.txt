@@ -13,7 +13,7 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
 
     ## Set any local library compile options
-    set(LIB_COMPILE_FLAGS "")
+    set(LIB_COMPILE_FLAGS "-Os")
 
     ## Includes files
     set(LIB_PUBLIC_INCLUDES  api)
