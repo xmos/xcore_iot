@@ -55,7 +55,7 @@
 /*  I/O and interrupt cores for Tile 1   */
 /*****************************************/
 #ifndef appconfPDM_MIC_IO_CORE
-#define appconfPDM_MIC_IO_CORE                  1 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfPDM_MIC_IO_CORE                  1 /* Must be kept off I/O cores. Must be kept off core 0 with the RTOS tick ISR */
 #endif /* appconfPDM_MIC_IO_CORE */
 
 #ifndef appconfI2S_IO_CORE
@@ -74,23 +74,19 @@
 /*  I/O and interrupt cores for Tile 1   */
 /*****************************************/
 #ifndef appconfPDM_CLOCK_FREQUENCY
-#define appconfPDM_CLOCK_FREQUENCY      3072000
+#define appconfPDM_CLOCK_FREQUENCY      MIC_ARRAY_CONFIG_MCLK_FREQ
 #endif /* appconfPDM_CLOCK_FREQUENCY */
 
 #ifndef appconfAUDIO_CLOCK_FREQUENCY
-#define appconfAUDIO_CLOCK_FREQUENCY    24576000
+#define appconfAUDIO_CLOCK_FREQUENCY    MIC_ARRAY_CONFIG_PDM_FREQ
 #endif /* appconfAUDIO_CLOCK_FREQUENCY */
-
-#if (appconfAUDIO_CLOCK_FREQUENCY != 24576000)
-#error PLL values only valid if appconfAUDIO_CLOCK_FREQUENCY == 24576000
-#endif
 
 #ifndef appconfPIPELINE_AUDIO_SAMPLE_RATE
 #define appconfPIPELINE_AUDIO_SAMPLE_RATE       16000
 #endif /* appconfPIPELINE_AUDIO_SAMPLE_RATE */
 
 #ifndef appconfAUDIO_FRAME_LENGTH
-#define appconfAUDIO_FRAME_LENGTH            	256
+#define appconfAUDIO_FRAME_LENGTH        MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
 #endif /* appconfAUDIO_FRAME_LENGTH */
 
 /*****************************************/

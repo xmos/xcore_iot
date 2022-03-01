@@ -16,6 +16,10 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
             sdk::hil::lib_mic_array
             sdk::rtos::osal
     )
+    target_compile_definitions(xcore_sdk_rtos_drivers_mic_array
+        INTERFACE
+            MIC_ARRAY_BASIC_API_ENABLE=1
+    )
 
     ## Create an alias
     add_library(sdk::rtos::drivers::mic_array ALIAS xcore_sdk_rtos_drivers_mic_array)

@@ -1,12 +1,10 @@
 
-if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS2A))
+if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     ## Source files
     file(GLOB_RECURSE LIB_C_SOURCES   lib_mic_array/lib_mic_array/src/*.c )
     file(GLOB_RECURSE LIB_CXX_SOURCES lib_mic_array/lib_mic_array/src/*.cc)
     file(GLOB_RECURSE LIB_XC_SOURCES  lib_mic_array/lib_mic_array/src/*.xc)
     file(GLOB_RECURSE LIB_ASM_SOURCES lib_mic_array/lib_mic_array/src/*.S )
-
-    list(REMOVE_ITEM LIB_C_SOURCES ${CMAKE_CURRENT_LIST_DIR}/lib_mic_array/lib_mic_array/src/fir/make_mic_dual_stage_3_coefs.c)
 
     ## cmake doesn't recognize .S files as assembly by default
     set_source_files_properties(LIB_ASM_SOURCES PROPERTIES LANGUAGE ASM)
@@ -21,7 +19,6 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     set(LIB_PUBLIC_INCLUDES
         lib_mic_array/lib_mic_array/api
         lib_mic_array/lib_mic_array/src/fir
-        ${CMAKE_CURRENT_LIST_DIR}  ## temporary hack for mic_array_conf.h
     )
     set(LIB_PRIVATE_INCLUDES lib_mic_array/lib_mic_array/src)
 
@@ -33,26 +30,24 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
     ## Create library target
-    add_library(xcore_sdk_hil_lib_mic_array STATIC)
+    add_library(xcore_sdk_hil_lib_mic_array INTERFACE)
     target_sources(xcore_sdk_hil_lib_mic_array
-        PUBLIC
+        INTERFACE
             ${LIB_PUBLIC_SOURCES}
-        PRIVATE
             ${LIB_PRIVATE_SOURCES}
     )
     target_include_directories(xcore_sdk_hil_lib_mic_array
-        PUBLIC
+        INTERFACE
             ${LIB_PUBLIC_INCLUDES}
-        PRIVATE
             ${LIB_PRIVATE_INCLUDES}
     )
     target_compile_options(xcore_sdk_hil_lib_mic_array
-        PRIVATE
+        INTERFACE
             ${LIB_COMPILE_FLAGS}
     )
     target_link_libraries(xcore_sdk_hil_lib_mic_array
-        PUBLIC
-            sdk::legacy_compat
+        INTERFACE
+            sdk::lib_xs3_math
     )
 
     ## Create an alias

@@ -1,4 +1,4 @@
-// Copyright 2020-2021 XMOS LIMITED.
+// Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #include "rtos_rpc.h"
@@ -7,7 +7,7 @@
 __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_remote_rx(
         rtos_mic_array_t *mic_array_ctx,
-        int32_t sample_buf[][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS],
+        int32_t sample_buf[][MIC_ARRAY_CONFIG_MIC_COUNT],
         size_t frame_count,
         unsigned timeout)
 {
@@ -19,7 +19,7 @@ static size_t mic_array_remote_rx(
 
     const rpc_param_desc_t rpc_param_desc[] = {
             RPC_PARAM_TYPE(mic_array_ctx),
-            RPC_PARAM_OUT_BUFFER(sample_buf[0], frame_count * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS)),
+            RPC_PARAM_OUT_BUFFER(sample_buf[0], frame_count * MIC_ARRAY_CONFIG_MIC_COUNT),
             RPC_PARAM_TYPE(frame_count),
             RPC_PARAM_TYPE(timeout),
             RPC_PARAM_RETURN(size_t),
@@ -38,7 +38,7 @@ static int mic_array_rx_rpc_host(rpc_msg_t *rpc_msg, uint8_t **resp_msg)
     int msg_length;
 
     rtos_mic_array_t *mic_array_ctx;
-    int32_t (*sample_buf)[MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS];
+    int32_t (*sample_buf)[MIC_ARRAY_CONFIG_MIC_COUNT];
     size_t frame_count;
     unsigned timeout;
     size_t ret;

@@ -165,7 +165,6 @@ static void mics_init(void)
             (1 << appconfPDM_MIC_IO_CORE),
             PDM_CLKBLK_1,
             PDM_CLKBLK_2,
-            appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY,
             PORT_MCLK_IN,
             PORT_PDM_CLK,
             PORT_PDM_DATA);

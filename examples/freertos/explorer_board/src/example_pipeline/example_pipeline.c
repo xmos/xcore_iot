@@ -16,37 +16,15 @@
 #include "example_pipeline/example_pipeline.h"
 #include "platform/driver_instances.h"
 
-#define FRAME_NUM_CHANS 2
-
 #ifndef appconfPRINT_AUDIO_FRAME_POWER
 #define appconfPRINT_AUDIO_FRAME_POWER 1
 #endif
 
-/*
- * Allow for 0.2 ms of overhead. This isn't needed when
- * the pipeline is run on the same core as the mics and i2s,
- * but when it is on the other core it is needed.
- */
-#define OVERHEAD 20000
-
-/*
- * Assumes 256 samples per frame, and 2 cores for 3 stages.
- */
-#if EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE == 16000
-#define TIME_PER_STAGE (1060000 - OVERHEAD)
-#elif EXAMPLE_PIPELINE_AUDIO_SAMPLE_RATE == 48000
-#define TIME_PER_STAGE (350000 - OVERHEAD)
-#else
-#define TIME_PER_STAGE 0
+#if MIC_ARRAY_CONFIG_MIC_COUNT != 2
+#error MIC_ARRAY_CONFIG_MIC_COUNT must be 2
 #endif
 
-#if FRAME_NUM_CHANS != 2
-#error FRAME_NUM_CHANS must be 2
-#endif
-
-
-#define TIME_PER_CYCLE (600.0 / 500.0 * 5.0 / 5.0)
-
+#undef MIN
 #define MIN(X, Y) ((X) <= (Y) ? (X) : (Y))
 
 static BaseType_t xStage1_Gain = appconfAUDIO_PIPELINE_STAGE_ONE_GAIN;
@@ -64,7 +42,7 @@ BaseType_t audiopipeline_set_stage1_gain( BaseType_t xNewGain )
     return xStage1_Gain;
 }
 
-void frame_power(int32_t (*audio_frame)[FRAME_NUM_CHANS])
+void frame_power(int32_t (*audio_frame)[MIC_ARRAY_CONFIG_MIC_COUNT])
 {
     uint64_t frame_power0 = 0;
     uint64_t frame_power1 = 0;
@@ -89,7 +67,7 @@ void *example_pipeline_input(void *data)
 {
     (void) data;
 
-    int32_t (*audio_frame)[FRAME_NUM_CHANS];
+    int32_t (*audio_frame)[MIC_ARRAY_CONFIG_MIC_COUNT];
 
     audio_frame = pvPortMalloc(appconfAUDIO_FRAME_LENGTH * sizeof(audio_frame[0]));
 
@@ -117,14 +95,14 @@ int example_pipeline_output(void *audio_frame, void *data)
     return 0;
 }
 
-void stage0(int32_t (*audio_frame)[FRAME_NUM_CHANS])
+void stage0(int32_t (*audio_frame)[MIC_ARRAY_CONFIG_MIC_COUNT])
 {
 #if appconfPRINT_AUDIO_FRAME_POWER
     frame_power(audio_frame);
 #endif
 }
 
-void stage1(int32_t (*audio_frame)[FRAME_NUM_CHANS])
+void stage1(int32_t (*audio_frame)[MIC_ARRAY_CONFIG_MIC_COUNT])
 {
 	for (int i = 0; i < appconfAUDIO_FRAME_LENGTH; i++)  {
         audio_frame[i][0] *= xStage1_Gain;
@@ -156,3 +134,5 @@ void example_pipeline_init(UBaseType_t priority)
 			priority,
 			stage_count);
 }
+
+#undef MIN
