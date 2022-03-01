@@ -39,6 +39,12 @@ set(APP_COMPILE_DEFINITIONS
     XE_BASE_TILE=0
     XUD_CORE_CLOCK=600
     XCOREAI_EXPLORER=1
+
+    MIC_ARRAY_BASIC_API_ENABLE=1
+    MIC_ARRAY_CONFIG_MCLK_FREQ=24576000
+    MIC_ARRAY_CONFIG_PDM_FREQ=3072000
+    MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME=256
+    MIC_ARRAY_CONFIG_MIC_COUNT=2
 )
 
 set(APP_LINK_OPTIONS
@@ -61,7 +67,7 @@ set(APP_LINK_OPTIONS
 # target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
 # target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 # target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos::audio_drivers sdk::rtos_freertos sdk::rtos::usb_device_control)
 # target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 # unset(TARGET_NAME)
 #
@@ -71,23 +77,23 @@ set(APP_LINK_OPTIONS
 # target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
 # target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 # target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos::audio_drivers sdk::rtos_freertos sdk::rtos::usb_device_control)
 # target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 # unset(TARGET_NAME)
 # unset(DEMO_SOURCES)
 # unset(DEMO_INCLUDES)
 # unset(DEMO_COMPILE_DEFINITIONS)
-
-#**********************
-# Merge binaries
-#**********************
-merge_binaries(example_freertos_usb_tusb_demo_audio_test tile0_example_freertos_usb_tusb_demo_audio_test tile1_example_freertos_usb_tusb_demo_audio_test 1)
-
-#**********************
-# Create run and debug targets
-#**********************
-create_run_target(example_freertos_usb_tusb_demo_audio_test)
-create_debug_target(example_freertos_usb_tusb_demo_audio_test)
+#
+# #**********************
+# # Merge binaries
+# #**********************
+# merge_binaries(example_freertos_usb_tusb_demo_audio_test tile0_example_freertos_usb_tusb_demo_audio_test tile1_example_freertos_usb_tusb_demo_audio_test 1)
+#
+# #**********************
+# # Create run and debug targets
+# #**********************
+# create_run_target(example_freertos_usb_tusb_demo_audio_test)
+# create_debug_target(example_freertos_usb_tusb_demo_audio_test)
 
 
 #**********************

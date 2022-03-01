@@ -7,9 +7,6 @@
 #include "timers.h"
 #include "queue.h"
 
-/* Library headers */
-#include "dsp_qformat.h"
-
 /* App headers */
 #include "app_conf.h"
 #include "audio_pipeline/audio_pipeline.h"
@@ -23,6 +20,9 @@
 #if MIC_ARRAY_CONFIG_MIC_COUNT != 2
 #error MIC_ARRAY_CONFIG_MIC_COUNT must be 2
 #endif
+
+#define Q31(f) (int)((signed long long)((f) * ((unsigned long long)1 << (31+20)) + (1<<19)) >> 20)
+#define F31(x) ((double)(x)/(double)(uint32_t)(1<<31)) // needs uint32_t cast because bit 31 is 1
 
 #undef MIN
 #define MIN(X, Y) ((X) <= (Y) ? (X) : (Y))

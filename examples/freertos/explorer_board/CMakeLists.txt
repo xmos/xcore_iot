@@ -24,12 +24,6 @@ set(APP_COMPILE_DEFINITIONS
     PLATFORM_USES_TILE_1=1
     XE_BASE_TILE=0
     XUD_CORE_CLOCK=600
-
-    MIC_ARRAY_CONFIG_MCLK_FREQ=24576000
-    MIC_ARRAY_CONFIG_PDM_FREQ=3072000
-    MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME=256
-    MIC_ARRAY_CONFIG_MIC_COUNT=2
-    DEBUG_PRINT_ENABLE_RTOS_MIC_ARRAY=1
 )
 
 set(APP_LINK_OPTIONS
@@ -48,7 +42,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::hil_audio sdk::rtos_freertos sdk::rtos_bsp::xcore_ai_explorer)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::rtos_bsp::xcore_ai_explorer)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
@@ -58,7 +52,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::hil_audio sdk::rtos_freertos sdk::rtos_bsp::xcore_ai_explorer)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::rtos_bsp::xcore_ai_explorer)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
 unset(TARGET_NAME)
 
