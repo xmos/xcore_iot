@@ -48,6 +48,12 @@ set(APP_COMPILE_DEFINITIONS
     RUN_QSPI_FLASH_TESTS=${QSPI_FLASH_TEST}
     RUN_I2S_TESTS=${I2S_TEST}
     RUN_MIC_ARRAY_TESTS=${MIC_ARRAY_TEST}
+
+    MIC_ARRAY_CONFIG_MCLK_FREQ=24576000
+    MIC_ARRAY_CONFIG_PDM_FREQ=3072000
+    MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME=256
+    MIC_ARRAY_CONFIG_MIC_COUNT=2
+    DEBUG_PRINT_ENABLE_RTOS_MIC_ARRAY=1
 )
 
 set(APP_LINK_OPTIONS
@@ -66,7 +72,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos::audio_drivers sdk::rtos_freertos)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
@@ -76,7 +82,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos::audio_drivers sdk::rtos_freertos)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
 unset(TARGET_NAME)
 

@@ -27,7 +27,6 @@ set(APP_COMPILE_DEFINITIONS
     MQTTCLIENT_PLATFORM_HEADER=MQTTFreeRTOS.h
     MBEDTLS_CONFIG_FILE=\"mbedtls_sample_config.h\"
     SL_WFX_DEBUG_MASK=\(SL_WFX_DEBUG_ERROR\)
-    MIC_DUAL_ENABLED=1
     MQTT_TASK=1
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
@@ -50,7 +49,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::iot sdk::rtos_bsp::xcore_ai_explorer)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::iot sdk::rtos_bsp::xcore_ai_explorer)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
@@ -60,7 +59,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::iot sdk::rtos_bsp::xcore_ai_explorer)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::iot sdk::rtos_bsp::xcore_ai_explorer)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 

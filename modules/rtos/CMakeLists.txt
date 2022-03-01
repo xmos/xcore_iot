@@ -38,16 +38,23 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
             sdk::rtos::drivers::clock_control
             sdk::rtos::drivers::gpio
             sdk::rtos::drivers::i2c
-            sdk::rtos::drivers::i2s
             sdk::rtos::drivers::intertile
             sdk::rtos::drivers::l2_cache
-            sdk::rtos::drivers::mic_array
             sdk::rtos::drivers::qspi_io
             sdk::rtos::drivers::rpc
             sdk::rtos::drivers::spi
             sdk::rtos::drivers::swmem
     )
     add_library(sdk::rtos::drivers ALIAS xcore_sdk_rtos_drivers)
+
+    ## Create an aggregate of rtos audio drivers
+    add_library(xcore_sdk_rtos_audio_drivers INTERFACE)
+    target_link_libraries(xcore_sdk_rtos_audio_drivers
+        INTERFACE
+            sdk::rtos::drivers::i2s
+            sdk::rtos::drivers::mic_array
+        )
+    add_library(sdk::rtos::audio_drivers ALIAS xcore_sdk_rtos_audio_drivers)
 
     ## Create an aggregate of sw_services
     add_library(xcore_sdk_rtos_sw_services INTERFACE)

@@ -1,4 +1,4 @@
-// Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright (c) 2021-2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
 #ifndef TILE_SUPPORT_H_
@@ -10,6 +10,7 @@
 #include "i2s.h"
 #include "spi.h"
 #include "qspi_flash.h"
+#include "mic_array.h"
 
 typedef struct tile0_struct tile0_ctx_t;
 struct tile0_struct {
@@ -27,8 +28,7 @@ struct tile1_struct {
     chanend_t c_from_gpio;
     chanend_t c_to_gpio;
 
-    port_t p_pdm_mic;
-    int pdm_decimation_factor;
+    pdm_rx_resources_t pdm_res;
 
     i2s_callback_group_t i2s_cb_group;
     port_t p_i2s_dout[1];

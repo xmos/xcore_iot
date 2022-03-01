@@ -17,18 +17,19 @@
 #define appconfI2C_INTERRUPT_CORE               0 /* Must be kept off I/O cores. */
 
 /* I/O and interrupt cores for Tile 1 */
-#define appconfPDM_MIC_IO_CORE                  1 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfPDM_MIC_IO_CORE                  1 /* Must be kept off I/O cores. Must be kept off core 0 with the RTOS tick ISR */
 #define appconfI2S_IO_CORE                      2 /* Must be kept off core 0 with the RTOS tick ISR */
 #define appconfPDM_MIC_INTERRUPT_CORE           3 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
 #define appconfI2S_INTERRUPT_CORE               4 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
 
 /* Audio Pipeline Configuration */
-#define appconfAUDIO_CLOCK_FREQUENCY            24576000
-#define appconfPDM_CLOCK_FREQUENCY              3072000
+#define appconfAUDIO_CLOCK_FREQUENCY            MIC_ARRAY_CONFIG_MCLK_FREQ
+#define appconfPDM_CLOCK_FREQUENCY              MIC_ARRAY_CONFIG_PDM_FREQ
 #define appconfPIPELINE_AUDIO_SAMPLE_RATE       16000
-#define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN    42
-#define appconfAUDIO_FRAME_LENGTH            	256
+#define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN    256
+#define appconfAUDIO_FRAME_LENGTH            	MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
 #define appconfPRINT_AUDIO_FRAME_POWER          0
+
 
 /* GPIO Configuration */
 #define appconfGPIO_VOLUME_RAPID_FIRE_MS       	100

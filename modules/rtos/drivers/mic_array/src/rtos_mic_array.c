@@ -1,4 +1,4 @@
-// Copyright 2020-2021 XMOS LIMITED.
+// Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #define DEBUG_UNIT RTOS_MIC_ARRAY
@@ -11,38 +11,47 @@
 #include "rtos_interrupt.h"
 #include "rtos_mic_array.h"
 
+#undef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+#define CLRSR(c) asm volatile("clrsr %0" : : "n"(c));
 
 static void mic_array_thread(rtos_mic_array_t *ctx)
 {
-#if MIC_DUAL_NUM_REF_CHANNELS > 0
-    chanend_t ref_audio_ends[MIC_DUAL_NUM_REF_CHANNELS];
-    for (int i = 0; i < MIC_DUAL_NUM_REF_CHANNELS; i++) {
-        ref_audio_ends[i] = ctx->c_ref_audio[i].end_a;
-    };
-#else
-    chanend_t *ref_audio_ends = NULL;
-#endif
-
-    (void) s_chan_in_byte(ctx->c_2x_pdm_mic.end_a);
+    (void) s_chan_in_byte(ctx->c_pdm_mic.end_a);
 
     rtos_printf("PDM mics on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
-    mic_dual_pdm_rx_decimate(
-            ctx->p_pdm_mics,
-            ctx->decimation_factor,
-            ctx->third_stage_coefs,
-            ctx->fir_gain_compensation,
-            ctx->c_2x_pdm_mic.end_a,
-            ref_audio_ends);
+
+    rtos_interrupt_mask_all();
+
+    /*
+     * ma_basic_task() itself uses interrupts, and does re-enable them. However,
+     * it appears to assume that KEDI is not set, therefore it is cleared here.
+     */
+    CLRSR(XS1_SR_KEDI_MASK);
+
+    ma_basic_task(&ctx->pdm_res, ctx->c_pdm_mic.end_a);
 }
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
 {
     rtos_mic_array_t *ctx = arg;
-    size_t words_remaining = MIC_DUAL_FRAME_SIZE * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+    size_t words_remaining = MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT;
     size_t words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
     size_t words_free = ctx->recv_buffer.buf_size - words_available;
-    int32_t *mic_sample_block = (int32_t *) s_chan_in_word(ctx->c_2x_pdm_mic.end_b);
+
+    /* Note: At some sample rates and frame sizes, transferring the pointer results
+     *       in lost data.
+     *       Transfer the buffer over into stack and then memcpy into the appropriate
+     *       spot in the ring buffer instead.
+     */
+    // int32_t *mic_sample_block = (int32_t *) ma_frame_rx_ptr(ctx->c_pdm_mic.end_b);
+    const ma_frame_format_t format =
+          ma_frame_format(MIC_ARRAY_CONFIG_MIC_COUNT, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, MA_LYT_SAMPLE_CHANNEL);
+
+    int32_t mic_samples[MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT];
+    ma_frame_rx_s32(mic_samples, ctx->c_pdm_mic.end_b, &format);
+    int32_t *mic_sample_block = (int32_t *)&mic_samples;
 
     if (words_remaining <= words_free) {
         while (words_remaining) {
@@ -59,7 +68,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
         }
 
         RTOS_MEMORY_BARRIER();
-        ctx->recv_buffer.total_written += MIC_DUAL_FRAME_SIZE * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+        ctx->recv_buffer.total_written += MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT;
     } else {
         rtos_printf("mic rx overrun\n");
     }
@@ -77,12 +86,12 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
 __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_local_rx(
         rtos_mic_array_t *ctx,
-        int32_t sample_buf[][MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS],
+        int32_t sample_buf[][MIC_ARRAY_CONFIG_MIC_COUNT],
         size_t frame_count,
         unsigned timeout)
 {
     size_t frames_recvd = 0;
-    size_t words_remaining = frame_count * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+    size_t words_remaining = frame_count * MIC_ARRAY_CONFIG_MIC_COUNT;
     int32_t *sample_buf_ptr = (int32_t *) sample_buf;
 
     xassert(words_remaining <= ctx->recv_buffer.buf_size);
@@ -119,7 +128,7 @@ static size_t mic_array_local_rx(
         }
 
         RTOS_MEMORY_BARRIER();
-        ctx->recv_buffer.total_read += frame_count * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+        ctx->recv_buffer.total_read += frame_count * MIC_ARRAY_CONFIG_MIC_COUNT;
 
         frames_recvd = frame_count;
     }
@@ -129,32 +138,25 @@ static size_t mic_array_local_rx(
 
 void rtos_mic_array_start(
         rtos_mic_array_t *mic_array_ctx,
-        int decimation_factor,
-        mic_dual_third_stage_coef_t *third_stage_coefs,
-        int fir_gain_compensation,
         size_t buffer_size,
         unsigned interrupt_core_id)
 {
     uint32_t core_exclude_map;
 
-    xassert(buffer_size >= MIC_DUAL_FRAME_SIZE);
+    xassert(buffer_size >= MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME);
     memset(&mic_array_ctx->recv_buffer, 0, sizeof(mic_array_ctx->recv_buffer));
-    mic_array_ctx->recv_buffer.buf_size = buffer_size * (MIC_DUAL_NUM_CHANNELS + MIC_DUAL_NUM_REF_CHANNELS);
+    mic_array_ctx->recv_buffer.buf_size = buffer_size * MIC_ARRAY_CONFIG_MIC_COUNT;
     mic_array_ctx->recv_buffer.buf = rtos_osal_malloc(mic_array_ctx->recv_buffer.buf_size * sizeof(int32_t));
     rtos_osal_semaphore_create(&mic_array_ctx->recv_sem, "mic_recv_sem", 1, 0);
-
-    mic_array_ctx->decimation_factor = decimation_factor;
-    mic_array_ctx->third_stage_coefs = third_stage_coefs;
-    mic_array_ctx->fir_gain_compensation = fir_gain_compensation;
 
     /* Ensure that the mic array interrupt is enabled on the requested core */
     rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << interrupt_core_id));
 
-    triggerable_enable_trigger(mic_array_ctx->c_2x_pdm_mic.end_b);
+    triggerable_enable_trigger(mic_array_ctx->c_pdm_mic.end_b);
 
     /* Tells the task running the decimator to start */
-    s_chan_out_byte(mic_array_ctx->c_2x_pdm_mic.end_b, 0);
+    s_chan_out_byte(mic_array_ctx->c_pdm_mic.end_b, 0);
 
     /* Restore the core exclusion map for the calling thread */
     rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
@@ -164,100 +166,32 @@ void rtos_mic_array_start(
     }
 }
 
-static void mic_array_setup_sdr(
-        xclock_t pdmclk,
-        port_t p_mclk,
-        port_t p_pdm_clk,
-        port_t p_pdm_mics,
-        int divide)
-{
-    clock_enable(pdmclk);
-    port_enable(p_mclk);
-    clock_set_source_port(pdmclk, p_mclk);
-    clock_set_divide(pdmclk, divide/2);
-
-    port_enable(p_pdm_clk);
-    port_set_clock(p_pdm_clk, pdmclk);
-    port_set_out_clock(p_pdm_clk);
-
-    port_start_buffered(p_pdm_mics, 32);
-    port_set_clock(p_pdm_mics, pdmclk);
-    port_clear_buffer(p_pdm_mics);
-
-    clock_start(pdmclk);
-}
-
-static void mic_array_setup_ddr(
-        xclock_t pdmclk,
-        xclock_t pdmclk6,
-        port_t p_mclk,
-        port_t p_pdm_clk,
-        port_t p_pdm_mics,
-        int divide)
-{
-    uint32_t tmp;
-
-    clock_enable(pdmclk);
-    port_enable(p_mclk);
-    clock_set_source_port(pdmclk, p_mclk);
-    clock_set_divide(pdmclk, divide/2);
-
-    clock_enable(pdmclk6);
-    clock_set_source_port(pdmclk6, p_mclk);
-    clock_set_divide(pdmclk6, divide/4);
-
-    port_enable(p_pdm_clk);
-    port_set_clock(p_pdm_clk, pdmclk);
-    port_set_out_clock(p_pdm_clk);
-
-    port_start_buffered(p_pdm_mics, 32);
-    port_set_clock(p_pdm_mics, pdmclk6);
-    port_clear_buffer(p_pdm_mics);
-
-    /* start the faster capture clock */
-    clock_start(pdmclk6);
-
-    /* wait for a rising edge on the capture clock */
-    //port_clear_trigger_in(p_pdm_mics);
-    asm volatile("inpw %0, res[%1], 4" : "=r"(tmp) : "r" (p_pdm_mics));
-
-    /* start the slower output clock */
-    clock_start(pdmclk);
-}
-
 void rtos_mic_array_init(
         rtos_mic_array_t *mic_array_ctx,
         uint32_t io_core_mask,
         const xclock_t pdmclk,
         const xclock_t pdmclk2,
-        const unsigned pdm_clock_divider,
         const port_t p_mclk,
         const port_t p_pdm_clk,
         const port_t p_pdm_mics)
 {
     mic_array_ctx->p_pdm_mics = p_pdm_mics;
-    mic_array_ctx->c_2x_pdm_mic = s_chan_alloc();
-#if MICARRAYCONF_DUAL_NUM_REF_CHANNELS > 0
-    for (int i = 0; i < MICARRAYCONF_DUAL_NUM_REF_CHANNELS; i++) {
-        mic_array_ctx->c_ref_audio[i] = s_chan_alloc();
-    }
-#endif
+    mic_array_ctx->c_pdm_mic = s_chan_alloc();
 
     xassert(pdmclk != 0);
 
-    if (pdmclk2 == 0)
-    {
-        mic_array_setup_sdr(pdmclk, p_mclk, p_pdm_clk, p_pdm_mics, pdm_clock_divider);
+    if (pdmclk2 == 0) {
+        mic_array_ctx->pdm_res = pdm_rx_resources_sdr(p_mclk, p_pdm_clk, p_pdm_mics, pdmclk);
+    } else {
+        mic_array_ctx->pdm_res = pdm_rx_resources_ddr(p_mclk, p_pdm_clk, p_pdm_mics, pdmclk, pdmclk2);
     }
-    else
-    {
-        mic_array_setup_ddr(pdmclk, pdmclk2, p_mclk, p_pdm_clk, p_pdm_mics, pdm_clock_divider);
-    }
+
+    ma_basic_init(&mic_array_ctx->pdm_res);
 
     mic_array_ctx->rpc_config = NULL;
     mic_array_ctx->rx = mic_array_local_rx;
 
-    triggerable_setup_interrupt_callback(mic_array_ctx->c_2x_pdm_mic.end_b, mic_array_ctx, RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr));
+    triggerable_setup_interrupt_callback(mic_array_ctx->c_pdm_mic.end_b, mic_array_ctx, RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr));
 
     rtos_osal_thread_create(
             &mic_array_ctx->hil_thread,
@@ -272,3 +206,5 @@ void rtos_mic_array_init(
     /* And ensure it only runs on one of the specified cores */
     rtos_osal_thread_core_exclusion_set(&mic_array_ctx->hil_thread, ~io_core_mask);
 }
+
+#undef MIN

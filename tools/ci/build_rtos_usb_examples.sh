@@ -10,7 +10,6 @@ if [ -z "$1" ] || [ "$1" == "all" ]
 then
     # row format is: "make_target BOARD toolchain"
     demos=(
-        "example_freertos_usb_tusb_demo_audio_test              XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
         "example_freertos_usb_tusb_demo_cdc_dual_ports          XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
         "example_freertos_usb_tusb_demo_cdc_msc                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
         "example_freertos_usb_tusb_demo_dfu_runtime             XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
@@ -25,10 +24,16 @@ then
 elif [ "$1" == "smoke" ]
 then
     demos=(
-        "example_freertos_usb_tusb_demo_audio_test         XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "example_freertos_usb_tusb_demo_dfu_runtime        XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "example_freertos_usb_tusb_demo_midi_test          XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "example_freertos_usb_tusb_demo_hid_generic_inout  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_cdc_dual_ports          XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_cdc_msc                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_dfu_runtime             XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_hid_composite           XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_hid_generic_inout       XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_hid_multiple_interface  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_midi_test               XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_msc_dual_lun            XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_usbtmc                  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "example_freertos_usb_tusb_demo_webusb_serial           XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
     )
 else
     echo "Argument $1 not a supported configuration!"

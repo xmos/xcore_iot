@@ -1,4 +1,4 @@
-// Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright (c) 2021-2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
 /* System headers */
@@ -19,7 +19,6 @@
 #include "tile_support.h"
 #include "app_pll_ctrl.h"
 #include "aic3204.h"
-#include "mic_support.h"
 
 static void tile1_setup_dac(void);
 static void tile1_i2s_init(void);
@@ -86,7 +85,7 @@ static void i2s_receive(chanend_t *input_c, size_t num_in, const int32_t *i2s_sa
 I2S_CALLBACK_ATTR
 static void i2s_send(chanend_t *input_c, size_t num_out, int32_t *i2s_sample_buf)
 {
-    s_chan_in_buf_word(*input_c, (uint32_t*)i2s_sample_buf, MIC_DUAL_NUM_CHANNELS);
+    s_chan_in_buf_word(*input_c, (uint32_t*)i2s_sample_buf, MIC_ARRAY_CONFIG_MIC_COUNT);
 }
 
 static void tile1_i2s_init(void)
@@ -106,16 +105,13 @@ static void tile1_i2s_init(void)
 
 static void tile1_mic_init(void)
 {
-    tile1_ctx->p_pdm_mic = PORT_PDM_DATA;
-    tile1_ctx->pdm_decimation_factor = mic_array_decimation_factor(
-            appconfPDM_CLOCK_FREQUENCY,
-            appconfPIPELINE_AUDIO_SAMPLE_RATE);
-
-    port_enable(tile1_ctx->p_pdm_mic);
-    mic_array_setup_ddr(PDM_CLKBLK_1,
-                        PDM_CLKBLK_2,
-                        PORT_MCLK_IN,
-                        PORT_PDM_CLK,
-                        PORT_PDM_DATA,
-                        appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY);
+    tile1_ctx->pdm_res = pdm_rx_resources_ddr(PORT_MCLK_IN,
+                                              PORT_PDM_CLK,
+                                              PORT_PDM_DATA,
+                                              PDM_CLKBLK_1,
+                                              PDM_CLKBLK_2);
+    // This makes it do SDR if we're only doing 1 mic
+    if( MIC_ARRAY_CONFIG_MIC_COUNT == 1 ) {
+        tile1_ctx->pdm_res.clock_b = 0;
+    }
 }

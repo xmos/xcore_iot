@@ -229,7 +229,6 @@ void board_tile1_init(
             MIC_ARRAY_CORE_MASK,
             pdmclk,
             pdmclk2,
-            appconfAUDIO_CLOCK_FREQUENCY / appconfPDM_CLOCK_FREQUENCY,
             p_mclk,
             p_pdm_clk,
             p_pdm_mics);

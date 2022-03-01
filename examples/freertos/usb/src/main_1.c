@@ -41,16 +41,9 @@ void vApplicationDaemonTaskStartup(void *arg)
 #if OSPREY_BOARD || XCOREAI_EXPLORER
     rtos_mic_array_rpc_config(mic_array_ctx, appconfMIC_ARRAY_RPC_PORT, appconfMIC_ARRAY_RPC_HOST_TASK_PRIORITY);
 
-    const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
-            PDM_CLOCK_FREQUENCY,
-            48000);
-
     rtos_mic_array_start(
             mic_array_ctx,
-            pdm_decimation_factor,
-            rtos_mic_array_third_stage_coefs(pdm_decimation_factor),
-            rtos_mic_array_fir_compensation(pdm_decimation_factor),
-            1.2 * MIC_DUAL_FRAME_SIZE,
+            1.2 * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME,
             0);
 #endif
 

@@ -161,7 +161,6 @@ void board_tile1_init(
             ~(1 << 0),
             pdmclk,
             pdmclk2,
-            AUDIO_CLOCK_FREQUENCY / PDM_CLOCK_FREQUENCY,
             p_mclk,
             p_pdm_clk,
             p_pdm_mics);

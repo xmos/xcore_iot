@@ -68,7 +68,7 @@ static void i2s_receive(rtos_i2s_t *ctx, size_t num_in, const int32_t *i2s_sampl
          * even if more sample spaces are actually free
          */
         size_t sample_spaces_free = MIN(words_free, ctx->recv_buffer.buf_size - ctx->recv_buffer.write_index);
-        buffer_words_written = ctx->receive_filter_cb(ctx, ctx->send_filter_app_data, i2s_sample_buf, num_in, &ctx->recv_buffer.buf[ctx->recv_buffer.write_index], sample_spaces_free);
+        buffer_words_written = ctx->receive_filter_cb(ctx, ctx->send_filter_app_data, (int32_t *)i2s_sample_buf, num_in, &ctx->recv_buffer.buf[ctx->recv_buffer.write_index], sample_spaces_free);
     }
 
     if (buffer_words_written > 0) {

@@ -16,7 +16,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     )
     target_link_libraries(xcore_sdk_rtos_board_support_xcore_ai_explorer
         INTERFACE
-            sdk::core sdk::rtos_freertos
+            sdk::core
+            sdk::rtos_freertos
+            sdk::rtos::audio_drivers
     )
     target_compile_definitions(xcore_sdk_rtos_board_support_xcore_ai_explorer
         INTERFACE
@@ -27,6 +29,12 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
             PLATFORM_SUPPORTS_TILE_3=0
             USB_TILE_NO=0
             USB_TILE=tile[USB_TILE_NO]
+
+            MIC_ARRAY_CONFIG_MCLK_FREQ=24576000
+            MIC_ARRAY_CONFIG_PDM_FREQ=3072000
+            MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME=256
+            MIC_ARRAY_CONFIG_MIC_COUNT=2
+            DEBUG_PRINT_ENABLE_RTOS_MIC_ARRAY=1
     )
 
     ## Create an alias

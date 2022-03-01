@@ -19,8 +19,11 @@ then
 elif [ "$1" == "smoke" ]
 then
     applications=(
-        "test_rtos_driver_hil      XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_hil_add  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "test_rtos_driver_clock_control_test  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "test_rtos_driver_hil                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "test_rtos_driver_hil_add             XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "test_rtos_driver_usb                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "test_rtos_driver_wifi                XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
     )
 else
     echo "Argument $1 not a supported configuration!"
