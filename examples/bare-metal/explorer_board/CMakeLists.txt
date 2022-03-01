@@ -53,7 +53,7 @@ target_sources(example_bare_metal_explorer_board PUBLIC ${APP_SOURCES})
 target_include_directories(example_bare_metal_explorer_board PUBLIC ${APP_INCLUDES})
 target_compile_definitions(example_bare_metal_explorer_board PRIVATE ${APP_COMPILE_DEFINITIONS})
 target_compile_options(example_bare_metal_explorer_board PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(example_bare_metal_explorer_board PUBLIC sdk::core sdk::utils)
+target_link_libraries(example_bare_metal_explorer_board PUBLIC sdk::core sdk::hil_audio sdk::utils)
 target_link_options(example_bare_metal_explorer_board PRIVATE ${APP_LINK_OPTIONS})
 
 #**********************

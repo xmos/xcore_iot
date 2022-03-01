@@ -48,34 +48,35 @@ set(APP_LINK_OPTIONS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
 )
 
+# Incomplete Pending 48khz support
 #**********************
 # Audio Test Tile Targets
 #**********************
-file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/audio_test/src/*.c )
-set(DEMO_INCLUDES              tinyusb_demos/audio_test/src/)
-set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_audio_test)
-add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
-target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-unset(TARGET_NAME)
-
-set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_audio_test)
-add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
-target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-unset(TARGET_NAME)
-unset(DEMO_SOURCES)
-unset(DEMO_INCLUDES)
-unset(DEMO_COMPILE_DEFINITIONS)
+# file(GLOB_RECURSE DEMO_SOURCES tinyusb_demos/audio_test/src/*.c )
+# set(DEMO_INCLUDES              tinyusb_demos/audio_test/src/)
+# set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+# set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_audio_test)
+# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+# unset(TARGET_NAME)
+#
+# set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_audio_test)
+# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+# unset(TARGET_NAME)
+# unset(DEMO_SOURCES)
+# unset(DEMO_INCLUDES)
+# unset(DEMO_COMPILE_DEFINITIONS)
 
 #**********************
 # Merge binaries
