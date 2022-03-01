@@ -46,16 +46,9 @@ static void start_mic_array_devices(mic_array_test_ctx_t *test_ctx)
 #if ON_TILE(1)
     mic_array_printf("Device start");
 
-    const int pdm_decimation_factor = rtos_mic_array_decimation_factor(
-            appconfPDM_CLOCK_FREQUENCY,
-            MIC_ARRAY_TEST_AUDIO_SAMPLE_RATE);
-
     rtos_mic_array_start(
             test_ctx->mic_array_ctx,
-            pdm_decimation_factor,
-            rtos_mic_array_third_stage_coefs(pdm_decimation_factor),
-            rtos_mic_array_fir_compensation(pdm_decimation_factor),
-            2 * MIC_DUAL_FRAME_SIZE,
+            2 * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME,
             MIC_ARRAY_ISR_CORE);
 #endif
 
