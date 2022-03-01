@@ -166,7 +166,7 @@ void qspi_flash_erase(qspi_flash_ctx_t *ctx,
 	address_bytes = (uint8_t *) &address;
 
 	xassert(erase_length >= 0 && erase_length <= qspi_flash_erase_chip);
-	if (erase_length < 0 || erase_length > qspi_flash_erase_chip) {
+	if (erase_length > qspi_flash_erase_chip) {
 	    return;
 	}
 
