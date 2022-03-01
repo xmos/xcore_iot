@@ -31,6 +31,12 @@ set(APP_COMPILE_DEFINITIONS
     PLATFORM_SUPPORTS_TILE_3=0
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
+
+    MIC_ARRAY_BASIC_API_ENABLE=1
+    MIC_ARRAY_CONFIG_MCLK_FREQ=24576000
+    MIC_ARRAY_CONFIG_PDM_FREQ=3072000
+    MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME=256
+    MIC_ARRAY_CONFIG_MIC_COUNT=2
 )
 
 set(APP_LINK_OPTIONS
@@ -47,7 +53,7 @@ target_sources(example_bare_metal_explorer_board PUBLIC ${APP_SOURCES})
 target_include_directories(example_bare_metal_explorer_board PUBLIC ${APP_INCLUDES})
 target_compile_definitions(example_bare_metal_explorer_board PRIVATE ${APP_COMPILE_DEFINITIONS})
 target_compile_options(example_bare_metal_explorer_board PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(example_bare_metal_explorer_board PUBLIC sdk::core)
+target_link_libraries(example_bare_metal_explorer_board PUBLIC sdk::core sdk::utils)
 target_link_options(example_bare_metal_explorer_board PRIVATE ${APP_LINK_OPTIONS})
 
 #**********************

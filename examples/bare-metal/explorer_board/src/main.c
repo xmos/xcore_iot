@@ -7,6 +7,7 @@
 #include <string.h>
 #include <xcore/assert.h>
 #include <xcore/chanend.h>
+#include <xcore/channel.h>
 #include <xcore/channel_streaming.h>
 #include <xcore/parallel.h>
 #include <xcore/port.h>
@@ -16,6 +17,7 @@
 /* SDK headers */
 #include "soc.h"
 #include "mic_array.h"
+#include "mic_array/etc/basic.h"
 #include "xcore_utils.h"
 #include "i2s.h"
 
@@ -24,7 +26,6 @@
 #include "app_demos.h"
 #include "burn.h"
 #include "audio_pipeline.h"
-#include "mic_support.h"
 #include "tile_support.h"
 #include "platform_init.h"
 
@@ -56,16 +57,18 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 
     platform_init_tile_1(c0);
 
-    streaming_channel_t s_chan_input = s_chan_alloc();
     streaming_channel_t s_chan_ab = s_chan_alloc();
     streaming_channel_t s_chan_bc = s_chan_alloc();
     streaming_channel_t s_chan_output = s_chan_alloc();
+    channel_t chan_decoupler = chan_alloc();
 
     tile1_ctx->c_i2s_to_dac = s_chan_output.end_b;
 
+    ma_basic_init(&tile1_ctx->pdm_res);
+
     PAR_JOBS (
-        PJOB(mic_dual_pdm_rx_decimate, (tile1_ctx->p_pdm_mic, tile1_ctx->pdm_decimation_factor, mic_array_third_stage_coefs(tile1_ctx->pdm_decimation_factor), mic_array_fir_compensation(tile1_ctx->pdm_decimation_factor), s_chan_input.end_a, NULL)),
-        PJOB(ap_stage_a, (s_chan_input.end_b, s_chan_ab.end_a)),
+        PJOB(ma_basic_task, (&tile1_ctx->pdm_res, chan_decoupler.end_a)),
+        PJOB(ap_stage_a, (chan_decoupler.end_b, s_chan_ab.end_a)),
         PJOB(ap_stage_b, (s_chan_ab.end_b, s_chan_bc.end_a, tile1_ctx->c_from_gpio)),
         PJOB(ap_stage_c, (s_chan_bc.end_b, s_chan_output.end_a, tile1_ctx->c_to_gpio)),
         PJOB(i2s_master, (&tile1_ctx->i2s_cb_group, tile1_ctx->p_i2s_dout, 1, NULL, 0, tile1_ctx->p_bclk, tile1_ctx->p_lrclk, tile1_ctx->p_mclk, tile1_ctx->bclk)),
