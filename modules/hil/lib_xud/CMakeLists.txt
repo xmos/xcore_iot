@@ -32,6 +32,7 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/lib_xud/lib_xud/src/core/XUD_GetDone.c PROPERTIES COMPILE_FLAGS "-mno-dual-issue") # Not in XS3 branch
     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/lib_xud/lib_xud/src/core/XUD_SetCrcTableAddr.c PROPERTIES COMPILE_FLAGS "-mno-dual-issue")
     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/lib_xud/lib_xud/src/core/XUD_HAL.xc PROPERTIES COMPILE_FLAGS "-Wno-return-type")
+    set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/lib_xud/lib_xud/src/core/XUD_Signalling.xc PROPERTIES COMPILE_FLAGS "-Wno-return-type")
 
     ## cmake doesn't recognize .S files as assembly by default
     set_source_files_properties(LIB_ASM_SOURCES PROPERTIES LANGUAGE ASM)
