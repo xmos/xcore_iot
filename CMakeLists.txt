@@ -18,8 +18,9 @@ option(CI_TESTING     "Enable CI test applications"  OFF)
 include(tools/cmake_utils/xmos_macros.cmake)
 
 ## Add various targets
-add_subdirectory(modules)
+add_subdirectory(applications)
 add_subdirectory(examples)
+add_subdirectory(modules)
 
 if(CI_TESTING)
     add_subdirectory(test)
