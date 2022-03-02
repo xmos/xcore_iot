@@ -35,3 +35,9 @@ I2S ADCD      ADC_DAT : X0D13
 I2S BCLK      BCLK : X0D22
 I2S LRCLK     LRCLK : X0D23
 ============  ================
+
+Wiring Diagram
+==============
+
+.. image:: images/wiring_diagram.png
+    :align: left
