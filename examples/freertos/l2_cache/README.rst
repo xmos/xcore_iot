@@ -8,13 +8,13 @@ The L2 cache example demonstrates how to use the software defined L2 cache.
 Building the firmware
 *********************
 
-Run the following commands to build the examples:
+Run the following commands in the xcore_sdk root folder to build the firmware:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ make example_freertos_l2_cache
 
@@ -22,7 +22,7 @@ Run the following commands to build the examples:
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
+        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ nmake example_freertos_l2_cache
 
@@ -37,16 +37,12 @@ Before running the firmware, the swmem must be flashed.
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make flash_example_freertos_l2_cache_swmem
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
         $ nmake flash_example_freertos_l2_cache_swmem
 
 ********************
@@ -59,14 +55,10 @@ Running with hardware.
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make run_example_freertos_l2_cache
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
         $ nmake run_example_freertos_l2_cache

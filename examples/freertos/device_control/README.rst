@@ -8,13 +8,13 @@ This example application demonstrates how to use device control over USB and I2C
 Building the firmware
 *********************
 
-Run the following commands to build the device_control firmware:
+Run the following commands to build the firmware:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ make example_freertos_device_control
 
@@ -22,7 +22,7 @@ Run the following commands to build the device_control firmware:
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
+        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ nmake example_freertos_device_control
 

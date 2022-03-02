@@ -18,11 +18,13 @@ Additionally, the example demonstrates a simple flash and SPI setup.
 Building the firmware
 *********************
 
+Run the following commands in the xcore_sdk root folder to build the firmware:
+
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ make example_bare_metal_explorer_board
 
@@ -30,7 +32,7 @@ Building the firmware
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
+        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ nmake example_bare_metal_explorer_board
 
