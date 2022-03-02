@@ -30,11 +30,11 @@ The SDK includes utilities that run on the PC host.  Run the following command t
 
 .. tab:: Linux and MacOS
 
-    Linux users require proper permissions for installation to the ``/opt/`` directory.  You may need to run the commands as ``sudo``. 
-
     .. code-block:: console
-    
-        $ bash tools/install/install_host_app.sh
+
+        $ cmake -B build_host
+        $ cd build_host
+        $ sudo make install
 
     This command installs the applications at ``/opt/xmos/SDK/<sdk version>/bin/`` directory.  You may wish to append this directory to your ``PATH`` variable.
 
@@ -47,8 +47,10 @@ The SDK includes utilities that run on the PC host.  Run the following command t
     Windows users must run the x86 native tools command prompt from Visual Studio
 
     .. code-block:: console
-    
-        $ tools/install/install_host_app.bat
+
+        $ cmake -B build_host
+        $ cd build_host
+        $ make install
 
     This command installs the applications at ``<USERPROFILE>\.xmos\SDK\<sdk version>\bin\`` directory.  You may wish to add this directory to your ``PATH`` variable.
 

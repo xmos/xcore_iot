@@ -109,4 +109,4 @@ jobs:
       
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/install/install_host_apps.sh
+          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_host_apps.sh

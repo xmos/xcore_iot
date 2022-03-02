@@ -58,13 +58,13 @@ Building the firmware
 Building SRAM memory configuration
 ==================================
 
-Run the following commands in the xcore_sdk root folder to build the cifar10 firmware:
+Run the following commands in the xcore_sdk root folder to build the firmware:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ make example_freertos_cifar10_sram
 
@@ -72,7 +72,7 @@ Run the following commands in the xcore_sdk root folder to build the cifar10 fir
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
+        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ nmake example_freertos_cifar10_sram
 
@@ -90,8 +90,6 @@ To build with the model stored in flash, replace the call to make above with the
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make example_freertos_cifar10_swmem
 
 
@@ -104,16 +102,12 @@ If your board supports LPDDR, you may also place your neural network in the exte
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make example_freertos_cifar10_extmem
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
         $ nmake example_freertos_cifar10_extmem
 
 ***********************
@@ -129,16 +123,12 @@ Flashing SRAM memory configuration
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make flash_fs_example_freertos_cifar10_sram
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
         $ nmake flash_fs_example_freertos_cifar10_sram
 
 
@@ -149,8 +139,6 @@ Flashing external flash memory configuration
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make flash_fs_example_freertos_cifar10_swmem
 
 
@@ -161,16 +149,12 @@ Flashing external DDR memory configuration
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make flash_fs_example_freertos_cifar10_extmem
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
         $ nmake flash_fs_example_freertos_cifar10_extmem
 
 ********************
@@ -187,16 +171,12 @@ Running SRAM memory configuration
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make run_example_freertos_cifar10_sram
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
         $ nmake run_example_freertos_cifar10_sram
 
 
@@ -207,8 +187,6 @@ Running external flash memory configuration
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make run_example_freertos_cifar10_swmem
 
 
@@ -219,14 +197,10 @@ Running external DDR memory configuration
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make run_example_freertos_cifar10_extmem
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
         $ nmake run_example_freertos_cifar10_extmem

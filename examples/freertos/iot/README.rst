@@ -41,7 +41,7 @@ Run the following commands in the xcore_sdk root folder:
 
     .. code-block:: console
 
-        $ cmake -B build
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ make example_freertos_iot
 
@@ -55,8 +55,6 @@ Before the demo can be run, the filesystem must be configured and flashed.
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make flash_fs_example_freertos_iot
 
 The script will create TLS credentials and prompt you for WiFi credentials:
@@ -76,14 +74,12 @@ The script will create TLS credentials and prompt you for WiFi credentials:
 Running the firmware
 ********************
 
-From the sdk root folder the iot example run with:
+Run the following commands in the xcore_sdk root folder:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make run_example_freertos_iot
 
 *********************

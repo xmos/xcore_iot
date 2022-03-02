@@ -23,13 +23,13 @@ Recipe options are:
 - example_freertos_usb_tusb_demo_usbtmc
 - example_freertos_usb_tusb_demo_webusb_serial
 
-Per example, to build the midi test demo, run:
+Per example, to build the midi test demo, run the following commands in the xcore_sdk root folder:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ make example_freertos_usb_tusb_demo_midi_test
 
@@ -37,7 +37,7 @@ Per example, to build the midi test demo, run:
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
+        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
         $ nmake example_freertos_usb_tusb_demo_midi_test
 
@@ -67,14 +67,10 @@ Per example, to run the midi test demo, run:
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
         $ make run_example_freertos_usb_tusb_demo_midi_test
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
         $ nmake run_example_freertos_usb_tusb_demo_midi_test
