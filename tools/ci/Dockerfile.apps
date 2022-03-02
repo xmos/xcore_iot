@@ -7,7 +7,7 @@ ARG CMAKE_VERSION=3.20.6
 
 # install apt dependencies
 RUN apt update
-RUN apt install -y git
+RUN apt install -y git pkg-config
 
 # install cmake
 RUN wget -O- https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz | tar -xz -C /opt
