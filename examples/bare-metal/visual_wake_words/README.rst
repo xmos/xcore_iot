@@ -10,23 +10,23 @@ This example demonstrates how to receive input data using `xscope`.
 Building the firmware
 *********************
 
-Run the following commands in the xcore_sdk root folder to build the dispatcher firmware:
+Run the following commands in the xcore_sdk root folder to build the firmware:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ cmake -B build
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
-        $ make example_bare_metal_vwv
+        $ make example_bare_metal_vww
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
+        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
         $ cd build
-        $ nmake example_bare_metal_vwv
+        $ nmake example_bare_metal_vww
 
 ********************
 Running the firmware
@@ -40,7 +40,7 @@ Running with hardware
 
         $ cmake -B build
         $ cd build
-        $ make run_example_bare_metal_vwv
+        $ make run_example_bare_metal_vww
 
 .. tab:: Windows
 
@@ -48,7 +48,7 @@ Running with hardware
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake run_example_bare_metal_vwv
+        $ nmake run_example_bare_metal_vww
 
 Running with simulator
 
@@ -60,7 +60,7 @@ Running with simulator
 
         $ cmake -B build
         $ cd build
-        $ make xsim_example_bare_metal_vwv
+        $ make xsim_example_bare_metal_vww
 
 .. tab:: Windows
 
@@ -68,7 +68,7 @@ Running with simulator
 
         $ cmake -G "NMake Makefiles" -B build
         $ cd build
-        $ nmake xsim_example_bare_metal_vwv
+        $ nmake xsim_example_bare_metal_vww
 
 The firmware will now wait until a data is sent from a host application. Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires Python.  Ensure you have installed Python 3 and the XCore SDK Python requirements.
 
