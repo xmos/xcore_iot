@@ -10,20 +10,20 @@ if [ -z "$1" ] || [ "$1" == "all" ]
 then
     # row format is: "make_target BOARD toolchain"
     applications=(
-        "test_rtos_driver_clock_control_test  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_hil                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_hil_add             XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_usb                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_wifi                XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "test_rtos_driver_clock_control_test  XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_rtos_driver_hil                 XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_rtos_driver_hil_add             XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_rtos_driver_usb                 XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_rtos_driver_wifi                XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
     )
 elif [ "$1" == "smoke" ]
 then
     applications=(
-        "test_rtos_driver_clock_control_test  XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_hil                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_hil_add             XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_usb                 XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
-        "test_rtos_driver_wifi                XCORE-AI-EXPLORER  tools/cmake_utils/xmos_xs3a_toolchain.cmake"
+        "test_rtos_driver_clock_control_test  XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_rtos_driver_hil                 XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_rtos_driver_hil_add             XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_rtos_driver_usb                 XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_rtos_driver_wifi                XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
     )
 else
     echo "Argument $1 not a supported configuration!"

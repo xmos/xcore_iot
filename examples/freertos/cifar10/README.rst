@@ -64,7 +64,7 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
         $ cd build
         $ make example_freertos_cifar10_sram
 
@@ -72,7 +72,7 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/cmake_utils/xmos_xs3a_toolchain.cmake
+        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
         $ cd build
         $ nmake example_freertos_cifar10_sram
 
