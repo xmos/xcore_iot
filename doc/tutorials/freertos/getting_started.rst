@@ -22,31 +22,32 @@ For example, a SPI interface might be available on tile 0. Normally, initializat
 
 The example application referenced above, as well as the RTOS driver documentation, should be consulted to see exactly how to initialize and share driver instances.
 
-The SDK provides the ON_TILE(t) preprocessor macro. This macro may be used by applications to ensure certain code is included only on a specific tile at compile time. In the example application, there is a single task that is created on both tiles that starts the drivers and creates the remaining application tasks. While this function is written as a single function, various parts are inside #if ON_TILE() blocks. For example, consider the following code snippet found inside the task vApplicationDaemonTaskStartup():
+The SDK provides the ON_TILE(t) preprocessor macro. This macro may be used by applications to ensure certain code is included only on a specific tile at compile time. In the example application, there is a single task that is created on both tiles that starts the drivers and creates the remaining application tasks. While this function is written as a single function, various parts are inside #if ON_TILE() blocks. For example, consider the following code snippet found inside the i2c_init() `function <https://github.com/xmos/xcore_sdk/blob/develop/modules/rtos/board_support/XCORE-AI-EXPLORER/platform/platform_init.c>`_:
 
 .. code-block:: C
 
-  #if ON_TILE(I2C_TILE)
-  {
-      int dac_init(rtos_i2c_master_t *i2c_ctx);
-      if (dac_init(i2c_master_ctx) == 0) {
-          rtos_printf("DAC initialization succeeded\n");
-          dac_configured = 1;
-      } else {
-          rtos_printf("DAC initialization failed\n");
-          dac_configured = 0;
-      }
-      chan_out_byte(other_tile_c, dac_configured);
-  }
-  #else
-  {
-      dac_configured = chan_in_byte(other_tile_c);
-  }
-  #endif
+    #if ON_TILE(I2C_TILE_NO)
+        rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
+        rtos_i2c_master_init(
+                i2c_master_ctx,
+                PORT_I2C_SCL, 0, 0,
+                PORT_I2C_SDA, 0, 0,
+                0,
+                100);
 
-When this function is compiled for tile I2C_TILE, only the first block is included. When it is compiled for the other tile, only the second block is included. When the application is run, tile I2C_TILE performs the initialization of the DAC, while the other tile waits for the DAC initialization to complete.
+        rtos_i2c_master_rpc_host_init(
+                i2c_master_ctx,
+                &i2c_rpc_config,
+                client_intertile_ctx,
+                1);
+    #else
+        rtos_i2c_master_rpc_client_init(
+                i2c_master_ctx,
+                &i2c_rpc_config,
+                intertile_ctx);
+    #endif
 
-I2C_TILE is defined at the top of the file. Because the |I2C| driver instance is shared between the two tiles, it may in fact be set to either zero or one, providing a demonstration of the way that drivers instances may be shared between tiles.
+When this function is compiled for tile I2C_TILE_NO, only the first block is included. When it is compiled for the other tile, only the second block is included. When the application is run, tile I2C_TILE_NO performs the initialization of the the |I2C| master driver host, while the other tile initializes the |I2C| master driver client. Because the |I2C| driver instance is shared between the two tiles, it may in fact be set to either zero or one, providing a demonstration of the way that drivers instances may be shared between tiles.
 
 The SDK provides a single XC file that provides the `main()` function. This provided `main()` function calls `main_tile0()` through `main_tile3()`, depending on the number of tiles that the application requires and the number of tiles provided by the target XCore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
 
