@@ -22,6 +22,7 @@ add_subdirectory(sw_services/device_control)
 add_subdirectory(sw_services/dhcpd)
 add_subdirectory(sw_services/dispatcher)
 add_subdirectory(sw_services/fatfs)
+add_subdirectory(sw_services/generic_pipeline)
 add_subdirectory(sw_services/http)
 add_subdirectory(sw_services/json)
 add_subdirectory(sw_services/mqtt)
@@ -60,6 +61,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     add_library(xcore_sdk_rtos_sw_services INTERFACE)
     target_link_libraries(xcore_sdk_rtos_sw_services
         INTERFACE
+            sdk::rtos::sw_services::generic_pipeline
             sdk::rtos::sw_services::concurrency_support
             sdk::rtos::sw_services::dispatcher
             sdk::rtos::sw_services::fatfs

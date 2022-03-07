@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #ifndef RTOS_OSAL_H_
@@ -68,6 +68,7 @@ rtos_osal_status_t rtos_osal_thread_preemption_disable(rtos_osal_thread_t *threa
 rtos_osal_status_t rtos_osal_thread_priority_set(rtos_osal_thread_t *thread, unsigned int priority);
 rtos_osal_status_t rtos_osal_thread_priority_get(rtos_osal_thread_t *thread, unsigned int *priority);
 rtos_osal_status_t rtos_osal_thread_delete(rtos_osal_thread_t *thread);
+rtos_osal_status_t rtos_osal_task_yield(void);
 
 /*
  * Mutexes
