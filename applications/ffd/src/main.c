@@ -3,18 +3,197 @@
 
 #include <platform.h>
 #include <xs1.h>
+#include <xcore/channel.h>
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "stream_buffer.h"
+#include "queue.h"
 
 /* Library headers */
 #include "rtos_printf.h"
+#include "src.h"
 
 /* App headers */
 #include "app_conf.h"
 #include "platform/platform_init.h"
 #include "platform/driver_instances.h"
+#include "usb_support.h"
+#include "usb_audio.h"
+#include "audio_pipeline/audio_pipeline.h"
+#include "intent_model_runner.h"
+#include "fs_support.h"
+
+#include "gpio_ctrl/gpi_ctrl.h"
+
+
+volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
+
+void audio_pipeline_input(void *input_app_data,
+                          int32_t (*mic_audio_frame)[2],
+                          size_t frame_count)
+{
+    (void) input_app_data;
+
+    static int flushed;
+    while (!flushed) {
+        size_t received;
+        received = rtos_mic_array_rx(mic_array_ctx,
+                                     mic_audio_frame,
+                                     frame_count,
+                                     0);
+        if (received == 0) {
+            rtos_mic_array_rx(mic_array_ctx,
+                              mic_audio_frame,
+                              frame_count,
+                              portMAX_DELAY);
+            flushed = 1;
+        }
+    }
+
+    /*
+     * NOTE: ALWAYS receive the next frame from the PDM mics,
+     * even if USB is the current mic source. The controls the
+     * timing since usb_audio_recv() does not block and will
+     * receive all zeros if no frame is available yet.
+     */
+    rtos_mic_array_rx(mic_array_ctx,
+                      mic_audio_frame,
+                      frame_count,
+                      portMAX_DELAY);
+
+#if appconfUSB_ENABLED
+    int32_t (*usb_mic_audio_frame)[2] = NULL;
+
+    if (mic_from_usb) {
+        usb_mic_audio_frame = mic_audio_frame;
+    }
+
+    /*
+     * As noted above, this does not block.
+     */
+    usb_audio_recv(intertile_ctx,
+                   frame_count,
+                   NULL,
+                   usb_mic_audio_frame);
+#endif
+}
+
+int audio_pipeline_output(void *output_app_data,
+                          int32_t (*proc_audio_frame)[2],
+                          int32_t (*mic_audio_frame)[2],
+                          size_t frame_count)
+{
+    (void) output_app_data;
+
+#if appconfI2S_ENABLED
+    rtos_i2s_tx(i2s_ctx,
+                (int32_t*) proc_audio_frame,
+                frame_count,
+                portMAX_DELAY);
+#endif
+
+#if appconfUSB_ENABLED
+    usb_audio_send(intertile_ctx,
+                  frame_count,
+                  proc_audio_frame,
+                  NULL,
+                  mic_audio_frame);
+#endif
+
+#if appconfINTENT_ENABLED
+#if INTENT_TILE_NO == AUDIO_HW_TILE_NO
+    intent_samples_send(frame_count,
+                        proc_audio_frame);
+#else
+    intent_intertile_samples_send(intertile_ctx,
+                                  frame_count,
+                                  proc_audio_frame);
+#endif
+#endif
+
+    return AUDIO_PIPELINE_FREE_FRAME;
+}
+
+RTOS_I2S_APP_SEND_FILTER_CALLBACK_ATTR
+size_t i2s_send_upsample_cb(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *send_buf, size_t samples_available)
+{
+    static int i;
+    static int32_t src_data[2][SRC_FF3V_FIR_TAPS_PER_PHASE] __attribute__((aligned(8)));
+
+    xassert(i2s_frame_size == 2);
+
+    switch (i) {
+    case 0:
+        i = 1;
+        if (samples_available >= 2) {
+            i2s_frame[0] = src_us3_voice_input_sample(src_data[0], src_ff3v_fir_coefs[2], send_buf[0]);
+            i2s_frame[1] = src_us3_voice_input_sample(src_data[1], src_ff3v_fir_coefs[2], send_buf[1]);
+            return 2;
+        } else {
+            i2s_frame[0] = src_us3_voice_input_sample(src_data[0], src_ff3v_fir_coefs[2], 0);
+            i2s_frame[1] = src_us3_voice_input_sample(src_data[1], src_ff3v_fir_coefs[2], 0);
+            return 0;
+        }
+    case 1:
+        i = 2;
+        i2s_frame[0] = src_us3_voice_get_next_sample(src_data[0], src_ff3v_fir_coefs[1]);
+        i2s_frame[1] = src_us3_voice_get_next_sample(src_data[1], src_ff3v_fir_coefs[1]);
+        return 0;
+    case 2:
+        i = 0;
+        i2s_frame[0] = src_us3_voice_get_next_sample(src_data[0], src_ff3v_fir_coefs[0]);
+        i2s_frame[1] = src_us3_voice_get_next_sample(src_data[1], src_ff3v_fir_coefs[0]);
+        return 0;
+    default:
+        xassert(0);
+        return 0;
+    }
+}
+
+RTOS_I2S_APP_RECEIVE_FILTER_CALLBACK_ATTR
+size_t i2s_send_downsample_cb(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *receive_buf, size_t sample_spaces_free)
+{
+    static int i;
+    static int64_t sum[2];
+    static int32_t src_data[2][SRC_FF3V_FIR_NUM_PHASES][SRC_FF3V_FIR_TAPS_PER_PHASE] __attribute__((aligned (8)));
+
+    xassert(i2s_frame_size == 2);
+
+    switch (i) {
+    case 0:
+        i = 1;
+        sum[0] = src_ds3_voice_add_sample(0, src_data[0][0], src_ff3v_fir_coefs[0], i2s_frame[0]);
+        sum[1] = src_ds3_voice_add_sample(0, src_data[1][0], src_ff3v_fir_coefs[0], i2s_frame[1]);
+        return 0;
+    case 1:
+        i = 2;
+        sum[0] = src_ds3_voice_add_sample(sum[0], src_data[0][1], src_ff3v_fir_coefs[1], i2s_frame[0]);
+        sum[1] = src_ds3_voice_add_sample(sum[1], src_data[1][1], src_ff3v_fir_coefs[1], i2s_frame[1]);
+        return 0;
+    case 2:
+        i = 0;
+        if (sample_spaces_free >= 2) {
+            receive_buf[0] = src_ds3_voice_add_final_sample(sum[0], src_data[0][2], src_ff3v_fir_coefs[2], i2s_frame[0]);
+            receive_buf[1] = src_ds3_voice_add_final_sample(sum[1], src_data[1][2], src_ff3v_fir_coefs[2], i2s_frame[1]);
+            return 2;
+        } else {
+            (void) src_ds3_voice_add_final_sample(sum[0], src_data[0][2], src_ff3v_fir_coefs[2], i2s_frame[0]);
+            (void) src_ds3_voice_add_final_sample(sum[1], src_data[1][2], src_ff3v_fir_coefs[2], i2s_frame[1]);
+            return 0;
+        }
+    default:
+        xassert(0);
+        return 0;
+    }
+}
+
+void i2s_rate_conversion_enable(void)
+{
+    rtos_i2s_send_filter_cb_set(i2s_ctx, i2s_send_upsample_cb, NULL);
+    rtos_i2s_receive_filter_cb_set(i2s_ctx, i2s_send_downsample_cb, NULL);
+}
 
 void vApplicationMallocFailedHook(void)
 {
@@ -26,7 +205,7 @@ void vApplicationMallocFailedHook(void)
 static void mem_analysis(void)
 {
 	for (;;) {
-		rtos_printf("Tile[%d]:\n\tMinimum heap free: %d\n\tCurrent heap free: %d\n", THIS_XCORE_TILE, xPortGetMinimumEverFreeHeapSize(), xPortGetFreeHeapSize());
+		// rtos_printf("Tile[%d]:\n\tMinimum heap free: %d\n\tCurrent heap free: %d\n", THIS_XCORE_TILE, xPortGetMinimumEverFreeHeapSize(), xPortGetFreeHeapSize());
 		vTaskDelay(pdMS_TO_TICKS(5000));
 	}
 }
@@ -37,7 +216,30 @@ void startup_task(void *arg)
 
     platform_start();
 
+#if ON_TILE(1)
+    gpio_gpi_init(gpio_ctx_t0);
+#endif
+
+#if ON_TILE(AUDIO_HW_TILE_NO)
+    audio_pipeline_init(NULL, NULL);
+#endif
+
+#if ON_TILE(FS_TILE_NO)
+    rtos_fatfs_init(qspi_flash_ctx);
+#endif
+
+#if appconfINTENT_ENABLED && ON_TILE(INTENT_TILE_NO)
+#if INTENT_TILE_NO == AUDIO_HW_TILE_NO
+    intent_task_create(appconfINTENT_MODEL_RUNNER_TASK_PRIORITY);
+#else
+    intertile_intent_task_create(appconfINTENT_MODEL_RUNNER_TASK_PRIORITY);
+#endif
+#endif
+
     mem_analysis();
+    /*
+     * TODO: Watchdog?
+     */
 }
 
 void vApplicationMinimalIdleHook(void)
@@ -50,6 +252,10 @@ static void tile_common_init(chanend_t c)
 {
     platform_init(c);
     chanend_free(c);
+
+#if appconfUSB_ENABLED && ON_TILE(USB_TILE_NO)
+    usb_audio_init(intertile_ctx, appconfUSB_AUDIO_TASK_PRIORITY);
+#endif
 
     xTaskCreate((TaskFunction_t) startup_task,
                 "startup_task",

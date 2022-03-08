@@ -1,23 +1,39 @@
-// Copyright (c) 2020 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright (c) 2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
-#ifndef SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_
-#define SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_
+#ifndef AUDIO_PIPELINE_H_
+#define AUDIO_PIPELINE_H_
 
+#include <stdint.h>
+#include "app_conf.h"
 
-typedef void * (*audio_pipeline_input_t)(void *data);
-typedef int (*audio_pipeline_output_t)(void *audio_frame_buffer, void *data);
+typedef struct {
+    int32_t ch_a;
+    int32_t ch_b;
+} ap_ch_pair_t;
 
-typedef void (*audio_pipeline_stage_t)(void *audio_frame_buffer);
+#define AP_FRAME_ADVANCE          240
+#define AP_CHANNEL_PAIRS          1
+
+#define AUDIO_PIPELINE_AUDIO_SAMPLE_RATE  appconfAUDIO_PIPELINE_SAMPLE_RATE
+#define AUDIO_PIPELINE_AUDIO_FRAME_LENGTH appconfAUDIO_PIPELINE_FRAME_ADVANCE
+
+#define AUDIO_PIPELINE_DONT_FREE_FRAME 0
+#define AUDIO_PIPELINE_FREE_FRAME      1
 
 void audio_pipeline_init(
-		const audio_pipeline_input_t input,
-		const audio_pipeline_output_t output,
-		void * const input_data,
-		void * const output_data,
-		const audio_pipeline_stage_t * const stage_functions,
-		const configSTACK_DEPTH_TYPE * const stage_stack_sizes,
-		const int pipeline_priority,
-		const int stage_count);
+        void *input_app_data,
+        void *output_app_data);
 
-#endif /* SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_ */
+void audio_pipeline_input(
+        void *input_app_data,
+        int32_t (*mic_audio_frame)[2],
+        size_t frame_count);
+
+int audio_pipeline_output(
+        void *output_app_data,
+        int32_t (*proc_audio_frame)[2],
+        int32_t (*mic_audio_frame)[2],
+        size_t frame_count);
+
+#endif /* AUDIO_PIPELINE_H_ */

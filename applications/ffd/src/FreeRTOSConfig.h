@@ -3,13 +3,20 @@
 
 /* Here is a good place to include header files that are required across
 your application. */
-#include "platform.h"
+#include <platform.h>
 
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 0
 #define configCPU_CLOCK_HZ                      100000000
+
+#if ON_TILE(0)
 #define configNUM_CORES                         5
+#endif
+#if ON_TILE(1)
+#define configNUM_CORES                         6
+#endif
+
 #define configTICK_RATE_HZ                      1000
 #define configMAX_PRIORITIES                    32
 #define configRUN_MULTIPLE_PRIORITIES           1

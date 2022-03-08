@@ -4,14 +4,80 @@
 #ifndef APP_CONF_H_
 #define APP_CONF_H_
 
+/* Intertile port settings */
+#define appconfUSB_AUDIO_PORT                     0
+#define appconfGPIO_T0_RPC_PORT                   1
+#define appconfGPIO_T1_RPC_PORT                   2
+#define appconfINTENT_MODEL_RUNNER_SAMPLES_PORT   3
+
 /* Audio Pipeline Configuration */
 #define appconfAUDIO_CLOCK_FREQUENCY            MIC_ARRAY_CONFIG_MCLK_FREQ
 #define appconfPDM_CLOCK_FREQUENCY              MIC_ARRAY_CONFIG_PDM_FREQ
-#define appconfPIPELINE_AUDIO_SAMPLE_RATE       16000
+#define appconfAUDIO_PIPELINE_SAMPLE_RATE       16000
 #define appconfAUDIO_FRAME_LENGTH            	MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
+#define appconfAUDIO_PIPELINE_CHANNEL_PAIRS     1
+#define appconfAUDIO_PIPELINE_FRAME_ADVANCE     240
+
+/* Intent Engine Configuration */
+#define appconfINTENT_FRAME_BUFFER_MULT         4       /* intent buffer is this value * appconfAUDIO_FRAME_LENGTH */
+#define appconfINTENT_FRAMES_PER_INFERENCE      200
+
+#ifndef appconfINTENT_ENABLED
+#define appconfINTENT_ENABLED   1
+#endif
+
+#ifndef appconfI2S_ENABLED
+#define appconfI2S_ENABLED   1
+#endif
+
+#ifndef appconfI2S_AUDIO_SAMPLE_RATE
+#define appconfI2S_AUDIO_SAMPLE_RATE appconfAUDIO_PIPELINE_SAMPLE_RATE
+#endif
+
+#ifndef appconfUSB_ENABLED
+#define appconfUSB_ENABLED   0
+#endif
+
+#ifndef appconfUSB_AUDIO_SAMPLE_RATE
+#define appconfUSB_AUDIO_SAMPLE_RATE appconfAUDIO_PIPELINE_SAMPLE_RATE
+#endif
+
+#define appconfMIC_SRC_MICS        0
+#define appconfMIC_SRC_USB         1
+#ifndef appconfMIC_SRC_DEFAULT
+#define appconfMIC_SRC_DEFAULT     appconfMIC_SRC_MICS
+#endif
+
+
+/* I/O and interrupt cores for Tile 0 */
+/* Note, USB and SPI are mutually exclusive */
+#define appconfXUD_IO_CORE                      1 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfSPI_IO_CORE                      1 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfUSB_INTERRUPT_CORE               2 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
+#define appconfUSB_SOF_INTERRUPT_CORE           3 /* Must be kept off I/O cores. Best kept off cores with other ISRs. */
+#define appconfSPI_INTERRUPT_CORE               2 /* Must be kept off I/O cores. */
+
+/* I/O and interrupt cores for Tile 1 */
+#define appconfPDM_MIC_IO_CORE                  1 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfI2S_IO_CORE                      2 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfI2C_IO_CORE                      3 /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfPDM_MIC_INTERRUPT_CORE           4 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
+#define appconfI2S_INTERRUPT_CORE               5 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
+#define appconfI2C_INTERRUPT_CORE               0 /* Must be kept off I/O cores. */
 
 /* Task Priorities */
-#define appconfSTARTUP_TASK_PRIORITY            (configMAX_PRIORITIES/2 + 5)
-#define appconfAUDIO_PIPELINE_TASK_PRIORITY    	(configMAX_PRIORITIES - 4)
+#define appconfSTARTUP_TASK_PRIORITY             (configMAX_PRIORITIES / 2 + 5)
+#define appconfAUDIO_PIPELINE_TASK_PRIORITY    	 (configMAX_PRIORITIES / 2)
+#define appconfINTENT_MODEL_RUNNER_TASK_PRIORITY (configMAX_PRIORITIES / 2)
+#define appconfGPIO_RPC_HOST_PRIORITY             (configMAX_PRIORITIES/2 + 2)
+#define appconfGPIO_TASK_PRIORITY                 (configMAX_PRIORITIES/2 + 2)
+#define appconfI2C_TASK_PRIORITY                  (configMAX_PRIORITIES/2 + 2)
+#define appconfUSB_MGR_TASK_PRIORITY              (configMAX_PRIORITIES/2 + 1)
+#define appconfUSB_AUDIO_TASK_PRIORITY            (configMAX_PRIORITIES/2 + 1)
+#define appconfSPI_TASK_PRIORITY                  (configMAX_PRIORITIES/2 + 1)
+#define appconfQSPI_FLASH_TASK_PRIORITY           (configMAX_PRIORITIES/2 + 0)
+
+
+#include "app_conf_check.h"
 
 #endif /* APP_CONF_H_ */

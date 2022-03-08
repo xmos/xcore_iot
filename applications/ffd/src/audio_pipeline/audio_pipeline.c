@@ -1,115 +1,130 @@
-// Copyright (c) 2020 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright (c) 2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
+
+/* STD headers */
+#include <string.h>
+#include <stdint.h>
+#include <xcore/hwtimer.h>
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "timers.h"
 #include "queue.h"
 
-#include "audio_pipeline.h"
+/* Library headers */
+#include "generic_pipeline.h"
 
-typedef struct {
-	audio_pipeline_input_t input;
-	audio_pipeline_output_t output;
-	void *input_data;
-	void *output_data;
-	QueueHandle_t *queues;
-	int stage_count;
-} audio_pipeline_ctx_t;
+/* App headers */
+#include "app_conf.h"
+#include "audio_pipeline/audio_pipeline.h"
 
-typedef struct {
-	audio_pipeline_ctx_t *pipeline_ctx;
-	audio_pipeline_stage_t stage_function;
-	int stage;
-} audio_pipeline_stage_ctx_t;
-
-static void audio_pipeline_stage(audio_pipeline_stage_ctx_t *ctx)
+typedef struct
 {
-	void *audio_frame_buffer;
-	audio_pipeline_ctx_t *pipeline_ctx = ctx->pipeline_ctx;
-	QueueHandle_t input_queue;
-	QueueHandle_t output_queue;
+    ap_ch_pair_t samples[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
+    ap_ch_pair_t mic_samples_passthrough[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
+} frame_data_t;
 
-	if (ctx->stage > 0) {
-		input_queue = pipeline_ctx->queues[ctx->stage - 1];
-	} else {
-		input_queue = NULL;
-	}
+static void *audio_pipeline_input_i(void *input_app_data)
+{
+    frame_data_t *frame_data;
 
-	if (ctx->stage < pipeline_ctx->stage_count - 1) {
-		output_queue = pipeline_ctx->queues[ctx->stage];
-	} else {
-		output_queue = NULL;
-	}
+    frame_data = pvPortMalloc(sizeof(frame_data_t));
 
-	for (;;) {
+    audio_pipeline_input(input_app_data,
+                       (int32_t(*)[2])frame_data->samples,
+                       AP_FRAME_ADVANCE);
 
-		if (input_queue != NULL) {
-			xQueueReceive(input_queue, &audio_frame_buffer, portMAX_DELAY);
-		} else {
-			audio_frame_buffer = pipeline_ctx->input(pipeline_ctx->input_data);
-			if (audio_frame_buffer == NULL) {
-				continue;
-			}
-		}
+    memcpy(frame_data->mic_samples_passthrough, frame_data->samples, sizeof(frame_data->mic_samples_passthrough));
 
-		ctx->stage_function(audio_frame_buffer);
+    return frame_data;
+}
 
-		if (output_queue != NULL) {
-			xQueueSend(output_queue, &audio_frame_buffer, portMAX_DELAY);
-		} else {
-			if (pipeline_ctx->output(audio_frame_buffer, pipeline_ctx->output_data) != 0) {
-				vPortFree(audio_frame_buffer);
-			}
-		}
+static int audio_pipeline_output_i(frame_data_t *frame_data,
+                                   void *output_app_data)
+{
+    return audio_pipeline_output(output_app_data,
+                               (int32_t(*)[2])frame_data->samples,
+                               (int32_t(*)[2])frame_data->mic_samples_passthrough,
+                               AP_FRAME_ADVANCE);
+}
 
-		taskYIELD();
-	}
+static void init_dsp_stage_0(void *state)
+{
+    /* Init dsp */
+}
+
+static void init_dsp_stage_1(void *state)
+{
+    /* Init dsp */
+}
+
+static void init_dsp_stage_2(void *state)
+{
+    /* Init dsp */
+}
+
+static void stage0(frame_data_t *frame_data)
+{
+    /* process frame here */
+
+    memcpy(frame_data->samples,
+           frame_data->samples,
+           sizeof(frame_data->samples));
+}
+
+static void stage1(frame_data_t *frame_data)
+{
+    /* process frame here */
+
+    memcpy(frame_data->samples,
+           frame_data->samples,
+           sizeof(frame_data->samples));
+}
+
+static void stage2(frame_data_t *frame_data)
+{
+    /* process frame here */
+
+    /* Below is debug until real DSP blocks are integrated */
+    /* Apply some gain so we can hear the mics with this skeleton app */
+    for(int ch=0; ch<AP_CHANNEL_PAIRS; ch++) {
+        for(int i=0; i<AP_FRAME_ADVANCE; i++) {
+            frame_data->samples[ch][i].ch_a *= 256;
+            frame_data->samples[ch][i].ch_b *= 256;
+        }
+    }
+    /* End of debug */
 }
 
 void audio_pipeline_init(
-		const audio_pipeline_input_t input,
-		const audio_pipeline_output_t output,
-		void * const input_data,
-		void * const output_data,
-		const audio_pipeline_stage_t * const stage_functions,
-		const configSTACK_DEPTH_TYPE * const stage_stack_sizes,
-		const int pipeline_priority,
-		const int stage_count)
+    void *input_app_data,
+    void *output_app_data)
 {
-	audio_pipeline_ctx_t *pipeline_ctx;
-	audio_pipeline_stage_ctx_t *stage_ctx;
-	int i;
-    char apstage_name[configMAX_TASK_NAME_LEN] = "apstage0";
+    const int stage_count = 3;
 
-	pipeline_ctx = pvPortMalloc(sizeof(audio_pipeline_ctx_t));
-	pipeline_ctx->input = input;
-	pipeline_ctx->input_data = input_data;
-	pipeline_ctx->output_data = output_data;
-	pipeline_ctx->output = output;
-	pipeline_ctx->stage_count = stage_count;
-	pipeline_ctx->queues = pvPortMalloc((stage_count - 1) * sizeof(QueueHandle_t));
+    const pipeline_stage_t stages[] = {
+        (pipeline_stage_t)stage0,
+        (pipeline_stage_t)stage1,
+        (pipeline_stage_t)stage2,
+    };
 
-	for (i = 0; i < stage_count - 1; i++) {
-		pipeline_ctx->queues[i] = xQueueCreate(2, sizeof(void *));
-	}
+    const configSTACK_DEPTH_TYPE stage_stack_sizes[] = {
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage0) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage1),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage2) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
+    };
 
-	stage_ctx = pvPortMalloc(stage_count * sizeof(audio_pipeline_stage_ctx_t));
+    init_dsp_stage_0(NULL);
+    init_dsp_stage_1(NULL);
+    init_dsp_stage_2(NULL);
 
-	for (i = 0; i < stage_count; i++) {
-        stage_ctx[i].pipeline_ctx = pipeline_ctx;
-        stage_ctx[i].stage = i;
-        stage_ctx[i].stage_function = stage_functions[i];
-
-        configASSERT(stage_count < 10); /* Name will still be unique but limit to 0-9 ASCII */
-        apstage_name[7] = i + '0';
-
-		xTaskCreate(
-                (TaskFunction_t) audio_pipeline_stage, /* Function that implements the task. */
-				apstage_name,                          /* Text name for the task. */
-				stage_stack_sizes[i],                  /* Stack size in words, not bytes. */
-				&stage_ctx[i],                         /* Parameter passed into the task. */
-				pipeline_priority,                     /* Priority at which the task is created. */
-				NULL);                                 /* Don't need the created task's handle. */
-	}
+    generic_pipeline_init((pipeline_input_t)audio_pipeline_input_i,
+                        (pipeline_output_t)audio_pipeline_output_i,
+                        input_app_data,
+                        output_app_data,
+                        stages,
+                        (const size_t*) stage_stack_sizes,
+                        appconfAUDIO_PIPELINE_TASK_PRIORITY,
+                        stage_count);
 }
