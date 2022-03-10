@@ -74,3 +74,6 @@
 [submodule "tools/xmos_cmake_toolchain"]
 	path = tools/xmos_cmake_toolchain
 	url = git@github.com:xmos/xmos_cmake_toolchain.git
+[submodule "modules/sw_avona"]
+	path = modules/sw_avona
+	url = git@github.com:xmos/sw_avona.git

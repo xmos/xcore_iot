@@ -9,6 +9,7 @@ add_subdirectory(lib_src)
 add_subdirectory(lib_xs3_math)
 add_subdirectory(multitile_support)
 add_subdirectory(rtos)
+add_subdirectory(sw_avona)
 add_subdirectory(thirdparty)
 add_subdirectory(utils)
 
