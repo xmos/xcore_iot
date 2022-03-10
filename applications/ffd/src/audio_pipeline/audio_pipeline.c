@@ -15,6 +15,9 @@
 /* Library headers */
 #include "generic_pipeline.h"
 #include "agc_api.h"
+#include "ic_api.h"
+#include "ns_api.h"
+#include "vad_api.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -22,7 +25,7 @@
 
 typedef struct {
     ap_ch_pair_t samples[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
-    int32_t samples_fmt2[AP_CHANNELS][AP_FRAME_ADVANCE];
+    int32_t samples_internal_fmt[AP_CHANNELS][AP_FRAME_ADVANCE];
     ap_ch_pair_t mic_samples_passthrough[AP_CHANNELS][AP_FRAME_ADVANCE];
 } frame_data_t;
 
@@ -33,27 +36,27 @@ typedef struct {
 #define AP_MAX_Y_CHANNELS (2)
 #define AP_MAX_X_CHANNELS (2)
 
-// typedef struct ic_stage_ctx {
-//     ic_state_t state;
-// } ic_stage_ctx_t;
-//
-// typedef struct vad_stage_ctx {
-//     vad_state_t state;
-// } vad_stage_ctx_t;
-//
-// typedef struct ns_stage_ctx {
-//     ns_state_t state[AP_MAX_Y_CHANNELS];
-// } ns_stage_ctx_t;
+typedef struct ic_stage_ctx {
+    ic_state_t state;
+} ic_stage_ctx_t;
+
+typedef struct vad_stage_ctx {
+    vad_state_t state;
+} vad_stage_ctx_t;
+
+typedef struct ns_stage_ctx {
+    ns_state_t state[AP_MAX_Y_CHANNELS];
+} ns_stage_ctx_t;
 
 typedef struct agc_stage_ctx {
     agc_meta_data_t md;
     agc_state_t state[AP_CHANNELS];
 } agc_stage_ctx_t;
 
-// static ic_stage_ctx_t ic_stage_state = {0};
-// static vad_stage_ctx_t vad_stage_state = {0};
-// static ns_stage_ctx_t ns_stage_state = {0};
-static agc_stage_ctx_t agc_stage_state = {0};
+static ic_stage_ctx_t ic_stage_state = {};
+static vad_stage_ctx_t vad_stage_state = {};
+static ns_stage_ctx_t ns_stage_state = {};
+static agc_stage_ctx_t agc_stage_state = {};
 
 static void *audio_pipeline_input_i(void *input_app_data)
 {
@@ -67,9 +70,10 @@ static void *audio_pipeline_input_i(void *input_app_data)
 
     memcpy(frame_data->mic_samples_passthrough, frame_data->samples, sizeof(frame_data->mic_samples_passthrough));
 
+    /* Convert to audiopipeline specific format */
     for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-        frame_data->samples_fmt2[0][i] = frame_data->samples[0][i].ch_a;
-        frame_data->samples_fmt2[1][i] = frame_data->samples[0][i].ch_b;
+        frame_data->samples_internal_fmt[0][i] = frame_data->samples[0][i].ch_a;
+        frame_data->samples_internal_fmt[1][i] = frame_data->samples[0][i].ch_b;
     }
 
     return frame_data;
@@ -78,6 +82,12 @@ static void *audio_pipeline_input_i(void *input_app_data)
 static int audio_pipeline_output_i(frame_data_t *frame_data,
                                    void *output_app_data)
 {
+    /* Convert out of audiopipeline specific format */
+    for(int i=0; i<AP_FRAME_ADVANCE; i++) {
+        frame_data->samples[0][i].ch_a = frame_data->samples_internal_fmt[0][i];
+        frame_data->samples[0][i].ch_b = frame_data->samples_internal_fmt[1][i];
+    }
+
     return audio_pipeline_output(output_app_data,
                                (int32_t(*)[2])frame_data->samples,
                                (int32_t(*)[2])frame_data->mic_samples_passthrough,
@@ -86,20 +96,26 @@ static int audio_pipeline_output_i(frame_data_t *frame_data,
 
 static void stage_vad_and_ic(frame_data_t *frame_data)
 {
-    /* process frame here */
-
-    memcpy(frame_data->samples,
-           frame_data->samples,
-           sizeof(frame_data->samples));
+    int32_t ic_output[AP_CHANNELS][AP_FRAME_ADVANCE];
+    ic_filter(&ic_stage_state.state,
+        frame_data->samples_internal_fmt[0],
+        frame_data->samples_internal_fmt[1],
+        ic_output[0]);
+    uint8_t vad = vad_probability_voice(ic_output[0], &vad_stage_state.state);
+    ic_adapt(&ic_stage_state.state, vad, ic_output[0]);
+    memcpy(frame_data->samples_internal_fmt[0], ic_output[0], AP_FRAME_ADVANCE * sizeof(int32_t));   /* Check if it is safe to do ic_output inplace */
 }
 
 static void stage_ns(frame_data_t *frame_data)
 {
-    /* process frame here */
+    configASSERT(NS_FRAME_ADVANCE == AP_FRAME_ADVANCE);
 
-    memcpy(frame_data->samples,
-           frame_data->samples,
-           sizeof(frame_data->samples));
+    for(int ch=0; ch<AP_CHANNELS; ch++) {
+        ns_process_frame(
+                    &ns_stage_state.state[ch],
+                    frame_data->samples_internal_fmt[ch],
+                    frame_data->samples_internal_fmt[ch]);
+    }
 }
 
 static void stage_agc(frame_data_t *frame_data)
@@ -109,23 +125,17 @@ static void stage_agc(frame_data_t *frame_data)
     for(int ch=0; ch<AP_CHANNELS; ch++) {
         agc_process_frame(
                 &agc_stage_state.state[ch],
-                frame_data->samples_fmt2[ch],
-                frame_data->samples_fmt2[ch],
+                frame_data->samples_internal_fmt[ch],
+                frame_data->samples_internal_fmt[ch],
                 &agc_stage_state.md);
-    }
-
-
-    for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-        frame_data->samples[0][i].ch_a = frame_data->samples_fmt2[0][i];
-        frame_data->samples[0][i].ch_b = frame_data->samples_fmt2[1][i];
     }
 }
 
 static void initialize_pipeline_stages(void) {
-    // ic_init(&ic_stage_state->ic_state);
-    // vad_init(&vad_stage_state->vad_state);
+    ic_init(&ic_stage_state.state);
+    vad_init(&vad_stage_state.state);
     for(int ch = 0; ch < AP_MAX_Y_CHANNELS; ch++){
-        // ns_init(&ns_stage_state->state[ch]);
+        ns_init(&ns_stage_state.state[ch]);
         agc_init(&agc_stage_state.state[ch], &AGC_PROFILE_ASR);
     }
     agc_stage_state.md.vad_flag = AGC_META_DATA_NO_VAD;

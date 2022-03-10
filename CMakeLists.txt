@@ -18,11 +18,11 @@ option(XCORE_SDK_CI_TESTING     "Enable CI test applications"  OFF)
 include(tools/cmake_utils/xmos_macros.cmake)
 
 ## Add various targets
-if(PROJECT_IS_TOP_LEVEL)
+# if(PROJECT_IS_TOP_LEVEL)
     add_subdirectory(applications)
     add_subdirectory(examples)
-endif()
-add_subdirectory(modules)   
+# endif()
+add_subdirectory(modules)
 
 if(XCORE_SDK_CI_TESTING)
     add_subdirectory(test)
