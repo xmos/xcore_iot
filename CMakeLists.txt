@@ -22,7 +22,7 @@ if(PROJECT_IS_TOP_LEVEL)
     add_subdirectory(applications)
     add_subdirectory(examples)
 endif()
-add_subdirectory(modules)
+add_subdirectory(modules)   
 
 if(XCORE_SDK_CI_TESTING)
     add_subdirectory(test)

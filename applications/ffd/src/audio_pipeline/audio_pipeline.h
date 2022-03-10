@@ -14,6 +14,7 @@ typedef struct {
 
 #define AP_FRAME_ADVANCE          240
 #define AP_CHANNEL_PAIRS          1
+#define AP_CHANNELS               2
 
 #define AUDIO_PIPELINE_AUDIO_SAMPLE_RATE  appconfAUDIO_PIPELINE_SAMPLE_RATE
 #define AUDIO_PIPELINE_AUDIO_FRAME_LENGTH appconfAUDIO_PIPELINE_FRAME_ADVANCE

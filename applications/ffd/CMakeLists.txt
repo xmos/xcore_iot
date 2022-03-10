@@ -44,6 +44,10 @@ set(APP_COMMON_LINK_LIBRARIES
     sdk::rtos_usb
     sdk::rtos::audio_drivers
     sdk::lib_src
+    avona::agc
+    avona::ic
+    avona::ns
+    avona::vad
 )
 
 #**********************

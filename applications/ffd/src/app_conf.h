@@ -30,7 +30,7 @@
 #define appconfINTENT_FRAMES_PER_INFERENCE      200
 
 #ifndef appconfINTENT_ENABLED
-#define appconfINTENT_ENABLED   1
+#define appconfINTENT_ENABLED   0
 #endif
 
 #ifndef appconfI2S_ENABLED
@@ -47,6 +47,12 @@
 
 #ifndef appconfUSB_AUDIO_SAMPLE_RATE
 #define appconfUSB_AUDIO_SAMPLE_RATE appconfAUDIO_PIPELINE_SAMPLE_RATE
+#endif
+
+#define appconfUSB_AUDIO_RELEASE   0
+#define appconfUSB_AUDIO_TESTING   1
+#ifndef appconfUSB_AUDIO_MODE
+#define appconfUSB_AUDIO_MODE      appconfUSB_AUDIO_TESTING
 #endif
 
 #define appconfMIC_SRC_MICS        0

@@ -14,16 +14,46 @@
 
 /* Library headers */
 #include "generic_pipeline.h"
+#include "agc_api.h"
 
 /* App headers */
 #include "app_conf.h"
 #include "audio_pipeline/audio_pipeline.h"
 
-typedef struct
-{
+typedef struct {
     ap_ch_pair_t samples[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
-    ap_ch_pair_t mic_samples_passthrough[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
+    int32_t samples_fmt2[AP_CHANNELS][AP_FRAME_ADVANCE];
+    ap_ch_pair_t mic_samples_passthrough[AP_CHANNELS][AP_FRAME_ADVANCE];
 } frame_data_t;
+
+#if AP_FRAME_ADVANCE != 240
+#error This pipeline is only configured for 240 frame advance
+#endif
+
+#define AP_MAX_Y_CHANNELS (2)
+#define AP_MAX_X_CHANNELS (2)
+
+// typedef struct ic_stage_ctx {
+//     ic_state_t state;
+// } ic_stage_ctx_t;
+//
+// typedef struct vad_stage_ctx {
+//     vad_state_t state;
+// } vad_stage_ctx_t;
+//
+// typedef struct ns_stage_ctx {
+//     ns_state_t state[AP_MAX_Y_CHANNELS];
+// } ns_stage_ctx_t;
+
+typedef struct agc_stage_ctx {
+    agc_meta_data_t md;
+    agc_state_t state[AP_CHANNELS];
+} agc_stage_ctx_t;
+
+// static ic_stage_ctx_t ic_stage_state = {0};
+// static vad_stage_ctx_t vad_stage_state = {0};
+// static ns_stage_ctx_t ns_stage_state = {0};
+static agc_stage_ctx_t agc_stage_state = {0};
 
 static void *audio_pipeline_input_i(void *input_app_data)
 {
@@ -37,6 +67,11 @@ static void *audio_pipeline_input_i(void *input_app_data)
 
     memcpy(frame_data->mic_samples_passthrough, frame_data->samples, sizeof(frame_data->mic_samples_passthrough));
 
+    for(int i=0; i<AP_FRAME_ADVANCE; i++) {
+        frame_data->samples_fmt2[0][i] = frame_data->samples[0][i].ch_a;
+        frame_data->samples_fmt2[1][i] = frame_data->samples[0][i].ch_b;
+    }
+
     return frame_data;
 }
 
@@ -49,22 +84,7 @@ static int audio_pipeline_output_i(frame_data_t *frame_data,
                                AP_FRAME_ADVANCE);
 }
 
-static void init_dsp_stage_0(void *state)
-{
-    /* Init dsp */
-}
-
-static void init_dsp_stage_1(void *state)
-{
-    /* Init dsp */
-}
-
-static void init_dsp_stage_2(void *state)
-{
-    /* Init dsp */
-}
-
-static void stage0(frame_data_t *frame_data)
+static void stage_vad_and_ic(frame_data_t *frame_data)
 {
     /* process frame here */
 
@@ -73,7 +93,7 @@ static void stage0(frame_data_t *frame_data)
            sizeof(frame_data->samples));
 }
 
-static void stage1(frame_data_t *frame_data)
+static void stage_ns(frame_data_t *frame_data)
 {
     /* process frame here */
 
@@ -82,19 +102,35 @@ static void stage1(frame_data_t *frame_data)
            sizeof(frame_data->samples));
 }
 
-static void stage2(frame_data_t *frame_data)
+static void stage_agc(frame_data_t *frame_data)
 {
-    /* process frame here */
+    configASSERT(AGC_FRAME_ADVANCE == AP_FRAME_ADVANCE);
 
-    /* Below is debug until real DSP blocks are integrated */
-    /* Apply some gain so we can hear the mics with this skeleton app */
-    for(int ch=0; ch<AP_CHANNEL_PAIRS; ch++) {
-        for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-            frame_data->samples[ch][i].ch_a *= 256;
-            frame_data->samples[ch][i].ch_b *= 256;
-        }
+    for(int ch=0; ch<AP_CHANNELS; ch++) {
+        agc_process_frame(
+                &agc_stage_state.state[ch],
+                frame_data->samples_fmt2[ch],
+                frame_data->samples_fmt2[ch],
+                &agc_stage_state.md);
     }
-    /* End of debug */
+
+
+    for(int i=0; i<AP_FRAME_ADVANCE; i++) {
+        frame_data->samples[0][i].ch_a = frame_data->samples_fmt2[0][i];
+        frame_data->samples[0][i].ch_b = frame_data->samples_fmt2[1][i];
+    }
+}
+
+static void initialize_pipeline_stages(void) {
+    // ic_init(&ic_stage_state->ic_state);
+    // vad_init(&vad_stage_state->vad_state);
+    for(int ch = 0; ch < AP_MAX_Y_CHANNELS; ch++){
+        // ns_init(&ns_stage_state->state[ch]);
+        agc_init(&agc_stage_state.state[ch], &AGC_PROFILE_ASR);
+    }
+    agc_stage_state.md.vad_flag = AGC_META_DATA_NO_VAD;
+    agc_stage_state.md.aec_ref_power = AGC_META_DATA_NO_AEC;
+    agc_stage_state.md.aec_corr_factor = AGC_META_DATA_NO_AEC;
 }
 
 void audio_pipeline_init(
@@ -104,20 +140,18 @@ void audio_pipeline_init(
     const int stage_count = 3;
 
     const pipeline_stage_t stages[] = {
-        (pipeline_stage_t)stage0,
-        (pipeline_stage_t)stage1,
-        (pipeline_stage_t)stage2,
+        (pipeline_stage_t)stage_vad_and_ic,
+        (pipeline_stage_t)stage_ns,
+        (pipeline_stage_t)stage_agc,
     };
 
     const configSTACK_DEPTH_TYPE stage_stack_sizes[] = {
-        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage0) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
-        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage1),
-        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage2) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_vad_and_ic) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_ns),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_agc) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
     };
 
-    init_dsp_stage_0(NULL);
-    init_dsp_stage_1(NULL);
-    init_dsp_stage_2(NULL);
+    initialize_pipeline_stages();
 
     generic_pipeline_init((pipeline_input_t)audio_pipeline_input_i,
                         (pipeline_output_t)audio_pipeline_output_i,
