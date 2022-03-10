@@ -1,8 +1,10 @@
-// Copyright 2020-2021 XMOS LIMITED.
+// Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #ifndef AIC3204_H_
 #define AIC3204_H_
+
+#include <stdint.h>
 
 // TLV320AIC3204 Device I2C Address
 #define AIC3204_I2C_DEVICE_ADDR 0x18
@@ -49,6 +51,33 @@
 #define AIC3204_AN_IN_CHRG    0x47 // Register 71 - Analog Input Quick Charging Config
 #define AIC3204_REF_STARTUP   0x7B // Register 123 - Reference Power Up Config
 
+/**
+ * Initialize the DAC
+ *
+ * \returns   0 on success
+ *            -1 otherwise
+ */
 int aic3204_init(void);
+
+/**
+ * User defined function to perform the reg write
+ *
+ * \returns   0 on success
+ *            -1 otherwise
+ */
+int aic3204_reg_write(uint8_t reg, uint8_t val);
+
+/**
+ * User defined function to perform the reset the device
+ */
+void aic3204_codec_reset(void);
+
+/**
+ * User defined function to perform a wait
+ *
+ * When called, this function must not return until
+ * at least wait_ms milliseconds has passed
+ */
+void aic3204_wait(uint32_t wait_ms);
 
 #endif /* AIC3204_H_ */

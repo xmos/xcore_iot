@@ -1,6 +1,7 @@
 // Copyright (c) 2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
+/* System headers */
 #include <platform.h>
 #include <xs1.h>
 #include <xcore/channel.h>
@@ -24,7 +25,6 @@
 #include "audio_pipeline/audio_pipeline.h"
 #include "intent_model_runner.h"
 #include "fs_support.h"
-
 #include "gpio_ctrl/gpi_ctrl.h"
 
 
@@ -103,7 +103,7 @@ int audio_pipeline_output(void *output_app_data,
 #endif
 
 #if appconfINTENT_ENABLED
-#if INTENT_TILE_NO == AUDIO_HW_TILE_NO
+#if INTENT_TILE_NO == AUDIO_PIPELINE_TILE_NO
     intent_samples_send(frame_count,
                         proc_audio_frame);
 #else
@@ -220,7 +220,7 @@ void startup_task(void *arg)
     gpio_gpi_init(gpio_ctx_t0);
 #endif
 
-#if ON_TILE(AUDIO_HW_TILE_NO)
+#if ON_TILE(AUDIO_PIPELINE_TILE_NO)
     audio_pipeline_init(NULL, NULL);
 #endif
 
@@ -229,7 +229,7 @@ void startup_task(void *arg)
 #endif
 
 #if appconfINTENT_ENABLED && ON_TILE(INTENT_TILE_NO)
-#if INTENT_TILE_NO == AUDIO_HW_TILE_NO
+#if INTENT_TILE_NO == AUDIO_PIPELINE_TILE_NO
     intent_task_create(appconfINTENT_MODEL_RUNNER_TASK_PRIORITY);
 #else
     intertile_intent_task_create(appconfINTENT_MODEL_RUNNER_TASK_PRIORITY);

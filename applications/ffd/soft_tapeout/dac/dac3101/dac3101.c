@@ -1,73 +1,33 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-/* FreeRTOS headers */
-#include "FreeRTOS.h"
-#include "task.h"
+/* System headers */
+#include <xcore/assert.h>
 
+/* App headers */
 #include "platform/driver_instances.h"
-#include "app_conf.h"
-
-/* Header for the audio codec chip registers and i2c address */
 #include "dac3101.h"
-
-#if XVF3610_Q60A
-#define IOEXP_I2C_ADDR        0x20
-
-/* Set DAC_RST_N to 0 on the I2C expander (address 0x20) */
-#define reset_dac()                                                            \
-{                                                                              \
-	i2c_regop_res_t ret;                                                       \
-	ret = rtos_i2c_master_reg_write(i2c_master_ctx, IOEXP_I2C_ADDR, 6, 0xFF);  \
-	if (ret != I2C_REGOP_SUCCESS) {                                            \
-        rtos_printf("Failed to set io expander DAC_RST_N!\n");                 \
-		return -1;                                                             \
-    }                                                                          \
-	vTaskDelay(pdMS_TO_TICKS(100));                                            \
-	ret = rtos_i2c_master_reg_write(i2c_master_ctx, IOEXP_I2C_ADDR, 6, 0x7f);  \
-	if (ret != I2C_REGOP_SUCCESS) {                                            \
-        rtos_printf("Failed to set io expander DAC_RST_N!\n");                 \
-		return -1;                                                             \
-	}                                                                          \
-	vTaskDelay(pdMS_TO_TICKS(100));                                            \
-}
-#else
-#define reset_dac() {;}
-#endif
-
-/*
- * Writes a value to a register in the DAC3101 DAC chip.
- */
-static inline int dac3101_reg_write(uint8_t reg, uint8_t val)
-{
-	i2c_regop_res_t ret;
-
-	ret = rtos_i2c_master_reg_write(i2c_master_ctx, DAC3101_I2C_DEVICE_ADDR, reg, val);
-
-	if (ret == I2C_REGOP_SUCCESS) {
-		return 0;
-	} else {
-		return -1;
-	}
-}
 
 /*
  * Example configuration of the TLV320DAC3101 DAC using i2c.
  *
  * Must be called after the RTOS scheduler is started.
  */
-int dac3101_init(void)
+int dac3101_init(uint32_t sample_rate)
 {
-    reset_dac();
+    dac3101_codec_reset();
+
+    xassert((sample_rate == 16000) || (sample_rate == 48000));
+
     // This setup is for 1.024MHz in (BCLK), PLL of 98.304MHz 24.576MHz out and fs of 16kHz or
     // or 3.072MHz BCLK, PLL of 98.304MHz 24.576MHz out and fs of 48kHz
     const unsigned PLLP = 1;
     const unsigned PLLR = 4;
-    const unsigned PLLJ = (appconfI2S_AUDIO_SAMPLE_RATE == 16000) ? 24 : 8;
+    const unsigned PLLJ = (sample_rate == 16000) ? 24 : 8;
     const unsigned PLLD = 0;
     const unsigned NDAC = 4;
-    const unsigned MDAC = (appconfI2S_AUDIO_SAMPLE_RATE == 16000) ? 6 : 4;
-    const unsigned DOSR = (appconfI2S_AUDIO_SAMPLE_RATE == 16000) ? 256 : 128;
+    const unsigned MDAC = (sample_rate == 16000) ? 6 : 4;
+    const unsigned DOSR = (sample_rate == 16000) ? 256 : 128;
 
 	if (
 		// Set register page to 0
@@ -87,9 +47,8 @@ int dac3101_init(void)
         dac3101_reg_write(DAC3101_B_DIV_VAL, 0x80 + 1) == 0
     ) {
 		// Wait for 1 ms
-		vTaskDelay(pdMS_TO_TICKS(1));
+		dac3101_wait(1);
 	} else {
-        rtos_printf("DAC init failed section 1\n");
 		return -1;
 	}
 
@@ -151,9 +110,8 @@ int dac3101_init(void)
         dac3101_reg_write(DAC3101_SPKR_VOL_A, 0x92) == 0
     ) {
 		// Wait for 100 ms
-		vTaskDelay(pdMS_TO_TICKS(100));
+        dac3101_wait(100);
 	} else {
-        rtos_printf("DAC init failed section 2\n");
 		return -1;
 	}
 
@@ -173,11 +131,10 @@ int dac3101_init(void)
         dac3101_reg_write(DAC3101_DAC_VOL, 0x00) == 0
     ) {
 		// Wait for 100 ms
-		vTaskDelay(pdMS_TO_TICKS(100));
+        dac3101_wait(100);
 	} else {
-        rtos_printf("DAC init failed section 3\n");
 		return -1;
 	}
-    
+
     return 0;
 }

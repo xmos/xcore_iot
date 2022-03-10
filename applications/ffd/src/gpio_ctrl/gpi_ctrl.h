@@ -7,7 +7,7 @@
 #include <platform.h>
 #include "rtos_gpio.h"
 
-#if XVF3610_Q60A
+#if XVF3610_Q60A || XK_VOICE_L71
 #define BUTTON_MUTE_BITMASK 0x10
 #define BUTTON_BTN_BITMASK  0x20
 #define BUTTON_IP_2_BITMASK 0x40

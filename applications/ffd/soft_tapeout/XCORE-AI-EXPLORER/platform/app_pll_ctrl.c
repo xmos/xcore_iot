@@ -1,11 +1,14 @@
-// Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
+// Copyright (c) 2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
+/* System headers */
 #include <platform.h>
 #include <xs1.h>
 #include <xcore/hwtimer.h>
 #include <xcore/assert.h>
-#include "app_pll_ctrl.h"
+
+/* App headers */
+#include "platform/app_pll_ctrl.h"
 
 void app_pll_set_numerator(int numerator)
 {

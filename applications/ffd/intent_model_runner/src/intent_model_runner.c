@@ -78,8 +78,12 @@ void intent_samples_send(size_t frame_count,
         samples[i] = (uint32_t)(processed_audio_frame[i][ASR_CHANNEL]);
     }
 
-    if (xStreamBufferSend(samples_to_intent_stream_buf, processed_audio_frame, sizeof(samples), 0) != sizeof(samples)) {
-        rtos_printf("lost local output samples for intent\n");
+    if(samples_to_intent_stream_buf != NULL) {
+        if (xStreamBufferSend(samples_to_intent_stream_buf, processed_audio_frame, sizeof(samples), 0) != sizeof(samples)) {
+            rtos_printf("lost local output samples for intent\n");
+        }
+    } else {
+        rtos_printf("intent engine streambuffer not ready\n");
     }
 }
 

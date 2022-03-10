@@ -1,41 +1,9 @@
-// Copyright 2020-2021 XMOS LIMITED.
+// Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-/* FreeRTOS headers */
-#include "FreeRTOS.h"
-#include "task.h"
-
+/* App headers */
 #include "platform/driver_instances.h"
-
-/* Header for the audio codec chip registers and i2c address */
 #include "aic3204.h"
-
-#if XCOREAI_EXPLORER
-#define reset_dac()                                                         \
-{                                                                           \
-    const rtos_gpio_port_id_t rst_port = rtos_gpio_port(PORT_CODEC_RST_N);  \
-    rtos_gpio_port_enable(gpio_ctx_t1, rst_port);                           \
-    rtos_gpio_port_out(gpio_ctx_t1, rst_port, 0xF);                         \
-}
-#else
-#define reset_dac() {;}
-#endif
-
-/*
- * Writes a value to a register in the AIC3204 DAC chip.
- */
-static inline int aic3204_reg_write(uint8_t reg, uint8_t val)
-{
-	i2c_regop_res_t ret;
-
-	ret = rtos_i2c_master_reg_write(i2c_master_ctx, AIC3204_I2C_DEVICE_ADDR, reg, val);
-
-	if (ret == I2C_REGOP_SUCCESS) {
-		return 0;
-	} else {
-		return -1;
-	}
-}
 
 /*
  * Example configuration of the TLV320AIC3204 DAC using i2c.
@@ -47,7 +15,7 @@ static inline int aic3204_reg_write(uint8_t reg, uint8_t val)
  */
 int aic3204_init(void)
 {
-    reset_dac();
+    aic3204_codec_reset();
 
 	if (
 		// Set register page to 0
@@ -131,7 +99,7 @@ int aic3204_init(void)
 		aic3204_reg_write(AIC3204_OP_PWR_CTRL, 0x30) == 0
 	) {
 		// Wait for 2.5 sec for soft stepping to take effect
-		vTaskDelay(pdMS_TO_TICKS(2500));
+        aic3204_wait(2500);
 	} else {
 		return -1;
 	}

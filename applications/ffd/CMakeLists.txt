@@ -4,6 +4,9 @@
 file(GLOB_RECURSE APP_SOURCES   src/*.c )
 set(APP_INCLUDES src src/usb)
 
+add_subdirectory(soft_tapeout)
+add_subdirectory(intent_model_runner)
+
 #**********************
 # Flags
 #**********************
@@ -15,7 +18,6 @@ set(APP_COMPILER_FLAGS
     -mcmodel=large
     -Wno-xcore-fptrgroup
     ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
-    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
 )
 set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
@@ -23,14 +25,6 @@ set(APP_COMPILE_DEFINITIONS
     PLATFORM_USES_TILE_1=1
 
     XUD_CORE_CLOCK=600
-
-    XCOREAI_EXPLORER=1
-    PLATFORM_SUPPORTS_TILE_0=1
-    PLATFORM_SUPPORTS_TILE_1=1
-    PLATFORM_SUPPORTS_TILE_2=0
-    PLATFORM_SUPPORTS_TILE_3=0
-    USB_TILE_NO=0
-    USB_TILE=tile[USB_TILE_NO]
 
     MIC_ARRAY_CONFIG_MCLK_FREQ=24576000
     MIC_ARRAY_CONFIG_PDM_FREQ=3072000
@@ -40,11 +34,8 @@ set(APP_COMPILE_DEFINITIONS
 
 set(APP_LINK_OPTIONS
     -report
-    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
     ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
 )
-
-add_subdirectory(intent_model_runner)
 
 set(APP_COMMON_LINK_LIBRARIES
     sdk::core
@@ -64,7 +55,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::app::ffd::xk_voice_l71)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
@@ -74,7 +65,47 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::app::ffd::xk_voice_l71)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile0_application_ffd_dev)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::app::ffd::xcore_ai_explorer)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_application_ffd_dev)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::app::ffd::xcore_ai_explorer)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile0_application_ffd_dev2)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::app::ffd::xvf3610_q60a)
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_application_ffd_dev2)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::app::ffd::xvf3610_q60a)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
 unset(TARGET_NAME)
 
@@ -82,9 +113,17 @@ unset(TARGET_NAME)
 # Merge binaries
 #**********************
 merge_binaries(application_ffd tile0_application_ffd tile1_application_ffd 1)
+merge_binaries(application_ffd_dev tile0_application_ffd_dev tile1_application_ffd_dev 1)
+merge_binaries(application_ffd_dev2 tile0_application_ffd_dev2 tile1_application_ffd_dev2 1)
 
 #**********************
 # Create run and debug targets
 #**********************
 create_run_target(application_ffd)
 create_debug_target(application_ffd)
+
+create_run_target(application_ffd_dev)
+create_debug_target(application_ffd_dev)
+
+create_run_target(application_ffd_dev2)
+create_debug_target(application_ffd_dev2)
