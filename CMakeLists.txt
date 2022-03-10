@@ -12,16 +12,18 @@ project(xcore_sdk)
 enable_language(CXX C ASM)
 
 ## Project options
-option(CI_TESTING     "Enable CI test applications"  OFF)
+option(XCORE_SDK_CI_TESTING     "Enable CI test applications"  OFF)
 
 ## Import some helpful macros
 include(tools/cmake_utils/xmos_macros.cmake)
 
 ## Add various targets
-add_subdirectory(applications)
-add_subdirectory(examples)
+if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(applications)
+    add_subdirectory(examples)
+endif()
 add_subdirectory(modules)
 
-if(CI_TESTING)
+if(XCORE_SDK_CI_TESTING)
     add_subdirectory(test)
 endif()
