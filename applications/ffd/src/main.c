@@ -28,7 +28,7 @@
 #include "gpio_ctrl/gpi_ctrl.h"
 
 
-volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
+volatile int mic_from_usb = appconfMIC_SRC_USB;//appconfMIC_SRC_DEFAULT;
 
 void audio_pipeline_input(void *input_app_data,
                           int32_t (*mic_audio_frame)[2],
@@ -82,6 +82,7 @@ void audio_pipeline_input(void *input_app_data,
 
 int audio_pipeline_output(void *output_app_data,
                           int32_t (*proc_audio_frame)[2],
+                          int32_t (*debug_audio_frame)[2],
                           int32_t (*mic_audio_frame)[2],
                           size_t frame_count)
 {
@@ -98,7 +99,7 @@ int audio_pipeline_output(void *output_app_data,
     usb_audio_send(intertile_ctx,
                   frame_count,
                   proc_audio_frame,
-                  NULL,
+                  debug_audio_frame,
                   mic_audio_frame);
 #endif
 

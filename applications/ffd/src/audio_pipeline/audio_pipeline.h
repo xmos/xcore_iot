@@ -34,6 +34,7 @@ void audio_pipeline_input(
 int audio_pipeline_output(
         void *output_app_data,
         int32_t (*proc_audio_frame)[2],
+        int32_t (*debug_audio_frame)[2],
         int32_t (*mic_audio_frame)[2],
         size_t frame_count);
 

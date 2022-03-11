@@ -202,26 +202,26 @@ void usb_audio_recv(rtos_intertile_t *intertile_ctx,
     }
 
     for (int i = 0; i < appconfAUDIO_PIPELINE_FRAME_ADVANCE; i++) {
-        if(reference_audio_frame != NULL) {
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 1
-            reference_audio_frame[i][0] = usb_audio_out_frame[i][0] << src_32_shift;
-#endif
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 2
-            reference_audio_frame[i][1] = usb_audio_out_frame[i][1] << src_32_shift;
-#endif
-        }
+//         if(reference_audio_frame != NULL) {
+// #if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 1
+//             reference_audio_frame[i][0] = usb_audio_out_frame[i][0] << src_32_shift;
+// #endif
+// #if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 2
+//             reference_audio_frame[i][1] = usb_audio_out_frame[i][1] << src_32_shift;
+// #endif
+//         }
 
         if (raw_mic_audio_frame != NULL) {
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 3
+// #if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 3
             raw_mic_audio_frame[i][0] = usb_audio_out_frame[i][2] << src_32_shift;
-#else
-            raw_mic_audio_frame[i][0] = 0;
-#endif
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 4
+// #else
+//             raw_mic_audio_frame[i][0] = 0;
+// #endif
+// #if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 4
             raw_mic_audio_frame[i][1] = usb_audio_out_frame[i][3] << src_32_shift;
-#else
-            raw_mic_audio_frame[i][1] = 0;
-#endif
+// #else
+//             raw_mic_audio_frame[i][1] = 0;
+// #endif
         }
     }
 }
