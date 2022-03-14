@@ -14,15 +14,14 @@
 /* App headers */
 #include "app_conf.h"
 #include "platform/driver_instances.h"
-#include "intent_model_runner.h"
+#include "inference_engine.h"
+#include "template_inf_eng.h"
 
-configSTACK_DEPTH_TYPE model_runner_manager_stack_size = 300;
-
-void model_runner_manager(void *args)
+void template_engine_task(void *args)
 {
     StreamBufferHandle_t input_queue = (StreamBufferHandle_t)args;
 
-    int32_t buf[appconfINTENT_FRAMES_PER_INFERENCE];
+    int32_t buf[appconfINFERENCE_FRAMES_PER_INFERENCE];
 
     /* Perform any initialization here */
 
@@ -30,7 +29,7 @@ void model_runner_manager(void *args)
     {
         /* Receive audio frames */
         uint8_t *buf_ptr = (uint8_t*)buf;
-        size_t buf_len = appconfINTENT_FRAMES_PER_INFERENCE * sizeof(int32_t);
+        size_t buf_len = appconfINFERENCE_FRAMES_PER_INFERENCE * sizeof(int32_t);
         do {
             size_t bytes_rxed = xStreamBufferReceive(input_queue,
                                                      buf_ptr,

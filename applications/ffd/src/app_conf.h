@@ -15,7 +15,7 @@
 #include "platform/driver_instances.h"
 #define FS_TILE_NO              FLASH_TILE_NO
 #define AUDIO_PIPELINE_TILE_NO  MICARRAY_TILE_NO
-#define INTENT_TILE_NO          FLASH_TILE_NO
+#define INFERENCE_TILE_NO          FLASH_TILE_NO
 
 /* Audio Pipeline Configuration */
 #define appconfAUDIO_CLOCK_FREQUENCY            MIC_ARRAY_CONFIG_MCLK_FREQ
@@ -26,11 +26,11 @@
 #define appconfAUDIO_PIPELINE_FRAME_ADVANCE     240
 
 /* Intent Engine Configuration */
-#define appconfINTENT_FRAME_BUFFER_MULT         4       /* intent buffer is this value * appconfAUDIO_FRAME_LENGTH */
-#define appconfINTENT_FRAMES_PER_INFERENCE      200
+#define appconfINFERENCE_FRAME_BUFFER_MULT         4       /* total buffer size is this value * appconfAUDIO_FRAME_LENGTH */
+#define appconfINFERENCE_FRAMES_PER_INFERENCE      200
 
-#ifndef appconfINTENT_ENABLED
-#define appconfINTENT_ENABLED   0
+#ifndef appconfINFERENCE_ENABLED
+#define appconfINFERENCE_ENABLED   1
 #endif
 
 #ifndef appconfI2S_ENABLED
@@ -77,17 +77,17 @@
 #define appconfI2S_INTERRUPT_CORE               5 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
 
 /* Task Priorities */
-#define appconfSTARTUP_TASK_PRIORITY              (configMAX_PRIORITIES / 2 + 5)
-#define appconfAUDIO_PIPELINE_TASK_PRIORITY    	  (configMAX_PRIORITIES / 2)
-#define appconfINTENT_MODEL_RUNNER_TASK_PRIORITY  (configMAX_PRIORITIES / 2)
-#define appconfGPIO_RPC_PRIORITY                  (configMAX_PRIORITIES/2)
-#define appconfGPIO_TASK_PRIORITY                 (configMAX_PRIORITIES/2 + 2)
-#define appconfI2C_TASK_PRIORITY                  (configMAX_PRIORITIES/2 + 2)
-#define appconfI2C_MASTER_RPC_PRIORITY            (configMAX_PRIORITIES/2)
-#define appconfUSB_MGR_TASK_PRIORITY              (configMAX_PRIORITIES/2 + 1)
-#define appconfUSB_AUDIO_TASK_PRIORITY            (configMAX_PRIORITIES/2 + 1)
-#define appconfSPI_TASK_PRIORITY                  (configMAX_PRIORITIES/2 + 1)
-#define appconfQSPI_FLASH_TASK_PRIORITY           (configMAX_PRIORITIES - 1)
+#define appconfSTARTUP_TASK_PRIORITY                (configMAX_PRIORITIES / 2 + 5)
+#define appconfAUDIO_PIPELINE_TASK_PRIORITY    	    (configMAX_PRIORITIES / 2)
+#define appconfINFERENCE_MODEL_RUNNER_TASK_PRIORITY (configMAX_PRIORITIES / 2)
+#define appconfGPIO_RPC_PRIORITY                    (configMAX_PRIORITIES/2)
+#define appconfGPIO_TASK_PRIORITY                   (configMAX_PRIORITIES/2 + 2)
+#define appconfI2C_TASK_PRIORITY                    (configMAX_PRIORITIES/2 + 2)
+#define appconfI2C_MASTER_RPC_PRIORITY              (configMAX_PRIORITIES/2)
+#define appconfUSB_MGR_TASK_PRIORITY                (configMAX_PRIORITIES/2 + 1)
+#define appconfUSB_AUDIO_TASK_PRIORITY              (configMAX_PRIORITIES/2 + 1)
+#define appconfSPI_TASK_PRIORITY                    (configMAX_PRIORITIES/2 + 1)
+#define appconfQSPI_FLASH_TASK_PRIORITY             (configMAX_PRIORITIES - 1)
 
 #include "app_conf_check.h"
 

@@ -5,7 +5,7 @@ file(GLOB_RECURSE APP_SOURCES   src/*.c )
 set(APP_INCLUDES src src/usb)
 
 add_subdirectory(soft_tapeout)
-add_subdirectory(intent_model_runner)
+add_subdirectory(inference_engines)
 
 #**********************
 # Flags
@@ -40,7 +40,7 @@ set(APP_LINK_OPTIONS
 set(APP_COMMON_LINK_LIBRARIES
     sdk::core
     sdk::rtos_freertos
-    sdk::app::intent_model_runner::template
+    sdk::app::inference_engine::template
     sdk::rtos_usb
     sdk::rtos::audio_drivers
     sdk::lib_src

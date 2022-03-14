@@ -23,7 +23,7 @@
 #include "usb_support.h"
 #include "usb_audio.h"
 #include "audio_pipeline/audio_pipeline.h"
-#include "intent_model_runner.h"
+#include "inference_engine.h"
 #include "fs_support.h"
 #include "gpio_ctrl/gpi_ctrl.h"
 
@@ -103,15 +103,8 @@ int audio_pipeline_output(void *output_app_data,
                   mic_audio_frame);
 #endif
 
-#if appconfINTENT_ENABLED
-#if INTENT_TILE_NO == AUDIO_PIPELINE_TILE_NO
-    intent_samples_send(frame_count,
-                        proc_audio_frame);
-#else
-    intent_intertile_samples_send(intertile_ctx,
-                                  frame_count,
-                                  proc_audio_frame);
-#endif
+#if appconfINFERENCE_ENABLED
+    inference_engine_sample_push((uint8_t *)proc_audio_frame, frame_count);
 #endif
 
     return AUDIO_PIPELINE_FREE_FRAME;
@@ -229,12 +222,8 @@ void startup_task(void *arg)
     rtos_fatfs_init(qspi_flash_ctx);
 #endif
 
-#if appconfINTENT_ENABLED && ON_TILE(INTENT_TILE_NO)
-#if INTENT_TILE_NO == AUDIO_PIPELINE_TILE_NO
-    intent_task_create(appconfINTENT_MODEL_RUNNER_TASK_PRIORITY);
-#else
-    intertile_intent_task_create(appconfINTENT_MODEL_RUNNER_TASK_PRIORITY);
-#endif
+#if appconfINFERENCE_ENABLED && ON_TILE(INFERENCE_TILE_NO)
+    inference_engine_create((void*)appconfINFERENCE_MODEL_RUNNER_TASK_PRIORITY);
 #endif
 
     mem_analysis();
