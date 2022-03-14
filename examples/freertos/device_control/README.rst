@@ -8,7 +8,7 @@ This example application demonstrates how to use device control over USB and I2C
 Building the firmware
 *********************
 
-Run the following commands to build the firmware:
+Run the following commands in the xcore_sdk root folder to build the firmware:
 
 .. tab:: Linux and Mac
 
