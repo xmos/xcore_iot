@@ -11,6 +11,7 @@
 #include "task.h"
 #include "stream_buffer.h"
 #include "queue.h"
+#include "event_groups.h"
 
 /* Library headers */
 #include "rtos_printf.h"
@@ -28,7 +29,7 @@
 #include "gpio_ctrl/gpi_ctrl.h"
 
 
-volatile int mic_from_usb = appconfMIC_SRC_USB;//appconfMIC_SRC_DEFAULT;
+volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
 
 void audio_pipeline_input(void *input_app_data,
                           int32_t (*mic_audio_frame)[2],
@@ -223,7 +224,8 @@ void startup_task(void *arg)
 #endif
 
 #if appconfINFERENCE_ENABLED && ON_TILE(INFERENCE_TILE_NO)
-    inference_engine_create(appconfINFERENCE_MODEL_RUNNER_TASK_PRIORITY, NULL);
+    EventGroupHandle_t egrp_inference = xEventGroupCreate();
+    inference_engine_create(appconfINFERENCE_MODEL_RUNNER_TASK_PRIORITY, egrp_inference);
 #endif
 
     mem_analysis();
