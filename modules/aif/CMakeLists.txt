@@ -1,4 +1,41 @@
 
+## Create library target for the tflite-micro microfrontend
+add_library(xcore_sdk_aif_microfrontend STATIC)
+
+## Source files
+set(MICROFRONTEND_PRIVATE_SOURCES
+  "kissfft/kiss_fft.c"
+  "kissfft/tools/kiss_fftr.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_lut.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window.c"
+  "tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window_util.c"
+)
+
+target_sources(xcore_sdk_aif_microfrontend
+    PRIVATE
+        ${MICROFRONTEND_PRIVATE_SOURCES}
+)
+target_include_directories(xcore_sdk_aif_microfrontend
+    PUBLIC
+        kissfft
+        tflite-micro
+)
+
+## Create an alias
+add_library(sdk::aif::microfrontend ALIAS xcore_sdk_aif_microfrontend)
+
 ## Create library target
 add_library(xcore_sdk_aif_tflite_micro_runtime INTERFACE)
 target_sources(xcore_sdk_aif_tflite_micro_runtime

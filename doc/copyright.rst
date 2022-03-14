@@ -16,6 +16,8 @@ HTTP Parser, Copyright (c) Joyent, Inc. and other Node contributors, licensed un
 
 JSMN JSON Parser, Copyright (c) 2010 Serge A. Zaitsev, licensed under the `MIT license <https://github.com/zserge/jsmn/blob/master/LICENSE>`__.
 
+KISS FFT, Copyright (c) 2003-2010 Mark Borgerding, licensed under the `SPDX-License-Identifier BSD-3-Clause <https://github.com/mborgerding/kissfft/blob/master/LICENSES/BSD-3-Clause>`__.  
+
 Mbed TLS library, Copyright (c) 2006-2018 ARM Limited, licensed under the `Apache License 2.0 <https://github.com/ARMmbed/mbedtls/blob/2a1d9332d55d1270084232e42df08fdb08129f1b/LICENSE>`__.
 
 Paho MQTT C/C++ client for Embedded platforms, Copyright (c) 2013 Eclipse Foundation, licensed under the `Eclipse Public License and Eclipse Distribution License <https://github.com/eclipse/paho.mqtt.embedded-c/blob/29ab2aa29c5e47794284376d7f8386cfd54c3eed/about.html>`__.
