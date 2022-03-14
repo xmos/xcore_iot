@@ -223,7 +223,7 @@ void startup_task(void *arg)
 #endif
 
 #if appconfINFERENCE_ENABLED && ON_TILE(INFERENCE_TILE_NO)
-    inference_engine_create((void*)appconfINFERENCE_MODEL_RUNNER_TASK_PRIORITY);
+    inference_engine_create(appconfINFERENCE_MODEL_RUNNER_TASK_PRIORITY, NULL);
 #endif
 
     mem_analysis();

@@ -4,6 +4,9 @@
 #ifndef KEYWORD_INF_ENG_H_
 #define KEYWORD_INF_ENG_H_
 
+typedef struct keyword_engine_args {
+} keyword_engine_args_t;
+
 void keyword_engine_task(void *args);
 
 void keyword_engine_task_create(unsigned priority);

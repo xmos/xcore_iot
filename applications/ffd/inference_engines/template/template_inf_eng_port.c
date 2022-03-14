@@ -17,14 +17,14 @@
 #include "inference_engine.h"
 #include "template_inf_eng.h"
 
-int32_t inference_engine_create(void *args)
+int32_t inference_engine_create(uint32_t priority, void *args)
 {
-    uint32_t prio = (uint32_t)args;
+    (void) args;
 #if appconfINFERENCE_ENABLED
 #if INFERENCE_TILE_NO == AUDIO_PIPELINE_TILE_NO
-    template_engine_task_create(prio);
+    template_engine_task_create(priority);
 #else
-    template_engine_intertile_task_create(prio);
+    template_engine_intertile_task_create(priority);
 #endif
 #endif
     return 0;
