@@ -4,7 +4,7 @@
 file(GLOB_RECURSE APP_SOURCES   src/*.c )
 set(APP_INCLUDES src src/usb)
 
-add_subdirectory(soft_tapeout)
+add_subdirectory(bsp_config)
 add_subdirectory(inference_engines)
 
 #**********************
