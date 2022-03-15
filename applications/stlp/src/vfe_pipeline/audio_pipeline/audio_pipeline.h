@@ -1,8 +1,9 @@
-// Copyright 2019-2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public Licence: Version 1.
+// Copyright (c) 2020 XMOS LIMITED. This Software is subject to the terms of the
+// XMOS Public License: Version 1
 
 #ifndef SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_
 #define SRC_AUDIO_PIPELINE_AUDIO_PIPELINE_H_
+
 
 typedef void * (*audio_pipeline_input_t)(void *data);
 typedef int (*audio_pipeline_output_t)(void *audio_frame_buffer, void *data);

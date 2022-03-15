@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /**
@@ -95,6 +95,13 @@ rtos_osal_status_t rtos_osal_thread_priority_get(rtos_osal_thread_t *thread, uns
 rtos_osal_status_t rtos_osal_thread_delete(rtos_osal_thread_t *thread)
 {
     vTaskDelete(thread_handle(thread));
+
+    return RTOS_OSAL_SUCCESS;
+}
+
+rtos_osal_status_t rtos_osal_task_yield(void)
+{
+    taskYIELD();
 
     return RTOS_OSAL_SUCCESS;
 }

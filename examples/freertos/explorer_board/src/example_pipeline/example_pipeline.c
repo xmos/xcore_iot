@@ -9,7 +9,7 @@
 
 /* App headers */
 #include "app_conf.h"
-#include "audio_pipeline/audio_pipeline.h"
+#include "generic_pipeline.h"
 #include "example_pipeline/example_pipeline.h"
 #include "platform/driver_instances.h"
 
@@ -114,9 +114,9 @@ void example_pipeline_init(UBaseType_t priority)
 {
 	const int stage_count = 2;
 
-	const audio_pipeline_stage_t stages[stage_count] = {
-			(audio_pipeline_stage_t) stage0,
-			(audio_pipeline_stage_t) stage1
+	const pipeline_stage_t stages[stage_count] = {
+			(pipeline_stage_t) stage0,
+			(pipeline_stage_t) stage1
 	};
 
 	const configSTACK_DEPTH_TYPE stage_stack_sizes[stage_count] = {
@@ -124,13 +124,13 @@ void example_pipeline_init(UBaseType_t priority)
 			configMINIMAL_STACK_SIZE
 	};
 
-	audio_pipeline_init(
+	generic_pipeline_init(
 			example_pipeline_input,
 			example_pipeline_output,
             NULL,
             NULL,
 			stages,
-			stage_stack_sizes,
+			(const size_t*) stage_stack_sizes,
 			priority,
 			stage_count);
 }

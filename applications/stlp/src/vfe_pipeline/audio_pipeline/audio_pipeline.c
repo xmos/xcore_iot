@@ -1,14 +1,12 @@
-// Copyright 2019-2021 XMOS LIMITED.
-// This Software is subject to the terms of the XMOS Public Licence: Version 1.
+// Copyright (c) 2020 XMOS LIMITED. This Software is subject to the terms of the
+// XMOS Public License: Version 1
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 
-/* App headers */
-#include "audio_pipeline/audio_pipeline.h"
-#include "platform/driver_instances.h"
+#include "audio_pipeline.h"
 
 typedef struct {
 	audio_pipeline_input_t input;
