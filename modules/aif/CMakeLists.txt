@@ -29,8 +29,13 @@ target_sources(xcore_sdk_aif_microfrontend
 )
 target_include_directories(xcore_sdk_aif_microfrontend
     PUBLIC
-        kissfft
         tflite-micro
+        kissfft
+)
+
+target_compile_definitions(xcore_sdk_aif_microfrontend
+    PUBLIC
+        FIXED_POINT=16
 )
 
 ## Create an alias

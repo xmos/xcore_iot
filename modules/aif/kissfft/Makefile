@@ -1,27 +1,4 @@
-KFVER=131
-
-DATATYPE ?= float
-
-PREFIX ?= /usr/local
-LIBDIR ?= $(PREFIX)/lib
-
-INSTALL ?= install
-
-ifeq ($(shell uname -s),Darwin)
-	SHARED_NAME := libkissfft.dylib
-	SHARED_FLAGS := -Wl,-install_name,$(SHARED_NAME)
-else
-	SHARED_NAME := libkissfft.so
-	SHARED_FLAGS := -Wl,-soname,$(SHARED_NAME)
-endif
-
-all:
-	gcc -Wall -fPIC -c *.c -Dkiss_fft_scalar=$(DATATYPE) -o kiss_fft.o
-	ar crus libkissfft.a kiss_fft.o
-	gcc -shared $(SHARED_FLAGS) -o $(SHARED_NAME) kiss_fft.o
-
-install: all
-	$(INSTALL) -Dt $(LIBDIR) $(SHARED_NAME)
+KFVER=130
 
 doc:
 	@echo "Start by reading the README file.  If you want to build and test lots of stuff, do a 'make testall'"
@@ -31,7 +8,6 @@ doc:
 
 testall:
 	# The simd and int32_t types may or may not work on your machine 
-	make -C test testcpp && test/testcpp
 	make -C test DATATYPE=simd CFLAGADD="$(CFLAGADD)" test
 	make -C test DATATYPE=int32_t CFLAGADD="$(CFLAGADD)" test
 	make -C test DATATYPE=int16_t CFLAGADD="$(CFLAGADD)" test
@@ -40,8 +16,8 @@ testall:
 	echo "all tests passed"
 
 tarball: clean
-	git archive --prefix=kissfft/ -o kissfft$(KFVER).tar.gz v$(KFVER)
-	git archive --prefix=kissfft/ -o kissfft$(KFVER).zip v$(KFVER)
+	hg archive -r v$(KFVER) -t tgz kiss_fft$(KFVER).tar.gz 
+	hg archive -r v$(KFVER) -t zip kiss_fft$(KFVER).zip
 
 clean:
 	cd test && make clean
