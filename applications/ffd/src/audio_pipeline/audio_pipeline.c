@@ -114,7 +114,7 @@ static void stage_vad_and_ic(frame_data_t *frame_data)
     int32_t ic_output[AP_CHANNELS][AP_FRAME_ADVANCE];
     /* The comms channel will be produced by two channels averaging */
     for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-        frame_data->samples_internal_fmt[1][i] = (frame_data->samples_internal_fmt[0][i] >> 1) + (frame_data->samples_internal_fmt[1][i] >> 1);
+        ic_output[1][i] = (frame_data->samples_internal_fmt[0][i] >> 1) + (frame_data->samples_internal_fmt[1][i] >> 1);
     }
 
     ic_filter(&ic_stage_state.state,
@@ -124,7 +124,7 @@ static void stage_vad_and_ic(frame_data_t *frame_data)
     uint8_t vad = vad_probability_voice(ic_output[0], &vad_stage_state.state);
     ic_adapt(&ic_stage_state.state, vad, ic_output[0]);
     frame_data->vad = vad;
-    memcpy(frame_data->samples_internal_fmt[0], ic_output[0], AP_FRAME_ADVANCE * sizeof(int32_t));
+    memcpy(frame_data->samples_internal_fmt, ic_output, AP_CHANNELS * AP_FRAME_ADVANCE * sizeof(int32_t));
 
 #if DEBUG
     memcpy(frame_data->ic_output[0], ic_output[0], AP_FRAME_ADVANCE * sizeof(int32_t));
