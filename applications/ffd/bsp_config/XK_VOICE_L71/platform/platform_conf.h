@@ -5,7 +5,7 @@
 #define PLATFORM_CONF_H_
 
 /*
- * Board support package for XVF3610
+ * Board support package for XK_VOICE_L71
  */
 
 #if __has_include("app_conf.h")

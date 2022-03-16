@@ -94,32 +94,11 @@ target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::ap
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
 unset(TARGET_NAME)
 
-set(TARGET_NAME tile0_application_ffd_dev2)
-add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
-target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::app::ffd::xvf3610_q60a)
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-unset(TARGET_NAME)
-
-set(TARGET_NAME tile1_application_ffd_dev2)
-add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
-target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC ${APP_COMMON_LINK_LIBRARIES} sdk::app::ffd::xvf3610_q60a)
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
-unset(TARGET_NAME)
-
 #**********************
 # Merge binaries
 #**********************
 merge_binaries(application_ffd tile0_application_ffd tile1_application_ffd 1)
 merge_binaries(application_ffd_dev tile0_application_ffd_dev tile1_application_ffd_dev 1)
-merge_binaries(application_ffd_dev2 tile0_application_ffd_dev2 tile1_application_ffd_dev2 1)
 
 #**********************
 # Create run and debug targets
@@ -129,6 +108,3 @@ create_debug_target(application_ffd)
 
 create_run_target(application_ffd_dev)
 create_debug_target(application_ffd_dev)
-
-create_run_target(application_ffd_dev2)
-create_debug_target(application_ffd_dev2)
