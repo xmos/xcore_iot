@@ -26,36 +26,57 @@
 #define AUDIO_BUFFER_STRIDE_LENGTH                                             \
   (AUDIO_BUFFER_LENGTH - appconfINFERENCE_FRAMES_PER_INFERENCE)
 
+static void initialize_features(struct FrontendState *state) {
+  struct FrontendConfig config;
+  size_t size_ms = (size_t)(((float)appconfINFERENCE_FRAMES_PER_INFERENCE /
+                             (float)appconfAUDIO_PIPELINE_SAMPLE_RATE) *
+                            1000 * NUM_FRAMES_PER_INFERENCE);
+
+  FrontendFillConfigWithDefaults(&config);
+  config.window.size_ms = size_ms;
+  config.window.step_size_ms = size_ms;
+  config.filterbank.num_channels = 16;
+  config.filterbank.lower_band_limit = 125.0;
+  config.filterbank.upper_band_limit = 7500.0;
+  config.noise_reduction.smoothing_bits = 10;
+  config.noise_reduction.even_smoothing = 0.025;
+  config.noise_reduction.odd_smoothing = 0.06;
+  config.noise_reduction.min_signal_remaining = 0.05;
+  config.pcan_gain_control.enable_pcan = false;
+  config.log_scale.enable_log = true;
+  config.log_scale.scale_shift = 6;
+
+  FrontendPopulateState(&config, state, appconfAUDIO_PIPELINE_SAMPLE_RATE);
+}
+
+static void compute_features(struct FrontendOutput *output,
+                             struct FrontendState *state, int16_t *audio16) {
+  size_t num_samples_read;
+
+  *output = FrontendProcessSamples(state, audio16, AUDIO_BUFFER_LENGTH,
+                                   &num_samples_read);
+
+  configASSERT(num_samples_read == AUDIO_BUFFER_LENGTH);
+  for (int i = 0; i < output->size; ++i) {
+    rtos_printf("%d ",
+                (int)output->values[i]); // Print the feature
+  }
+  rtos_printf("\n");
+}
+
 void keyword_engine_task(void *args) {
   StreamBufferHandle_t input_queue = (StreamBufferHandle_t)args;
 
-  struct FrontendConfig frontend_config;
-  struct FrontendState frontend_state;
+  struct FrontendState state;
   struct FrontendOutput frontend_output;
   int32_t buf[appconfINFERENCE_FRAMES_PER_INFERENCE];
   int16_t audio16[AUDIO_BUFFER_LENGTH];
   size_t audio16_index = 0;
-  size_t num_frontend_samples_read;
 
   /* Perform any initialization here */
-  FrontendFillConfigWithDefaults(&frontend_config);
-  frontend_config.window.size_ms = 30;
-  frontend_config.window.step_size_ms = 30;
-  frontend_config.noise_reduction.smoothing_bits = 10;
-  frontend_config.filterbank.num_channels = 16;
-  frontend_config.filterbank.lower_band_limit = 8.0;
-  frontend_config.filterbank.upper_band_limit = 450.0;
-  frontend_config.noise_reduction.smoothing_bits = 10;
-  frontend_config.noise_reduction.even_smoothing = 0.025;
-  frontend_config.noise_reduction.odd_smoothing = 0.06;
-  frontend_config.noise_reduction.min_signal_remaining = 0.05;
-  frontend_config.pcan_gain_control.enable_pcan = false;
-  frontend_config.log_scale.enable_log = true;
-  frontend_config.log_scale.scale_shift = 6;
-  FrontendPopulateState(&frontend_config, &frontend_state,
-                        appconfAUDIO_PIPELINE_SAMPLE_RATE);
+  initialize_features(&state);
 
-  // TODO: Sync frontend_config settings with the model training
+  // TODO: Sync config settings with the model training
   // TODO:  store input tensor of features [65*16]
   //             Need to "quantize" the features
   // TODO: call inference every TBD audio frames
@@ -76,16 +97,7 @@ void keyword_engine_task(void *args) {
       /* Audio is int32, convert to int16 */
       audio16[audio16_index] = (int16_t)(buf[i] >> 16);
       if (audio16_index++ == AUDIO_BUFFER_LENGTH) {
-        /* Compute features */
-        frontend_output = FrontendProcessSamples(&frontend_state, audio16,
-                                                 AUDIO_BUFFER_LENGTH,
-                                                 &num_frontend_samples_read);
-
-        configASSERT(num_frontend_samples_read == AUDIO_BUFFER_LENGTH);
-        for (int i = 0; i < frontend_output.size; ++i) {
-          printf("%d ",
-                 (int)frontend_output.values[i]); // Print the feature
-        }
+        compute_features(&frontend_output, &state, audio16);
 
         /* Shift the audio buffer left one stride*/
         memcpy(&audio16[0], &audio16[appconfINFERENCE_FRAMES_PER_INFERENCE],
