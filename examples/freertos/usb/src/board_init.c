@@ -159,11 +159,7 @@ void board_tile1_init(
     rtos_mic_array_init(
             mic_array_ctx,
             ~(1 << 0),
-            pdmclk,
-            pdmclk2,
-            p_mclk,
-            p_pdm_clk,
-            p_pdm_mics);
+            RTOS_MIC_ARRAY_SAMPLE_CHANNEL);
 #endif
 
     rtos_gpio_rpc_client_init(

@@ -120,11 +120,7 @@ static void mics_init(void)
     rtos_mic_array_init(
             mic_array_ctx,
             (1 << appconfPDM_MIC_IO_CORE),
-            PDM_CLKBLK_1,
-            PDM_CLKBLK_2,
-            PORT_MCLK,
-            PORT_PDM_CLK,
-            PORT_PDM_DATA);
+            RTOS_MIC_ARRAY_SAMPLE_CHANNEL);
 #endif
 }
 
