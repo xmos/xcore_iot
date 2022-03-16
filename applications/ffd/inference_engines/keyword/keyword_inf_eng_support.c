@@ -10,6 +10,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "stream_buffer.h"
+#include "event_groups.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -88,25 +89,27 @@ void keyword_engine_samples_send_local(
     }
 }
 
-void keyword_engine_task_create(unsigned priority)
+void keyword_engine_task_create(uint32_t priority, keyword_engine_args_t *args)
 {
-    samples_to_engine_stream_buf = xStreamBufferCreate(
-                                           2 * appconfAUDIO_PIPELINE_FRAME_ADVANCE,
+    args->samples_to_engine_stream_buf = xStreamBufferCreate(
+                                           appconfINFERENCE_FRAME_BUFFER_MULT * appconfAUDIO_PIPELINE_FRAME_ADVANCE,
                                            appconfINFERENCE_FRAMES_PER_INFERENCE);
+    samples_to_engine_stream_buf = args->samples_to_engine_stream_buf;  // TODO remove need for this to be static
 
     xTaskCreate((TaskFunction_t)keyword_engine_task,
                 "keyword_eng",
                 RTOS_THREAD_STACK_SIZE(keyword_engine_task),
-                samples_to_engine_stream_buf,
+                args,
                 uxTaskPriorityGet(NULL),
                 NULL);
 }
 
-void keyword_engine_intertile_task_create(uint32_t priority)
+void keyword_engine_intertile_task_create(uint32_t priority, keyword_engine_args_t *args)
 {
-    samples_to_engine_stream_buf = xStreamBufferCreate(
+    args->samples_to_engine_stream_buf = xStreamBufferCreate(
                                            appconfINFERENCE_FRAME_BUFFER_MULT * appconfAUDIO_PIPELINE_FRAME_ADVANCE,
                                            appconfINFERENCE_FRAMES_PER_INFERENCE);
+    samples_to_engine_stream_buf = args->samples_to_engine_stream_buf;  // TODO remove need for this to be static
 
     xTaskCreate((TaskFunction_t)keyword_engine_intertile_samples_in_task,
                 "inf_intertile_rx",
@@ -118,7 +121,7 @@ void keyword_engine_intertile_task_create(uint32_t priority)
     xTaskCreate((TaskFunction_t)keyword_engine_task,
                 "keyword_eng",
                 RTOS_THREAD_STACK_SIZE(keyword_engine_task),
-                samples_to_engine_stream_buf,
+                args,
                 uxTaskPriorityGet(NULL),
                 NULL);
 }

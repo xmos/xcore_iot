@@ -8,6 +8,7 @@
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
+#include "event_groups.h"
 #include "stream_buffer.h"
 #include "task.h"
 
@@ -64,19 +65,20 @@ static void compute_features(struct FrontendOutput *output,
   rtos_printf("\n");
 }
 
-void keyword_engine_task(void *args) {
-  StreamBufferHandle_t input_queue = (StreamBufferHandle_t)args;
+void keyword_engine_task(keyword_engine_args_t *args) {
+  StreamBufferHandle_t input_buf = args->samples_to_engine_stream_buf;
+  EventGroupHandle_t output_egrp = args->egrp_inference;
+
+  int32_t buf[appconfINFERENCE_FRAMES_PER_INFERENCE];
 
   struct FrontendState state;
   struct FrontendOutput frontend_output;
-  int32_t buf[appconfINFERENCE_FRAMES_PER_INFERENCE];
   int16_t audio16[AUDIO_BUFFER_LENGTH];
   size_t audio16_index = 0;
 
   /* Perform any initialization here */
   initialize_features(&state);
 
-  // TODO: Sync config settings with the model training
   // TODO:  store input tensor of features [65*16]
   //             Need to "quantize" the features
   // TODO: call inference every TBD audio frames
@@ -87,7 +89,7 @@ void keyword_engine_task(void *args) {
     size_t buf_len = appconfINFERENCE_FRAMES_PER_INFERENCE * sizeof(int32_t);
     do {
       size_t bytes_rxed =
-          xStreamBufferReceive(input_queue, buf_ptr, buf_len, portMAX_DELAY);
+          xStreamBufferReceive(input_buf, buf_ptr, buf_len, portMAX_DELAY);
 
       buf_len -= bytes_rxed;
       buf_ptr += bytes_rxed;
@@ -108,5 +110,21 @@ void keyword_engine_task(void *args) {
 
     /* Perform inference here */
     // rtos_printf("inference\n");
+
+    /* Set output event bits */
+    // int output_test = 0;
+    // switch (output_test) {
+    // default:
+    // case 0:
+    //   xEventGroupSetBits(output_egrp, INFERENCE_BIT_A | INFERENCE_BIT_B);
+    //   break;
+    // case 1:
+    //   xEventGroupSetBits(output_egrp, INFERENCE_BIT_A);
+    //   break;
+    // case 2:
+    //   xEventGroupSetBits(output_egrp, INFERENCE_BIT_B);
+    //   break;
+    // }
+    // output_test = (output_test >= 2) ? 0 : output_test + 1;
   }
 }

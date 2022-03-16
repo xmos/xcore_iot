@@ -23,20 +23,11 @@
 #include "app_conf.h"
 #include "audio_pipeline/audio_pipeline.h"
 
-#define DEBUG 1
-
 typedef struct {
     ap_ch_pair_t samples[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
     ap_ch_pair_t debug_samples[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
     int32_t samples_internal_fmt[AP_CHANNELS][AP_FRAME_ADVANCE];
     ap_ch_pair_t mic_samples_passthrough[AP_CHANNELS][AP_FRAME_ADVANCE];
-
-#if DEBUG
-    int32_t ic_output[AP_CHANNELS][AP_FRAME_ADVANCE];
-    int32_t ns_output[AP_CHANNELS][AP_FRAME_ADVANCE];
-    int32_t agc_output[AP_CHANNELS][AP_FRAME_ADVANCE];
-#endif
-
     uint8_t vad;
 } frame_data_t;
 
@@ -84,8 +75,8 @@ static void *audio_pipeline_input_i(void *input_app_data)
 
     /* Convert to audiopipeline specific format */
     for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-        frame_data->samples_internal_fmt[0][i] = frame_data->samples[0][i].ch_a * 64;
-        frame_data->samples_internal_fmt[1][i] = frame_data->samples[0][i].ch_b * 64;
+        frame_data->samples_internal_fmt[0][i] = frame_data->samples[0][i].ch_a;
+        frame_data->samples_internal_fmt[1][i] = frame_data->samples[0][i].ch_b;
     }
 
     return frame_data;
@@ -98,8 +89,8 @@ static int audio_pipeline_output_i(frame_data_t *frame_data,
     for(int i=0; i<AP_FRAME_ADVANCE; i++) {
         frame_data->samples[0][i].ch_a = frame_data->samples_internal_fmt[0][i];
         frame_data->samples[0][i].ch_b = frame_data->samples_internal_fmt[1][i];
-        frame_data->debug_samples[0][i].ch_a = frame_data->ic_output[0][i];
-        frame_data->debug_samples[0][i].ch_b = frame_data->ns_output[0][i];
+        frame_data->debug_samples[0][i].ch_a = 0;
+        frame_data->debug_samples[0][i].ch_b = 0;
     }
 
     return audio_pipeline_output(output_app_data,
@@ -114,7 +105,7 @@ static void stage_vad_and_ic(frame_data_t *frame_data)
     int32_t ic_output[AP_CHANNELS][AP_FRAME_ADVANCE];
     /* The comms channel will be produced by two channels averaging */
     for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-        frame_data->samples_internal_fmt[1][i] = (frame_data->samples_internal_fmt[0][i] >> 1) + (frame_data->samples_internal_fmt[1][i] >> 1);
+        ic_output[1][i] = (frame_data->samples_internal_fmt[0][i] >> 1) + (frame_data->samples_internal_fmt[1][i] >> 1);
     }
 
     ic_filter(&ic_stage_state.state,
@@ -124,12 +115,7 @@ static void stage_vad_and_ic(frame_data_t *frame_data)
     uint8_t vad = vad_probability_voice(ic_output[0], &vad_stage_state.state);
     ic_adapt(&ic_stage_state.state, vad, ic_output[0]);
     frame_data->vad = vad;
-    memcpy(frame_data->samples_internal_fmt[0], ic_output[0], AP_FRAME_ADVANCE * sizeof(int32_t));
-
-#if DEBUG
-    memcpy(frame_data->ic_output[0], ic_output[0], AP_FRAME_ADVANCE * sizeof(int32_t));
-    memcpy(frame_data->ic_output[1], ic_output[1], AP_FRAME_ADVANCE * sizeof(int32_t));
-#endif
+    memcpy(frame_data->samples_internal_fmt, ic_output, AP_CHANNELS * AP_FRAME_ADVANCE * sizeof(int32_t));
 }
 
 static void stage_ns(frame_data_t *frame_data)
@@ -142,11 +128,6 @@ static void stage_ns(frame_data_t *frame_data)
                     frame_data->samples_internal_fmt[ch],
                     frame_data->samples_internal_fmt[ch]);
     }
-
-#if DEBUG
-    memcpy(frame_data->ns_output[0], frame_data->samples_internal_fmt[0], AP_FRAME_ADVANCE * sizeof(int32_t));
-    memcpy(frame_data->ns_output[1], frame_data->samples_internal_fmt[1], AP_FRAME_ADVANCE * sizeof(int32_t));
-#endif
 }
 
 static void stage_agc(frame_data_t *frame_data)
@@ -162,11 +143,6 @@ static void stage_agc(frame_data_t *frame_data)
                 frame_data->samples_internal_fmt[ch],
                 &agc_stage_state.md);
     }
-
-#if DEBUG
-    memcpy(frame_data->agc_output[0], frame_data->samples_internal_fmt[0], AP_FRAME_ADVANCE * sizeof(int32_t));
-    memcpy(frame_data->agc_output[1], frame_data->samples_internal_fmt[1], AP_FRAME_ADVANCE * sizeof(int32_t));
-#endif
 }
 
 static void initialize_pipeline_stages(void) {
