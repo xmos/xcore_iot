@@ -27,6 +27,8 @@
 #include "inference_engine.h"
 #include "fs_support.h"
 #include "gpio_ctrl/gpi_ctrl.h"
+#include "keyword_inf_eng.h"
+#include "inference_hmi/inference_hmi.h"
 
 
 volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
@@ -215,17 +217,19 @@ void startup_task(void *arg)
     gpio_gpi_init(gpio_ctx_t0);
 #endif
 
-#if ON_TILE(AUDIO_PIPELINE_TILE_NO)
-    audio_pipeline_init(NULL, NULL);
-#endif
-
 #if ON_TILE(FS_TILE_NO)
     rtos_fatfs_init(qspi_flash_ctx);
 #endif
 
 #if appconfINFERENCE_ENABLED && ON_TILE(INFERENCE_TILE_NO)
-    EventGroupHandle_t egrp_inference = xEventGroupCreate();
-    inference_engine_create(appconfINFERENCE_MODEL_RUNNER_TASK_PRIORITY, egrp_inference);
+    keyword_engine_args_t *kw_eng_args = pvPortMalloc( sizeof(keyword_engine_args_t) );
+    kw_eng_args->egrp_inference = xEventGroupCreate();
+    inference_engine_create(appconfINFERENCE_MODEL_RUNNER_TASK_PRIORITY, kw_eng_args);
+    inference_hmi_create(appconfINFERENCE_HMI_TASK_PRIORITY, kw_eng_args->egrp_inference);
+#endif
+
+#if ON_TILE(AUDIO_PIPELINE_TILE_NO)
+    audio_pipeline_init(NULL, NULL);
 #endif
 
     mem_analysis();

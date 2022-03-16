@@ -89,8 +89,8 @@ static int audio_pipeline_output_i(frame_data_t *frame_data,
     for(int i=0; i<AP_FRAME_ADVANCE; i++) {
         frame_data->samples[0][i].ch_a = frame_data->samples_internal_fmt[0][i];
         frame_data->samples[0][i].ch_b = frame_data->samples_internal_fmt[1][i];
-        frame_data->debug_samples[0][i].ch_a = frame_data->ic_output[0][i];
-        frame_data->debug_samples[0][i].ch_b = frame_data->ns_output[0][i];
+        frame_data->debug_samples[0][i].ch_a = 0;
+        frame_data->debug_samples[0][i].ch_b = 0;
     }
 
     return audio_pipeline_output(output_app_data,
