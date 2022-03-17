@@ -44,7 +44,7 @@ struct rtos_mic_array_struct {
     rtos_driver_rpc_t *rpc_config;
 
     __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
-    size_t (*rx)(rtos_mic_array_t *, int32_t sample_buf[][MIC_ARRAY_CONFIG_MIC_COUNT], size_t, unsigned);
+    size_t (*rx)(rtos_mic_array_t *, int32_t **sample_buf, size_t, unsigned);
 
     streaming_channel_t c_pdm_mic;
     rtos_mic_array_format_t format;
@@ -83,7 +83,10 @@ struct rtos_mic_array_struct {
  * \param sample_buf     A buffer to copy the received sample frames into.
  * \param frame_count    The number of frames to receive from the buffer.
  *                       This must be less than or equal to the size of the
- *                       buffer specified to rtos_mic_array_start().
+ *                       buffer specified to rtos_mic_array_start() if in
+ *                       RTOS_MIC_ARRAY_SAMPLE_CHANNEL mode.  This must be equal
+ *                       to MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME if in
+ *                       RTOS_MIC_ARRAY_CHANNEL_SAMPLE mode.
  * \param timeout        The amount of time to wait before the requested number
  *                       of frames becomes available.
  *
@@ -91,7 +94,7 @@ struct rtos_mic_array_struct {
  */
 inline size_t rtos_mic_array_rx(
         rtos_mic_array_t *ctx,
-        int32_t sample_buf[][MIC_ARRAY_CONFIG_MIC_COUNT],
+        int32_t **sample_buf,
         size_t frame_count,
         unsigned timeout)
 {
