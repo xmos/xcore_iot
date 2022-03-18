@@ -84,8 +84,8 @@ static void i2s_start(void)
             i2s_ctx,
             rtos_i2s_mclk_bclk_ratio(appconfAUDIO_CLOCK_FREQUENCY, appconfPIPELINE_AUDIO_SAMPLE_RATE),
             I2S_MODE_I2S,
-            2.2 * appconfAUDIO_FRAME_LENGTH,
-            1.2 * appconfAUDIO_FRAME_LENGTH,
+            2.2 * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME,
+            1.2 * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME,
             appconfI2S_INTERRUPT_CORE);
 #endif
 }

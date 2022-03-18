@@ -30,11 +30,11 @@
 #include "keyword_inf_eng.h"
 #include "inference_hmi/inference_hmi.h"
 
-
 volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
 
 void audio_pipeline_input(void *input_app_data,
-                          int32_t (*mic_audio_frame)[2],
+                          int32_t **input_audio_frames,
+                          size_t ch_count,
                           size_t frame_count)
 {
     (void) input_app_data;
@@ -43,12 +43,12 @@ void audio_pipeline_input(void *input_app_data,
     while (!flushed) {
         size_t received;
         received = rtos_mic_array_rx(mic_array_ctx,
-                                     mic_audio_frame,
+                                     input_audio_frames,
                                      frame_count,
                                      0);
         if (received == 0) {
             rtos_mic_array_rx(mic_array_ctx,
-                              mic_audio_frame,
+                              input_audio_frames,
                               frame_count,
                               portMAX_DELAY);
             flushed = 1;
@@ -62,15 +62,15 @@ void audio_pipeline_input(void *input_app_data,
      * receive all zeros if no frame is available yet.
      */
     rtos_mic_array_rx(mic_array_ctx,
-                      mic_audio_frame,
+                      input_audio_frames,
                       frame_count,
                       portMAX_DELAY);
 
 #if appconfUSB_ENABLED
-    int32_t (*usb_mic_audio_frame)[2] = NULL;
+    int32_t **usb_mic_audio_frame = NULL;
 
     if (mic_from_usb) {
-        usb_mic_audio_frame = mic_audio_frame;
+        usb_mic_audio_frame = input_audio_frames;
     }
 
     /*
@@ -78,118 +78,45 @@ void audio_pipeline_input(void *input_app_data,
      */
     usb_audio_recv(intertile_ctx,
                    frame_count,
-                   NULL,
-                   usb_mic_audio_frame);
+                   usb_mic_audio_frame,
+                   ch_count);
 #endif
 }
 
 int audio_pipeline_output(void *output_app_data,
-                          int32_t (*proc_audio_frame)[2],
-                          int32_t (*debug_audio_frame)[2],
-                          int32_t (*mic_audio_frame)[2],
+                          int32_t **output_audio_frames,
+                          size_t ch_count,
                           size_t frame_count)
 {
     (void) output_app_data;
 
 #if appconfI2S_ENABLED
+    /* I2S expects sample channel format */
+    int32_t tmp[appconfAUDIO_PIPELINE_FRAME_ADVANCE][appconfAUDIO_PIPELINE_CHANNELS];
+    for (int j=0; j<appconfAUDIO_PIPELINE_FRAME_ADVANCE; j++) {
+        /* ASR output is first */
+        tmp[j][0] = output_audio_frames[j];
+        tmp[j][1] = output_audio_frames[j];
+    }
+
     rtos_i2s_tx(i2s_ctx,
-                (int32_t*) proc_audio_frame,
+                (int32_t*) tmp,
                 frame_count,
                 portMAX_DELAY);
 #endif
 
 #if appconfUSB_ENABLED
     usb_audio_send(intertile_ctx,
-                  frame_count,
-                  proc_audio_frame,
-                  debug_audio_frame,
-                  mic_audio_frame);
+                frame_count,
+                output_audio_frames,
+                4);
 #endif
 
 #if appconfINFERENCE_ENABLED
-    inference_engine_sample_push((uint8_t *)proc_audio_frame, frame_count);
+    inference_engine_sample_push((uint8_t *)output_audio_frames, frame_count);
 #endif
 
     return AUDIO_PIPELINE_FREE_FRAME;
-}
-
-RTOS_I2S_APP_SEND_FILTER_CALLBACK_ATTR
-size_t i2s_send_upsample_cb(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *send_buf, size_t samples_available)
-{
-    static int i;
-    static int32_t src_data[2][SRC_FF3V_FIR_TAPS_PER_PHASE] __attribute__((aligned(8)));
-
-    xassert(i2s_frame_size == 2);
-
-    switch (i) {
-    case 0:
-        i = 1;
-        if (samples_available >= 2) {
-            i2s_frame[0] = src_us3_voice_input_sample(src_data[0], src_ff3v_fir_coefs[2], send_buf[0]);
-            i2s_frame[1] = src_us3_voice_input_sample(src_data[1], src_ff3v_fir_coefs[2], send_buf[1]);
-            return 2;
-        } else {
-            i2s_frame[0] = src_us3_voice_input_sample(src_data[0], src_ff3v_fir_coefs[2], 0);
-            i2s_frame[1] = src_us3_voice_input_sample(src_data[1], src_ff3v_fir_coefs[2], 0);
-            return 0;
-        }
-    case 1:
-        i = 2;
-        i2s_frame[0] = src_us3_voice_get_next_sample(src_data[0], src_ff3v_fir_coefs[1]);
-        i2s_frame[1] = src_us3_voice_get_next_sample(src_data[1], src_ff3v_fir_coefs[1]);
-        return 0;
-    case 2:
-        i = 0;
-        i2s_frame[0] = src_us3_voice_get_next_sample(src_data[0], src_ff3v_fir_coefs[0]);
-        i2s_frame[1] = src_us3_voice_get_next_sample(src_data[1], src_ff3v_fir_coefs[0]);
-        return 0;
-    default:
-        xassert(0);
-        return 0;
-    }
-}
-
-RTOS_I2S_APP_RECEIVE_FILTER_CALLBACK_ATTR
-size_t i2s_send_downsample_cb(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *receive_buf, size_t sample_spaces_free)
-{
-    static int i;
-    static int64_t sum[2];
-    static int32_t src_data[2][SRC_FF3V_FIR_NUM_PHASES][SRC_FF3V_FIR_TAPS_PER_PHASE] __attribute__((aligned (8)));
-
-    xassert(i2s_frame_size == 2);
-
-    switch (i) {
-    case 0:
-        i = 1;
-        sum[0] = src_ds3_voice_add_sample(0, src_data[0][0], src_ff3v_fir_coefs[0], i2s_frame[0]);
-        sum[1] = src_ds3_voice_add_sample(0, src_data[1][0], src_ff3v_fir_coefs[0], i2s_frame[1]);
-        return 0;
-    case 1:
-        i = 2;
-        sum[0] = src_ds3_voice_add_sample(sum[0], src_data[0][1], src_ff3v_fir_coefs[1], i2s_frame[0]);
-        sum[1] = src_ds3_voice_add_sample(sum[1], src_data[1][1], src_ff3v_fir_coefs[1], i2s_frame[1]);
-        return 0;
-    case 2:
-        i = 0;
-        if (sample_spaces_free >= 2) {
-            receive_buf[0] = src_ds3_voice_add_final_sample(sum[0], src_data[0][2], src_ff3v_fir_coefs[2], i2s_frame[0]);
-            receive_buf[1] = src_ds3_voice_add_final_sample(sum[1], src_data[1][2], src_ff3v_fir_coefs[2], i2s_frame[1]);
-            return 2;
-        } else {
-            (void) src_ds3_voice_add_final_sample(sum[0], src_data[0][2], src_ff3v_fir_coefs[2], i2s_frame[0]);
-            (void) src_ds3_voice_add_final_sample(sum[1], src_data[1][2], src_ff3v_fir_coefs[2], i2s_frame[1]);
-            return 0;
-        }
-    default:
-        xassert(0);
-        return 0;
-    }
-}
-
-void i2s_rate_conversion_enable(void)
-{
-    rtos_i2s_send_filter_cb_set(i2s_ctx, i2s_send_upsample_cb, NULL);
-    rtos_i2s_receive_filter_cb_set(i2s_ctx, i2s_send_downsample_cb, NULL);
 }
 
 void vApplicationMallocFailedHook(void)

@@ -23,20 +23,19 @@
 #include "app_conf.h"
 #include "audio_pipeline/audio_pipeline.h"
 
+/* Note: Changing the order here will effect the channel order for
+ * audio_pipeline_input() and audio_pipeline_output()
+ */
 typedef struct {
-    ap_ch_pair_t samples[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
-    ap_ch_pair_t debug_samples[AP_CHANNEL_PAIRS][AP_FRAME_ADVANCE];
-    int32_t samples_internal_fmt[AP_CHANNELS][AP_FRAME_ADVANCE];
-    ap_ch_pair_t mic_samples_passthrough[AP_CHANNELS][AP_FRAME_ADVANCE];
+    int32_t samples[appconfAUDIO_PIPELINE_CHANNELS][appconfAUDIO_PIPELINE_FRAME_ADVANCE];
+    int32_t mic_samples_passthrough[appconfAUDIO_PIPELINE_CHANNELS][appconfAUDIO_PIPELINE_FRAME_ADVANCE];
+
     uint8_t vad;
 } frame_data_t;
 
-#if AP_FRAME_ADVANCE != 240
+#if appconfAUDIO_PIPELINE_FRAME_ADVANCE != 240
 #error This pipeline is only configured for 240 frame advance
 #endif
-
-#define AP_MAX_Y_CHANNELS (2)
-#define AP_MAX_X_CHANNELS (2)
 
 typedef struct ic_stage_ctx {
     ic_state_t state;
@@ -47,12 +46,12 @@ typedef struct vad_stage_ctx {
 } vad_stage_ctx_t;
 
 typedef struct ns_stage_ctx {
-    ns_state_t state[AP_MAX_Y_CHANNELS];
+    ns_state_t state;
 } ns_stage_ctx_t;
 
 typedef struct agc_stage_ctx {
     agc_meta_data_t md;
-    agc_state_t state[AP_CHANNELS];
+    agc_state_t state;
 } agc_stage_ctx_t;
 
 static ic_stage_ctx_t ic_stage_state = {};
@@ -67,17 +66,12 @@ static void *audio_pipeline_input_i(void *input_app_data)
     frame_data = pvPortMalloc(sizeof(frame_data_t));
 
     audio_pipeline_input(input_app_data,
-                       (int32_t(*)[2])frame_data->samples,
-                       AP_FRAME_ADVANCE);
+                       frame_data->samples,
+                       2,
+                       appconfAUDIO_PIPELINE_FRAME_ADVANCE);
     frame_data->vad = 0;
 
     memcpy(frame_data->mic_samples_passthrough, frame_data->samples, sizeof(frame_data->mic_samples_passthrough));
-
-    /* Convert to audiopipeline specific format */
-    for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-        frame_data->samples_internal_fmt[0][i] = frame_data->samples[0][i].ch_a;
-        frame_data->samples_internal_fmt[1][i] = frame_data->samples[0][i].ch_b;
-    }
 
     return frame_data;
 }
@@ -85,73 +79,57 @@ static void *audio_pipeline_input_i(void *input_app_data)
 static int audio_pipeline_output_i(frame_data_t *frame_data,
                                    void *output_app_data)
 {
-    /* Convert out of audiopipeline specific format */
-    for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-        frame_data->samples[0][i].ch_a = frame_data->samples_internal_fmt[0][i];
-        frame_data->samples[0][i].ch_b = frame_data->samples_internal_fmt[1][i];
-        frame_data->debug_samples[0][i].ch_a = 0;
-        frame_data->debug_samples[0][i].ch_b = 0;
-    }
-
     return audio_pipeline_output(output_app_data,
-                               (int32_t(*)[2])frame_data->samples,
-                               (int32_t(*)[2])frame_data->debug_samples,
-                               (int32_t(*)[2])frame_data->mic_samples_passthrough,
-                               AP_FRAME_ADVANCE);
+                               frame_data->samples,
+                               4,
+                               appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 }
 
 static void stage_vad_and_ic(frame_data_t *frame_data)
 {
-    int32_t ic_output[AP_CHANNELS][AP_FRAME_ADVANCE];
-    /* The comms channel will be produced by two channels averaging */
-    for(int i=0; i<AP_FRAME_ADVANCE; i++) {
-        ic_output[1][i] = (frame_data->samples_internal_fmt[0][i] >> 1) + (frame_data->samples_internal_fmt[1][i] >> 1);
-    }
+    int32_t ic_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
 
     ic_filter(&ic_stage_state.state,
-        frame_data->samples_internal_fmt[0],
-        frame_data->samples_internal_fmt[1],
-        ic_output[0]);
-    uint8_t vad = vad_probability_voice(ic_output[0], &vad_stage_state.state);
-    ic_adapt(&ic_stage_state.state, vad, ic_output[0]);
+              frame_data->samples[0],
+              frame_data->samples[1],
+              ic_output);
+    uint8_t vad = vad_probability_voice(ic_output, &vad_stage_state.state);
+    ic_adapt(&ic_stage_state.state, vad, ic_output);
     frame_data->vad = vad;
-    memcpy(frame_data->samples_internal_fmt, ic_output, AP_CHANNELS * AP_FRAME_ADVANCE * sizeof(int32_t));
+    memcpy(frame_data->samples, ic_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
 }
 
 static void stage_ns(frame_data_t *frame_data)
 {
-    configASSERT(NS_FRAME_ADVANCE == AP_FRAME_ADVANCE);
-
-    for(int ch=0; ch<AP_CHANNELS; ch++) {
-        ns_process_frame(
-                    &ns_stage_state.state[ch],
-                    frame_data->samples_internal_fmt[ch],
-                    frame_data->samples_internal_fmt[ch]);
-    }
+    int32_t ns_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
+    configASSERT(NS_FRAME_ADVANCE == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
+    ns_process_frame(
+                &ns_stage_state.state,
+                ns_output,
+                frame_data->samples[0]);
+    memcpy(frame_data->samples, ns_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
 }
 
 static void stage_agc(frame_data_t *frame_data)
 {
-    configASSERT(AGC_FRAME_ADVANCE == AP_FRAME_ADVANCE);
+    int32_t agc_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
+    configASSERT(AGC_FRAME_ADVANCE == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 
     agc_stage_state.md.vad_flag = (frame_data->vad > AGC_VAD_THRESHOLD);
 
-    for(int ch=0; ch<AP_CHANNELS; ch++) {
-        agc_process_frame(
-                &agc_stage_state.state[ch],
-                frame_data->samples_internal_fmt[ch],
-                frame_data->samples_internal_fmt[ch],
-                &agc_stage_state.md);
-    }
+    agc_process_frame(
+            &agc_stage_state.state,
+            agc_output,
+            frame_data->samples[0],
+            &agc_stage_state.md);
+    memcpy(frame_data->samples, agc_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
 }
 
 static void initialize_pipeline_stages(void) {
     ic_init(&ic_stage_state.state);
     vad_init(&vad_stage_state.state);
-    for(int ch = 0; ch < AP_MAX_Y_CHANNELS; ch++){
-        ns_init(&ns_stage_state.state[ch]);
-        agc_init(&agc_stage_state.state[ch], &AGC_PROFILE_ASR);
-    }
+    ns_init(&ns_stage_state.state);
+    agc_init(&agc_stage_state.state, &AGC_PROFILE_ASR);
     agc_stage_state.md.vad_flag = AGC_META_DATA_NO_VAD;
     agc_stage_state.md.aec_ref_power = AGC_META_DATA_NO_AEC;
     agc_stage_state.md.aec_corr_factor = AGC_META_DATA_NO_AEC;
