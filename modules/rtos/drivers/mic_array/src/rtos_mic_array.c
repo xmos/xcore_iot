@@ -1,7 +1,7 @@
 // Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#define DEBUG_UNIT RTOS_MIC_ARRAY
+// #define DEBUG_UNIT RTOS_MIC_ARRAY
 
 #include <string.h>
 
@@ -84,13 +84,17 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
 __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_local_rx(
         rtos_mic_array_t *ctx,
-        int32_t sample_buf[][MIC_ARRAY_CONFIG_MIC_COUNT],
+        int32_t **sample_buf,
         size_t frame_count,
         unsigned timeout)
 {
     size_t frames_recvd = 0;
     size_t words_remaining = frame_count * MIC_ARRAY_CONFIG_MIC_COUNT;
     int32_t *sample_buf_ptr = (int32_t *) sample_buf;
+
+    if(ctx->format == RTOS_MIC_ARRAY_CHANNEL_SAMPLE) {
+        xassert(frame_count == MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME);
+    }
 
     xassert(words_remaining <= ctx->recv_buffer.buf_size);
     if (words_remaining > ctx->recv_buffer.buf_size) {

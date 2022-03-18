@@ -7,18 +7,6 @@
 #include <stdint.h>
 #include "app_conf.h"
 
-typedef struct {
-    int32_t ch_a;
-    int32_t ch_b;
-} ap_ch_pair_t;
-
-#define AP_FRAME_ADVANCE          240
-#define AP_CHANNEL_PAIRS          1
-#define AP_CHANNELS               2
-
-#define AUDIO_PIPELINE_AUDIO_SAMPLE_RATE  appconfAUDIO_PIPELINE_SAMPLE_RATE
-#define AUDIO_PIPELINE_AUDIO_FRAME_LENGTH appconfAUDIO_PIPELINE_FRAME_ADVANCE
-
 #define AUDIO_PIPELINE_DONT_FREE_FRAME 0
 #define AUDIO_PIPELINE_FREE_FRAME      1
 
@@ -28,14 +16,14 @@ void audio_pipeline_init(
 
 void audio_pipeline_input(
         void *input_app_data,
-        int32_t (*mic_audio_frame)[2],
+        int32_t **input_audio_frames,
+        size_t ch_count,
         size_t frame_count);
 
 int audio_pipeline_output(
         void *output_app_data,
-        int32_t (*proc_audio_frame)[2],
-        int32_t (*debug_audio_frame)[2],
-        int32_t (*mic_audio_frame)[2],
+        int32_t **output_audio_frames,
+        size_t ch_count,
         size_t frame_count);
 
 #endif /* AUDIO_PIPELINE_H_ */

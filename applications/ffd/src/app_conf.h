@@ -21,20 +21,20 @@
 #define appconfAUDIO_CLOCK_FREQUENCY            MIC_ARRAY_CONFIG_MCLK_FREQ
 #define appconfPDM_CLOCK_FREQUENCY              MIC_ARRAY_CONFIG_PDM_FREQ
 #define appconfAUDIO_PIPELINE_SAMPLE_RATE       16000
-#define appconfAUDIO_FRAME_LENGTH            	MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
-#define appconfAUDIO_PIPELINE_CHANNEL_PAIRS     1
-#define appconfAUDIO_PIPELINE_FRAME_ADVANCE     240
+#define appconfAUDIO_PIPELINE_CHANNELS          MIC_ARRAY_CONFIG_MIC_COUNT
+/* If in channel sample format, appconfAUDIO_PIPELINE_FRAME_ADVANCE == MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME*/
+#define appconfAUDIO_PIPELINE_FRAME_ADVANCE     MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
 
 /* Intent Engine Configuration */
-#define appconfINFERENCE_FRAME_BUFFER_MULT         4       /* total buffer size is this value * appconfAUDIO_FRAME_LENGTH */
-#define appconfINFERENCE_FRAMES_PER_INFERENCE      240
+#define appconfINFERENCE_FRAME_BUFFER_MULT      4       /* total buffer size is this value * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME */
+#define appconfINFERENCE_FRAMES_PER_INFERENCE   200
 
 #ifndef appconfINFERENCE_ENABLED
 #define appconfINFERENCE_ENABLED   1
 #endif
 
 #ifndef appconfI2S_ENABLED
-#define appconfI2S_ENABLED   1
+#define appconfI2S_ENABLED   0
 #endif
 
 #ifndef appconfI2S_AUDIO_SAMPLE_RATE
@@ -42,7 +42,7 @@
 #endif
 
 #ifndef appconfUSB_ENABLED
-#define appconfUSB_ENABLED   1
+#define appconfUSB_ENABLED   0
 #endif
 
 #ifndef appconfUSB_AUDIO_SAMPLE_RATE

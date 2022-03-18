@@ -69,10 +69,6 @@
 #define appconfPIPELINE_AUDIO_SAMPLE_RATE   16000
 #endif /* appconfPIPELINE_AUDIO_SAMPLE_RATE */
 
-#ifndef appconfAUDIO_FRAME_LENGTH
-#define appconfAUDIO_FRAME_LENGTH           MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
-#endif /* appconfAUDIO_FRAME_LENGTH */
-
 /*****************************************/
 /*  I/O Task Priorities                  */
 /*****************************************/
