@@ -26,16 +26,17 @@
   (appconfINFERENCE_FRAMES_PER_INFERENCE * NUM_FRAMES_PER_INFERENCE)
 #define AUDIO_BUFFER_STRIDE_LENGTH                                             \
   (AUDIO_BUFFER_LENGTH - appconfINFERENCE_FRAMES_PER_INFERENCE)
+#define AUDIO_WINDOW_LENGTH_MS                                                 \
+  (((float)appconfINFERENCE_FRAMES_PER_INFERENCE /                             \
+    (float)appconfAUDIO_PIPELINE_SAMPLE_RATE) *                                \
+   1000 * NUM_FRAMES_PER_INFERENCE)
 
 static void initialize_features(struct FrontendState *state) {
   struct FrontendConfig config;
-  size_t size_ms = (size_t)(((float)appconfINFERENCE_FRAMES_PER_INFERENCE /
-                             (float)appconfAUDIO_PIPELINE_SAMPLE_RATE) *
-                            1000 * NUM_FRAMES_PER_INFERENCE);
 
   FrontendFillConfigWithDefaults(&config);
-  config.window.size_ms = size_ms;
-  config.window.step_size_ms = size_ms;
+  config.window.size_ms = AUDIO_WINDOW_LENGTH_MS;
+  config.window.step_size_ms = AUDIO_WINDOW_LENGTH_MS;
   config.filterbank.num_channels = 16;
   config.filterbank.lower_band_limit = 125.0;
   config.filterbank.upper_band_limit = 7500.0;
@@ -75,6 +76,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
   struct FrontendOutput frontend_output;
   int16_t audio16[AUDIO_BUFFER_LENGTH];
   size_t audio16_index = 0;
+  int output_index = 0;
 
   /* Perform any initialization here */
   initialize_features(&state);
@@ -90,18 +92,17 @@ void keyword_engine_task(keyword_engine_args_t *args) {
     do {
       size_t bytes_rxed =
           xStreamBufferReceive(input_buf, buf_ptr, buf_len, portMAX_DELAY);
-
       buf_len -= bytes_rxed;
       buf_ptr += bytes_rxed;
     } while (buf_len > 0);
 
     for (int i = 0; i < appconfINFERENCE_FRAMES_PER_INFERENCE; ++i) {
       /* Audio is int32, convert to int16 */
-      audio16[audio16_index] = (int16_t)(buf[i] >> 16);
-      if (audio16_index++ == AUDIO_BUFFER_LENGTH) {
+      audio16[audio16_index++] = (int16_t)(buf[i] >> 16);
+      if (audio16_index == AUDIO_BUFFER_LENGTH) {
         compute_features(&frontend_output, &state, audio16);
 
-        /* Shift the audio buffer left one stride*/
+        /* Shift the audio buffer left one stride */
         memcpy(&audio16[0], &audio16[appconfINFERENCE_FRAMES_PER_INFERENCE],
                AUDIO_BUFFER_STRIDE_LENGTH * sizeof(audio16[0]));
         audio16_index = AUDIO_BUFFER_STRIDE_LENGTH;
@@ -112,8 +113,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
     // rtos_printf("inference\n");
 
     /* Set output event bits */
-    // int output_test = 0;
-    // switch (output_test) {
+    // switch (output_index) {
     // default:
     // case 0:
     //   xEventGroupSetBits(output_egrp, INFERENCE_BIT_A | INFERENCE_BIT_B);
@@ -125,6 +125,6 @@ void keyword_engine_task(keyword_engine_args_t *args) {
     //   xEventGroupSetBits(output_egrp, INFERENCE_BIT_B);
     //   break;
     // }
-    // output_test = (output_test >= 2) ? 0 : output_test + 1;
+    // output_index = (output_index >= 2) ? 0 : output_index + 1;
   }
 }
