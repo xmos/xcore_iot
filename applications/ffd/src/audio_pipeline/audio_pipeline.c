@@ -66,7 +66,7 @@ static void *audio_pipeline_input_i(void *input_app_data)
     frame_data = pvPortMalloc(sizeof(frame_data_t));
 
     audio_pipeline_input(input_app_data,
-                       frame_data->samples,
+                       (int32_t **)frame_data->samples,
                        2,
                        appconfAUDIO_PIPELINE_FRAME_ADVANCE);
     frame_data->vad = 0;
@@ -80,7 +80,7 @@ static int audio_pipeline_output_i(frame_data_t *frame_data,
                                    void *output_app_data)
 {
     return audio_pipeline_output(output_app_data,
-                               frame_data->samples,
+                               (int32_t **)frame_data->samples,
                                4,
                                appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 }
