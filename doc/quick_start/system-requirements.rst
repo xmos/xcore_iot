@@ -31,4 +31,4 @@ The XCore SDK is officially supported on the following platforms. Unofficial sup
 Prerequisites
 *************
 
-`XTC Tools 15.0.6 <https://www.xmos.com/software/tools/>`_ or newer and `CMake 3.20 <https://cmake.org/download/>`_ or newer are required for building the example applications.  If necessary, download and follow the installation instructions for those components.
+`XTC Tools 15.0.6 <https://www.xmos.com/software/tools/>`_ or newer and `CMake 3.21 <https://cmake.org/download/>`_ or newer are required for building the example applications.  If necessary, download and follow the installation instructions for those components.
