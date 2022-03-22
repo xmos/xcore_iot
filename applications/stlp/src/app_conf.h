@@ -12,6 +12,7 @@
 #define appconfDEVICE_CONTROL_I2C_PORT 4
 #define appconfSPI_AUDIO_PORT          5
 #define appconfWW_SAMPLES_PORT         6
+#define appconfAUDIOPIPELINE_PORT      7
 
 
 /* Application tile specifiers */
@@ -36,7 +37,7 @@
 #endif
 
 #ifndef appconfUSB_ENABLED
-#define appconfUSB_ENABLED         1
+#define appconfUSB_ENABLED         0
 #endif
 
 #ifndef appconfWW_ENABLED

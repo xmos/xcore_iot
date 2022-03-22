@@ -62,7 +62,7 @@ void stage_1_init(stage_1_state_t *state, aec_conf_t *de_conf, aec_conf_t *non_d
     adec_init(&state->adec_state, adec_config);
     aec_switch_configuration(state, &state->aec_non_de_mode_conf);
 }
-
+#include "rtos_support.h"
 static int framenum = 0;
 void stage_1_process_frame(stage_1_state_t *state, int32_t (*output_frame)[AP_FRAME_ADVANCE], float_s32_t *max_ref_energy, float_s32_t *aec_corr_factor, int32_t (*input_y)[AP_FRAME_ADVANCE], int32_t (*input_x)[AP_FRAME_ADVANCE])
 {
@@ -80,11 +80,11 @@ void stage_1_process_frame(stage_1_state_t *state, int32_t (*output_frame)[AP_FR
     int is_ref_active = aec_detect_input_activity(input_x, state->ref_active_threshold, state->aec_main_state.shared_state->num_x_channels);
 
     /** AEC*/
-#if (NUM_AEC_THREADS > 1)
-    aec_process_frame_2threads(&state->aec_main_state, &state->aec_shadow_state, output_frame, NULL, input_y, input_x);
-#else
+// #if (NUM_AEC_THREADS > 1)
+//     aec_process_frame_2threads(&state->aec_main_state, &state->aec_shadow_state, output_frame, NULL, input_y, input_x);
+// #else
     aec_process_frame_1thread(&state->aec_main_state, &state->aec_shadow_state, output_frame, NULL, input_y, input_x);
-#endif
+// #endif
 
     /** Update metadata*/
     *max_ref_energy = aec_calc_max_input_energy(input_x, state->aec_main_state.shared_state->num_x_channels);

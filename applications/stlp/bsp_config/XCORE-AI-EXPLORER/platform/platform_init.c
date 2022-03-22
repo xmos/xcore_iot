@@ -141,17 +141,32 @@ static void spi_init(void)
 
 static void mics_init(void)
 {
+    static rtos_driver_rpc_t mic_array_rpc_config;
 #if ON_TILE(MICARRAY_TILE_NO)
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
     rtos_mic_array_init(
             mic_array_ctx,
             (1 << appconfPDM_MIC_IO_CORE),
             RTOS_MIC_ARRAY_CHANNEL_SAMPLE);
+    rtos_mic_array_rpc_host_init(
+            mic_array_ctx,
+            &mic_array_rpc_config,
+            client_intertile_ctx,
+            1);
+#else
+    rtos_mic_array_rpc_client_init(
+            mic_array_ctx,
+            &mic_array_rpc_config,
+            intertile_ctx);
 #endif
 }
 
 static void i2s_init(void)
 {
-#if appconfI2S_ENABLED && ON_TILE(I2S_TILE_NO)
+#if appconfI2S_ENABLED
+    static rtos_driver_rpc_t i2s_rpc_config;
+#if ON_TILE(I2S_TILE_NO)
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
     port_t p_i2s_dout[1] = {
             PORT_I2S_DAC_DATA
     };
@@ -170,6 +185,17 @@ static void i2s_init(void)
             PORT_I2S_LRCLK,
             PORT_MCLK,
             I2S_CLKBLK);
+    rtos_i2s_rpc_host_init(
+            i2s_ctx,
+            &i2s_rpc_config,
+            client_intertile_ctx,
+            1);
+#else
+    rtos_i2s_rpc_client_init(
+            i2s_ctx,
+            &i2s_rpc_config,
+            intertile_ctx);
+#endif
 #endif
 }
 

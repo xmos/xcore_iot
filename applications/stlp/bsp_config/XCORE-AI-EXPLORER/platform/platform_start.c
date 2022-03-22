@@ -109,6 +109,8 @@ static void spi_start(void)
 
 static void mics_start(void)
 {
+    rtos_mic_array_rpc_config(mic_array_ctx, appconfMIC_ARRAY_RPC_PORT, appconfMIC_ARRAY_RPC_PRIORITY);
+
 #if ON_TILE(MICARRAY_TILE_NO)
     rtos_mic_array_start(
             mic_array_ctx,
@@ -119,7 +121,10 @@ static void mics_start(void)
 
 static void i2s_start(void)
 {
-#if appconfI2S_ENABLED && ON_TILE(I2S_TILE_NO)
+#if appconfI2S_ENABLED
+    rtos_i2s_rpc_config(i2s_ctx, appconfI2S_RPC_PORT, appconfI2S_RPC_PRIORITY); 
+
+#if ON_TILE(I2S_TILE_NO)
     if (appconfI2S_AUDIO_SAMPLE_RATE == 3*appconfAUDIO_PIPELINE_SAMPLE_RATE) {
         i2s_rate_conversion_enable();
     }
@@ -131,6 +136,7 @@ static void i2s_start(void)
             2.2 * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME,
             1.2 * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME,
             appconfI2S_INTERRUPT_CORE);
+#endif
 #endif
 }
 
