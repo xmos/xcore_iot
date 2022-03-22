@@ -47,7 +47,7 @@ typedef struct {
 #endif
 
 typedef struct stage1_ctx {
-    stage_1_state_t DWORD_ALIGNED state;
+    // stage_1_state_t DWORD_ALIGNED state;
 
     aec_conf_t aec_de_mode_conf;
     aec_conf_t aec_non_de_mode_conf;
@@ -106,13 +106,13 @@ static int audio_pipeline_output_i(frame_data_t *frame_data,
 static void stage_1(frame_data_t *frame_data)
 {
     int32_t stage1_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
-    stage_1_process_frame(&stage1_state.state,
-                          &stage1_output[0],
-                          &frame_data->max_ref_energy,
-                          &frame_data->aec_corr_factor,
-                          frame_data->samples,
-                          frame_data->aec_reference_audio_samples);
-    memcpy(frame_data->samples, stage1_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
+    // stage_1_process_frame(&stage1_state.state,
+    //                       &stage1_output[0],
+    //                       &frame_data->max_ref_energy,
+    //                       &frame_data->aec_corr_factor,
+    //                       frame_data->samples,
+    //                       frame_data->aec_reference_audio_samples);
+    // memcpy(frame_data->samples, stage1_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
 }
 
 static void stage_vad_and_ic(frame_data_t *frame_data)
@@ -158,19 +158,19 @@ static void stage_agc(frame_data_t *frame_data)
 
 static void initialize_pipeline_stages(void)
 {
-    stage1_state.aec_non_de_mode_conf.num_y_channels = AP_MAX_Y_CHANNELS;
-    stage1_state.aec_non_de_mode_conf.num_x_channels = AP_MAX_X_CHANNELS;
-    stage1_state.aec_non_de_mode_conf.num_main_filt_phases = AEC_MAIN_FILTER_PHASES;
-    stage1_state.aec_non_de_mode_conf.num_shadow_filt_phases = AEC_SHADOW_FILTER_PHASES;
-
-    stage1_state.aec_de_mode_conf.num_y_channels = 1;
-    stage1_state.aec_de_mode_conf.num_x_channels = 1;
-    stage1_state.aec_de_mode_conf.num_main_filt_phases = 30;
-    stage1_state.aec_de_mode_conf.num_shadow_filt_phases = 0;
-
-    stage1_state.adec_conf.bypass = 1; // Bypass automatic DE correction
-    stage1_state.adec_conf.force_de_cycle_trigger = 1; // Force a delay correction cycle, so that delay correction happens once after initialisation. Make sure this is set back to 0 after adec has requested a transition into DE mode once, to stop any further delay correction (automatic or forced) by ADEC
-    stage_1_init(&stage1_state.state, &stage1_state.aec_de_mode_conf, &stage1_state.aec_non_de_mode_conf, &stage1_state.adec_conf);
+    // stage1_state.aec_non_de_mode_conf.num_y_channels = AP_MAX_Y_CHANNELS;
+    // stage1_state.aec_non_de_mode_conf.num_x_channels = AP_MAX_X_CHANNELS;
+    // stage1_state.aec_non_de_mode_conf.num_main_filt_phases = AEC_MAIN_FILTER_PHASES;
+    // stage1_state.aec_non_de_mode_conf.num_shadow_filt_phases = AEC_SHADOW_FILTER_PHASES;
+    //
+    // stage1_state.aec_de_mode_conf.num_y_channels = 1;
+    // stage1_state.aec_de_mode_conf.num_x_channels = 1;
+    // stage1_state.aec_de_mode_conf.num_main_filt_phases = 30;
+    // stage1_state.aec_de_mode_conf.num_shadow_filt_phases = 0;
+    //
+    // stage1_state.adec_conf.bypass = 1; // Bypass automatic DE correction
+    // stage1_state.adec_conf.force_de_cycle_trigger = 1; // Force a delay correction cycle, so that delay correction happens once after initialisation. Make sure this is set back to 0 after adec has requested a transition into DE mode once, to stop any further delay correction (automatic or forced) by ADEC
+    // stage_1_init(&stage1_state.state, &stage1_state.aec_de_mode_conf, &stage1_state.aec_non_de_mode_conf, &stage1_state.adec_conf);
 
     ic_init(&ic_stage_state.state);
     vad_init(&vad_stage_state.state);
