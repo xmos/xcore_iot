@@ -13,19 +13,6 @@
 #error appconfI2S_AUDIO_SAMPLE_RATE must be 48000 to use I2S TDM
 #endif
 
-
-#if OSPREY_BOARD
-#if appconfI2C_CTRL_ENABLED
-#error I2C device control not currently supported on Osprey
-#endif
-#if appconfI2S_ENABLED
-#error I2S not currently supported on Osprey
-#endif
-#if appconfSPI_OUTPUT_ENABLED
-#error SPI audio output not currently supported on Osprey
-#endif
-#endif
-
 #if XVF3610_Q60A
 #if appconfSPI_OUTPUT_ENABLED
 #error SPI audio output not currently supported on XVF3610 board

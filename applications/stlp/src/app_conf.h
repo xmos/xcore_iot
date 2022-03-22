@@ -4,22 +4,7 @@
 #ifndef APP_CONF_H_
 #define APP_CONF_H_
 
-/* Hacks to build temporarily */
-#include <stdint.h>
-typedef struct {
-    int32_t ch_a;
-    int32_t ch_b;
-} vtb_ch_pair_t;
-#define VFE_PROC_FRAME_LENGTH_LOG2 9
-#define VFE_FRAME_ADVANCE          240
-#define VFE_CHANNEL_PAIRS          1
-/* End of hacks */
-
-#define appconfAUDIO_CLOCK_FREQUENCY        24576000
-#define appconfPDM_CLOCK_FREQUENCY          3072000
-#define appconfAUDIO_PIPELINE_SAMPLE_RATE   16000
-#define appconfAUDIO_PIPELINE_FRAME_ADVANCE VFE_FRAME_ADVANCE
-
+/* Intertile port settings */
 #define appconfUSB_AUDIO_PORT          0
 #define appconfGPIO_T0_RPC_PORT        1
 #define appconfGPIO_T1_RPC_PORT        2
@@ -28,6 +13,19 @@ typedef struct {
 #define appconfSPI_AUDIO_PORT          5
 #define appconfWW_SAMPLES_PORT         6
 
+
+/* Application tile specifiers */
+#include "platform/driver_instances.h"
+#define FS_TILE_NO              FLASH_TILE_NO
+#define AUDIO_PIPELINE_TILE_NO  MICARRAY_TILE_NO
+
+/* Audio Pipeline Configuration */
+#define appconfAUDIO_CLOCK_FREQUENCY            MIC_ARRAY_CONFIG_MCLK_FREQ
+#define appconfPDM_CLOCK_FREQUENCY              MIC_ARRAY_CONFIG_PDM_FREQ
+#define appconfAUDIO_PIPELINE_SAMPLE_RATE       16000
+#define appconfAUDIO_PIPELINE_CHANNELS          MIC_ARRAY_CONFIG_MIC_COUNT
+/* If in channel sample format, appconfAUDIO_PIPELINE_FRAME_ADVANCE == MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME*/
+#define appconfAUDIO_PIPELINE_FRAME_ADVANCE     MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
 
 #ifndef appconfI2S_ENABLED
 #if XVF3610_Q60A || XCOREAI_EXPLORER
@@ -51,18 +49,18 @@ typedef struct {
 #endif
 
 #ifndef appconfI2C_CTRL_ENABLED
-#if XCOREAI_EXPLORER
-/*
- * When this is enabled on the XVF3610_Q60A board, the board
- * cannot function as an I2C master and will not configure the
- * DAC. In this case the DAC should be configured externally.
- * MCLK will also default to be external if this is set on
- * the XVF3610_Q60A board.
- */
-#define appconfI2C_CTRL_ENABLED    1
-#else
+// #if XCOREAI_EXPLORER
+// /*
+//  * When this is enabled on the XVF3610_Q60A board, the board
+//  * cannot function as an I2C master and will not configure the
+//  * DAC. In this case the DAC should be configured externally.
+//  * MCLK will also default to be external if this is set on
+//  * the XVF3610_Q60A board.
+//  */
+// #define appconfI2C_CTRL_ENABLED    1
+// #else
 #define appconfI2C_CTRL_ENABLED    0
-#endif
+// #endif
 #endif
 
 #ifndef appconfSPI_OUTPUT_ENABLED
@@ -148,6 +146,7 @@ typedef struct {
 
 /* Task Priorities */
 #define appconfSTARTUP_TASK_PRIORITY              (configMAX_PRIORITIES/2 + 5)
+#define appconfAUDIO_PIPELINE_TASK_PRIORITY       (configMAX_PRIORITIES / 2)
 #define appconfGPIO_RPC_HOST_PRIORITY             (configMAX_PRIORITIES/2 + 2)
 #define appconfGPIO_TASK_PRIORITY                 (configMAX_PRIORITIES/2 + 2)
 #define appconfI2C_TASK_PRIORITY                  (configMAX_PRIORITIES/2 + 2)

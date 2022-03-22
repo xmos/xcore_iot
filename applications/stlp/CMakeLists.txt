@@ -1,5 +1,6 @@
 
 
+add_subdirectory(bsp_config)
 
 set(APP_COMPILER_FLAGS
     "-Os"
@@ -9,19 +10,17 @@ set(APP_COMPILER_FLAGS
     "-mcmodel=large"
     "-Wno-xcore-fptrgroup"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope"
-    "${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn"
-    ${APP_CONF_DEFINES}
 )
 
 set(APP_SOURCES
     "src/main.c"
 
-    "src/platform/driver_instances.c"
-    "src/platform/platform_init.c"
-    "src/platform/platform_start.c"
-    "src/platform/app_pll_ctrl.c"
-    "src/platform/aic3204/aic3204.c"
-    "src/platform/dac3101/dac3101.c"
+    # "src/platform/driver_instances.c"
+    # "src/platform/platform_init.c"
+    # "src/platform/platform_start.c"
+    # "src/platform/app_pll_ctrl.c"
+    # "src/platform/aic3204/aic3204.c"
+    # "src/platform/dac3101/dac3101.c"
 
     "src/app_control/app_control.c"
     "src/app_control/ap_control_handlers.c"
@@ -29,9 +28,14 @@ set(APP_SOURCES
     "src/app_control/stage1_control_handlers.c"
     "src/app_control/stage2_control_handlers.c"
 
-    "src/vfe_pipeline/audio_pipeline/audio_pipeline.c"
-    "src/vfe_pipeline/vfe_pipeline.c"
-    "src/vfe_pipeline/burn_cycles.S"
+    # "src/vfe_pipeline/audio_pipeline/audio_pipeline.c"
+    # "src/vfe_pipeline/vfe_pipeline.c"
+    # "src/vfe_pipeline/burn_cycles.S"
+
+    "src/audio_pipeline/audio_pipeline.c"
+    "src/audio_pipeline/delay_buffer/delay_buffer.c"
+    "src/audio_pipeline/pipeline_stage_1/stage_1.c"
+    "src/audio_pipeline/pipeline_stage_1/aec_process_frame_1thread.c"
 
     "src/usb/usb_audio.c"
     "src/usb/usb_descriptors.c"
@@ -56,31 +60,17 @@ set(APP_INCLUDES
 
 set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
-    PLATFORM_SUPPORTS_TILE_0=1
-    PLATFORM_SUPPORTS_TILE_1=1
-    PLATFORM_SUPPORTS_TILE_2=0
-    PLATFORM_SUPPORTS_TILE_3=0
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
     XUD_CORE_CLOCK=600
-    ENABLE_RTOS_XSCOPE_TRACE=0
 
     CFG_TUSB_DEBUG_PRINTF=rtos_printf
     CFG_TUSB_DEBUG=0
-
-    MIC_ARRAY_CONFIG_MCLK_FREQ=24576000
-    MIC_ARRAY_CONFIG_PDM_FREQ=3072000
-    MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME=256
-    MIC_ARRAY_CONFIG_MIC_COUNT=2
-    USB_TILE_NO=0
-    USB_TILE=tile[USB_TILE_NO]
-    XCOREAI_EXPLORER=1
 )
 
 set(APP_LINK_OPTIONS
     -lquadspi
     -report
-    ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
     ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
 )
 
@@ -99,6 +89,14 @@ set(APP_LINK_LIBRARIES
     sdk::rtos::usb_device_control
     sdk::rtos::audio_drivers
     sdk::lib_src
+    avona::adec
+    avona::aec
+    avona::agc
+    avona::ic
+    avona::ns
+    avona::vad
+
+    sdk::app::stlp::xcore_ai_explorer
 )
 #**********************
 # Tile Targets
