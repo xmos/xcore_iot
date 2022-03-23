@@ -97,4 +97,4 @@ The following unix command will generate a C source file that contains the Tenso
 
 .. code-block:: console
 
-    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/vww_model_data.h --source src/vww_model_data.c --variable-name vww
+    $ python <path-to-sdk>/tools/tflite_micro/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/vww_model_data.h --source src/vww_model_data.c --variable-name vww

@@ -1,12 +1,6 @@
 Jinja2
-#jupyter
-#jupyter_client
-#jupyter_client
-#jupyter_console
-#jupyter_core
 matplotlib
 numpy
 opencv-python
 PyYAML
-setuptools_scm
-#tensorflow==2.4.4
+xmos-ai-tools
