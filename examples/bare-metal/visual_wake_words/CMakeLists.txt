@@ -12,7 +12,6 @@ set(APP_COMPILER_FLAGS
     -g
     -report
     -fxscope
-    -lquadspi
     -mcmodel=large
     -Wno-xcore-fptrgroup
     ${CMAKE_CURRENT_SOURCE_DIR}/config.xscope
@@ -22,6 +21,7 @@ set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
     TF_LITE_STATIC_MEMORY=1
     __xtflm_conf_h_exists__=1
+    CI_TESTING=${CI_TESTING}
     # NDEBUG                        # define this to remove debug and profiling
     # TF_LITE_STRIP_ERROR_STRINGS   # define this to remove logging
 )
@@ -63,5 +63,13 @@ add_custom_target(xsim_example_bare_metal_vww
   DEPENDS example_bare_metal_vww
   COMMENT
     "Run application"
+  VERBATIM
+)
+
+add_custom_target(test_example_bare_metal_vww
+  COMMAND xrun --xscope example_bare_metal_vww.xe
+  DEPENDS example_bare_metal_vww
+  COMMENT
+    "Test application"
   VERBATIM
 )

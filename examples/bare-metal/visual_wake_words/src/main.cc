@@ -32,6 +32,14 @@ void print_output()
 extern "C" {
 #endif
 
+void run_inference()
+{
+    interp_invoke_par_5(&ie);
+    print_profiler_summary(&ie);
+
+    print_output();
+}
+
 void app_main()
 {
   // setup inference engine
@@ -48,6 +56,13 @@ void app_main()
   input_size = ie.input_sizes[0];
   output_buffer = (int8_t *) ie.output_buffers[0];
   output_size = ie.output_sizes[0];
+
+#ifdef CI_TESTING
+  // run inference with an all zero input tensor as a check
+  memset(input_buffer, input_size, 0);
+  run_inference();
+  exit(0);
+#endif // CI_TESTING
 }
 
 void app_data(void *data, size_t size)
@@ -56,10 +71,7 @@ void app_data(void *data, size_t size)
   input_bytes += size - 1;
   if (input_bytes == input_size)
   {
-    interp_invoke_par_5(&ie);
-    print_profiler_summary(&ie);
-
-    print_output();
+    run_inference();
     input_bytes = 0;
   }
 }
