@@ -77,3 +77,24 @@ Sending a test image to the xcore.ai Explorer board using `xscope`. The `test_im
 .. code-block:: console
 
     $ ./test_image.py path/to/image
+
+********************
+Optimizing the model
+********************
+
+An unoptimized, quantized model is included with the example.
+
+First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
+
+.. code-block:: console
+
+    $ xcore-opt --xcore-thread-count 5 -o model/model_xcore.tflite model/model_quant.tflite 
+
+Converting flatbuffer to source file
+====================================
+
+The following unix command will generate a C source file that contains the TensorFlow Lite model as a char array.
+
+.. code-block:: console
+
+    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/vww_model_data.h --source src/vww_model_data.c --variable-name vww

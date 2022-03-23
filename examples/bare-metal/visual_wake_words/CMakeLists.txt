@@ -1,8 +1,8 @@
 #**********************
 # Gather Sources
 #**********************
-file(GLOB_RECURSE APP_SOURCES   app/*.c app/*.xc model_runner/*.c model_runner/*.cc)
-set(APP_INCLUDES app model_runner)
+file(GLOB_RECURSE APP_SOURCES   src/*.c src/*.xc src/*.cc)
+set(APP_INCLUDES src)
 
 #**********************
 # Flags
@@ -21,7 +21,6 @@ set(APP_COMPILER_FLAGS
 set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
     TF_LITE_STATIC_MEMORY=1
-    XCORE=1
     # NDEBUG                        # define this to remove debug and profiling
     # TF_LITE_STRIP_ERROR_STRINGS   # define this to remove logging
 )
@@ -43,7 +42,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS})
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::aif_model_runner_bare_metal)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::inferencing::lib_tflite_micro)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
