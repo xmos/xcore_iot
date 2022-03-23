@@ -21,6 +21,7 @@ set(APP_COMPILER_FLAGS
 set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
     TF_LITE_STATIC_MEMORY=1
+    __xtflm_conf_h_exists__=1
     # NDEBUG                        # define this to remove debug and profiling
     # TF_LITE_STRIP_ERROR_STRINGS   # define this to remove logging
 )

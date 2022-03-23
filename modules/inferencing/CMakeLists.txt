@@ -166,12 +166,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     target_sources(xcore_sdk_inferencing_lib_tflite_micro
         INTERFACE
             ${LIB_TFLITE_MICRO_SOURCES_ASM}
-            #${LIB_TFLITE_MICRO_PATH}/src/inference_engine.cc
-            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_conv2d_v2.cc
+            ${LIB_TFLITE_MICRO_PATH}/src/inference_engine.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_bsign.cc
+            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_custom_options.cc
+            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_conv2d_v2.cc
+            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_error_reporter.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_interpreter.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_profiler.cc
-            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_custom_options.cc
     )
 
     target_include_directories(xcore_sdk_inferencing_lib_tflite_micro
