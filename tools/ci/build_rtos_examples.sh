@@ -10,9 +10,8 @@ if [ -z "$1" ] || [ "$1" == "all" ]
 then
     # row format is: "make_target BOARD toolchain"
     applications=(
-        "example_freertos_cifar10_extmem   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
         "example_freertos_cifar10_sram     XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-        "example_freertos_cifar10_swmem    XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        # "example_freertos_cifar10_swmem    XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
         "example_freertos_device_control   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
         "example_freertos_dispatcher       XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
         "example_freertos_explorer_board   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
