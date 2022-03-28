@@ -14,16 +14,16 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
+        $ cmake -B build_fw -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
+        $ cd build_fw
         $ make example_freertos_device_control
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
+        $ cmake -G "NMake Makefiles" -B build_fw -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
+        $ cd build_fw
         $ nmake example_freertos_device_control
 
 ********************
@@ -61,3 +61,45 @@ From the xcore_sdk build folder run:
     .. code-block:: console
 
         $ nmake debug_example_freertos_device_control
+
+*********************
+Building the host app
+*********************
+
+With the firmware running in its own terminal, in a new window,
+run the following commands in the xcore_sdk root folder to build the host app:
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ cmake -B build
+        $ cd build
+        $ make example_freertos_device_control_host
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ cmake -G "NMake Makefiles" -B build
+        $ cd build
+        $ nmake example_freertos_device_control_host
+
+********************
+Running the host app
+********************
+
+From the xcore_sdk/build/examples/freertos/device_control/host/
+folder run:
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ ./example_freertos_device_control_host --help
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ example_freertos_device_control_host.exe --help
