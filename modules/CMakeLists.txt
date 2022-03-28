@@ -1,5 +1,4 @@
 
-add_subdirectory(aif)
 add_subdirectory(inferencing)
 add_subdirectory(device_memory_support)
 add_subdirectory(hil)
