@@ -271,7 +271,7 @@ inline size_t rtos_qspi_flash_page_count_get(
 inline size_t rtos_qspi_flash_sector_size_get(
         rtos_qspi_flash_t *qspi_flash_ctx)
 {
-    return qspi_flash_erase_type_size(&qspi_flash_ctx->ctx, 0);
+    return qspi_flash_erase_type_size(&qspi_flash_ctx->ctx, qspi_flash_erase_1);
 }
 
 /**@}*/

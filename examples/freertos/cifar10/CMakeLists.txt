@@ -2,7 +2,7 @@
 # Gather Sources
 #**********************
 file(GLOB_RECURSE APP_SOURCES   src/*.c src/*.cc)
-set(APP_INCLUDES src src/model_runner)
+set(APP_INCLUDES src src/image_classifier)
 
 #**********************
 # Flags
@@ -46,7 +46,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::aif_model_runner_freertos)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::inferencing::rtos)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
@@ -56,80 +56,57 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::aif_model_runner_freertos)
+target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::inferencing::rtos)
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME tile0_example_freertos_cifar10_extmem)
-add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
-target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0 USE_EXTMEM=1)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::aif_model_runner_freertos)
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-unset(TARGET_NAME)
+# set(TARGET_NAME tile0_example_freertos_cifar10_swmem)
+# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0 USE_SWMEM=1)
+# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::inferencing::rtos)
+# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+# unset(TARGET_NAME)
 
-set(TARGET_NAME tile1_example_freertos_cifar10_extmem)
-add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
-target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1 USE_EXTMEM=1)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::aif_model_runner_freertos)
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-unset(TARGET_NAME)
-
-set(TARGET_NAME tile0_example_freertos_cifar10_swmem)
-add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
-target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0 USE_SWMEM=1)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::aif_model_runner_freertos)
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-unset(TARGET_NAME)
-
-set(TARGET_NAME tile1_example_freertos_cifar10_swmem)
-add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
-target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1 USE_SWMEM=1)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::aif_model_runner_freertos)
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-unset(TARGET_NAME)
+# set(TARGET_NAME tile1_example_freertos_cifar10_swmem)
+# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1 USE_SWMEM=1)
+# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::inferencing::rtos)
+# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+# unset(TARGET_NAME)
 
 #**********************
 # Merge binaries
 #**********************
 merge_binaries(example_freertos_cifar10_sram tile0_example_freertos_cifar10_sram tile1_example_freertos_cifar10_sram 1)
-merge_binaries(example_freertos_cifar10_extmem tile0_example_freertos_cifar10_extmem tile1_example_freertos_cifar10_extmem 1)
-merge_binaries(example_freertos_cifar10_swmem tile0_example_freertos_cifar10_swmem tile1_example_freertos_cifar10_swmem 1)
+# merge_binaries(example_freertos_cifar10_swmem tile0_example_freertos_cifar10_swmem tile1_example_freertos_cifar10_swmem 1)
 
 #**********************
 # Create run and debug targets
 #**********************
 create_run_target(example_freertos_cifar10_sram)
 create_debug_target(example_freertos_cifar10_sram)
-create_run_target(example_freertos_cifar10_extmem)
-create_debug_target(example_freertos_cifar10_extmem)
-create_run_target(example_freertos_cifar10_swmem)
-create_debug_target(example_freertos_cifar10_swmem)
+# create_run_target(example_freertos_cifar10_swmem)
+# create_debug_target(example_freertos_cifar10_swmem)
 
 #**********************
 # Extract swmem
 #**********************
-add_custom_command(
-    TARGET example_freertos_cifar10_swmem POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory example_freertos_cifar10_swmem_split
-    COMMAND xobjdump --strip example_freertos_cifar10_swmem.xe
-    COMMAND xobjdump --split --split-dir example_freertos_cifar10_swmem_split example_freertos_cifar10_swmem.xb
-    BYPRODUCTS
-        example_freertos_cifar10_swmem.xb
-        example_freertos_cifar10_swmem_split
-    VERBATIM
-)
+# add_custom_command(
+#     TARGET example_freertos_cifar10_swmem POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E make_directory example_freertos_cifar10_swmem_split
+#     COMMAND xobjdump --strip example_freertos_cifar10_swmem.xe
+#     COMMAND xobjdump --split --split-dir example_freertos_cifar10_swmem_split example_freertos_cifar10_swmem.xb
+#     BYPRODUCTS
+#         example_freertos_cifar10_swmem.xb
+#         example_freertos_cifar10_swmem_split
+#     VERBATIM
+# )
 
 #**********************
 # Filesystem support targets
@@ -173,32 +150,24 @@ add_custom_target(flash_fs_example_freertos_cifar10_sram
     VERBATIM
 )
 
-add_custom_target(flash_fs_example_freertos_cifar10_extmem
-    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_cifar10_extmem.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/cifar10_fat.fs
-    DEPENDS cifar10_fat.fs
-    COMMENT
-        "Flash filesystem"
-    VERBATIM
-)
-
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
-    add_custom_target(flash_fs_example_freertos_cifar10_swmem
-        COMMAND echo "Not yet implemented"
-        DEPENDS cifar10_fat.fs example_freertos_cifar10_swmem
-        COMMENT
-            "Flash filesystem and swmem"
-        VERBATIM
-    )
-else()
-    add_custom_target(flash_fs_example_freertos_cifar10_swmem
-        COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/example_freertos_cifar10_swmem_split/image_n0c1.swmem filesystem_support/flash_image.bin
-        COMMAND cat filesystem_support/cifar10_fat.fs | dd of=filesystem_support/flash_image.bin bs=1 seek=1048576 conv=notrunc
-        COMMAND xflash --write-all filesystem_support/flash_image.bin --target-file XCORE-AI-EXPLORER.xn
-        DEPENDS cifar10_fat.fs example_freertos_cifar10_swmem
-        WORKING_DIRECTORY
-            ${CMAKE_CURRENT_LIST_DIR}
-        COMMENT
-            "Flash filesystem and swmem"
-        VERBATIM
-    )
-endif()
+# if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
+#     add_custom_target(flash_fs_example_freertos_cifar10_swmem
+#         COMMAND echo "Not yet implemented"
+#         DEPENDS cifar10_fat.fs example_freertos_cifar10_swmem
+#         COMMENT
+#             "Flash filesystem and swmem"
+#         VERBATIM
+#     )
+# else()
+#     add_custom_target(flash_fs_example_freertos_cifar10_swmem
+#         COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/example_freertos_cifar10_swmem_split/image_n0c1.swmem filesystem_support/flash_image.bin
+#         COMMAND cat filesystem_support/cifar10_fat.fs | dd of=filesystem_support/flash_image.bin bs=1 seek=1048576 conv=notrunc
+#         COMMAND xflash --write-all filesystem_support/flash_image.bin --target-file XCORE-AI-EXPLORER.xn
+#         DEPENDS cifar10_fat.fs example_freertos_cifar10_swmem
+#         WORKING_DIRECTORY
+#             ${CMAKE_CURRENT_LIST_DIR}
+#         COMMENT
+#             "Flash filesystem and swmem"
+#         VERBATIM
+#     )
+# endif()
