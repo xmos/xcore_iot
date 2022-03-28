@@ -22,9 +22,8 @@ then
 elif [ "$1" == "smoke" ]
 then
     applications=(
-        "example_freertos_cifar10_extmem   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
         "example_freertos_cifar10_sram     XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-        "example_freertos_cifar10_swmem    XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+        # "example_freertos_cifar10_swmem    XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
         "example_freertos_device_control   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
         "example_freertos_dispatcher       XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
         "example_freertos_explorer_board   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
