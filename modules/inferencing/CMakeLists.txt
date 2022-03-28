@@ -38,67 +38,79 @@ target_sources(xcore_sdk_inferencing_tflite_micro
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/kernel_util.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/quantize_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/activations.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/activations_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/add.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/add_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/add_n.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/arg_min_max.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/batch_to_space_nd.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/ceil.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/circular_buffer.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/circular_buffer_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/comparisons.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/concatenation.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/conv.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/conv_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/cumsum.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/depth_to_space.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/depthwise_conv.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/depthwise_conv_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/dequantize.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/dequantize_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/detection_postprocess.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/elementwise.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/elu.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/expand_dims.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/floor.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/floor_div.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/floor_mod.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/fully_connected.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/fully_connected_common.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/hard_swish.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/hard_swish_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/l2norm.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/l2_pool_2d.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/leaky_relu.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/leaky_relu_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/logical.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/logical_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/logistic.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/logistic_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/maximum_minimum.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/mul.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/mul_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/neg.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/pack.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/pad.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/pooling.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/pooling_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/prelu.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/prelu_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/quantize.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/quantize_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/reduce.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/reshape.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/shape.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/resize_bilinear.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/round.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/shape.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/softmax.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/softmax_common.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/space_to_batch_nd.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/space_to_depth.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/split.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/split_v.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/squeeze.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/strided_slice.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/sub.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/sub_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/svdf.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/svdf_common.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/tanh.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/unpack.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/hard_swish.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/floor_div.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/floor_mod.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/l2_pool_2d.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/leaky_relu.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/depth_to_space.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/transpose_conv.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/resize_bilinear.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/batch_to_space_nd.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/space_to_batch_nd.cc
         ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/transpose.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/pooling_common.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/expand_dims.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/space_to_depth.cc
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/circular_buffer.cc
-)
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/transpose_conv.cc
+        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/unpack.cc
+    )
 target_include_directories(xcore_sdk_inferencing_tflite_micro
     INTERFACE
     ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/gemmlowp
@@ -119,7 +131,7 @@ add_library(xcore_sdk_inferencing_lib_nn STATIC)
 
 ## Source files
 file(GLOB_RECURSE LIB_NN_SOURCES_ASM lib_nn/lib_nn/src/asm/*.S)
-file(GLOB_RECURSE LIB_NN_SOURCES_C   lib_nn/lib_nn/src/c/*.c)
+file(GLOB_RECURSE LIB_NN_SOURCES_C   lib_nn/lib_nn/src/c/*.c lib_nn/lib_nn/src/asm/*.c)
 file(GLOB_RECURSE LIB_NN_SOURCES_CPP lib_nn/lib_nn/src/cpp/*.cpp)
 
 ## cmake doesn't recognize .S files as assembly by default
@@ -172,6 +184,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_conv2d_v2.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_error_reporter.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_interpreter.cc
+            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_load_from_flash.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_profiler.cc
     )
 

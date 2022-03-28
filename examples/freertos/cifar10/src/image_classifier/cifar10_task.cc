@@ -1,28 +1,34 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include <platform.h>
-#include <xs1.h>
-
-#include "FreeRTOS.h"
-
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "FreeRTOS.h"
+#include "InferenceEngine.hpp"
+
+extern "C" {
+
+#include <platform.h>
+#include <xs1.h>
+
 #include "fs_support.h"
 #include "app_conf.h"
 #include "cifar10_task.h"
 #include "cifar10_model_data.h"
-#include "cifar10_model_runner.h"
-#include "model_runner.h"
 
-typedef struct model_runner_args {
+void cifar10_task_app(void *args);
+void cifar10_runner_rx(void *args);
+
+}; // extern "C"
+
+typedef struct inference_engine_args {
   QueueHandle_t input_queue;
   rtos_intertile_address_t *intertile_addr;
-} model_runner_args_t;
+} inference_engine_args_t;
 
 #define TENSOR_ARENA_SIZE 58000
 
@@ -42,7 +48,7 @@ static const char *test_input_files[] = {
     "airplane.bin", "bird.bin",  "cat.bin",  "deer.bin",
     "frog.bin",     "horse.bin", "truck.bin"};
 
-static void cifar10_task_app(void *args) {
+void cifar10_task_app(void *args) {
   rtos_intertile_address_t *adr = (rtos_intertile_address_t *)args;
   FIL current_file;
   unsigned int file_size;
@@ -62,7 +68,7 @@ static void cifar10_task_app(void *args) {
         continue;
       }
 
-      data = pvPortMalloc(sizeof(unsigned char) * file_size);
+      data = (uint8_t *) pvPortMalloc(sizeof(unsigned char) * file_size);
 
       configASSERT(data != NULL); /* Failed to allocate memory for file data */
 
@@ -119,8 +125,8 @@ static void cifar10_task_app(void *args) {
   }
 }
 
-static void cifar10_runner_rx(void *args) {
-  model_runner_args_t *targs = (model_runner_args_t *)args;
+void cifar10_runner_rx(void *args) {
+  inference_engine_args_t *targs = (inference_engine_args_t *)args;
   QueueHandle_t q = targs->input_queue;
   rtos_intertile_address_t *adr = targs->intertile_addr;
   uint8_t *input_tensor;
@@ -134,49 +140,47 @@ static void cifar10_runner_rx(void *args) {
 }
 
 static void cifar10_task_runner(void *args) {
-  model_runner_args_t *targs = (model_runner_args_t *)args;
+  inference_engine_args_t *targs = (inference_engine_args_t *)args;
   QueueHandle_t q = targs->input_queue;
   rtos_intertile_address_t *adr = targs->intertile_addr;
-  size_t req_size = 0;
-  uint8_t *interpreter_buf = NULL;
   int8_t *input_buffer = NULL;
   size_t input_size = 0;
   int8_t *output_buffer = NULL;
   size_t output_size = 0;
-  model_runner_t *model_runner_ctx = NULL;
   uint8_t *tensor_arena = NULL;
   uint8_t *input_tensor;
-  dispatcher_t *dispatcher;
+  // dispatcher_t *dispatcher;
+  xcore::RTOSInferenceEngine<6, 8> inference_engine;
 
-  tensor_arena = pvPortMalloc(TENSOR_ARENA_SIZE);
+  tensor_arena = (uint8_t *) pvPortMalloc(TENSOR_ARENA_SIZE);
 
-  dispatcher = dispatcher_create();
-  dispatcher_thread_init(dispatcher, appconfDISPATCHER_LENGTH,
-                         appconfDISPATCHER_THREAD_COUNT,
-                         appconfDISPATCHER_THREAD_PRIORITY);
+  // dispatcher = dispatcher_create();
+  // dispatcher_thread_init(dispatcher, appconfDISPATCHER_LENGTH,
+  //                        appconfDISPATCHER_THREAD_COUNT,
+  //                        appconfDISPATCHER_THREAD_PRIORITY);
 
-  model_runner_init(tensor_arena, TENSOR_ARENA_SIZE);
+  auto resolver = inference_engine.Initialize(tensor_arena, TENSOR_ARENA_SIZE);
 
-  req_size = model_runner_buffer_size_get();
-  interpreter_buf = pvPortMalloc(req_size);
-  model_runner_ctx = pvPortMalloc(sizeof(model_runner_t));
+  // Register the model operators
+  resolver->AddSoftmax();
+  resolver->AddPad();
+  resolver->AddConv2D();
+  resolver->AddReshape();
+  resolver->AddMaxPool2D();
+  resolver->AddCustom(tflite::ops::micro::xcore::rtos::Conv2D_V2_OpCode,
+                      tflite::ops::micro::xcore::rtos::Register_Conv2D_V2());
 
-  cifar10_model_runner_create(model_runner_ctx, interpreter_buf);
-  model_runner_dispatcher_create(model_runner_ctx, dispatcher);
-  if (model_runner_allocate(model_runner_ctx, cifar10_model_data) != 0) {
+  // Load the model
+  if (inference_engine.LoadModel(cifar10_model_data) !=  xcore::InferenceEngineStatus::Ok) {
     rtos_printf("Invalid model provided!\n");
-
     vPortFree(tensor_arena);
-    vPortFree(interpreter_buf);
-    vPortFree(model_runner_ctx);
-
     vTaskDelete(NULL);
   }
 
-  input_buffer = model_runner_input_buffer_get(model_runner_ctx);
-  input_size = model_runner_input_size_get(model_runner_ctx);
-  output_buffer = model_runner_output_buffer_get(model_runner_ctx);
-  output_size = model_runner_output_size_get(model_runner_ctx);
+  input_buffer = inference_engine.GetInputBuffer();
+  input_size = inference_engine.GetInputSize();
+  output_buffer = inference_engine.GetOutputBuffer();
+  output_size = inference_engine.GetOutputSize();
 
   while (1) {
     rtos_printf("Wait for input tensor...\n");
@@ -186,8 +190,8 @@ static void cifar10_task_runner(void *args) {
     vPortFree(input_tensor);
 
     rtos_printf("Running inference...\n");
-    model_runner_invoke(model_runner_ctx);
-    model_runner_profiler_summary_print(model_runner_ctx);
+    inference_engine.Invoke();
+    inference_engine.PrintProfilerSummary();
 
     rtos_intertile_tx(adr->intertile_ctx, adr->port, output_buffer,
                       output_size);
@@ -201,9 +205,9 @@ void cifar10_app_task_create(rtos_intertile_address_t *intertile_addr,
               priority, NULL);
 }
 
-void cifar10_model_runner_task_create(rtos_intertile_address_t *intertile_addr,
+void cifar10_image_classifier_task_create(rtos_intertile_address_t *intertile_addr,
                                       unsigned priority) {
-  model_runner_args_t *args = pvPortMalloc(sizeof(model_runner_args_t));
+  inference_engine_args_t *args = (inference_engine_args_t *) pvPortMalloc(sizeof(inference_engine_args_t));
   QueueHandle_t input_queue = xQueueCreate(1, sizeof(int32_t *));
 
   configASSERT(args);
@@ -219,3 +223,4 @@ void cifar10_model_runner_task_create(rtos_intertile_address_t *intertile_addr,
               RTOS_THREAD_STACK_SIZE(cifar10_runner_rx), args, priority - 1,
               NULL);
 }
+
