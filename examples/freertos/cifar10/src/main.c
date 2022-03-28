@@ -45,7 +45,7 @@ void startup_task(void *arg)
 #endif
 
 #if ON_TILE(1)
-    cifar10_model_runner_task_create(cifar10_addr, appconfCIFAR10_TASK_PRIORITY);
+    cifar10_image_classifier_task_create(cifar10_addr, appconfCIFAR10_TASK_PRIORITY);
 #endif
 
 	for (;;) {
@@ -78,20 +78,6 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3) {
 
   tile_common_init(c1);
 }
-
-/* Workaround.
- * extmem builds will fail to load since tile 1 was not given control in the
- * tile 0 build
- * TODO: Find a better solution
- */
-#if USE_EXTMEM
-__attribute__((section(".ExtMem_code"))) void main_tile1(chanend_t c0,
-                                                         chanend_t c1,
-                                                         chanend_t c2,
-                                                         chanend_t c3) {
-  return;
-}
-#endif
 #endif
 
 #if ON_TILE(1)
