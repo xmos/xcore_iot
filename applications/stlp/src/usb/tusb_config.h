@@ -92,7 +92,7 @@ extern const uint16_t tud_audio_desc_lengths[CFG_TUD_AUDIO];
 // EP and buffer sizes
 #define AUDIO_FRAMES_PER_USB_FRAME                   (appconfUSB_AUDIO_SAMPLE_RATE / 1000)
 
-#define CFG_TUD_AUDIO_ENABLE_EP_IN                  0
+#define CFG_TUD_AUDIO_ENABLE_EP_IN                  1
 #define CFG_TUD_AUDIO_FUNC_1_EP_IN_SZ               (AUDIO_FRAMES_PER_USB_FRAME * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX)
 #define CFG_TUD_AUDIO_FUNC_1_EP_IN_SZ_MAX           (CFG_TUD_AUDIO_FUNC_1_EP_IN_SZ)    // Maximum EP IN size for all AS alternate settings used
 #define CFG_TUD_AUDIO_FUNC_1_EP_IN_SW_BUF_SZ        CFG_TUD_AUDIO_FUNC_1_EP_IN_SZ

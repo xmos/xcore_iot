@@ -38,7 +38,7 @@
 static stage_delay_ctx_t delay_buf_state = {};
 static aec_ctx_t aec_state = {};
 
-static void *audio_pipeline_input_i(void *input_app_data)
+void *audio_pipeline_input_i(void *input_app_data)
 {
     frame_data_t *frame_data;
 
@@ -56,7 +56,7 @@ static void *audio_pipeline_input_i(void *input_app_data)
     return frame_data;
 }
 
-static int audio_pipeline_output_i(frame_data_t *frame_data,
+int audio_pipeline_output_i(frame_data_t *frame_data,
                                    void *output_app_data)
 {
     rtos_intertile_tx(intertile_ctx,
@@ -66,7 +66,7 @@ static int audio_pipeline_output_i(frame_data_t *frame_data,
     return AUDIO_PIPELINE_FREE_FRAME;
 }
 
-static void stage_delay(frame_data_t *frame_data)
+void stage_delay(frame_data_t *frame_data)
 {
 #if (appconfINPUT_SAMPLES_MIC_DELAY_MS > 0) /* Delay mics */
     size_t bytes_sent = xStreamBufferSend(
@@ -77,7 +77,7 @@ static void stage_delay(frame_data_t *frame_data)
 
     configASSERT(bytes_sent == AP_INPUT_SAMPLES_MIC_DELAY_CUR_FRAME_BYTES);
 
-    if (xStreamBufferBytesAvailable(delay_buf_state.delay_buf) >= AP_INPUT_SAMPLES_MIC_DELAY_BUF_SIZE_BYTES) {
+    if (xStreamBufferBytesAvailable(delay_buf_state.delay_buf) > AP_INPUT_SAMPLES_MIC_DELAY_BUF_SIZE_BYTES) {
         size_t bytes_rx = xStreamBufferReceive(
                                     delay_buf_state.delay_buf,
                                     &frame_data->samples,
@@ -86,7 +86,7 @@ static void stage_delay(frame_data_t *frame_data)
 
         configASSERT(bytes_rx == AP_INPUT_SAMPLES_MIC_DELAY_CUR_FRAME_BYTES);
     }
-#elif (appconfINPUT_SAMPLES_MIC_DELAY_MS < 0)/* Delay Ref*/
+#elif (appconfINPUT_SAMPLES_MIC_DELAY_MS < 0) /* Delay Ref*/
     size_t bytes_sent = xStreamBufferSend(
                                 delay_buf_state.delay_buf,
                                 &frame_data->aec_reference_audio_samples,
@@ -95,7 +95,7 @@ static void stage_delay(frame_data_t *frame_data)
 
     configASSERT(bytes_sent == AP_INPUT_SAMPLES_MIC_DELAY_CUR_FRAME_BYTES);
 
-    if (xStreamBufferBytesAvailable(delay_buf_state.delay_buf) >= AP_INPUT_SAMPLES_MIC_DELAY_BUF_SIZE_BYTES) {
+    if (xStreamBufferBytesAvailable(delay_buf_state.delay_buf) > AP_INPUT_SAMPLES_MIC_DELAY_BUF_SIZE_BYTES) {
         size_t bytes_rx = xStreamBufferReceive(
                                     delay_buf_state.delay_buf,
                                     &frame_data->aec_reference_audio_samples,
@@ -104,11 +104,11 @@ static void stage_delay(frame_data_t *frame_data)
 
         configASSERT(bytes_rx == AP_INPUT_SAMPLES_MIC_DELAY_CUR_FRAME_BYTES);
     }
-#else  /* Do nothing */
+#else /* Delay None */
 #endif
 }
 
-static void stage_1(frame_data_t *frame_data)
+void stage_aec(frame_data_t *frame_data)
 {
     int32_t stage1_output[AEC_MAX_Y_CHANNELS][appconfAUDIO_PIPELINE_FRAME_ADVANCE];
     aec_process_frame_1thread(
@@ -128,10 +128,11 @@ static void stage_1(frame_data_t *frame_data)
 
 static void initialize_pipeline_stages(void)
 {
+#if (appconfINPUT_SAMPLES_MIC_DELAY_MS != 0)
     configASSERT(AP_INPUT_SAMPLES_MIC_DELAY_BUF_SIZE_BYTES > 0);
-
     delay_buf_state.delay_buf = xStreamBufferCreate((size_t)AP_INPUT_SAMPLES_MIC_DELAY_BUF_SIZE_BYTES + AP_INPUT_SAMPLES_MIC_DELAY_CUR_FRAME_BYTES, 0);
     configASSERT(delay_buf_state.delay_buf);
+#endif
 
     aec_init(&aec_state.aec_main_state,
              &aec_state.aec_shadow_state,
@@ -152,12 +153,12 @@ void audio_pipeline_init(
 
     const pipeline_stage_t stages[] = {
         (pipeline_stage_t)stage_delay,
-        (pipeline_stage_t)stage_1,
+        (pipeline_stage_t)stage_aec,
     };
 
     const configSTACK_DEPTH_TYPE stage_stack_sizes[] = {
-        RTOS_THREAD_STACK_SIZE(stage_delay) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
-        RTOS_THREAD_STACK_SIZE(stage_1) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_delay) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_aec) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
     };
 
     initialize_pipeline_stages();

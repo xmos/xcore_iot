@@ -28,7 +28,7 @@
 /* If in channel sample format, appconfAUDIO_PIPELINE_FRAME_ADVANCE == MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME*/
 #define appconfAUDIO_PIPELINE_FRAME_ADVANCE     MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
 
-#define appconfINPUT_SAMPLES_MIC_DELAY_MS 150
+#define appconfINPUT_SAMPLES_MIC_DELAY_MS   150
 
 
 #ifndef appconfI2S_ENABLED
@@ -40,7 +40,7 @@
 #endif
 
 #ifndef appconfUSB_ENABLED
-#define appconfUSB_ENABLED         0
+#define appconfUSB_ENABLED         1
 #endif
 
 #ifndef appconfWW_ENABLED

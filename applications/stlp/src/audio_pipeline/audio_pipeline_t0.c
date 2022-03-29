@@ -40,7 +40,7 @@ static vad_stage_ctx_t vad_stage_state = {};
 static ns_stage_ctx_t ns_stage_state = {};
 static agc_stage_ctx_t agc_stage_state = {};
 
-static void *audio_pipeline_input_i(void *input_app_data)
+void *audio_pipeline_input_i(void *input_app_data)
 {
     frame_data_t *frame_data;
 
@@ -58,10 +58,11 @@ static void *audio_pipeline_input_i(void *input_app_data)
             intertile_ctx,
             frame_data,
             bytes_received);
+
     return frame_data;
 }
 
-static int audio_pipeline_output_i(frame_data_t *frame_data,
+int audio_pipeline_output_i(frame_data_t *frame_data,
                                    void *output_app_data)
 {
     return audio_pipeline_output(output_app_data,
@@ -70,10 +71,9 @@ static int audio_pipeline_output_i(frame_data_t *frame_data,
                                appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 }
 
-static void stage_vad_and_ic(frame_data_t *frame_data)
+void stage_vad_and_ic(frame_data_t *frame_data)
 {
     int32_t ic_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
-
     ic_filter(&ic_stage_state.state,
               frame_data->samples[0],
               frame_data->samples[1],
@@ -84,7 +84,7 @@ static void stage_vad_and_ic(frame_data_t *frame_data)
     memcpy(frame_data->samples, ic_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
 }
 
-static void stage_ns(frame_data_t *frame_data)
+void stage_ns(frame_data_t *frame_data)
 {
     int32_t ns_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
     configASSERT(NS_FRAME_ADVANCE == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
@@ -95,7 +95,7 @@ static void stage_ns(frame_data_t *frame_data)
     memcpy(frame_data->samples, ns_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
 }
 
-static void stage_agc(frame_data_t *frame_data)
+void stage_agc(frame_data_t *frame_data)
 {
     int32_t agc_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
     configASSERT(AGC_FRAME_ADVANCE == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
@@ -136,9 +136,9 @@ void audio_pipeline_init(
     };
 
     const configSTACK_DEPTH_TYPE stage_stack_sizes[] = {
-        RTOS_THREAD_STACK_SIZE(stage_vad_and_ic) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
-        RTOS_THREAD_STACK_SIZE(stage_ns),
-        RTOS_THREAD_STACK_SIZE(stage_agc) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_vad_and_ic) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_ns),
+        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_agc) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
     };
 
     initialize_pipeline_stages();
