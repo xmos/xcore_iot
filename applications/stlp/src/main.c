@@ -38,7 +38,6 @@ void audio_pipeline_input(void *input_app_data,
                         size_t ch_count,
                         size_t frame_count)
 {
-#if ON_TILE(1)
     (void) input_app_data;
     int32_t **mic_ptr = (int32_t **)(input_audio_frames + (2 * frame_count));
 
@@ -109,7 +108,6 @@ void audio_pipeline_input(void *input_app_data,
         }
     }
 #endif
-#endif
 }
 
 int audio_pipeline_output(void *output_app_data,
@@ -117,7 +115,6 @@ int audio_pipeline_output(void *output_app_data,
                         size_t ch_count,
                         size_t frame_count)
 {
-#if ON_TILE(0)
     (void) output_app_data;
 
 #if appconfI2S_ENABLED
@@ -188,7 +185,6 @@ int audio_pipeline_output(void *output_app_data,
     //                mic_audio_frame);
 #endif
 
-#endif
     return AUDIO_PIPELINE_FREE_FRAME;
 }
 

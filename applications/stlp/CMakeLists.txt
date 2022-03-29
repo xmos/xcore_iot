@@ -32,8 +32,9 @@ set(APP_SOURCES
     # "src/vfe_pipeline/vfe_pipeline.c"
     # "src/vfe_pipeline/burn_cycles.S"
 
-    "src/audio_pipeline/audio_pipeline.c"
-    "src/audio_pipeline/aec_process_frame_1thread.c"
+    "src/audio_pipeline/audio_pipeline_t0.c"
+    "src/audio_pipeline/audio_pipeline_t1.c"
+    "src/audio_pipeline/aec/aec_process_frame_1thread.c"
 
     "src/usb/usb_audio.c"
     "src/usb/usb_descriptors.c"
