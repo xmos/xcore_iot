@@ -3,7 +3,11 @@
 #ifndef AEC_MEMORY_POOL_H
 #define AEC_MEMORY_POOL_H
 
-#include "audio_pipeline/audio_pipeline.h"
+#define AEC_MAX_Y_CHANNELS        (2)
+#define AEC_MAX_X_CHANNELS        (2)
+#define AEC_MAIN_FILTER_PHASES    (10)
+#define AEC_SHADOW_FILTER_PHASES  (5)
+
 #include "xs3_math.h"
 
 //Memory pool definition

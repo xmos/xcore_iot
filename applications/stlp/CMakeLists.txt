@@ -33,9 +33,7 @@ set(APP_SOURCES
     # "src/vfe_pipeline/burn_cycles.S"
 
     "src/audio_pipeline/audio_pipeline.c"
-    "src/audio_pipeline/delay_buffer/delay_buffer.c"
-    "src/audio_pipeline/pipeline_stage_1/stage_1.c"
-    "src/audio_pipeline/pipeline_stage_1/aec_process_frame_1thread.c"
+    "src/audio_pipeline/aec_process_frame_1thread.c"
 
     "src/usb/usb_audio.c"
     "src/usb/usb_descriptors.c"
