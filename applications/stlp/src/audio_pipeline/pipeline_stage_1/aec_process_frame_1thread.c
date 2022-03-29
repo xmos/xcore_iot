@@ -1,4 +1,4 @@
-// Copyright 2021 XMOS LIMITED.
+// Copyright 2021-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include <stdio.h>
 #include <string.h>
@@ -9,7 +9,6 @@
  * can be compiled for both bare metal and x86.
  */
 static unsigned X_energy_recalc_bin = 0;
-static int framenum = 0;
 void aec_process_frame_1thread(
         aec_state_t *main_state,
         aec_state_t *shadow_state,
@@ -21,11 +20,11 @@ void aec_process_frame_1thread(
     // Read number of mic and reference channels. These are specified as part of the configuration when aec_init() is called.
     int num_y_channels = main_state->shared_state->num_y_channels; //Number of mic channels
     int num_x_channels = main_state->shared_state->num_x_channels; //Number of reference channels
-    
+
     // Set up the input BFP structures main_state->shared_state->y and main_state->shared_state->x to point to the new frame.
     // Initialise some other BFP structures that need to be initialised at the beginning of each frame
     aec_frame_init(main_state, shadow_state, y_data, x_data);
-    
+
     // Calculate Exponential moving average (EMA) energy of the mic and reference input.
     for(int ch=0; ch<num_y_channels; ch++) {
         aec_calc_time_domain_ema_energy(&main_state->shared_state->y_ema_energy[ch], &main_state->shared_state->y[ch],
@@ -67,7 +66,7 @@ void aec_process_frame_1thread(
          * the nth X sample's energy summed over main_state->num_phases number of frames in the X FIFO.
          */
         aec_calc_X_fifo_energy(main_state, ch, X_energy_recalc_bin);
-        
+
         // Calculate sum of X energy for shadow filter
         /* BFP struct shadow_state->X_energy[ch] points to AEC_PROC_FRAME_LENGTH/2 + 1 real 32bit values where value at index n is
          * the nth X sample's energy summed over shadow_state->num_phases number of frames in the X FIFO.
@@ -94,7 +93,7 @@ void aec_process_frame_1thread(
     }
 
     // Copy state->shared_state->X_fifo BFP struct to main_state->X_fifo_1d and shadow_state->X_fifo_1d BFP structs
-    /* The updated state->shared_state->X_FIFO BFP structures are copied to an alternate set of BFP structs present in the 
+    /* The updated state->shared_state->X_FIFO BFP structures are copied to an alternate set of BFP structs present in the
      * main and shadow filter state structure, that are used to efficiently access the X FIFO in the Error computation and filter
      * update steps.
      */
@@ -109,7 +108,7 @@ void aec_process_frame_1thread(
         // shadow_state->Error[ch] and shadow_state->Y_hat[ch] are updated
         aec_calc_Error_and_Y_hat(shadow_state, ch);
     }
-    
+
     // Calculate time domain error and time domain estimated mic input from their spectrums calculated in the previous step.
     /* The time domain estimated mic_input (y_hat) is used to calculate the average coherence between y and y_hat in aec_calc_coherence.
      * Only the estimated mic input calculated using the main filter is needed for coherence calculation, so the y_hat calculation is
@@ -134,7 +133,7 @@ void aec_process_frame_1thread(
          * Note that aec_calc_output() will still need to be called since this function also windows the error signal
          * which is needed for subsequent processing of the shadow filter even when output is not generated.
          */
-        if(output_shadow != NULL) {           
+        if(output_shadow != NULL) {
             aec_calc_output(shadow_state, &output_shadow[ch], ch);
         }
         else {
@@ -158,7 +157,7 @@ void aec_process_frame_1thread(
     for(int ch=0; ch<num_y_channels; ch++) {
         // main_state->Error[ch] is updated
         aec_forward_fft(&main_state->Error[ch], &main_state->error[ch]);
-        
+
         // shadow_state->Error[ch] is updated
         aec_forward_fft(&shadow_state->Error[ch], &shadow_state->error[ch]
                );
@@ -169,17 +168,17 @@ void aec_process_frame_1thread(
     for(int ch=0; ch<num_y_channels; ch++) {
         // main_state->overall_Error[ch] is updated
         aec_calc_freq_domain_energy(&main_state->overall_Error[ch], &main_state->Error[ch]);
-        
+
         // shadow_state->overall_Error[ch] is updated
         aec_calc_freq_domain_energy(&shadow_state->overall_Error[ch], &shadow_state->Error[ch]);
-        
+
         // main_state->shared_state->overall_Y[ch] is updated
         aec_calc_freq_domain_energy(&main_state->shared_state->overall_Y[ch], &main_state->shared_state->Y[ch]);
     }
 
     // Compare and update filters. Calculate adaption step_size mu
     /* At this point we're ready to check how well the filters are performing and update them if needed.
-     * 
+     *
      * main_state->shared_state->shadow_filter_params are updated to indicate the current state of filter comparison algorithm.
      * main_state->H_hat, main_state->Error, shadow_state->H_hat, shadow_state->Error are optionally updated depending on the update needed.
      *
@@ -211,12 +210,11 @@ void aec_process_frame_1thread(
             aec_calc_T(shadow_state, ych, xch);
         }
         // Update filters
-        
+
         // Update main_state->H_hat
         aec_filter_adapt(main_state, ych);
 
         // Update shadow_state->H_hat
         aec_filter_adapt(shadow_state, ych);
     }
-    framenum++; 
 }

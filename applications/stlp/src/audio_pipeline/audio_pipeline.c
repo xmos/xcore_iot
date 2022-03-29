@@ -225,18 +225,17 @@ void audio_pipeline_init(
     void *output_app_data)
 {
 #if ON_TILE(1)
-    const int stage_count = 3;
+    const int stage_count = 1;
 
     const pipeline_stage_t stages[] = {
-        (pipeline_stage_t)stage_dummy,
         (pipeline_stage_t)stage_1,
-        (pipeline_stage_t)stage_dummy,
     };
 
     const configSTACK_DEPTH_TYPE stage_stack_sizes[] = {
-        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_dummy) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
-        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_1),
-        configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_dummy) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
+        // configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_dummy) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
+        // configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_1),
+        // configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_dummy) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
+            configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_1) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
     };
 
     initialize_pipeline_stages();

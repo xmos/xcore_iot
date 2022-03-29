@@ -135,10 +135,16 @@ void usb_audio_send(rtos_intertile_t *intertile_ctx,
         }
     }
 
-    rtos_intertile_tx(intertile_ctx,
-                      appconfUSB_AUDIO_PORT,
-                      usb_audio_in_frame,
-                      sizeof(usb_audio_in_frame));
+    // rtos_intertile_tx(intertile_ctx,
+    //                   appconfUSB_AUDIO_PORT,
+    //                   usb_audio_in_frame,
+    //                   sizeof(usb_audio_in_frame));
+
+    if (mic_interface_open) {
+        if (xStreamBufferSend(samples_to_host_stream_buf, usb_audio_in_frame, sizeof(usb_audio_in_frame), 0) != sizeof(usb_audio_in_frame)) {
+            rtos_printf("lost VFE output samples\n");
+        }
+    }
 }
 
 void usb_audio_recv(rtos_intertile_t *intertile_ctx,
@@ -195,26 +201,26 @@ void usb_audio_in_task(void *arg)
     }
 
     for (;;) {
-        samp_t usb_audio_in_frame[appconfAUDIO_PIPELINE_FRAME_ADVANCE][CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX];
-        size_t frame_length;
-
-        frame_length = rtos_intertile_rx_len(
-                intertile_ctx,
-                appconfUSB_AUDIO_PORT,
-                portMAX_DELAY);
-
-        xassert(frame_length == sizeof(usb_audio_in_frame));
-
-        rtos_intertile_rx_data(
-                intertile_ctx,
-                usb_audio_in_frame,
-                frame_length);
-
-        if (mic_interface_open) {
-            if (xStreamBufferSend(samples_to_host_stream_buf, usb_audio_in_frame, sizeof(usb_audio_in_frame), 0) != sizeof(usb_audio_in_frame)) {
-                rtos_printf("lost VFE output samples\n");
-            }
-        }
+        // samp_t usb_audio_in_frame[appconfAUDIO_PIPELINE_FRAME_ADVANCE][CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX];
+        // size_t frame_length;
+        //
+        // frame_length = rtos_intertile_rx_len(
+        //         intertile_ctx,
+        //         appconfUSB_AUDIO_PORT,
+        //         portMAX_DELAY);
+        //
+        // xassert(frame_length == sizeof(usb_audio_in_frame));
+        //
+        // rtos_intertile_rx_data(
+        //         intertile_ctx,
+        //         usb_audio_in_frame,
+        //         frame_length);
+        //
+        // if (mic_interface_open) {
+        //     if (xStreamBufferSend(samples_to_host_stream_buf, usb_audio_in_frame, sizeof(usb_audio_in_frame), 0) != sizeof(usb_audio_in_frame)) {
+        //         rtos_printf("lost VFE output samples\n");
+        //     }
+        // }
     }
 }
 
@@ -237,15 +243,15 @@ void usb_audio_out_task(void *arg)
          * This shouldn't normally be zero, but it could be possible that
          * the stream buffer is reset after this task has been notified.
          */
-        if (bytes_received > 0) {
-            xassert(bytes_received == sizeof(usb_audio_out_frame));
-
-            rtos_intertile_tx(
-                    intertile_ctx,
-                    appconfUSB_AUDIO_PORT,
-                    usb_audio_out_frame,
-                    bytes_received);
-        }
+        // if (bytes_received > 0) {
+        //     xassert(bytes_received == sizeof(usb_audio_out_frame));
+        //
+        //     rtos_intertile_tx(
+        //             intertile_ctx,
+        //             appconfUSB_AUDIO_PORT,
+        //             usb_audio_out_frame,
+        //             bytes_received);
+        // }
     }
 }
 
