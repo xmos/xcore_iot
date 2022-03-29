@@ -15,6 +15,10 @@ typedef struct keyword_engine_args {
     EventGroupHandle_t egrp_inference;
 } keyword_engine_args_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void keyword_engine_task(keyword_engine_args_t *args);
 
 void keyword_engine_task_create(
@@ -31,5 +35,9 @@ void keyword_engine_samples_send_remote(
         rtos_intertile_t *intertile_ctx,
         size_t frame_count,
         int32_t (*processed_audio_frame)[2]);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif /* KEYWORD_INF_ENG_H_ */

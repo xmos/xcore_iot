@@ -12,14 +12,15 @@
 #include "stream_buffer.h"
 #include "task.h"
 
-/* App headers */
-#include "app_conf.h"
-#include "inference_engine.h"
-#include "keyword_inf_eng.h"
-#include "platform/driver_instances.h"
-
+/* Inference headers */
+#include "InferenceEngine.hpp"
 #include "tensorflow/lite/experimental/microfrontend/lib/frontend.h"
 #include "tensorflow/lite/experimental/microfrontend/lib/frontend_util.h"
+
+/* App headers */
+#include "app_conf.h"
+#include "keyword_inf_eng.h"
+#include "platform/driver_instances.h"
 
 #define NUM_FRAMES_PER_INFERENCE (2)
 #define AUDIO_BUFFER_LENGTH                                                    \

@@ -25,7 +25,7 @@ add_library(sdk::app::inference_engine::template ALIAS xcore_sdk_app_ffd_inferen
 add_library(xcore_sdk_app_ffd_inference_engine_keyword INTERFACE)
 target_sources(xcore_sdk_app_ffd_inference_engine_keyword
     INTERFACE
-        keyword/keyword_inf_eng.c
+        keyword/keyword_inf_eng.cc
         keyword/keyword_inf_eng_port.c
         keyword/keyword_inf_eng_support.c
 )
