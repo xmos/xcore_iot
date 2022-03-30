@@ -35,7 +35,10 @@
 #endif
 
 #if ON_TILE(1)
+
+#if appconfINPUT_SAMPLES_MIC_DELAY_MS != 0
 static stage_delay_ctx_t delay_buf_state = {};
+#endif
 static aec_ctx_t aec_state = {};
 
 static void *audio_pipeline_input_i(void *input_app_data)

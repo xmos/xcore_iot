@@ -29,12 +29,8 @@
 
 #include "gpio_test/gpio_test.h"
 
-
-// volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
-// volatile int aec_ref_source = appconfAEC_REF_DEFAULT;
-
-volatile int mic_from_usb = appconfMIC_SRC_USB;
-volatile int aec_ref_source = appconfAEC_REF_USB;
+volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
+volatile int aec_ref_source = appconfAEC_REF_DEFAULT;
 
 void audio_pipeline_input(void *input_app_data,
                         int32_t **input_audio_frames,
