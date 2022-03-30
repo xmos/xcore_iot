@@ -15,13 +15,6 @@ target_include_directories(example_freertos_device_control_host PRIVATE ${APP_IN
 message(STATUS "Building with ${CMAKE_C_COMPILER_ID}")
 
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-	# TODO: Currently building with default compile options
-	# These were originally here:
-    # target_compile_options(example_freertos_device_control_host PRIVATE /O2 /W4)
-	
-	# These are Windows args used in app_xvf3610/host/dfu_control:
-	# target_compile_options(example_freertos_device_control_host PUBLIC /RTC1 /nologo /W4 /WX- /O2 /EHa /_CRT_SECURE_NO_WARNINGS)
-
 	target_link_options(example_freertos_device_control_host PRIVATE "")
 else ()
     target_compile_options(example_freertos_device_control_host PRIVATE -O2 -Wall)

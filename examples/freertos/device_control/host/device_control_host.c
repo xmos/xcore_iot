@@ -7,9 +7,7 @@
 #include "argtable/argtable3.h"
 #include "commands.h"
 
-#define VERSION_CMD 0x80
-
-struct arg_lit *help, *version;
+struct arg_lit *help, *test_cmd;
 struct arg_str *get, *set, *cmd_args;
 struct arg_end *end;
 
@@ -19,7 +17,7 @@ int main(int argc, char **argv)
 
     void *argtable[] = {
         help    = arg_lit0(NULL, "help", "display this help and exit"),
-        version = arg_lit0(NULL, "version", "display version info and exit"),
+        test_cmd = arg_lit0(NULL, "test_cmd", "display test value and exit"),
 
         get     = arg_str0("g", "get", "<cmd>", "Sends the specified get command and prints the return value(s). Must not be used with --set."),
         set     = arg_str0("s", "set", "<cmd>", "Sends the specified set command with the provided argument(s). Must not be used with --get."),
@@ -70,6 +68,7 @@ int main(int argc, char **argv)
                 if (cmd != NULL) {
                     cmd_values = calloc(cmd->num_values, sizeof(cmd_param_t));
                     ret = command_get(cmd, cmd_values, cmd->num_values);
+                    printf("Command %s sent with resid %i\n", get->sval[0], cmd->resid);
                 } else {
                     printf("Command %s not recognized\n", get->sval[0]);
                 }
@@ -79,7 +78,10 @@ int main(int argc, char **argv)
 
             if (cmd_values != NULL) {
                 for (int i = 0; i < cmd->num_values; i++) {
-                    command_value_print(cmd, cmd_values[i]);
+                    // print the actual value
+                    //command_value_print(cmd, cmd_values[i]);
+                    // this converts an int to hex for readability
+                    printf("%x\n", cmd_values[i]);
                 }
                 printf("\n");
             }
