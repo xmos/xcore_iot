@@ -1,8 +1,8 @@
 // Copyright (c) 2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
-#ifndef KEYWORD_INF_ENG_H_
-#define KEYWORD_INF_ENG_H_
+#ifndef KEYWORD_INFERENCE_H_
+#define KEYWORD_INFERENCE_H_
 
 #include "stream_buffer.h"
 #include "event_groups.h"
@@ -18,8 +18,6 @@ typedef struct keyword_engine_args {
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-void keyword_engine_task(keyword_engine_args_t *args);
 
 void keyword_engine_task_create(
         uint32_t priority,
@@ -40,4 +38,4 @@ void keyword_engine_samples_send_remote(
 };
 #endif
 
-#endif /* KEYWORD_INF_ENG_H_ */
+#endif /* KEYWORD_INFERENCE_H_ */

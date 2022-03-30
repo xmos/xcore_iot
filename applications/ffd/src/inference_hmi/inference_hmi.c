@@ -14,7 +14,7 @@
 /* App headers */
 #include "app_conf.h"
 #include "platform/driver_instances.h"
-#include "keyword_inf_eng.h"
+#include "keyword_inference.h"
 #include "inference_hmi/inference_hmi.h"
 
 void inference_hmi_task(void *args)

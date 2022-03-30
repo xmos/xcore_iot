@@ -27,7 +27,7 @@
 #include "inference_engine.h"
 #include "fs_support.h"
 #include "gpio_ctrl/gpi_ctrl.h"
-#include "keyword_inf_eng.h"
+#include "keyword_inference.h"
 #include "inference_hmi/inference_hmi.h"
 
 volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;

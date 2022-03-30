@@ -16,7 +16,7 @@
 #include "app_conf.h"
 #include "platform/driver_instances.h"
 #include "inference_engine.h"
-#include "keyword_inf_eng.h"
+#include "keyword_inference.h"
 
 int32_t inference_engine_create(uint32_t priority, void *args)
 {
