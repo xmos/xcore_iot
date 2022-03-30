@@ -7,9 +7,7 @@
 
 # Establish working directories
 # sdk root dir
-cd ../..
 SDK_ROOT_DIR=$(git rev-parse --show-toplevel)
-echo $SDK_ROOT_DIR
 
 # host app dir
 HOST_APP_DIR=$SDK_ROOT_DIR/build_host/examples/freertos/device_control/host

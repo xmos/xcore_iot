@@ -20,7 +20,7 @@
  * it will be set automatically by the device control
  * host library.
  */
-#define APP_CONTROL_CMD_AP_VERSION 0x00
+#define APP_CONTROL_CMD_AP_TEST_CMD 0x00
 #define APP_CONTROL_CMD_AP_MIC_FROM_USB 0x01
 
 #ifndef CMDSPEC_ALLOC_STRINGS
@@ -28,7 +28,7 @@
 #endif
 
 static cmd_t commands[] = {
-        {APP_CONTROL_RESID_AP, "version", TYPE_UINT32, 0, APP_CONTROL_CMD_AP_VERSION, CMD_RO, 1, "Returns the Avona audio pipeline version"},
+        {APP_CONTROL_RESID_AP, "test_cmd", TYPE_UINT32, 0, APP_CONTROL_CMD_AP_TEST_CMD, CMD_RO, 1, "Returns a test valuee"},
         {APP_CONTROL_RESID_AP, "mic_from_usb", TYPE_UINT8, 0, APP_CONTROL_CMD_AP_MIC_FROM_USB, CMD_RW, 1, "Microphone audio is received from the USB host when true"},
         {APP_CONTROL_RESID_AP, "fixed_point_cmd", TYPE_INT32, 24, 0x7F, CMD_RW, 2, "This is an example fixed point command"},
 };
@@ -75,7 +75,7 @@ void command_list_print(void)
     int i;
 
     for (i = 0; i < ARRAY_SIZE(commands); i++) {
-        /* print shit about each command. do a get and/or set version */
+        /* print about each command. do a get and/or set version */
         cmd_t *cmd = &commands[i];
 
         printf("%s\n", cmd->cmd_name);
