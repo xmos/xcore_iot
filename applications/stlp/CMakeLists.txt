@@ -15,22 +15,11 @@ set(APP_COMPILER_FLAGS
 set(APP_SOURCES
     "src/main.c"
 
-    # "src/platform/driver_instances.c"
-    # "src/platform/platform_init.c"
-    # "src/platform/platform_start.c"
-    # "src/platform/app_pll_ctrl.c"
-    # "src/platform/aic3204/aic3204.c"
-    # "src/platform/dac3101/dac3101.c"
-
     "src/app_control/app_control.c"
     "src/app_control/ap_control_handlers.c"
     "src/app_control/aec_control_handlers.c"
     "src/app_control/stage1_control_handlers.c"
     "src/app_control/stage2_control_handlers.c"
-
-    # "src/vfe_pipeline/audio_pipeline/audio_pipeline.c"
-    # "src/vfe_pipeline/vfe_pipeline.c"
-    # "src/vfe_pipeline/burn_cycles.S"
 
     "src/audio_pipeline/audio_pipeline_t0.c"
     "src/audio_pipeline/audio_pipeline_t1.c"
@@ -39,8 +28,6 @@ set(APP_SOURCES
     "src/usb/usb_audio.c"
     "src/usb/usb_descriptors.c"
     "src/usb/adaptive_rate_adjust.c"
-
-    "src/spi/spi_interface.c"
 
     "src/ww_model_runner/ww_model_runner.c"
 
