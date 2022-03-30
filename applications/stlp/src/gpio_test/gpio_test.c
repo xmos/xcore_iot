@@ -8,7 +8,7 @@
 #include "platform/app_pll_ctrl.h"
 #include "gpio_test/gpio_test.h"
 
-#if XVF3610_Q60A
+#if XK_VOICE_L71
 #define BUTTON_MUTE_BITMASK 0x10
 #define BUTTON_BTN_BITMASK  0x20
 #define BUTTON_IP_2_BITMASK 0x40
@@ -67,7 +67,7 @@ static void gpio_handler(rtos_gpio_t *gpio_ctx)
 
         gpio_val = rtos_gpio_port_in(gpio_ctx, gpio_port);
 
-#if XVF3610_Q60A
+#if XK_VOICE_L71
         if (((gpio_val & BUTTON_MUTE_BITMASK) != 0) && (mute_status != 1)) {
             rtos_printf("Mute active\n");
             mute_status = 1;

@@ -39,7 +39,7 @@ static PryonLiteDecoderHandle sDecoder = NULL;
 __attribute__((aligned(8))) static uint8_t decoder_buf[DECODER_BUF_SIZE];
 static uint8_t *decoder_buf_ptr = (uint8_t *)&decoder_buf;
 
-#if XVF3610_Q60A
+#if XK_VOICE_L71
 #define WW_ERROR_LED 4
 #define WW_VAD_LED   1
 #define WW_ALEXA_LED 5

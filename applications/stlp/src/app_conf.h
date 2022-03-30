@@ -40,15 +40,11 @@
 #define appconfAUDIO_PIPELINE_SKIP_AGC           0
 
 #ifndef appconfI2S_ENABLED
-#if XVF3610_Q60A || XCOREAI_EXPLORER
 #define appconfI2S_ENABLED         1
-#else
-#define appconfI2S_ENABLED         0
-#endif
 #endif
 
 #ifndef appconfUSB_ENABLED
-#define appconfUSB_ENABLED         1
+#define appconfUSB_ENABLED         0
 #endif
 
 #ifndef appconfWW_ENABLED
@@ -63,11 +59,11 @@
 #ifndef appconfI2C_CTRL_ENABLED
 // #if XCOREAI_EXPLORER
 // /*
-//  * When this is enabled on the XVF3610_Q60A board, the board
+//  * When this is enabled on the XK_VOICE_L71 board, the board
 //  * cannot function as an I2C master and will not configure the
 //  * DAC. In this case the DAC should be configured externally.
 //  * MCLK will also default to be external if this is set on
-//  * the XVF3610_Q60A board.
+//  * the XK_VOICE_L71 board.
 //  */
 // #define appconfI2C_CTRL_ENABLED    1
 // #else
@@ -85,7 +81,7 @@
 #endif
 
 #ifndef appconfEXTERNAL_MCLK
-#if XVF3610_Q60A && appconfI2C_CTRL_ENABLED
+#if XK_VOICE_L71 && appconfI2C_CTRL_ENABLED
 #define appconfEXTERNAL_MCLK       1
 #else
 #define appconfEXTERNAL_MCLK       0

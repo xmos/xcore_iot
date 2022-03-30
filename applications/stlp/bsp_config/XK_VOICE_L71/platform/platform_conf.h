@@ -35,6 +35,22 @@
 #define appconfGPIO_RPC_PRIORITY (configMAX_PRIORITIES/2)
 #endif /* appconfGPIO_RPC_PRIORITY */
 
+#ifndef appconfMIC_ARRAY_RPC_PORT
+#define appconfMIC_ARRAY_RPC_PORT 13
+#endif /* appconfMIC_ARRAY_RPC_PORT */
+
+#ifndef appconfMIC_ARRAY_RPC_PRIORITY
+#define appconfMIC_ARRAY_RPC_PRIORITY (configMAX_PRIORITIES-2)
+#endif /* appconfMIC_ARRAY_RPC_PRIORITY */
+
+#ifndef appconfI2S_RPC_PORT
+#define appconfI2S_RPC_PORT 14
+#endif /* appconfI2S_RPC_PORT */
+
+#ifndef appconfI2S_RPC_PRIORITY
+#define appconfI2S_RPC_PRIORITY (configMAX_PRIORITIES-2)
+#endif /* appconfI2S_RPC_PRIORITY */
+
 /*****************************************/
 /*  I/O and interrupt cores              */
 /*****************************************/

@@ -82,7 +82,9 @@ set(APP_LINK_LIBRARIES
     avona::ns
     avona::vad
 
-    sdk::app::stlp::xcore_ai_explorer
+    sdk::app::stlp::xk_voice_l71
+
+    # sdk::app::stlp::xcore_ai_explorer
 )
 #**********************
 # Tile Targets

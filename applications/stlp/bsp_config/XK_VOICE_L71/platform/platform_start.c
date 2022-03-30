@@ -16,7 +16,7 @@
 #include "dac3101.h"
 #include "usb_support.h"
 
-if appconfI2C_CTRL_ENABLED
+#if appconfI2C_CTRL_ENABLED
 #include "app_control/app_control.h"
 #include "device_control_i2c.h"
 #endif
@@ -45,7 +45,7 @@ static void flash_start(void)
 
 static void i2c_master_start(void)
 {
-if !appconfI2C_CTRL_ENABLED
+#if !appconfI2C_CTRL_ENABLED
     rtos_i2c_master_rpc_config(i2c_master_ctx, appconfI2C_MASTER_RPC_PORT, appconfI2C_MASTER_RPC_PRIORITY);
 
 #if ON_TILE(I2C_TILE_NO)
@@ -56,7 +56,7 @@ if !appconfI2C_CTRL_ENABLED
 
 static void audio_codec_start(void)
 {
-if !appconfI2C_CTRL_ENABLED
+#if !appconfI2C_CTRL_ENABLED
 #if appconfI2S_ENABLED
     int ret = 0;
 #if ON_TILE(I2C_TILE_NO)
@@ -100,6 +100,8 @@ static void spi_start(void)
 
 static void mics_start(void)
 {
+    rtos_mic_array_rpc_config(mic_array_ctx, appconfMIC_ARRAY_RPC_PORT, appconfMIC_ARRAY_RPC_PRIORITY);
+
 #if ON_TILE(MICARRAY_TILE_NO)
     rtos_mic_array_start(
             mic_array_ctx,
@@ -110,8 +112,9 @@ static void mics_start(void)
 
 static void i2s_start(void)
 {
-#if appconfI2S_ENABLED && ON_TILE(I2S_TILE_NO)
-
+#if appconfI2S_ENABLED
+    rtos_i2s_rpc_config(i2s_ctx, appconfI2S_RPC_PORT, appconfI2S_RPC_PRIORITY);
+#if ON_TILE(I2S_TILE_NO)
     if (appconfI2S_AUDIO_SAMPLE_RATE == 3*appconfAUDIO_PIPELINE_SAMPLE_RATE) {
         i2s_rate_conversion_enable();
     }
@@ -123,6 +126,7 @@ static void i2s_start(void)
             2.2 * appconfAUDIO_PIPELINE_FRAME_ADVANCE,
             1.2 * appconfAUDIO_PIPELINE_FRAME_ADVANCE * (appconfI2S_TDM_ENABLED ? 3 : 1),
             appconfI2S_INTERRUPT_CORE);
+#endif
 #endif
 }
 

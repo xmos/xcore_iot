@@ -13,7 +13,7 @@
 #error appconfI2S_AUDIO_SAMPLE_RATE must be 48000 to use I2S TDM
 #endif
 
-#if XVF3610_Q60A
+#if XK_VOICE_L71
 #if appconfSPI_OUTPUT_ENABLED
 #error SPI audio output not currently supported on XVF3610 board
 #endif
