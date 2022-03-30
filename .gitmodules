@@ -37,18 +37,6 @@
 [submodule "wfx-firmware"]
 	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware
 	url = git@github.com:SiliconLabs/wfx-firmware.git
-[submodule "modules/aif/lib_nn"]
-	path = modules/aif/lib_nn
-	url = git@github.com:xmos/lib_nn.git
-[submodule "modules/aif/flatbuffers"]
-	path = modules/aif/flatbuffers
-	url = git@github.com:google/flatbuffers.git
-[submodule "modules/aif/gemmlowp"]
-	path = modules/aif/gemmlowp
-	url = git@github.com:google/gemmlowp.git
-[submodule "modules/aif/ruy"]
-	path = modules/aif/ruy
-	url = git@github.com:google/ruy.git
 [submodule "lib_xud"]
 	path = modules/hil/lib_xud/lib_xud
 	url = git@github.com:xmos/lib_xud.git
@@ -61,9 +49,6 @@
 [submodule "lib_src"]
 	path = modules/lib_src/lib_src
 	url = git@github.com:xmos/lib_src.git
-[submodule "modules/aif/tflite-micro"]
-	path = modules/aif/tflite-micro
-	url = git@github.com:xmos/tflite-micro.git
 [submodule "modules/hil/l2_cache"]
 	path = modules/hil/lib_l2_cache/lib_l2_cache
 	url = git@github.com:xmos/lib_l2_cache.git
@@ -74,6 +59,12 @@
 [submodule "tools/xmos_cmake_toolchain"]
 	path = tools/xmos_cmake_toolchain
 	url = git@github.com:xmos/xmos_cmake_toolchain.git
+[submodule "modules/inferencing/lib_tflite_micro"]
+	path = modules/inferencing/lib_tflite_micro
+	url = git@github.com:xmos/lib_tflite_micro.git
+[submodule "modules/inferencing/lib_nn"]
+	path = modules/inferencing/lib_nn
+	url = git@github.com:xmos/lib_nn.git
 [submodule "modules/sw_avona"]
 	path = modules/sw_avona
 	url = git@github.com:xmos/sw_avona.git

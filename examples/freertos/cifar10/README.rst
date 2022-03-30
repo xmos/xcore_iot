@@ -2,9 +2,7 @@
 CIFAR-10
 ########
 
-This example application implements a CNN architecture trained on the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`__ dataset.  This example demonstrates how to place models in SRAM, Flash or LPDDR.
-
-The example reads a set of test images from a filesystem in flash.  The FreeRTOS kernel manages filesystem IO and sends example images to the AI device that implements the CIFAR-10 model.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
+This example application implements a CNN architecture trained on the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`__ dataset.  The example reads a set of test images from a filesystem in flash.  The FreeRTOS kernel manages filesystem IO and sends example images to the AI device that implements the CIFAR-10 model.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
 
 - airplane
 - automobile
@@ -55,9 +53,6 @@ This example is supported on the XCORE-AI-EXPLORER board.
 Building the firmware
 *********************
 
-Building SRAM memory configuration
-==================================
-
 Run the following commands in the xcore_sdk root folder to build the firmware:
 
 .. tab:: Linux and Mac
@@ -77,47 +72,11 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
         $ nmake example_freertos_cifar10_sram
 
 
-Building external flash memory configuration
-============================================
-
-.. note::
-
-    There is no Windows support for using external flash memory.
-
-To build with the model stored in flash, replace the call to make above with the following:
-
-.. tab:: Linux and Mac
-
-    .. code-block:: console
-
-        $ make example_freertos_cifar10_swmem
-
-
-Building external DDR memory configuration
-==========================================
-
-If your board supports LPDDR, you may also place your neural network in the external DDR memory.
-
-.. tab:: Linux and Mac
-
-    .. code-block:: console
-
-        $ make example_freertos_cifar10_extmem
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-        $ nmake example_freertos_cifar10_extmem
-
 ***********************
 Setting up the hardware
 ***********************
 
 Before running the firmware, the filesystem containing the images must be flashed.  After the images have been generated, by following the instructions above:
-
-Flashing SRAM memory configuration
-==================================
 
 .. tab:: Linux and Mac
 
@@ -132,40 +91,12 @@ Flashing SRAM memory configuration
         $ nmake flash_fs_example_freertos_cifar10_sram
 
 
-Flashing external flash memory configuration
-============================================
-
-.. tab:: Linux and Mac
-
-    .. code-block:: console
-
-        $ make flash_fs_example_freertos_cifar10_swmem
-
-
-Flashing external DDR memory configuration
-==========================================
-
-.. tab:: Linux and Mac
-
-    .. code-block:: console
-
-        $ make flash_fs_example_freertos_cifar10_extmem
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-        $ nmake flash_fs_example_freertos_cifar10_extmem
-
 ********************
 Running the firmware
 ********************
 
 Running with hardware.
 
-
-Running SRAM memory configuration
-=================================
 
 .. tab:: Linux and Mac
 
@@ -179,28 +110,23 @@ Running SRAM memory configuration
 
         $ nmake run_example_freertos_cifar10_sram
 
+********************
+Optimizing the model
+********************
 
-Running external flash memory configuration
-===========================================
+An unoptimized, quantized model is included with the example.
 
-.. tab:: Linux and Mac
+First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
-    .. code-block:: console
+.. code-block:: console
 
-        $ make run_example_freertos_cifar10_swmem
+    $ xcore-opt -o model/model_xcore.tflite model/model_quant.tflite 
 
+Converting flatbuffer to source file
+====================================
 
-Running external DDR memory configuration
-=========================================
+The following unix command will generate a C source file that contains the TensorFlow Lite model as a char array.
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-    .. code-block:: console
-
-        $ make run_example_freertos_cifar10_extmem
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-        $ nmake run_example_freertos_cifar10_extmem
+    $ python <path-to-sdk>/tools/tflite_micro/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/image_classifier/cifar10_model_data.h --source src/image_classifier/cifar10_model_data.c --variable-name cifar10
