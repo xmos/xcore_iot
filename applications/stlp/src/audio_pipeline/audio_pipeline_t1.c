@@ -38,11 +38,12 @@
 static stage_delay_ctx_t delay_buf_state = {};
 static aec_ctx_t aec_state = {};
 
-void *audio_pipeline_input_i(void *input_app_data)
+static void *audio_pipeline_input_i(void *input_app_data)
 {
     frame_data_t *frame_data;
 
     frame_data = pvPortMalloc(sizeof(frame_data_t));
+    memset(frame_data, 0x00, sizeof(frame_data_t));
 
     audio_pipeline_input(input_app_data,
                        (int32_t **)frame_data->aec_reference_audio_samples,
@@ -56,7 +57,7 @@ void *audio_pipeline_input_i(void *input_app_data)
     return frame_data;
 }
 
-int audio_pipeline_output_i(frame_data_t *frame_data,
+static int audio_pipeline_output_i(frame_data_t *frame_data,
                                    void *output_app_data)
 {
     rtos_intertile_tx(intertile_ctx,
@@ -66,8 +67,10 @@ int audio_pipeline_output_i(frame_data_t *frame_data,
     return AUDIO_PIPELINE_FREE_FRAME;
 }
 
-void stage_delay(frame_data_t *frame_data)
+static void stage_delay(frame_data_t *frame_data)
 {
+#if appconfAUDIO_PIPELINE_SKIP_STATIC_DELAY
+#else
 #if (appconfINPUT_SAMPLES_MIC_DELAY_MS > 0) /* Delay mics */
     size_t bytes_sent = xStreamBufferSend(
                                 delay_buf_state.delay_buf,
@@ -106,10 +109,13 @@ void stage_delay(frame_data_t *frame_data)
     }
 #else /* Delay None */
 #endif
+#endif /* appconfAUDIO_PIPELINE_SKIP_DELAY */
 }
 
-void stage_aec(frame_data_t *frame_data)
+static void stage_aec(frame_data_t *frame_data)
 {
+#if appconfAUDIO_PIPELINE_SKIP_AEC
+#else
     int32_t stage1_output[AEC_MAX_Y_CHANNELS][appconfAUDIO_PIPELINE_FRAME_ADVANCE];
     aec_process_frame_1thread(
             &aec_state.aec_main_state,
@@ -124,6 +130,7 @@ void stage_aec(frame_data_t *frame_data)
                                     aec_state.aec_main_state.shared_state->num_x_channels);
     frame_data->aec_corr_factor = aec_calc_corr_factor(&aec_state.aec_main_state, 0);
     memcpy(frame_data->samples, stage1_output, AEC_MAX_Y_CHANNELS * appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
+#endif
 }
 
 static void initialize_pipeline_stages(void)
@@ -159,6 +166,7 @@ void audio_pipeline_init(
     const configSTACK_DEPTH_TYPE stage_stack_sizes[] = {
         configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_delay) + RTOS_THREAD_STACK_SIZE(audio_pipeline_input_i),
         configMINIMAL_STACK_SIZE + RTOS_THREAD_STACK_SIZE(stage_aec) + RTOS_THREAD_STACK_SIZE(audio_pipeline_output_i),
+
     };
 
     initialize_pipeline_stages();

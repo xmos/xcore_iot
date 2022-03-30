@@ -40,11 +40,12 @@ static vad_stage_ctx_t vad_stage_state = {};
 static ns_stage_ctx_t ns_stage_state = {};
 static agc_stage_ctx_t agc_stage_state = {};
 
-void *audio_pipeline_input_i(void *input_app_data)
+static void *audio_pipeline_input_i(void *input_app_data)
 {
     frame_data_t *frame_data;
 
     frame_data = pvPortMalloc(sizeof(frame_data_t));
+    memset(frame_data, 0x00, sizeof(frame_data_t));
 
     size_t bytes_received = 0;
     bytes_received = rtos_intertile_rx_len(
@@ -62,7 +63,7 @@ void *audio_pipeline_input_i(void *input_app_data)
     return frame_data;
 }
 
-int audio_pipeline_output_i(frame_data_t *frame_data,
+static int audio_pipeline_output_i(frame_data_t *frame_data,
                                    void *output_app_data)
 {
     return audio_pipeline_output(output_app_data,
@@ -71,8 +72,10 @@ int audio_pipeline_output_i(frame_data_t *frame_data,
                                appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 }
 
-void stage_vad_and_ic(frame_data_t *frame_data)
+static void stage_vad_and_ic(frame_data_t *frame_data)
 {
+#if appconfAUDIO_PIPELINE_SKIP_IC_AND_VAD
+#else
     int32_t ic_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
     ic_filter(&ic_stage_state.state,
               frame_data->samples[0],
@@ -81,11 +84,15 @@ void stage_vad_and_ic(frame_data_t *frame_data)
     uint8_t vad = vad_probability_voice(ic_output, &vad_stage_state.state);
     ic_adapt(&ic_stage_state.state, vad, ic_output);
     frame_data->vad = vad;
+    /* Intentionally ignoring comms ch from here on out */
     memcpy(frame_data->samples, ic_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
+#endif
 }
 
-void stage_ns(frame_data_t *frame_data)
+static void stage_ns(frame_data_t *frame_data)
 {
+#if appconfAUDIO_PIPELINE_SKIP_NS
+#else
     int32_t ns_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
     configASSERT(NS_FRAME_ADVANCE == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
     ns_process_frame(
@@ -93,10 +100,13 @@ void stage_ns(frame_data_t *frame_data)
                 ns_output,
                 frame_data->samples[0]);
     memcpy(frame_data->samples, ns_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
+#endif
 }
 
-void stage_agc(frame_data_t *frame_data)
+static void stage_agc(frame_data_t *frame_data)
 {
+#if appconfAUDIO_PIPELINE_SKIP_AGC
+#else
     int32_t agc_output[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
     configASSERT(AGC_FRAME_ADVANCE == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 
@@ -110,6 +120,7 @@ void stage_agc(frame_data_t *frame_data)
             frame_data->samples[0],
             &agc_stage_state.md);
     memcpy(frame_data->samples, agc_output, appconfAUDIO_PIPELINE_FRAME_ADVANCE * sizeof(int32_t));
+#endif
 }
 
 static void initialize_pipeline_stages(void)

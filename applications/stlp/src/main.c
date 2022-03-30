@@ -30,8 +30,11 @@
 #include "gpio_test/gpio_test.h"
 
 
-volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
-volatile int aec_ref_source = appconfAEC_REF_DEFAULT;
+// volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
+// volatile int aec_ref_source = appconfAEC_REF_DEFAULT;
+
+volatile int mic_from_usb = appconfMIC_SRC_USB;
+volatile int aec_ref_source = appconfAEC_REF_USB;
 
 void audio_pipeline_input(void *input_app_data,
                         int32_t **input_audio_frames,
@@ -71,19 +74,20 @@ void audio_pipeline_input(void *input_app_data,
                       portMAX_DELAY);
 
 #if appconfUSB_ENABLED
-    // int32_t **usb_mic_audio_frame = NULL;
-    //
-    // if (mic_from_usb) {
-    //     usb_mic_audio_frame = input_audio_frames;
-    // }
-    //
-    // /*
-    //  * As noted above, this does not block.
-    //  */
-    // usb_audio_recv(intertile_ctx,
-    //                frame_count,
-    //                usb_mic_audio_frame,
-    //                ch_count);
+    int32_t **usb_mic_audio_frame = NULL;
+
+    if (mic_from_usb) {
+        usb_mic_audio_frame = input_audio_frames;
+    }
+
+    /*
+     * As noted above, this does not block.
+     * and expects ref L, ref R, mic 0, mic 1
+     */
+    usb_audio_recv(intertile_ctx,
+                   frame_count,
+                   usb_mic_audio_frame,
+                   ch_count);
 #endif
 
 #if appconfI2S_ENABLED
@@ -297,9 +301,7 @@ void startup_task(void *arg)
 #if ON_TILE(1)
     app_control_ap_servicer_register();
 #endif
-// #if ON_TILE(AUDIO_PIPELINE_TILE_NO)
     audio_pipeline_init(NULL, NULL);
-// #endif
 
 #if ON_TILE(FS_TILE_NO)
     rtos_fatfs_init(qspi_flash_ctx);

@@ -14,7 +14,6 @@
 #define appconfWW_SAMPLES_PORT         6
 #define appconfAUDIOPIPELINE_PORT      7
 
-
 /* Application tile specifiers */
 #include "platform/driver_instances.h"
 #define FS_TILE_NO              FLASH_TILE_NO
@@ -28,8 +27,17 @@
 /* If in channel sample format, appconfAUDIO_PIPELINE_FRAME_ADVANCE == MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME*/
 #define appconfAUDIO_PIPELINE_FRAME_ADVANCE     MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
 
-#define appconfINPUT_SAMPLES_MIC_DELAY_MS   150
+/**
+ * A positive delay will delay mics
+ * A negative delay will delay ref
+ */
+#define appconfINPUT_SAMPLES_MIC_DELAY_MS        0
 
+#define appconfAUDIO_PIPELINE_SKIP_STATIC_DELAY  0
+#define appconfAUDIO_PIPELINE_SKIP_AEC           0
+#define appconfAUDIO_PIPELINE_SKIP_IC_AND_VAD    0
+#define appconfAUDIO_PIPELINE_SKIP_NS            0
+#define appconfAUDIO_PIPELINE_SKIP_AGC           0
 
 #ifndef appconfI2S_ENABLED
 #if XVF3610_Q60A || XCOREAI_EXPLORER
