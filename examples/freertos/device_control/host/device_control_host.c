@@ -77,11 +77,10 @@ int main(int argc, char **argv)
             }
 
             if (cmd_values != NULL) {
+                printf("Bytes received are:\n");
                 for (int i = 0; i < cmd->num_values; i++) {
                     // print the actual value
-                    //command_value_print(cmd, cmd_values[i]);
-                    // this converts an int to hex for readability
-                    printf("%x\n", cmd_values[i]);
+                    command_value_print(cmd, cmd_values[i]);
                 }
                 printf("\n");
             }
