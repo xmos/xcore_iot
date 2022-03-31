@@ -30,6 +30,7 @@ set(APP_SOURCES
     "src/usb/adaptive_rate_adjust.c"
 
     "src/ww_model_runner/ww_model_runner.c"
+    "src/ww_model_runner/model_runner.c"
 
     "src/gpio_test/gpio_test.c"
 )
@@ -59,15 +60,6 @@ set(APP_LINK_OPTIONS
     -report
     ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
 )
-
-
-# if(USE_WW)
-#     add_compile_definitions(
-#         appconfWW_ENABLED=1
-#     )
-#     message(STATUS "Using ${USE_WW} model runner")
-#     include("${CMAKE_SOURCE_DIR}/src/ww_model_runner/${USE_WW}/model_runner.cmake")
-# endif()
 
 set(APP_LINK_LIBRARIES
     sdk::core

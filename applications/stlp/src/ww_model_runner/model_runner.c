@@ -38,5 +38,6 @@ void model_runner_manager(void *args)
         } while(buf_len > 0);
 
         /* Perform inference here */
+        rtos_printf("inference\n");
     }
 }
