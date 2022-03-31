@@ -60,9 +60,9 @@ static void audio_codec_start(void)
 #if appconfI2S_ENABLED
     int ret = 0;
 #if ON_TILE(I2C_TILE_NO)
-    // if (dac3101_init(appconfI2S_AUDIO_SAMPLE_RATE) != 0) {
-    //     rtos_printf("DAC initialization failed\n");
-    // }
+    if (dac3101_init(appconfI2S_AUDIO_SAMPLE_RATE) != 0) {
+        rtos_printf("DAC initialization failed\n");
+    }
     rtos_intertile_tx(intertile_ctx, 0, &ret, sizeof(ret));
 #else
     rtos_intertile_rx_len(intertile_ctx, 0, RTOS_OSAL_WAIT_FOREVER);
