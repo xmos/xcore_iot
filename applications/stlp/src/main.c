@@ -29,8 +29,13 @@
 
 #include "gpio_test/gpio_test.h"
 
-volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
-volatile int aec_ref_source = appconfAEC_REF_DEFAULT;
+volatile int mic_from_usb = appconfMIC_SRC_USB;
+volatile int aec_ref_source = appconfAEC_REF_I2S;
+
+// volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
+// volatile int aec_ref_source = appconfAEC_REF_DEFAULT;
+
+static  int first_entry = 0;
 
 void audio_pipeline_input(void *input_app_data,
                         int32_t **input_audio_frames,
@@ -84,8 +89,21 @@ void audio_pipeline_input(void *input_app_data,
                    frame_count,
                    usb_mic_audio_frame,
                    ch_count);
+
+     /* I2S expects sample channel format */
+     int32_t tmp[appconfAUDIO_PIPELINE_FRAME_ADVANCE][2];
+     for (int j=0; j<appconfAUDIO_PIPELINE_FRAME_ADVANCE; j++) {
+         tmp[j][0] = *(input_audio_frames + j);
+         tmp[j][1] = *(input_audio_frames + j + appconfAUDIO_PIPELINE_FRAME_ADVANCE);
+     }
+
+     rtos_i2s_tx(i2s_ctx,
+                 (int32_t*) tmp,
+                 frame_count,
+                 portMAX_DELAY);
 #endif
 
+  if (first_entry == 1) {
 #if appconfI2S_ENABLED
     if (!appconfUSB_ENABLED || aec_ref_source == appconfAEC_REF_I2S) {
         /* This shouldn't need to block given it shares a clock with the PDM mics */
@@ -108,6 +126,9 @@ void audio_pipeline_input(void *input_app_data,
         }
     }
 #endif
+} else {
+    first_entry = 1;
+}
 }
 
 int audio_pipeline_output(void *output_app_data,
@@ -117,45 +138,45 @@ int audio_pipeline_output(void *output_app_data,
 {
     (void) output_app_data;
 
-#if appconfI2S_ENABLED
-#if !appconfI2S_TDM_ENABLED
-    /* I2S expects sample channel format */
-    int32_t tmp[appconfAUDIO_PIPELINE_FRAME_ADVANCE][appconfAUDIO_PIPELINE_CHANNELS];
-    int32_t *tmpptr = (int32_t *)output_audio_frames;
-    for (int j=0; j<appconfAUDIO_PIPELINE_FRAME_ADVANCE; j++) {
-        /* ASR output is first */
-        tmp[j][0] = *(tmpptr+j);
-        tmp[j][1] = *(tmpptr+j); // duplicate on ch 1
-    }
-
-    rtos_i2s_tx(i2s_ctx,
-                (int32_t*) tmp,
-                frame_count,
-                portMAX_DELAY);
-#else
-    int32_t *tmpptr = (int32_t *)output_audio_frames;
-    for (int i = 0; i < frame_count; i++) {
-        /* output_audio_frames format is
-         *   processed_audio_frame
-         *   reference_audio_frame
-         *   raw_mic_audio_frame
-         */
-        int32_t tdm_output[6];
-
-        tdm_output[0] = *(tmpptr + i + (4 * frame_count)) & ~0x1;   // mic 0
-        tdm_output[1] = *(tmpptr + i + (5 * frame_count)) & ~0x1;   // mic 1
-        tdm_output[2] = *(tmpptr + i + (2 * frame_count)) & ~0x1;   // ref 0
-        tdm_output[3] = *(tmpptr + i + (3 * frame_count)) & ~0x1;   // ref 1
-        tdm_output[4] = *(tmpptr + i) | 0x1;                        // proc 0
-        tdm_output[5] = *(tmpptr + i + frame_count) | 0x1;          // proc 1
-
-        rtos_i2s_tx(i2s_ctx,
-                    tdm_output,
-                    appconfI2S_AUDIO_SAMPLE_RATE / appconfAUDIO_PIPELINE_SAMPLE_RATE,
-                    portMAX_DELAY);
-    }
-#endif
-#endif
+// #if appconfI2S_ENABLED
+// #if !appconfI2S_TDM_ENABLED
+//     /* I2S expects sample channel format */
+//     int32_t tmp[appconfAUDIO_PIPELINE_FRAME_ADVANCE][appconfAUDIO_PIPELINE_CHANNELS];
+//     int32_t *tmpptr = (int32_t *)output_audio_frames;
+//     for (int j=0; j<appconfAUDIO_PIPELINE_FRAME_ADVANCE; j++) {
+//         /* ASR output is first */
+//         tmp[j][0] = *(tmpptr+j);
+//         tmp[j][1] = *(tmpptr+j); // duplicate on ch 1
+//     }
+//
+//     rtos_i2s_tx(i2s_ctx,
+//                 (int32_t*) tmp,
+//                 frame_count,
+//                 portMAX_DELAY);
+// #else
+//     int32_t *tmpptr = (int32_t *)output_audio_frames;
+//     for (int i = 0; i < frame_count; i++) {
+//         /* output_audio_frames format is
+//          *   processed_audio_frame
+//          *   reference_audio_frame
+//          *   raw_mic_audio_frame
+//          */
+//         int32_t tdm_output[6];
+//
+//         tdm_output[0] = *(tmpptr + i + (4 * frame_count)) & ~0x1;   // mic 0
+//         tdm_output[1] = *(tmpptr + i + (5 * frame_count)) & ~0x1;   // mic 1
+//         tdm_output[2] = *(tmpptr + i + (2 * frame_count)) & ~0x1;   // ref 0
+//         tdm_output[3] = *(tmpptr + i + (3 * frame_count)) & ~0x1;   // ref 1
+//         tdm_output[4] = *(tmpptr + i) | 0x1;                        // proc 0
+//         tdm_output[5] = *(tmpptr + i + frame_count) | 0x1;          // proc 1
+//
+//         rtos_i2s_tx(i2s_ctx,
+//                     tdm_output,
+//                     appconfI2S_AUDIO_SAMPLE_RATE / appconfAUDIO_PIPELINE_SAMPLE_RATE,
+//                     portMAX_DELAY);
+//     }
+// #endif
+// #endif
 
 #if appconfUSB_ENABLED
     usb_audio_send(intertile_ctx,
