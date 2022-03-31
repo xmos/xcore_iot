@@ -38,7 +38,7 @@ control_ret_t read_cmd(control_resid_t resid, control_cmd_t cmd, uint8_t *payloa
     for (int i = 0; i < payload_len; i++) {
         payload[i] = (cmd & 0x7F) + i;
     }
-    rtos_printf("Bytes to be sent are:\n\t", payload_len);
+    rtos_printf("Raw bytes to be sent are:\n\t", payload_len);
     for (int i = 0; i < payload_len; i++) {
         rtos_printf("%02x ", payload[i]);
     }
