@@ -3,6 +3,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     ## Bare metal examples
     add_subdirectory(bare-metal/explorer_board)
     add_subdirectory(bare-metal/visual_wake_words)
+    add_subdirectory(bare-metal/graphic_equaliser)
 
     ## FreeRTOS examples
     add_subdirectory(freertos/cifar10)
