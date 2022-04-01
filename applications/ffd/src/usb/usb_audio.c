@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
+ * Copyright (c) 2021-2022 XMOS LIMITED. This Software is subject to the terms of the
  * XMOS Public License: Version 1
  *
  * The MIT License (MIT)
@@ -111,11 +111,11 @@ typedef int32_t samp_t;
 
 void usb_audio_send(rtos_intertile_t *intertile_ctx,
                     size_t frame_count,
-                    int32_t (*processed_audio_frame)[2],
-                    int32_t (*reference_audio_frame)[2],
-                    int32_t (*raw_mic_audio_frame)[2])
+                    int32_t **frame_buffers,
+                    size_t num_chans)
 {
     samp_t usb_audio_in_frame[appconfAUDIO_PIPELINE_FRAME_ADVANCE][CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX];
+    int32_t *frame_buf_ptr = (int32_t *) frame_buffers;
 
 #if CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX == 2
     const int src_32_shift = 16;
@@ -123,44 +123,16 @@ void usb_audio_send(rtos_intertile_t *intertile_ctx,
     const int src_32_shift = 0;
 #endif
 
+    memset(usb_audio_in_frame, 0, sizeof(samp_t) * appconfAUDIO_PIPELINE_FRAME_ADVANCE * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX);
+
     xassert(frame_count == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 
-    for (int i = 0; i < appconfAUDIO_PIPELINE_FRAME_ADVANCE; i++) {
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX >= 1
-        usb_audio_in_frame[i][0] = processed_audio_frame[i][0] >> src_32_shift;
-#endif
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX >= 2
-        usb_audio_in_frame[i][1] = processed_audio_frame[i][1] >> src_32_shift;
-#endif
-
-
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX >= 3
-        if (reference_audio_frame != NULL) {
-            usb_audio_in_frame[i][2] = reference_audio_frame[i][0] >> src_32_shift;
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX >= 4
-            usb_audio_in_frame[i][3] = reference_audio_frame[i][1] >> src_32_shift;
-#endif
-        } else {
-            usb_audio_in_frame[i][2] = 0;
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX >= 4
-            usb_audio_in_frame[i][3] = 0;
-#endif
+    for(int ch=0; ch<CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX; ch++) {
+        for (int i=0; i<appconfAUDIO_PIPELINE_FRAME_ADVANCE; i++) {
+            if (ch < num_chans) {
+                usb_audio_in_frame[i][ch] = frame_buf_ptr[i+(appconfAUDIO_PIPELINE_FRAME_ADVANCE*ch)] >> src_32_shift;
+            }
         }
-#endif
-
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX >= 5
-        if (raw_mic_audio_frame != NULL) {
-            usb_audio_in_frame[i][4] = raw_mic_audio_frame[i][0] >> src_32_shift;
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX >= 6
-            usb_audio_in_frame[i][5] = raw_mic_audio_frame[i][1] >> src_32_shift;
-#endif
-        } else {
-            usb_audio_in_frame[i][4] = 0;
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX >= 6
-            usb_audio_in_frame[i][5] = 0;
-#endif
-        }
-#endif
     }
 
     rtos_intertile_tx(intertile_ctx,
@@ -171,11 +143,12 @@ void usb_audio_send(rtos_intertile_t *intertile_ctx,
 
 void usb_audio_recv(rtos_intertile_t *intertile_ctx,
                     size_t frame_count,
-                    int32_t (*reference_audio_frame)[2],
-                    int32_t (*raw_mic_audio_frame)[2])
+                    int32_t **frame_buffers,
+                    size_t num_chans)
 {
     static samp_t usb_audio_out_frame[appconfAUDIO_PIPELINE_FRAME_ADVANCE][CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX];
     size_t bytes_received;
+    int32_t *frame_buf_ptr = (int32_t *) frame_buffers;
 
 #if CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_RX == 2
     const int src_32_shift = 16;
@@ -201,27 +174,14 @@ void usb_audio_recv(rtos_intertile_t *intertile_ctx,
         memset(usb_audio_out_frame, 0, sizeof(usb_audio_out_frame));
     }
 
-    for (int i = 0; i < appconfAUDIO_PIPELINE_FRAME_ADVANCE; i++) {
-        if(reference_audio_frame != NULL) {
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 1
-            reference_audio_frame[i][0] = usb_audio_out_frame[i][0] << src_32_shift;
-#endif
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 2
-            reference_audio_frame[i][1] = usb_audio_out_frame[i][1] << src_32_shift;
-#endif
-        }
-
-        if (raw_mic_audio_frame != NULL) {
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 3
-            raw_mic_audio_frame[i][0] = usb_audio_out_frame[i][2] << src_32_shift;
-#else
-            raw_mic_audio_frame[i][0] = 0;
-#endif
-#if CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX >= 4
-            raw_mic_audio_frame[i][1] = usb_audio_out_frame[i][3] << src_32_shift;
-#else
-            raw_mic_audio_frame[i][1] = 0;
-#endif
+    if (frame_buf_ptr != NULL) {
+        memset(frame_buf_ptr, 0, sizeof(int32_t) * appconfAUDIO_PIPELINE_FRAME_ADVANCE * num_chans);
+        for(int ch=0; ch<CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX; ch++) {
+            for (int i=0; i<appconfAUDIO_PIPELINE_FRAME_ADVANCE; i++) {
+                if (ch < num_chans) {
+                    frame_buf_ptr[i+(appconfAUDIO_PIPELINE_FRAME_ADVANCE*ch)] = usb_audio_out_frame[i][0] << src_32_shift;
+                }
+            }
         }
     }
 }
@@ -542,6 +502,21 @@ bool tud_audio_get_req_entity_cb(uint8_t rhport,
 
     TU_LOG2("  Unsupported entity: %d\r\n", entityID);
     return false; 	// Yet not implemented
+}
+
+bool tud_audio_rx_done_pre_read_cb(uint8_t rhport,
+                                    uint16_t n_bytes_received,
+                                    uint8_t func_id,
+                                    uint8_t ep_out,
+                                    uint8_t cur_alt_setting)
+{
+    (void) rhport;
+    (void) n_bytes_received;
+    (void) func_id;
+    (void) ep_out;
+    (void) cur_alt_setting;
+
+    return true;
 }
 
 bool tud_audio_rx_done_post_read_cb(uint8_t rhport,

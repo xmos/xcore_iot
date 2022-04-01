@@ -36,16 +36,11 @@ void ap_stage_a(chanend_t c_input, chanend_t c_output) {
     // initialise the array which will hold the data
     int32_t output[FRAMES_TO_BUFFER_PER_STAGE][MIC_ARRAY_CONFIG_MIC_COUNT][MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME];
     int buf_ndx = 0;
-    // get the frame format
-    const ma_frame_format_t format =
-          ma_frame_format(MIC_ARRAY_CONFIG_MIC_COUNT, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, MA_LYT_SAMPLE_CHANNEL);
 
     while(1)
     {
-        // recieve frame over the channel
-        ma_frame_rx_s32(output[buf_ndx], c_input, &format);
- 
-        // send the frame over the channel
+        ma_frame_rx_transpose((int32_t *)output[buf_ndx], c_input, MIC_ARRAY_CONFIG_MIC_COUNT, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME);
+
         s_chan_out_buf_word(c_output, (uint32_t*)output[buf_ndx], MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT);
         buf_ndx = (buf_ndx + 1 >= FRAMES_TO_BUFFER_PER_STAGE) ? buf_ndx + 1 : 0;
     }

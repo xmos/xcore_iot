@@ -110,3 +110,27 @@ jobs:
       - name: Build
         run: |
           docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_host_apps.sh
+
+  build_reference_apps:
+    name: Build reference applications
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Pull SDK builder image
+        run: |
+          docker pull ${SDK_BUILDER_IMAGE} 
+      
+      - name: Build
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_reference_apps.sh
+
+      - name: Save reference app firmware artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: xcore_sdk_reference_apps
+          path: ./dist
+          retention-days: 5
