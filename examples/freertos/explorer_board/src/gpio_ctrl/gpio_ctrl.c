@@ -34,7 +34,7 @@ static void volume_up( void )
 {
     BaseType_t gain = 0;
     gain = audiopipeline_get_stage1_gain();
-    if( gain != 0xFFFFFFFF )
+    if( gain != 0x0000FFFF )
     {
         gain++;
     }
@@ -46,7 +46,7 @@ static void volume_down( void )
 {
     BaseType_t gain = 0;
     gain = audiopipeline_get_stage1_gain();
-    if( gain > 0 )
+    if( gain > 1 )
     {
         gain--;
     }

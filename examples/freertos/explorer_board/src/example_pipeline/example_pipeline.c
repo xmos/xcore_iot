@@ -7,6 +7,9 @@
 #include "timers.h"
 #include "queue.h"
 
+/* SDK headers */
+#include "bfp_math.h"
+
 /* App headers */
 #include "app_conf.h"
 #include "generic_pipeline.h"
@@ -21,6 +24,7 @@
 #error MIC_ARRAY_CONFIG_MIC_COUNT must be 2
 #endif
 
+#define NORM_EXP -31
 #define Q31(f) (int)((signed long long)((f) * ((unsigned long long)1 << (31+20)) + (1<<19)) >> 20)
 #define F31(x) ((double)(x)/(double)(uint32_t)(1<<31)) // needs uint32_t cast because bit 31 is 1
 
@@ -44,23 +48,23 @@ BaseType_t audiopipeline_set_stage1_gain( BaseType_t xNewGain )
 
 void frame_power(int32_t (*audio_frame)[MIC_ARRAY_CONFIG_MIC_COUNT])
 {
-    uint64_t frame_power0 = 0;
-    uint64_t frame_power1 = 0;
+    // initialise block floating point structures for both channels
+    bfp_s32_t ch1, ch2;
+    bfp_s32_init(&ch1, audio_frame[0], NORM_EXP, appconfAUDIO_FRAME_LENGTH, 1);
+    bfp_s32_init(&ch2, audio_frame[1], NORM_EXP, appconfAUDIO_FRAME_LENGTH, 1);
+    // converting from int32_t to float_s32_t
+    float_s32_t num_samples_float = float_to_float_s32((float)appconfAUDIO_FRAME_LENGTH);
+    // calculate the frame energy
+    float_s32_t frame_energy_ch1 = float_s64_to_float_s32(bfp_s32_energy(&ch1));
+    float_s32_t frame_energy_ch2 = float_s64_to_float_s32(bfp_s32_energy(&ch2));
+    // calculate the frame power
+    float_s32_t frame_power_ch1 = float_s32_div(frame_energy_ch1, num_samples_float);
+    float_s32_t frame_power_ch2 = float_s32_div(frame_energy_ch2, num_samples_float);
+    // compare power with the threshold 
 
-    for (int i = 0; i < appconfAUDIO_FRAME_LENGTH; ++i) {
-        int64_t smp = audio_frame[i][0];
-        frame_power0 += (smp * smp) >> 31;
-        smp = audio_frame[i][1];
-        frame_power1 += (smp * smp) >> 31;
-    }
-
-    /* divide by appconfMIC_FRAME_LENGTH (2^8) */
-    frame_power0 >>= 8;
-    frame_power1 >>= 8;
-
-    rtos_printf("Stage 1 mic power:\nch0: %d\nch1: %d\n",
+    /*rtos_printf("Stage 1 mic power:\nch0: %d\nch1: %d\n",
                  MIN(frame_power0, (uint64_t) Q31(F31(INT32_MAX))),
-                 MIN(frame_power0, (uint64_t) Q31(F31(INT32_MAX))));
+                 MIN(frame_power0, (uint64_t) Q31(F31(INT32_MAX))));*/
 }
 
 void *example_pipeline_input(void *data)
@@ -104,10 +108,17 @@ void stage0(int32_t (*audio_frame)[MIC_ARRAY_CONFIG_MIC_COUNT])
 
 void stage1(int32_t (*audio_frame)[MIC_ARRAY_CONFIG_MIC_COUNT])
 {
-	for (int i = 0; i < appconfAUDIO_FRAME_LENGTH; i++)  {
-        audio_frame[i][0] *= xStage1_Gain;
-        audio_frame[i][1] *= xStage1_Gain;
-	}
+    // initialise block floating point structures for both channels
+    bfp_s32_t ch1, ch2;
+    bfp_s32_init(&ch1, audio_frame[0], NORM_EXP, appconfAUDIO_FRAME_LENGTH, 1);
+    bfp_s32_init(&ch2, audio_frame[1], NORM_EXP, appconfAUDIO_FRAME_LENGTH, 1);
+    float_s32_t gain_float = float_to_float_s32((float)xStage1_Gain);
+    // scale both channels 
+    bfp_s32_scale(&ch1, &ch1, gain_float);
+    bfp_s32_scale(&ch2, &ch2, gain_float);
+    // normalise exponent
+    bfp_s32_use_exponent(&ch1, NORM_EXP);
+    bfp_s32_use_exponent(&ch2, NORM_EXP);
 }
 
 void example_pipeline_init(UBaseType_t priority)
