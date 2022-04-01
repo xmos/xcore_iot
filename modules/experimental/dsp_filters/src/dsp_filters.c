@@ -2,6 +2,7 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #include "dsp_filters.h"
+#include "string.h"
 
 #define EXP -31
 
