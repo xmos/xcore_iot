@@ -55,6 +55,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
   size_t inference_input_size = 0;
   size_t inference_input_row = 0;
   int8_t *inference_input_buffer = nullptr;
+  int8_t *inference_output_buffer = nullptr;
   
   /* Perform any initialization here */
   initialize_features(&frontend_state);
@@ -80,6 +81,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
   inference_input_size = inference_engine.GetInputSize();
   inference_input_height = inference_engine.GetInputDimension(1);
   inference_input_chans = inference_engine.GetInputDimension(3);
+  inference_output_buffer = inference_engine.GetOutputBuffer();
 
   while (1) {
     /* Receive audio frames */
@@ -95,15 +97,21 @@ void keyword_engine_task(keyword_engine_args_t *args) {
     for (int i = 0; i < appconfINFERENCE_FRAMES_PER_INFERENCE; i++) {
       /* Audio is int32, convert to int16 */
       audio16_buf[audio16_buf_index++] = (int16_t)(audio_recv_buf[i] >> 16);
+      //printf("%d       %d\n", audio_recv_buf[i], audio16_buf[audio16_buf_index-1]);
       if (audio16_buf_index == AUDIO_BUFFER_LENGTH) {
         /* Compute features */
         compute_features(&frontend_output, &frontend_state, audio16_buf);
 
         /* Copy features to inference input tensor */
         for (int j = 0; j < frontend_output.size; j++) {
-            // TODO: Do I need to "quantize" the feature values?
-            //       I might!  Need to follow up....
-            inference_input_buffer[inference_input_row + inference_input_chans * j] = frontend_output.values[i];
+            // The feature pipeline outputs 16-bit signed integers in roughly a 0 to 670
+            // We have to scale the values to the -128 to 127 signed int8 numbers
+            constexpr int16_t min_feature_value = 0;
+            constexpr int16_t max_feature_value = 670;
+            int16_t clipped_value = frontend_output.values[i];
+            if (clipped_value < min_feature_value) clipped_value = min_feature_value;
+            if (clipped_value > max_feature_value) clipped_value = max_feature_value;
+            inference_input_buffer[inference_input_row + inference_input_chans * j] = (255 * clipped_value) / max_feature_value - 128;
         }
         inference_input_row++;
 
@@ -114,7 +122,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
 
         if (inference_input_row == inference_input_height) {
           /* Last row, time to run inference */
-          rtos_printf("inference\n");
+          //rtos_printf("inference\n");
           //inference_engine.Invoke();
           //inference_engine.PrintProfilerSummary();
 
@@ -125,6 +133,8 @@ void keyword_engine_task(keyword_engine_args_t *args) {
                 inference_input_size - offset
           );
           inference_input_row -= FEATURE_BUFFER_SHIFT_LENGTH;
+
+          printf("outputs     %d      %d\n", (int)inference_output_buffer[0], (int)inference_output_buffer[1]);
         }
       }
     }
@@ -235,7 +245,7 @@ void keyword_engine_task_create(uint32_t priority, keyword_engine_args_t *args)
 void keyword_engine_intertile_task_create(uint32_t priority, keyword_engine_args_t *args)
 {
     args->samples_to_engine_stream_buf = xStreamBufferCreate(
-                                           appconfINFERENCE_FRAME_BUFFER_MULT * appconfAUDIO_PIPELINE_FRAME_ADVANCE,
+                                           appconfINFERENCE_FRAME_BUFFER_MULT * appconfAUDIO_PIPELINE_FRAME_ADVANCE * NUM_AUDIO_FRAMES_PER_INFERENCE,
                                            appconfINFERENCE_FRAMES_PER_INFERENCE);
     samples_to_engine_stream_buf = args->samples_to_engine_stream_buf;  // TODO remove need for this to be static
 

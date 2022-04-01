@@ -9,7 +9,7 @@
 #define AUDIO_WINDOW_LENGTH_MS                                                 \
   (((float)appconfINFERENCE_FRAMES_PER_INFERENCE /                             \
     (float)appconfAUDIO_PIPELINE_SAMPLE_RATE) *                                \
-   1000 * NUM_FRAMES_PER_FEATURES)
+   1000 * NUM_AUDIO_FRAMES_PER_FEATURES)
 
 void initialize_features(struct FrontendState *state) {
   struct FrontendConfig config;
@@ -39,9 +39,9 @@ void compute_features(struct FrontendOutput *output,
                                    &num_samples_read);
 
   configASSERT(num_samples_read == AUDIO_BUFFER_LENGTH);
-//   for (int i = 0; i < output->size; ++i) {
-//     rtos_printf("%d ",
-//                 (int)output->values[i]); // Print the feature
-//   }
-//   rtos_printf("\n");
+  for (int i = 0; i < output->size; ++i) {
+    rtos_printf("%d ",
+                (int)output->values[i]); // Print the feature
+  }
+  rtos_printf("\n");
 }

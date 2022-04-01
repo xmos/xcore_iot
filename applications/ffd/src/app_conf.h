@@ -27,7 +27,7 @@
 
 /* Intent Engine Configuration */
 #define appconfINFERENCE_FRAME_BUFFER_MULT      4       /* total buffer size is this value * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME */
-#define appconfINFERENCE_FRAMES_PER_INFERENCE   200
+#define appconfINFERENCE_FRAMES_PER_INFERENCE   240
 
 #ifndef appconfINFERENCE_ENABLED
 #define appconfINFERENCE_ENABLED   1
@@ -42,7 +42,7 @@
 #endif
 
 #ifndef appconfUSB_ENABLED
-#define appconfUSB_ENABLED   0
+#define appconfUSB_ENABLED   1 //KAM FIXME: 0
 #endif
 
 #ifndef appconfUSB_AUDIO_SAMPLE_RATE
@@ -58,7 +58,7 @@
 #define appconfMIC_SRC_MICS        0
 #define appconfMIC_SRC_USB         1
 #ifndef appconfMIC_SRC_DEFAULT
-#define appconfMIC_SRC_DEFAULT     appconfMIC_SRC_MICS
+#define appconfMIC_SRC_DEFAULT     appconfMIC_SRC_USB //KAM FIXME: appconfMIC_SRC_MICS
 #endif
 
 
