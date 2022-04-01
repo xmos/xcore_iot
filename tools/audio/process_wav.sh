@@ -43,7 +43,7 @@ fi
 if [[ "$CHANNELS" == 1 ]]; then # reference-less test vector
     # file only has 1 microphone channel
     #   need to insert 2 silent reference channels and repeat microphone channel
-    echo "remix 0 0 1 1"
+    REMIX_PATTERN="remix 0 0 1 1"
 elif [[ "$CHANNELS" == 2 ]]; then # reference-less test vector
     # file only has microphone channels
     #   need to insert 2 silent reference channels
