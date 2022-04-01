@@ -23,33 +23,33 @@
 #include "app_control/app_control.h"
 #include "usb_support.h"
 #include "usb_audio.h"
-#include "vfe_pipeline/vfe_pipeline.h"
+#include "audio_pipeline/audio_pipeline.h"
 #include "ww_model_runner/ww_model_runner.h"
 #include "fs_support.h"
 
 #include "gpio_test/gpio_test.h"
 
-
 volatile int mic_from_usb = appconfMIC_SRC_DEFAULT;
 volatile int aec_ref_source = appconfAEC_REF_DEFAULT;
 
-void vfe_pipeline_input(void *input_app_data,
-                        int32_t (*mic_audio_frame)[2],
-                        int32_t (*ref_audio_frame)[2],
+void audio_pipeline_input(void *input_app_data,
+                        int32_t **input_audio_frames,
+                        size_t ch_count,
                         size_t frame_count)
 {
     (void) input_app_data;
+    int32_t **mic_ptr = (int32_t **)(input_audio_frames + (2 * frame_count));
 
     static int flushed;
     while (!flushed) {
         size_t received;
         received = rtos_mic_array_rx(mic_array_ctx,
-                                     mic_audio_frame,
+                                     mic_ptr,
                                      frame_count,
                                      0);
         if (received == 0) {
             rtos_mic_array_rx(mic_array_ctx,
-                              mic_audio_frame,
+                              mic_ptr,
                               frame_count,
                               portMAX_DELAY);
             flushed = 1;
@@ -65,65 +65,89 @@ void vfe_pipeline_input(void *input_app_data,
      * receive all zeros if no frame is available yet.
      */
     rtos_mic_array_rx(mic_array_ctx,
-                      mic_audio_frame,
+                      mic_ptr,
                       frame_count,
                       portMAX_DELAY);
 
 #if appconfUSB_ENABLED
-    int32_t (*usb_mic_audio_frame)[2] = NULL;
+    int32_t **usb_mic_audio_frame = NULL;
 
     if (mic_from_usb) {
-        usb_mic_audio_frame = mic_audio_frame;
+        usb_mic_audio_frame = input_audio_frames;
     }
 
     /*
      * As noted above, this does not block.
+     * and expects ref L, ref R, mic 0, mic 1
      */
     usb_audio_recv(intertile_ctx,
                    frame_count,
-                   ref_audio_frame,
-                   usb_mic_audio_frame);
+                   usb_mic_audio_frame,
+                   ch_count);
 #endif
 
 #if appconfI2S_ENABLED
     if (!appconfUSB_ENABLED || aec_ref_source == appconfAEC_REF_I2S) {
         /* This shouldn't need to block given it shares a clock with the PDM mics */
 
+        /* I2S provides sample channel format */
+        int32_t tmp[appconfAUDIO_PIPELINE_FRAME_ADVANCE][appconfAUDIO_PIPELINE_CHANNELS];
+        int32_t *tmpptr = (int32_t *)input_audio_frames;
+
         size_t rx_count =
         rtos_i2s_rx(i2s_ctx,
-                    (int32_t*) ref_audio_frame,
+                    (int32_t*) tmp,
                     frame_count,
                     portMAX_DELAY);
         xassert(rx_count == frame_count);
+
+        for (int i=0; i<appconfAUDIO_PIPELINE_FRAME_ADVANCE; i++) {
+            /* ref is first */
+            *(tmpptr + i) = tmp[i][0];
+            *(tmpptr + i + appconfAUDIO_PIPELINE_FRAME_ADVANCE) = tmp[i][1];
+        }
     }
 #endif
 }
 
-int vfe_pipeline_output(void *output_app_data,
-                        int32_t (*proc_audio_frame)[2],
-                        int32_t (*mic_audio_frame)[2],
-                        int32_t (*ref_audio_frame)[2],
+int audio_pipeline_output(void *output_app_data,
+                        int32_t **output_audio_frames,
+                        size_t ch_count,
                         size_t frame_count)
 {
     (void) output_app_data;
 
 #if appconfI2S_ENABLED
 #if !appconfI2S_TDM_ENABLED
+    /* I2S expects sample channel format */
+    int32_t tmp[appconfAUDIO_PIPELINE_FRAME_ADVANCE][appconfAUDIO_PIPELINE_CHANNELS];
+    int32_t *tmpptr = (int32_t *)output_audio_frames;
+    for (int j=0; j<appconfAUDIO_PIPELINE_FRAME_ADVANCE; j++) {
+        /* ASR output is first */
+        tmp[j][0] = *(tmpptr+j);
+        tmp[j][1] = *(tmpptr+j); // duplicate on ch 1
+    }
+
     rtos_i2s_tx(i2s_ctx,
-                (int32_t*) proc_audio_frame,
+                (int32_t*) tmp,
                 frame_count,
                 portMAX_DELAY);
 #else
+    int32_t *tmpptr = (int32_t *)output_audio_frames;
     for (int i = 0; i < frame_count; i++) {
-
+        /* output_audio_frames format is
+         *   processed_audio_frame
+         *   reference_audio_frame
+         *   raw_mic_audio_frame
+         */
         int32_t tdm_output[6];
 
-        tdm_output[0] = mic_audio_frame[i][0] | 0x1;
-        tdm_output[1] = mic_audio_frame[i][1] | 0x1;
-        tdm_output[2] = ref_audio_frame[i][0] & ~0x1;
-        tdm_output[3] = ref_audio_frame[i][1] & ~0x1;
-        tdm_output[4] = proc_audio_frame[i][0] & ~0x1;
-        tdm_output[5] = proc_audio_frame[i][1] & ~0x1;
+        tdm_output[0] = *(tmpptr + i + (4 * frame_count)) & ~0x1;   // mic 0
+        tdm_output[1] = *(tmpptr + i + (5 * frame_count)) & ~0x1;   // mic 1
+        tdm_output[2] = *(tmpptr + i + (2 * frame_count)) & ~0x1;   // ref 0
+        tdm_output[3] = *(tmpptr + i + (3 * frame_count)) & ~0x1;   // ref 1
+        tdm_output[4] = *(tmpptr + i) | 0x1;                        // proc 0
+        tdm_output[5] = *(tmpptr + i + frame_count) | 0x1;          // proc 1
 
         rtos_i2s_tx(i2s_ctx,
                     tdm_output,
@@ -135,33 +159,18 @@ int vfe_pipeline_output(void *output_app_data,
 
 #if appconfUSB_ENABLED
     usb_audio_send(intertile_ctx,
-                  frame_count,
-                  proc_audio_frame,
-                  ref_audio_frame,
-                  mic_audio_frame);
+                frame_count,
+                output_audio_frames,
+                6);
 #endif
 
 #if appconfWW_ENABLED
     ww_audio_send(intertile_ctx,
                   frame_count,
-                  proc_audio_frame);
+                  output_audio_frames);
 #endif
 
-#if appconfSPI_OUTPUT_ENABLED
-    void spi_audio_send(rtos_intertile_t *intertile_ctx,
-                        size_t frame_count,
-                        int32_t (*processed_audio_frame)[2],
-                        int32_t (*reference_audio_frame)[2],
-                        int32_t (*raw_mic_audio_frame)[2]);
-
-    spi_audio_send(intertile_ctx,
-                   frame_count,
-                   proc_audio_frame,
-                   ref_audio_frame,
-                   mic_audio_frame);
-#endif
-
-    return VFE_PIPELINE_FREE_FRAME;
+    return AUDIO_PIPELINE_FREE_FRAME;
 }
 
 RTOS_I2S_APP_SEND_FILTER_CALLBACK_ATTR
@@ -255,7 +264,7 @@ void vApplicationMallocFailedHook(void)
 static void mem_analysis(void)
 {
 	for (;;) {
-//		rtos_printf("Tile[%d]:\n\tMinimum heap free: %d\n\tCurrent heap free: %d\n", THIS_XCORE_TILE, xPortGetMinimumEverFreeHeapSize(), xPortGetFreeHeapSize());
+		rtos_printf("Tile[%d]:\n\tMinimum heap free: %d\n\tCurrent heap free: %d\n", THIS_XCORE_TILE, xPortGetMinimumEverFreeHeapSize(), xPortGetFreeHeapSize());
 		vTaskDelay(pdMS_TO_TICKS(5000));
 	}
 }
@@ -270,10 +279,10 @@ void startup_task(void *arg)
     gpio_test(gpio_ctx_t0);
 #endif
 
-#if ON_TILE(AUDIO_HW_TILE_NO)
+#if ON_TILE(1)
     app_control_ap_servicer_register();
-    vfe_pipeline_init(NULL, NULL);
 #endif
+    audio_pipeline_init(NULL, NULL);
 
 #if ON_TILE(FS_TILE_NO)
     rtos_fatfs_init(qspi_flash_ctx);

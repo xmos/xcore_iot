@@ -4,6 +4,7 @@
 
 import sys
 import os
+import platform
 import time
 import struct
 import ctypes
@@ -41,7 +42,12 @@ PRINT_CALLBACK = ctypes.CFUNCTYPE(
 class Endpoint(object):
     def __init__(self):
         tool_path = os.environ.get("XMOS_TOOL_PATH")
-        lib_path = os.path.join(tool_path, "lib", "xscope_endpoint.so")
+        ps = platform.system()
+        if ps == 'Windows':
+            lib_path = os.path.join(tool_path, 'lib', 'xscope_endpoint.dll')
+        else:  # Darwin (aka MacOS) or Linux
+            lib_path = os.path.join(tool_path, 'lib', 'xscope_endpoint.so')
+        
         self.lib_xscope = ctypes.CDLL(lib_path)
 
         self.ready = True

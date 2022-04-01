@@ -9,9 +9,10 @@ add_subdirectory(lib_src)
 add_subdirectory(lib_xs3_math)
 add_subdirectory(multitile_support)
 add_subdirectory(rtos)
-add_subdirectory(sw_avona)
+add_subdirectory(avona)
 add_subdirectory(thirdparty)
 add_subdirectory(utils)
+add_subdirectory(experimental)
 
 if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS2A))
     ## Create an aggregate of core libraries

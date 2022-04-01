@@ -104,7 +104,7 @@ void matrix_multiply()
     rtos_printf("Congratulations, output matrix verified!\n");
 
   // free memory
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < NUM_THREADS; i++)
   {
     dispatch_job_delete(jobs[i]);
   }

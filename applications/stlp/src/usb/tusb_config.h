@@ -31,7 +31,7 @@
 
 #include <stdint.h>
 #include "app_conf.h"
-#include "vfe_pipeline/vfe_pipeline.h"
+#include "audio_pipeline/audio_pipeline.h"
 
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
