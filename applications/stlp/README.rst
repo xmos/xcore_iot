@@ -2,90 +2,108 @@
 Avona Voice Reference Design
 ============================
 
-This is the XMOS Avona voice reference design
+This is the XMOS Avona voice reference design.
 
-****************** 
+******************
 Supported Hardware
-****************** 
+******************
 
-This example is supported on the XCORE-AI-EXPLORER board.
-
-***** 
-Setup
-***** 
-
-This example requires the xcore_sdk and Amazon Wakeword.
-
-Set the environment variable XCORE_SDK_PATH to the root of the xcore_sdk and set the environment variable WW_PATH to the root of the Amazon Wakeword.
-
-.. tab:: Linux and MacOS
-
-    .. code-block:: console
-
-        $ export XCORE_SDK_PATH=/path/to/sdk
-        $ export WW_PATH=/path/to/wakeword
-        
-.. tab:: Windows XTC Tools CMD prompt
-
-    .. code-block:: console
-    
-        $ set XCORE_SDK_PATH=C:\path\to\sdk\
-        $ set WW_PATH=C:\path\to\wakeword\
-
-It is recommended that your `XCORE_SDK_PATH` and WW_PATH not include spaces.  However, if this is not possible, you will need to enclose your path environment variable value in quotes.
-
-.. code-block:: console
-
-    $ export XCORE_SDK_PATH="<path with spaces to>/xcore_sdk"
-
-.. note:: Linux and MacOS users can add this export command to your ``.profile`` or ``.bash_profile`` script. This way the environment variable will be set every time a new terminal window is launched.  Windows users can add the environmet variables to the System Properties.
+This example is supported on the XK_VOICE_L71 board.
 
 *********************
 Building the Firmware
 *********************
 
-Run the following commands to build the avona firmware:
+Run the following commands in the xcore_sdk root folder to build the firmware:
 
-.. tab:: Linux and MacOS
+.. tab:: Linux and Mac
 
     .. code-block:: console
-    
-        $ cmake -B build -DMULTITILE_BUILD=1 -DUSE_WW=amazon -DBOARD=XCORE-AI-EXPLORER -DXE_BASE_TILE=0 -DOUTPUT_DIR=bin
+
+        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
         $ cd build
-        $ make -j
-        
-.. tab:: Windows XTC Tools CMD prompt
-
-    .. code-block:: console
-    
-        $ cmake -G "NMake Makefiles" -B build -DMULTITILE_BUILD=1 -DUSE_WW=amazon -DBOARD=XCORE-AI-EXPLORER -DXE_BASE_TILE=0 -DOUTPUT_DIR=bin
-        $ cd build
-        $ nmake
-
-After building the firmware, you need to create the filesystem, which includes the wakeword models, and flash the device with the following commands:
-
-Flash the filesystem with the following command:
-
-.. tab:: Linux and MacOS
-
-    .. code-block:: console
-
-        $ cd filesystem_support
-        $ ./flash_image.sh
+        $ make application_stlp
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cd filesystem_support
-        $ flash_image.bat
+        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
+        $ cd build
+        $ nmake application_stlp
+
+From the xcore_sdk build folder, create the filesystem and flash the device with the following command:
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ make flash_fs_application_stlp
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake flash_fs_application_stlp
 
 ********************
 Running the Firmware
 ********************
 
-From the root folder of the avona application run:
+From the xcore_sdk build folder run:
+
+.. tab:: Linux and Mac
 
     .. code-block:: console
 
-        $ xrun --xscope bin/sw_avona.xe
+        $ make run_application_stlp
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake run_application_stlp
+
+
+********************************
+Debugging the firmware with xgdb
+********************************
+
+From the xcore_sdk build folder run:
+
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        $ make debug_application_stlp
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        $ nmake debug_application_stlp
+
+
+********************
+Running the Firmware With WAV Files
+********************
+
+This application supports USB audio input and output debug configuration.
+
+To enable USB audio debug, add the following compile definitions:
+
+.. tab:: WAV File Debug Additional Compile Definitions
+
+    appconfUSB_ENABLED=1
+    appconfMIC_SRC_DEFAULT=appconfMIC_SRC_USB
+    appconfAEC_REF_DEFAULT=appconfAEC_REF_USB
+
+After rebuilding the firmware, run the application.
+
+In a separate terminal, run the usb audio host utility provided in the tools/audio folder:
+
+.. code-block:: console
+
+        $ process_wav.sh -c 4 input.wav output.wav
+
+This application requires the input audio wav file to be 4 channels in the order MIC 0, MIC 1, REF L, REF R.  Output is ASR, ignore, REF L, REF R, MIC 0, MIC 1, where the reference and microphone are passthrough.
