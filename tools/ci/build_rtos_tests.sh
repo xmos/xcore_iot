@@ -44,5 +44,5 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
 
     (cd ${path}; rm -rf build_ci_${board})
     (cd ${path}; mkdir -p build_ci_${board})
-    (cd ${path}/build_ci_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DCI_TESTING=ON; log_errors make ${application} -j)
+    (cd ${path}/build_ci_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application} -j)
 done

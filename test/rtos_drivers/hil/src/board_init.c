@@ -227,11 +227,7 @@ void board_tile1_init(
     rtos_mic_array_init(
             mic_array_ctx,
             MIC_ARRAY_CORE_MASK,
-            pdmclk,
-            pdmclk2,
-            p_mclk,
-            p_pdm_clk,
-            p_pdm_mics);
+            RTOS_MIC_ARRAY_SAMPLE_CHANNEL);
 
     rtos_i2s_master_init(
             i2s_master_ctx,

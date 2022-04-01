@@ -17,7 +17,7 @@
 /* SDK headers */
 #include "soc.h"
 #include "mic_array.h"
-#include "mic_array/etc/basic.h"
+#include "mic_array_vanilla.h"
 #include "xcore_utils.h"
 #include "i2s.h"
 
@@ -64,10 +64,8 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 
     tile1_ctx->c_i2s_to_dac = s_chan_output.end_b;
 
-    ma_basic_init(&tile1_ctx->pdm_res);
-
     PAR_JOBS (
-        PJOB(ma_basic_task, (&tile1_ctx->pdm_res, chan_decoupler.end_a)),
+        PJOB(ma_vanilla_task, (chan_decoupler.end_a)),
         PJOB(ap_stage_a, (chan_decoupler.end_b, s_chan_ab.end_a)),
         PJOB(ap_stage_b, (s_chan_ab.end_b, s_chan_bc.end_a, tile1_ctx->c_from_gpio)),
         PJOB(ap_stage_c, (s_chan_bc.end_b, s_chan_output.end_a, tile1_ctx->c_to_gpio)),

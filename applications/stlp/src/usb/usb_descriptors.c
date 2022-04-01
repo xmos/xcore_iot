@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
  * XMOS Public License: Version 1
  *
@@ -31,7 +31,7 @@
 #include "device_control_usb.h"
 
 #define XMOS_VID    0x20B1
-#define AVONA_PID 0x0020
+#define AVONA_PID   0x0020
 #define AVONA_PRODUCT_STR "Avona Voice Reference Design"
 
 //--------------------------------------------------------------------+

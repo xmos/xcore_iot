@@ -9,6 +9,7 @@
 /* SDK headers */
 #include "soc.h"
 #include "mic_array.h"
+#include "mic_array_vanilla.h"
 #include "xcore_utils.h"
 #include "i2c.h"
 #include "i2s.h"
@@ -105,13 +106,5 @@ static void tile1_i2s_init(void)
 
 static void tile1_mic_init(void)
 {
-    tile1_ctx->pdm_res = pdm_rx_resources_ddr(PORT_MCLK_IN,
-                                              PORT_PDM_CLK,
-                                              PORT_PDM_DATA,
-                                              PDM_CLKBLK_1,
-                                              PDM_CLKBLK_2);
-    // This makes it do SDR if we're only doing 1 mic
-    if( MIC_ARRAY_CONFIG_MIC_COUNT == 1 ) {
-        tile1_ctx->pdm_res.clock_b = 0;
-    }
+    ma_vanilla_init();
 }

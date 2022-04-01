@@ -15,10 +15,20 @@
 #include <xcore/clock.h>
 #include <xcore/port.h>
 #include "mic_array.h"
-#include "mic_array/etc/basic.h"
+#include "mic_array_vanilla.h"
 
 #include "rtos_osal.h"
 #include "rtos_driver_rpc.h"
+
+/**
+ * Typedef for the RTOS mic array driver audio format
+ */
+typedef enum
+{
+    RTOS_MIC_ARRAY_CHANNEL_SAMPLE,
+    RTOS_MIC_ARRAY_SAMPLE_CHANNEL,
+    RTOS_MIC_ARRAY_FORMAT_COUNT
+} rtos_mic_array_format_t;
 
 /**
  * Typedef to the RTOS mic array driver instance struct.
@@ -34,10 +44,10 @@ struct rtos_mic_array_struct {
     rtos_driver_rpc_t *rpc_config;
 
     __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
-    size_t (*rx)(rtos_mic_array_t *, int32_t sample_buf[][MIC_ARRAY_CONFIG_MIC_COUNT], size_t, unsigned);
+    size_t (*rx)(rtos_mic_array_t *, int32_t **sample_buf, size_t, unsigned);
 
-    port_t p_pdm_mics;
     streaming_channel_t c_pdm_mic;
+    rtos_mic_array_format_t format;
 
     rtos_osal_thread_t hil_thread;
     rtos_osal_semaphore_t recv_sem;
@@ -51,8 +61,6 @@ struct rtos_mic_array_struct {
         volatile size_t total_read;
         volatile size_t required_available_count;
     } recv_buffer;
-
-    pdm_rx_resources_t pdm_res;
 };
 
 #include "rtos_mic_array_rpc.h"
@@ -75,7 +83,10 @@ struct rtos_mic_array_struct {
  * \param sample_buf     A buffer to copy the received sample frames into.
  * \param frame_count    The number of frames to receive from the buffer.
  *                       This must be less than or equal to the size of the
- *                       buffer specified to rtos_mic_array_start().
+ *                       buffer specified to rtos_mic_array_start() if in
+ *                       RTOS_MIC_ARRAY_SAMPLE_CHANNEL mode.  This must be equal
+ *                       to MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME if in
+ *                       RTOS_MIC_ARRAY_CHANNEL_SAMPLE mode.
  * \param timeout        The amount of time to wait before the requested number
  *                       of frames becomes available.
  *
@@ -83,7 +94,7 @@ struct rtos_mic_array_struct {
  */
 inline size_t rtos_mic_array_rx(
         rtos_mic_array_t *ctx,
-        int32_t sample_buf[][MIC_ARRAY_CONFIG_MIC_COUNT],
+        int32_t **sample_buf,
         size_t frame_count,
         unsigned timeout)
 {
@@ -122,23 +133,12 @@ void rtos_mic_array_start(
  * \param io_core_mask      A bitmask representing the cores on which the low level mic array
  *                          I/O thread created by the driver is allowed to run. Bit 0 is core 0,
  *                          bit 1 is core 1, etc.
- * \param pdmclk            A clock that will be configured to drive \p p_pdm_clk.
- * \param pdmclk2           A clock that must be specified if there are two mics in DDR
- *                          mode per pin. It will be configured and used to sample \p p_pdm_mics.
- *                          \note The driver currently only supports two microhones in DDR mode,
- *                          so this must be specified.
- * \param p_mclk            Input port which supplies the master clock.
- * \param p_pdm_clk         1-bit output port which drives the microphones' clock pins.
- * \param p_pdm_mics        1-bit input port connected to the microphones' data out pins.
+ * \param format            Format of the output data
  */
 void rtos_mic_array_init(
         rtos_mic_array_t *mic_array_ctx,
         uint32_t io_core_mask,
-        const xclock_t pdmclk,
-        const xclock_t pdmclk2,
-        const port_t p_mclk,
-        const port_t p_pdm_clk,
-        const port_t p_pdm_mics);
+        rtos_mic_array_format_t format);
 
 /**@}*/
 
