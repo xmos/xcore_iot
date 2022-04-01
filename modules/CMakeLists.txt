@@ -12,6 +12,7 @@ add_subdirectory(rtos)
 add_subdirectory(avona)
 add_subdirectory(thirdparty)
 add_subdirectory(utils)
+add_subdirectory(experimental)
 
 if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS2A))
     ## Create an aggregate of core libraries
