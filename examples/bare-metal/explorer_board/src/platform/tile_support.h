@@ -28,8 +28,6 @@ struct tile1_struct {
     chanend_t c_from_gpio;
     chanend_t c_to_gpio;
 
-    pdm_rx_resources_t pdm_res;
-
     i2s_callback_group_t i2s_cb_group;
     port_t p_i2s_dout[1];
     port_t p_bclk;

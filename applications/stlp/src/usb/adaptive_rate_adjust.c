@@ -26,7 +26,7 @@ int32_t dsp_math_multiply( int32_t input1_value, int32_t input2_value, int32_t q
     return result;
 }
 
-#if XVF3610_Q60A
+#if XK_VOICE_L71
 #define PORT_MCLK       PORT_MCLK_IN_OUT
 #elif XCOREAI_EXPLORER
 #define PORT_MCLK       PORT_MCLK_IN
@@ -223,7 +223,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(sof_t1_isr, arg)
     sof_cb();
 }
 
-#if XVF3610_Q60A || OSPREY_BOARD
+#if XK_VOICE_L71 || OSPREY_BOARD
 static void sof_intertile_init(chanend_t other_tile_c)
 {
     sof_t1_isr_c = chanend_alloc();
@@ -259,7 +259,7 @@ static void sof_intertile_init(chanend_t other_tile_c)
 
 void adaptive_rate_adjust_init(chanend_t other_tile_c, xclock_t mclk_clkblk)
 {
-#if (XCOREAI_EXPLORER && ON_TILE(0)) || ((XVF3610_Q60A || OSPREY_BOARD) && ON_TILE(1))
+#if (XCOREAI_EXPLORER && ON_TILE(0)) || ((XK_VOICE_L71 || OSPREY_BOARD) && ON_TILE(1))
     /*
      * Configure the MCLK input port on the tile that
      * will run sof_cb() and count its clock cycles.
@@ -279,7 +279,7 @@ void adaptive_rate_adjust_init(chanend_t other_tile_c, xclock_t mclk_clkblk)
     port_set_clock(PORT_MCLK, mclk_clkblk);
     clock_start(mclk_clkblk);
 #endif
-#if XVF3610_Q60A || OSPREY_BOARD
+#if XK_VOICE_L71 || OSPREY_BOARD
     /*
      * On the Osprey and 3610 boards an additional intertile
      * channel and ISR must be set up in order to run the

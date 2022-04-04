@@ -1,7 +1,7 @@
 // Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#define DEBUG_UNIT RTOS_MIC_ARRAY
+// #define DEBUG_UNIT RTOS_MIC_ARRAY
 
 #include <string.h>
 
@@ -30,7 +30,7 @@ static void mic_array_thread(rtos_mic_array_t *ctx)
      */
     CLRSR(XS1_SR_KEDI_MASK);
 
-    ma_basic_task(&ctx->pdm_res, ctx->c_pdm_mic.end_a);
+    ma_vanilla_task(ctx->c_pdm_mic.end_a);
 }
 
 DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
@@ -40,17 +40,15 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
     size_t words_available = ctx->recv_buffer.total_written - ctx->recv_buffer.total_read;
     size_t words_free = ctx->recv_buffer.buf_size - words_available;
 
-    /* Note: At some sample rates and frame sizes, transferring the pointer results
-     *       in lost data.
-     *       Transfer the buffer over into stack and then memcpy into the appropriate
-     *       spot in the ring buffer instead.
-     */
-    // int32_t *mic_sample_block = (int32_t *) ma_frame_rx_ptr(ctx->c_pdm_mic.end_b);
-    const ma_frame_format_t format =
-          ma_frame_format(MIC_ARRAY_CONFIG_MIC_COUNT, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, MA_LYT_SAMPLE_CHANNEL);
-
     int32_t mic_samples[MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT];
-    ma_frame_rx_s32(mic_samples, ctx->c_pdm_mic.end_b, &format);
+
+    if (ctx->format == RTOS_MIC_ARRAY_CHANNEL_SAMPLE) {
+        ma_frame_rx(mic_samples, ctx->c_pdm_mic.end_b, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, MIC_ARRAY_CONFIG_MIC_COUNT);
+    } else if (ctx->format == RTOS_MIC_ARRAY_SAMPLE_CHANNEL) {
+        ma_frame_rx_transpose(mic_samples, ctx->c_pdm_mic.end_b, MIC_ARRAY_CONFIG_MIC_COUNT, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME);
+    } else {
+        xassert(0); /* Invalid format */
+    }
     int32_t *mic_sample_block = (int32_t *)&mic_samples;
 
     if (words_remaining <= words_free) {
@@ -86,13 +84,17 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(rtos_mic_array_isr, arg)
 __attribute__((fptrgroup("rtos_mic_array_rx_fptr_grp")))
 static size_t mic_array_local_rx(
         rtos_mic_array_t *ctx,
-        int32_t sample_buf[][MIC_ARRAY_CONFIG_MIC_COUNT],
+        int32_t **sample_buf,
         size_t frame_count,
         unsigned timeout)
 {
     size_t frames_recvd = 0;
     size_t words_remaining = frame_count * MIC_ARRAY_CONFIG_MIC_COUNT;
     int32_t *sample_buf_ptr = (int32_t *) sample_buf;
+
+    if(ctx->format == RTOS_MIC_ARRAY_CHANNEL_SAMPLE) {
+        xassert(frame_count == MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME);
+    }
 
     xassert(words_remaining <= ctx->recv_buffer.buf_size);
     if (words_remaining > ctx->recv_buffer.buf_size) {
@@ -169,24 +171,14 @@ void rtos_mic_array_start(
 void rtos_mic_array_init(
         rtos_mic_array_t *mic_array_ctx,
         uint32_t io_core_mask,
-        const xclock_t pdmclk,
-        const xclock_t pdmclk2,
-        const port_t p_mclk,
-        const port_t p_pdm_clk,
-        const port_t p_pdm_mics)
+        rtos_mic_array_format_t format)
 {
-    mic_array_ctx->p_pdm_mics = p_pdm_mics;
     mic_array_ctx->c_pdm_mic = s_chan_alloc();
+    mic_array_ctx->format = format;
 
-    xassert(pdmclk != 0);
+    xassert(format < RTOS_MIC_ARRAY_FORMAT_COUNT);
 
-    if (pdmclk2 == 0) {
-        mic_array_ctx->pdm_res = pdm_rx_resources_sdr(p_mclk, p_pdm_clk, p_pdm_mics, pdmclk);
-    } else {
-        mic_array_ctx->pdm_res = pdm_rx_resources_ddr(p_mclk, p_pdm_clk, p_pdm_mics, pdmclk, pdmclk2);
-    }
-
-    ma_basic_init(&mic_array_ctx->pdm_res);
+    ma_vanilla_init();
 
     mic_array_ctx->rpc_config = NULL;
     mic_array_ctx->rx = mic_array_local_rx;

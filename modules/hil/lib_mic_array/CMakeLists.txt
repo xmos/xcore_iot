@@ -2,7 +2,7 @@
 if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     ## Source files
     file(GLOB_RECURSE LIB_C_SOURCES   lib_mic_array/lib_mic_array/src/*.c )
-    file(GLOB_RECURSE LIB_CXX_SOURCES lib_mic_array/lib_mic_array/src/*.cc)
+    file(GLOB_RECURSE LIB_CXX_SOURCES lib_mic_array/lib_mic_array/src/*.cc lib_mic_array/lib_mic_array/src/*.cpp lib_mic_array/lib_mic_array/src/*.cxx)
     file(GLOB_RECURSE LIB_XC_SOURCES  lib_mic_array/lib_mic_array/src/*.xc)
     file(GLOB_RECURSE LIB_ASM_SOURCES lib_mic_array/lib_mic_array/src/*.S )
 
@@ -13,18 +13,21 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
 
     ## Set any local library compile options
-    set(LIB_COMPILE_FLAGS "-O3")
+    set(LIB_COMPILE_FLAGS "-O2")
 
     ## Includes files
     set(LIB_PUBLIC_INCLUDES
         lib_mic_array/lib_mic_array/api
-        lib_mic_array/lib_mic_array/src/fir
     )
     set(LIB_PRIVATE_INCLUDES lib_mic_array/lib_mic_array/src)
 
     ## Gather library sources
     set(LIB_PUBLIC_SOURCES   "")
     set(LIB_PRIVATE_SOURCES  ${LIB_C_SOURCES} ${LIB_CXX_SOURCES} ${LIB_XC_SOURCES})
+
+    ## Add vanilla api
+    list(APPEND LIB_PUBLIC_INCLUDES lib_mic_array/etc/vanilla)
+    list(APPEND LIB_PRIVATE_SOURCES lib_mic_array/etc/vanilla/mic_array_vanilla.cpp)
 
     ## Append platform specific sources
     list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})

@@ -87,11 +87,15 @@ void generic_pipeline_init(
 	pipeline_ctx->output_data = output_data;
 	pipeline_ctx->output = output;
 	pipeline_ctx->stage_count = stage_count;
-	pipeline_ctx->queues = rtos_osal_malloc((stage_count - 1) * sizeof(rtos_osal_queue_t));
+    if (stage_count > 1) {
+    	pipeline_ctx->queues = rtos_osal_malloc((stage_count - 1) * sizeof(rtos_osal_queue_t));
 
-	for (i = 0; i < stage_count - 1; i++) {
-        (void) rtos_osal_queue_create(&pipeline_ctx->queues[i], NULL, 2, sizeof(void *));
-	}
+    	for (i = 0; i < stage_count - 1; i++) {
+            (void) rtos_osal_queue_create(&pipeline_ctx->queues[i], NULL, 2, sizeof(void *));
+    	}
+    } else {
+        pipeline_ctx->queues = NULL;
+    }
 
 	stage_ctx = rtos_osal_malloc(stage_count * sizeof(pipeline_stage_ctx_t));
 
