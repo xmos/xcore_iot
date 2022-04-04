@@ -53,8 +53,8 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
     bfp_s32_t ch1, ch2;
     bfp_s32_init(&ch1, output[0], NORM_EXP, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, 0);
     bfp_s32_init(&ch2, output[1], NORM_EXP, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, 0);
-    // converting from int32_t to float_s32_t
-    float_s32_t gain_float = {STAGE_B_INITIAL_GAIN, 0};
+
+    int32_t stage_b_gain = STAGE_B_INITIAL_GAIN;
 
     triggerable_disable_all();
     // initialise events
@@ -76,7 +76,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                 bfp_s32_headroom(&ch1);
                 bfp_s32_headroom(&ch2);
                 // update the gain
-                gain_float.mant = stage_b_gain;
+                float_s32_t gain_float = {stage_b_gain, 0};
                 // scale both channels 
                 bfp_s32_scale(&ch1, &ch1, gain_float);
                 bfp_s32_scale(&ch2, &ch2, gain_float);
@@ -99,7 +99,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                 default:
                     break;
                 case 0x01:  /* Btn A */
-                    stage_b_gain = (stage_b_gain == 0x0000FFFF) ? stage_b_gain : stage_b_gain + 1;
+                    stage_b_gain = (stage_b_gain == 0x000FFFFF) ? stage_b_gain : stage_b_gain + 1;
                     break;
                 case 0x02:  /* Btn B */
                     stage_b_gain = (stage_b_gain == 1) ? stage_b_gain : stage_b_gain - 1;

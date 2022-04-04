@@ -34,7 +34,7 @@ static void volume_up( void )
 {
     BaseType_t gain = 0;
     gain = audiopipeline_get_stage1_gain();
-    if( gain != 0x0000FFFF )
+    if( gain != 0x000FFFFF )
     {
         gain++;
     }
