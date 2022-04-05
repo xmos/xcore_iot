@@ -8,20 +8,17 @@
 
 #include "tensorflow/lite/experimental/microfrontend/lib/frontend.h"
 
-#define NUM_AUDIO_FRAMES_PER_FEATURES    (2)
-#define AUDIO_BUFFER_LENGTH              (appconfINFERENCE_FRAMES_PER_INFERENCE * NUM_AUDIO_FRAMES_PER_FEATURES)
-#define AUDIO_BUFFER_SHIFT_LENGTH        (AUDIO_BUFFER_LENGTH - appconfINFERENCE_FRAMES_PER_INFERENCE)
+#define NUM_AUDIO_FRAMES_PER_FEATURES (2)
 
-#define NUM_AUDIO_FRAMES_PER_INFERENCE   (4)
-#define FEATURE_BUFFER_SHIFT_LENGTH      (NUM_AUDIO_FRAMES_PER_INFERENCE)
+#define FEATURE_INPUT_BUFFER_SHIFT (4)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void initialize_features(struct FrontendState *state);
-void compute_features(struct FrontendOutput *output,
-                      struct FrontendState *state, int16_t *audio16);
+size_t compute_features(struct FrontendOutput *output,
+                        struct FrontendState *state, int16_t *audio16);
 
 #ifdef __cplusplus
 };

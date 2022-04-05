@@ -17,28 +17,19 @@
 #include "inference_engine.h"
 #include "template_inf_eng.h"
 
-#define ASR_CHANNEL             (0)
-#define COMMS_CHANNEL           (1)
-
 static StreamBufferHandle_t samples_to_engine_stream_buf = 0;
 
 void template_engine_samples_send_remote(
         rtos_intertile_t *intertile_ctx,
         size_t frame_count,
-        int32_t (*processed_audio_frame)[2])
+        int32_t *processed_audio_frame)
 {
     configASSERT(frame_count == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 
-    uint32_t samples[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
-
-    for (int i = 0; i < frame_count; i++) {
-        samples[i] = (uint32_t)processed_audio_frame[i][ASR_CHANNEL];
-    }
-
     rtos_intertile_tx(intertile_ctx,
                       appconfINTENT_MODEL_RUNNER_SAMPLES_PORT,
-                      samples,
-                      sizeof(samples));
+                      processed_audio_frame,
+                      sizeof(int32_t) * frame_count);
 }
 
 static void template_engine_intertile_samples_in_task(void *arg)
@@ -46,7 +37,7 @@ static void template_engine_intertile_samples_in_task(void *arg)
     (void) arg;
 
     for (;;) {
-        uint32_t samples[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
+        int32_t samples[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
         size_t bytes_received;
 
         bytes_received = rtos_intertile_rx_len(
@@ -69,18 +60,13 @@ static void template_engine_intertile_samples_in_task(void *arg)
 
 void template_engine_samples_send_local(
         size_t frame_count,
-        int32_t (*processed_audio_frame)[2])
+        int32_t *processed_audio_frame)
 {
     configASSERT(frame_count == appconfAUDIO_PIPELINE_FRAME_ADVANCE);
 
-    uint32_t samples[appconfAUDIO_PIPELINE_FRAME_ADVANCE];
-
-    for (int i = 0; i < frame_count; i++) {
-        samples[i] = (uint32_t)(processed_audio_frame[i][ASR_CHANNEL]);
-    }
-
     if(samples_to_engine_stream_buf != NULL) {
-        if (xStreamBufferSend(samples_to_engine_stream_buf, processed_audio_frame, sizeof(samples), 0) != sizeof(samples)) {
+        size_t bytes_to_send = sizeof(int32_t) * frame_count;
+        if (xStreamBufferSend(samples_to_engine_stream_buf, processed_audio_frame, bytes_to_send, 0) != bytes_to_send) {
             rtos_printf("lost local output samples for inference\n");
         }
     } else {

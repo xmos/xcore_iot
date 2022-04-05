@@ -30,18 +30,18 @@ int32_t inference_engine_create(uint32_t priority, void *args)
     return 0;
 }
 
-int32_t inference_engine_sample_push(uint8_t *buf, size_t bytes)
+int32_t inference_engine_sample_push(int32_t *buf, size_t frames)
 {
 #if appconfINFERENCE_ENABLED
 #if INFERENCE_TILE_NO == AUDIO_PIPELINE_TILE_NO
     template_engine_samples_send_local(
-            bytes,
-            (int32_t(*)[2])buf);
+            frames,
+            buf);
 #else
     template_engine_samples_send_remote(
             intertile_ctx,
-            bytes,
-            (int32_t(*)[2])buf);
+            frames,
+            buf);
 #endif
 #endif
     return 0;

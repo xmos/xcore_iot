@@ -113,7 +113,7 @@ int audio_pipeline_output(void *output_app_data,
 #endif
 
 #if appconfINFERENCE_ENABLED
-    inference_engine_sample_push((uint8_t *)output_audio_frames, frame_count);
+    inference_engine_sample_push(output_audio_frames, frame_count);
 #endif
 
     return AUDIO_PIPELINE_FREE_FRAME;

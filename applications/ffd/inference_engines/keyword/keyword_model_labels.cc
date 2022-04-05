@@ -4,6 +4,8 @@
 #include "keyword_model_labels.h"
 
 const char* keyword_model_lables[kKeywordModelLabelCount] = {
-    "television",
+    "_silence_",
+    "_unknown_",
     "computer",
+    "television",
 };

@@ -24,7 +24,7 @@ void keyword_engine_task_create(
         keyword_engine_args_t *args);
 void keyword_engine_samples_send_local(
         size_t frame_count,
-        int32_t (*processed_audio_frame)[2]);
+        int32_t *processed_audio_frame);
 
 void keyword_engine_intertile_task_create(
         uint32_t priority,
@@ -32,7 +32,7 @@ void keyword_engine_intertile_task_create(
 void keyword_engine_samples_send_remote(
         rtos_intertile_t *intertile_ctx,
         size_t frame_count,
-        int32_t (*processed_audio_frame)[2]);
+        int32_t *processed_audio_frame);
 
 #ifdef __cplusplus
 };
