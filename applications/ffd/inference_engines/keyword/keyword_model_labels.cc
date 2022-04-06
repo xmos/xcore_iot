@@ -3,7 +3,7 @@
 
 #include "keyword_model_labels.h"
 
-const char* keyword_model_lables[kKeywordModelLabelCount] = {
+const char* keyword_model_labels[kKeywordModelLabelCount] = {
     "_silence_",
     "_unknown_",
     "computer",

@@ -31,6 +31,13 @@ void keyword_engine_task(keyword_engine_args_t *args);
 void keyword_engine_intertile_samples_in_task(void *arg);
 };
 
+const uint32_t keyword_model_eventgroup_bits[kKeywordModelLabelCount] = {
+    INFERENCE_BIT_SPOTTED_SILENCE,
+    INFERENCE_BIT_SPOTTED_UNKNOWN,
+    INFERENCE_BIT_RED,
+    INFERENCE_BIT_ACTIVATE
+};
+
 static StreamBufferHandle_t samples_to_engine_stream_buf = 0;
 
 static xcore::RTOSInferenceEngine<4, 13> inference_engine;
@@ -131,7 +138,8 @@ void keyword_engine_task(keyword_engine_args_t *args) {
       for (int i = 0; i < output_size; i++) {
         float prob = (float)(output_buffer[i] - output_quant.zero_point) * output_quant.scale * 100.0;
         if (prob >= 70) {
-          rtos_printf("recognized %s (%d%%)\n", keyword_model_lables[i], (int)prob);
+          rtos_printf("recognized %s (%d%%)\n", keyword_model_labels[i], (int)prob);
+          xEventGroupSetBits(output_egrp, keyword_model_eventgroup_bits[i]);
         }
       }
 
@@ -140,22 +148,6 @@ void keyword_engine_task(keyword_engine_args_t *args) {
       memmove(feature_input_buffer, feature_input_buffer+offset,
               input_size - offset);
       feature_input_row -= FEATURE_INPUT_BUFFER_SHIFT;
-
-      /* Set output event bits */
-      // switch (keyword_output_index) {
-      // default:
-      // case 0:
-      //   xEventGroupSetBits(output_egrp, INFERENCE_BIT_A | INFERENCE_BIT_B);
-      //   break;
-      // case 1:
-      //   xEventGroupSetBits(output_egrp, INFERENCE_BIT_A);
-      //   break;
-      // case 2:
-      //   xEventGroupSetBits(output_egrp, INFERENCE_BIT_B);
-      //   break;
-      // }
-      // keyword_output_index = (keyword_output_index >= 2) ? 0 :
-      // keyword_output_index + 1;
     }
   }
 }
