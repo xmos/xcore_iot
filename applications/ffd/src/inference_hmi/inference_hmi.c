@@ -19,6 +19,7 @@
 
 #define KEYWORD_DETECT_DEBOUNCE       3
 #define KEYWORD_DETECT_UNKNOWN_RESET  10
+#define KEYWORD_DETECT_SILENCE_RESET  10
 
 typedef enum inference_state {
     STATE_WAIT_FOR_ANY,
@@ -51,14 +52,28 @@ rtos_gpio_port_id_t gpo_port = 0;
 }
 
 #elif XCOREAI_EXPLORER
-#define gpo_setup()     {                               \
-    gpio_port = rtos_gpio_port(PORT_LEDS);              \
-    rtos_gpio_port_enable(gpio_ctx_t0, gpio_port);      \
+/* LED 0 is "green"
+ * LED 1 is "red" */
+#define gpo_setup()     {                                      \
+    gpo_port = rtos_gpio_port(PORT_LEDS);                      \
+    rtos_gpio_port_enable(gpio_ctx_t0, gpo_port);              \
 }
-#define green_led_on()  {rtos_printf("Green on\n");}
-#define green_led_off() {rtos_printf("Green off\n");}
-#define red_led_on()    {rtos_printf("Red on\n");}
-#define red_led_off()   {rtos_printf("Red off\n");}
+#define green_led_on()  {                                      \
+    uint32_t val = rtos_gpio_port_in(gpio_ctx_t0, gpo_port);   \
+    rtos_gpio_port_out(gpio_ctx_t0, gpo_port, val |= (1<<0));  \
+}
+#define green_led_off()  {                                     \
+    uint32_t val = rtos_gpio_port_in(gpio_ctx_t0, gpo_port);   \
+    rtos_gpio_port_out(gpio_ctx_t0, gpo_port, val &= ~(1<<0)); \
+}
+#define red_led_on()  {                                        \
+    uint32_t val = rtos_gpio_port_in(gpio_ctx_t0, gpo_port);   \
+    rtos_gpio_port_out(gpio_ctx_t0, gpo_port, val |= (1<<1));  \
+}
+#define red_led_off()  {                                       \
+    uint32_t val = rtos_gpio_port_in(gpio_ctx_t0, gpo_port);   \
+    rtos_gpio_port_out(gpio_ctx_t0, gpo_port, val &= ~(1<<1)); \
+}
 #endif
 
 void inference_hmi_task(void *args)
@@ -91,12 +106,21 @@ void inference_hmi_task(void *args)
         }
         last_rx_bits = rx_bits;
 
+        /* Assume in the unknown case that it is just "filler" words
+         * IE: "open the door" -> ACTION FILLER OBJECT */
         if ((rx_bits & INFERENCE_BIT_SPOTTED_UNKNOWN) != 0) {
-            if (successive_cnt >= KEYWORD_DETECT_UNKNOWN_RESET) {
+            if (successive_cnt == KEYWORD_DETECT_UNKNOWN_RESET) {
                 intent = 0;
                 state = STATE_WAIT_FOR_ANY;
                 rtos_printf("Unknown threshold passed.  Reset intent state\n");
             }
+        /* Similarly to "filler" words, we must filter out inter word silence */
+        } else if ((rx_bits & INFERENCE_BIT_SPOTTED_SILENCE) != 0) {
+           if (successive_cnt == KEYWORD_DETECT_SILENCE_RESET) {
+               intent = 0;
+               state = STATE_WAIT_FOR_ANY;
+               rtos_printf("Silence threshold passed.  Reset intent state\n");
+           }
         } else {
             /* Only run the state machine once per non-unknown keyword */
             if (successive_cnt == KEYWORD_DETECT_DEBOUNCE) {
