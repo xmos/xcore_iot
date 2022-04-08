@@ -39,6 +39,22 @@ void audio_pipeline_input(void *input_app_data,
 {
     (void) input_app_data;
 
+#if appconfUSB_ENABLED
+    int32_t **usb_mic_audio_frame = NULL;
+
+    if (mic_from_usb) {
+        usb_mic_audio_frame = input_audio_frames;
+        usb_audio_recv(intertile_ctx,
+                       frame_count,
+                       usb_mic_audio_frame,
+                       ch_count);
+    } else {
+        rtos_mic_array_rx(mic_array_ctx,
+                          input_audio_frames,
+                          frame_count,
+                          portMAX_DELAY);
+    }
+#else
     static int flushed;
     while (!flushed) {
         size_t received;
@@ -55,31 +71,10 @@ void audio_pipeline_input(void *input_app_data,
         }
     }
 
-    /*
-     * NOTE: ALWAYS receive the next frame from the PDM mics,
-     * even if USB is the current mic source. The controls the
-     * timing since usb_audio_recv() does not block and will
-     * receive all zeros if no frame is available yet.
-     */
     rtos_mic_array_rx(mic_array_ctx,
                       input_audio_frames,
                       frame_count,
                       portMAX_DELAY);
-
-#if appconfUSB_ENABLED
-    int32_t **usb_mic_audio_frame = NULL;
-
-    if (mic_from_usb) {
-        usb_mic_audio_frame = input_audio_frames;
-    }
-
-    /*
-     * As noted above, this does not block.
-     */
-    usb_audio_recv(intertile_ctx,
-                   frame_count,
-                   usb_mic_audio_frame,
-                   ch_count);
 #endif
 }
 
