@@ -27,7 +27,7 @@
 
 /* Intent Engine Configuration */
 #define appconfINFERENCE_FRAME_BUFFER_MULT      4       /* total buffer size is this value * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME */
-#define appconfINFERENCE_FRAMES_PER_INFERENCE   200
+#define appconfINFERENCE_FRAMES_PER_INFERENCE   240
 
 #ifndef appconfINFERENCE_ENABLED
 #define appconfINFERENCE_ENABLED   1

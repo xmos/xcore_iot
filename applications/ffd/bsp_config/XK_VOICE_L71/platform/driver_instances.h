@@ -4,12 +4,21 @@
 #ifndef DRIVER_INSTANCES_H_
 #define DRIVER_INSTANCES_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "rtos_intertile.h"
 #include "rtos_qspi_flash.h"
 #include "rtos_gpio.h"
-#include "rtos_mic_array.h"
 #include "rtos_i2c_master.h"
 #include "rtos_i2s.h"
+
+#ifdef __cplusplus
+};
+#endif
+
+#include "rtos_mic_array.h"
 
 /* Tile specifiers */
 #define FLASH_TILE_NO      0

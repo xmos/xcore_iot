@@ -2,6 +2,52 @@
 SET(LIB_TFLITE_MICRO_PATH lib_tflite_micro/lib_tflite_micro)
 SET(LIB_TFLITE_MICRO_SUBMODULES_PATH ${LIB_TFLITE_MICRO_PATH}/submodules)
 
+## ****************************************
+## Create tflite-micro microfrontend target
+## ****************************************
+
+## Create library target for the tflite-micro microfrontend
+add_library(xcore_sdk_inferencing_microfrontend STATIC)
+
+## Source files
+set(MICROFRONTEND_PRIVATE_SOURCES
+  "kissfft/kiss_fft.c"
+  "kissfft/tools/kiss_fftr.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_lut.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window.c"
+  "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window_util.c"
+)
+
+target_sources(xcore_sdk_inferencing_microfrontend
+    PRIVATE
+        ${MICROFRONTEND_PRIVATE_SOURCES}
+)
+target_include_directories(xcore_sdk_inferencing_microfrontend
+    PUBLIC
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro"
+        kissfft
+)
+
+target_compile_definitions(xcore_sdk_inferencing_microfrontend
+    PUBLIC
+        FIXED_POINT=16
+)
+
+## Create an alias
+add_library(sdk::inferencing::microfrontend ALIAS xcore_sdk_inferencing_microfrontend)
+
 ## **********************************
 ## Create tflite-micro runtime target
 ## **********************************
