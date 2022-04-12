@@ -116,45 +116,47 @@ void keyword_engine_task(keyword_engine_args_t *args) {
     num_samples_read =
         compute_features(&frontend_output, &frontend_state, audio16_recv_buf);
 
-    /* Copy features to inference input tensor */
-    for (int i = 0; i < frontend_output.size; i++) {
-      // int8_t quant_value = (int8_t)((float)frontend_output.values[i] / input_quant.scale + input_quant.zero_point);
-      size_t input_index = feature_input_row * input_width * input_chans + input_chans * i;
-      constexpr int32_t value_scale = 256;
-      constexpr int32_t value_div = static_cast<int32_t>((25.6f * 26.0f) + 0.5f);
-      int32_t quant_value =
-          ((frontend_output.values[i] * value_scale) + (value_div / 2)) /
-          value_div;
-      quant_value -= 128;
-      if (quant_value < -128) {
-        quant_value = -128;
-      }
-      if (quant_value > 127) {
-        quant_value = 127;
-      }
-      feature_input_buffer[input_index] = quant_value;
-
-    }
-
-    feature_input_row++;
-
-    if (feature_input_row == input_height) {
-      /* Last row, time to run inference */
-      memcpy(inference_input_buffer, feature_input_buffer, input_size);
-      inference_engine.Invoke();
-      for (int i = 0; i < output_size; i++) {
-        float prob = (float)(output_buffer[i] - output_quant.zero_point) * output_quant.scale * 100.0;
-        if (prob >= 80) {
-          rtos_printf("recognized %s (%d%%)\n", keyword_model_labels[i], (int)prob);
-          xEventGroupSetBits(output_egrp, (1<<i));
+    if (frontend_output.size == FEATURE_COUNT) {
+      /* Copy features to inference input tensor */
+      for (int i = 0; i < FEATURE_COUNT; i++) {
+        // int8_t quant_value = (int8_t)((float)frontend_output.values[i] / input_quant.scale + input_quant.zero_point);
+        size_t input_index = feature_input_row * input_width * input_chans + input_chans * i;
+        constexpr int32_t value_scale = 256;
+        constexpr int32_t value_div = static_cast<int32_t>((25.6f * 26.0f) + 0.5f);
+        int32_t quant_value =
+            ((frontend_output.values[i] * value_scale) + (value_div / 2)) /
+            value_div;
+        quant_value -= 128;
+        if (quant_value < -128) {
+          quant_value = -128;
         }
+        if (quant_value > 127) {
+          quant_value = 127;
+        }
+        feature_input_buffer[input_index] = quant_value;
+
       }
 
-      /* Shift the input tensor rows "up" one shift length */
-      size_t offset = FEATURE_INPUT_BUFFER_SHIFT * input_chans * input_width;
-      memmove(feature_input_buffer, feature_input_buffer+offset,
-              input_size - offset);
-      feature_input_row -= FEATURE_INPUT_BUFFER_SHIFT;
+      feature_input_row++;
+
+      if (feature_input_row == input_height) {
+        /* Last row, time to run inference */
+        memcpy(inference_input_buffer, feature_input_buffer, input_size);
+        inference_engine.Invoke();
+        for (int i = 0; i < output_size; i++) {
+          float prob = (float)(output_buffer[i] - output_quant.zero_point) * output_quant.scale * 100.0;
+          if (prob >= 80) {
+            rtos_printf("recognized %s (%d%%)\n", keyword_model_labels[i], (int)prob);
+            xEventGroupSetBits(output_egrp, (1<<i));
+          }
+        }
+
+        /* Shift the input tensor rows "up" one shift length */
+        size_t offset = FEATURE_INPUT_BUFFER_SHIFT * input_chans * input_width;
+        memmove(feature_input_buffer, feature_input_buffer+offset,
+                input_size - offset);
+        feature_input_row -= FEATURE_INPUT_BUFFER_SHIFT;
+      }
     }
   }
 }

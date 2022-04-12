@@ -8,9 +8,9 @@
 
 #include "tensorflow/lite/experimental/microfrontend/lib/frontend.h"
 
+#define FEATURE_COUNT                 (16)
 #define NUM_AUDIO_FRAMES_PER_FEATURES (2)
-
-#define FEATURE_INPUT_BUFFER_SHIFT (4)
+#define FEATURE_INPUT_BUFFER_SHIFT    (4)
 
 #ifdef __cplusplus
 extern "C" {

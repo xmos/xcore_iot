@@ -20,7 +20,7 @@ void initialize_features(struct FrontendState *state) {
 
   config.window.size_ms = (int)AUDIO_WINDOW_LENGTH_MS;
   config.window.step_size_ms = (int)AUDIO_WINDOW_STEP_MS;
-  config.filterbank.num_channels = 16;
+  config.filterbank.num_channels = FEATURE_COUNT;
   config.pcan_gain_control.enable_pcan = false;
 
   FrontendPopulateState(&config, state, appconfAUDIO_PIPELINE_SAMPLE_RATE);
