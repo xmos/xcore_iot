@@ -6,6 +6,9 @@
 const char* keyword_model_labels[kKeywordModelLabelCount] = {
     "_silence_",
     "_unknown_",
+    "clear",
     "computer",
-    "television",
+    "display",
+    "green",
+    "red",
 };

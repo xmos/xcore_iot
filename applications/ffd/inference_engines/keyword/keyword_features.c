@@ -17,18 +17,11 @@ void initialize_features(struct FrontendState *state) {
   struct FrontendConfig config;
 
   FrontendFillConfigWithDefaults(&config);
+
   config.window.size_ms = (int)AUDIO_WINDOW_LENGTH_MS;
   config.window.step_size_ms = (int)AUDIO_WINDOW_STEP_MS;
   config.filterbank.num_channels = 16;
-  config.filterbank.lower_band_limit = 125.0;
-  config.filterbank.upper_band_limit = 7500.0;
-  config.noise_reduction.smoothing_bits = 10;
-  config.noise_reduction.even_smoothing = 0.025;
-  config.noise_reduction.odd_smoothing = 0.06;
-  config.noise_reduction.min_signal_remaining = 0.05;
   config.pcan_gain_control.enable_pcan = false;
-  config.log_scale.enable_log = 1;
-  config.log_scale.scale_shift = 6;
 
   FrontendPopulateState(&config, state, appconfAUDIO_PIPELINE_SAMPLE_RATE);
 }

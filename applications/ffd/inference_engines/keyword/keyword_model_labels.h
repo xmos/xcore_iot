@@ -4,7 +4,7 @@
 #ifndef KEYWORD_MODEL_LABELS_H_
 #define KEYWORD_MODEL_LABELS_H_
 
-constexpr int kKeywordModelLabelCount = 4;
-extern const char* keyword_model_labels[kKeywordModelLabelCount];
+constexpr int kKeywordModelLabelCount = 7;
+extern const char* keyword_model_lables[kKeywordModelLabelCount];
 
 #endif  // KEYWORD_MODEL_LABELS_H_

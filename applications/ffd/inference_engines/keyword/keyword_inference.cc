@@ -66,7 +66,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
   int8_t *output_buffer = nullptr;
   int8_t *feature_input_buffer = nullptr;
   size_t feature_input_row = 0;
-  xcore::QuantizationParams input_quant;
+  //xcore::QuantizationParams input_quant;
   xcore::QuantizationParams output_quant;
 
   /* Perform any initialization here */
@@ -96,7 +96,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
   input_width = inference_engine.GetInputDimension(2);
   input_chans = inference_engine.GetInputDimension(3);
   input_size = inference_engine.GetInputSize();
-  input_quant = inference_engine.GetInputQuantization();
+  //input_quant = inference_engine.GetInputQuantization();
 
   output_buffer = inference_engine.GetOutputBuffer();
   output_size = inference_engine.GetOutputSize();
@@ -125,10 +125,24 @@ void keyword_engine_task(keyword_engine_args_t *args) {
 
     /* Copy features to inference input tensor */
     for (int i = 0; i < frontend_output.size; i++) {
-      int8_t quant_value = (int8_t)((float)frontend_output.values[i] / input_quant.scale + input_quant.zero_point);
+      // int8_t quant_value = (int8_t)((float)frontend_output.values[i] / input_quant.scale + input_quant.zero_point);
       size_t input_index = feature_input_row * input_width * input_chans + input_chans * i;
+      constexpr int32_t value_scale = 256;
+      constexpr int32_t value_div = static_cast<int32_t>((25.6f * 26.0f) + 0.5f);
+      int32_t quant_value =
+          ((frontend_output.values[i] * value_scale) + (value_div / 2)) /
+          value_div;
+      quant_value -= 128;
+      if (quant_value < -128) {
+        quant_value = -128;
+      }
+      if (quant_value > 127) {
+        quant_value = 127;
+      }
       feature_input_buffer[input_index] = quant_value;
+
     }
+
     feature_input_row++;
 
     if (feature_input_row == input_height) {
@@ -137,9 +151,8 @@ void keyword_engine_task(keyword_engine_args_t *args) {
       inference_engine.Invoke();
       for (int i = 0; i < output_size; i++) {
         float prob = (float)(output_buffer[i] - output_quant.zero_point) * output_quant.scale * 100.0;
-        if (prob >= 70) {
-          rtos_printf("recognized %s (%d%%)\n", keyword_model_labels[i], (int)prob);
-          xEventGroupSetBits(output_egrp, keyword_model_eventgroup_bits[i]);
+        if (prob >= 80) {
+          rtos_printf("recognized %s (%d%%)\n", keyword_model_lables[i], (int)prob);
         }
       }
 
