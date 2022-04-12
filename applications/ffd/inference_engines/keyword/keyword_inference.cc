@@ -152,7 +152,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
       for (int i = 0; i < output_size; i++) {
         float prob = (float)(output_buffer[i] - output_quant.zero_point) * output_quant.scale * 100.0;
         if (prob >= 80) {
-          rtos_printf("recognized %s (%d%%)\n", keyword_model_lables[i], (int)prob);
+          rtos_printf("recognized %s (%d%%)\n", keyword_model_labels[i], (int)prob);
         }
       }
 

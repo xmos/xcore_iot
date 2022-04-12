@@ -5,6 +5,6 @@
 #define KEYWORD_MODEL_LABELS_H_
 
 constexpr int kKeywordModelLabelCount = 7;
-extern const char* keyword_model_lables[kKeywordModelLabelCount];
+extern const char* keyword_model_labels[kKeywordModelLabelCount];
 
 #endif  // KEYWORD_MODEL_LABELS_H_
