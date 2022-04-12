@@ -31,13 +31,6 @@ void keyword_engine_task(keyword_engine_args_t *args);
 void keyword_engine_intertile_samples_in_task(void *arg);
 };
 
-const uint32_t keyword_model_eventgroup_bits[kKeywordModelLabelCount] = {
-    INFERENCE_BIT_SPOTTED_SILENCE,
-    INFERENCE_BIT_SPOTTED_UNKNOWN,
-    INFERENCE_BIT_RED,
-    INFERENCE_BIT_ACTIVATE
-};
-
 static StreamBufferHandle_t samples_to_engine_stream_buf = 0;
 
 static xcore::RTOSInferenceEngine<4, 13> inference_engine;
@@ -153,6 +146,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
         float prob = (float)(output_buffer[i] - output_quant.zero_point) * output_quant.scale * 100.0;
         if (prob >= 80) {
           rtos_printf("recognized %s (%d%%)\n", keyword_model_labels[i], (int)prob);
+          xEventGroupSetBits(output_egrp, (1<<i));
         }
       }
 

@@ -17,9 +17,10 @@
 #include "keyword_inference.h"
 #include "inference_hmi/inference_hmi.h"
 
-#define KEYWORD_DETECT_DEBOUNCE       3
-#define KEYWORD_DETECT_UNKNOWN_RESET  10
-#define KEYWORD_DETECT_SILENCE_RESET  10
+#define KEYWORD_DETECT_DEBOUNCE       1
+// TODO: change the silence and unknown resets to a wall block based reset
+#define KEYWORD_DETECT_UNKNOWN_RESET  20
+#define KEYWORD_DETECT_SILENCE_RESET  20
 
 typedef enum inference_state {
     STATE_WAIT_FOR_ANY,
@@ -128,8 +129,8 @@ void inference_hmi_task(void *args)
                 switch (state) {
                     default:
                     case STATE_WAIT_FOR_ANY:
-                        if ( ((rx_bits & INFERENCE_BIT_ACTIVATE) != 0)
-                          || ((rx_bits & INFERENCE_BIT_DEACTIVATE) != 0) ) {
+                        if ( ((rx_bits & INFERENCE_BIT_DISPLAY) != 0)
+                          || ((rx_bits & INFERENCE_BIT_CLEAR) != 0) ) {
                               state = STATE_WAIT_FOR_OBJECT;
                               intent |= rx_bits;
                               rtos_printf("Found object wait for action\n");
@@ -141,8 +142,8 @@ void inference_hmi_task(void *args)
                         }
                         break;
                     case STATE_WAIT_FOR_ACTION:
-                        if ( ((rx_bits & INFERENCE_BIT_ACTIVATE) != 0)
-                          || ((rx_bits & INFERENCE_BIT_DEACTIVATE) != 0) ) {
+                        if ( ((rx_bits & INFERENCE_BIT_DISPLAY) != 0)
+                          || ((rx_bits & INFERENCE_BIT_CLEAR) != 0) ) {
                           intent |= rx_bits;
                         } else {
                             rtos_printf("Action with no object.  Reset intent state\n");
@@ -166,22 +167,22 @@ void inference_hmi_task(void *args)
                 switch (intent) {
                     default:
                         break;
-                    case (INFERENCE_BIT_GREEN | INFERENCE_BIT_ACTIVATE):
+                    case (INFERENCE_BIT_GREEN | INFERENCE_BIT_DISPLAY):
                         green_led_on();
                         rtos_printf("Intent is GREEN ON\n");
                         intent = 0;
                         break;
-                    case (INFERENCE_BIT_GREEN | INFERENCE_BIT_DEACTIVATE):
+                    case (INFERENCE_BIT_GREEN | INFERENCE_BIT_CLEAR):
                         green_led_off();
                         rtos_printf("Intent is GREEN OFF\n");
                         intent = 0;
                         break;
-                    case (INFERENCE_BIT_RED | INFERENCE_BIT_ACTIVATE):
+                    case (INFERENCE_BIT_RED | INFERENCE_BIT_DISPLAY):
                         red_led_on();
                         rtos_printf("Intent is RED ON\n");
                         intent = 0;
                         break;
-                    case (INFERENCE_BIT_RED | INFERENCE_BIT_DEACTIVATE):
+                    case (INFERENCE_BIT_RED | INFERENCE_BIT_CLEAR):
                         red_led_off();
                         rtos_printf("Intent is RED OFF\n");
                         intent = 0;
