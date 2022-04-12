@@ -1,3 +1,13 @@
+##########
+Frameworks
+##########
+
+.. toctree::
+   :maxdepth: 1
+   :includehidden:
+
+   ../../../modules/avona/index.rst
+
 #######
 Modules
 #######

@@ -3,7 +3,7 @@
 PROJECT_NAME = XCore SDK
 PROJECT_BRIEF = "XCore Software Development Kit"
 
-PREDEFINED = __DOXYGEN__=1 C_API= EXTERN_C= __attribute__((weak))=
+PREDEFINED = __DOXYGEN__=1 C_API= EXTERN_C= DWORD_ALIGNED= __attribute__((weak))=
 
 # HIL library APIs
 INPUT += ../modules/hil/lib_i2c/api
@@ -22,6 +22,14 @@ INPUT += ../modules/rtos/drivers
 # RTOS SW Services
 INPUT += ../modules/rtos/sw_services/device_control/host ../modules/rtos/sw_services/device_control/api 
 
+# Avona library APIs
+INPUT += ../modules/avona/modules/lib_aec/api ../modules/avona/examples/bare-metal/shared_src/aec/
+INPUT += ../modules/avona/modules/lib_ns/api
+INPUT += ../modules/avona/modules/lib_agc/api
+INPUT += ../modules/avona/modules/lib_adec/api
+INPUT += ../modules/avona/modules/lib_ic/api
+INPUT += ../modules/avona/modules/lib_vad/api
+
 USE_MATHJAX = YES
 MATHJAX_FORMAT = HTML-CSS
 MATHJAX_RELPATH = https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/
@@ -30,4 +38,3 @@ MATHJAX_RELPATH = https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/
 ALIASES += math{1}="@f$\1@f$"
 ALIASES += vector{1}="@f$\bar \1@f$"
 ALIASES += operation{1}="@par Operation Performed:^^@f{align*}{ \1 @f}"
-
