@@ -32,10 +32,6 @@ set(APP_COMPILE_DEFINITIONS
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
 
-    MIC_ARRAY_CONFIG_MCLK_FREQ=24576000
-    MIC_ARRAY_CONFIG_PDM_FREQ=3072000
-    MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME=240
-    MIC_ARRAY_CONFIG_MIC_COUNT=2
     MIC_ARRAY_CONFIG_CLOCK_BLOCK_A=XS1_CLKBLK_1
     MIC_ARRAY_CONFIG_CLOCK_BLOCK_B=XS1_CLKBLK_2
     MIC_ARRAY_CONFIG_PORT_MCLK=PORT_MCLK_IN
@@ -59,6 +55,10 @@ target_compile_definitions(example_bare_metal_explorer_board PRIVATE ${APP_COMPI
 target_compile_options(example_bare_metal_explorer_board PRIVATE ${APP_COMPILER_FLAGS})
 target_link_libraries(example_bare_metal_explorer_board PUBLIC sdk::core sdk::hil_audio sdk::utils)
 target_link_options(example_bare_metal_explorer_board PRIVATE ${APP_LINK_OPTIONS})
+
+# MCLK_FREQ,  PDM_FREQ, MIC_COUNT,  SAMPLES_PER_FRAME
+mic_array_vanilla_add( example_bare_metal_explorer_board
+    24576000  3072000   2           240 )
 
 #**********************
 # Create run and debug targets
