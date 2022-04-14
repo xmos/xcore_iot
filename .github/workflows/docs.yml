@@ -49,4 +49,3 @@ jobs:
           name: xcore_sdk_docs
           path: doc/_build
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn` 
-          retention-days: 5
