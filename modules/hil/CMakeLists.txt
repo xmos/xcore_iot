@@ -3,7 +3,7 @@ add_subdirectory(lib_clock_control)
 add_subdirectory(lib_i2c)
 add_subdirectory(lib_i2s)
 add_subdirectory(lib_l2_cache)
-add_subdirectory(lib_mic_array/lib_mic_array)
+add_subdirectory(lib_mic_array)
 add_subdirectory(lib_qspi_io)
 add_subdirectory(lib_spi)
 add_subdirectory(lib_xud)
@@ -21,10 +21,6 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
             sdk::hil::lib_xud
     )
     add_library(sdk::hil ALIAS xcore_sdk_hil)
-
-    ## Create SDK aliases for lib_mic_array
-    add_library( xcore_sdk_hil_lib_mic_array ALIAS lib_mic_array )
-    add_library( sdk::hil::lib_mic_array ALIAS lib_mic_array)
 
     ## Create an aggregate of hil libraries
     add_library(xcore_sdk_hil_audio INTERFACE)
