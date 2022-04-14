@@ -22,6 +22,10 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     )
     add_library(sdk::hil ALIAS xcore_sdk_hil)
 
+    ## Create SDK aliases for lib_mic_array
+    add_library( xcore_sdk_hil_lib_mic_array ALIAS lib_mic_array )
+    add_library( sdk::hil::lib_mic_array ALIAS lib_mic_array)
+
     ## Create an aggregate of hil libraries
     add_library(xcore_sdk_hil_audio INTERFACE)
     target_link_libraries(xcore_sdk_hil_audio
