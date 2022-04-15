@@ -27,10 +27,11 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     add_library(sdk::rtos::sw_services::device_control ALIAS xcore_sdk_rtos_sw_services_device_control)
 else()
     ## Host app
+    add_library(xcore_sdk_rtos_sw_services_device_control_host_usb INTERFACE)
 
     # Discern OS for libusb library location
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        link_directories("host/libusb/OSX64")
+        target_link_directories(xcore_sdk_rtos_sw_services_device_control_host_usb INTERFACE "host/libusb/OSX64")
         set(libusb-1.0_INCLUDE_DIRS "host/libusb/OSX64")
         set(LINK_LIBS usb-1.0.0)
     elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -38,12 +39,11 @@ else()
         pkg_check_modules(libusb-1.0 REQUIRED libusb-1.0)
         set(LINK_LIBS usb-1.0)
     elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-        link_directories("host/libusb/Win32")
+        target_link_directories(xcore_sdk_rtos_sw_services_device_control_host_usb INTERFACE "host/libusb/Win32")
         set(libusb-1.0_INCLUDE_DIRS "host/libusb/Win32")
         set(LINK_LIBS libusb)
     endif()
 
-    add_library(xcore_sdk_rtos_sw_services_device_control_host_usb INTERFACE)
     target_sources(xcore_sdk_rtos_sw_services_device_control_host_usb
         INTERFACE
             host/util.c
