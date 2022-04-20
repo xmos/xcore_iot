@@ -1,11 +1,10 @@
 #**********************
 # Gather Sources
 #**********************
-file(GLOB_RECURSE APP_SOURCES   src/*.c )
+file(GLOB_RECURSE APP_SOURCES  src/*.xc src/*.c )
 set(APP_INCLUDES
     src
     src/equaliser
-    src/file_utils
 )
 
 #**********************
@@ -16,7 +15,6 @@ set(APP_COMPILER_FLAGS
     -g
     -report
     -fxscope
-    -mcmodel=large
     -Wno-xcore-fptrgroup
     ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
     ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
@@ -32,6 +30,7 @@ set(APP_COMPILE_DEFINITIONS
 )
 
 set(APP_LINK_OPTIONS
+    -fxscope
     -report
     ${CMAKE_CURRENT_SOURCE_DIR}/XCORE-AI-EXPLORER.xn
     ${CMAKE_CURRENT_SOURCE_DIR}/src/config.xscope
@@ -51,5 +50,26 @@ target_link_options(example_bare_metal_graphic_equaliser PRIVATE ${APP_LINK_OPTI
 #**********************
 # Create run and debug targets
 #**********************
-create_run_target(example_bare_metal_graphic_equaliser)
-create_debug_target(example_bare_metal_graphic_equaliser)
+add_custom_target(run_example_bare_metal_graphic_equaliser
+  COMMAND xrun --xscope-port localhost:10234 example_bare_metal_graphic_equaliser.xe
+  DEPENDS example_bare_metal_graphic_equaliser
+  COMMENT
+    "Run application"
+  VERBATIM
+)
+
+add_custom_target(xsim_example_bare_metal_graphic_equaliser
+  COMMAND xsim --xscope "-realtime localhost:10234" example_bare_metal_graphic_equaliser.xe
+  DEPENDS example_bare_metal_graphic_equaliser
+  COMMENT
+    "Run application"
+  VERBATIM
+)
+
+add_custom_target(test_example_bare_metal_graphic_equaliser
+  COMMAND xrun --xscope example_bare_metal_graphic_equaliser.xe
+  DEPENDS example_bare_metal_graphic_equaliser
+  COMMENT
+    "Test application"
+  VERBATIM
+)

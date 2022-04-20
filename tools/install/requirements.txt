@@ -4,3 +4,4 @@ numpy
 opencv-python
 PyYAML
 xmos-ai-tools
+scipy
