@@ -10,3 +10,4 @@ Several example bare-metal applications are included to illustrate the fundament
     
     explorer_board.rst
     visual_wake_words.rst
+    graphic_equaliser.rst
