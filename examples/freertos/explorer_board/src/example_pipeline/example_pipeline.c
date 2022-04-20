@@ -75,6 +75,8 @@ void *example_pipeline_input(void *data)
 
     audio_frame = pvPortMalloc(appconfAUDIO_FRAME_LENGTH * sizeof(audio_frame[0]));
 
+    mic_array_ctx->format = RTOS_MIC_ARRAY_CHANNEL_SAMPLE;
+
     rtos_mic_array_rx(
             mic_array_ctx,
             audio_frame,
@@ -88,9 +90,17 @@ int example_pipeline_output(void *audio_frame, void *data)
 {
     (void) data;
 
+    int32_t WORD_ALIGNED frame [appconfAUDIO_FRAME_LENGTH][MIC_ARRAY_CONFIG_MIC_COUNT];
+
+    for (int i = 0; i < appconfAUDIO_FRAME_LENGTH; i++){
+        for(int j = 0; j < MIC_ARRAY_CONFIG_MIC_COUNT; j++){
+            xs3_memcpy(&frame[i][j], audio_frame + (i + j * appconfAUDIO_FRAME_LENGTH) * sizeof(int32_t), sizeof(int32_t));
+        }
+    }
+
     rtos_i2s_tx(
             i2s_ctx,
-            audio_frame,
+            &frame[0][0],
             appconfAUDIO_FRAME_LENGTH,
             portMAX_DELAY);
 
