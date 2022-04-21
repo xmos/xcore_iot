@@ -16,6 +16,10 @@ pipeline {
     agent {
         label 'sdk'
     }
+    options {
+        disableConcurrentBuilds()
+        skipDefaultCheckout()
+    }    
     parameters {
         string(
             name: 'TOOLS_VERSION',
@@ -31,6 +35,12 @@ pipeline {
         CONDA_RUN = "${CONDA_EXE} run -p ${VENV_PATH}"
     }        
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                sh "git clone git@github.com:xmos/xcore_sdk.git"
+            }
+        }        
         stage('Download artifacts') {
             steps {
                 dir("${DIST_PATH}") {
@@ -70,7 +80,7 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
-                        sh "${CONDA_RUN} python tools/ci/xrun.py --xe example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
+                        sh "${CONDA_RUN} python ../tools/ci/xrun.py --xe example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
                     }
                 }
             }
