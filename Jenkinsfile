@@ -1,6 +1,6 @@
 @Library('xmos_jenkins_shared_library@v0.18.0') _
 
-// wait here until specified artifacts appear
+// Wait here until specified artifacts appear
 def artifactUrls = getGithubArtifactUrls([
     "xcore_sdk_bare-metal_example_apps"
     // "xcore_sdk_freertos_example_apps",
@@ -25,7 +25,7 @@ pipeline {
     }    
     environment {
         DIST_PATH = "dist"
-        VENV_PATH = "xcore_sdk_venv"
+        VENV_PATH = "jenkins_venv"
     }        
     options {
         skipDefaultCheckout()
@@ -35,15 +35,19 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     downloadExtractZips(artifactUrls)
+                    // List extracted files for log
                     sh "ls -la"
                 }
             }
         }
-        stage('Install Dependencies') {
+        stage('Create virtual environment') {
             steps {
                 dir("${DIST_PATH}") {
+                    // Create the venv
+                    sh "apt-get install python3-venv"
                     sh "python3 -m venv ${VENV_PATH}"
                     withVenv("${VENV_PATH}") {
+                        // Install dependencies
                         sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
                     }
                 }
@@ -52,13 +56,12 @@ pipeline {
         stage('Cleanup xtagctl') {
             steps {
                 dir("${DIST_PATH}") {
-                    withTools(params.TOOLS_VERSION) {
-                        withVenv("${VENV_PATH}") {
-                            sh "xtagctl status"
-                            sh "xtagctl reset_all XCORE-AI-EXPLORER"
-                        }
-                        sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
+                    // Cleanup any xtagctl cruft from previous failed runs
+                    withVenv("${VENV_PATH}") {
+                        sh "xtagctl status"
+                        sh "xtagctl reset_all XCORE-AI-EXPLORER"
                     }
+                    sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
                 }
             }
         }
