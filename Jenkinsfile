@@ -25,7 +25,7 @@ pipeline {
     }    
     environment {
         DIST_PATH = "dist"
-        CONDA_VENV = "xcore_sdk_venv"
+        VENV_PATH = "xcore_sdk_venv"
     }        
     options {
         skipDefaultCheckout()
@@ -41,23 +41,22 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                // withTools(params.TOOLS_VERSION) {
-                //     installDependencies()
-                // }
-                sh "conda create --prefix ${CONDA_VENV} python=3.8"
-                sh "conda activate ${CONDA_VENV}"
-                sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
-                sh "conda deactivate"
+                dir("${DIST_PATH}") {
+                    sh "python3 -m venv ${VENV_PATH}"
+                    withVenv("${VENV_PATH}") {
+                        sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+                    }
+                }
             }
         }
         stage('Cleanup xtagctl') {
             steps {
                 dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
-                        sh "conda activate ${CONDA_VENV}"
-                        sh "xtagctl status"
-                        sh "xtagctl reset_all XCORE-AI-EXPLORER"
-                        sh "conda deactivate"
+                        withVenv("${VENV_PATH}") {
+                            sh "xtagctl status"
+                            sh "xtagctl reset_all XCORE-AI-EXPLORER"
+                        }
                         sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
                     }
                 }
@@ -67,9 +66,9 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
-                        sh "conda activate ${CONDA_VENV}"
-                        sh "xrun --xscope example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
-                        sh "conda deactivate"
+                        withVenv("${VENV_PATH}") {
+                            sh "xrun --xscope example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
+                        }
                     }
                 }
             }
