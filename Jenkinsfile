@@ -1,7 +1,7 @@
 @Library('xmos_jenkins_shared_library@develop') _
 
 // wait here until specified artifacts appear
-def docArtifactUrls = getGithubArtifactUrls([
+def artifactUrls = getGithubArtifactUrls([
     "xcore_sdk_bare-metal_example_apps"
     // "xcore_sdk_freertos_example_apps",
     // "xcore_sdk_freertos_usb_example_apps",
