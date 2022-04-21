@@ -26,6 +26,7 @@ pipeline {
     environment {
         DIST_PATH = "dist"
         VENV_PATH = "jenkins_venv"
+        CONDA_PATH = "miniconda3"
     }        
     options {
         skipDefaultCheckout()
@@ -51,12 +52,14 @@ pipeline {
                     //     sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
                     // }
                     sh "wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh"
-                    sh "bash Miniconda3-py38_4.11.0-Linux-x86_64.sh -b"
-                    sh "conda create --prefix ${VENV_PATH} python=3.8"
-                    sh "conda activate ${VENV_PATH}"
+                    sh "bash Miniconda3-py38_4.11.0-Linux-x86_64.sh -b -p ${CONDA_PATH}"
+                    sh "${CONDA_PATH}/bin/conda create --prefix ${VENV_PATH} python=3.8"
+                }
+                dir("${DIST_PATH}") {
                     // Install dependencies
+                    sh "${CONDA_PATH}/bin/conda activate ${VENV_PATH}"
                     sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
-                    sh "conda deactivate"
+                    sh "${CONDA_PATH}/bin/conda deactivate"
                 }
             }
         }
@@ -68,10 +71,10 @@ pipeline {
                     //     sh "xtagctl status"
                     //     sh "xtagctl reset_all XCORE-AI-EXPLORER"
                     // }
-                    sh "conda activate ${VENV_PATH}"
+                    sh "${CONDA_PATH}/bin/conda activate ${VENV_PATH}"
                     sh "xtagctl status"
                     sh "xtagctl reset_all XCORE-AI-EXPLORER"
-                    sh "conda deactivate"
+                    sh "${CONDA_PATH}/bin/conda deactivate"
                     sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
                 }
             }
