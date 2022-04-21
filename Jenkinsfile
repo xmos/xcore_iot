@@ -1,4 +1,4 @@
-@Library('xmos_jenkins_shared_library@develop') _
+@Library('xmos_jenkins_shared_library@v0.18.0') _
 
 // wait here until specified artifacts appear
 def artifactUrls = getGithubArtifactUrls([
@@ -16,10 +16,13 @@ getApproval()
 
 pipeline {
     agent {
-        label 'linux'
+        label 'sdk'
     }
+    options {
+        skipDefaultCheckout()
+    }    
     stages {
-        stage('download artifacts') {
+        stage('Download artifacts') {
             steps {
                 dir("${distDir}") {
                     downloadExtractZips(artifactUrls)
@@ -27,10 +30,21 @@ pipeline {
                 }
             }
         }
-        stage('run bare-metal examples') {
+        // stage('Reset XTAGs'){
+        //     steps{
+        //         dir("${distDir}") {
+        //             sh "rm -f ~/.xtag/acquired" //Hacky but ensure it always works even when previous failed run left lock file present
+        //             withVenv {
+        //                 sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+        //                 sh "xtagctl reset_all XCORE-AI-EXPLORER"
+        //             }
+        //         }
+        //     }
+        // }        
+        stage('Run bare-metal examples') {
             steps {
                 dir("${distDir}") {
-                    sh "ls -la"
+                    sh "xrun --xscope example_bare_metal_vww.xe"
                 }
             }
         }
