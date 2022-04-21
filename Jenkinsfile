@@ -43,13 +43,29 @@ pipeline {
                 withTools(params.TOOLS_VERSION) {
                     installDependencies()
                 }
+                withVenv {
+                    sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+                }
             }
-        }        
+        }
+        stage('Cleanup xtagctl'){
+            steps {
+                withVenv() {
+                    withTools(params.TOOLS_VERSION) {
+                    sh "xtagctl status"
+                    sh "xtagctl reset_all XCORE-AI-EXPLORER"
+                    sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
+                }
+            }
+          }
+        }         
         stage('Run bare-metal examples') {
             steps {
                 dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
-                        sh "xrun --xscope example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
+                        withVenv {
+                            sh "xrun --xscope example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
+                        }
                     }
                 }
             }
