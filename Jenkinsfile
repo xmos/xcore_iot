@@ -25,7 +25,7 @@ pipeline {
     }    
     environment {
         DIST_PATH = "dist"
-        CONDA_VENV = "${CONDA_VENV}"
+        CONDA_VENV = "xcore_sdk_venv"
     }        
     options {
         skipDefaultCheckout()
