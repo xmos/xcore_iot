@@ -44,7 +44,7 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     // Create the venv
-                    sh "apt-get install python3-venv"
+                    sh "sudo apt-get install python3-venv"
                     sh "python3 -m venv ${VENV_PATH}"
                     withVenv("${VENV_PATH}") {
                         // Install dependencies
