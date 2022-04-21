@@ -21,7 +21,7 @@ pipeline {
     stages {
         stage('download artifacts') {
             steps {
-                dir(${distDir}) {
+                dir("${distDir}") {
                     downloadExtractZips(artifactUrls)
                     sh "tar -xf xcore_sdk_bare-metal_example_apps"
                 }
@@ -29,7 +29,7 @@ pipeline {
         }
         stage('run bare-metal examples') {
             steps {
-                dir(${distDir}) {
+                dir("${distDir}") {
                     sh "ls -la"
                 }
             }
