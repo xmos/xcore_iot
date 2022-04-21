@@ -58,10 +58,17 @@ pipeline {
                 }
                 dir("${DIST_PATH}") {
                     // Install dependencies
-                    sh "source ${CONDA_PATH}/etc/profile.d/conda.sh"
-                    sh "${CONDA_PATH}/bin/conda activate ${VENV_PATH}"
-                    sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
-                    sh "${CONDA_PATH}/bin/conda deactivate"
+                    sh '''#!/usr/bin/env bash
+                    source ${CONDA_PATH}/etc/profile.d/conda.sh
+                    conda activate ./${VENV_PATH}
+                    pip install git+https://github0.xmos.com/xmos-int/xtagctl.git
+                    conda deactivate
+                    '''
+                    // sh '''#!/usr/bin/env bash
+                    // sh "source ${CONDA_PATH}/etc/profile.d/conda.sh"
+                    // sh "${CONDA_PATH}/bin/conda activate ./${VENV_PATH}"
+                    // sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+                    // sh "${CONDA_PATH}/bin/conda deactivate"
                 }
             }
         }
@@ -73,11 +80,19 @@ pipeline {
                     //     sh "xtagctl status"
                     //     sh "xtagctl reset_all XCORE-AI-EXPLORER"
                     // }
-                    sh "source ${CONDA_PATH}/etc/profile.d/conda.sh"
-                    sh "${CONDA_PATH}/bin/conda activate ${VENV_PATH}"
-                    sh "xtagctl status"
-                    sh "xtagctl reset_all XCORE-AI-EXPLORER"
-                    sh "${CONDA_PATH}/bin/conda deactivate"
+                    sh '''#!/usr/bin/env bash
+                    source ${CONDA_PATH}/etc/profile.d/conda.sh
+                    conda activate ./${VENV_PATH}
+                    xtagctl status
+                    xtagctl reset_all XCORE-AI-EXPLORER
+                    conda deactivate
+                    '''
+                    // sh "source ${CONDA_PATH}/etc/profile.d/conda.sh"
+                    // sh "${CONDA_PATH}/bin/conda init bash"
+                    // sh "${CONDA_PATH}/bin/conda activate ./${VENV_PATH}"
+                    // sh "xtagctl status"
+                    // sh "xtagctl reset_all XCORE-AI-EXPLORER"
+                    // sh "${CONDA_PATH}/bin/conda deactivate"
                     sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
                 }
             }
