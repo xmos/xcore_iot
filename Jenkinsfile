@@ -44,12 +44,19 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     // Create the venv
-                    sh "sudo apt-get install python3-venv"
-                    sh "python3 -m venv ${VENV_PATH}"
-                    withVenv("${VENV_PATH}") {
-                        // Install dependencies
-                        sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
-                    }
+                    // sh "sudo apt-get install python3-venv"
+                    // sh "python3 -m venv ${VENV_PATH}"
+                    // withVenv("${VENV_PATH}") {
+                    //     // Install dependencies
+                    //     sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+                    // }
+                    sh "wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh"
+                    sh "bash Miniconda3-py38_4.11.0-Linux-x86_64.sh -b"
+                    sh "conda create --prefix ${VENV_PATH} python=3.8"
+                    sh "conda activate ${VENV_PATH}"
+                    // Install dependencies
+                    sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+                    sh "conda deactivate"
                 }
             }
         }
@@ -57,10 +64,14 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     // Cleanup any xtagctl cruft from previous failed runs
-                    withVenv("${VENV_PATH}") {
-                        sh "xtagctl status"
-                        sh "xtagctl reset_all XCORE-AI-EXPLORER"
-                    }
+                    // withVenv("${VENV_PATH}") {
+                    //     sh "xtagctl status"
+                    //     sh "xtagctl reset_all XCORE-AI-EXPLORER"
+                    // }
+                    sh "conda activate ${VENV_PATH}"
+                    sh "xtagctl status"
+                    sh "xtagctl reset_all XCORE-AI-EXPLORER"
+                    sh "conda deactivate"
                     sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
                 }
             }
