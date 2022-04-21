@@ -10,41 +10,47 @@ def artifactUrls = getGithubArtifactUrls([
     // "xcore_sdk_rtos_tests"
 ])
 
-def distDir = "dist"
-
 getApproval()
 
 pipeline {
     agent {
         label 'sdk'
     }
+    parameters {
+        string(
+            name: 'TOOLS_VERSION',
+            defaultValue: '15.1.4',
+            description: 'The XTC tools version'
+        )
+    }    
+    environment {
+        DIST_PATH = "dist"
+    }        
     options {
         skipDefaultCheckout()
     }    
     stages {
         stage('Download artifacts') {
             steps {
-                dir("${distDir}") {
+                dir("${DIST_PATH}") {
                     downloadExtractZips(artifactUrls)
                     sh "ls -la"
                 }
             }
         }
-        // stage('Reset XTAGs'){
-        //     steps{
-        //         dir("${distDir}") {
-        //             sh "rm -f ~/.xtag/acquired" //Hacky but ensure it always works even when previous failed run left lock file present
-        //             withVenv {
-        //                 sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
-        //                 sh "xtagctl reset_all XCORE-AI-EXPLORER"
-        //             }
-        //         }
-        //     }
-        // }        
+        stage('Install Dependencies') {
+            steps {
+                withTools(params.TOOLS_VERSION) {
+                    installDependencies()
+                }
+            }
+        }        
         stage('Run bare-metal examples') {
             steps {
-                dir("${distDir}") {
-                    sh "xrun --xscope example_bare_metal_vww.xe"
+                dir("${DIST_PATH}") {
+                    withTools(params.TOOLS_VERSION) {
+                        sh "xrun --xscope example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
+                    }
                 }
             }
         }
