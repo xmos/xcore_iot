@@ -50,7 +50,7 @@ pipeline {
                 sh "conda deactivate"
             }
         }
-        stage('Cleanup xtagctl'){
+        stage('Cleanup xtagctl') {
             steps {
                 dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
@@ -62,8 +62,7 @@ pipeline {
                     }
                 }
             }
-          }
-        }         
+        }
         stage('Run bare-metal examples') {
             steps {
                 dir("${DIST_PATH}") {
