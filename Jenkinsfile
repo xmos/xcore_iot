@@ -25,6 +25,7 @@ pipeline {
     }    
     environment {
         DIST_PATH = "dist"
+        CONDA_VENV = "${CONDA_VENV}"
     }        
     options {
         skipDefaultCheckout()
@@ -40,21 +41,25 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                withTools(params.TOOLS_VERSION) {
-                    installDependencies()
-                }
-                withVenv {
-                    sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
-                }
+                // withTools(params.TOOLS_VERSION) {
+                //     installDependencies()
+                // }
+                sh "conda create --prefix ${CONDA_VENV} python=3.8"
+                sh "conda activate ${CONDA_VENV}"
+                sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+                sh "conda deactivate"
             }
         }
         stage('Cleanup xtagctl'){
             steps {
-                withVenv() {
+                dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
-                    sh "xtagctl status"
-                    sh "xtagctl reset_all XCORE-AI-EXPLORER"
-                    sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
+                        sh "conda activate ${CONDA_VENV}"
+                        sh "xtagctl status"
+                        sh "xtagctl reset_all XCORE-AI-EXPLORER"
+                        sh "conda deactivate"
+                        sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
+                    }
                 }
             }
           }
@@ -63,9 +68,9 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
-                        withVenv {
-                            sh "xrun --xscope example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
-                        }
+                        sh "conda activate ${CONDA_VENV}"
+                        sh "xrun --xscope example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
+                        sh "conda deactivate"
                     }
                 }
             }
