@@ -22,7 +22,7 @@ add_subdirectory(modules)
 
 ## Add top level project targets
 if(PROJECT_IS_TOP_LEVEL)
-    add_subdirectory(applications)
+    include(applications/applications.cmake)
     add_subdirectory(examples)
 
     if(XCORE_SDK_CI_TESTING)

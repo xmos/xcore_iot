@@ -27,23 +27,23 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     list(APPEND LIB_PUBLIC_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
     ## Create library target
-    add_library(xcore_sdk_utils STATIC)
+    add_library(xcore_sdk_utils INTERFACE)
     target_sources(xcore_sdk_utils
-        PUBLIC
+        INTERFACE
             ${LIB_PUBLIC_SOURCES}
-        PRIVATE
+        # PRIVATE
             ${LIB_PRIVATE_SOURCES}
     )
     target_include_directories(xcore_sdk_utils
-        PUBLIC
+        INTERFACE
             ${LIB_PUBLIC_INCLUDES}
-        PRIVATE
+        # PRIVATE
             ${LIB_PRIVATE_INCLUDES}
     )
-    target_compile_options(xcore_sdk_utils
-        PRIVATE
-            ${LIB_COMPILE_FLAGS}
-    )
+    # target_compile_options(xcore_sdk_utils
+    #     PRIVATE
+    #         ${LIB_COMPILE_FLAGS}
+    # )
 
     ## Create an alias
     add_library(sdk::utils ALIAS xcore_sdk_utils)
