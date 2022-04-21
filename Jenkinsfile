@@ -23,7 +23,7 @@ pipeline {
             steps {
                 dir("${distDir}") {
                     downloadExtractZips(artifactUrls)
-                    sh "tar -xf xcore_sdk_bare-metal_example_apps"
+                    sh "ls -la"
                 }
             }
         }
