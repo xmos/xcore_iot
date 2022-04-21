@@ -51,12 +51,14 @@ pipeline {
                     //     // Install dependencies
                     //     sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
                     // }
-                    sh "wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh"
-                    sh "bash Miniconda3-py38_4.11.0-Linux-x86_64.sh -b -p ${CONDA_PATH}"
+                    sh "wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh -O conda_install.sh"
+                    sh "bash conda_install.sh -b -p ${CONDA_PATH}"
+                    sh "rm -rf conda_install.sh"
                     sh "${CONDA_PATH}/bin/conda create --prefix ${VENV_PATH} python=3.8"
                 }
                 dir("${DIST_PATH}") {
                     // Install dependencies
+                    sh "source ${CONDA_PATH}/etc/profile.d/conda.sh"
                     sh "${CONDA_PATH}/bin/conda activate ${VENV_PATH}"
                     sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
                     sh "${CONDA_PATH}/bin/conda deactivate"
@@ -71,6 +73,7 @@ pipeline {
                     //     sh "xtagctl status"
                     //     sh "xtagctl reset_all XCORE-AI-EXPLORER"
                     // }
+                    sh "source ${CONDA_PATH}/etc/profile.d/conda.sh"
                     sh "${CONDA_PATH}/bin/conda activate ${VENV_PATH}"
                     sh "xtagctl status"
                     sh "xtagctl reset_all XCORE-AI-EXPLORER"
