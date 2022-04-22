@@ -14,7 +14,6 @@ add_subdirectory(utils)
 add_subdirectory(experimental)
 
 ## Use default FFT tables provided in repo
-set( XS3_MATH_GEN_FFT_LUT OFF )
 add_subdirectory(lib_xs3_math)
 add_library( xcore_sdk_lib_xs3_math ALIAS lib_xs3_math )
 add_library( sdk::lib_xs3_math ALIAS lib_xs3_math )
