@@ -26,9 +26,6 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     ## Assume all asm is XS3A for now
     set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
 
-    ## Set any local library compile options
-    set(LIB_COMPILE_FLAGS "-O3" "-DREF_CLK_FREQ=100" "-fasm-linenum" "-fcomment-asm" "-DXUD_FULL_PIDTABLE=1")
-
     ## Includes files
     set(LIB_PUBLIC_INCLUDES  lib_xud/lib_xud/api lib_xud/lib_xud/src/user)
     set(LIB_PRIVATE_INCLUDES lib_xud/lib_xud/src lib_xud/lib_xud/src/core)
@@ -40,9 +37,10 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     ## Append platform specific sources
     list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
+    ## Apply compile flags to sources at the top level directory because this is an INTERFACE library
     set_source_files_properties(${LIB_PRIVATE_SOURCES} DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTIES COMPILE_OPTIONS "-O3;-DREF_CLK_FREQ=100;-fasm-linenum;-fcomment-asm;-DXUD_FULL_PIDTABLE=1")
 
-    ## Append file specific properties
+    ## Append file specific compile flags to sources at the top level directory because this is an INTERFACE library
     set_property(SOURCE ${CMAKE_CURRENT_LIST_DIR}/lib_xud/lib_xud/src/core/XUD_IoLoop.S DIRECTORY ${CMAKE_SOURCE_DIR}  APPEND PROPERTY COMPILE_OPTIONS "-fschedule -g0")
     set_property(SOURCE ${CMAKE_CURRENT_LIST_DIR}/lib_xud/lib_xud/src/core/XUD_Main.xc DIRECTORY ${CMAKE_SOURCE_DIR}  APPEND PROPERTY COMPILE_OPTIONS "-mno-dual-issue")
     set_property(SOURCE ${CMAKE_CURRENT_LIST_DIR}/lib_xud/lib_xud/src/user/client/XUD_SetDevAddr.xc DIRECTORY ${CMAKE_SOURCE_DIR}  APPEND PROPERTY COMPILE_OPTIONS "-mno-dual-issue")
@@ -63,23 +61,17 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     target_sources(xcore_sdk_hil_lib_xud
         INTERFACE
             ${LIB_PUBLIC_SOURCES}
-        # INTERFACE
             ${LIB_PRIVATE_SOURCES}
     )
     target_include_directories(xcore_sdk_hil_lib_xud
         INTERFACE
             ${LIB_PUBLIC_INCLUDES}
-        # INTERFACE
             ${LIB_PRIVATE_INCLUDES}
     )
-    # target_compile_options(xcore_sdk_hil_lib_xud
-    #     INTERFACE
-    #         ${LIB_COMPILE_FLAGS}
-    # )
-    # target_link_libraries(xcore_sdk_hil_lib_xud
-    #     INTERFACE
-    #         sdk::legacy_compat
-    # )
+    target_link_libraries(xcore_sdk_hil_lib_xud
+        INTERFACE
+            sdk::legacy_compat
+    )
 
     ## Create an alias
     add_library(sdk::hil::lib_xud ALIAS xcore_sdk_hil_lib_xud)
