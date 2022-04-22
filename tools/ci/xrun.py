@@ -9,7 +9,7 @@ import xtagctl
 
 
 def xrun(adapter_id, flags):
-    args = ["xrun", "--xscope"]
+    args = ["xrun", "--adapter-id", adapter_id, "--xscope"]
     if flags.args:
         args.append("--args")
         args.append(flags.xe)
