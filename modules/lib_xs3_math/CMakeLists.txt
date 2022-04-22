@@ -1,4 +1,6 @@
 
+set( XS3_MATH_GEN_FFT_LUT OFF )
+
 # Add library
 add_subdirectory(lib_xs3_math)
 
