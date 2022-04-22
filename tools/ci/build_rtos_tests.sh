@@ -34,5 +34,5 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     (cd ${path}; rm -rf build_${board})
     (cd ${path}; mkdir -p build_${board})
     (cd ${path}/build_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${make_target} -j)
-    (cd ${path}/build_${board}; cp test/rtos_drivers/${name}/${make_target}.xe ${DIST_DIR})
+    (cd ${path}/build_${board}; cp ${make_target}.xe ${DIST_DIR})
 done
