@@ -36,11 +36,12 @@ pipeline {
     }    
     environment {
         DIST_PATH = "dist"
+        VENV_DIRNAME = ".venv"
         // VENV_PATH = "./jenkins_venv"   // NOTE: Needs to be prepended with ./
         // CONDA_PATH = "miniconda3"
         // CONDA_EXE = "${CONDA_PATH}/bin/conda"
         // CONDA_RUN = "${CONDA_EXE} run -p ${VENV_PATH}"
-        CONDA_RUN = ""
+        // CONDA_RUN = ""
     }        
     stages {
         stage('Checkout') {
@@ -55,6 +56,17 @@ pipeline {
                     downloadExtractZips(artifactUrls)
                     // List extracted files for log
                     sh "ls -la"
+                }
+            }
+        }
+        stage('Create virtual environment') {
+            steps {
+                dir("${DIST_PATH}") {
+                    sh "pyenv install -s 3.8.13"
+                    sh "~/.pyenv/versions/3.8.13/bin/python -m venv ${VENV_DIRNAME}"
+                    withVenv() {
+                        sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+                    }
                 }
             }
         }
@@ -81,7 +93,9 @@ pipeline {
                 dir("${DIST_PATH}") {
                     // Cleanup any xtagctl cruft from previous failed runs
                     withTools(params.TOOLS_VERSION) {
-                        sh "${CONDA_RUN} xtagctl reset_all XCORE-AI-EXPLORER"
+                        withVenv() {
+                            sh "xtagctl reset_all XCORE-AI-EXPLORER"
+                        }
                     }
                     sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
                 }
@@ -91,8 +105,10 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
-                        withXTAG("xcore_sdk_test_rig") { adapterID ->
-                            sh "${CONDA_RUN} ../test/examples/run_bare_metal_vww_tests.sh ${adapterID}"
+                        withVenv() {
+                            withXTAG("xcore_sdk_test_rig") { adapterID ->
+                                sh "../test/examples/run_bare_metal_vww_tests.sh ${adapterID}"
+                            }
                         }
                     }
                 }
