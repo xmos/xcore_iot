@@ -86,7 +86,10 @@ typedef struct {
 	 * The following members are all set automatically by qspi_flash_init() if
 	 * SFDP is supported. These may be set prior to calling qspi_flash_init()
 	 * in the event that SFDP is not supported.
+     * Additionally, sfdp_skip may be set to skip SFDP and use manually set
+     * parameters.
 	 */
+	bool sfdp_skip;
 	bool sfdp_supported;
 	size_t page_size_bytes;
 	size_t page_count;
@@ -405,7 +408,7 @@ void qspi_flash_read_nibble_swapped(qspi_flash_ctx_t *ctx,
  * This reads data from the flash in quad I/O "eXecute In Place" mode.
  * All four lines are used to send the address and to read the data.
  * No command is sent. The flash must already have been put into "XIP" mode.
- 
+
  * The method used to put the flash into XIP mode, as well as to take it out,
  * is flash dependent. See your flash's datasheet.
  *
@@ -463,7 +466,7 @@ void qspi_flash_write(qspi_flash_ctx_t *ctx,
                       const uint8_t *data,
                       uint32_t address,
                       size_t len);
-                      
+
 /**
  * This is the same as qspi_flash_write() except that the nibbles in each
  * byte of the data written are swapped.
@@ -499,7 +502,7 @@ void qspi_flash_sfdp_read(qspi_flash_ctx_t *ctx,
 
 /**
  * Deinitializes the QSPI I/O interface associated with the QSPI flash.
- * 
+ *
  * \param ctx The QSPI flash context associated with the QSPI flash.
  *            This should have been previously initialized with
  *            qspi_flash_init().
