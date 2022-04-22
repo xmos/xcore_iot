@@ -60,9 +60,12 @@ pipeline {
         }
         stage('Create virtual environment') {
             steps {
+                // Create venv
                 sh "pyenv install -s $PYTHON_VERSION"
                 sh "~/.pyenv/versions/$PYTHON_VERSION/bin/python -m venv $VENV_DIRNAME"
+                // Install dependencies
                 withVenv() {
+                    // NOTE: only one dependency so not using a requirements.txt file for this yet
                     sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
                 }
             }
