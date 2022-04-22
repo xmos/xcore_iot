@@ -1,8 +1,11 @@
 @Library('xmos_jenkins_shared_library@v0.18.0') _
 
 def withXTAG(String target, Closure body) {
+    // Acquire an xtag adapter-id by target name
     def adapterID = sh (script: "xtagctl acquire ${target}", returnStdout: true).trim()
+    // Run the closure
     body(adapterID)
+    // Release the xtag by adapter-id
     sh ("xtagctl release ${adapterID}")
 }
 
@@ -37,7 +40,7 @@ pipeline {
     environment {
         PYTHON_VERSION = "3.8.11"
         VENV_DIRNAME = ".venv"
-        DIST_DIRNAME = "dist"
+        DOWNLOAD_DIRNAME = "build"
     }        
     stages {
         stage('Checkout') {
@@ -48,7 +51,7 @@ pipeline {
         }        
         stage('Download artifacts') {
             steps {
-                dir("$DIST_DIRNAME") {
+                dir("$DOWNLOAD_DIRNAME") {
                     downloadExtractZips(artifactUrls)
                     // List extracted files for log
                     sh "ls -la"
@@ -57,36 +60,30 @@ pipeline {
         }
         stage('Create virtual environment') {
             steps {
-                dir("$DIST_DIRNAME") {
-                    sh "pyenv install -s $PYTHON_VERSION"
-                    sh "~/.pyenv/versions/$PYTHON_VERSION/bin/python -m venv $VENV_DIRNAME"
-                    withVenv() {
-                        sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
-                    }
+                sh "pyenv install -s $PYTHON_VERSION"
+                sh "~/.pyenv/versions/$PYTHON_VERSION/bin/python -m venv $VENV_DIRNAME"
+                withVenv() {
+                    sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
                 }
             }
         }
         stage('Cleanup xtagctl') {
             steps {
-                dir("$DIST_DIRNAME") {
-                    // Cleanup any xtagctl cruft from previous failed runs
-                    withTools(params.TOOLS_VERSION) {
-                        withVenv {
-                            sh "xtagctl reset_all XCORE-AI-EXPLORER"
-                        }
+                // Cleanup any xtagctl cruft from previous failed runs
+                withTools(params.TOOLS_VERSION) {
+                    withVenv {
+                        sh "xtagctl reset_all xcore_sdk_test_rig"
                     }
-                    sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
                 }
+                sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
             }
         }
         stage('Run bare-metal examples') {
             steps {
-                dir("$DIST_DIRNAME") {
-                    withTools(params.TOOLS_VERSION) {
-                        withVenv {
-                            withXTAG("xcore_sdk_test_rig") { adapterID ->
-                                sh "../test/examples/run_bare_metal_vww_tests.sh $adapterID"
-                            }
+                withTools(params.TOOLS_VERSION) {
+                    withVenv {
+                        withXTAG("xcore_sdk_test_rig") { adapterID ->
+                            sh "test/examples/run_bare_metal_vww_tests.sh $adapterID"
                         }
                     }
                 }
