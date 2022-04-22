@@ -1,0 +1,3 @@
+
+add_library(test_hil_lib_spi_master_tester INTERFACE)
+target_include_directories(test_hil_lib_spi_master_tester INTERFACE ${CMAKE_CURRENT_LIST_DIR}/src)
