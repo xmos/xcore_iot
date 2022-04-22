@@ -16,11 +16,18 @@ Running Tests
 
 **NOTE: The example application tests are a work in progress.  Expect changes here soon.**
 
-First, build all the example applications.
+Bare-metal Examples
+===================
 
-Run the tests with the following command:
+First, build all the bare-metal example applications.
 
 .. code-block:: console
 
-    $ ./run_examples_tests.sh
+    $ bash tools/ci/build_metal_examples.sh
+
+Run the tests with the following commands:
+
+.. code-block:: console
+
+    $ bash test/examples/run_bare_metal_vww_tests.sh <optional adapter-id>
 
