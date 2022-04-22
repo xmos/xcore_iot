@@ -6,13 +6,20 @@ add_subdirectory(legacy_compat)
 add_subdirectory(lib_otpinfo)
 add_subdirectory(lib_random)
 add_subdirectory(lib_src)
-add_subdirectory(lib_xs3_math)
 add_subdirectory(multitile_support)
 add_subdirectory(rtos)
 add_subdirectory(avona)
 add_subdirectory(thirdparty)
 add_subdirectory(utils)
 add_subdirectory(experimental)
+
+## Use default FFT tables provided in repo
+set( XS3_MATH_GEN_FFT_LUT OFF )
+add_subdirectory(lib_xs3_math)
+add_library( xcore_sdk_lib_xs3_math ALIAS lib_xs3_math )
+add_library( sdk::lib_xs3_math ALIAS lib_xs3_math )
+
+
 
 if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS2A))
     ## Create an aggregate of core libraries
