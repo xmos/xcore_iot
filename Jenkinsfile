@@ -35,8 +35,9 @@ pipeline {
         )
     }    
     environment {
-        DIST_PATH = "dist"
+        PYTHON_VERSION = "3.8.11"
         VENV_DIRNAME = ".venv"
+        DIST_DIRNAME = "dist"
         // VENV_PATH = "./jenkins_venv"   // NOTE: Needs to be prepended with ./
         // CONDA_PATH = "miniconda3"
         // CONDA_EXE = "${CONDA_PATH}/bin/conda"
@@ -52,7 +53,7 @@ pipeline {
         }        
         stage('Download artifacts') {
             steps {
-                dir("${DIST_PATH}") {
+                dir("$DIST_DIRNAME") {
                     downloadExtractZips(artifactUrls)
                     // List extracted files for log
                     sh "ls -la"
@@ -61,9 +62,9 @@ pipeline {
         }
         stage('Create virtual environment') {
             steps {
-                dir("${DIST_PATH}") {
-                    sh "pyenv install -s 3.8.13"
-                    sh "~/.pyenv/versions/3.8.13/bin/python -m venv ${VENV_DIRNAME}"
+                dir("$DIST_DIRNAME") {
+                    sh "pyenv install -s $PYTHON_VERSION"
+                    sh "~/.pyenv/versions/$PYTHON_VERSION/bin/python -m venv $VENV_DIRNAME"
                     withVenv() {
                         sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
                     }
@@ -72,17 +73,17 @@ pipeline {
         }
         // stage('Create virtual environment') {
         //     steps {
-        //         dir("${DIST_PATH}") {
+        //         dir("$DIST_DIRNAME") {
         //             // Install Conda
         //             sh "wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh -O conda_install.sh"
         //             sh "bash conda_install.sh -b -p ${CONDA_PATH}"
         //             sh "rm -rf conda_install.sh"
         //         }
-        //         dir("${DIST_PATH}") {
+        //         dir("$DIST_DIRNAME") {
         //             // Create the Conda environment
         //             sh "${CONDA_EXE} create --prefix ${VENV_PATH} python=3.8"
         //         }
-        //         dir("${DIST_PATH}") {
+        //         dir("$DIST_DIRNAME") {
         //             // Install dependencies
         //             sh "${CONDA_RUN} pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
         //         }
@@ -90,10 +91,10 @@ pipeline {
         // }
         stage('Cleanup xtagctl') {
             steps {
-                dir("${DIST_PATH}") {
+                dir("$DIST_DIRNAME") {
                     // Cleanup any xtagctl cruft from previous failed runs
                     withTools(params.TOOLS_VERSION) {
-                        withVenv() {
+                        withVenv {
                             sh "xtagctl reset_all XCORE-AI-EXPLORER"
                         }
                     }
@@ -103,11 +104,11 @@ pipeline {
         }
         stage('Run bare-metal examples') {
             steps {
-                dir("${DIST_PATH}") {
+                dir("$DIST_DIRNAME") {
                     withTools(params.TOOLS_VERSION) {
-                        withVenv() {
+                        withVenv {
                             withXTAG("xcore_sdk_test_rig") { adapterID ->
-                                sh "../test/examples/run_bare_metal_vww_tests.sh ${adapterID}"
+                                sh "../test/examples/run_bare_metal_vww_tests.sh $adapterID"
                             }
                         }
                     }
