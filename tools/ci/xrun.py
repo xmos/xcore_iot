@@ -50,5 +50,5 @@ if __name__ == "__main__":
     )
     flags = parser.parse_args()
 
-    with xtagctl.acquire("xcore_sdk_test_harness") as adapter_id:
+    with xtagctl.acquire("xcore_sdk_test_rig") as adapter_id:
         xrun(adapter_id, flags)

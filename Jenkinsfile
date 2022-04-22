@@ -1,5 +1,12 @@
 @Library('xmos_jenkins_shared_library@v0.18.0') _
 
+def withXTAG(String target, Closure body) {
+    def adapterID = sh("xtagctl acquire ${target}")
+    body(adapterID)
+    sh ("xtagctl release ${adapterID}")
+}
+
+
 // Wait here until specified artifacts appear
 def artifactUrls = getGithubArtifactUrls([
     "xcore_sdk_bare-metal_example_apps"
@@ -53,10 +60,13 @@ pipeline {
         stage('Create virtual environment') {
             steps {
                 dir("${DIST_PATH}") {
-                    // Create the Conda environment
+                    // Install Conda
                     sh "wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh -O conda_install.sh"
                     sh "bash conda_install.sh -b -p ${CONDA_PATH}"
                     sh "rm -rf conda_install.sh"
+                }
+                dir("${DIST_PATH}") {
+                    // Create the Conda environment
                     sh "${CONDA_EXE} create --prefix ${VENV_PATH} python=3.8"
                 }
                 dir("${DIST_PATH}") {
@@ -80,7 +90,9 @@ pipeline {
             steps {
                 dir("${DIST_PATH}") {
                     withTools(params.TOOLS_VERSION) {
-                        sh "${CONDA_RUN} python ../tools/ci/xrun.py --xe example_bare_metal_vww.xe 2>&1 | tee example_bare_metal_vww.log"
+                        withXTAG("xcore_sdk_test_rig") { adapterID ->
+                            sh "${CONDA_RUN} ../test/examples/run_bare_metal_vww_tests.sh ${adapterID}"
+                        }
                     }
                 }
             }
