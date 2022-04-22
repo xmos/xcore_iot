@@ -41,6 +41,7 @@ pipeline {
         PYTHON_VERSION = "3.8.11"
         VENV_DIRNAME = ".venv"
         DOWNLOAD_DIRNAME = "build"
+        SDK_TEST_RIG_TARGET = "xcore_sdk_test_rig"
     }        
     stages {
         stage('Checkout') {
@@ -65,7 +66,7 @@ pipeline {
                 sh "~/.pyenv/versions/$PYTHON_VERSION/bin/python -m venv $VENV_DIRNAME"
                 // Install dependencies
                 withVenv() {
-                    // NOTE: only one dependency so not using a requirements.txt file for this yet
+                    // NOTE: only one dependency so not using a requirements.txt file here yet
                     sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
                 }
             }
@@ -75,7 +76,7 @@ pipeline {
                 // Cleanup any xtagctl cruft from previous failed runs
                 withTools(params.TOOLS_VERSION) {
                     withVenv {
-                        sh "xtagctl reset_all xcore_sdk_test_rig"
+                        sh "xtagctl reset_all $SDK_TEST_RIG_TARGET"
                     }
                 }
                 sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
@@ -85,7 +86,7 @@ pipeline {
             steps {
                 withTools(params.TOOLS_VERSION) {
                     withVenv {
-                        withXTAG("xcore_sdk_test_rig") { adapterID ->
+                        withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
                             sh "test/examples/run_bare_metal_vww_tests.sh $adapterID"
                         }
                     }
