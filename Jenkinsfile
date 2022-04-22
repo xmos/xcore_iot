@@ -1,7 +1,7 @@
 @Library('xmos_jenkins_shared_library@v0.18.0') _
 
 def withXTAG(String target, Closure body) {
-    def adapterID = sh "xtagctl acquire ${target}"
+    def adapterID = sh (script: "xtagctl acquire ${target}", returnStdout: true).trim()
     body(adapterID)
     sh ("xtagctl release ${adapterID}")
 }
@@ -38,11 +38,6 @@ pipeline {
         PYTHON_VERSION = "3.8.11"
         VENV_DIRNAME = ".venv"
         DIST_DIRNAME = "dist"
-        // VENV_PATH = "./jenkins_venv"   // NOTE: Needs to be prepended with ./
-        // CONDA_PATH = "miniconda3"
-        // CONDA_EXE = "${CONDA_PATH}/bin/conda"
-        // CONDA_RUN = "${CONDA_EXE} run -p ${VENV_PATH}"
-        // CONDA_RUN = ""
     }        
     stages {
         stage('Checkout') {
@@ -71,24 +66,6 @@ pipeline {
                 }
             }
         }
-        // stage('Create virtual environment') {
-        //     steps {
-        //         dir("$DIST_DIRNAME") {
-        //             // Install Conda
-        //             sh "wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.11.0-Linux-x86_64.sh -O conda_install.sh"
-        //             sh "bash conda_install.sh -b -p ${CONDA_PATH}"
-        //             sh "rm -rf conda_install.sh"
-        //         }
-        //         dir("$DIST_DIRNAME") {
-        //             // Create the Conda environment
-        //             sh "${CONDA_EXE} create --prefix ${VENV_PATH} python=3.8"
-        //         }
-        //         dir("$DIST_DIRNAME") {
-        //             // Install dependencies
-        //             sh "${CONDA_RUN} pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
-        //         }
-        //     }
-        // }
         stage('Cleanup xtagctl') {
             steps {
                 dir("$DIST_DIRNAME") {
