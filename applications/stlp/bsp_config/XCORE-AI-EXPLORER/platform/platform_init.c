@@ -27,6 +27,28 @@ static void mclk_init(chanend_t other_tile_c)
 static void flash_init(void)
 {
 #if ON_TILE(FLASH_TILE_NO)
+    qspi_flash_ctx->ctx.sfdp_skip = true;
+    qspi_flash_ctx->ctx.sfdp_supported = false;
+    qspi_flash_ctx->ctx.page_size_bytes = 256;
+    qspi_flash_ctx->ctx.page_count = 16384;
+    qspi_flash_ctx->ctx.flash_size_kbytes = 4096;
+    qspi_flash_ctx->ctx.address_bytes = 3;
+    qspi_flash_ctx->ctx.erase_info[0].size_log2 = 12;
+    qspi_flash_ctx->ctx.erase_info[0].cmd = 0xEEFEEEEE;
+    qspi_flash_ctx->ctx.erase_info[1].size_log2 = 15;
+    qspi_flash_ctx->ctx.erase_info[1].cmd = 0xEFEFEEFE;
+    qspi_flash_ctx->ctx.erase_info[2].size_log2 = 16;
+    qspi_flash_ctx->ctx.erase_info[2].cmd = 0xFFEFFEEE;
+    qspi_flash_ctx->ctx.erase_info[3].size_log2 = 0;
+    qspi_flash_ctx->ctx.erase_info[3].cmd = 0;
+    qspi_flash_ctx->ctx.busy_poll_cmd = 0xEEEEEFEF;
+    qspi_flash_ctx->ctx.busy_poll_bit = 0;
+    qspi_flash_ctx->ctx.busy_poll_ready_value = 0;
+    qspi_flash_ctx->ctx.qe_reg = 2;
+    qspi_flash_ctx->ctx.qe_bit = 1;
+    qspi_flash_ctx->ctx.sr2_read_cmd = 0xEEFFEFEF;
+    qspi_flash_ctx->ctx.sr2_write_cmd = 0xEEEEEEEE;
+
     rtos_qspi_flash_init(
             qspi_flash_ctx,
             FLASH_CLKBLK,
