@@ -38,5 +38,5 @@ for ((i = 0; i < ${#demos[@]}; i += 1)); do
     (cd ${path}; rm -rf build_${board})
     (cd ${path}; mkdir -p build_${board})
     (cd ${path}/build_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board}; log_errors make ${make_target} -j)
-    (cd ${path}/build_${board}; cp examples/freertos/usb/${make_target}.xe ${DIST_DIR})
+    (cd ${path}/build_${board}; cp ${make_target}.xe ${DIST_DIR})
 done

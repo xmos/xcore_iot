@@ -16,7 +16,7 @@ Source and license checks must currently be performed manually.  The `infr` tool
 
 To install te `infr` tools, run:
 
-    $ pip install --src infr -r inf_requirements.txt
+    $ pip install --src infr -r infr_requirements.txt
 
 ### Source Check
 
