@@ -13,7 +13,7 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
 
     ## Set any local library compile options
-    set(LIB_COMPILE_FLAGS "-O3")
+    set(LIB_COMPILE_FLAGS "-Os")
 
     ## Includes files
     set(LIB_PUBLIC_INCLUDES  api)
@@ -27,24 +27,24 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
     ## Create library target
-    add_library(xcore_sdk_hil_lib_spi STATIC)
-    target_sources(xcore_sdk_hil_lib_spi
+    add_library(xcore_sdk_hil_lib_uart STATIC)
+    target_sources(xcore_sdk_hil_lib_uart
         PUBLIC
             ${LIB_PUBLIC_SOURCES}
         PRIVATE
             ${LIB_PRIVATE_SOURCES}
     )
-    target_include_directories(xcore_sdk_hil_lib_spi
+    target_include_directories(xcore_sdk_hil_lib_uart
         PUBLIC
             ${LIB_PUBLIC_INCLUDES}
         PRIVATE
             ${LIB_PRIVATE_INCLUDES}
     )
-    target_compile_options(xcore_sdk_hil_lib_spi
+    target_compile_options(xcore_sdk_hil_lib_uart
         PRIVATE
             ${LIB_COMPILE_FLAGS}
     )
 
     ## Create an alias
-    add_library(sdk::hil::lib_spi ALIAS xcore_sdk_hil_lib_spi)
+    add_library(sdk::hil::lib_uart ALIAS xcore_sdk_hil_lib_uart)
 endif()
