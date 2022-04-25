@@ -1,5 +1,0 @@
-add_subdirectory(i2c_master_reg_test)
-add_subdirectory(i2c_master_test)
-add_subdirectory(i2c_slave_test)
-add_subdirectory(i2c_test_repeated_start)
-add_subdirectory(i2c_test_locks)

@@ -99,7 +99,8 @@ int32_t dsp_math_multiply( int32_t input1_value, int32_t input2_value, int32_t q
  */
 #define P 16
 
-static void sof_cb(void)
+__attribute__((dual_issue))
+void sof_cb(void)
 {
     static int32_t numerator = PID_TEST ? 0 : Q(P)((APP_PLL_FRAC_NOM & 0x0000FF00) >> 8);
     static int32_t previous_error;

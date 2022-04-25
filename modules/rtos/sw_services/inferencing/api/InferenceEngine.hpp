@@ -4,7 +4,6 @@
 #ifndef RTOS_INFERENCE_ENGINE_H_
 #define RTOS_INFERENCE_ENGINE_H_
 
-//#include <stddef.h>
 #include <cstdint>
 
 #include "tensorflow/lite/micro/micro_error_reporter.h"
@@ -13,6 +12,8 @@
 #include "xcore_interpreter.h"
 #include "xcore_ops.h"
 #include "xcore_rtos_ops.h"
+
+#include "rtos_printf.h"
 
 namespace xcore {
 
@@ -39,6 +40,7 @@ typedef struct QuantizationParams {
   int32_t zero_point;
 } QuantizationParams;
 
+
 /**
  * RTOSInferenceEngine class
  *
@@ -63,7 +65,6 @@ public:
     arena_(nullptr), 
     arena_size_(0), 
     model_(nullptr), 
-    reporter_(nullptr), 
     allocator_(nullptr), 
     planner_(nullptr), 
     profiler_(nullptr)
@@ -94,15 +95,8 @@ public:
     arena_ = arena;
     arena_size_ = arena_size;
 
-    // Set up error reporting
-    if (reporter_ == nullptr) {
-      static error_reporter_t error_reporter_s;
-
-      reporter_ = &error_reporter_s;
-    }
-
     // Set up simple allocator
-    static simple_allocator_t simple_allocator_s(reporter_, arena, arena_size);
+    static simple_allocator_t simple_allocator_s(&reporter_, arena, arena_size);
 
     // Set up simple allocator
     if (planner_ == nullptr) {
@@ -112,7 +106,7 @@ public:
 
     // Set up micro allocator
     if (allocator_ == nullptr) {
-      allocator_ = micro_allocator_t::Create(&simple_allocator_s, planner_, reporter_);
+      allocator_ = micro_allocator_t::Create(&simple_allocator_s, planner_, &reporter_);
     }
 
     return &resolver_;
@@ -147,7 +141,7 @@ public:
 
     // Build an interpreter to run the model with
     interpreter_ = new (interpreter_buffer_)
-        interpreter_t(model_, resolver_, allocator_, reporter_, planner_, true, profiler_, nullptr);
+        interpreter_t(model_, resolver_, allocator_, &reporter_, planner_, true, profiler_, nullptr);
 
     // Allocate memory from the tensor_arena for the model's tensors.
     TfLiteStatus allocate_tensors_status = interpreter_->AllocateTensors();
@@ -207,7 +201,7 @@ public:
         const auto *opcode = opcodes->Get(index);
         const TfLiteRegistration *registration = nullptr;
 
-        GetRegistrationFromOpCode(opcode, *c_resolver, reporter_, &registration);
+        GetRegistrationFromOpCode(opcode, *c_resolver, &reporter_, &registration);
 
         if (registration->builtin_code == tflite::BuiltinOperator_CUSTOM) {
           op_name = registration->custom_name;
@@ -217,10 +211,10 @@ public:
         }
         time_us = durations[i] / PLATFORM_REFERENCE_MHZ;
         total += time_us;
-        printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_us);
+        rtos_printf("Operator %d, %s took %lu microseconds\n", i, op_name, time_us);
       }
     }
-    printf("TOTAL %lu microseconds\n", total);
+    rtos_printf("TOTAL %lu microseconds\n", total);
 #endif    
   }
 
@@ -239,6 +233,15 @@ public:
    * @return    Input size (in bytes)
    */
   size_t GetInputSize(size_t index=0) const {return interpreter_->input(index)->bytes;}
+
+  /** Get the model input dimension
+   *
+   * @param[in] dim        Input dimension
+   * @param[in] index      Input index
+   *
+   * @return    Dimension size
+   */
+  size_t GetInputDimension(size_t dim_index, size_t input_index=0) const {return interpreter_->input(input_index)->dims->data[dim_index];}
 
   /** Get the model input quantization parameters
    *
@@ -290,74 +293,16 @@ private:
   uint8_t *arena_;
   size_t arena_size_;
   const model_t *model_;
-  error_reporter_t *reporter_;
   micro_allocator_t *allocator_;
   memory_planner_t *planner_;
   xcore_profiler_t *profiler_;
   interpreter_t *interpreter_;
   resolver_t resolver_;
-
+  
+  error_reporter_t reporter_;
   uint64_t interpreter_buffer_[(sizeof(tflite::micro::xcore::XCoreInterpreter) + sizeof(uint64_t)-1)/sizeof(uint64_t)]; // This needs to be aligned on a double word boundary
 };
 
 } // namespace xcore
-
-
-
-// /** Get the model input buffer.
-//  *
-//  * @param[in] model_content      Model contents
-//  *
-//  * @return    Pointer to model input buffer.
-//  */
-// int8_t *inference_engine_input_buffer_get(inference_engine_t *ctx);
-
-// /** Get the model input size.
-//  *
-//  * @return    Model input size (in bytes).
-//  */
-// size_t inference_engine_input_size_get(inference_engine_t *ctx);
-
-// /** Get the model input quantization parameters.
-//  *
-//  * @param[out] scale        Quantization scale
-//  * @param[out] zero_point   Quantization zero point
-//  */
-// void inference_engine_input_quant_get(inference_engine_t *ctx,
-//                                       float *scale,
-//                                       int *zero_point);
-
-// /** Run inference using the inference engine.
-//  */
-// InferenceEngineStatus inference_engine_invoke(inference_engine_t *ctx);
-
-// /** Get the model output buffer.
-//  *
-//  * @return    Pointer to model output buffer.
-//  */
-// int8_t *inference_engine_output_buffer_get(inference_engine_t *ctx);
-
-// /** Get the model output size.
-//  *
-//  * @return    Model output size (in bytes).
-//  */
-// size_t inference_engine_output_size_get(inference_engine_t *ctx);
-
-// /** Get the model output quantization parameters.
-//  *
-//  * @param[out] scale        Quantization scale
-//  * @param[out] zero_point   Quantization zero point
-//  */
-// void inference_engine_ouput_quant_get(inference_engine_t *ctx, 
-//                                       float *scale,
-//                                       int *zero_point);
-
-// #ifndef NDEBUG
-
-// /** Print a summary report of profiler inference durations.
-//  */
-// void inference_engine_profiler_summary_print(inference_engine_t *ctx);
-
-// #endif
 
 #endif // RTOS_INFERENCE_ENGINE_H_

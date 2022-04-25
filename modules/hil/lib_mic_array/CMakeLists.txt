@@ -12,9 +12,6 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     ## Assume all asm is XS3A for now
     set(XCORE_XS3A_SOURCES ${LIB_ASM_SOURCES})
 
-    ## Set any local library compile options
-    set(LIB_COMPILE_FLAGS "-O2")
-
     ## Includes files
     set(LIB_PUBLIC_INCLUDES
         lib_mic_array/lib_mic_array/api
@@ -31,6 +28,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
 
     ## Append platform specific sources
     list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
+
+    ## Apply compile flags to sources at the top level directory because this is an INTERFACE library
+    set_source_files_properties(${LIB_PRIVATE_SOURCES} DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTIES COMPILE_OPTIONS "-O2")
 
     ## Create library target
     add_library(xcore_sdk_hil_lib_mic_array INTERFACE)

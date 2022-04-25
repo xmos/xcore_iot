@@ -97,7 +97,7 @@ inline uint8_t read_reg8_addr16(
         uint16_t reg,
         i2c_regop_res_t *result)
 {
-    uint8_t buf[2] = {(reg >> 8) & 0xFF, reg & 0xFF};
+    uint8_t buf[2] = {(uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF)};
     size_t bytes_sent = 0;
     i2c_res_t res;
 
@@ -191,7 +191,7 @@ inline uint16_t read_reg16(
         uint16_t reg,
         i2c_regop_res_t *result)
 {
-    uint8_t buf[2] = {(reg >> 8) & 0xFF, reg & 0xFF};
+    uint8_t buf[2] = {(uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF)};
     size_t bytes_sent = 0;
     i2c_res_t res;
 
@@ -272,7 +272,7 @@ inline i2c_regop_res_t write_reg8_addr16(
         uint16_t reg,
         uint8_t data)
 {
-    uint8_t buf[3] = {(reg >> 8) & 0xFF, reg & 0xFF, data};
+    uint8_t buf[3] = {(uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF), (uint8_t)(data)};
     size_t bytes_sent = 0;
     i2c_regop_res_t reg_res;
 
@@ -310,7 +310,7 @@ inline i2c_regop_res_t write_reg16_addr8(
         uint8_t reg,
         uint16_t data)
 {
-    uint8_t buf[3] = {reg, (data >> 8) & 0xFF, data & 0xFF};
+    uint8_t buf[3] = {(uint8_t)(reg), (uint8_t)((data >> 8) & 0xFF), (uint8_t)(data & 0xFF)};
     size_t bytes_sent = 0;
     i2c_regop_res_t reg_res;
 
@@ -348,7 +348,8 @@ inline i2c_regop_res_t write_reg16(
         uint16_t reg,
         uint16_t data)
 {
-    uint8_t buf[4] = {(reg >> 8) & 0xFF, reg & 0xFF, (data >> 8) & 0xFF, data & 0xFF};
+    uint8_t buf[4] = {(uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF),
+                      (uint8_t)((data >> 8) & 0xFF), (uint8_t)(data & 0xFF)};
     size_t bytes_sent = 0;
     i2c_regop_res_t reg_res;
 

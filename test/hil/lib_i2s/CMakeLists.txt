@@ -1,4 +1,0 @@
-add_subdirectory(backpressure_test)
-add_subdirectory(i2s_master_external_clock_test)
-add_subdirectory(i2s_master_test)
-add_subdirectory(i2s_slave_test)

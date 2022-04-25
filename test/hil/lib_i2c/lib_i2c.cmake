@@ -1,0 +1,5 @@
+include(${CMAKE_CURRENT_LIST_DIR}/i2c_master_reg_test/i2c_master_reg_test.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/i2c_master_test/i2c_master_test.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/i2c_slave_test/i2c_slave_test.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/i2c_test_locks/i2c_test_locks.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/i2c_test_repeated_start/i2c_test_repeated_start.cmake)

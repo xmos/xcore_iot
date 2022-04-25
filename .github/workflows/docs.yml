@@ -44,9 +44,8 @@ jobs:
           docker run --rm -t -u "$(id -u):$(id -g)" -v ${{ github.workspace }}:/build -e REPO:/build -e EXCLUDE_PATTERNS=/build/doc/exclude_patterns.inc -e DOXYGEN_INCLUDE=/build/doc/Doxyfile.inc -e DOXYGEN_INPUT=ignore ${DOC_BUILDER_IMAGE}
 
       - name: Save documentation artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: xcore_sdk_docs
           path: doc/_build
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn` 
-          retention-days: 5

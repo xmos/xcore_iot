@@ -5,5 +5,5 @@ XCore SDK Tools Guide
 .. toctree::
    :maxdepth: 2
 
-   installing-ai-tools
+   installing_ai_tools
    cmd_line_tools/index
