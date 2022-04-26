@@ -10,3 +10,4 @@ HIL
    i2s/i2s.rst
    spi/spi.rst
    qspi/qspi.rst
+   ../../../../modules/hil/lib_mic_array/lib_mic_array/doc/index.rst
