@@ -9,7 +9,5 @@ modules/legacy_compat
 modules/lib_otpinfo
 modules/lib_src
 modules/lib_random
-modules/lib_dsp
-modules/lib_mic_array
-modules/hil/lib_mic_array
+modules/inferencing
 modules/hil/lib_xud

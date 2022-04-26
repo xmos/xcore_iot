@@ -12,7 +12,7 @@ This is the user guide for the `XCore Software Development Kit <https://github.c
    doc/quick_start/index
    doc/tutorials/index
    doc/reference/index
-   documents/tools/index
+   doc/tools/index
    doc/contributing
    doc/versions
    doc/copyright
