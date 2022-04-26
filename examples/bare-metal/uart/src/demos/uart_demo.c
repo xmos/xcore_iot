@@ -14,18 +14,25 @@
 #include "app_conf.h"
 #include "app_demos.h"
 
-void uart_demo(uart_tx_device_t* device_ctx)
+#include <xcore/port.h>
+#include <xcore/hwtimer.h>
+
+void uart_demo(uart_tx_t* uart)
 {
-    uint32_t in_buf = 0;
-    uint32_t out_buf = 0;
+    char tx_buff[] = "U\0U"; //0x55
 
-    // spi_master_start_transaction(device_ctx);
-    // spi_master_transfer(device_ctx,
-    //                     (uint8_t *)&out_buf,
-    //                     (uint8_t *)&in_buf,
-    //                     4);
-    // spi_master_end_transaction(device_ctx);
+    port_t p_uart_tx = WIFI_CLK;
+    hwtimer_t tmr = hwtimer_alloc();
 
-    debug_printf("uart got 0x%x\n", out_buf);
+
+    uart_tx_init(uart, p_uart_tx, 115200, 8, UART_PARITY_NONE, 1);
+
+    for(int i=0; i<sizeof(tx_buff); i++){
+        uart_tx(uart, tx_buff[i]);
+        debug_printf("uart sent 0x%x (%c)\n", tx_buff[i], tx_buff[i]);
+
+    }
+   
+
     exit(0);
 }

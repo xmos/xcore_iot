@@ -10,8 +10,7 @@
 #include <xcore/channel.h>
 #include <xcore/channel_streaming.h>
 #include <xcore/parallel.h>
-#include <xcore/port.h>
-#include <xcore/hwtimer.h>
+
 #include <xcore/triggerable.h>
 
 /* SDK headers */
@@ -30,10 +29,10 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     (void)c2;
     (void)c3;
 
-    uart_tx_device_t uart_device_ctx;
+    uart_tx_t uart_tx;
 
     PAR_JOBS (
-        PJOB(uart_demo, (&uart_device_ctx)),
+        PJOB(uart_demo, (&uart_tx)),
         // PJOB(burn, ()),
         // PJOB(burn, ()),
         // PJOB(burn, ()),

@@ -49,21 +49,21 @@ inline void spi_io_port_outpw(
  * Enum type representing the different options
  * for the SPI master sample delay.
  */
-typedef enum {
-    spi_master_sample_delay_0 = 0, /**< Samples 1/2 clock cycle after output from device */
-    spi_master_sample_delay_1 = 1, /**< Samples 3/4 clock cycle after output from device */
-    spi_master_sample_delay_2 = 2, /**< Samples 1 clock cycle after output from device */
-    spi_master_sample_delay_3 = 3, /**< Samples 1 and 1/4 clock cycle after output from device */
-    spi_master_sample_delay_4 = 4, /**< Samples 1 and 1/2 clock cycle after output from device */
-} spi_master_sample_delay_t;
+typedef enum uart_parity_t {
+  UART_PARITY_NONE = 0,
+  UART_PARITY_EVEN,
+  UART_PARITY_ODD
+} uart_parity_t;
 
-/**
- * Enum type used to set which of the two clock sources SCLK is derived from.
- */
+
 typedef enum {
-    spi_master_source_clock_ref = 0, /**< SCLK is derived from the 100 MHz reference clock */
-    spi_master_source_clock_xcore    /**< SCLK is derived from the core clock */
-} spi_master_source_clock_t;
+    UART_IDLE = 0,
+    UART_START,
+    UART_DATA,
+    UART_PARITY,
+    UART_STOP
+} uart_state_t;
+
 
 /**
  * Struct to hold a SPI master context.
@@ -72,24 +72,19 @@ typedef enum {
  */
 typedef struct {
     port_t tx_port;
-    uint32_t current_device;
-    int delay_before_transfer;
+    uint32_t bit_time_ticks;
+    uint32_t next_event_time_ticks;
+    uart_parity_t parity;
+    uint8_t num_data_bits;
+    uint8_t current_data_bit;
+    uint8_t uart_data;
+    uint8_t stop_bits;
+    size_t buffer_size;
+    uart_state_t state;
+    char* buffer;
+
 } uart_tx_t;
 
-
-/**
- * Struct type representing a SPI device connected to a SPI master
- * interface.
- *
- * The members in this struct should not be accessed directly.
- */
-typedef struct {
-    uart_tx_t *uart_tx_ctx;
-    uint32_t bit_time_ticks;
-    size_t buffer_size;
-    uint8_t stop_bits;
-    uint8_t parity_enable;
-} uart_tx_device_t;
 
 /**
  * Initializes a SPI master I/O interface.
@@ -102,43 +97,12 @@ typedef struct {
  * \param miso_port   The SPI interface's MISO port. Must be a 1-bit port.
  */
 void uart_tx_init(
-        uart_tx_t *spi,
-        xclock_t clock_block,
+        uart_tx_t *uart,
         port_t cs_port,
-        port_t sclk_port,
-        port_t mosi_port,
-        port_t miso_port);
-
-/**
- * Initialize a SPI device. Multiple SPI devices may be initialized per SPI interface.
- * Each must be on a unique pin of the interface's chip select port.
- *
- * \param dev                   The context representing the device to initialize.
- * \param spi                   The context representing the SPI master interface that the device is connected to.
- * \param cs_pin                The bit number of the chip select port that is connected to the device's chip select pin.
- * \param cpol                  The clock polarity required by the device.
- * \param cpha                  The clock phase required by the device.
- * \param source_clock          The source clock to derive SCLK from. See spi_master_source_clock_t.
- * \param clock_divisor         The value to divide the source clock by.
- *                              The frequency of SCLK will be set to:
- *                               - (F_src) / (4 * clock_divisor) when clock_divisor > 0
- *                               - (F_src) / (2)                 when clock_divisor = 0
- *                              Where F_src is the frequency of the source clock.
- * \param miso_sample_delay     When to sample MISO. See spi_master_sample_delay_t.
- * \param miso_pad_delay        The number of core clock cycles to delay sampling the MISO pad during
- *                              a transaction. This allows for more fine grained adjustment
- *                              of sampling time. The value may be between 0 and 5.
- * \param cs_to_clk_delay_ticks The minimum number of reference clock ticks between assertion of chip select
- *                              and the first clock edge.
- * \param clk_to_cs_delay_ticks The minimum number of reference clock ticks between the last clock edge and
- *                              de-assertion of chip select.
- * \param cs_to_cs_delay_ticks  The minimum number of reference clock ticks between transactions, which is between
- *                              de-assertion of chip select and the end of one transaction, and its re-assertion at
- *                              the beginning of the next.
- */
-void spi_master_device_init(
-        uart_tx_device_t *dev,
-        uart_tx_t *uart
+        uint32_t baud_rate,
+        uint8_t data_bits,
+        uart_parity_t parity,
+        uint8_t stop_bits
         );
 
 
@@ -159,6 +123,11 @@ void spi_master_device_init(
 //         uint8_t *data_out,
 //         uint8_t *data_in,
 //         size_t len);
+
+
+void uart_tx(
+        uart_tx_t *uart,
+        char data);
 
 /**
  * Enforces a minimum delay between the time this is called and
