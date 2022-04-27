@@ -42,7 +42,7 @@ typedef enum {
 
 
 typedef enum {
-    UART_TX_CHAR_END = 0x01
+    UART_TX_EMPTY = 0x01
 } uart_callback_t;
 
 
@@ -55,25 +55,27 @@ typedef enum {
 
 
 /**
- * Struct to hold a SPI master context.
+ * Struct to hold a UART Tx context.
  *
  * The members in this struct should not be accessed directly.
  */
 typedef struct {
     port_t tx_port;
+    uart_state_t state;
     uint32_t bit_time_ticks;
     uint32_t next_event_time_ticks;
     uart_parity_t parity;
-    uint8_t num_data_bits;
+    uint8_t num_data_bits; //These are ordered to be better packed
     uint8_t current_data_bit;
-    uint8_t uart_data;
+    char uart_data;
     uint8_t stop_bits;
-    size_t buffer_size;
+    unsigned buffer_size;
+    unsigned buff_head_idx;
+    unsigned buff_tail_idx;
     UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
-
-    uart_state_t state;
     hwtimer_t tmr;
     char* buffer;
+
 
 } uart_tx_t;
 
@@ -101,6 +103,17 @@ void uart_tx_init(
         size_t buffer_size,
         void(*uart_callback_fptr)(uart_callback_t callback_info)
         );
+
+
+
+void uart_tx_blocking_init(
+        uart_tx_t *uart_cfg,
+        port_t tx_port,
+        uint32_t baud_rate,
+        uint8_t num_data_bits,
+        uart_parity_t parity,
+        uint8_t stop_bits,
+        hwtimer_t tmr);
 
 
 /**

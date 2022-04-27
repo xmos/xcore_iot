@@ -15,6 +15,20 @@ DEFINE_INTERRUPT_CALLBACK(UART_INTERRUPTABLE_FUNCTIONS, transition_isr, callback
 }
 
 
+
+void uart_tx_blocking_init(
+        uart_tx_t *uart_cfg,
+        port_t tx_port,
+        uint32_t baud_rate,
+        uint8_t num_data_bits,
+        uart_parity_t parity,
+        uint8_t stop_bits,
+        hwtimer_t tmr){
+
+    uart_tx_init(uart_cfg, tx_port, baud_rate, num_data_bits, parity, stop_bits, tmr,
+                 NULL, 0, NULL);
+}
+
 void uart_tx_init(
         uart_tx_t *uart_cfg,
         port_t tx_port,
@@ -44,9 +58,9 @@ void uart_tx_init(
 
     //HW timer will be replaced by poll if set to zero
     uart_cfg->tmr = tmr;
-    unsigned buffer_used = (buffer_size && buffer != NULL);
 
-    //Assert if buffer is used but no timer as we need the timer  
+    unsigned buffer_used = (buffer_size && buffer != NULL);
+    //Assert if buffer is used but no timer as we need the timer for buffered mode  
     if(buffer_used && !tmr){
         xassert(0);    
     }
@@ -55,6 +69,8 @@ void uart_tx_init(
         uart_cfg->buffer_size = buffer_size;
         uart_cfg->buffer = buffer;
         uart_cfg->uart_callback_fptr = uart_callback_fptr;
+        uart_cfg->buff_head_idx = 0;
+        uart_cfg->buff_tail_idx = 0;
         //Setup interrupt
         triggerable_setup_interrupt_callback(tmr, uart_cfg, INTERRUPT_CALLBACK(transition_isr) );
         interrupt_unmask_all();
@@ -80,12 +96,81 @@ static inline uint32_t get_current_time(uart_tx_t *uart_cfg){
 static inline void sleep_until_next_transition(uart_tx_t *uart_cfg){
     unsigned buffer_used = (uart_cfg->buffer_size && uart_cfg->buffer != NULL);
     if(buffer_used){
+        //Setup next interrupt
         hwtimer_set_trigger_time(uart_cfg->tmr, uart_cfg->next_event_time_ticks);
     } 
     else if(uart_cfg->tmr){
+        //Wait on a the timer
         hwtimer_wait_until(uart_cfg->tmr, uart_cfg->next_event_time_ticks);
     }else{
+        //Poll the timer
         while(get_current_time(uart_cfg) < uart_cfg->next_event_time_ticks);
+    }
+}
+
+
+typedef enum {
+    UART_BUFFER_OK = 0,
+    UART_BUFFER_EMPTY,
+    UART_BUFFER_FULL
+} uart_buffer_error_t;
+
+static inline unsigned get_buffer_fill_level(uart_tx_t *uart_cfg){
+    unsigned fill_level = 0;
+    if (uart_cfg->buff_head_idx == uart_cfg->buff_tail_idx){
+        fill_level = 0;
+    }
+    else if(uart_cfg->buff_head_idx > uart_cfg->buff_tail_idx){
+        fill_level = uart_cfg->buff_head_idx - uart_cfg->buff_tail_idx;
+    }
+    else {
+        fill_level = uart_cfg->buffer_size + uart_cfg->buff_tail_idx - uart_cfg->buff_head_idx;
+    }
+    return fill_level;
+}
+
+static inline uart_buffer_error_t push_char_into_buffer(uart_tx_t *uart_cfg, char data){
+    uart_buffer_error_t err = UART_BUFFER_OK;
+    if(get_buffer_fill_level(uart_cfg) < uart_cfg->buffer_size){
+        uart_cfg->buffer[uart_cfg->buff_head_idx] = data;
+        uart_cfg->buff_head_idx += 1;
+        if(uart_cfg->buff_head_idx == uart_cfg->buffer_size){
+           uart_cfg->buff_head_idx = 0; 
+        }
+    } else {
+       err = UART_BUFFER_FULL;
+    }
+    return err;
+}
+
+static inline uart_buffer_error_t pop_char_from_buffer(uart_tx_t *uart_cfg, char *data){    
+    uart_buffer_error_t err = UART_BUFFER_OK;
+    if(get_buffer_fill_level(uart_cfg)){
+        *data = uart_cfg->buffer[uart_cfg->buff_tail_idx];
+        uart_cfg->buff_tail_idx += 1;
+        if(uart_cfg->buff_tail_idx == uart_cfg->buffer_size){
+           uart_cfg->buff_tail_idx = 0; 
+        }
+    } else {
+        err = UART_BUFFER_EMPTY;
+    }
+    return err;
+}
+
+
+
+
+
+
+static inline void buffered_uart_tx_char_finished(uart_tx_t *uart_cfg){
+    uart_buffer_error_t err = pop_char_from_buffer(uart_cfg, &uart_cfg->uart_data);
+    if(err == UART_BUFFER_OK){
+        uart_cfg->current_data_bit = 0;
+        pop_char_from_buffer(uart_cfg, &uart_cfg->uart_data);
+        uart_cfg->state = UART_START;
+    } else {
+        triggerable_disable_trigger(uart_cfg->tmr);
+        (*uart_cfg->uart_callback_fptr)(UART_TX_EMPTY);
     }
 }
 
@@ -98,8 +183,8 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
         }
 
         case UART_START: {
-            port_out(uart_cfg->tx_port, 0);
             uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
+            port_out(uart_cfg->tx_port, 0);
             uart_cfg->state = UART_DATA;
             uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks;
             break;
@@ -144,8 +229,7 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
      unsigned buffer_used = (uart_cfg->buffer_size && uart_cfg->buffer != NULL);
      if(buffer_used){
         if(uart_cfg->state == UART_IDLE){
-            triggerable_disable_trigger(uart_cfg->tmr);
-            (*uart_cfg->uart_callback_fptr)(UART_TX_CHAR_END);
+            buffered_uart_tx_char_finished(uart_cfg);
         } else {
             sleep_until_next_transition(uart_cfg);
         }
@@ -155,20 +239,27 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
 
 
 void uart_tx(uart_tx_t *uart_cfg, char data){
-    uart_cfg->uart_data = data;
-    uart_cfg->current_data_bit = 0;
-    uart_cfg->state = UART_START;
     //CHeck to see if we are using interrupts/buffered mode
     unsigned buffer_used = (uart_cfg->buffer_size && uart_cfg->buffer != NULL);
     if(buffer_used){
-        uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
-        sleep_until_next_transition(uart_cfg);
-        triggerable_enable_trigger(uart_cfg->tmr);
-        return;
-    }
-    while(uart_cfg->state != UART_IDLE){
-        uart_tx_handle_transition(uart_cfg);
-        sleep_until_next_transition(uart_cfg);
+        if(get_buffer_fill_level(uart_cfg) == 0 && uart_cfg->state == UART_IDLE){//Kick off a transmit
+            uart_cfg->uart_data = data;
+            uart_cfg->current_data_bit = 0;
+            uart_cfg->state = UART_START;
+            uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
+            sleep_until_next_transition(uart_cfg);
+            triggerable_enable_trigger(uart_cfg->tmr);
+        } else {//Transaction already underway
+            uart_buffer_error_t err = push_char_into_buffer(uart_cfg, data);
+        }
+    } else {
+        uart_cfg->uart_data = data;
+        uart_cfg->current_data_bit = 0;
+        uart_cfg->state = UART_START;
+        while(uart_cfg->state != UART_IDLE){
+            uart_tx_handle_transition(uart_cfg);
+            sleep_until_next_transition(uart_cfg);
+        }
     }
 }
 

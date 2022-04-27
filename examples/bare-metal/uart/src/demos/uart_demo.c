@@ -29,8 +29,8 @@ UART_CALLBACK_ATTR void uart_callback(uart_callback_t callback_info){
 
 DEFINE_INTERRUPT_PERMITTED(uart_isr_grp, void, uart_demo, uart_tx_t* uart)
 {
-    // char tx_msg[] = "\x55\0\xaa"; //U = 0x55
-    char tx_msg[] = {0x55};
+    char tx_msg[] = "\x55\0\xaa"; //U = 0x55
+    // char tx_msg[] = {0x55};
 
     port_t p_uart_tx = WIFI_CLK;
     hwtimer_t tmr = hwtimer_alloc();
@@ -40,7 +40,8 @@ DEFINE_INTERRUPT_PERMITTED(uart_isr_grp, void, uart_demo, uart_tx_t* uart)
 
     uart_tx_init(uart, p_uart_tx, 115200, 8, UART_PARITY_NONE, 1,
                 tmr, tx_buff, sizeof(tx_buff), uart_callback);
-                // tmr, NULL, 0);
+
+    uart_tx_blocking_init(uart, p_uart_tx, 921600, 8, UART_PARITY_NONE, 1, tmr);
 
 
     for(int i=0; i<sizeof(tx_msg); i++){
