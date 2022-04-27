@@ -6,37 +6,13 @@
  *  \brief API for SPI I/O
  */
 
-/**
- * The minimum number of clock ticks that should
- * be specified for any SPI master delay value.
- */
-#define SPI_MASTER_MINIMUM_DELAY 10
 
 #include <stdlib.h> /* for size_t */
 #include <stdint.h>
-#include <xclib.h> /* for byterev() */
-#include <xcore/assert.h>
 #include <xcore/port.h>
-#include <xcore/clock.h>
-
-/* The SETC constant for pad delay is missing from xs2a_user.h */
-#define SPI_IO_SETC_PAD_DELAY(n) (0x7007 | ((n) << 3))
-
-/* These appear to be missing from the public API of lib_xcore */
-#define SPI_IO_RESOURCE_SETCI(res, c) asm volatile( "setc res[%0], %1" :: "r" (res), "n" (c))
-#define SPI_IO_RESOURCE_SETC(res, r) asm volatile( "setc res[%0], %1" :: "r" (res), "r" (r))
-#define SPI_IO_SETSR(c) asm volatile("setsr %0" : : "n"(c));
-#define SPI_IO_CLRSR(c) asm volatile("clrsr %0" : : "n"(c));
-
-/* is setpsc available in lib_xcore or anywhere else..??? */
-__attribute__((always_inline))
-inline void spi_io_port_outpw(
-        resource_t __p,
-        uint32_t __w,
-        uint32_t __bpw)
-{
-    asm volatile("outpw res[%0], %1, %2" : : "r" (__p), "r" (__w), "r" (__bpw));
-}
+#include <xcore/triggerable.h>
+#include <xcore/hwtimer.h>
+#include <xcore/interrupt.h>
 
 /**
  * \addtogroup hil_spi_master hil_spi_master
@@ -65,6 +41,19 @@ typedef enum {
 } uart_state_t;
 
 
+typedef enum {
+    UART_TX_CHAR_END = 0x01
+} uart_callback_t;
+
+
+
+/**
+ * This attribute must be specified on all SPI callback functions
+ * provided by the application.
+ */
+#define UART_CALLBACK_ATTR __attribute__((fptrgroup("uart_callback")))
+
+
 /**
  * Struct to hold a SPI master context.
  *
@@ -80,7 +69,10 @@ typedef struct {
     uint8_t uart_data;
     uint8_t stop_bits;
     size_t buffer_size;
+    UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
+
     uart_state_t state;
+    hwtimer_t tmr;
     char* buffer;
 
 } uart_tx_t;
@@ -102,7 +94,12 @@ void uart_tx_init(
         uint32_t baud_rate,
         uint8_t data_bits,
         uart_parity_t parity,
-        uint8_t stop_bits
+        uint8_t stop_bits,
+
+        hwtimer_t tmr,
+        char *tx_buff,
+        size_t buffer_size,
+        void(*uart_callback_fptr)(uart_callback_t callback_info)
         );
 
 
@@ -207,11 +204,6 @@ void uart_tx_deinit(
  */
 // typedef void (*slave_transaction_ended_t)(void *app_data, uint8_t **out_buf, size_t bytes_written, uint8_t **in_buf, size_t bytes_read, size_t read_bits);
 
-/**
- * This attribute must be specified on all SPI callback functions
- * provided by the application.
- */
-#define SPI_CALLBACK_ATTR __attribute__((fptrgroup("spi_callback")))
 
 /**@}*/ // END: addtogroup hil_spi_master
 

@@ -2,9 +2,18 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include <stdint.h>
 #include <xcore/assert.h>
-#include <xcore/hwtimer.h>
+#include <xcore/interrupt_wrappers.h>
 
 #include "uart.h"
+
+void uart_tx_handle_transition(uart_tx_t *uart_cfg);
+
+
+DEFINE_INTERRUPT_CALLBACK(UART_INTERRUPTABLE_FUNCTIONS, transition_isr, callback_info){
+    uart_tx_t *uart_cfg = (uart_tx_t*) callback_info;
+    uart_tx_handle_transition(uart_cfg);
+}
+
 
 void uart_tx_init(
         uart_tx_t *uart_cfg,
@@ -12,7 +21,12 @@ void uart_tx_init(
         uint32_t baud_rate,
         uint8_t num_data_bits,
         uart_parity_t parity,
-        uint8_t stop_bits
+        uint8_t stop_bits,
+
+        hwtimer_t tmr,
+        char *buffer,
+        size_t buffer_size,
+        void(*uart_callback_fptr)(uart_callback_t callback_info)
         ){
 
     uart_cfg->tx_port = tx_port;
@@ -23,13 +37,31 @@ void uart_tx_init(
     xassert(parity == UART_PARITY_NONE || parity == UART_PARITY_EVEN || parity == UART_PARITY_ODD);
     uart_cfg->parity = parity;
     uart_cfg->stop_bits = stop_bits;
-
-    uart_cfg->buffer_size = 0;
-    uart_cfg->buffer = NULL;
-
-    uart_cfg->state = UART_IDLE;
     uart_cfg->current_data_bit = 0;
     uart_cfg->uart_data = 0;
+    uart_cfg->state = UART_IDLE;
+
+
+    //HW timer will be replaced by poll if set to zero
+    uart_cfg->tmr = tmr;
+    unsigned buffer_used = (buffer_size && buffer != NULL);
+
+    //Assert if buffer is used but no timer as we need the timer  
+    if(buffer_used && !tmr){
+        xassert(0);    
+    }
+    //TODO work out if buffer can be used without HW timer
+    if(buffer_used){
+        uart_cfg->buffer_size = buffer_size;
+        uart_cfg->buffer = buffer;
+        uart_cfg->uart_callback_fptr = uart_callback_fptr;
+        //Setup interrupt
+        triggerable_setup_interrupt_callback(tmr, uart_cfg, INTERRUPT_CALLBACK(transition_isr) );
+        interrupt_unmask_all();
+    } else {
+        uart_cfg->buffer_size = 0;
+        uart_cfg->buffer = NULL;
+    }
 
     port_enable(tx_port);
     port_out(tx_port, 1); //Set to idle
@@ -39,20 +71,29 @@ void uart_tx_init(
 
 
 static inline uint32_t get_current_time(uart_tx_t *uart_cfg){
-    uint32_t time_now = get_reference_time();
-    return time_now;
+    if(uart_cfg->tmr){
+        return hwtimer_get_time(uart_cfg->tmr);
+    }
+    return get_reference_time();
 }
 
 static inline void sleep_until_next_transition(uart_tx_t *uart_cfg){
-    while(get_current_time(uart_cfg) < uart_cfg->next_event_time_ticks);
+    unsigned buffer_used = (uart_cfg->buffer_size && uart_cfg->buffer != NULL);
+    if(buffer_used){
+        hwtimer_set_trigger_time(uart_cfg->tmr, uart_cfg->next_event_time_ticks);
+    } 
+    else if(uart_cfg->tmr){
+        hwtimer_wait_until(uart_cfg->tmr, uart_cfg->next_event_time_ticks);
+    }else{
+        while(get_current_time(uart_cfg) < uart_cfg->next_event_time_ticks);
+    }
 }
-
-
 
 void uart_tx_handle_transition(uart_tx_t *uart_cfg){
     switch(uart_cfg->state){
         case UART_IDLE: {
-            //Nothing to do
+            //Nothing to do. We should never arrive here. TODO tidy with default case
+            xassert(0);
             break;
         }
 
@@ -100,6 +141,15 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
             xassert(0);
         }
     }
+     unsigned buffer_used = (uart_cfg->buffer_size && uart_cfg->buffer != NULL);
+     if(buffer_used){
+        if(uart_cfg->state == UART_IDLE){
+            triggerable_disable_trigger(uart_cfg->tmr);
+            (*uart_cfg->uart_callback_fptr)(UART_TX_CHAR_END);
+        } else {
+            sleep_until_next_transition(uart_cfg);
+        }
+     }
 }
 
 
@@ -108,6 +158,14 @@ void uart_tx(uart_tx_t *uart_cfg, char data){
     uart_cfg->uart_data = data;
     uart_cfg->current_data_bit = 0;
     uart_cfg->state = UART_START;
+    //CHeck to see if we are using interrupts/buffered mode
+    unsigned buffer_used = (uart_cfg->buffer_size && uart_cfg->buffer != NULL);
+    if(buffer_used){
+        uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
+        sleep_until_next_transition(uart_cfg);
+        triggerable_enable_trigger(uart_cfg->tmr);
+        return;
+    }
     while(uart_cfg->state != UART_IDLE){
         uart_tx_handle_transition(uart_cfg);
         sleep_until_next_transition(uart_cfg);

@@ -10,7 +10,7 @@
 #include <xcore/channel.h>
 #include <xcore/channel_streaming.h>
 #include <xcore/parallel.h>
-
+#include <xcore/interrupt_wrappers.h>
 #include <xcore/triggerable.h>
 
 /* SDK headers */
@@ -22,6 +22,9 @@
 #include "app_demos.h"
 #include "burn.h"
 
+DECLARE_INTERRUPT_PERMITTED(void, uart_demo, uart_tx_t* uart);
+
+
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 {
     (void)c0;
@@ -32,12 +35,13 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     uart_tx_t uart_tx;
 
     PAR_JOBS (
-        PJOB(uart_demo, (&uart_tx)),
+        PJOB(INTERRUPT_PERMITTED(uart_demo), (&uart_tx))
+        // PJOB(uart_demo, (&uart_tx)),
         // PJOB(burn, ()),
         // PJOB(burn, ()),
         // PJOB(burn, ()),
         // PJOB(burn, ()),
-        PJOB(burn, ())
+        // PJOB(burn, ())
     );
 }
 

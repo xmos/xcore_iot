@@ -8,6 +8,8 @@
 #include <xcore/chanend.h>
 
 #include "uart.h"
+
+
 DECLARE_JOB(uart_demo, (uart_tx_t*));
 
 #endif /* APP_CONF_H_ */

@@ -14,7 +14,7 @@
 <!--   "NONE", "UINT", "INT", "FLOAT"                        -->
 <!-- ======================================================= -->
 
-<xSCOPEconfig ioMode="basic" enabled="true">
+<xSCOPEconfig ioMode="basic" enabled="false">
 
     <!-- For example: -->
     <!-- <Probe name="Probe Name" type="CONTINUOUS" datatype="UINT" units="Value" enabled="true"/> -->

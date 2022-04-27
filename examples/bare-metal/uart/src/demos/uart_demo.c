@@ -16,23 +16,39 @@
 
 #include <xcore/port.h>
 #include <xcore/hwtimer.h>
+#include <xcore/interrupt_wrappers.h>
 
-void uart_demo(uart_tx_t* uart)
+
+volatile int uart_working = 1;
+
+UART_CALLBACK_ATTR void uart_callback(uart_callback_t callback_info){
+    debug_printf("ISR callback 0x%x\n", callback_info);
+    uart_working = 0;
+}
+
+
+DEFINE_INTERRUPT_PERMITTED(uart_isr_grp, void, uart_demo, uart_tx_t* uart)
 {
-    char tx_buff[] = "U\0U"; //0x55
+    // char tx_msg[] = "\x55\0\xaa"; //U = 0x55
+    char tx_msg[] = {0x55};
 
     port_t p_uart_tx = WIFI_CLK;
     hwtimer_t tmr = hwtimer_alloc();
+    // tmr = 0;
+
+    char tx_buff[64];
+
+    uart_tx_init(uart, p_uart_tx, 115200, 8, UART_PARITY_NONE, 1,
+                tmr, tx_buff, sizeof(tx_buff), uart_callback);
+                // tmr, NULL, 0);
 
 
-    uart_tx_init(uart, p_uart_tx, 115200, 8, UART_PARITY_NONE, 1);
-
-    for(int i=0; i<sizeof(tx_buff); i++){
-        uart_tx(uart, tx_buff[i]);
-        debug_printf("uart sent 0x%x (%c)\n", tx_buff[i], tx_buff[i]);
+    for(int i=0; i<sizeof(tx_msg); i++){
+        uart_tx(uart, tx_msg[i]);
+        debug_printf("uart sent 0x%x (%c)\n", tx_msg[i], tx_msg[i]);
 
     }
-   
-
+    
+    while(uart_working);
     exit(0);
 }
