@@ -42,6 +42,8 @@ DEFINE_INTERRUPT_PERMITTED(uart_isr_grp, void, uart_demo, uart_tx_t* uart)
                 tmr, tx_buff, sizeof(tx_buff), uart_callback);
 
     uart_tx_blocking_init(uart, p_uart_tx, 921600, 8, UART_PARITY_NONE, 1, tmr);
+    uart_tx_blocking_init(uart, p_uart_tx, 1843200, 8, UART_PARITY_NONE, 1, tmr);
+    uart_tx_blocking_init(uart, p_uart_tx, 2764800, 8, UART_PARITY_NONE, 1, tmr);
 
 
     for(int i=0; i<sizeof(tx_msg); i++){

@@ -176,12 +176,6 @@ static inline void buffered_uart_tx_char_finished(uart_tx_t *uart_cfg){
 
 void uart_tx_handle_transition(uart_tx_t *uart_cfg){
     switch(uart_cfg->state){
-        case UART_IDLE: {
-            //Nothing to do. We should never arrive here. TODO tidy with default case
-            xassert(0);
-            break;
-        }
-
         case UART_START: {
             uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
             port_out(uart_cfg->tx_port, 0);
@@ -222,6 +216,7 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
             uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks;
             break;
         }
+        case UART_IDLE:
         default: {
             xassert(0);
         }
