@@ -1,6 +1,14 @@
-from array import array
+# Copyright 2022 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public Licence: Version 1.
+import Pyxsim as px
+from typing import Sequence
+from functools import partial
 
-import xmostest
+# We need to disable output buffering for this test to work on MacOS; this has
+# no effect on Linux systems. Let's redefine print once to avoid putting the 
+# same argument everywhere.
+print = partial(print, flush=True)
+
 
 Parity = dict(
     UART_PARITY_EVEN=0,
@@ -9,7 +17,7 @@ Parity = dict(
 )
 
 
-class UARTTxChecker(xmostest.SimThread):
+class UARTTxChecker(px.SimThread):
     """
     This simulator thread will act as a UART device, and will check sent and
     transations caused by the device, by looking at the tx pins.

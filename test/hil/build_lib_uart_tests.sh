@@ -8,14 +8,14 @@ source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 # setup configurations
 if [ -z "$1" ] || [ "$1" == "all" ]
 then
-    # row format is: "make_target BOARD"
+    # row format is: "make_target BOARD toolchain"
     applications=(
-        "test_hil_uart_tx_test XCORE-AI-EXPLORER"
+        "test_hil_uart_tx_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
     )
 elif [ "$1" == "smoke" ]
 then
     applications=(
-        "test_hil_uart_tx_test XCORE-AI-EXPLORER"
+        "test_hil_uart_tx_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
  
     )
 else
@@ -36,5 +36,5 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
 
     (cd ${path}; rm -rf build_ci_${board})
     (cd ${path}; mkdir -p build_ci_${board})
-    (cd ${path}/build_ci_${board}; log_errors cmake ../ -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application} -j)
+    (cd ${path}/build_ci_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application} -j)
 done
