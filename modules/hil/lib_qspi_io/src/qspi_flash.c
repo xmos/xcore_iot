@@ -613,7 +613,7 @@ void qspi_flash_init(qspi_flash_ctx_t *ctx)
 	/* configure the QSPI I/O interface */
 	qspi_io_init(qspi_io_ctx, ctx->source_clock);
 
-	if (sfdp_discover(&sfdp_info, ctx, (sfdp_read_cb_t) qspi_flash_sfdp_read)) {
+	if ((ctx->sfdp_skip == false) && sfdp_discover(&sfdp_info, ctx, (sfdp_read_cb_t) qspi_flash_sfdp_read)) {
 	    int ret;
 	    int erase_table_entries;
 	    uint8_t read_instruction;
