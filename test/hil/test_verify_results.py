@@ -4,7 +4,7 @@
 import pytest
 import xml.etree.ElementTree as ET
 
-libs = ("lib_i2c", "lib_i2s", "lib_spi")
+libs = ("lib_i2c", "lib_i2s", "lib_spi", "lib_spi")
 acceptable_outcomes = ("skipped",)
 result_fname = "test_results.xml"
 

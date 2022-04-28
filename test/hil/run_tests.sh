@@ -5,6 +5,7 @@ declare -a hil_test_libs=(
     "lib_i2s"
     # "lib_qspi_io"
     "lib_spi"
+    "lib_uart"
     )
 
 #****************************
