@@ -20,7 +20,7 @@ then
     )
 else
     echo "Argument $1 not a supported configuration!"
-    exit
+    return
 fi
 
 
@@ -29,6 +29,7 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
     application="${FIELDS[0]}"
     board="${FIELDS[1]}"
+    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[2]}"
     path="${XCORE_SDK_ROOT}"
     echo '******************************************************'
     echo '* Building' ${application} 'for' ${board}
