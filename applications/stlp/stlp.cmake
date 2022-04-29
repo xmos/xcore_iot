@@ -34,9 +34,9 @@ set(APP_COMPILE_DEFINITIONS
     CFG_TUSB_DEBUG=0
 
     ## For USB input and output testing
-    appconfUSB_ENABLED=1
-    appconfAEC_REF_DEFAULT=appconfAEC_REF_USB
-    appconfMIC_SRC_DEFAULT=appconfMIC_SRC_USB
+    # appconfUSB_ENABLED=1
+    # appconfAEC_REF_DEFAULT=appconfAEC_REF_USB
+    # appconfMIC_SRC_DEFAULT=appconfMIC_SRC_USB
 )
 
 set(APP_LINK_OPTIONS
