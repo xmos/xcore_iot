@@ -163,20 +163,3 @@ jobs:
         with:
           name: xcore_sdk_reference_apps
           path: ./dist/*.xe
-
-  build_hil_tests:
-    name: Build HIL test applications
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout SDK
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Pull SDK builder image
-        run: |
-          docker pull ${SDK_BUILDER_IMAGE}
-
-      - name: Build
-        run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_hil_tests.sh
