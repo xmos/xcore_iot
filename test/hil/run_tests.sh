@@ -7,6 +7,7 @@ then
         "lib_i2c"
         "lib_i2s"
         "lib_spi"
+        #"lib_qspi_io"
         )
 else
     declare -a hil_test_libs=(
@@ -37,7 +38,7 @@ tests_end=`date +%s`
 #****************************
 # Check results
 #****************************
-pytest test_verify_results.py
+pytest test_verify_results.py ${hil_test_libs[*]}
 
 #****************************
 # Display time results
