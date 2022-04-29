@@ -12,9 +12,9 @@
 name: HIL CI
 
 on:
-  push:
-    branches:
-      - develop
+  # push:
+  #   branches:
+  #     - develop
   pull_request:
     branches:
       - develop
@@ -39,7 +39,6 @@ jobs:
     - uses: dorny/paths-filter@v2
       id: filter
       with:
-        base: develop
         filters: |
           lib_i2c:
             - 'modules/hil/lib_i2c/**'
