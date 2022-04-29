@@ -16,6 +16,8 @@
 #include "platform/driver_instances.h"
 #include "keyword_inference.h"
 #include "inference_hmi/inference_hmi.h"
+#include "ssd1306.h"
+#include "test_images.h"
 
 #define KEYWORD_DETECT_DEBOUNCE       1
 // TODO: change the silence and unknown resets to a wall block based reset
@@ -77,6 +79,21 @@ rtos_gpio_port_id_t gpo_port = 0;
 }
 #endif
 
+__attribute__(( fptrgroup("ssd1306_transport_write") ))
+size_t ssd1306_I2C_write(void* app_ctx, void* bus, int address, uint8_t *buf, size_t len) {
+    size_t num_bytes_sent = 0;
+
+    rtos_i2c_master_write(
+            (rtos_i2c_master_t*)bus,
+            (uint8_t)address,
+            buf,
+            len,
+            &num_bytes_sent,
+            1);
+
+    return num_bytes_sent;
+}
+
 void inference_hmi_task(void *args)
 {
     EventGroupHandle_t egrp_intent = (EventGroupHandle_t) args;
@@ -86,8 +103,29 @@ void inference_hmi_task(void *args)
     inference_state_t state = STATE_WAIT_FOR_ANY;
     inference_state_t last_state = STATE_WAIT_FOR_ANY;
     uint32_t intent = 0;
+    ssd1306_context ssd1306_ctx_s;
+    ssd1306_context* ssd1306_ctx = &ssd1306_ctx_s;
+    ssd1306_transport ssd1306_transport = {i2c_master_ctx, 0x3C, &ssd1306_I2C_write};
+    uint8_t display_buf[512];
 
     gpo_setup();
+
+    ssd1306_init(
+        NULL,
+        ssd1306_ctx,
+        &ssd1306_transport,
+        ssd1306_MDOB128032GV);
+
+#if 1    /* For initial testing of display */
+    rtos_printf("OLED display init done\n");
+
+    uint32_t img_ndx = 0;
+    while(1) {
+        ssd1306_write(NULL, ssd1306_ctx, test_images[img_ndx % 4]);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        img_ndx++;
+    }
+#endif
 
     while(1) {
         /* Wait forever for a bit change.  Clear changed bit on exit */
@@ -170,24 +208,29 @@ void inference_hmi_task(void *args)
                     case (INFERENCE_BIT_GREEN | INFERENCE_BIT_DISPLAY):
                         green_led_on();
                         rtos_printf("Intent is GREEN ON\n");
+                        // ssd1306_128x32_ascii_to_bitmap("GREEN ON", (char *)display_buf);
                         intent = 0;
                         break;
                     case (INFERENCE_BIT_GREEN | INFERENCE_BIT_CLEAR):
                         green_led_off();
                         rtos_printf("Intent is GREEN OFF\n");
+                        // ssd1306_128x32_ascii_to_bitmap("GREEN OFF", (char *)display_buf);
                         intent = 0;
                         break;
                     case (INFERENCE_BIT_RED | INFERENCE_BIT_DISPLAY):
                         red_led_on();
                         rtos_printf("Intent is RED ON\n");
+                        // ssd1306_128x32_ascii_to_bitmap("RED ON", (char *)display_buf);
                         intent = 0;
                         break;
                     case (INFERENCE_BIT_RED | INFERENCE_BIT_CLEAR):
                         red_led_off();
                         rtos_printf("Intent is RED OFF\n");
+                        // ssd1306_128x32_ascii_to_bitmap("RED OFF", (char *)display_buf);
                         intent = 0;
                         break;
                 }
+                // ssd1306_write(NULL, ssd1306_ctx, display_buf);
             }
         }
     }
