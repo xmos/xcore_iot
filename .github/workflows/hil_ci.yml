@@ -15,9 +15,6 @@ on:
   push:
     branches:
       - 'develop'
-  pull_request:
-    branches:
-      - 'develop'
 
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
@@ -39,6 +36,7 @@ jobs:
     - uses: dorny/paths-filter@v2
       id: filter
       with:
+        base: develop
         filters: |
           lib_i2c:
             - 'modules/hil/lib_i2c/**'
