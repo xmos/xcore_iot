@@ -15,7 +15,7 @@ RUN echo "export PATH=/opt/cmake-${CMAKE_VERSION}-linux-x86_64/bin:$PATH" \
     > /etc/profile.d/cmake.sh
 
 # install python requirements
-RUN python -m pip install --upgrade pip
+RUN python3 -m pip install --upgrade pip
 RUN pip3 install -r pytest pytest-forked pytest-xdist
 
 # set login shell
