@@ -41,7 +41,7 @@ jobs:
 
       - name: Run tests
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk/test/hil -v ${{github.workspace}}:/xcore_sdk/test/hil ${SDK_BUILDER_IMAGE} bash -l test/hil/run_tests.sh lib_i2c
+          docker run --user $(id -u) --rm -w /xcore_sdk/test/hil -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l run_tests.sh lib_i2c
 
   # i2s_hil_tests:
   #   name: I2S HIL tests
