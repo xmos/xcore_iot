@@ -2,7 +2,7 @@
 # Copyright 2022 XMOS LIMITED.
 # This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-from uart_tx_checker import UARTTxChecker, Parity
+from uart_tx_checker import UARTTxChecker
 from pathlib import Path
 import Pyxsim as px
 import pytest
@@ -19,8 +19,7 @@ speed_args = {"1843200 baud": 1843200,
 data_bit_args = {   "eight": 8,            
                     "seven": 7,
                     "six": 6,
-                    "five": 5
-    }
+                    "five": 5}
 
 parity_args = { "NONE": 0,
                 "EVEN": 1,

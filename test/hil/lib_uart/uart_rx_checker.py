@@ -1,6 +1,13 @@
-from random import randint
+# Copyright 2022 XMOS LIMITED.
+# This Software is subject to the terms of the XMOS Public Licence: Version 1.
+import Pyxsim as px
+from typing import Sequence
+from functools import partial
 
-import xmostest
+# We need to disable output buffering for this test to work on MacOS; this has
+# no effect on Linux systems. Let's redefine print once to avoid putting the 
+# same argument everywhere.
+print = partial(print, flush=True)
 
 Parity = dict(
     UART_PARITY_EVEN=0,
@@ -10,7 +17,7 @@ Parity = dict(
 )
 
 
-class DriveHigh(xmostest.SimThread):
+class DriveHigh(px.SimThread):
     def __init__(self, p):
         self._p = p
 
@@ -20,7 +27,7 @@ class DriveHigh(xmostest.SimThread):
         xsi.drive_port_pins(self._p, 1);
 
 
-class UARTRxChecker(xmostest.SimThread):
+class UARTRxChecker(px.SimThread):
     def __init__(self, rx_port, tx_port, parity, baud, stop_bits, bpb, data=[0x7f, 0x00, 0x2f, 0xff],
                  intermittent=False):
         """
@@ -133,8 +140,8 @@ class UARTRxChecker(xmostest.SimThread):
 
         Returns float value in nanoseconds.
         """
-        # Return float value in ns
-        return (1.0 / self._baud) * 1e9
+        # Return float value in ps
+        return (1.0 / self._baud) * 1e12
 
     def wait_baud_time(self, xsi):
         """

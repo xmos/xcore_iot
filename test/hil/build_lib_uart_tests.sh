@@ -11,12 +11,13 @@ then
     # row format is: "make_target BOARD toolchain"
     applications=(
         "test_hil_uart_tx_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+        "test_hil_uart_rx_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
     )
 elif [ "$1" == "smoke" ]
 then
     applications=(
         "test_hil_uart_tx_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
- 
+        "test_hil_uart_rx_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
     )
 else
     echo "Argument $1 not a supported configuration!"
