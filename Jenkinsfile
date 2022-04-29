@@ -87,10 +87,12 @@ pipeline {
                 withTools(params.TOOLS_VERSION) {
                     withVenv {
                         withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_bare_metal_vww.xe")) {
-                                sh "test/examples/run_bare_metal_vww_tests.sh $adapterID"
-                            } else {
-                                 echo 'SKIPPED: example_bare_metal_vww'
+                            script {
+                                if (fileExists("$DOWNLOAD_DIRNAME/example_bare_metal_vww.xe")) {
+                                    sh "test/examples/run_bare_metal_vww_tests.sh $adapterID"
+                                } else {
+                                    echo 'SKIPPED: example_bare_metal_vww'
+                                }
                             }
                         } 
                     }
