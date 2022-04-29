@@ -7,12 +7,16 @@ ARG CMAKE_VERSION=3.21.6
 
 # install apt dependencies
 RUN apt update
-RUN apt install -y git pkg-config libusb-1.0-0-dev
+RUN apt install -y git pkg-config python3-pip libusb-1.0-0-dev
 
 # install cmake
 RUN wget -O- https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz | tar -xz -C /opt
 RUN echo "export PATH=/opt/cmake-${CMAKE_VERSION}-linux-x86_64/bin:$PATH" \
     > /etc/profile.d/cmake.sh
+
+# install python requirements
+RUN python3 -m pip install --upgrade pip
+RUN pip3 install pytest pytest-forked pytest-xdist
 
 # set login shell
 SHELL ["/bin/bash", "-l", "-c"]
