@@ -28,6 +28,7 @@ env:
 jobs:
   # JOB to run change detection
   changes:
+    name: HIL change detection
     runs-on: ubuntu-latest
     # Set job outputs to values from filter step
     outputs:
@@ -68,36 +69,40 @@ jobs:
         run: |
           docker run --user $(id -u) --rm -w /xcore_sdk/test/hil -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l run_tests.sh lib_i2c
 
-  # i2s_hil_tests:
-  #   name: I2S HIL tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout SDK
-  #       uses: actions/checkout@v2
-  #       with:
-  #         submodules: recursive
+  i2s_hil_tests:
+    name: I2S HIL tests
+    needs: changes
+    if: ${{ needs.changes.outputs.lib_i2s == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
-  #     - name: Pull SDK builder image
-  #       run: |
-  #         docker pull ${SDK_BUILDER_IMAGE}
+      - name: Pull SDK builder image
+        run: |
+          docker pull ${SDK_BUILDER_IMAGE}
 
-  #     - name: Build
-  #       run: |
-  #         docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l test/hil/build_lib_i2s_tests.sh
+      - name: Run tests
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk/test/hil -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l run_tests.sh lib_i2s
 
-  # spi_hil_tests:
-  #   name: SPI HIL tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout SDK
-  #       uses: actions/checkout@v2
-  #       with:
-  #         submodules: recursive
+  spi_hil_tests:
+    name: SPI HIL tests
+    needs: changes
+    if: ${{ needs.changes.outputs.lib_spi == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
-  #     - name: Pull SDK builder image
-  #       run: |
-  #         docker pull ${SDK_BUILDER_IMAGE}
+      - name: Pull SDK builder image
+        run: |
+          docker pull ${SDK_BUILDER_IMAGE}
 
-  #     - name: Build
-  #       run: |
-  #         docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l test/hil/build_lib_spi_tests.sh
+      - name: Run tests
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk/test/hil -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l run_tests.sh lib_spi
