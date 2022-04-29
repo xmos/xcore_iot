@@ -12,8 +12,12 @@ mkdir -p ${DIST_DIR}
 # setup configurations
 # row format is: "name make_target BOARD toolchain"
 applications=(
-    "ffd application_ffd   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-    "stlp application_stlp  XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+    "ffd                     application_ffd                    XK_VOICE_L71       tools/xmos_cmake_toolchain/xs3a.cmake"
+    "ffd_dev                 application_ffd_dev                XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+    "stlp                    application_stlp                   XK_VOICE_L71       tools/xmos_cmake_toolchain/xs3a.cmake"
+    "stlp_dev_fixeddelay     application_stlp_dev_fixeddelay    XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+    "stlp_dev_adec           application_stlp_dev_adec          XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+    "stlp_dev_adec_altarch   application_stlp_dev_adec_altarch  XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
 )
 
 # perform builds
