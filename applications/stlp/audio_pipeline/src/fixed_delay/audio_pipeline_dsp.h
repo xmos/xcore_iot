@@ -5,7 +5,17 @@
 #define AUDIO_PIPELINE_DSP_H_
 
 #include <stdint.h>
+#include "FreeRTOS.h"
+#include "stream_buffer.h"
 #include "app_conf.h"
+
+#include "aec_api.h"
+#include "agc_api.h"
+#include "ic_api.h"
+#include "ns_api.h"
+#include "vad_api.h"
+#include "aec/aec_config.h"
+#include "aec/aec_memory_pool.h"
 
 /* Note: Changing the order here will effect the channel order for
  * audio_pipeline_input() and audio_pipeline_output()

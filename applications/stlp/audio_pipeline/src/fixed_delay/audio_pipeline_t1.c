@@ -20,22 +20,21 @@
 #include "ic_api.h"
 #include "ns_api.h"
 #include "vad_api.h"
-#include "audio_pipeline/aec/aec_config.h"
-#include "audio_pipeline/aec/aec_memory_pool.h"
+#include "aec/aec_config.h"
+#include "aec/aec_memory_pool.h"
 #include "adec_api.h"
 
 /* App headers */
 #include "app_conf.h"
 #include "app_control/app_control.h"
-#include "audio_pipeline/audio_pipeline.h"
-#include "audio_pipeline/audio_pipeline_dsp.h"
+#include "audio_pipeline.h"
+#include "audio_pipeline_dsp.h"
 
 #if appconfAUDIO_PIPELINE_FRAME_ADVANCE != 240
 #error This pipeline is only configured for 240 frame advance
 #endif
 
 #if ON_TILE(1)
-
 #if appconfINPUT_SAMPLES_MIC_DELAY_MS != 0
 static stage_delay_ctx_t delay_buf_state = {};
 #endif
