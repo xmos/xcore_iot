@@ -26,8 +26,33 @@ env:
   SDK_BUILDER_IMAGE: 'ghcr.io/xmos/sdk_app_builder:develop'
 
 jobs:
+  # JOB to run change detection
+  changes:
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      lib_i2c: ${{ steps.filter.outputs.lib_i2c }}
+      lib_i2s: ${{ steps.filter.outputs.lib_i2s }}
+      lib_spi: ${{ steps.filter.outputs.lib_spi }}
+    steps:
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          lib_i2c:
+            - 'modules/hil/lib_i2c/**'
+            - 'test/hil/lib_i2c/**'
+          lib_i2s:
+            - 'modules/hil/lib_i2s/**'
+            - 'test/hil/lib_i2s/**'
+          lib_spi:
+            - 'modules/hil/lib_spi/**'
+            - 'test/hil/lib_spi/**'
+            
   i2c_hil_tests:
     name: I2C HIL tests
+    needs: changes
+    if: ${{ needs.changes.outputs.lib_i2c == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SDK
