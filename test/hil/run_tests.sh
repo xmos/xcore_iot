@@ -1,11 +1,18 @@
 #!/bin/bash
 
-declare -a hil_test_libs=(
-    "lib_i2c"
-    "lib_i2s"
-    # "lib_qspi_io"
-    "lib_spi"
-    )
+if [ -z "$1" ] || [ "$1" == "all" ]
+then
+    declare -a hil_test_libs=(
+        "lib_i2c"
+        "lib_i2s"
+        # "lib_qspi_io"
+        "lib_spi"
+        )
+else
+    declare -a hil_test_libs=(
+        "$1"
+        )
+fi
 
 #****************************
 # Run tests and copy results

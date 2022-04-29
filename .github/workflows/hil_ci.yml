@@ -1,0 +1,78 @@
+# YAML schema for GitHub Actions:
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+#
+# Helpful YAML parser to clarify YAML syntax:
+# https://yaml-online-parser.appspot.com/
+#
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+#
+# This file contains the workflows that are run prior to merging a pull request.
+
+name: HIL CI
+
+on:
+  push:
+    branches:
+      - 'develop'
+  pull_request:
+    branches:
+      - 'develop'
+
+  # Allow manually triggering of the workflow.
+  workflow_dispatch: {}
+
+env:
+  SDK_BUILDER_IMAGE: 'ghcr.io/xmos/sdk_app_builder:develop'
+
+jobs:
+  i2c_hil_tests:
+    name: I2C HIL tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Pull SDK builder image
+        run: |
+          docker pull ${SDK_BUILDER_IMAGE}
+
+      - name: Run tests
+        run: |
+          docker run --user $(id -u) --rm -w /xcore_sdk/test/hil -v ${{github.workspace}}:/xcore_sdk/test/hil ${SDK_BUILDER_IMAGE} bash -l test/hil/run_tests.sh lib_i2c
+
+  # i2s_hil_tests:
+  #   name: I2S HIL tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout SDK
+  #       uses: actions/checkout@v2
+  #       with:
+  #         submodules: recursive
+
+  #     - name: Pull SDK builder image
+  #       run: |
+  #         docker pull ${SDK_BUILDER_IMAGE}
+
+  #     - name: Build
+  #       run: |
+  #         docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l test/hil/build_lib_i2s_tests.sh
+
+  # spi_hil_tests:
+  #   name: SPI HIL tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout SDK
+  #       uses: actions/checkout@v2
+  #       with:
+  #         submodules: recursive
+
+  #     - name: Pull SDK builder image
+  #       run: |
+  #         docker pull ${SDK_BUILDER_IMAGE}
+
+  #     - name: Build
+  #       run: |
+  #         docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l test/hil/build_lib_spi_tests.sh
