@@ -15,20 +15,18 @@
 #define SETSR(c) asm volatile("setsr %0" : : "n"(c));
 
 port_t p_uart_tx = XS1_PORT_1A;
-port_t p_uart_rx = XS1_PORT_1B;
 
 DECLARE_JOB(test, (void));
 
 void test() {
-    uint8_t data[1] = {0x99};
-
     uart_tx_t uart;
     hwtimer_t tmr = hwtimer_alloc();
 
-    uart_tx_blocking_init(&uart, p_uart_tx, 1843200, 8, UART_PARITY_NONE, 1, tmr);
+    uart_tx_blocking_init(&uart, p_uart_tx, 921600, 8, UART_PARITY_NONE, 1, tmr);
 
-    uart_tx(&uart, data[0]);
-    uart_tx(&uart, data[0]);
+    for(char b = 0x00; b <= 0x7f; b++){
+        uart_tx(&uart, b);
+    }
 
     uart_tx_deinit(&uart);
 

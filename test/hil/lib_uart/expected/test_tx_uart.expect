@@ -1,6 +1,4 @@
 tx starts high: True
-TEST CONFIG:{'baud rate':\d+}
-Performing tx test.
 Start bit recv'd
 Parity bit correct
 tx ends high: True

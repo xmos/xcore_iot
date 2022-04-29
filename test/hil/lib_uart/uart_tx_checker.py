@@ -65,8 +65,8 @@ class UARTTxChecker(px.SimThread):
         Returns float value in nanoseconds.
         :rtype:            float
         """
-        # Return float value in ns
-        return (1.0/self._baud) * 1e9
+        # Return float value in ps
+        return (1.0/self._baud) * 1e12
 
     def wait_baud_time(self, xsi):
         """
@@ -148,12 +148,13 @@ class UARTTxChecker(px.SimThread):
         :param crc_sum:    The checksum to test parity against.
         :param parity:     The UART partiy setting. See Parity.
         """
-        if parity < 2:
+        if parity > 0:
+            parity_val = 0 if parity == 1 else 1
             read = self.get_val_timeout(xsi, self._tx_port)
-            if read == (crc_sum + parity) % 2:
+            if read == (crc_sum + parity_val) % 2:
                 print("Parity bit correct")
             else:
-                print("Parity bit incorrect. Got %d, expected %d" % (read, (crc_sum + parity) % 2))
+                print("Parity bit incorrect. Got %d, expected %d" % (read, (crc_sum + parity_val) % 2))
         else:
             print("Parity bit correct")
 
@@ -238,3 +239,4 @@ class UARTTxChecker(px.SimThread):
         # Print each member of K as a hex byte
         # inline lambda function mapped over a list? awh yiss.
         print(", ".join(map((lambda x: "0x%02x" % ord(x)), K)))
+
