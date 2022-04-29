@@ -14,7 +14,10 @@ name: HIL CI
 on:
   push:
     branches:
-      - 'develop'
+      - develop
+  pull_request:
+    branches:
+      - develop
 
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
