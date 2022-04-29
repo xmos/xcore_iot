@@ -16,7 +16,12 @@ RUN echo "export PATH=/opt/cmake-${CMAKE_VERSION}-linux-x86_64/bin:$PATH" \
 
 # install python requirements
 RUN python3 -m pip install --upgrade pip
-RUN pip3 install pytest pytest-forked pytest-xdist
+#RUN pip3 install -r
+#RUN pip3 install pytest pytest-forked pytest-xdist
+
+WORKDIR /tools/install
+ADD tools/install/contribute.txt /tools/install
+RUN pip3 install -r contribute.txt
 
 # set login shell
 SHELL ["/bin/bash", "-l", "-c"]
