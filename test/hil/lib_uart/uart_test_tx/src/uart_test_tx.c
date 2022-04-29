@@ -30,7 +30,9 @@ void test() {
     uart_tx(&uart, data[0]);
     uart_tx(&uart, data[0]);
 
-    // uart_deinit(&uart);
+    uart_tx_deinit(&uart);
+
+    hwtimer_free(tmr);
     exit(0);
 }
 

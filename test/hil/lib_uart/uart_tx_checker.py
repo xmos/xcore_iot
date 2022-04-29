@@ -113,12 +113,12 @@ class UARTTxChecker(px.SimThread):
         val = 0
 
         # Recv start bit
-        print "tx starts high: %s" % ("True" if self.get_port_val(xsi, self._tx_port) else "False")
+        print("tx starts high: %s" % ("True" if self.get_port_val(xsi, self._tx_port) else "False"))
         self.wait_for_port_pins_change([self._tx_port])
 
         # The tx line should go low for 1 bit time
         if self.get_val_timeout(xsi, self._tx_port) == 0:
-            print "Start bit recv'd"
+            print("Start bit recv'd")
         else:
             return False
 
@@ -136,7 +136,7 @@ class UARTTxChecker(px.SimThread):
         self.check_stopbit(xsi)
 
         # Print a new line to split bytes in output
-        print ""
+        print()
 
         return byte
 
@@ -151,11 +151,11 @@ class UARTTxChecker(px.SimThread):
         if parity < 2:
             read = self.get_val_timeout(xsi, self._tx_port)
             if read == (crc_sum + parity) % 2:
-                print "Parity bit correct"
+                print("Parity bit correct")
             else:
-                print "Parity bit incorrect. Got %d, expected %d" % (read, (crc_sum + parity) % 2)
+                print("Parity bit incorrect. Got %d, expected %d" % (read, (crc_sum + parity) % 2))
         else:
-            print "Parity bit correct"
+            print("Parity bit correct")
 
     def check_stopbit(self, xsi):
         """
@@ -168,7 +168,7 @@ class UARTTxChecker(px.SimThread):
             # The stop bits should stay high for this time
             if self.get_val_timeout(xsi, self._tx_port) == 0:
                 stop_bits_correct = False
-        print "tx ends high: %s" % ("True" if stop_bits_correct else "False")
+        print("tx ends high: %s" % ("True" if stop_bits_correct else "False"))
 
     def get_val_timeout(self, xsi, port):
         """
@@ -224,7 +224,7 @@ class UARTTxChecker(px.SimThread):
 
         # Start value should *not* have changed during timeout
         if transitioned_during_wait:
-            print "FAIL :: Unexpected Transition."
+            print("FAIL :: Unexpected Transition.")
 
         return start_val
 
@@ -237,4 +237,4 @@ class UARTTxChecker(px.SimThread):
 
         # Print each member of K as a hex byte
         # inline lambda function mapped over a list? awh yiss.
-        print ", ".join(map((lambda x: "0x%02x" % ord(x)), K))
+        print(", ".join(map((lambda x: "0x%02x" % ord(x)), K)))

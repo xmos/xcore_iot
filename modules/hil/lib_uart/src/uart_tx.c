@@ -84,6 +84,14 @@ void uart_tx_init(
 }
 
 
+void uart_tx_deinit(uart_tx_t *uart_cfg){
+    unsigned buffer_used = (uart_cfg->buffer_size && uart_cfg->buffer != NULL);
+    if(buffer_used){
+        triggerable_disable_trigger(uart_cfg->tmr);
+    }
+    port_disable(uart_cfg->tx_port);
+}
+
 
 
 static inline uint32_t get_current_time(uart_tx_t *uart_cfg){

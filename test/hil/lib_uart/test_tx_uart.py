@@ -33,24 +33,18 @@ stop_bit_args = {   "one": 1,
 @pytest.mark.parametrize("data", data_bit_args.values(), ids=data_bit_args.keys())
 @pytest.mark.parametrize("parity", parity_args.values(), ids=parity_args.keys())
 @pytest.mark.parametrize("stop", stop_bit_args.values(), ids=stop_bit_args.keys())
-def test_uart_tx(baud, data, parity, stop):
+def test_uart_tx(request, capfd, baud, data, parity, stop):
     myenv = {'baud': baud}
     cwd = Path(request.fspath).parent
+    binary = f'{cwd}/uart_test_tx/bin/test_hil_uart_tx_test.xe'
 
-    resources = xmostest.request_resource("xsim")
-
-    checker = UARTTxChecker("tile[0]:XS1_PORT_1A", "tile[0]:XS1_PORT_1B", parity, baud, stop, data)
-
-
-    xmostest.run_on_simulator(resources['xsim'],
-                              'app_uart_test_rx/bin/smoke/app_uart_test_rx_smoke.xe',
-                              simthreads=[checker],
-                              xscope_io=True,
-                              tester=tester,
-                              simargs=["--vcd-tracing", "-tile tile[0] -ports -o trace.vcd"],
-                              clean_before_build=True,
-                              build_env=myenv)
-
+    length = 2
+    checker = UARTTxChecker("tile[0]:XS1_PORT_1A", "tile[0]:XS1_PORT_1B", parity, baud, length, stop, data)
+    sim_args = ["--vcd-tracing", "-tile tile[0] -ports -o trace.vcd"]
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/test_tx_uart.expect',
+                                            regexp = True,
+                                            ordered = True,
+                                            ignore = ["CONFIG:.*?"])
 
     px.run_with_pyxsim(binary,
                     simthreads = [checker],
