@@ -19,7 +19,7 @@
 #if appconfWW_ENABLED
 extern configSTACK_DEPTH_TYPE model_runner_manager_stack_size;
 
-static StreamBufferHandle_t audio_stream;
+static StreamBufferHandle_t audio_stream = NULL;
 
 void ww_audio_send(rtos_intertile_t *intertile_ctx,
                     size_t frame_count,
@@ -33,8 +33,10 @@ void ww_audio_send(rtos_intertile_t *intertile_ctx,
         ww_samples[i] = (uint16_t)(processed_audio_frame[i][ASR_CHANNEL] >> 16);
     }
 
-    if (xStreamBufferSend(audio_stream, ww_samples, sizeof(ww_samples), 0) != sizeof(ww_samples)) {
-        rtos_printf("lost output samples for ww\n");
+    if(audio_stream != NULL) {
+        if (xStreamBufferSend(audio_stream, ww_samples, sizeof(ww_samples), 0) != sizeof(ww_samples)) {
+            rtos_printf("lost output samples for ww\n");
+        }
     }
 }
 

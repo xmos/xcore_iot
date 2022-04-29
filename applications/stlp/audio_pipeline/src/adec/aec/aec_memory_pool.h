@@ -1,9 +1,10 @@
 // Copyright 2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
+
 #ifndef AEC_MEMORY_POOL_H
 #define AEC_MEMORY_POOL_H
 
-#include "audio_pipeline/aec/aec_config.h"
+#include "audio_pipeline_dsp.h"
 #include "xs3_math.h"
 
 //Memory pool definition
