@@ -11,23 +11,23 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
 
     ## Source files
     set(MICROFRONTEND_PRIVATE_SOURCES
-    "kissfft/kiss_fft.c"
-    "kissfft/tools/kiss_fftr.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_lut.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window.c"
-    "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window_util.c"
+        "kissfft/kiss_fft.c"
+        "kissfft/tools/kiss_fftr.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft.cc"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/fft_util.cc"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/filterbank_util.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/frontend_util.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_lut.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/log_scale_util.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/noise_reduction.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/noise_reduction_util.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/pcan_gain_control_util.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window.c"
+        "${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/experimental/microfrontend/lib/window_util.c"
     )
 
     target_sources(xcore_sdk_inferencing_microfrontend
@@ -53,11 +53,9 @@ endif()
 ## Create tflite-micro runtime target
 ## **********************************
 if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
-    add_library(xcore_sdk_inferencing_tflite_micro INTERFACE)
+    add_library(xcore_sdk_inferencing_tflite_micro STATIC)
     target_sources(xcore_sdk_inferencing_tflite_micro
-        INTERFACE
-            ## XCORE implementations
-            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/micro_time.cc
+        PRIVATE
             ## tflite-micro runtime sources
             ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/c/common.c
             ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/core/api/error_reporter.cc
@@ -160,17 +158,36 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
             ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels/unpack.cc
         )
     target_include_directories(xcore_sdk_inferencing_tflite_micro
-        INTERFACE
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/gemmlowp
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/ruy
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/flatbuffers/include
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro
-        ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels    
+        PUBLIC
+            ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/gemmlowp
+            ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/ruy
+            ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/flatbuffers/include
+            ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro
+            ${LIB_TFLITE_MICRO_SUBMODULES_PATH}/tflite-micro/tensorflow/lite/micro/kernels    
     )
-
-    ## Create an alias
-    add_library(sdk::inferencing::tflite_micro ALIAS xcore_sdk_inferencing_tflite_micro)
+    target_compile_options(xcore_sdk_inferencing_tflite_micro 
+        PRIVATE
+            "-Wno-xcore-fptrgroup"
+    )  
 endif()
+
+## ****************************************
+## Create XCore tflite-micro runtime target
+## ****************************************
+if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
+    add_library(xcore_sdk_inferencing_xcore_tflite_micro INTERFACE)
+    target_sources(xcore_sdk_inferencing_xcore_tflite_micro
+        INTERFACE
+            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/micro_time.cc
+        )
+    target_link_libraries(xcore_sdk_inferencing_xcore_tflite_micro
+        INTERFACE
+            xcore_sdk_inferencing_tflite_micro
+    )        
+    ## Create an alias
+    add_library(sdk::inferencing::tflite_micro ALIAS xcore_sdk_inferencing_xcore_tflite_micro)
+endif()
+
 
 ## ********************
 ## Create lib_nn target
@@ -240,14 +257,14 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
 
     target_include_directories(xcore_sdk_inferencing_lib_tflite_micro
         INTERFACE
-        ${LIB_TFLITE_MICRO_PATH}/api
-        ${LIB_TFLITE_MICRO_PATH}/src
-        ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels
+            ${LIB_TFLITE_MICRO_PATH}/api
+            ${LIB_TFLITE_MICRO_PATH}/src
+            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels
     )
     target_link_libraries(xcore_sdk_inferencing_lib_tflite_micro
         INTERFACE
-            sdk::inferencing::tflite_micro
             sdk::inferencing::lib_nn
+            sdk::inferencing::tflite_micro
     )
 
     ## Create an alias

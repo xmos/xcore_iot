@@ -1,5 +1,6 @@
 SET(LIB_TFLITE_MICRO_PATH ${CMAKE_SOURCE_DIR}/modules/inferencing/lib_tflite_micro/lib_tflite_micro)
 
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     ## ******************************
     ## Create inferencing RTOS target
@@ -25,8 +26,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     )
     target_link_libraries(xcore_sdk_inferencing_rtos
         INTERFACE
-            sdk::inferencing::lib_nn
             sdk::inferencing::tflite_micro
+            sdk::inferencing::lib_nn
     )
 
     ## Create an alias
