@@ -5,6 +5,7 @@
 #include <platform.h>
 #include <xs1.h>
 #include <xcore/hwtimer.h>
+#include <string.h>
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
@@ -18,6 +19,7 @@
 #include "inference_hmi/inference_hmi.h"
 #include "ssd1306.h"
 #include "test_images.h"
+#include "font8x8_basic.h"
 
 #define KEYWORD_DETECT_DEBOUNCE       1
 // TODO: change the silence and unknown resets to a wall block based reset
@@ -233,6 +235,55 @@ void inference_hmi_task(void *args)
                 // ssd1306_write(NULL, ssd1306_ctx, display_buf);
             }
         }
+    }
+}
+
+
+// display attibs
+#define MAX_ROWS 32
+#define MAX_COLS 128
+#define JUSTIFICATION "LEFT"
+#define TOP_MARGIN 10
+#define LEFT_MARGIN 2
+
+// font attribs
+#define FONT_SIZE 8
+
+void ssd1306_128x32_ascii_to_bitmap(char* str_buf, char* bitmap) {
+    // Clear bitmap buffer
+    memset(bitmap, 0, sizeof(char)*MAX_ROWS*MAX_COLS);
+
+    char* cur_ptr = str_buf;
+    char* cur_bmp = NULL;
+
+    // drawing
+    int draw_start_pt = (TOP_MARGIN * MAX_COLS) + LEFT_MARGIN; // Give space
+    char* brush = bitmap + draw_start_pt;
+
+    while(1){
+        // check for null terminator and edge of canvas
+        int next_char_column = ((int)brush - (int)bitmap) % MAX_COLS;
+        if (((char)*cur_ptr == (char)'\0') ||
+            (next_char_column + FONT_SIZE >= 128)) {
+            break;
+        }
+
+        cur_bmp = font8x8_basic[(int)*(cur_ptr)];
+
+        // draw one character
+        for(int x=0; x<sizeof(font8x8_basic[0]); x++) {
+            char tmp = *(cur_bmp + x);
+            for(int t=0; t<8; t++) {  // print a row of current letter
+                *(brush + t) = (tmp >> t) & 1; // if the t bit pos is 1,
+                                               // set bmp to 1
+            }
+            brush += MAX_COLS; // move brush down one row
+        }
+
+        brush -= MAX_COLS * sizeof(font8x8_basic[0]); // move brush to start
+        brush += FONT_SIZE; // move brush over
+
+        cur_ptr++; // iterate to next address        
     }
 }
 
