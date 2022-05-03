@@ -167,8 +167,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     )
     target_compile_options(xcore_sdk_inferencing_tflite_micro 
         PRIVATE
-            "-O3"
+            "-Os"
             "-Wno-xcore-fptrgroup"
+            $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
     )  
     target_compile_definitions(xcore_sdk_inferencing_tflite_micro 
         PUBLIC
@@ -213,8 +214,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     )
     target_compile_options(xcore_sdk_inferencing_lib_nn 
         PRIVATE
-            "-O3"
+            "-Os"
             "-Wno-xcore-fptrgroup"
+            $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
     )
 
     ## Create an alias
@@ -255,6 +257,12 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
         INTERFACE
             sdk::inferencing::lib_nn
             sdk::inferencing::tflite_micro
+    )
+    target_compile_options(xcore_sdk_inferencing_lib_tflite_micro 
+        INTERFACE
+            "-Os"
+            "-Wno-xcore-fptrgroup"
+            $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
     )
 
     ## Create an alias
