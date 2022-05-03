@@ -99,7 +99,7 @@ static void i2c_init(void)
             PORT_I2C_SCL, 0, 0,
             PORT_I2C_SDA, 0, 0,
             0,
-            100);
+            400);
 
     rtos_i2c_master_rpc_host_init(
             i2c_master_ctx,

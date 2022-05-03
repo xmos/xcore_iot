@@ -18,8 +18,9 @@
 #include "keyword_inference.h"
 #include "inference_hmi/inference_hmi.h"
 #include "ssd1306.h"
-#include "test_images.h"
 #include "font8x8_basic.h"
+
+void ssd1306_128x32_ascii_to_bitmap(char* str_buf, char* bitmap);
 
 #define KEYWORD_DETECT_DEBOUNCE       1
 // TODO: change the silence and unknown resets to a wall block based reset
@@ -112,22 +113,15 @@ void inference_hmi_task(void *args)
 
     gpo_setup();
 
+    /* Initialize and clear the screen */
     ssd1306_init(
         NULL,
         ssd1306_ctx,
         &ssd1306_transport,
         ssd1306_MDOB128032GV);
 
-#if 1    /* For initial testing of display */
-    rtos_printf("OLED display init done\n");
-
-    uint32_t img_ndx = 0;
-    while(1) {
-        ssd1306_write(NULL, ssd1306_ctx, test_images[img_ndx % 4]);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        img_ndx++;
-    }
-#endif
+    memset(display_buf, 0, sizeof(display_buf));
+    ssd1306_write(NULL, ssd1306_ctx, display_buf);
 
     while(1) {
         /* Wait forever for a bit change.  Clear changed bit on exit */
@@ -210,29 +204,29 @@ void inference_hmi_task(void *args)
                     case (INFERENCE_BIT_GREEN | INFERENCE_BIT_DISPLAY):
                         green_led_on();
                         rtos_printf("Intent is GREEN ON\n");
-                        // ssd1306_128x32_ascii_to_bitmap("GREEN ON", (char *)display_buf);
+                        ssd1306_128x32_ascii_to_bitmap("Green On", (char *)display_buf);
                         intent = 0;
                         break;
                     case (INFERENCE_BIT_GREEN | INFERENCE_BIT_CLEAR):
                         green_led_off();
                         rtos_printf("Intent is GREEN OFF\n");
-                        // ssd1306_128x32_ascii_to_bitmap("GREEN OFF", (char *)display_buf);
+                        ssd1306_128x32_ascii_to_bitmap("Green Off", (char *)display_buf);
                         intent = 0;
                         break;
                     case (INFERENCE_BIT_RED | INFERENCE_BIT_DISPLAY):
                         red_led_on();
                         rtos_printf("Intent is RED ON\n");
-                        // ssd1306_128x32_ascii_to_bitmap("RED ON", (char *)display_buf);
+                        ssd1306_128x32_ascii_to_bitmap("Red On", (char *)display_buf);
                         intent = 0;
                         break;
                     case (INFERENCE_BIT_RED | INFERENCE_BIT_CLEAR):
                         red_led_off();
                         rtos_printf("Intent is RED OFF\n");
-                        // ssd1306_128x32_ascii_to_bitmap("RED OFF", (char *)display_buf);
+                        ssd1306_128x32_ascii_to_bitmap("Red Off", (char *)display_buf);
                         intent = 0;
                         break;
                 }
-                // ssd1306_write(NULL, ssd1306_ctx, display_buf);
+                ssd1306_write(NULL, ssd1306_ctx, display_buf);
             }
         }
     }
@@ -241,13 +235,12 @@ void inference_hmi_task(void *args)
 
 // display attibs
 #define MAX_ROWS 32
-#define MAX_COLS 128
-#define JUSTIFICATION "LEFT"
+#define MAX_COLS 16 // (128/8)
 #define TOP_MARGIN 10
-#define LEFT_MARGIN 2
+#define LEFT_MARGIN 1
 
 // font attribs
-#define FONT_SIZE 8
+#define FONT_SIZE 1
 
 void ssd1306_128x32_ascii_to_bitmap(char* str_buf, char* bitmap) {
     // Clear bitmap buffer
@@ -260,30 +253,22 @@ void ssd1306_128x32_ascii_to_bitmap(char* str_buf, char* bitmap) {
     int draw_start_pt = (TOP_MARGIN * MAX_COLS) + LEFT_MARGIN; // Give space
     char* brush = bitmap + draw_start_pt;
 
-    while(1){
+    while(1) {
         // check for null terminator and edge of canvas
         int next_char_column = ((int)brush - (int)bitmap) % MAX_COLS;
         if (((char)*cur_ptr == (char)'\0') ||
-            (next_char_column + FONT_SIZE >= 128)) {
+            (next_char_column + FONT_SIZE >= MAX_COLS)) {
             break;
         }
-
+        // rtos_printf("add %c to bitmap at column %d\n", (char)*cur_ptr, ((int)brush - (int)bitmap) % MAX_COLS);
         cur_bmp = font8x8_basic[(int)*(cur_ptr)];
 
         // draw one character
         for(int x=0; x<sizeof(font8x8_basic[0]); x++) {
-            char tmp = *(cur_bmp + x);
-            for(int t=0; t<8; t++) {  // print a row of current letter
-                *(brush + t) = (tmp >> t) & 1; // if the t bit pos is 1,
-                                               // set bmp to 1
-            }
-            brush += MAX_COLS; // move brush down one row
+            *(brush + (MAX_COLS * x)) = *(cur_bmp + x);
         }
-
-        brush -= MAX_COLS * sizeof(font8x8_basic[0]); // move brush to start
         brush += FONT_SIZE; // move brush over
-
-        cur_ptr++; // iterate to next address        
+        cur_ptr++; // iterate to next character in string
     }
 }
 
