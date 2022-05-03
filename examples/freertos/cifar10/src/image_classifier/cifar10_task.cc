@@ -15,10 +15,10 @@ extern "C" {
 #include <platform.h>
 #include <xs1.h>
 
-#include "fs_support.h"
 #include "app_conf.h"
-#include "cifar10_task.h"
 #include "cifar10_model_data.h"
+#include "cifar10_task.h"
+#include "fs_support.h"
 
 void cifar10_task_app(void *args);
 void cifar10_runner_rx(void *args);
@@ -68,7 +68,7 @@ void cifar10_task_app(void *args) {
         continue;
       }
 
-      data = (uint8_t *) pvPortMalloc(sizeof(unsigned char) * file_size);
+      data = (uint8_t *)pvPortMalloc(sizeof(unsigned char) * file_size);
 
       configASSERT(data != NULL); /* Failed to allocate memory for file data */
 
@@ -152,7 +152,7 @@ static void cifar10_task_runner(void *args) {
   // dispatcher_t *dispatcher;
   xcore::RTOSInferenceEngine<6, 8> inference_engine;
 
-  tensor_arena = (uint8_t *) pvPortMalloc(TENSOR_ARENA_SIZE);
+  tensor_arena = (uint8_t *)pvPortMalloc(TENSOR_ARENA_SIZE);
 
   // dispatcher = dispatcher_create();
   // dispatcher_thread_init(dispatcher, appconfDISPATCHER_LENGTH,
@@ -167,11 +167,12 @@ static void cifar10_task_runner(void *args) {
   resolver->AddConv2D();
   resolver->AddReshape();
   resolver->AddMaxPool2D();
-  resolver->AddCustom(tflite::ops::micro::xcore::rtos::Conv2D_V2_OpCode,
+  resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_V2_OpCode,
                       tflite::ops::micro::xcore::rtos::Register_Conv2D_V2());
 
   // Load the model
-  if (inference_engine.LoadModel(cifar10_model_data) !=  xcore::InferenceEngineStatus::Ok) {
+  if (inference_engine.LoadModel(cifar10_model_data) !=
+      xcore::InferenceEngineStatus::Ok) {
     rtos_printf("Invalid model provided!\n");
     vPortFree(tensor_arena);
     vTaskDelete(NULL);
@@ -205,9 +206,10 @@ void cifar10_app_task_create(rtos_intertile_address_t *intertile_addr,
               priority, NULL);
 }
 
-void cifar10_image_classifier_task_create(rtos_intertile_address_t *intertile_addr,
-                                      unsigned priority) {
-  inference_engine_args_t *args = (inference_engine_args_t *) pvPortMalloc(sizeof(inference_engine_args_t));
+void cifar10_image_classifier_task_create(
+    rtos_intertile_address_t *intertile_addr, unsigned priority) {
+  inference_engine_args_t *args =
+      (inference_engine_args_t *)pvPortMalloc(sizeof(inference_engine_args_t));
   QueueHandle_t input_queue = xQueueCreate(1, sizeof(int32_t *));
 
   configASSERT(args);
@@ -223,4 +225,3 @@ void cifar10_image_classifier_task_create(rtos_intertile_address_t *intertile_ad
               RTOS_THREAD_STACK_SIZE(cifar10_runner_rx), args, priority - 1,
               NULL);
 }
-

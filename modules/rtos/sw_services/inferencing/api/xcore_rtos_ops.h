@@ -10,13 +10,13 @@ namespace tflite {
 namespace ops {
 namespace micro {
 namespace xcore {
-namespace rtos {
 
-constexpr const char *Conv2D_V2_OpCode = "XC_conv2d_v2";
+namespace rtos {
 
 TfLiteRegistration *Register_Conv2D_V2();
 
 } // namespace rtos
+
 } // namespace xcore
 } // namespace micro
 } // namespace ops
