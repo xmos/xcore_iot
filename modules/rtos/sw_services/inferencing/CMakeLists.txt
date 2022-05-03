@@ -12,6 +12,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
         INTERFACE
             src/debug_log.cc
             src/xcore_rtos_conv2d_v2.cc
+            ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/micro_time.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_custom_options.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_error_reporter.cc
             ${LIB_TFLITE_MICRO_PATH}/src/tflite-xcore-kernels/xcore_interpreter.cc
