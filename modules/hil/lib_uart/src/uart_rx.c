@@ -71,6 +71,25 @@ void uart_rx_init(
     port_in(rx_port); //Ensure port is input
 }
 
+static inline void sleep_until_start_transition(uart_rx_t *uart_cfg){
+    if(buffer_used(&uart_cfg->buffer)){
+        //Wait on a the port interrupt
+        // hwtimer_wait_until(uart_cfg->tmr, uart_cfg->next_event_time_ticks);
+    }else{
+        //Poll the port
+        while(port_in(uart_cfg->rx_port) & 0x1);
+    }
+}
+
+static inline void sleep_until_next_sample(uart_rx_t *uart_cfg){
+    if(uart_cfg->tmr){
+        //Wait on a the timer
+        hwtimer_wait_until(uart_cfg->tmr, uart_cfg->next_event_time_ticks);
+    }else{
+        //Poll the timer
+        while(get_current_time(uart_cfg) < uart_cfg->next_event_time_ticks);
+    }
+}
 
 static inline void enable_start_bit_transition_interrupt(uart_rx_t *uart_cfg, int enable){
 
@@ -81,6 +100,7 @@ static inline void enable_sample_timer_interrupt(uart_rx_t *uart_cfg, int enable
 }
 
 void uart_rx_handle_event(uart_rx_t *uart_cfg){
+    // printf("state: %d\n", uart_cfg->state);
     switch(uart_cfg->state){
         case UART_IDLE: {
             uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
@@ -133,7 +153,6 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
      
         case UART_STOP: {   
             uint32_t pin = port_in(uart_cfg->rx_port) & 0x1;
-            uart_cfg->state = UART_IDLE;
             if(pin != 1){
                 //TODO handle error
             }
@@ -145,8 +164,11 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
 
         case UART_STOP_END: {   
             //We don't care about the value, just enable the start bit transition detect
-            enable_sample_timer_interrupt(uart_cfg, 0);
-            enable_start_bit_transition_interrupt(uart_cfg, 1);
+            if(buffer_used(&uart_cfg->buffer)){
+                enable_sample_timer_interrupt(uart_cfg, 0);
+                enable_start_bit_transition_interrupt(uart_cfg, 1);
+            }
+            uart_cfg->state = UART_IDLE;
             break;
         }
 
@@ -158,14 +180,31 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
         if(uart_cfg->state == UART_IDLE){
             // buffered_uart_tx_char_finished(uart_cfg);
         } else {
-            // sleep_until_next_transition(uart_cfg);
+            // sleep_until_start_transition(uart_cfg);
+            // sleep_until_next_sample(uart_cfg);
         }
      }
 }
 
 
-char uart_rx(uart_rx_t *uart){
-    return 0;
+char uart_rx(uart_rx_t *uart_cfg){
+    if(buffer_used(&uart_cfg->buffer)){
+        printf("BUFFER USED\n");
+        enable_start_bit_transition_interrupt(uart_cfg, 1);
+    } else {
+        // printf("BUFFER NOT USED\n");
+        uart_cfg->uart_data = 0;
+        uart_cfg->current_data_bit = 0;
+        uart_cfg->state = UART_IDLE;
+        sleep_until_start_transition(uart_cfg);
+        // printf("START BIT EDGE\n");
+        do{
+            uart_rx_handle_event(uart_cfg);
+            sleep_until_next_sample(uart_cfg);
+        } while(uart_cfg->state != UART_IDLE);
+
+        return uart_cfg->uart_data;
+    }
 }
 
 void uart_rx_deinit(uart_rx_t *uart_cfg){

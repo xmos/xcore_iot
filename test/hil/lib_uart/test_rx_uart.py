@@ -29,7 +29,7 @@ parity_args = { "NONE": 0,
 stop_bit_args = {   "one": 1,
                     "two": 2}
 
-speed_args = {"921600 baud": 921600}
+speed_args = {"115200 baud": 115200}
 data_bit_args = {"eight": 8}
 parity_args = { "NONE": 0}                
 stop_bit_args = {"one": 1}

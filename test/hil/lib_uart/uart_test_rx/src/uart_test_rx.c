@@ -36,13 +36,15 @@ void test() {
     port_enable(p_uart_tx);
     port_out(p_uart_tx, 1); //Set to idle
 
+    // uart_rx_init(&uart, p_uart_rx, 921600, 8, UART_PARITY_NONE, 1, tmr,
+    //     buffer, sizeof(buffer), rx_callback);
 
-    uart_rx_init(&uart, p_uart_rx, 921600, 8, UART_PARITY_NONE, 1, tmr,
-        buffer, sizeof(buffer), rx_callback);
+    uart_rx_init(&uart, p_uart_rx, 115200, 8, UART_PARITY_NONE, 1, tmr,
+        NULL, 0, NULL);
 
-    for(int i = 0; i < NUM_RX_WORDS; i++){
-        while(!data_ready);
-    }
+    // for(int i = 0; i < NUM_RX_WORDS; i++){
+    //     while(!data_ready);
+    // }
 
     for(int i = 0; i < NUM_RX_WORDS; i++){
         printf("0x%x\n", uart_rx(&uart));
@@ -52,6 +54,7 @@ void test() {
     uart_rx_deinit(&uart);
 
     hwtimer_free(tmr);
+    printf("Fin\n");
     exit(0);
 }
 

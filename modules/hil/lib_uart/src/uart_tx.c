@@ -88,13 +88,13 @@ void uart_tx_deinit(uart_tx_t *uart_cfg){
 }
 
 
-
 static inline uint32_t get_current_time(uart_tx_t *uart_cfg){
     if(uart_cfg->tmr){
         return hwtimer_get_time(uart_cfg->tmr);
     }
     return get_reference_time();
 }
+
 
 static inline void sleep_until_next_transition(uart_tx_t *uart_cfg){
     if(buffer_used(&uart_cfg->buffer)){
@@ -109,7 +109,6 @@ static inline void sleep_until_next_transition(uart_tx_t *uart_cfg){
         while(get_current_time(uart_cfg) < uart_cfg->next_event_time_ticks);
     }
 }
-
 
 
 static inline void buffered_uart_tx_char_finished(uart_tx_t *uart_cfg){
