@@ -16,7 +16,7 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     set(LIB_COMPILE_FLAGS "-Os")
 
     ## Includes files
-    set(LIB_PUBLIC_INCLUDES  api)
+    set(LIB_PUBLIC_INCLUDES  api src)
     set(LIB_PRIVATE_INCLUDES src)
 
     ## Gather library sources

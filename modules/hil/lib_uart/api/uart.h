@@ -14,6 +14,8 @@
 #include <xcore/hwtimer.h>
 #include <xcore/interrupt.h>
 
+#include "uart_util.h"
+
 /**
  * \addtogroup hil_spi_master hil_spi_master
  *
@@ -37,7 +39,8 @@ typedef enum {
     UART_START,
     UART_DATA,
     UART_PARITY,
-    UART_STOP
+    UART_STOP,
+    UART_STOP_END //Special stage for Rx only
 } uart_state_t;
 
 
@@ -69,12 +72,9 @@ typedef struct {
     uint8_t current_data_bit;
     char uart_data;
     uint8_t stop_bits;
-    unsigned buffer_size;
-    unsigned buff_head_idx;
-    unsigned buff_tail_idx;
     UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
     hwtimer_t tmr;
-    char* buffer;
+    uart_buffer_t buffer;
 } uart_tx_t;
 
 
@@ -88,12 +88,9 @@ typedef struct {
     uint8_t current_data_bit;
     char uart_data;
     uint8_t stop_bits;
-    unsigned buffer_size;
-    unsigned buff_head_idx;
-    unsigned buff_tail_idx;
     UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
     hwtimer_t tmr;
-    char* buffer;
+    uart_buffer_t buffer;
 } uart_rx_t;
 
 /**
