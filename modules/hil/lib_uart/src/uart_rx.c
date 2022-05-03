@@ -157,13 +157,6 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
                 //TODO handle error
             }
             //TODO do we wait for negative edge or end of stop symbol? Probs stop symbol
-            uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks >> 1;
-            uart_cfg->state = UART_STOP_END;
-            break;
-        }
-
-        case UART_STOP_END: {   
-            //We don't care about the value, just enable the start bit transition detect
             if(buffer_used(&uart_cfg->buffer)){
                 enable_sample_timer_interrupt(uart_cfg, 0);
                 enable_start_bit_transition_interrupt(uart_cfg, 1);

@@ -47,14 +47,13 @@ void test() {
     // }
 
     for(int i = 0; i < NUM_RX_WORDS; i++){
-        printf("0x%x\n", uart_rx(&uart));
+        printf("0x%02x\n", uart_rx(&uart));
     }
 
 
     uart_rx_deinit(&uart);
-
     hwtimer_free(tmr);
-    printf("Fin\n");
+
     exit(0);
 }
 

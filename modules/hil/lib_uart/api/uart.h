@@ -39,8 +39,7 @@ typedef enum {
     UART_START,
     UART_DATA,
     UART_PARITY,
-    UART_STOP,
-    UART_STOP_END //Special stage for Rx only
+    UART_STOP
 } uart_state_t;
 
 
