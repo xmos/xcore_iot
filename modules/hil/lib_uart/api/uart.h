@@ -75,10 +75,26 @@ typedef struct {
     UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
     hwtimer_t tmr;
     char* buffer;
-
-
 } uart_tx_t;
 
+
+typedef struct {
+    port_t rx_port;
+    uart_state_t state;
+    uint32_t bit_time_ticks;
+    uint32_t next_event_time_ticks;
+    uart_parity_t parity;
+    uint8_t num_data_bits; //These are ordered to be better packed
+    uint8_t current_data_bit;
+    char uart_data;
+    uint8_t stop_bits;
+    unsigned buffer_size;
+    unsigned buff_head_idx;
+    unsigned buff_tail_idx;
+    UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
+    hwtimer_t tmr;
+    char* buffer;
+} uart_rx_t;
 
 /**
  * Initializes a SPI master I/O interface.
@@ -92,7 +108,7 @@ typedef struct {
  */
 void uart_tx_init(
         uart_tx_t *uart,
-        port_t cs_port,
+        port_t tx_port,
         uint32_t baud_rate,
         uint8_t data_bits,
         uart_parity_t parity,
@@ -179,53 +195,31 @@ void uart_tx(
 void uart_tx_deinit(
         uart_tx_t *uart);
 
-/**
- * Master has started a transaction
- *
- * This callback function will be called when the SPI master has asserted
- * this slave's chip select.
- *
- * The input and output buffer may be the same; however, partial byte/incomplete
- * reads will result in out_buf bits being masked off due to a partial bit output.
- *
- * \param app_data   A pointer to application specific data provided
- *                   by the application. Used to share data between
- * \param out_buf    The buffer to send to the master
- * \param outbuf_len The length in bytes of out_buf
- * \param in_buf     The buffer to receive into from the master
- * \param inbuf_len  The length in bytes of in_buf
- */
-// typedef void (*slave_transaction_started_t)(void *app_data, uint8_t **out_buf, size_t *outbuf_len, uint8_t **in_buf, size_t *inbuf_len);
-
-/**
- * Master has ended a transaction
- *
- * This callback function will be called when the SPI master has de-asserted
- * this slave's chip select.
- *
- * The value of bytes_read contains the number of full bytes that are in
- * in_buf.  When read_bits is greater than 0, the byte after the last full byte
- * contains the partial bits read.
- *
- * \param app_data      A pointer to application specific data provided
- *                      by the application. Used to share data between
- * \param out_buf       The buffer that had been provided to be sent to the master
- * \param bytes_written The length in bytes of out_buf that had been written
- * \param in_buf        The buffer that had been provided to be received into from the master
- * \param bytes_read    The length in bytes of in_buf that has been read in to
- * \param read_bits     The length in bits of in_buf
- */
-// typedef void (*slave_transaction_ended_t)(void *app_data, uint8_t **out_buf, size_t bytes_written, uint8_t **in_buf, size_t bytes_read, size_t read_bits);
 
 
-/**@}*/ // END: addtogroup hil_spi_master
 
-/**
- * \addtogroup hil_spi_slave hil_spi_slave
- *
- * The public API for using the HIL SPI slave.
- * @{
- */
+
+
+
+void uart_rx_init(
+        uart_rx_t *uart,
+        port_t rx_port,
+        uint32_t baud_rate,
+        uint8_t data_bits,
+        uart_parity_t parity,
+        uint8_t stop_bits,
+
+        hwtimer_t tmr,
+        char *tx_buff,
+        size_t buffer_size,
+        void(*uart_callback_fptr)(uart_callback_t callback_info)
+        );
+
+char uart_rx(uart_rx_t *uart);
+
+void uart_rx_deinit(uart_rx_t *uart);
+
+
 
 /**
  * Callback group representing callback events that can occur during the
@@ -248,30 +242,5 @@ typedef struct {
 } spi_slave_callback_group_t;
 #endif
 
-/**
- * Initializes a SPI slave.
- *
- * \note Verified at 25000 kbps, with a 2000ns CS assertion to first clock
- * in all modes.  The CS to first clock minimum delay will vary based on the 
- * duration of the slave_transaction_started callback.
- *
- * \param spi_cbg     The spi_slave_callback_group_t context to use.
- * \param p_sclk      The SPI slave's SCLK port. Must be a 1-bit port.
- * \param p_mosi      The SPI slave's MOSI port. Must be a 1-bit port.
- * \param p_miso      The SPI slave's MISO port. Must be a 1-bit port.
- * \param p_cs        The SPI slave's CS port. Must be a 1-bit port.
- * \param clock_block The clock block to use for the SPI slave.
- * \param cpol        The clock polarity to use.
- * \param cpha        The clock phase to use.
- */
-// void spi_slave(
-//         const spi_slave_callback_group_t *spi_cbg,
-//         port_t p_sclk,
-//         port_t p_mosi,
-//         port_t p_miso,
-//         port_t p_cs,
-//         xclock_t clk,
-//         int cpol,
-//         int cpha);
 
 /**@}*/ // END: addtogroup hil_spi_slave
