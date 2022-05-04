@@ -22,6 +22,9 @@
 
 void ssd1306_128x32_ascii_to_bitmap(char* str_buf, char* bitmap);
 
+void ssd1306_128x32_clear_bitmap(char* bitmap);
+void ssd1306_128x32_add_indicator_frame_to_bitmap(char* bitmap);
+
 #define KEYWORD_DETECT_DEBOUNCE       1
 // TODO: change the silence and unknown resets to a wall block based reset
 #define KEYWORD_DETECT_UNKNOWN_RESET  20
@@ -120,7 +123,7 @@ void inference_hmi_task(void *args)
         &ssd1306_transport,
         ssd1306_MDOB128032GV);
 
-    memset(display_buf, 0, sizeof(display_buf));
+    ssd1306_128x32_clear_bitmap(display_buf);
     ssd1306_write(NULL, ssd1306_ctx, display_buf);
 
     while(1) {
@@ -148,6 +151,7 @@ void inference_hmi_task(void *args)
                 intent = 0;
                 state = STATE_WAIT_FOR_ANY;
                 rtos_printf("Unknown threshold passed.  Reset intent state\n");
+                ssd1306_128x32_clear_bitmap(display_buf);
             }
         /* Similarly to "filler" words, we must filter out inter word silence */
         } else if ((rx_bits & INFERENCE_BIT_SPOTTED_SILENCE) != 0) {
@@ -155,6 +159,7 @@ void inference_hmi_task(void *args)
                intent = 0;
                state = STATE_WAIT_FOR_ANY;
                rtos_printf("Silence threshold passed.  Reset intent state\n");
+               ssd1306_128x32_clear_bitmap(display_buf);
            }
         } else {
             /* Only run the state machine once per non-unknown keyword */
@@ -168,11 +173,13 @@ void inference_hmi_task(void *args)
                               state = STATE_WAIT_FOR_OBJECT;
                               intent |= rx_bits;
                               rtos_printf("Found object wait for action\n");
+                              ssd1306_128x32_add_indicator_frame_to_bitmap((char *)display_buf);
                         } else if ( ((rx_bits & INFERENCE_BIT_GREEN) != 0)
                                  || ((rx_bits & INFERENCE_BIT_RED) != 0) ) {
                               state = STATE_WAIT_FOR_ACTION;
                               intent |= rx_bits;
                               rtos_printf("Found action wait for object\n");
+                              ssd1306_128x32_add_indicator_frame_to_bitmap((char *)display_buf);
                         }
                         break;
                     case STATE_WAIT_FOR_ACTION:
@@ -181,6 +188,7 @@ void inference_hmi_task(void *args)
                           intent |= rx_bits;
                         } else {
                             rtos_printf("Action with no object.  Reset intent state\n");
+                            ssd1306_128x32_clear_bitmap(display_buf);
                             intent = 0;
                         }
                         state = STATE_WAIT_FOR_ANY;
@@ -191,6 +199,7 @@ void inference_hmi_task(void *args)
                           intent |= rx_bits;
                         } else {
                             rtos_printf("Object with no action.  Reset intent state\n");
+                            ssd1306_128x32_clear_bitmap(display_buf);
                             intent = 0;
                         }
                         state = STATE_WAIT_FOR_ANY;
@@ -226,9 +235,9 @@ void inference_hmi_task(void *args)
                         intent = 0;
                         break;
                 }
-                ssd1306_write(NULL, ssd1306_ctx, display_buf);
             }
         }
+        ssd1306_write(NULL, ssd1306_ctx, display_buf);
     }
 }
 
@@ -242,10 +251,12 @@ void inference_hmi_task(void *args)
 // font attribs
 #define FONT_SIZE 1
 
-void ssd1306_128x32_ascii_to_bitmap(char* str_buf, char* bitmap) {
+void ssd1306_128x32_clear_bitmap(char* bitmap) {
     // Clear bitmap buffer
     memset(bitmap, 0, sizeof(char)*MAX_ROWS*MAX_COLS);
+}
 
+void ssd1306_128x32_ascii_to_bitmap(char* str_buf, char* bitmap) {
     char* cur_ptr = str_buf;
     char* cur_bmp = NULL;
 
@@ -272,6 +283,14 @@ void ssd1306_128x32_ascii_to_bitmap(char* str_buf, char* bitmap) {
     }
 }
 
+void ssd1306_128x32_add_indicator_frame_to_bitmap(char* bitmap) {
+    memset(bitmap, 0xFF, MAX_COLS); // Set top row
+    for(int i=1; i<MAX_ROWS; i++) { // Set middle rows
+        *(bitmap + (i*MAX_COLS)) = 0x01;
+        *(bitmap + (i*MAX_COLS) + (MAX_COLS - 1)) = 0x80;
+    }
+    memset(bitmap + (MAX_COLS*(MAX_ROWS-1)), 0xFF, MAX_COLS); // Set bottom row
+}
 
 void inference_hmi_create(unsigned priority, void *args)
 {
