@@ -29,7 +29,7 @@ parity_args = { "NONE": 0,
 stop_bit_args = {   "one": 1,
                     "two": 2}
 
-speed_args = {"115200 baud": 115200}
+speed_args = {"115200 baud": 19200}
 data_bit_args = {"eight": 8}
 parity_args = { "NONE": 0}                
 stop_bit_args = {"one": 1}
@@ -43,7 +43,7 @@ def test_uart_rx(request, capfd, baud, bpb, parity, stop):
     cwd = Path(request.fspath).parent
     binary = f'{cwd}/uart_test_rx/bin/test_hil_uart_rx_test.xe'
 
-    tx_port = "tile[0]:XS1_PORT_1A" #Used for synch
+    tx_port = "tile[0]:XS1_PORT_1A" #Used for synch to start checker
     rx_port = "tile[0]:XS1_PORT_1B"
     checker = UARTRxChecker(rx_port, tx_port, parity, baud, stop, bpb, data=[0x7f, 0x00, 0x2f, 0xff])
     
@@ -52,7 +52,7 @@ def test_uart_rx(request, capfd, baud, bpb, parity, stop):
                                             ordered = True,
                                             ignore = ["TEST CONFIG:.*"])
 
-    simargs = ["--vcd-tracing", "-tile tile[0] -ports -ports-detailed -cores -instructions -o trace.vcd"] #This is just for local debug so we can capture the run, pass as kwarg to run_with_pyxsim
+    simargs = ["--trace-to", "trace.txt", "--vcd-tracing", "-tile tile[0] -ports -ports-detailed -cores -instructions -o trace.vcd"] #This is just for local debug so we can capture the run, pass as kwarg to run_with_pyxsim
     px.run_with_pyxsim(binary, simthreads = [checker], simargs=simargs)
     capture = capfd.readouterr().out[:-1] #Tester appends an extra line feed which we don't need
 

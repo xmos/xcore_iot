@@ -6,7 +6,6 @@
  *  \brief API for SPI I/O
  */
 
-
 #include <stdlib.h> /* for size_t */
 #include <stdint.h>
 #include <xcore/port.h>
@@ -44,7 +43,11 @@ typedef enum {
 
 
 typedef enum {
-    UART_TX_EMPTY = 0x01
+    UART_TX_EMPTY = 0x01,
+    UART_START_BIT_ERROR,
+    UART_PARITY_ERROR,
+    UART_STOP_BIT_ERROR,
+    UART_RX_COMPLETE
 } uart_callback_t;
 
 
@@ -62,8 +65,8 @@ typedef enum {
  * The members in this struct should not be accessed directly.
  */
 typedef struct {
-    port_t tx_port;
     uart_state_t state;
+    port_t tx_port;
     uint32_t bit_time_ticks;
     uint32_t next_event_time_ticks;
     uart_parity_t parity;
@@ -78,8 +81,8 @@ typedef struct {
 
 
 typedef struct {
-    port_t rx_port;
     uart_state_t state;
+    port_t rx_port;
     uint32_t bit_time_ticks;
     uint32_t next_event_time_ticks;
     uart_parity_t parity;

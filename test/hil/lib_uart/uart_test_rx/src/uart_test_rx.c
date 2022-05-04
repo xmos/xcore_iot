@@ -2,6 +2,7 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 #include <xs1.h>
 #include <stdio.h>
+#include <print.h>
 #include <string.h>
 #include <stdlib.h>
 #include <xcore/parallel.h>
@@ -10,42 +11,41 @@
 #include <xcore/triggerable.h>
 #include <xcore/interrupt.h>
 #include <xcore/interrupt_wrappers.h>
+
 #include "uart.h"
 
 #define SETSR(c) asm volatile("setsr %0" : : "n"(c));
 #define NUM_RX_WORDS    4
 
-port_t p_uart_rx = XS1_PORT_1B;
 port_t p_uart_tx = XS1_PORT_1A;
+port_t p_uart_rx = XS1_PORT_1B;
 
-DECLARE_JOB(test, (void));
+volatile unsigned bytes_received = 0;
 
-volatile data_ready = 0;
-
-void rx_callback(uart_callback_t callback_info){
-    data_ready = 1;
+UART_CALLBACK_ATTR void rx_callback(uart_callback_t callback_info){
+    // printstr("CALLBACK\n");
+    bytes_received += 1;
 }
 
-void test() {
+
+DEFINE_INTERRUPT_PERMITTED(UART_INTERRUPTABLE_FUNCTIONS, void, test, void){
     uart_rx_t uart;
     hwtimer_t tmr = hwtimer_alloc();
 
     char buffer[64];
 
+    uart_rx_init(&uart, p_uart_rx, 19200, 8, UART_PARITY_NONE, 1, tmr,
+        buffer, sizeof(buffer), rx_callback);
+
     //Tester waits until it can see the tx_port driven to idle
     port_enable(p_uart_tx);
-    port_out(p_uart_tx, 1); //Set to idle
+    port_out(p_uart_tx, 1); //Set to drive idle
 
-    // uart_rx_init(&uart, p_uart_rx, 921600, 8, UART_PARITY_NONE, 1, tmr,
-    //     buffer, sizeof(buffer), rx_callback);
+    // uart_rx_init(&uart, p_uart_rx, 115200, 8, UART_PARITY_NONE, 1, tmr,
+    //     NULL, 0, NULL);
 
-    uart_rx_init(&uart, p_uart_rx, 115200, 8, UART_PARITY_NONE, 1, tmr,
-        NULL, 0, NULL);
-
-    // for(int i = 0; i < NUM_RX_WORDS; i++){
-    //     while(!data_ready);
-    // }
-
+    while(bytes_received < NUM_RX_WORDS);
+ 
     for(int i = 0; i < NUM_RX_WORDS; i++){
         printf("0x%02x\n", uart_rx(&uart));
     }
@@ -66,14 +66,16 @@ void burn(void) {
 
 int main(void) {
     PAR_JOBS (
-        PJOB(test, ()),
-        PJOB(burn, ()),
-        PJOB(burn, ()),
-        PJOB(burn, ()),
-        PJOB(burn, ()),
-        PJOB(burn, ()),
-        PJOB(burn, ()),
-        PJOB(burn, ())
+        PJOB(INTERRUPT_PERMITTED(test), ())
+
+        // PJOB(INTERRUPT_PERMITTED(test), ()),
+        // PJOB(burn, ()),
+        // PJOB(burn, ()),
+        // PJOB(burn, ()),
+        // PJOB(burn, ()),
+        // PJOB(burn, ()),
+        // PJOB(burn, ()),
+        // PJOB(burn, ())
     );
     return 0;
 }
