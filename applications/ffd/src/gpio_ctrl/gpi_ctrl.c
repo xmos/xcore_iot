@@ -11,7 +11,7 @@
 __attribute__((weak))
 void gpio_gpi_toggled_cb(uint32_t gpio_val)
 {
-    rtos_printf("A GPI toggled");
+    // rtos_printf("A GPI toggled\n");
 }
 
 RTOS_GPIO_ISR_CALLBACK_ATTR
