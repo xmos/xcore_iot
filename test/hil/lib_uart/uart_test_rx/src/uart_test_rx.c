@@ -23,7 +23,23 @@ port_t p_uart_rx = XS1_PORT_1B;
 volatile unsigned bytes_received = 0;
 
 UART_CALLBACK_ATTR void rx_callback(uart_callback_t callback_info){
-    // printstr("CALLBACK\n");
+    if(callback_info != UART_RX_COMPLETE){
+        switch(callback_info){
+            case UART_TX_EMPTY:
+                printstrln("UART_TX_EMPTY");
+                break;
+            case UART_START_BIT_ERROR:
+                printstrln("UART_START_BIT_ERROR");
+                break;
+            case UART_PARITY_ERROR:
+                printstrln("UART_PARITY_ERROR");
+                break;
+            case UART_STOP_BIT_ERROR:
+                printstrln("UART_STOP_BIT_ERROR");
+                break;
+            // UART_RX_COMPLETE
+        }
+    }
     bytes_received += 1;
 }
 
@@ -49,7 +65,6 @@ DEFINE_INTERRUPT_PERMITTED(UART_INTERRUPTABLE_FUNCTIONS, void, test, void){
     for(int i = 0; i < NUM_RX_WORDS; i++){
         printf("0x%02x\n", uart_rx(&uart));
     }
-
 
     uart_rx_deinit(&uart);
     hwtimer_free(tmr);

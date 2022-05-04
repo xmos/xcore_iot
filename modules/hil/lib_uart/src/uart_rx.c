@@ -121,9 +121,14 @@ static inline void sleep_until_next_sample(uart_rx_t *uart_cfg){
 
 
 void uart_rx_handle_event(uart_rx_t *uart_cfg){
+    port_out(p_dbg, uart_cfg->state);
     switch(uart_cfg->state){
         case UART_IDLE: {
             uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
+            uint32_t pin = port_in(uart_cfg->rx_port) & 0x1;
+            if(pin != 0){
+                (*uart_cfg->uart_callback_fptr)(UART_START_BIT_ERROR);
+            }
             uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks >> 1;
             uart_cfg->state = UART_START;
             if(buffer_used(&uart_cfg->buffer)){
