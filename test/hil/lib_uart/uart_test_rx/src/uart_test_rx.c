@@ -23,24 +23,23 @@ port_t p_uart_rx = XS1_PORT_1B;
 volatile unsigned bytes_received = 0;
 
 UART_CALLBACK_ATTR void rx_callback(uart_callback_t callback_info){
-    if(callback_info != UART_RX_COMPLETE){
-        switch(callback_info){
-            case UART_TX_EMPTY:
-                printstrln("UART_TX_EMPTY");
-                break;
-            case UART_START_BIT_ERROR:
-                printstrln("UART_START_BIT_ERROR");
-                break;
-            case UART_PARITY_ERROR:
-                printstrln("UART_PARITY_ERROR");
-                break;
-            case UART_STOP_BIT_ERROR:
-                printstrln("UART_STOP_BIT_ERROR");
-                break;
-            // UART_RX_COMPLETE
-        }
+    switch(callback_info){
+        case UART_TX_EMPTY:
+            printstrln("UART_TX_EMPTY");
+            break;
+        case UART_START_BIT_ERROR:
+            printstrln("UART_START_BIT_ERROR");
+            break;
+        case UART_PARITY_ERROR:
+            printstrln("UART_PARITY_ERROR");
+            break;
+        case UART_STOP_BIT_ERROR:
+            printstrln("UART_STOP_BIT_ERROR");
+            break;
+        case UART_RX_COMPLETE:
+            bytes_received += 1;
+            break;
     }
-    bytes_received += 1;
 }
 
 
@@ -50,7 +49,7 @@ DEFINE_INTERRUPT_PERMITTED(UART_INTERRUPTABLE_FUNCTIONS, void, test, void){
 
     char buffer[64];
 
-    uart_rx_init(&uart, p_uart_rx, 19200, 8, UART_PARITY_NONE, 1, tmr,
+    uart_rx_init(&uart, p_uart_rx, 115200, 8, UART_PARITY_NONE, 1, tmr,
         buffer, sizeof(buffer), rx_callback);
 
     //Tester waits until it can see the tx_port driven to idle
@@ -59,6 +58,8 @@ DEFINE_INTERRUPT_PERMITTED(UART_INTERRUPTABLE_FUNCTIONS, void, test, void){
 
     // uart_rx_init(&uart, p_uart_rx, 115200, 8, UART_PARITY_NONE, 1, tmr,
     //     NULL, 0, NULL);
+
+    //Tester will now transmit the bytes
 
     while(bytes_received < NUM_RX_WORDS);
  

@@ -23,15 +23,6 @@ static inline uint32_t get_current_time(uart_rx_t *uart_cfg){
     return get_reference_time();
 }
 
-static inline void enable_start_bit_transition_interrupt(uart_rx_t *uart_cfg, int enable){
-    // port_clear_trigger_in(uart_cfg->rx_port);
-    triggerable_set_trigger_enabled(uart_cfg->rx_port, enable);
-}
-
-static inline void enable_sample_timer_interrupt(uart_rx_t *uart_cfg, int enable){
-    // hwtimer_clear_trigger_time(uart_cfg->tmr);
-    triggerable_set_trigger_enabled(uart_cfg->tmr, enable);
-}   
 
 port_t p_dbg = XS1_PORT_32A;
 
@@ -206,11 +197,10 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
                 push_char_into_buffer(&uart_cfg->buffer, uart_cfg->uart_data);
                 hwtimer_clear_trigger_time(uart_cfg->tmr);
                 triggerable_set_trigger_enabled(uart_cfg->tmr, 0);
-                port_clear_trigger_in(uart_cfg->rx_port);
 
                 port_set_trigger_in_equal(uart_cfg->rx_port, 0); //Trigger on low (start of start bit)
-
                 triggerable_set_trigger_enabled(uart_cfg->rx_port, 1);
+
             }
             break;
         }
@@ -224,18 +214,15 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
 
 char uart_rx(uart_rx_t *uart_cfg){
     if(buffer_used(&uart_cfg->buffer)){
-        // printstr("BUFFER USED\n");
         char rx_data = 0;
         uart_buffer_error_t err = pop_char_from_buffer(&uart_cfg->buffer, &rx_data);
 
         return rx_data;
     } else {
-        // printstr("BUFFER NOT USED\n");
         uart_cfg->uart_data = 0;
         uart_cfg->current_data_bit = 0;
         uart_cfg->state = UART_IDLE;
         sleep_until_start_transition(uart_cfg);
-        // printstr("START BIT EDGE\n");
         do{
             uart_rx_handle_event(uart_cfg);
             sleep_until_next_sample(uart_cfg);
@@ -246,11 +233,12 @@ char uart_rx(uart_rx_t *uart_cfg){
 }
 
 void uart_rx_deinit(uart_rx_t *uart_cfg){
-    //TODO make buffer used a fn
-    if(buffer_used(&uart_cfg->buffer)){
+    interrupt_mask_all();
+    if(buffer_used(&uart_cfg->buffer)){        
         triggerable_set_trigger_enabled(uart_cfg->rx_port, 0);
         triggerable_set_trigger_enabled(uart_cfg->tmr, 0);
     }
     port_disable(uart_cfg->rx_port);
+    interrupt_unmask_all();
 }
 
