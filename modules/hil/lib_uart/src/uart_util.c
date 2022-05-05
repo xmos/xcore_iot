@@ -53,7 +53,3 @@ uart_buffer_error_t pop_char_from_buffer(uart_buffer_t *buff_cfg, char *data){
     return err;
 }
 
-
-int buffer_used(uart_buffer_t *buff_cfg){
-    return((buff_cfg->size && buff_cfg->buffer != NULL));
-}

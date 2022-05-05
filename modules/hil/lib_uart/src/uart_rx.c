@@ -54,9 +54,11 @@ void uart_rx_init(
     uart_cfg->uart_data = 0;
     uart_cfg->state = UART_IDLE;
 
-
     //HW timer will be replaced by poll if set to zero
     uart_cfg->tmr = tmr;
+
+    init_buffer(&uart_cfg->buffer, buffer, buffer_size);
+    uart_cfg->uart_callback_fptr = uart_callback_fptr;
 
     //Assert if buffer is used but no timer as we need the timer for buffered mode 
     if(buffer_used(&uart_cfg->buffer) && !tmr){
@@ -67,11 +69,11 @@ void uart_rx_init(
 
     //TODO work out if buffer can be used without HW timer
     if(buffer_used(&uart_cfg->buffer)){
+        printstrln("SETTING UP ISR");
         init_buffer(&uart_cfg->buffer, buffer, buffer_size);
 
         //Setup interrupts
         interrupt_mask_all();
-        uart_cfg->uart_callback_fptr = uart_callback_fptr;
         port_in(rx_port); //Ensure port is input and clear trigger
         port_set_trigger_in_equal(rx_port, 0); //Trigger on low (start of start bit)
         triggerable_setup_interrupt_callback(rx_port, uart_cfg, INTERRUPT_CALLBACK(uart_rx_isr) );
@@ -92,7 +94,7 @@ void uart_rx_init(
 static inline void sleep_until_start_transition(uart_rx_t *uart_cfg){
     if(uart_cfg->tmr){
         //Wait on a the port transition to low
-        port_in_when_pinsneq(uart_cfg->rx_port, PORT_UNBUFFERED, 0);
+        port_in_when_pinseq(uart_cfg->rx_port, PORT_UNBUFFERED, 0);
     }else{
         //Poll the port
         while(port_in(uart_cfg->rx_port) & 0x1);
@@ -186,7 +188,7 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
         case UART_STOP: {   
             uint32_t pin = port_in(uart_cfg->rx_port) & 0x1;
             if(pin != 1){
-                (*uart_cfg->uart_callback_fptr)(UART_STOP_BIT_ERROR);
+                (*uart_cfg->uart_callback_fptr)(UART_FRAMING_ERROR);
             } else {
                 (*uart_cfg->uart_callback_fptr)(UART_RX_COMPLETE);
             }
@@ -194,7 +196,10 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
 
             //Go back to waiting for next start bit transition
             if(buffer_used(&uart_cfg->buffer)){
-                push_char_into_buffer(&uart_cfg->buffer, uart_cfg->uart_data);
+                uart_buffer_error_t err = push_char_into_buffer(&uart_cfg->buffer, uart_cfg->uart_data);
+                if(err == UART_BUFFER_FULL){
+                    (*uart_cfg->uart_callback_fptr)(UART_OVERRUN_ERROR);
+                }
                 hwtimer_clear_trigger_time(uart_cfg->tmr);
                 triggerable_set_trigger_enabled(uart_cfg->tmr, 0);
 
@@ -216,11 +221,11 @@ char uart_rx(uart_rx_t *uart_cfg){
     if(buffer_used(&uart_cfg->buffer)){
         char rx_data = 0;
         uart_buffer_error_t err = pop_char_from_buffer(&uart_cfg->buffer, &rx_data);
-
+        if(err == UART_BUFFER_EMPTY){
+            (*uart_cfg->uart_callback_fptr)(UART_UNDERRUN_ERROR);
+        }
         return rx_data;
     } else {
-        uart_cfg->uart_data = 0;
-        uart_cfg->current_data_bit = 0;
         uart_cfg->state = UART_IDLE;
         sleep_until_start_transition(uart_cfg);
         do{

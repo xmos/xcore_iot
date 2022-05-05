@@ -29,9 +29,13 @@ parity_args = { "NONE": 0,
 stop_bit_args = {   "one": 1,
                     "two": 2}
 
-speed_args = {"115200 baud": 115200}
+# speed_args = {"115200 baud": 115200}
+# speed_args = {"230400 baud": 230400}
+speed_args = {"576000 baud": 576000}
+
 data_bit_args = {"eight": 8}
 parity_args = { "NONE": 0}                
+# parity_args = { "EVEN": 1}                
 stop_bit_args = {"one": 1}
 
 @pytest.mark.parametrize("baud", speed_args.values(), ids=speed_args.keys())
