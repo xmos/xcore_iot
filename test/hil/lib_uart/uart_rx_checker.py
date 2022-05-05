@@ -71,6 +71,7 @@ class UARTRxChecker(px.SimThread):
         # Send stop bit(s)
         self.send_stop(xsi)
 
+
     def send_start(self, xsi):
         """
         Send a start bit.
@@ -101,7 +102,7 @@ class UARTRxChecker(px.SimThread):
         :param xsi:        XMOS Simulator Instance.
         :param byte:       Data to send parity of.
         """
-        parity = self._parity
+        parity = (self._parity - 1) % 3 #parity enum in lib_uart (old XC) different from SDK
         if parity < 2:
             crc_sum = 0
             for x in range(self._bits_per_byte):

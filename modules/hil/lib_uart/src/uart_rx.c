@@ -146,6 +146,7 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
                 (*uart_cfg->uart_callback_fptr)(UART_START_BIT_ERROR);
             }
             uart_cfg->state = UART_DATA;
+            uart_cfg->uart_data = 0;
             uart_cfg->current_data_bit = 0;
             uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks;
             if(buffer_used(&uart_cfg->buffer)){
