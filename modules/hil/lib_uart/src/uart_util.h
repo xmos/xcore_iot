@@ -15,15 +15,16 @@ typedef enum {
 
 typedef struct {
     unsigned size;
-    unsigned head_idx;
-    unsigned tail_idx;
+    unsigned next_write_idx;
+    unsigned next_read_idx;
+    uint8_t size_overlow_flag;
     uint8_t * buffer;
 } uart_buffer_t;
 
 void init_buffer(uart_buffer_t *buff_cfg, uint8_t *buffer, unsigned size);
 unsigned get_buffer_fill_level(uart_buffer_t *uart_cfg);
-uart_buffer_error_t push_char_into_buffer(uart_buffer_t *buff_cfg, uint8_t data);
-uart_buffer_error_t pop_char_from_buffer(uart_buffer_t *buff_cfg, uint8_t *data);
+uart_buffer_error_t push_byte_into_buffer(uart_buffer_t *buff_cfg, uint8_t data);
+uart_buffer_error_t pop_byte_from_buffer(uart_buffer_t *buff_cfg, uint8_t *data);
 
 static int buffer_used(uart_buffer_t *buff_cfg){
     return((buff_cfg->size && buff_cfg->buffer != NULL));

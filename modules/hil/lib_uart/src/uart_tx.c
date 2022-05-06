@@ -38,7 +38,7 @@ void uart_tx_init(
         uint8_t stop_bits,
 
         hwtimer_t tmr,
-        char *buffer,
+        uint8_t *buffer,
         size_t buffer_size,
         void(*uart_callback_fptr)(uart_callback_t callback_info)
         ){
@@ -112,10 +112,10 @@ static inline void sleep_until_next_transition(uart_tx_t *uart_cfg){
 
 
 static inline void buffered_uart_tx_char_finished(uart_tx_t *uart_cfg){
-    uart_buffer_error_t err = pop_char_from_buffer(&uart_cfg->buffer, &uart_cfg->uart_data);
+    uart_buffer_error_t err = pop_byte_from_buffer(&uart_cfg->buffer, &uart_cfg->uart_data);
     if(err == UART_BUFFER_OK){
         uart_cfg->current_data_bit = 0;
-        pop_char_from_buffer(&uart_cfg->buffer, &uart_cfg->uart_data);
+        pop_byte_from_buffer(&uart_cfg->buffer, &uart_cfg->uart_data);
         uart_cfg->state = UART_START;
     } else {
         triggerable_disable_trigger(uart_cfg->tmr);
@@ -181,7 +181,7 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
 
 
 
-void uart_tx(uart_tx_t *uart_cfg, char data){
+void uart_tx(uart_tx_t *uart_cfg, uint8_t data){
     //CHeck to see if we are using interrupts/buffered mode
     if(buffer_used(&uart_cfg->buffer)){
         if(get_buffer_fill_level(&uart_cfg->buffer) == 0 && uart_cfg->state == UART_IDLE){//Kick off a transmit
@@ -192,7 +192,7 @@ void uart_tx(uart_tx_t *uart_cfg, char data){
             sleep_until_next_transition(uart_cfg);
             triggerable_enable_trigger(uart_cfg->tmr);
         } else {//Transaction already underway
-            uart_buffer_error_t err = push_char_into_buffer(&uart_cfg->buffer, data);
+            uart_buffer_error_t err = push_byte_into_buffer(&uart_cfg->buffer, data);
         }
     } else {
         uart_cfg->uart_data = data;

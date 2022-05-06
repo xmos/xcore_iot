@@ -74,7 +74,7 @@ typedef struct {
     uart_parity_t parity;
     uint8_t num_data_bits; //These are ordered to be better packed
     uint8_t current_data_bit;
-    char uart_data;
+    uint8_t uart_data;
     uint8_t stop_bits;
     UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
     hwtimer_t tmr;
@@ -90,7 +90,7 @@ typedef struct {
     uart_parity_t parity;
     uint8_t num_data_bits; //These are ordered to be better packed
     uint8_t current_data_bit;
-    char uart_data;
+    uint8_t uart_data;
     uint8_t stop_bits;
     UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
     hwtimer_t tmr;
@@ -116,7 +116,7 @@ void uart_tx_init(
         uint8_t stop_bits,
 
         hwtimer_t tmr,
-        char *tx_buff,
+        uint8_t *tx_buff,
         size_t buffer_size,
         void(*uart_callback_fptr)(uart_callback_t callback_info)
         );
@@ -154,7 +154,7 @@ void uart_tx_blocking_init(
 
 void uart_tx(
         uart_tx_t *uart,
-        char data);
+        uint8_t data);
 
 /**
  * Enforces a minimum delay between the time this is called and
@@ -211,12 +211,12 @@ void uart_rx_init(
         uint8_t stop_bits,
 
         hwtimer_t tmr,
-        char *tx_buff,
+        uint8_t *tx_buff,
         size_t buffer_size,
         void(*uart_callback_fptr)(uart_callback_t callback_info)
         );
 
-char uart_rx(uart_rx_t *uart);
+uint8_t uart_rx(uart_rx_t *uart);
 
 void uart_rx_deinit(uart_rx_t *uart);
 

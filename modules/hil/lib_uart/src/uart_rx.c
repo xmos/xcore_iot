@@ -35,7 +35,7 @@ void uart_rx_init(
         uint8_t stop_bits,
 
         hwtimer_t tmr,
-        char *buffer,
+        uint8_t *buffer,
         size_t buffer_size,
         void(*uart_callback_fptr)(uart_callback_t callback_info)
         ){
@@ -196,7 +196,7 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
 
             //Go back to waiting for next start bit transition
             if(buffer_used(&uart_cfg->buffer)){
-                uart_buffer_error_t err = push_char_into_buffer(&uart_cfg->buffer, uart_cfg->uart_data);
+                uart_buffer_error_t err = push_byte_into_buffer(&uart_cfg->buffer, uart_cfg->uart_data);
                 if(err == UART_BUFFER_FULL){
                     (*uart_cfg->uart_callback_fptr)(UART_OVERRUN_ERROR);
                 }
@@ -217,10 +217,10 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
 }
 
 
-char uart_rx(uart_rx_t *uart_cfg){
+uint8_t uart_rx(uart_rx_t *uart_cfg){
     if(buffer_used(&uart_cfg->buffer)){
-        char rx_data = 0;
-        uart_buffer_error_t err = pop_char_from_buffer(&uart_cfg->buffer, &rx_data);
+        uint8_t rx_data = 0;
+        uart_buffer_error_t err = pop_byte_from_buffer(&uart_cfg->buffer, &rx_data);
         if(err == UART_BUFFER_EMPTY){
             (*uart_cfg->uart_callback_fptr)(UART_UNDERRUN_ERROR);
         }
