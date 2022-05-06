@@ -4,6 +4,7 @@ set -e
 if [ -z "$1" ] || [ "$1" == "all" ]
 then
     declare -a hil_test_libs=(
+        "lib_uart"
         "lib_i2c"
         "lib_i2s"
         "lib_spi"

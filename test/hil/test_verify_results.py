@@ -6,7 +6,7 @@ import pytest
 import xml.etree.ElementTree as ET
 
 if len(sys.argv) == 2:
-    libs = ["lib_i2c", "lib_i2s", "lib_spi"]
+    libs = ["lib_uart", "lib_i2c", "lib_i2s", "lib_spi"]
 else:
     libs = sys.argv[2:]
 

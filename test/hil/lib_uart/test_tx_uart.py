@@ -43,7 +43,7 @@ def test_uart_tx(request, capfd, baud, bpb, parity, stop):
     cwd = Path(request.fspath).parent
     binary = f'{cwd}/uart_test_tx/bin/test_hil_uart_tx_test.xe'
 
-    length_of_test = 128
+    length_of_test = 4
     tx_port = "tile[0]:XS1_PORT_1A"
     rx_port = None
     checker = UARTTxChecker(rx_port, tx_port, parity, baud, length_of_test, stop, bpb)

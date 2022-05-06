@@ -17,7 +17,7 @@ typedef struct {
     unsigned size;
     unsigned next_write_idx;
     unsigned next_read_idx;
-    uint8_t size_overlow_flag;
+    unsigned size_overlow_flag;
     uint8_t * buffer;
 } uart_buffer_t;
 

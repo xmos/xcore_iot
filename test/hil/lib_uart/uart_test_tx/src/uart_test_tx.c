@@ -12,20 +12,35 @@
 #include <xcore/interrupt_wrappers.h>
 #include "uart.h"
 
+#ifndef TEST_BAUD
+#define TEST_BAUD 921600
+#endif
+#ifndef TEST_DATA_BITS
+#define TEST_DATA_BITS 8
+#endif
+#ifndef TEST_PARITY
+#define TEST_PARITY UART_PARITY_NONE
+#endif
+#ifndef TEST_STOP_BITS
+#define TEST_STOP_BITS 1
+#endif
+
 #define SETSR(c) asm volatile("setsr %0" : : "n"(c));
 
 port_t p_uart_tx = XS1_PORT_1A;
 
 DECLARE_JOB(test, (void));
 
+uint8_t tx_data[] = {0xff, 0x00, 0xaa, 0x55};
+
 void test() {
     uart_tx_t uart;
     hwtimer_t tmr = hwtimer_alloc();
 
-    uart_tx_blocking_init(&uart, p_uart_tx, 921600, 8, UART_PARITY_NONE, 1, tmr);
+    uart_tx_blocking_init(&uart, p_uart_tx, TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS, tmr);
 
-    for(char b = 0x00; b <= 0x7f; b++){
-        uart_tx(&uart, b);
+    for(int i = 0; i < sizeof(tx_data); i++){
+        uart_tx(&uart, tx_data[i]);
     }
 
     uart_tx_deinit(&uart);
