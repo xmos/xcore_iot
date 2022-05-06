@@ -21,11 +21,17 @@ No hardware is needed for these tests as they all run using the ``xsim`` XCore s
 Running Tests
 *************
 
-Run all the tests with the following command:
+Build and run all the tests with the following command:
 
 .. code-block:: console
 
     $ ./run_tests.sh
+
+Alternatively, you can build and run tests for a single HIL module (lib_i2c in the following example):
+
+.. code-block:: console
+
+    $ ./run_tests.sh lib_i2c
 
 Alternatively, you can run tests for a single HIL module (lib_i2c in the following example):
 

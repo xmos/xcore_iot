@@ -40,7 +40,7 @@
 
 #include "rtos_intertile.h"
 
-#include "audio_pipeline/audio_pipeline.h"
+#include "audio_pipeline.h"
 
 #include "app_conf.h"
 

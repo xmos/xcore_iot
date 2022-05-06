@@ -31,7 +31,7 @@
 
 #include <stdint.h>
 #include "app_conf.h"
-#include "audio_pipeline/audio_pipeline.h"
+#include "audio_pipeline.h"
 
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION

@@ -1,9 +1,5 @@
-/*
- * adaptive_rate_adjust.h
- *
- *  Created on: Sep 15, 2021
- *      Author: mbruno
- */
+// Copyright 2021-2022 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #ifndef ADAPTIVE_RATE_ADJUST_H_
 #define ADAPTIVE_RATE_ADJUST_H_

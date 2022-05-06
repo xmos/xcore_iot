@@ -1,12 +1,19 @@
 #!/bin/bash
+set -e
 
-declare -a hil_test_libs=(
-    "lib_i2c"
-    "lib_i2s"
-    # "lib_qspi_io"
-    "lib_spi"
-    "lib_uart"
-    )
+if [ -z "$1" ] || [ "$1" == "all" ]
+then
+    declare -a hil_test_libs=(
+        "lib_i2c"
+        "lib_i2s"
+        "lib_spi"
+        #"lib_qspi_io"
+        )
+else
+    declare -a hil_test_libs=(
+        "$1"
+        )
+fi
 
 #****************************
 # Run tests and copy results
@@ -31,7 +38,7 @@ tests_end=`date +%s`
 #****************************
 # Check results
 #****************************
-pytest test_verify_results.py
+pytest test_verify_results.py ${hil_test_libs[*]}
 
 #****************************
 # Display time results
