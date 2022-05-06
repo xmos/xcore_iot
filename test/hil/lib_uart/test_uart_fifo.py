@@ -19,7 +19,7 @@ def test_fifo(request, capfd):
 
     binary = f'{cwd}/uart_test_fifo/bin/test_hil_uart_fifo_test.xe'
 
-    px.run_with_pyxsim(binary, simthreads = [])
+    px.run_with_pyxsim(binary, simthreads = [], simargs = ["--trace-to", "trace.txt"])
     capture = capfd.readouterr().out[:-1] #Tester appends an extra line feed which we don't need
 
 

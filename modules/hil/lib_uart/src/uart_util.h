@@ -3,6 +3,7 @@
 
 #pragma once
 #include <stddef.h>
+#include <stdint.h>
 
 #include <print.h> //TODO Remove me
 
@@ -16,13 +17,13 @@ typedef struct {
     unsigned size;
     unsigned head_idx;
     unsigned tail_idx;
-    char* buffer;
+    uint8_t * buffer;
 } uart_buffer_t;
 
-void init_buffer(uart_buffer_t *buff_cfg, char *buffer, unsigned size);
+void init_buffer(uart_buffer_t *buff_cfg, uint8_t *buffer, unsigned size);
 unsigned get_buffer_fill_level(uart_buffer_t *uart_cfg);
-uart_buffer_error_t push_char_into_buffer(uart_buffer_t *buff_cfg, char data);
-uart_buffer_error_t pop_char_from_buffer(uart_buffer_t *buff_cfg, char *data);
+uart_buffer_error_t push_char_into_buffer(uart_buffer_t *buff_cfg, uint8_t data);
+uart_buffer_error_t pop_char_from_buffer(uart_buffer_t *buff_cfg, uint8_t *data);
 
 static int buffer_used(uart_buffer_t *buff_cfg){
     return((buff_cfg->size && buff_cfg->buffer != NULL));

@@ -3,7 +3,7 @@
 
 #include "uart_util.h"
 
-void init_buffer(uart_buffer_t *buff_cfg, char *buffer, unsigned size){
+void init_buffer(uart_buffer_t *buff_cfg, uint8_t *buffer, unsigned size){
     buff_cfg->buffer = buffer;
     buff_cfg->size = size;
     buff_cfg->tail_idx = 0;
@@ -11,45 +11,41 @@ void init_buffer(uart_buffer_t *buff_cfg, char *buffer, unsigned size){
 
 }
 
-unsigned get_buffer_fill_level(uart_buffer_t *buff_cfg){
+inline unsigned get_buffer_fill_level(uart_buffer_t *buff_cfg){
     unsigned fill_level = 0;
-    if (buff_cfg->head_idx == buff_cfg->tail_idx){
-        fill_level = 0;
-    }
-    else if(buff_cfg->head_idx > buff_cfg->tail_idx){
+    if(buff_cfg->head_idx >= buff_cfg->tail_idx){
         fill_level = buff_cfg->head_idx - buff_cfg->tail_idx;
-    }
-    else {
+    } else {
         fill_level = buff_cfg->size + buff_cfg->tail_idx - buff_cfg->head_idx;
     }
     return fill_level;
 }
 
-uart_buffer_error_t push_char_into_buffer(uart_buffer_t *buff_cfg, char data){
-    uart_buffer_error_t err = UART_BUFFER_OK;
-    if(get_buffer_fill_level(buff_cfg) < buff_cfg->size){
-        buff_cfg->buffer[buff_cfg->head_idx] = data;
-        buff_cfg->head_idx += 1;
-        if(buff_cfg->head_idx == buff_cfg->size){
-           buff_cfg->head_idx = 0; 
-        }
-    } else {
-       err = UART_BUFFER_FULL;
+uart_buffer_error_t push_char_into_buffer(uart_buffer_t *buff_cfg, uint8_t data){
+    unsigned next_idx = buff_cfg->head_idx + 1;
+    if (next_idx == buff_cfg->size){
+        next_idx = 0; //Check for wrap
     }
-    return err;
+    if(next_idx == buff_cfg->tail_idx){
+         return UART_BUFFER_FULL;
+    }
+    buff_cfg->buffer[buff_cfg->head_idx] = data;
+    buff_cfg->head_idx = next_idx;
+
+    return UART_BUFFER_OK;
 }
 
-uart_buffer_error_t pop_char_from_buffer(uart_buffer_t *buff_cfg, char *data){    
+uart_buffer_error_t pop_char_from_buffer(uart_buffer_t *buff_cfg, uint8_t *data){    
     uart_buffer_error_t err = UART_BUFFER_OK;
-    if(get_buffer_fill_level(buff_cfg)){
+    if(buff_cfg->head_idx == buff_cfg->tail_idx){
+        return UART_BUFFER_EMPTY;
+    } else {
         *data = buff_cfg->buffer[buff_cfg->tail_idx];
         buff_cfg->tail_idx += 1;
         if(buff_cfg->tail_idx == buff_cfg->size){
-           buff_cfg->tail_idx = 0; 
-        }
-    } else {
-        err = UART_BUFFER_EMPTY;
+           buff_cfg->tail_idx = 0;
+       }
     }
-    return err;
+    return UART_BUFFER_OK;
 }
 
