@@ -76,6 +76,7 @@ typedef struct {
     uint8_t current_data_bit;
     uint8_t uart_data;
     uint8_t stop_bits;
+    uint8_t current_stop_bit;
     UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
     hwtimer_t tmr;
     uart_buffer_t buffer;
@@ -92,6 +93,7 @@ typedef struct {
     uint8_t current_data_bit;
     uint8_t uart_data;
     uint8_t stop_bits;
+    uint8_t current_stop_bit;
     UART_CALLBACK_ATTR void(*uart_callback_fptr)(uart_callback_t callback_info);
     hwtimer_t tmr;
     uart_buffer_t buffer;

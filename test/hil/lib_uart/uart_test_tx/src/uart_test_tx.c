@@ -37,10 +37,11 @@ DECLARE_JOB(test, (void));
 
 
 void test() {
-    uint8_t tx_data[] = {0xff, 0x00, 0xaa, 0x55};
+    uint8_t tx_data[] = {0xff, 0x00, 0x08, 0x55};
 
     uart_tx_t uart;
     hwtimer_t tmr = hwtimer_alloc();
+    // printf("UART setting: %d %d %d %d\n", TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS);
 
 #if TEST_USE_BUFFERED
 #else

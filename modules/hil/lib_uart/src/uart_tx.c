@@ -51,6 +51,7 @@ void uart_tx_init(
     xassert(parity == UART_PARITY_NONE || parity == UART_PARITY_EVEN || parity == UART_PARITY_ODD);
     uart_cfg->parity = parity;
     uart_cfg->stop_bits = stop_bits;
+    uart_cfg->current_stop_bit = 0;
     uart_cfg->current_data_bit = 0;
     uart_cfg->uart_data = 0;
     uart_cfg->state = UART_IDLE;
@@ -148,11 +149,10 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
         }
 
         case UART_PARITY: {
-            uint32_t parity_setting = (uart_cfg->parity == UART_PARITY_EVEN) ? 0 : 1;
+            uint32_t parity_setting = (uart_cfg->parity == UART_PARITY_EVEN) ? 1 : 0;
             uint32_t parity = (unsigned)uart_cfg->uart_data;
             // crc32(parity, parity_setting, 1); //http://bugzilla/show_bug.cgi?id=18663
             asm volatile("crc32 %0, %2, %3" : "=r" (parity) : "0" (parity), "r" (parity_setting), "r" (1));
-            parity &= 1;
             port_out(uart_cfg->tx_port, parity);
             uart_cfg->state = UART_STOP;
             uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks;
@@ -160,7 +160,11 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
      
         case UART_STOP: {   
             port_out(uart_cfg->tx_port, 1);
-            uart_cfg->state = UART_IDLE;
+            uart_cfg->current_stop_bit += 1;
+            if(uart_cfg->current_stop_bit == uart_cfg->stop_bits){
+               uart_cfg->state = UART_IDLE;
+               uart_cfg->current_stop_bit = 0;
+            }
             uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks;
             break;
         }
