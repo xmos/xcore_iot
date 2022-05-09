@@ -149,13 +149,14 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
         }
 
         case UART_PARITY: {
-            uint32_t parity_setting = (uart_cfg->parity == UART_PARITY_EVEN) ? 1 : 0;
+            uint32_t parity_setting = (uart_cfg->parity == UART_PARITY_EVEN) ? 0 : 1;
             uint32_t parity = (unsigned)uart_cfg->uart_data;
             // crc32(parity, parity_setting, 1); //http://bugzilla/show_bug.cgi?id=18663
             asm volatile("crc32 %0, %2, %3" : "=r" (parity) : "0" (parity), "r" (parity_setting), "r" (1));
             port_out(uart_cfg->tx_port, parity);
             uart_cfg->state = UART_STOP;
             uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks;
+            break;
         }
      
         case UART_STOP: {   
