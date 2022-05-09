@@ -10,13 +10,6 @@ from functools import partial
 print = partial(print, flush=True)
 
 
-Parity = dict(
-    UART_PARITY_EVEN=0,
-    UART_PARITY_ODD=1,
-    UART_PARITY_NONE=2,
-)
-
-
 class UARTTxChecker(px.SimThread):
     """
     This simulator thread will act as a UART device, and will check sent and
@@ -120,6 +113,7 @@ class UARTTxChecker(px.SimThread):
         if self.get_val_timeout(xsi, self._tx_port) == 0:
             print("Start bit recv'd")
         else:
+            print("Stop bit issue")
             return False
 
         # recv the byte

@@ -115,7 +115,6 @@ static inline void buffered_uart_tx_char_finished(uart_tx_t *uart_cfg){
     uart_buffer_error_t err = pop_byte_from_buffer(&uart_cfg->buffer, &uart_cfg->uart_data);
     if(err == UART_BUFFER_OK){
         uart_cfg->current_data_bit = 0;
-        pop_byte_from_buffer(&uart_cfg->buffer, &uart_cfg->uart_data);
         uart_cfg->state = UART_START;
     } else {
         triggerable_disable_trigger(uart_cfg->tmr);

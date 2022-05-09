@@ -12,6 +12,10 @@
 #include <xcore/interrupt_wrappers.h>
 #include "uart.h"
 
+#ifndef TEST_USE_BUFFERED
+#define TEST_USE_BUFFERED 0
+#endif
+
 #ifndef TEST_BAUD
 #define TEST_BAUD 921600
 #endif
@@ -31,13 +35,17 @@ port_t p_uart_tx = XS1_PORT_1A;
 
 DECLARE_JOB(test, (void));
 
-uint8_t tx_data[] = {0xff, 0x00, 0xaa, 0x55};
 
 void test() {
+    uint8_t tx_data[] = {0xff, 0x00, 0xaa, 0x55};
+
     uart_tx_t uart;
     hwtimer_t tmr = hwtimer_alloc();
 
+#if TEST_USE_BUFFERED
+#else
     uart_tx_blocking_init(&uart, p_uart_tx, TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS, tmr);
+#endif
 
     for(int i = 0; i < sizeof(tx_data); i++){
         uart_tx(&uart, tx_data[i]);
