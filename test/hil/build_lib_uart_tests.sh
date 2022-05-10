@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+#Build tests in parallel. Quite tough on host machine (200+ processes) but saves ~3x time
+parallel=0
+
 XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
 source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
@@ -282,21 +285,33 @@ do_build () {
 
    (cd ${path}; rm -rf build_ci_${application}_${board})
    (cd ${path}; mkdir -p  build_ci_${application}_${board})
-   # (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application} -j)
-   (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application}) 
+   if [ "$parallel" != "0" ]
+   then
+        (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application} -j)
+   else
+        (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application}) 
+   fi
    (cd ${path}; rm -rf build_ci_${application}_${board})
 }
 
 
 # run build processes and store pids in array
 for ((i = 0; i < ${#applications[@]}; i += 1)); do
-    do_build "$i" &
-    # do_build "$i"
-    pids[${i}]=$!
-    sleep 2 #Limit rate of spawning a bit
+
+    if [ "$parallel" == "0" ]
+    then
+        do_build "$i"
+    else
+        do_build "$i" &
+        pids[${i}]=$!
+        sleep 3 #Limit rate of spawning a bit to make life easier for host
+    fi
 done
 
-# wait for all pids
-for pid in ${pids[*]}; do
-    wait $pid
-done
+if [ "$parallel" != "0" ]
+then
+    # wait for all pids
+    for pid in ${pids[*]}; do
+        wait $pid
+    done
+fi
