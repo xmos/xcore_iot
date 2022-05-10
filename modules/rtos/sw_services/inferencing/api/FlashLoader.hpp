@@ -4,8 +4,10 @@
 #ifndef RTOS_FLASH_LOADER_H_
 #define RTOS_FLASH_LOADER_H_
 
+extern "C" {
 #include "ff.h"
 #include "rtos_qspi_flash.h"
+}
 
 namespace xcore {
 namespace rtos {
