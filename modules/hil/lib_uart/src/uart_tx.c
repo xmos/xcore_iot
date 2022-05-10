@@ -186,7 +186,10 @@ void uart_tx_handle_transition(uart_tx_t *uart_cfg){
 
 
 void uart_tx(uart_tx_t *uart_cfg, uint8_t data){
-    //CHeck to see if we are using interrupts/buffered mode
+    uint32_t mask = 0;
+    asm volatile("mkmsk %0, %1": "=r"(mask) : "r"(uart_cfg->num_data_bits));
+    data &= mask;//So pariy gets calc'd properly
+    //Check to see if we are using interrupts/buffered mode
     if(buffer_used(&uart_cfg->buffer)){
         if(get_buffer_fill_level(&uart_cfg->buffer) == 0 && uart_cfg->state == UART_IDLE){//Kick off a transmit
             uart_cfg->uart_data = data;

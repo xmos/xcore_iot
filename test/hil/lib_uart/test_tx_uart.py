@@ -53,12 +53,12 @@ def test_uart_tx(request, capfd, buffered, baud, bpb, parity, stop):
     rx_port = None
     checker = UARTTxChecker(rx_port, tx_port, parity, baud, length_of_test, stop, bpb)
     
-    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/test_tx_uart.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/test_tx_uart_{bpb}b.expect',
                                             regexp = False,
                                             ordered = True,
                                             ignore = ["TEST CONFIG:.*"])
 
     simargs = ["--trace-to", "trace.txt", "--vcd-tracing", "-tile tile[0] -ports -ports-detailed -cores -instructions -o trace.vcd"] #This is just for local debug so we can capture the run, pass as kwarg to run_with_pyxsim
-    px.run_with_pyxsim(binary, simthreads = [checker], simargs=simargs)
+    px.run_with_pyxsim(binary, simthreads = [checker])
     capture = capfd.readouterr().out[:-1] #Tester appends an extra line feed which we don't need
     tester.run(capture)
