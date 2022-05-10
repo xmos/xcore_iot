@@ -65,14 +65,6 @@ The following libraries are also provided by the SDK.
 
     * - Target
       - Description
-    * - sdk::device_memory_support_bare_metal
-      - Device memory helpers for bare-metal applications
-    * - sdk::device_memory_support_rtos
-      - Device memory helpers for RTOS applications
-    * - sdk::lib_otpinfo
-      - OTP info library
-    * - sdk::lib_random
-      - Random number generation library
     * - sdk::lib_src
       - Sample rate conversion API
     * - sdk::lib_xs3_math
