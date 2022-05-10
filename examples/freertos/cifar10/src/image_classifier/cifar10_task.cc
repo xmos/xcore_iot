@@ -20,17 +20,17 @@ extern "C" {
 #include "cifar10_task.h"
 #include "fs_support.h"
 
-void cifar10_task_app(void *args);
-void cifar10_runner_rx(void *args);
+void cifar10_task_inputs(void *args);
+void cifar10_task_inference(void *args);
 
 }; // extern "C"
 
 typedef struct inference_engine_args {
   QueueHandle_t input_queue;
-  rtos_intertile_address_t *intertile_addr;
+  QueueHandle_t output_queue;
 } inference_engine_args_t;
 
-#define TENSOR_ARENA_SIZE 58000
+#define TENSOR_ARENA_SIZE 64000
 
 static int argmax(const int8_t *A, const int N) {
   int m = 0;
@@ -48,15 +48,16 @@ static const char *test_input_files[] = {
     "airplane.bin", "bird.bin",  "cat.bin",  "deer.bin",
     "frog.bin",     "horse.bin", "truck.bin"};
 
-void cifar10_task_app(void *args) {
-  rtos_intertile_address_t *adr = (rtos_intertile_address_t *)args;
+void cifar10_task_inputs(void *args) {
+  inference_engine_args_t *targs = (inference_engine_args_t *)args;
+  QueueHandle_t input_queue = targs->input_queue;
+  QueueHandle_t output_queue = targs->output_queue;
   FIL current_file;
   unsigned int file_size;
-  uint8_t *data = NULL;
+  uint8_t *input_tensor = nullptr;
+  uint8_t *output_tensor = nullptr;
   FRESULT result;
   unsigned int bytes_read = 0;
-  uint8_t *output_tensor;
-  int output_tensor_len;
   char classification[12] = {0};
 
   while (1) {
@@ -68,19 +69,16 @@ void cifar10_task_app(void *args) {
         continue;
       }
 
-      data = (uint8_t *)pvPortMalloc(sizeof(unsigned char) * file_size);
+      input_tensor = (uint8_t *)pvPortMalloc(sizeof(unsigned char) * file_size);
 
-      configASSERT(data != NULL); /* Failed to allocate memory for file data */
+      configASSERT(input_tensor !=
+                   NULL); /* Failed to allocate memory for file data */
 
-      result = f_read(&current_file, data, file_size, &bytes_read);
+      result = f_read(&current_file, input_tensor, file_size, &bytes_read);
 
-      rtos_intertile_tx(adr->intertile_ctx, adr->port, data, file_size);
-
-      vPortFree(data);
-
-      output_tensor_len =
-          rtos_intertile_rx(adr->intertile_ctx, adr->port,
-                            (void **)&output_tensor, portMAX_DELAY);
+      xQueueSend(input_queue, &input_tensor, portMAX_DELAY);
+      xQueueReceive(output_queue, &output_tensor, portMAX_DELAY);
+      vPortFree(input_tensor);
 
       switch (argmax((int8_t *)output_tensor, 10)) {
       case 0:
@@ -118,39 +116,25 @@ void cifar10_task_app(void *args) {
       }
       rtos_printf("Classification of file %s is %s\n", test_input_files[i],
                   classification);
-      vPortFree(output_tensor);
     }
     rtos_printf("All files complete.  Repeating in 5 seconds...\n");
     vTaskDelay(pdMS_TO_TICKS(5000));
   }
 }
 
-void cifar10_runner_rx(void *args) {
+#pragma stackfunction 500
+void cifar10_task_inference(void *args) {
   inference_engine_args_t *targs = (inference_engine_args_t *)args;
-  QueueHandle_t q = targs->input_queue;
-  rtos_intertile_address_t *adr = targs->intertile_addr;
-  uint8_t *input_tensor;
-  int input_tensor_len;
-
-  while (1) {
-    input_tensor_len = rtos_intertile_rx(adr->intertile_ctx, adr->port,
-                                         (void **)&input_tensor, portMAX_DELAY);
-    xQueueSend(q, &input_tensor, portMAX_DELAY);
-  }
-}
-
-static void cifar10_task_runner(void *args) {
-  inference_engine_args_t *targs = (inference_engine_args_t *)args;
-  QueueHandle_t q = targs->input_queue;
-  rtos_intertile_address_t *adr = targs->intertile_addr;
-  int8_t *input_buffer = NULL;
+  QueueHandle_t input_queue = targs->input_queue;
+  QueueHandle_t output_queue = targs->output_queue;
+  int8_t *input_buffer = nullptr;
   size_t input_size = 0;
-  int8_t *output_buffer = NULL;
+  int8_t *output_buffer = nullptr;
   size_t output_size = 0;
-  uint8_t *tensor_arena = NULL;
-  uint8_t *input_tensor;
+  uint8_t *tensor_arena = nullptr;
+  uint8_t *input_tensor = nullptr;
   // dispatcher_t *dispatcher;
-  xcore::RTOSInferenceEngine<6, 8> inference_engine;
+  xcore::rtos::InferenceEngine<7, 18> inference_engine;
 
   tensor_arena = (uint8_t *)pvPortMalloc(TENSOR_ARENA_SIZE);
 
@@ -169,10 +153,22 @@ static void cifar10_task_runner(void *args) {
   resolver->AddMaxPool2D();
   resolver->AddCustom(tflite::ops::micro::xcore::Conv2D_V2_OpCode,
                       tflite::ops::micro::xcore::rtos::Register_Conv2D_V2());
+  resolver->AddCustom(
+      tflite::ops::micro::xcore::Load_Flash_OpCode,
+      tflite::ops::micro::xcore::rtos::Register_LoadFromFlash());
 
   // Load the model
-  if (inference_engine.LoadModel(cifar10_model_data) !=
-      xcore::InferenceEngineStatus::Ok) {
+  xcore::rtos::FatFSLoader flash_loader;
+  FIL model_file;
+  unsigned int model_file_size;
+  if (rtos_ff_get_file("model.bin", &model_file, &model_file_size) == 0) {
+    rtos_printf("Failed to load file model.bin\n");
+    vPortFree(tensor_arena);
+    vTaskDelete(NULL);
+  }
+  flash_loader.Init(&model_file);
+  if (inference_engine.LoadModel(cifar10_model_data, &flash_loader) !=
+      xcore::rtos::InferenceEngineStatus::Ok) {
     rtos_printf("Invalid model provided!\n");
     vPortFree(tensor_arena);
     vTaskDelete(NULL);
@@ -185,43 +181,35 @@ static void cifar10_task_runner(void *args) {
 
   while (1) {
     rtos_printf("Wait for input tensor...\n");
-    xQueueReceive(q, &input_tensor, portMAX_DELAY);
-
+    xQueueReceive(input_queue, &input_tensor, portMAX_DELAY);
     memcpy(input_buffer, input_tensor, input_size);
-    vPortFree(input_tensor);
 
     rtos_printf("Running inference...\n");
     inference_engine.Invoke();
     inference_engine.PrintProfilerSummary();
 
-    rtos_intertile_tx(adr->intertile_ctx, adr->port, output_buffer,
-                      output_size);
+    xQueueSend(output_queue, &output_buffer, portMAX_DELAY);
   }
 }
 
-void cifar10_app_task_create(rtos_intertile_address_t *intertile_addr,
-                             unsigned priority) {
-  xTaskCreate((TaskFunction_t)cifar10_task_app, "cifar10",
-              RTOS_THREAD_STACK_SIZE(cifar10_task_app), intertile_addr,
-              priority, NULL);
-}
-
-void cifar10_image_classifier_task_create(
-    rtos_intertile_address_t *intertile_addr, unsigned priority) {
+void cifar10_image_classifier_task_create(unsigned priority) {
   inference_engine_args_t *args =
       (inference_engine_args_t *)pvPortMalloc(sizeof(inference_engine_args_t));
   QueueHandle_t input_queue = xQueueCreate(1, sizeof(int32_t *));
+  QueueHandle_t output_queue = xQueueCreate(1, sizeof(int32_t *));
 
   configASSERT(args);
   configASSERT(input_queue);
+  configASSERT(output_queue);
 
   args->input_queue = input_queue;
-  args->intertile_addr = intertile_addr;
+  args->output_queue = output_queue;
 
-  xTaskCreate((TaskFunction_t)cifar10_task_runner, "cifar10", 500, args,
-              priority, NULL);
+  xTaskCreate((TaskFunction_t)cifar10_task_inference, "cifar10_inference",
+              RTOS_THREAD_STACK_SIZE(cifar10_task_inference), args, priority,
+              NULL);
 
-  xTaskCreate((TaskFunction_t)cifar10_runner_rx, "cifar10_rx",
-              RTOS_THREAD_STACK_SIZE(cifar10_runner_rx), args, priority - 1,
+  xTaskCreate((TaskFunction_t)cifar10_task_inputs, "cifar10_inputs",
+              RTOS_THREAD_STACK_SIZE(cifar10_task_inputs), args, priority,
               NULL);
 }

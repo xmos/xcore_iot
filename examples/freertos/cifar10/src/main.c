@@ -13,9 +13,9 @@
 
 /* App headers */
 #include "app_conf.h"
-#include "platform/platform_init.h"
-#include "platform/driver_instances.h"
 #include "cifar10_task.h"
+#include "platform/driver_instances.h"
+#include "platform/platform_init.h"
 
 void vApplicationMallocFailedHook(void) {
   rtos_printf("Malloc Failed on tile %d!\n", THIS_XCORE_TILE);
@@ -28,46 +28,34 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName) {
   configASSERT(0);
 }
 
-void startup_task(void *arg)
-{
-    rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE, portGET_CORE_ID());
+void startup_task(void *arg) {
+  rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE,
+              portGET_CORE_ID());
 
-    platform_start();
-
-    static rtos_intertile_address_t cifar10_addr_s;
-    static rtos_intertile_address_t *cifar10_addr = &cifar10_addr_s;
-
-    cifar10_addr->intertile_ctx = intertile_ctx;
-    cifar10_addr->port = CIFAR10_PORT;
+  platform_start();
 
 #if ON_TILE(0)
-    cifar10_app_task_create(cifar10_addr, appconfCIFAR10_TASK_PRIORITY);
+  cifar10_image_classifier_task_create(appconfCIFAR10_TASK_PRIORITY);
 #endif
 
-#if ON_TILE(1)
-    cifar10_image_classifier_task_create(cifar10_addr, appconfCIFAR10_TASK_PRIORITY);
-#endif
-
-	for (;;) {
-		rtos_printf("Tile[%d]:\n\tMinimum heap free: %d\n\tCurrent heap free: %d\n", THIS_XCORE_TILE, xPortGetMinimumEverFreeHeapSize(), xPortGetFreeHeapSize());
-		vTaskDelay(pdMS_TO_TICKS(5000));
-	}
+  for (;;) {
+    rtos_printf("Tile[%d]:\n\tMinimum heap free: %d\n\tCurrent heap free: %d\n",
+                THIS_XCORE_TILE, xPortGetMinimumEverFreeHeapSize(),
+                xPortGetFreeHeapSize());
+    vTaskDelay(pdMS_TO_TICKS(5000));
+  }
 }
 
-static void tile_common_init(chanend_t c)
-{
-    platform_init(c);
-    chanend_free(c);
+static void tile_common_init(chanend_t c) {
+  platform_init(c);
+  chanend_free(c);
 
-    xTaskCreate((TaskFunction_t) startup_task,
-                "startup_task",
-                RTOS_THREAD_STACK_SIZE(startup_task),
-                NULL,
-                appconfSTARTUP_TASK_PRIORITY,
-                NULL);
+  xTaskCreate((TaskFunction_t)startup_task, "startup_task",
+              RTOS_THREAD_STACK_SIZE(startup_task), NULL,
+              appconfSTARTUP_TASK_PRIORITY, NULL);
 
-    rtos_printf("start scheduler on tile %d\n", THIS_XCORE_TILE);
-    vTaskStartScheduler();
+  rtos_printf("start scheduler on tile %d\n", THIS_XCORE_TILE);
+  vTaskStartScheduler();
 }
 
 #if ON_TILE(0)

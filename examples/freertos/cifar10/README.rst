@@ -61,7 +61,7 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
         $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
         $ cd build
-        $ make example_freertos_cifar10_sram
+        $ make example_freertos_cifar10
 
 .. tab:: Windows
 
@@ -69,7 +69,7 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
         $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=tools/xmos_cmake_toolchain/xs3a.cmake
         $ cd build
-        $ nmake example_freertos_cifar10_sram
+        $ nmake example_freertos_cifar10
 
 
 ***********************
@@ -82,13 +82,13 @@ Before running the firmware, the filesystem containing the images must be flashe
 
     .. code-block:: console
 
-        $ make flash_fs_example_freertos_cifar10_sram
+        $ make flash_fs_example_freertos_cifar10
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake flash_fs_example_freertos_cifar10_sram
+        $ nmake flash_fs_example_freertos_cifar10
 
 
 ********************
@@ -102,13 +102,13 @@ Running with hardware.
 
     .. code-block:: console
 
-        $ make run_example_freertos_cifar10_sram
+        $ make run_example_freertos_cifar10
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_example_freertos_cifar10_sram
+        $ nmake run_example_freertos_cifar10
 
 ********************
 Optimizing the model
@@ -120,7 +120,7 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
 .. code-block:: console
 
-    $ xcore-opt -o model/model_xcore.tflite model/model_quant.tflite 
+    $ xcore-opt --xcore-flash-image-file=filesystem_support/model.bin -o model/model_xcore.tflite model/model_quant.tflite
 
 Converting flatbuffer to source file
 ====================================
