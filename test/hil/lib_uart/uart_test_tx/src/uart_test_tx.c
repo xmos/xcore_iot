@@ -12,24 +12,8 @@
 #include <xcore/interrupt_wrappers.h>
 #include "uart.h"
 
-#ifndef TEST_USE_BUFFERED
-#define TEST_USE_BUFFERED 0
-#endif
+#include "uart_test_common.h"
 
-#ifndef TEST_BAUD
-#define TEST_BAUD 921600
-#endif
-#ifndef TEST_DATA_BITS
-#define TEST_DATA_BITS 8
-#endif
-#ifndef TEST_PARITY
-#define TEST_PARITY UART_PARITY_NONE
-#endif
-#ifndef TEST_STOP_BITS
-#define TEST_STOP_BITS 1
-#endif
-
-#define SETSR(c) asm volatile("setsr %0" : : "n"(c));
 
 port_t p_uart_tx = XS1_PORT_1A;
 

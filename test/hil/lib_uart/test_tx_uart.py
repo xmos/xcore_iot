@@ -7,8 +7,8 @@ from pathlib import Path
 import Pyxsim as px
 import pytest
 
-buffered_args = {   "unbuffered" : 0,
-                    "buffered": 1}
+buffered_args = {   "UNBUFFERED" : 0,
+                    "BUFFERED": 1}
 
 speed_args = {
               # "1843200 baud": 1843200,
@@ -43,7 +43,10 @@ def test_uart_tx(request, capfd, buffered, baud, bpb, parity, stop):
     myenv = {'baud': baud}
     cwd = Path(request.fspath).parent
     parity_key = [key for key, value in parity_args.items() if value == parity][0] #reverse lookup because we use the parity key name in the binary
-    binary = f'{cwd}/uart_test_tx/bin/test_hil_uart_tx_test_buffer{buffered}_{baud}_{bpb}_{parity_key}_{stop}.xe'
+    buffer_key = [key for key, value in buffered_args.items() if value == buffered][0] #reverse lookup because we use the parity key name in the binary
+
+    binary = f'{cwd}/uart_test_tx/bin/test_hil_uart_tx_test_{buffer_key}_{baud}_{bpb}_{parity_key}_{stop}.xe'
+    assert Path(binary).exists()
 
     length_of_test = 4
     tx_port = "tile[0]:XS1_PORT_1A"

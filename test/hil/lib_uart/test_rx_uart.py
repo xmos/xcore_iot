@@ -8,18 +8,17 @@ import Pyxsim as px
 import pytest
 import sys
 
+buffered_args = {   "UNBUFFERED" : 0,
+                    "BUFFERED": 1}
+
 speed_args = {"1843200 baud": 1843200,
               "921600 baud": 921600,
               "576000 baud": 576000,
               "115200 baud": 115200,
-              "38400 baud": 38400,
-              "19200 baud": 19200,
-              "9600 baud": 9600,
-              "1200 baud": 1200}
+              "9600 baud": 9600
+              }
 
 data_bit_args = {   "eight": 8,            
-                    "seven": 7,
-                    "six": 6,
                     "five": 5}
 
 parity_args = { "NONE": 0,
@@ -29,29 +28,34 @@ parity_args = { "NONE": 0,
 stop_bit_args = {   "one": 1,
                     "two": 2}
 
-# speed_args = {"115200 baud": 115200}
+speed_args = {"115200 baud": 115200}
 # speed_args = {"230400 baud": 230400}
-speed_args = {"576000 baud": 576000}
+# speed_args = {"576000 baud": 576000}
 
 data_bit_args = {"eight": 8}
 parity_args = { "NONE": 0}                
 # parity_args = { "EVEN": 1}                
 stop_bit_args = {"one": 1}
 
+@pytest.mark.parametrize("buffered", buffered_args.values(), ids=buffered_args.keys())
 @pytest.mark.parametrize("baud", speed_args.values(), ids=speed_args.keys())
 @pytest.mark.parametrize("bpb", data_bit_args.values(), ids=data_bit_args.keys())
 @pytest.mark.parametrize("parity", parity_args.values(), ids=parity_args.keys())
 @pytest.mark.parametrize("stop", stop_bit_args.values(), ids=stop_bit_args.keys())
-def test_uart_rx(request, capfd, baud, bpb, parity, stop):
+def test_uart_rx(request, capfd, buffered, baud, bpb, parity, stop):
     myenv = {'baud': baud}
     cwd = Path(request.fspath).parent
-    binary = f'{cwd}/uart_test_rx/bin/test_hil_uart_rx_test.xe'
+    parity_key = [key for key, value in parity_args.items() if value == parity][0] #reverse lookup because we use the parity key name in the binary
+    buffer_key = [key for key, value in buffered_args.items() if value == buffered][0] #reverse lookup 
+
+    binary = f'{cwd}/uart_test_rx/bin/test_hil_uart_rx_test_{buffer_key}_{baud}_{bpb}_{parity_key}_{stop}.xe'
+    assert Path(binary).exists()
 
     tx_port = "tile[0]:XS1_PORT_1A" #Used for synch to start checker
     rx_port = "tile[0]:XS1_PORT_1B"
-    checker = UARTRxChecker(rx_port, tx_port, parity, baud, stop, bpb, data=[0x7f, 0x00, 0x2f, 0xff])
+    checker = UARTRxChecker(rx_port, tx_port, parity, baud, stop, bpb, data=[0xff, 0x00, 0x08, 0x55])
     
-    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/test_rx_uart.expect',
+    tester = px.testers.PytestComparisonTester(f'{cwd}/expected/test_rx_uart_{bpb}b.expect',
                                             regexp = False,
                                             ordered = True,
                                             ignore = ["TEST CONFIG:.*"])

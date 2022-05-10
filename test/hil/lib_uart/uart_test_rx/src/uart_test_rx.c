@@ -13,10 +13,9 @@
 #include <xcore/interrupt_wrappers.h>
 
 #include "uart.h"
+#include "uart_test_common.h"
 
-#define USE_BUFFERED_UART   0
 
-#define SETSR(c) asm volatile("setsr %0" : : "n"(c));
 #define NUM_RX_WORDS    4
 
 port_t p_uart_tx = XS1_PORT_1A;
@@ -50,6 +49,7 @@ UART_CALLBACK_ATTR void rx_callback(uart_callback_t callback_info){
     }
 }
 
+
 DEFINE_INTERRUPT_PERMITTED(UART_INTERRUPTABLE_FUNCTIONS, void, test, void){
     uart_rx_t uart;
     hwtimer_t tmr = hwtimer_alloc();
@@ -57,20 +57,24 @@ DEFINE_INTERRUPT_PERMITTED(UART_INTERRUPTABLE_FUNCTIONS, void, test, void){
     char buffer[64];
     char test_rx[NUM_RX_WORDS];
 
-#if USE_BUFFERED_UART
-    uart_rx_init(&uart, p_uart_rx, 230400, 8, UART_PARITY_NONE, 1, tmr,
+    // printf("UART setting: %d %d %d %d\n", TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS);
+
+
+#if TEST_USE_BUFFERED
+    uart_rx_init(&uart, p_uart_rx, TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS, tmr,
         buffer, sizeof(buffer), rx_callback);
 #else
-    uart_rx_init(&uart, p_uart_rx, 576000, 8, UART_PARITY_NONE, 1, tmr,
+    uart_rx_init(&uart, p_uart_rx, TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS, tmr,
         NULL, 0, rx_callback);
 #endif
+
     //Tester waits until it can see the tx_port driven to idle
     port_enable(p_uart_tx);
     port_out(p_uart_tx, 1); //Set to drive idle
 
     //Tester will now transmit the bytes
 
-#if USE_BUFFERED_UART
+#if TEST_USE_BUFFERED
     while(bytes_received < NUM_RX_WORDS);
 #endif
 

@@ -2,7 +2,7 @@
 # Gather Sources
 #**********************
 file(GLOB_RECURSE APP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
-set(APP_INCLUDES ${CMAKE_CURRENT_LIST_DIR}/src)
+set(APP_INCLUDES ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_LIST_DIR}/..)
 
 #**********************
 # Flags
@@ -55,7 +55,7 @@ foreach(buffer ${TEST_USE_BUFFERED})
         foreach(data ${TEST_DATA_BITS})
             foreach(parity ${TEST_PARITY})
                 foreach(stop ${TEST_STOP_BITS})
-                    set(TARGET_NAME "test_hil_uart_tx_test_buffer${buffer}_${baud}_${data}_${parity}_${stop}")
+                    set(TARGET_NAME "test_hil_uart_tx_test_${buffer}_${baud}_${data}_${parity}_${stop}")
                     # message(STATUS "${TARGET_NAME}") #Print so we can copy to build_tests sh file
                     add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
                     target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
