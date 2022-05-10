@@ -10,18 +10,15 @@ import pytest
 buffered_args = {   "unbuffered" : 0,
                     "buffered": 1}
 
-speed_args = {"1843200 baud": 1843200,
+speed_args = {
+              # "1843200 baud": 1843200,
               "921600 baud": 921600,
               "576000 baud": 576000,
               "115200 baud": 115200,
-              "38400 baud": 38400,
-              "19200 baud": 19200,
-              "9600 baud": 9600,
-              "1200 baud": 1200}
+              "9600 baud": 9600
+              }
 
 data_bit_args = {   "eight": 8,            
-                    "seven": 7,
-                    "six": 6,
                     "five": 5}
 
 parity_args = { "NONE": 0,
@@ -31,11 +28,11 @@ parity_args = { "NONE": 0,
 stop_bit_args = {   "one": 1,
                     "two": 2}
 
-buffered_args = {   "unbuffered" : 0}
-speed_args = {"921600 baud": 921600}
-data_bit_args = {"eight": 8}
-parity_args = { "NONE": 0}                
-stop_bit_args = {"one": 1}
+# buffered_args = {   "unbuffered" : 0}
+# speed_args = {"921600 baud": 921600}
+# data_bit_args = {"eight": 8}
+# parity_args = { "NONE": 0}                
+# stop_bit_args = {"one": 1}
 
 @pytest.mark.parametrize("buffered", buffered_args.values(), ids=buffered_args.keys())
 @pytest.mark.parametrize("baud", speed_args.values(), ids=speed_args.keys())

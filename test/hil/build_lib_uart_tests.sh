@@ -12,6 +12,7 @@ then
     applications=(
         # "test_hil_uart_fifo_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
         # "test_hil_uart_rx_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+
 "test_hil_uart_tx_test_buffer0_1843200_8_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
 "test_hil_uart_tx_test_buffer0_1843200_8_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
 "test_hil_uart_tx_test_buffer0_1843200_8_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
@@ -71,7 +72,67 @@ then
 "test_hil_uart_tx_test_buffer0_9600_5_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
 "test_hil_uart_tx_test_buffer0_9600_5_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
 "test_hil_uart_tx_test_buffer0_9600_5_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
-"test_hil_uart_tx_test_buffer0_9600_5_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake" 
+"test_hil_uart_tx_test_buffer0_9600_5_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_8_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_8_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_8_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_8_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_8_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_8_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_5_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_5_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_5_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_5_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_5_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_1843200_5_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_8_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_8_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_8_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_8_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_8_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_8_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_5_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_5_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_5_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_5_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_5_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_921600_5_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_8_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_8_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_8_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_8_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_8_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_8_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_5_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_5_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_5_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_5_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_5_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_576000_5_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_8_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_8_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_8_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_8_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_8_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_8_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_5_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_5_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_5_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_5_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_5_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_115200_5_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_8_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_8_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_8_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_8_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_8_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_8_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_5_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_5_NONE_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_5_EVEN_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_5_EVEN_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_5_ODD_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
+"test_hil_uart_tx_test_buffer1_9600_5_ODD_2 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake" 
 )
 elif [ "$1" == "smoke" ]
 then
@@ -97,9 +158,9 @@ do_build () {
 
    (cd ${path}; rm -rf build_ci_${application}_${board})
    (cd ${path}; mkdir -p  build_ci_${application}_${board})
-   (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application} -j)
-   # (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application}) 
-   # (cd ${path}; rm -rf build_ci_${application}_${board})
+   # (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application} -j)
+   (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application}) 
+   (cd ${path}; rm -rf build_ci_${application}_${board})
 }
 
 

@@ -93,7 +93,7 @@ void uart_rx_init(
 
 static inline void sleep_until_start_transition(uart_rx_t *uart_cfg){
     if(uart_cfg->tmr){
-        //Wait on a the port transition to low
+        //Wait on a port transition to low
         port_in_when_pinseq(uart_cfg->rx_port, PORT_UNBUFFERED, 0);
     }else{
         //Poll the port
