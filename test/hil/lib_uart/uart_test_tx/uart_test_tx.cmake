@@ -20,7 +20,7 @@ set(APP_LINK_OPTIONS
 # Tile Targets
 #**********************
 if(NOT DEFINED ENV{TEST_USE_BUFFERED})
-    set(TEST_USE_BUFFERED 0 1)
+    set(TEST_USE_BUFFERED UNBUFFERED BUFFERED)
 else()
     set(TEST_USE_BUFFERED $ENV{TEST_USE_BUFFERED})
 endif()
