@@ -33,7 +33,7 @@ void keyword_engine_intertile_samples_in_task(void *arg);
 
 static StreamBufferHandle_t samples_to_engine_stream_buf = 0;
 
-static xcore::RTOSInferenceEngine<4, 13> inference_engine;
+static xcore::rtos::InferenceEngine<4, 13> inference_engine;
 static struct FrontendState frontend_state;
 static struct FrontendOutput frontend_output;
 static int32_t audio32_recv_buf[appconfINFERENCE_FRAMES_PER_INFERENCE];
@@ -59,8 +59,8 @@ void keyword_engine_task(keyword_engine_args_t *args) {
   int8_t *output_buffer = nullptr;
   int8_t *feature_input_buffer = nullptr;
   size_t feature_input_row = 0;
-  // xcore::QuantizationParams input_quant;
-  xcore::QuantizationParams output_quant;
+  // xcore::rtos::QuantizationParams input_quant;
+  xcore::rtos::QuantizationParams output_quant;
 
   /* Perform any initialization here */
   initialize_features(&frontend_state);
@@ -77,7 +77,7 @@ void keyword_engine_task(keyword_engine_args_t *args) {
 
   // Load the model
   if (inference_engine.LoadModel(keyword_model_data) !=
-      xcore::InferenceEngineStatus::Ok) {
+      xcore::rtos::InferenceEngineStatus::Ok) {
     rtos_printf("Invalid model provided!\n");
     vPortFree(tensor_arena);
     vPortFree(feature_input_buffer);
