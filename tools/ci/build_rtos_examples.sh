@@ -11,7 +11,7 @@ mkdir -p ${DIST_DIR}
 
 # row format is: "name make_target BOARD toolchain"
 applications=(
-    "cifar10          example_freertos_cifar10_sram     XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+    "cifar10          example_freertos_cifar10          XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
     "device_control   example_freertos_device_control   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
     "dispatcher       example_freertos_dispatcher       XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
     "explorer_board   example_freertos_explorer_board   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"

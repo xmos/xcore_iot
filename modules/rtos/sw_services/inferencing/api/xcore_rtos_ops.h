@@ -14,6 +14,7 @@ namespace xcore {
 namespace rtos {
 
 TfLiteRegistration *Register_Conv2D_V2();
+TfLiteRegistration *Register_LoadFromFlash();
 
 } // namespace rtos
 
