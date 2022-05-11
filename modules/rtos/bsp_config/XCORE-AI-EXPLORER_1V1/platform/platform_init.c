@@ -7,16 +7,6 @@
 #include "platform/app_pll_ctrl.h"
 #include "platform/driver_instances.h"
 
-/** TILE 0 Clock Blocks */
-#define FLASH_CLKBLK  XS1_CLKBLK_3
-#define MCLK_CLKBLK   XS1_CLKBLK_4
-#define SPI_CLKBLK    XS1_CLKBLK_5
-
-/** TILE 1 Clock Blocks */
-#define PDM_CLKBLK_1  XS1_CLKBLK_1
-#define PDM_CLKBLK_2  XS1_CLKBLK_2
-#define I2S_CLKBLK    XS1_CLKBLK_3
-
 static void mclk_init(void)
 {
 #if ON_TILE(1)
