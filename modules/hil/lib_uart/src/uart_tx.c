@@ -9,7 +9,7 @@
 void uart_tx_handle_transition(uart_tx_t *uart_cfg);
 
 
-DEFINE_INTERRUPT_CALLBACK(UART_INTERRUPTABLE_FUNCTIONS, transition_isr, callback_info){
+DEFINE_INTERRUPT_CALLBACK(UART_TX_INTERRUPTABLE_FUNCTIONS, transition_isr, callback_info){
     uart_tx_t *uart_cfg = (uart_tx_t*) callback_info;
     uart_tx_handle_transition(uart_cfg);
 }

@@ -10,7 +10,7 @@
 
 void uart_rx_handle_event(uart_rx_t *uart_cfg);
 
-DEFINE_INTERRUPT_CALLBACK(UART_INTERRUPTABLE_FUNCTIONS, uart_rx_isr, callback_info){
+DEFINE_INTERRUPT_CALLBACK(UART_RX_INTERRUPTABLE_FUNCTIONS, uart_rx_isr, callback_info){
     uart_rx_t *uart_cfg = (uart_rx_t*) callback_info;
     uart_rx_handle_event(uart_cfg);
 }
@@ -41,6 +41,7 @@ void uart_rx_init(
         ){
 
     port_enable(p_dbg);
+    port_out(p_dbg, 0xff);
 
     uart_cfg->rx_port = rx_port;
     uart_cfg->bit_time_ticks = XS1_TIMER_HZ / baud_rate;
@@ -69,7 +70,6 @@ void uart_rx_init(
 
     //TODO work out if buffer can be used without HW timer
     if(buffer_used(&uart_cfg->buffer)){
-        printstrln("SETTING UP ISR");
         init_buffer(&uart_cfg->buffer, buffer, buffer_size);
 
         //Setup interrupts
@@ -99,6 +99,7 @@ static inline void sleep_until_start_transition(uart_rx_t *uart_cfg){
         //Poll the port
         while(port_in(uart_cfg->rx_port) & 0x1);
     }
+    uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
 }
 
 static inline void sleep_until_next_sample(uart_rx_t *uart_cfg){
@@ -117,12 +118,15 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
     port_out(p_dbg, uart_cfg->state);
     switch(uart_cfg->state){
         case UART_IDLE: {
-            uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
+            if(buffer_used(&uart_cfg->buffer)){
+                uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
+            }
+            //Double check line still low
             uint32_t pin = port_in(uart_cfg->rx_port) & 0x1;
             if(pin != 0){
                 (*uart_cfg->uart_callback_fptr)(UART_START_BIT_ERROR);
             }
-            uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks >> 1;
+            uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks >> 1; //Halfway through start bit
             uart_cfg->state = UART_START;
             if(buffer_used(&uart_cfg->buffer)){
                 triggerable_set_trigger_enabled(uart_cfg->rx_port, 0);
@@ -189,7 +193,7 @@ void uart_rx_handle_event(uart_rx_t *uart_cfg){
             uint32_t pin = port_in(uart_cfg->rx_port) & 0x1;
             if(pin != 1){
                 (*uart_cfg->uart_callback_fptr)(UART_FRAMING_ERROR);
-            } else {
+            } else if(buffer_used(&uart_cfg->buffer)){
                 (*uart_cfg->uart_callback_fptr)(UART_RX_COMPLETE);
             }
             uart_cfg->state = UART_IDLE;

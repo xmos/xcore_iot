@@ -13,7 +13,7 @@ buffered_args = {   "UNBUFFERED" : 0,
 
 speed_args = {
               # "1843200 baud": 1843200,
-              # "921600 baud": 921600,
+              "921600 baud": 921600,
               "576000 baud": 576000,
               "115200 baud": 115200,
               "9600 baud": 9600
@@ -29,6 +29,9 @@ parity_args = { "NONE": 0,
 stop_bit_args = {   "one": 1,
                     "two": 2}
 
+# buffered_args = {   "UNBUFFERED" : 0}
+# buffered_args = {   "BUFFERED" : 1}
+# speed_args = {"1843200 baud": 1843200}
 # speed_args = {"921600 baud": 921600}
 # speed_args = {"576000 baud": 576000}
 # data_bit_args = {"eight": 8}
@@ -47,6 +50,9 @@ def test_uart_rx(request, capfd, buffered, baud, bpb, parity, stop):
     parity_key = [key for key, value in parity_args.items() if value == parity][0] #reverse lookup because we use the parity key name in the binary
     buffer_key = [key for key, value in buffered_args.items() if value == buffered][0] #reverse lookup 
 
+    if buffered and baud >= 921600:
+        pytest.skip(f"Skipping {buffer_key} at {baud} baud")
+
     binary = f'{cwd}/uart_test_rx/bin/test_hil_uart_rx_test_{buffer_key}_{baud}_{bpb}_{parity_key}_{stop}.xe'
     assert Path(binary).exists()
 
@@ -59,8 +65,9 @@ def test_uart_rx(request, capfd, buffered, baud, bpb, parity, stop):
                                             ordered = True,
                                             ignore = ["TEST CONFIG:.*"])
 
-    simargs = ["--trace-to", "trace.txt", "--vcd-tracing", "-tile tile[0] -ports -ports-detailed -cores -instructions -o trace.vcd"] #This is just for local debug so we can capture the run, pass as kwarg to run_with_pyxsim
-    px.run_with_pyxsim(binary, simthreads = [checker])
+    simargs = ['--weak-external-drive']
+    simargs = ['--weak-external-drive', "--trace-to", "trace.txt", "--vcd-tracing", "-tile tile[0] -ports -ports-detailed -cores -instructions -o trace.vcd"] #This is just for local debug so we can capture the run, pass as kwarg to run_with_pyxsim
+    px.run_with_pyxsim(binary, simthreads = [checker], simargs=simargs)
     capture = capfd.readouterr().out[:-1] #Tester appends an extra line feed which we don't need
 
     tester.run(capture)

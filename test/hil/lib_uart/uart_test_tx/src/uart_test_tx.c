@@ -14,20 +14,48 @@
 
 #include "uart_test_common.h"
 
+volatile unsigned tx_empty = 0;
+
+UART_CALLBACK_ATTR void tx_callback(uart_callback_t callback_info){
+    switch(callback_info){
+        case UART_TX_EMPTY:
+            tx_empty = 1;
+            break;
+        case UART_START_BIT_ERROR:
+            printstrln("UART_START_BIT_ERROR");
+            break;
+        case UART_PARITY_ERROR:
+            printstrln("UART_PARITY_ERROR");
+            break;
+        case UART_FRAMING_ERROR:
+            printstrln("UART_FRAMING_ERROR");
+            break;
+        case UART_OVERRUN_ERROR:
+            printstrln("UART_OVERRUN_ERROR");
+            break;
+        case UART_UNDERRUN_ERROR:
+            printstrln("UART_UNDERRUN_ERROR");
+            break;
+        case UART_RX_COMPLETE:
+            printstrln("UART_UNDERRUN_ERROR");
+            break;
+    }
+}
 
 port_t p_uart_tx = XS1_PORT_1A;
 
-DECLARE_JOB(test, (void));
 
-
-void test() {
+DEFINE_INTERRUPT_PERMITTED(UART_TX_INTERRUPTABLE_FUNCTIONS, void, test, void){
     uint8_t tx_data[] = {0xff, 0x00, 0x08, 0x55};
+
+    char buffer[64];
 
     uart_tx_t uart;
     hwtimer_t tmr = hwtimer_alloc();
     // printf("UART setting: %d %d %d %d\n", TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS);
 
-#if TEST_USE_BUFFERED
+#if TEST_BUFFER
+    uart_tx_init(&uart, p_uart_tx, TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS, tmr, buffer, sizeof(buffer), tx_callback);
 #else
     uart_tx_blocking_init(&uart, p_uart_tx, TEST_BAUD, TEST_DATA_BITS, TEST_PARITY, TEST_STOP_BITS, tmr);
 #endif
@@ -35,6 +63,10 @@ void test() {
     for(int i = 0; i < sizeof(tx_data); i++){
         uart_tx(&uart, tx_data[i]);
     }
+
+#if TEST_BUFFER
+    while(!tx_empty);
+#endif
 
     uart_tx_deinit(&uart);
 
@@ -51,7 +83,7 @@ void burn(void) {
 
 int main(void) {
     PAR_JOBS (
-        PJOB(test, ()),
+        PJOB(INTERRUPT_PERMITTED(test), ()),
         PJOB(burn, ()),
         PJOB(burn, ()),
         PJOB(burn, ()),
