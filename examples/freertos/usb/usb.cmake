@@ -19,12 +19,6 @@ set(APP_COMPILER_FLAGS
     ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
 )
 set(APP_COMPILE_DEFINITIONS
-    # CFG_TUSB_MCU=OPT_MCU_NONE
-    # CFG_TUSB_OS=OPT_OS_CUSTOM
-    # BOARD_DEVICE_RHPORT_NUM=0
-    # CFG_TUD_EP_MAX=12  ## RTOS_USB_ENDPOINT_COUNT_MAX
-    # CFG_TUD_TASK_QUEUE_SZ=8
-
     CFG_TUSB_DEBUG_PRINTF=rtos_printf
     CFG_TUSB_DEBUG=0
 
@@ -174,6 +168,49 @@ merge_binaries(example_freertos_usb_tusb_demo_cdc_msc tile0_example_freertos_usb
 #**********************
 create_run_target(example_freertos_usb_tusb_demo_cdc_msc)
 create_debug_target(example_freertos_usb_tusb_demo_cdc_msc)
+
+
+#**********************
+# DFU Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/dfu/src/*.c )
+set(DEMO_INCLUDES              ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/dfu/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED
+                               DFU_DEMO=1
+)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_dfu)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_dfu)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(example_freertos_usb_tusb_demo_dfu tile0_example_freertos_usb_tusb_demo_dfu tile1_example_freertos_usb_tusb_demo_dfu 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(example_freertos_usb_tusb_demo_dfu)
+create_debug_target(example_freertos_usb_tusb_demo_dfu)
 
 
 #**********************
