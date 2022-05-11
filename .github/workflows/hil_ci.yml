@@ -35,6 +35,7 @@ jobs:
       lib_i2c: ${{ steps.filter.outputs.lib_i2c }}
       lib_i2s: ${{ steps.filter.outputs.lib_i2s }}
       lib_spi: ${{ steps.filter.outputs.lib_spi }}
+      lib_uart: ${{ steps.filter.outputs.lib_uart }}
     steps:
     - uses: dorny/paths-filter@v2
       id: filter
@@ -49,6 +50,9 @@ jobs:
           lib_spi:
             - 'modules/hil/lib_spi/**'
             - 'test/hil/lib_spi/**'
+          lib_uart:
+            - 'modules/hil/lib_uart/**'
+            - 'test/hil/lib_uart/**'
             
   i2c_hil_tests:
     name: I2C HIL tests
@@ -106,3 +110,23 @@ jobs:
       - name: Run tests
         run: |
           docker run --user $(id -u) --rm -w /xcore_sdk/test/hil -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l run_tests.sh lib_spi
+
+
+    uart_hil_tests:
+      name: UART HIL tests
+      needs: changes
+      if: ${{ needs.changes.outputs.lib_uart == 'true' }}
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout SDK
+          uses: actions/checkout@v2
+          with:
+            submodules: recursive
+
+        - name: Pull SDK builder image
+          run: |
+            docker pull ${SDK_BUILDER_IMAGE}
+
+        - name: Run tests
+          run: |
+            docker run --user $(id -u) --rm -w /xcore_sdk/test/hil -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l run_tests.sh lib_uart
