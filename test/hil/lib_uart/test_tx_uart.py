@@ -62,7 +62,7 @@ def test_uart_tx(request, capfd, buffered, baud, bpb, parity, stop):
                                             ignore = ["TEST CONFIG:.*"])
 
     simargs = ["--trace-to", "trace.txt", "--vcd-tracing", "-tile tile[0] -ports -ports-detailed -cores -instructions -o trace.vcd"] #This is just for local debug so we can capture the run, pass as kwarg to run_with_pyxsim
-    # simargs = []  
+    simargs = []  #For speed when not debugging
     px.run_with_pyxsim(binary, simthreads = [checker], simargs=simargs)
     capture = capfd.readouterr().out[:-1] #Tester appends an extra line feed which we don't need
     tester.run(capture)

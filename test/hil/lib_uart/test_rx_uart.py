@@ -12,7 +12,6 @@ buffered_args = {   "UNBUFFERED" : 0,
                     "BUFFERED": 1}
 
 speed_args = {
-              # "1843200 baud": 1843200,
               "921600 baud": 921600,
               "576000 baud": 576000,
               "115200 baud": 115200,
@@ -65,8 +64,8 @@ def test_uart_rx(request, capfd, buffered, baud, bpb, parity, stop):
                                             ordered = True,
                                             ignore = ["TEST CONFIG:.*"])
 
-    simargs = ['--weak-external-drive']
     simargs = ['--weak-external-drive', "--trace-to", "trace.txt", "--vcd-tracing", "-tile tile[0] -ports -ports-detailed -cores -instructions -o trace.vcd"] #This is just for local debug so we can capture the run, pass as kwarg to run_with_pyxsim
+    simargs = ['--weak-external-drive'] #for speed when not debugging
     px.run_with_pyxsim(binary, simthreads = [checker], simargs=simargs)
     capture = capfd.readouterr().out[:-1] #Tester appends an extra line feed which we don't need
 

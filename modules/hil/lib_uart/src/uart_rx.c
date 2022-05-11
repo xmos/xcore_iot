@@ -24,8 +24,6 @@ static inline uint32_t get_current_time(uart_rx_t *uart_cfg){
 }
 
 
-port_t p_dbg = XS1_PORT_32A;
-
 void uart_rx_init(
         uart_rx_t *uart_cfg,
         port_t rx_port,
@@ -39,9 +37,6 @@ void uart_rx_init(
         size_t buffer_size,
         void(*uart_callback_fptr)(uart_callback_t callback_info)
         ){
-
-    port_enable(p_dbg);
-    port_out(p_dbg, 0xff);
 
     uart_cfg->rx_port = rx_port;
     uart_cfg->bit_time_ticks = XS1_TIMER_HZ / baud_rate;
@@ -115,7 +110,6 @@ static inline void sleep_until_next_sample(uart_rx_t *uart_cfg){
 
 
 void uart_rx_handle_event(uart_rx_t *uart_cfg){
-    port_out(p_dbg, uart_cfg->state);
     switch(uart_cfg->state){
         case UART_IDLE: {
             if(buffer_used(&uart_cfg->buffer)){
