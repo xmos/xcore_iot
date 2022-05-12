@@ -152,15 +152,7 @@ void led_blinky_cb(TimerHandle_t xTimer)
     (void) xTimer;
     led_val ^= 1;
 
-#if OSPREY_BOARD
-#define RED         ~(1<<6)
-#define GREEN       ~(1<<7)
-    if(led_val) {
-        rtos_gpio_port_out(gpio_ctx, led_port, RED);
-    } else {
-        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
-    }
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
     rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 #else
 #error No valid board was specified
@@ -176,9 +168,7 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
-#if OSPREY_BOARD
-        button_port = rtos_gpio_port(PORT_BUTTON);
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
         button_port = rtos_gpio_port(PORT_BUTTONS);
 #else
 #error No valid board was specified
