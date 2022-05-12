@@ -2,7 +2,7 @@
 set -e
 
 #Build tests in parallel. Quite tough on host machine (200+ processes) but saves ~3x time
-parallel=0
+parallel=1
 
 XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
@@ -13,6 +13,9 @@ if [ -z "$1" ] || [ "$1" == "all" ]
 then
     # row format is: "make_target BOARD toolchain"
     applications=(
+
+###################################  FIFO  #############################################################
+"test_hil_uart_fifo_test XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
 
 ################################### UART TX ############################################################
 "test_hil_uart_tx_test_UNBUFFERED_921600_8_NONE_1 XCORE-AI-EXPLORER tools/xmos_cmake_toolchain/xs3a.cmake"
@@ -241,7 +244,7 @@ do_build () {
 
    (cd ${path}; rm -rf build_ci_${application}_${board})
    (cd ${path}; mkdir -p  build_ci_${application}_${board})
-   if [ "$parallel" != "0" ]
+   if [ "$parallel" == "0" ]
    then
         (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DXCORE_SDK_CI_TESTING=ON; log_errors make ${application} -j)
    else

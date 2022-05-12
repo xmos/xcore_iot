@@ -30,7 +30,7 @@ for lib in ${hil_test_libs[@]}; do
     echo "************************"
     echo "* Running ${lib} tests *"
     echo "************************"
-    cd ${lib} && pytest --junitxml="test_results.xml"
+    cd ${lib} && pytest -n 8 --junitxml="test_results.xml"
     popd
 done
 

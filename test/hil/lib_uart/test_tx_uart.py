@@ -27,12 +27,17 @@ parity_args = { "NONE": 0,
 stop_bit_args = {   "one": 1,
                     "two": 2}
 
-# buffered_args = {   "unbuffered" : 0}
+# buffered_args = {   "UNBUFFERED" : 0}
+# buffered_args = {   "BUFFERED" : 1}
 # speed_args = {"921600 baud": 921600}
-# speed_args = {"1843200 baud": 1843200}
+# speed_args = {"576000 baud": 576000}
+# speed_args = {"115200 baud": 115200}
 # data_bit_args = {"eight": 8}
 # parity_args = { "NONE": 0}                
 # stop_bit_args = {"one": 1}
+# data_bit_args = {"five": 5}
+# parity_args = { "EVEN": 1}                
+# stop_bit_args = {"two": 2}
 
 @pytest.mark.parametrize("buffered", buffered_args.values(), ids=buffered_args.keys())
 @pytest.mark.parametrize("baud", speed_args.values(), ids=speed_args.keys())
