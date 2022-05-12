@@ -28,7 +28,7 @@ static size_t mic_array_remote_rx(
 
     rpc_client_call_generic(
             host_address->intertile_ctx, host_address->port, 0, rpc_param_desc,
-            &host_ctx_ptr, &sample_buf, &frame_count, &timeout, &ret);
+            &host_ctx_ptr, sample_buf, &frame_count, &timeout, &ret);
 
     return ret;
 }
