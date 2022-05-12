@@ -171,11 +171,26 @@ static void spi_init(void)
 
 static void mics_init(void)
 {
+    static rtos_driver_rpc_t micarray_rpc_config;
+
 #if ON_TILE(MICARRAY_TILE_NO)
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
+
     rtos_mic_array_init(
             mic_array_ctx,
             (1 << appconfPDM_MIC_IO_CORE),
             RTOS_MIC_ARRAY_SAMPLE_CHANNEL);
+
+    rtos_mic_array_rpc_host_init(
+            mic_array_ctx,
+            &micarray_rpc_config,
+            client_intertile_ctx,
+            1);
+#else
+    rtos_mic_array_rpc_client_init(
+            mic_array_ctx,
+            &micarray_rpc_config,
+            intertile_ctx);
 #endif
 }
 
