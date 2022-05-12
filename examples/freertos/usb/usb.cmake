@@ -502,46 +502,45 @@ create_run_target(example_freertos_usb_tusb_demo_msc_dual_lun)
 create_debug_target(example_freertos_usb_tusb_demo_msc_dual_lun)
 
 
-# Incomplete
-# #**********************
-# # UAC2 Headset Tile Targets
-# #**********************
-# file(GLOB_RECURSE DEMO_SOURCES ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/uac2_headset/src/*.c )
-# set(DEMO_INCLUDES              ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/uac2_headset/src/)
-# set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
-# set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_uac2_headset)
-# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
-# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
-# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
-# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos::audio_drivers sdk::rtos_freertos sdk::rtos::usb_device_control)
-# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-# unset(TARGET_NAME)
-#
-# set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_uac2_headset)
-# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
-# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
-# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
-# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-# target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos::audio_drivers sdk::rtos_freertos sdk::rtos::usb_device_control)
-# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-# unset(TARGET_NAME)
-# unset(DEMO_SOURCES)
-# unset(DEMO_INCLUDES)
-# unset(DEMO_COMPILE_DEFINITIONS)
-#
-# #**********************
-# # Merge binaries
-# #**********************
-# merge_binaries(example_freertos_usb_tusb_demo_uac2_headset tile0_example_freertos_usb_tusb_demo_uac2_headset tile1_example_freertos_usb_tusb_demo_uac2_headset 1)
-#
-# #**********************
-# # Create run and debug targets
-# #**********************
-# create_run_target(example_freertos_usb_tusb_demo_uac2_headset)
-# create_debug_target(example_freertos_usb_tusb_demo_uac2_headset)
+#**********************
+# UAC2 Headset Tile Targets
+#**********************
+file(GLOB_RECURSE DEMO_SOURCES ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/uac2_headset/src/*.c )
+set(DEMO_INCLUDES              ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/uac2_headset/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_uac2_headset)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_uac2_headset)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(example_freertos_usb_tusb_demo_uac2_headset tile0_example_freertos_usb_tusb_demo_uac2_headset tile1_example_freertos_usb_tusb_demo_uac2_headset 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(example_freertos_usb_tusb_demo_uac2_headset)
+create_debug_target(example_freertos_usb_tusb_demo_uac2_headset)
 
 
 #**********************
