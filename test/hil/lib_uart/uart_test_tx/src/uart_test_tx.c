@@ -48,7 +48,7 @@ port_t p_uart_tx = XS1_PORT_1A;
 DEFINE_INTERRUPT_PERMITTED(UART_TX_INTERRUPTABLE_FUNCTIONS, void, test, void){
     uint8_t tx_data[] = {0xff, 0x00, 0x08, 0x55};
 
-    char buffer[64];
+    uint8_t buffer[64];
 
     uart_tx_t uart;
     hwtimer_t tmr = hwtimer_alloc();

@@ -1,8 +1,8 @@
 #define UNBUFFERED 0
 #define BUFFERED 1
 
-#ifndef TEST_USE_BUFFERED
-#define TEST_USE_BUFFERED UNBUFFERED
+#ifndef TEST_BUFFER
+#define TEST_BUFFER UNBUFFERED
 #endif
 
 #ifndef TEST_BAUD
