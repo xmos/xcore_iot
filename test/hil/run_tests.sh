@@ -30,7 +30,9 @@ for lib in ${hil_test_libs[@]}; do
     echo "************************"
     echo "* Running ${lib} tests *"
     echo "************************"
-    cd ${lib} && pytest -n 8 --junitxml="test_results.xml"
+    #https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    #Looks like runners are 2 cores (maybe 2 HT) so run 4 at a time for speedup
+    cd ${lib} && pytest -n 4 --junitxml="test_results.xml"
     popd
 done
 
