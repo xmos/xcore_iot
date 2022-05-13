@@ -23,6 +23,26 @@
  *
  */
 
+/* This example demonstrates WebUSB as web serial with browser with WebUSB support (e.g Chrome).
+ * After enumerated successfully, browser will pop-up notification
+ * with URL to landing page, click on it to test
+ *  - Click "Connect" and select device, When connected the on-board LED will litted up.
+ *  - Any charters received from either webusb/Serial will be echo back to webusb and Serial
+ *
+ * Note:
+ * - The WebUSB landing page notification is currently disabled in Chrome
+ * on Windows due to Chromium issue 656702 (https://crbug.com/656702). You have to
+ * go to landing page (below) to test
+ *
+ * - On Windows 7 and prior: You need to use Zadig tool to manually bind the
+ * WebUSB interface with the WinUSB driver for Chrome to access. From windows 8 and 10, this
+ * is done automatically by firmware.
+ *
+ * - On Linux/macOS, udev permission may need to be updated by
+ *   - copying '/examples/device/99-tinyusb.rules' file to /etc/udev/rules.d/ then
+ *   - run 'sudo udevadm control --reload-rules && sudo udevadm trigger'
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -51,7 +71,7 @@ enum  {
   BLINK_ALWAYS_OFF  = 0
 };
 
-#define URL  "www.tinyusb.org/examples/webusb-serial"
+#define URL  "example.tinyusb.org/webusb-serial/"
 
 const tusb_desc_webusb_url_t desc_url =
 {
@@ -101,27 +121,26 @@ void tud_resume_cb(void)
     xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
 }
 
-
 // send characters to both CDC and WebUSB
 void echo_all(uint8_t buf[], uint32_t count)
 {
-    // echo to web serial
-    if ( web_serial_connected )
-    {
-        tud_vendor_write(buf, count);
-    }
+  // echo to web serial
+  if ( web_serial_connected )
+  {
+    tud_vendor_write(buf, count);
+  }
 
-    // echo to cdc
-    if ( tud_cdc_connected() )
+  // echo to cdc
+  if ( tud_cdc_connected() )
+  {
+    for(uint32_t i=0; i<count; i++)
     {
-        for(uint32_t i=0; i<count; i++)
-        {
-            tud_cdc_write_char(buf[i]);
+      tud_cdc_write_char(buf[i]);
 
-            if ( buf[i] == '\r' ) tud_cdc_write_char('\n');
-        }
-        tud_cdc_write_flush();
+      if ( buf[i] == '\r' ) tud_cdc_write_char('\n');
     }
+    tud_cdc_write_flush();
+  }
 }
 
 //--------------------------------------------------------------------+
@@ -133,58 +152,63 @@ void echo_all(uint8_t buf[], uint32_t count)
 // return false to stall control endpoint (e.g unsupported request)
 bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t const * request)
 {
-    // nothing to with DATA & ACK stage
-    if (stage != CONTROL_STAGE_SETUP ) return true;
+  // nothing to with DATA & ACK stage
+  if (stage != CONTROL_STAGE_SETUP) return true;
 
-    if (request->bmRequestType_bit.type == TUSB_REQ_TYPE_VENDOR)
-    {
-        switch (request->bRequest)
-        {
-            case VENDOR_REQUEST_WEBUSB:
-                // match vendor request in BOS descriptor
-                // Get landing page url
-                return tud_control_xfer(rhport, request, (void*) &desc_url, desc_url.bLength);
+  switch (request->bmRequestType_bit.type)
+  {
+    case TUSB_REQ_TYPE_VENDOR:
+      switch (request->bRequest)
+      {
+        case VENDOR_REQUEST_WEBUSB:
+          // match vendor request in BOS descriptor
+          // Get landing page url
+          return tud_control_xfer(rhport, request, (void*)(uintptr_t) &desc_url, desc_url.bLength);
 
-            case VENDOR_REQUEST_MICROSOFT:
-                if ( request->wIndex == 7 )
-                {
-                    // Get Microsoft OS 2.0 compatible descriptor
-                    uint16_t total_len;
-                    memcpy(&total_len, desc_ms_os_20+8, 2);
+        case VENDOR_REQUEST_MICROSOFT:
+          if ( request->wIndex == 7 )
+          {
+            // Get Microsoft OS 2.0 compatible descriptor
+            uint16_t total_len;
+            memcpy(&total_len, desc_ms_os_20+8, 2);
 
-                    return tud_control_xfer(rhport, request, (void*) desc_ms_os_20, total_len);
-                } else
-                {
-                    return false;
-                }
+            return tud_control_xfer(rhport, request, (void*)(uintptr_t) desc_ms_os_20, total_len);
+          }else
+          {
+            return false;
+          }
 
-            default:
-                return false;
-        }
-    } else if (
-        request->bmRequestType_bit.type == TUSB_REQ_TYPE_CLASS &&
-        request->bRequest == 0x22)
-    {
-        // Webserial simulate the CDC_REQUEST_SET_CONTROL_LINE_STATE (0x22) to
-        // connect and disconnect.
+        default: break;
+      }
+    break;
+
+    case TUSB_REQ_TYPE_CLASS:
+      if (request->bRequest == 0x22)
+      {
+        // Webserial simulate the CDC_REQUEST_SET_CONTROL_LINE_STATE (0x22) to connect and disconnect.
         web_serial_connected = (request->wValue != 0);
 
         // Always lit LED if connected
         if ( web_serial_connected )
         {
-            xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_ALWAYS_ON), 0);
+          xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_ALWAYS_ON), 0);
 
-            tud_vendor_write_str("\r\nTinyUSB WebUSB device example\r\n");
-        } else {
-            xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
+          tud_vendor_write_str("\r\nTinyUSB WebUSB device example\r\n");
+        }else
+        {
+          xTimerChangePeriod(blinky_timer_ctx, pdMS_TO_TICKS(BLINK_MOUNTED), 0);
         }
 
         // response with status OK
         return tud_control_status(rhport, request);
-    }
+      }
+    break;
 
-    // stall unknown request
-    return false;
+    default: break;
+  }
+
+  // stall unknown request
+  return false;
 }
 
 void webserial_task(void)
@@ -259,15 +283,7 @@ void led_blinky_cb(TimerHandle_t xTimer)
     (void) xTimer;
     led_val ^= 1;
 
-#if OSPREY_BOARD
-#define RED         ~(1<<6)
-#define GREEN       ~(1<<7)
-    if(led_val) {
-        rtos_gpio_port_out(gpio_ctx, led_port, RED);
-    } else {
-        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
-    }
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
     rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 #else
 #error No valid board was specified
@@ -283,9 +299,7 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
-#if OSPREY_BOARD
-        button_port = rtos_gpio_port(PORT_BUTTON);
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
         button_port = rtos_gpio_port(PORT_BUTTONS);
 #else
 #error No valid board was specified

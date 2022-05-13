@@ -28,6 +28,16 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
             sdk::rtos::drivers::usb
             sdk::rtos::FreeRTOS_SMP
     )
+    ## These definitions are only needed while we our port is not upstreamed
+    target_compile_definitions(xcore_sdk_rtos_sw_services_usb
+        INTERFACE
+            CFG_TUSB_MCU=OPT_MCU_NONE
+            CFG_TUSB_OS=OPT_OS_CUSTOM
+            BOARD_DEVICE_RHPORT_NUM=0
+            CFG_TUD_TASK_QUEUE_SZ=8
+            TUP_DCD_ENDPOINT_MAX=12  ## RTOS_USB_ENDPOINT_COUNT_MAX
+            TUP_RHPORT_HIGHSPEED=0x00
+    )
 
     ## Create an alias
     add_library(sdk::rtos::sw_services::usb ALIAS xcore_sdk_rtos_sw_services_usb)

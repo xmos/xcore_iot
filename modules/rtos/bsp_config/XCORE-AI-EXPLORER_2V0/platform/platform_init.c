@@ -7,16 +7,6 @@
 #include "platform/app_pll_ctrl.h"
 #include "platform/driver_instances.h"
 
-/** TILE 0 Clock Blocks */
-#define FLASH_CLKBLK  XS1_CLKBLK_3
-#define MCLK_CLKBLK   XS1_CLKBLK_4
-#define SPI_CLKBLK    XS1_CLKBLK_5
-
-/** TILE 1 Clock Blocks */
-#define PDM_CLKBLK_1  XS1_CLKBLK_1
-#define PDM_CLKBLK_2  XS1_CLKBLK_2
-#define I2S_CLKBLK    XS1_CLKBLK_3
-
 static void mclk_init(void)
 {
 #if ON_TILE(1)
@@ -181,11 +171,26 @@ static void spi_init(void)
 
 static void mics_init(void)
 {
+    static rtos_driver_rpc_t micarray_rpc_config;
+
 #if ON_TILE(MICARRAY_TILE_NO)
+    rtos_intertile_t *client_intertile_ctx[1] = {intertile_ctx};
+
     rtos_mic_array_init(
             mic_array_ctx,
             (1 << appconfPDM_MIC_IO_CORE),
             RTOS_MIC_ARRAY_SAMPLE_CHANNEL);
+
+    rtos_mic_array_rpc_host_init(
+            mic_array_ctx,
+            &micarray_rpc_config,
+            client_intertile_ctx,
+            1);
+#else
+    rtos_mic_array_rpc_client_init(
+            mic_array_ctx,
+            &micarray_rpc_config,
+            intertile_ctx);
 #endif
 }
 

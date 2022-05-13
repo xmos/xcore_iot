@@ -40,6 +40,14 @@
 #define appconfGPIO_RPC_PRIORITY (configMAX_PRIORITIES/2)
 #endif /* appconfGPIO_RPC_PRIORITY */
 
+#ifndef appconfMIC_ARRAY_RPC_PORT
+#define appconfMIC_ARRAY_RPC_PORT 13
+#endif /* appconfMIC_ARRAY_RPC_PORT */
+
+#ifndef appconfMIC_ARRAY_RPC_PRIORITY
+#define appconfMIC_ARRAY_RPC_PRIORITY ((configMAX_PRIORITIES/2) + 1)
+#endif /* appconfMIC_ARRAY_RPC_PRIORITY */
+
 /*****************************************/
 /*  I/O and interrupt cores for Tile 0   */
 /*****************************************/

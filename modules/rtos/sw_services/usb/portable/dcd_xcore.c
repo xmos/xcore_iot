@@ -381,6 +381,12 @@ bool dcd_edpt_open(uint8_t rhport,
     return true;
 }
 
+void dcd_edpt_close_all (uint8_t rhport)
+{
+    (void) rhport;
+    // TODO see dcd_edpt_close()
+}
+
 void dcd_edpt_close(uint8_t rhport,
                     uint8_t ep_addr)
 {
@@ -449,6 +455,16 @@ bool dcd_edpt_xfer(uint8_t rhport,
     }
 
     return false;
+}
+
+// Submit a transfer where is managed by FIFO, When complete dcd_event_xfer_complete() is invoked to notify the stack - optional, however, must be listed in usbd.c
+bool dcd_edpt_xfer_fifo (uint8_t rhport, uint8_t ep_addr, tu_fifo_t * ff, uint16_t total_bytes)
+{
+  (void) rhport;
+  (void) ep_addr;
+  (void) ff;
+  (void) total_bytes;
+  return false;
 }
 
 // Stall endpoint

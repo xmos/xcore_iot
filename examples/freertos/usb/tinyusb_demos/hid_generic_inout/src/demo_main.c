@@ -16,16 +16,24 @@
  *
  * There are 2 ways to test the sketch
  * 1. Using nodejs
- *    - Install nodejs and npm to your PC
- *    - Install excellent node-hid (https://github.com/node-hid/node-hid) by
- *      $ npm install node-hid
- *    - Run provided hid test script
- *      $ node hid_test.js
+ * - Install nodejs and npm to your PC
  *
- * 2. Using python hidRun
- *    - Python and `hid` package is required, for installation please follow https://pypi.org/project/hid/
- *    - Run provided hid test script to send and receive data to this device.
- *      $ python3 hid_test.py
+ * - Install excellent node-hid (https://github.com/node-hid/node-hid) by
+ *   $ npm install node-hid
+ *
+ * - Run provided hid test script
+ *   $ node hid_test.js
+ *
+ * 2. Using python
+ * - Install `hid` package (https://pypi.org/project/hid/) by
+ *   $ pip install hid
+ *
+ * - hid package replies on hidapi (https://github.com/libusb/hidapi) for backend,
+ *   which already available in Linux. However on windows, you may need to download its dlls from their release page and
+ *   copy it over to folder where python is installed.
+ *
+ * - Run provided hid test script to send and receive data to this device.
+ *   $ python3 hid_test.py
  */
 
 /* Blink pattern
@@ -75,6 +83,7 @@ void tud_resume_cb(void)
 {
     blink_interval_ms = BLINK_MOUNTED;
 }
+
 //--------------------------------------------------------------------+
 // USB HID
 //--------------------------------------------------------------------+
@@ -116,15 +125,7 @@ void led_blinky_cb(TimerHandle_t xTimer)
     (void) xTimer;
     led_val ^= 1;
 
-#if OSPREY_BOARD
-#define RED         ~(1<<6)
-#define GREEN       ~(1<<7)
-    if(led_val) {
-        rtos_gpio_port_out(gpio_ctx, led_port, RED);
-    } else {
-        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
-    }
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
     rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 #else
 #error No valid board was specified
@@ -136,11 +137,7 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
     if (gpio_ctx == NULL) {
         gpio_ctx = ctx;
 
-#if XCORE200_MIC_ARRAY
-        led_port = rtos_gpio_port(PORT_LED10_TO_12);
-#else
         led_port = rtos_gpio_port(PORT_LEDS);
-#endif
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 

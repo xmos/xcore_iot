@@ -140,7 +140,8 @@ static void send_hid_report(uint8_t report_id, uint32_t btn)
         tud_hid_report(REPORT_ID_GAMEPAD, &report, sizeof(report));
 
         has_gamepad_key = true;
-      } else {
+      }else
+      {
         report.hat = GAMEPAD_HAT_CENTERED;
         report.buttons = 0;
         if (has_gamepad_key) tud_hid_report(REPORT_ID_GAMEPAD, &report, sizeof(report));
@@ -153,32 +154,29 @@ static void send_hid_report(uint8_t report_id, uint32_t btn)
   }
 }
 
-void hid_task(void* args)
+// Every 10ms, we will sent 1 report for each HID profile (keyboard, mouse etc ..)
+// tud_hid_report_complete_cb() is used to send the next report after previous one is complete
+void hid_task(void)
 {
-    (void) args;
+      // Poll every 10ms
+    vTaskDelay(pdMS_TO_TICKS(10));
 
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(10));
-
-        uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
-#if OSPREY_BOARD
-        buttons_val = (~buttons_val) & 0x4;
-#elif XCOREAI_EXPLORER || XCORE200_MIC_ARRAY
-        buttons_val = (~buttons_val) & 0x1;
+    uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
+#if XCOREAI_EXPLORER
+    buttons_val = (~buttons_val) & 0x1;
 #endif
 
-        // Remote wakeup
-        if ( tud_suspended() && buttons_val )
-        {
-            // Wake up host if we are in suspend mode
-            // and REMOTE_WAKEUP feature is enabled by host
-            tud_remote_wakeup();
-        }
-        else
-        {
-            // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
-            send_hid_report(REPORT_ID_KEYBOARD, buttons_val);
-        }
+    // Remote wakeup
+    if ( tud_suspended() && buttons_val )
+    {
+        // Wake up host if we are in suspend mode
+        // and REMOTE_WAKEUP feature is enabled by host
+        tud_remote_wakeup();
+    }
+    else
+    {
+        // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
+        send_hid_report(REPORT_ID_KEYBOARD, buttons_val);
     }
 }
 
@@ -195,9 +193,7 @@ void tud_hid_report_complete_cb(uint8_t itf, uint8_t const* report, uint8_t len)
     if (next_report_id < REPORT_ID_COUNT)
     {
         uint32_t buttons_val = rtos_gpio_port_in(gpio_ctx, button_port);
-#if OSPREY_BOARD
-        buttons_val = (~buttons_val) & 0x4;
-#elif XCOREAI_EXPLORER || XCORE200_MIC_ARRAY
+#if XCOREAI_EXPLORER
         buttons_val = (~buttons_val) & 0x1;
 #endif
 
@@ -222,14 +218,33 @@ uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t
 
 // Invoked when received SET_REPORT control request or
 // received data on OUT endpoint ( Report ID = 0, Type = 0 )
-void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
+void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
 {
-    // TODO set LED based on CAPLOCK, NUMLOCK etc...
-    (void) itf;
-    (void) report_id;
-    (void) report_type;
-    (void) buffer;
-    (void) bufsize;
+  (void) instance;
+
+  if (report_type == HID_REPORT_TYPE_OUTPUT)
+  {
+    // Set keyboard LED e.g Capslock, Numlock etc...
+    if (report_id == REPORT_ID_KEYBOARD)
+    {
+      // bufsize should be (at least) 1
+      if ( bufsize < 1 ) return;
+
+      uint8_t const kbd_leds = buffer[0];
+
+      if (kbd_leds & KEYBOARD_LED_CAPSLOCK)
+      {
+        // Capslock On: disable blink, turn led on
+        blink_interval_ms = 0;
+        rtos_gpio_port_out(gpio_ctx, led_port, 0);
+      }else
+      {
+        // Caplocks Off: back to normal blink
+        rtos_gpio_port_out(gpio_ctx, led_port, 1);
+        blink_interval_ms = BLINK_MOUNTED;
+      }
+    }
+  }
 }
 
 void led_blinky_task(void *args)
@@ -237,7 +252,6 @@ void led_blinky_task(void *args)
     (void) args;
 
     TickType_t last_wake_time;
-    const TickType_t blink_freq = 10;
 
     last_wake_time = xTaskGetTickCount();
 
@@ -246,21 +260,17 @@ void led_blinky_task(void *args)
 
         led_val ^= 1;
 
-#if OSPREY_BOARD
-    #define RED         ~(1<<6)
-    #define GREEN       ~(1<<7)
-        if(led_val) {
-            rtos_gpio_port_out(gpio_ctx, led_port, RED);
-        } else {
-            rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
-        }
-    #elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
-    #elif XCORE200_MIC_ARRAY
-        rtos_gpio_port_out(gpio_ctx, led_port, led_val << 2);
-    #else
+#else
 #error No valid board was specified
 #endif
+    }
+}
+
+static void hid_task_wrapper(void *arg) {
+    while(1) {
+        hid_task();
     }
 }
 
@@ -269,20 +279,12 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
     if (gpio_ctx == NULL) {
         gpio_ctx = ctx;
 
-#if XCORE200_MIC_ARRAY
-        led_port = rtos_gpio_port(PORT_LED10_TO_12);
-#else
         led_port = rtos_gpio_port(PORT_LEDS);
-#endif
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
-#if OSPREY_BOARD
-        button_port = rtos_gpio_port(PORT_BUTTON);
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
         button_port = rtos_gpio_port(PORT_BUTTONS);
-#elif XCORE200_MIC_ARRAY
-        button_port = rtos_gpio_port(PORT_BUT_A_TO_D);
 #else
 #error No valid board was specified
 #endif
@@ -296,9 +298,9 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
                     configMAX_PRIORITIES - 1,
                     NULL);
 
-        xTaskCreate((TaskFunction_t) hid_task,
+        xTaskCreate((TaskFunction_t) hid_task_wrapper,
                     "hid_task",
-                    portTASK_STACK_DEPTH(hid_task),
+                    portTASK_STACK_DEPTH(hid_task_wrapper),
                     NULL,
                     priority,
                     NULL);

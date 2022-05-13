@@ -32,6 +32,10 @@
 #include "demo_main.h"
 #include "tusb.h"
 
+//--------------------------------------------------------------------+
+// MACRO CONSTANT TYPEDEF PROTYPES
+//--------------------------------------------------------------------+
+
 /* Blink pattern
  * - 250 ms  : device not mounted
  * - 1000 ms : device mounted
@@ -85,38 +89,27 @@ void tud_resume_cb(void)
 //--------------------------------------------------------------------+
 // USB CDC
 //--------------------------------------------------------------------+
-void cdc_task(void* params)
+void cdc_task(void)
 {
-  (void) params;
-
-  // RTOS forever loop
-  while ( 1 )
+  // connected() check for DTR bit
+  // Most but not all terminal client set this when making connection
+  // if ( tud_cdc_connected() )
   {
-    // connected() check for DTR bit
-    // Most but not all terminal client set this when making connection
-    // if ( tud_cdc_connected() )
+    // connected and there are data available
+    if ( tud_cdc_available() )
     {
-      // There are data available
-      if ( tud_cdc_available() )
-      {
-        uint8_t buf[64];
+      // read datas
+      char buf[64];
+      uint32_t count = tud_cdc_read(buf, sizeof(buf));
+      (void) count;
 
-        // read and echo back
-        uint32_t count = tud_cdc_read(buf, sizeof(buf));
-
-        for(uint32_t i=0; i<count; i++)
-        {
-          tud_cdc_write_char(buf[i]);
-
-          if ( buf[i] == '\r' ) tud_cdc_write_char('\n');
-        }
-
-        tud_cdc_write_flush();
-      }
+      // Echo back
+      // Note: Skip echo by commenting out write() and write_flush()
+      // for throughput test e.g
+      //    $ dd if=/dev/zero of=/dev/ttyACM0 count=10000
+      tud_cdc_write(buf, count);
+      tud_cdc_write_flush();
     }
-
-    // For ESP32-S2 this delay is essential to allow idle how to run and reset wdt
-    vTaskDelay(pdMS_TO_TICKS(10));
   }
 }
 
@@ -126,12 +119,13 @@ void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
   (void) itf;
   (void) rts;
 
-  // connected
+  // TODO set some indicator
   if ( dtr )
   {
-    // print initial message when connected
-    tud_cdc_write_str("\r\nTinyUSB CDC MSC device with FreeRTOS example\r\n");
-    tud_cdc_write_flush();
+    // Terminal connected
+  }else
+  {
+    // Terminal disconnected
   }
 }
 
@@ -149,19 +143,17 @@ void led_blinky_cb(TimerHandle_t xTimer)
     (void) xTimer;
     led_val ^= 1;
 
-#if OSPREY_BOARD
-#define RED         ~(1<<6)
-#define GREEN       ~(1<<7)
-    if(led_val) {
-        rtos_gpio_port_out(gpio_ctx, led_port, RED);
-    } else {
-        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
-    }
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
     rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 #else
 #error No valid board was specified
 #endif
+}
+
+static void cdc_task_wrapper(void *arg) {
+    while(1) {
+        cdc_task();
+    }
 }
 
 void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
@@ -173,9 +165,7 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
-#if OSPREY_BOARD
-        button_port = rtos_gpio_port(PORT_BUTTON);
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
         button_port = rtos_gpio_port(PORT_BUTTONS);
 #else
 #error No valid board was specified
@@ -189,11 +179,11 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
                                         led_blinky_cb);
         xTimerStart(blinky_timer_ctx, 0);
 
-        // xTaskCreate((TaskFunction_t) cdc_task,
-        //             "cdc_task",
-        //             portTASK_STACK_DEPTH(cdc_task),
-        //             NULL,
-        //             priority,
-        //             NULL);
+        xTaskCreate((TaskFunction_t) cdc_task_wrapper,
+                    "cdc_task",
+                    portTASK_STACK_DEPTH(cdc_task_wrapper),
+                    NULL,
+                    priority,
+                    NULL);
     }
 }
