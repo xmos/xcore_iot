@@ -6,15 +6,7 @@
 
 #include "uart.h"
 
-void uart_tx_handle_transition(uart_tx_t *uart_cfg);
-
-
-DEFINE_INTERRUPT_CALLBACK(UART_TX_INTERRUPTABLE_FUNCTIONS, transition_isr, callback_info){
-    uart_tx_t *uart_cfg = (uart_tx_t*) callback_info;
-    uart_tx_handle_transition(uart_cfg);
-}
-
-
+DECLARE_INTERRUPT_CALLBACK(uart_tx_handle_transition, callback_info);
 
 void uart_tx_blocking_init(
         uart_tx_t *uart_cfg,
@@ -69,7 +61,7 @@ void uart_tx_init(
     if(buffer_used(&uart_cfg->buffer)){
         //Setup interrupt
         uart_cfg->uart_callback_fptr = uart_callback_fptr;
-        triggerable_setup_interrupt_callback(tmr, uart_cfg, INTERRUPT_CALLBACK(transition_isr) );
+        triggerable_setup_interrupt_callback(tmr, uart_cfg, INTERRUPT_CALLBACK(uart_tx_handle_transition) );
         interrupt_unmask_all();
     }
 
@@ -119,7 +111,8 @@ static inline void buffered_uart_tx_char_finished(uart_tx_t *uart_cfg){
     }
 }
 
-void uart_tx_handle_transition(uart_tx_t *uart_cfg){
+DEFINE_INTERRUPT_CALLBACK(UART_TX_INTERRUPTABLE_FUNCTIONS, uart_tx_handle_transition, callback_info){
+    uart_tx_t *uart_cfg = (uart_tx_t*) callback_info;
     switch(uart_cfg->state){
         case UART_START: {
             uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);

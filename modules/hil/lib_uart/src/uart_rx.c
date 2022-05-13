@@ -8,13 +8,7 @@
 
 #include <print.h>
 
-void uart_rx_handle_event(uart_rx_t *uart_cfg);
-
-DEFINE_INTERRUPT_CALLBACK(UART_RX_INTERRUPTABLE_FUNCTIONS, uart_rx_isr, callback_info){
-    uart_rx_t *uart_cfg = (uart_rx_t*) callback_info;
-    uart_rx_handle_event(uart_cfg);
-}
-
+DECLARE_INTERRUPT_CALLBACK(uart_rx_handle_event, callback_info);
 
 static inline uint32_t get_current_time(uart_rx_t *uart_cfg){
     if(uart_cfg->tmr){
@@ -71,10 +65,10 @@ void uart_rx_init(
         interrupt_mask_all();
         port_in(rx_port); //Ensure port is input and clear trigger
         port_set_trigger_in_equal(rx_port, 0); //Trigger on low (start of start bit)
-        triggerable_setup_interrupt_callback(rx_port, uart_cfg, INTERRUPT_CALLBACK(uart_rx_isr) );
+        triggerable_setup_interrupt_callback(rx_port, uart_cfg, INTERRUPT_CALLBACK(uart_rx_handle_event) );
 
         hwtimer_clear_trigger_time(uart_cfg->tmr);
-        triggerable_setup_interrupt_callback(tmr, uart_cfg, INTERRUPT_CALLBACK(uart_rx_isr) );
+        triggerable_setup_interrupt_callback(tmr, uart_cfg, INTERRUPT_CALLBACK(uart_rx_handle_event) );
 
         //Initial ISR will be on falling edge of rx, followed by timer ISRs for sampling the values
         triggerable_set_trigger_enabled(uart_cfg->rx_port, 1);
@@ -108,8 +102,8 @@ static inline void sleep_until_next_sample(uart_rx_t *uart_cfg){
 }
 
 
-
-void uart_rx_handle_event(uart_rx_t *uart_cfg){
+DEFINE_INTERRUPT_CALLBACK(UART_RX_INTERRUPTABLE_FUNCTIONS, uart_rx_handle_event, callback_info){
+    uart_rx_t *uart_cfg = (uart_rx_t*) callback_info;
     switch(uart_cfg->state){
         case UART_IDLE: {
             if(buffer_used(&uart_cfg->buffer)){
