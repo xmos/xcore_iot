@@ -6,7 +6,7 @@
 
 #include "uart.h"
 
-DECLARE_INTERRUPT_CALLBACK(uart_tx_handle_transition, callback_info);
+DECLARE_INTERRUPT_CALLBACK(uart_tx_handle_event, callback_info);
 
 void uart_tx_blocking_init(
         uart_tx_t *uart_cfg,
@@ -61,7 +61,7 @@ void uart_tx_init(
     if(buffer_used(&uart_cfg->buffer)){
         //Setup interrupt
         uart_cfg->uart_callback_fptr = uart_callback_fptr;
-        triggerable_setup_interrupt_callback(tmr, uart_cfg, INTERRUPT_CALLBACK(uart_tx_handle_transition) );
+        triggerable_setup_interrupt_callback(tmr, uart_cfg, INTERRUPT_CALLBACK(uart_tx_handle_event) );
         interrupt_unmask_all();
     }
 
@@ -111,7 +111,14 @@ static inline void buffered_uart_tx_char_finished(uart_tx_t *uart_cfg){
     }
 }
 
-DEFINE_INTERRUPT_CALLBACK(UART_TX_INTERRUPTABLE_FUNCTIONS, uart_tx_handle_transition, callback_info){
+// There was additional latency introduced in the start bit causing a slight stretching.
+// This is due to UART_START get current_time not including the ISR or fn call
+// It has been measured on the simulator to be 170-174ns for polling/event and 230-260ns for ISR 
+#define INTERRUPT_LATENCY_COMPENSATION_TICKS (XS1_TIMER_MHZ * 245 / 1000)
+#define BLOCKING_LATENCY_COMPENSATION_TICKS  (XS1_TIMER_MHZ * 170 / 1000)
+
+
+DEFINE_INTERRUPT_CALLBACK(UART_TX_INTERRUPTABLE_FUNCTIONS, uart_tx_handle_event, callback_info){
     uart_tx_t *uart_cfg = (uart_tx_t*) callback_info;
     switch(uart_cfg->state){
         case UART_START: {
@@ -120,6 +127,11 @@ DEFINE_INTERRUPT_CALLBACK(UART_TX_INTERRUPTABLE_FUNCTIONS, uart_tx_handle_transi
             uart_cfg->state = UART_DATA;
             uart_cfg->current_data_bit = 0;
             uart_cfg->next_event_time_ticks += uart_cfg->bit_time_ticks;
+            if(buffer_used(&uart_cfg->buffer)){
+                uart_cfg->next_event_time_ticks -= INTERRUPT_LATENCY_COMPENSATION_TICKS;
+            } else {
+                uart_cfg->next_event_time_ticks -= BLOCKING_LATENCY_COMPENSATION_TICKS;
+            }
             break;
         }
 
@@ -207,7 +219,7 @@ void uart_tx(uart_tx_t *uart_cfg, uint8_t data){
         uart_cfg->state = UART_START;
         //Blocking call
         do {
-            uart_tx_handle_transition(uart_cfg);
+            uart_tx_handle_event(uart_cfg);
             sleep_until_next_transition(uart_cfg);
         } while(uart_cfg->state != UART_IDLE);
     }

@@ -16,7 +16,6 @@ static inline uint32_t get_current_time(uart_rx_t *uart_cfg){
     return get_reference_time();
 }
 
-
 void uart_rx_init(
         uart_rx_t *uart_cfg,
         port_t rx_port,
@@ -104,14 +103,13 @@ static inline void sleep_until_next_sample(uart_rx_t *uart_cfg){
 // and 320ns at 120Mhz thread speed. Hence use mid point of 340ns
 // Latency for polling mode is between 210ns and 190 so use 200ns
 #define INTERRUPT_LATENCY_COMPENSATION_TICKS (XS1_TIMER_MHZ * 340 / 1000)
-#define POLLING_LATENCY_COMPENSATION_TICKS   (XS1_TIMER_MHZ * 200 / 1000)
+#define BLOCKING_LATENCY_COMPENSATION_TICKS  (XS1_TIMER_MHZ * 200 / 1000)
 
 
 DEFINE_INTERRUPT_CALLBACK(UART_RX_INTERRUPTABLE_FUNCTIONS, uart_rx_handle_event, callback_info){
     uart_rx_t *uart_cfg = (uart_rx_t*) callback_info;
     switch(uart_cfg->state){
         case UART_IDLE: {
-            port_out(p_dbg, 0x1111);
             if(buffer_used(&uart_cfg->buffer)){
                 uart_cfg->next_event_time_ticks = get_current_time(uart_cfg);
             }
@@ -129,7 +127,7 @@ DEFINE_INTERRUPT_CALLBACK(UART_RX_INTERRUPTABLE_FUNCTIONS, uart_rx_handle_event,
                 hwtimer_set_trigger_time(uart_cfg->tmr, uart_cfg->next_event_time_ticks);
                 triggerable_set_trigger_enabled(uart_cfg->tmr, 1);
             } else {
-                uart_cfg->next_event_time_ticks -= POLLING_LATENCY_COMPENSATION_TICKS;
+                uart_cfg->next_event_time_ticks -= BLOCKING_LATENCY_COMPENSATION_TICKS;
             }
             break;
         }
