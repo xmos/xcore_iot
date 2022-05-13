@@ -263,7 +263,7 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     else
         do_build "$i" &
         pids[${i}]=$!
-        sleep 1 #Limit rate of spawning a bit to make life easier for host
+        sleep 0.1 #Limit rate of spawning a bit to make life easier for host
     fi
 done
 
