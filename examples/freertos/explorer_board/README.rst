@@ -28,6 +28,9 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
         $ cd build
         $ nmake example_freertos_explorer_board
 
+.. note::
+   The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
+
 From the xcore_sdk build folder, create the filesystem and flash the device with the following command:
 
 .. tab:: Linux and Mac

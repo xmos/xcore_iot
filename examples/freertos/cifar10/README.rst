@@ -76,6 +76,9 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 Setting up the hardware
 ***********************
 
+.. note::
+   The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
+
 Before running the firmware, the filesystem containing the images must be flashed.  After the images have been generated, by following the instructions above:
 
 .. tab:: Linux and Mac
