@@ -44,7 +44,7 @@
 #endif
 
 #ifndef appconfUSB_ENABLED
-#define appconfUSB_ENABLED         0
+#define appconfUSB_ENABLED         1
 #endif
 
 #ifndef appconfWW_ENABLED
@@ -106,13 +106,13 @@
 #define appconfAEC_REF_USB         0
 #define appconfAEC_REF_I2S         1
 #ifndef appconfAEC_REF_DEFAULT
-#define appconfAEC_REF_DEFAULT     appconfAEC_REF_I2S
+#define appconfAEC_REF_DEFAULT     appconfAEC_REF_USB
 #endif
 
 #define appconfMIC_SRC_MICS        0
 #define appconfMIC_SRC_USB         1
 #ifndef appconfMIC_SRC_DEFAULT
-#define appconfMIC_SRC_DEFAULT     appconfMIC_SRC_MICS
+#define appconfMIC_SRC_DEFAULT     appconfMIC_SRC_USB
 #endif
 
 #define appconfUSB_AUDIO_RELEASE   0
