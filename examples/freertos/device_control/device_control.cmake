@@ -70,3 +70,4 @@ merge_binaries(example_freertos_device_control tile0_example_freertos_device_con
 #**********************
 create_run_target(example_freertos_device_control)
 create_debug_target(example_freertos_device_control)
+create_flash_app_target(example_freertos_device_control)

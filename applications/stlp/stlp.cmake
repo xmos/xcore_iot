@@ -96,6 +96,7 @@ merge_binaries(application_stlp tile0_application_stlp tile1_application_stlp 1)
 #**********************
 create_run_target(application_stlp)
 create_debug_target(application_stlp)
+create_flash_app_target(application_stlp)
 
 #**********************
 # XMOS Development Targets
