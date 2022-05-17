@@ -2,6 +2,7 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #define DEBUG_UNIT ADAPTIVE_USB
+#define DEBUG_PRINT_ENABLE_ADAPTIVE_USB 1
 
 #include "adaptive_rate_adjust.h"
 
@@ -203,6 +204,11 @@ void sof_cb(void)
 }
 
 static chanend_t sof_t1_isr_c;
+
+void tud_xcore_data_cb(uint32_t cur_time, uint32_t ep_num, uint32_t ep_dir, size_t xfer_len)
+{
+    rtos_printf("Data on ep %d at time %d in dir %d with length %d\n", ep_num, cur_time, ep_dir, xfer_len);
+}
 
 bool tud_xcore_sof_cb(uint8_t rhport)
 {
