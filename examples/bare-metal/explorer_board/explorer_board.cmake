@@ -65,3 +65,4 @@ mic_array_vanilla_add( example_bare_metal_explorer_board
 #**********************
 create_run_target(example_bare_metal_explorer_board)
 create_debug_target(example_bare_metal_explorer_board)
+create_flash_app_target(example_bare_metal_explorer_board)
