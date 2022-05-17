@@ -107,6 +107,8 @@ merge_binaries(application_ffd_dev tile0_application_ffd_dev tile1_application_f
 #**********************
 create_run_target(application_ffd)
 create_debug_target(application_ffd)
+create_flash_app_target(application_ffd)
 
 create_run_target(application_ffd_dev)
 create_debug_target(application_ffd_dev)
+create_flash_app_target(application_ffd_dev)
