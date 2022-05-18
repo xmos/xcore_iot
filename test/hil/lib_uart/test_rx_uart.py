@@ -37,6 +37,7 @@ stop_bit_args = {   "one": 1,
 # parity_args = { "NONE": 0}                
 # parity_args = { "EVEN": 1}                
 # stop_bit_args = {"one": 1}
+# stop_bit_args = {"two": 2}
 
 @pytest.mark.parametrize("buffered", buffered_args.values(), ids=buffered_args.keys())
 @pytest.mark.parametrize("baud", speed_args.values(), ids=speed_args.keys())

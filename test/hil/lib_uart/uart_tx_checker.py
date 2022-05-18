@@ -88,6 +88,10 @@ class UARTTxChecker(px.SimThread):
         packet = []
         start_time = 0
         got_start_bit = False
+
+        initial_port_val = self.get_port_val(xsi, self._tx_port)
+        print("tx starts high: %s" % ("True" if initial_port_val else "False"))
+
         for x in range(length):
             packet.append(chr(self.read_byte(xsi, parity)))
         return packet
@@ -106,14 +110,18 @@ class UARTTxChecker(px.SimThread):
         val = 0
 
         # Recv start bit
-        print("tx starts high: %s" % ("True" if self.get_port_val(xsi, self._tx_port) else "False"))
-        self.wait_for_port_pins_change([self._tx_port])
+        initial_port_val = self.get_port_val(xsi, self._tx_port)
+
+        if initial_port_val == 1:
+            self.wait_for_port_pins_change([self._tx_port])
+        #else go for it as assume tx has just fallen with no interframe gap
+        # print("Byte start time: ", xsi.get_time())
 
         # The tx line should go low for 1 bit time
         if self.get_val_timeout(xsi, self._tx_port) == 0:
             print("Start bit recv'd")
         else:
-            print("Stop bit issue")
+            print("Start bit issue")
             return False
 
         # recv the byte
@@ -122,6 +130,8 @@ class UARTTxChecker(px.SimThread):
             val = self.get_val_timeout(xsi, self._tx_port)
             byte += (val << j)
             crc_sum += val
+
+        print(f"Sampled {self._bits_per_byte} data bits")
 
         # Check the parity if needs be
         self.check_parity(xsi, crc_sum, parity)
@@ -163,7 +173,7 @@ class UARTTxChecker(px.SimThread):
             # The stop bits should stay high for this time
             if self.get_val_timeout(xsi, self._tx_port) == 0:
                 stop_bits_correct = False
-        print("tx ends high: %s" % ("True" if stop_bits_correct else "False"))
+        print("Stop bit correct: %s" % ("True" if stop_bits_correct else "False"))
 
     def get_val_timeout(self, xsi, port):
         """
