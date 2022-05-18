@@ -50,3 +50,13 @@ macro(create_debug_target _EXECUTABLE_NAME)
         "Debug application"
     )
 endmacro()
+
+## Creates a flash app target for a provided binary
+macro(create_flash_app_target _EXECUTABLE_NAME)
+    add_custom_target(flash_app_${_EXECUTABLE_NAME}
+      COMMAND xflash --quad-spi-clock 50MHz ${_EXECUTABLE_NAME}.xe
+      DEPENDS ${_EXECUTABLE_NAME}.xe
+      COMMENT
+        "Flash application"
+    )
+endmacro()

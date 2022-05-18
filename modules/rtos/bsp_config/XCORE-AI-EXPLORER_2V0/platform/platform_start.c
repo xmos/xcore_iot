@@ -54,6 +54,7 @@ static void audio_codec_start(void)
 
 static void mics_start(void)
 {
+    rtos_mic_array_rpc_config(mic_array_ctx, appconfMIC_ARRAY_RPC_PORT, appconfMIC_ARRAY_RPC_PRIORITY);
 #if ON_TILE(MICARRAY_TILE_NO)
     rtos_mic_array_start(
             mic_array_ctx,

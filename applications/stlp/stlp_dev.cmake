@@ -49,6 +49,7 @@ foreach(STLP_AP ${STLP_DEV_PIPELINES})
     #**********************
     create_run_target(application_stlp_dev_${STLP_AP})
     create_debug_target(application_stlp_dev_${STLP_AP})
+    create_flash_app_target(application_stlp_dev_${STLP_AP})
 
     #**********************
     # Filesystem support targets

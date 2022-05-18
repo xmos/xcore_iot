@@ -97,60 +97,57 @@ void tud_resume_cb(void)
 
 void hid_task(void)
 {
-    while(1) {
-        // Poll every 10ms
-        vTaskDelay(pdMS_TO_TICKS(10));
+  // Poll every 10ms
+  vTaskDelay(pdMS_TO_TICKS(10));
 
-        uint32_t btn = rtos_gpio_port_in(gpio_ctx, button_port);
-#if OSPREY_BOARD
-        btn = (~btn) & 0x4;
-#elif XCOREAI_EXPLORER || XCORE200_MIC_ARRAY
-        btn = (~btn) & 0x1;
+  uint32_t btn = rtos_gpio_port_in(gpio_ctx, button_port);
+#if XCOREAI_EXPLORER
+  btn = (~btn) & 0x1;
 #endif
 
-        // Remote wakeup
-        if ( tud_suspended() && btn )
-        {
-            // Wake up host if we are in suspend mode
-            // and REMOTE_WAKEUP feature is enabled by host
-            tud_remote_wakeup();
-        }
+  // Remote wakeup
+  if ( tud_suspended() && btn )
+  {
+    // Wake up host if we are in suspend mode
+    // and REMOTE_WAKEUP feature is enabled by host
+    tud_remote_wakeup();
+  }
 
-        /*------------- Keyboard -------------*/
-        if ( tud_hid_n_ready(ITF_KEYBOARD) )
-        {
-            // use to avoid send multiple consecutive zero report for keyboard
-            static bool has_key = false;
+  /*------------- Keyboard -------------*/
+  if ( tud_hid_n_ready(ITF_KEYBOARD) )
+  {
+    // use to avoid send multiple consecutive zero report for keyboard
+    static bool has_key = false;
 
-            if ( btn )
-            {
-                uint8_t keycode[6] = { 0 };
-                keycode[0] = HID_KEY_A;
+    if ( btn )
+    {
+      uint8_t keycode[6] = { 0 };
+      keycode[0] = HID_KEY_A;
 
-                tud_hid_n_keyboard_report(ITF_KEYBOARD, 0, 0, keycode);
+      tud_hid_n_keyboard_report(ITF_KEYBOARD, 0, 0, keycode);
 
-                has_key = true;
-            }else
-            {
-                // send empty key report if previously has key pressed
-                if (has_key) tud_hid_n_keyboard_report(ITF_KEYBOARD, 0, 0, NULL);
-                has_key = false;
-            }
-        }
-
-        /*------------- Mouse -------------*/
-        if ( tud_hid_n_ready(ITF_MOUSE) )
-        {
-            if ( btn )
-            {
-                int8_t const delta = 5;
-
-                // no button, right + down, no scroll pan
-                tud_hid_n_mouse_report(ITF_MOUSE, 0, 0x00, delta, delta, 0, 0);
-            }
-        }
+      has_key = true;
+    }else
+    {
+      // send empty key report if previously has key pressed
+      if (has_key) tud_hid_n_keyboard_report(ITF_KEYBOARD, 0, 0, NULL);
+      has_key = false;
     }
+  }
+
+  /*------------- Mouse -------------*/
+  if ( tud_hid_n_ready(ITF_MOUSE) )
+  {
+    if ( btn )
+    {
+      int8_t const delta = 5;
+
+      // no button, right + down, no scroll pan
+      tud_hid_n_mouse_report(ITF_MOUSE, 0, 0x00, delta, delta, 0, 0);
+    }
+  }
 }
+
 
 
 // Invoked when received GET_REPORT control request
@@ -189,19 +186,17 @@ void led_blinky_cb(TimerHandle_t xTimer)
     (void) xTimer;
     led_val ^= 1;
 
-#if OSPREY_BOARD
-#define RED         ~(1<<6)
-#define GREEN       ~(1<<7)
-    if(led_val) {
-        rtos_gpio_port_out(gpio_ctx, led_port, RED);
-    } else {
-        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
-    }
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
     rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 #else
 #error No valid board was specified
 #endif
+}
+
+static void hid_task_wrapper(void *arg) {
+    while(1) {
+        hid_task();
+    }
 }
 
 void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
@@ -213,12 +208,8 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
-#if OSPREY_BOARD
-        button_port = rtos_gpio_port(PORT_BUTTON);
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
         button_port = rtos_gpio_port(PORT_BUTTONS);
-#elif XCORE200_MIC_ARRAY
-        button_port = rtos_gpio_port(PORT_BUT_A_TO_D);
 #else
 #error No valid board was specified
 #endif
@@ -231,9 +222,9 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
                                         led_blinky_cb);
         xTimerStart(blinky_timer_ctx, 0);
 
-        xTaskCreate((TaskFunction_t) hid_task,
+        xTaskCreate((TaskFunction_t) hid_task_wrapper,
                 "hid_task",
-                portTASK_STACK_DEPTH(hid_task),
+                portTASK_STACK_DEPTH(hid_task_wrapper),
                 NULL,
                 priority,
                 NULL);

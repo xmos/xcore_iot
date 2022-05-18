@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "FreeRTOS.h"
 #include "demo_main.h"
@@ -44,13 +45,11 @@ static void echo_serial_port(uint8_t itf, uint8_t buf[], uint32_t count)
     }
     else
     {
-      // echo back additional ports as upper case
+      // echo back 2nd port as upper case
       if (islower(buf[i])) buf[i] -= 'a' - 'A';
     }
 
     tud_cdc_n_write_char(itf, buf[i]);
-
-    if ( buf[i] == '\r' ) tud_cdc_n_write_char(itf, '\n');
   }
   tud_cdc_n_write_flush(itf);
 }
@@ -58,42 +57,42 @@ static void echo_serial_port(uint8_t itf, uint8_t buf[], uint32_t count)
 //--------------------------------------------------------------------+
 // USB CDC
 //--------------------------------------------------------------------+
-static void cdc_task(void *arg)
+static void cdc_task(void)
 {
-    uint8_t itf = *((uint8_t *)arg);
+  uint8_t itf;
 
-    while(1) {
-        // connected() check for DTR bit
-        // Most but not all terminal client set this when making connection
-        if ( tud_cdc_n_connected(itf) )
-        {
-            if ( tud_cdc_n_available(itf) )
-            {
-                uint8_t buf[64];
+  for (itf = 0; itf < CFG_TUD_CDC; itf++)
+  {
+    // connected() check for DTR bit
+    // Most but not all terminal client set this when making connection
+    // if ( tud_cdc_n_connected(itf) )
+    {
+      if ( tud_cdc_n_available(itf) )
+      {
+        uint8_t buf[64];
 
-                uint32_t count = tud_cdc_n_read(itf, buf, sizeof(buf));
+        uint32_t count = tud_cdc_n_read(itf, buf, sizeof(buf));
 
-                // echo back to both serial ports
-                echo_serial_port(0, buf, count);
-                echo_serial_port(1, buf, count);
-            }
-        }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        // echo back to both serial ports
+        echo_serial_port(0, buf, count);
+        echo_serial_port(1, buf, count);
+      }
     }
-    vPortFree(arg); // Should never get here
+  }
+}
+
+static void cdc_task_wrapper(void *arg) {
+    while(1) {
+        cdc_task();
+    }
 }
 
 void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
 {
-    for (uint8_t itf = 0; itf < CFG_TUD_CDC; itf++)
-    {
-        uint8_t *itf_num = pvPortMalloc(sizeof(uint8_t*));
-        *itf_num = itf;
-        xTaskCreate((TaskFunction_t) cdc_task,
-                    "cdc_task",
-                    portTASK_STACK_DEPTH(cdc_task),
-                    itf_num,
-                    priority,
-                    NULL);
-    }
+    xTaskCreate((TaskFunction_t) cdc_task_wrapper,
+                "cdc_task",
+                portTASK_STACK_DEPTH(cdc_task_wrapper),
+                NULL,
+                priority,
+                NULL);
 }

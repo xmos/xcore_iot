@@ -17,6 +17,20 @@
 #define MICARRAY_TILE_NO   1
 #define I2S_TILE_NO        1
 
+/** TILE 0 Clock Blocks */
+#define FLASH_CLKBLK  XS1_CLKBLK_1
+#define MCLK_CLKBLK   XS1_CLKBLK_2
+#define SPI_CLKBLK    XS1_CLKBLK_3
+#define XUD_CLKBLK_1  XS1_CLKBLK_4 /* Reserved for lib_xud */
+#define XUD_CLKBLK_2  XS1_CLKBLK_5 /* Reserved for lib_xud */
+
+/** TILE 1 Clock Blocks */
+#define PDM_CLKBLK_1  XS1_CLKBLK_1
+#define PDM_CLKBLK_2  XS1_CLKBLK_2
+#define I2S_CLKBLK    XS1_CLKBLK_3
+// #define UNUSED_CLKBLK XS1_CLKBLK_4
+// #define UNUSED_CLKBLK XS1_CLKBLK_5
+
 extern rtos_intertile_t *intertile_ctx;
 extern rtos_qspi_flash_t *qspi_flash_ctx;
 extern rtos_spi_master_t *spi_master_ctx;

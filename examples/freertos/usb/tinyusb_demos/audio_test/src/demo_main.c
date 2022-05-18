@@ -23,6 +23,9 @@
  *
  */
 
+/* XMOS modified demo.  Record in Audacity or comparable program
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,12 +34,17 @@
 #include "stream_buffer.h"
 #include "rtos_gpio.h"
 #include "rtos_mic_array.h"
+#include "platform/driver_instances.h"
 #include "demo_main.h"
 #include "tusb.h"
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
+
+#ifndef AUDIO_SAMPLE_RATE
+#define AUDIO_SAMPLE_RATE   16000
+#endif
 
 /* Blink pattern
  * - 250 ms  : device not mounted
@@ -67,7 +75,7 @@ audio_control_range_2_n_t(1) volumeRng[CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX+1]; 		
 audio_control_range_4_n_t(1) sampleFreqRng; 						// Sample frequency range state
 
 // Audio test data
-static bool interface_open = false;
+static volatile bool interface_open = false;
 static StreamBufferHandle_t sample_stream_buf;
 
 //--------------------------------------------------------------------+
@@ -107,39 +115,37 @@ void tud_resume_cb(void)
 
 void audio_task(void *arg)
 {
-    int tmp = 0;
-    rtos_mic_array_t *mic_array_ctx = (rtos_mic_array_t*) arg;
-
-    int32_t mic_samples[256][MIC_DUAL_NUM_CHANNELS];
+    (void) arg;
+    int32_t mic_samples[MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME][MIC_ARRAY_CONFIG_MIC_COUNT];
     int16_t *samples_to_buffer = (int16_t *) mic_samples;
 
     while (!tusb_inited()) {
         vTaskDelay(10);
     }
 
-    for (;;) {
+    size_t received = 0;
+    do {
+        received = rtos_mic_array_rx(mic_array_ctx,
+                                     (int32_t**)mic_samples,
+                                     MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME,
+                                     0);
+    } while(received != 0);
 
+    for (;;) {
         rtos_mic_array_rx(
                 mic_array_ctx,
-                mic_samples,
-                256,
+                (int32_t**)mic_samples,
+                MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME,
                 portMAX_DELAY);
 
         if (interface_open) {
-            for (int i = 0; i < 256; i++) {
+            for (int i = 0; i < MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME; i++) {
                 samples_to_buffer[i] = mic_samples[i][0] >> 16;
             }
 
-            if (xStreamBufferSend(sample_stream_buf, samples_to_buffer, 256 * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX, 0) != 256 * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX) {
+            if (xStreamBufferSend(sample_stream_buf, samples_to_buffer, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX, 0) != MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX) {
                 rtos_printf("lost mic samples\n");
             }
-    #if TEST_SEND_FAST
-            if (tmp++ == 100) {
-                int16_t extra_sample = 0x7FFF;
-                xStreamBufferSend(sample_stream_buf, &extra_sample, CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX, 0);
-                tmp = 0;
-            }
-    #endif
         }
     }
 }
@@ -400,27 +406,15 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport, uint8_t itf, uint8_t ep_in, u
 
   bytes_available = xStreamBufferBytesAvailable(sample_stream_buf);
 
-  if (bytes_available > (256 + 8) * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX) {
+  if (bytes_available > (MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME + 8) * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX) {
       tx_byte_count = BYTES_PER_FRAME_EXTRA;
-#if 0
-      rtos_printf("Will send more samples to prevent an overflow (%u bytes in buffer)\n", bytes_available);
-#endif
+      // rtos_printf("Will send more samples to prevent an overflow (%u bytes in buffer)\n", bytes_available);
   } else {
       tx_byte_count = BYTES_PER_FRAME_NOMINAL;
   }
 
   /* TODO: Should ensure that a multiple of CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX is received here */
   bytes_available = xStreamBufferReceive(sample_stream_buf, buf, tx_byte_count, 0);
-
-#if 0
-  if (bytes_available < BYTES_PER_FRAME_NOMINAL) {
-      rtos_printf("Only sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX));
-  } else if (bytes_available > BYTES_PER_FRAME_NOMINAL) {
-      rtos_printf("Sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX));
-  } else {
-      rtos_printf("Sending %u samples\n", bytes_available / (CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX));
-  }
-#endif
 
   tud_audio_write(buf, bytes_available);
 
@@ -469,18 +463,8 @@ void led_blinky_cb(TimerHandle_t xTimer)
     (void) xTimer;
     led_val ^= 1;
 
-#if OSPREY_BOARD
-#define RED         ~(1<<6)
-#define GREEN       ~(1<<7)
-    if(led_val) {
-        rtos_gpio_port_out(gpio_ctx, led_port, RED);
-    } else {
-        rtos_gpio_port_out(gpio_ctx, led_port, GREEN);
-    }
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
     rtos_gpio_port_out(gpio_ctx, led_port, led_val);
-#elif XCORE200_MIC_ARRAY
-    rtos_gpio_port_out(gpio_ctx, led_port, led_val << 2);
 #else
 #error No valid board was specified
 #endif
@@ -491,29 +475,21 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
     if (gpio_ctx == NULL) {
         gpio_ctx = ctx;
 
-#if XCORE200_MIC_ARRAY
-        led_port = rtos_gpio_port(PORT_LED10_TO_12);
-#else
         led_port = rtos_gpio_port(PORT_LEDS);
-#endif
         rtos_gpio_port_enable(gpio_ctx, led_port);
         rtos_gpio_port_out(gpio_ctx, led_port, led_val);
 
         // Init values
-        sampFreq = 48000;
+        sampFreq = AUDIO_SAMPLE_RATE;
         clkValid = 1;
 
         sampleFreqRng.wNumSubRanges = 1;
-        sampleFreqRng.subrange[0].bMin = 48000;
-        sampleFreqRng.subrange[0].bMax = 48000;
+        sampleFreqRng.subrange[0].bMin = AUDIO_SAMPLE_RATE;
+        sampleFreqRng.subrange[0].bMax = AUDIO_SAMPLE_RATE;
         sampleFreqRng.subrange[0].bRes = 0;
 
-#if OSPREY_BOARD
-        button_port = rtos_gpio_port(PORT_BUTTON);
-#elif XCOREAI_EXPLORER
+#if XCOREAI_EXPLORER
         button_port = rtos_gpio_port(PORT_BUTTONS);
-#elif XCORE200_MIC_ARRAY
-        button_port = rtos_gpio_port(PORT_BUT_A_TO_D);
 #else
 #error No valid board was specified
 #endif
@@ -526,14 +502,13 @@ void create_tinyusb_demo(rtos_gpio_t *ctx, unsigned priority)
                                         led_blinky_cb);
         xTimerStart(blinky_timer_ctx, 0);
 
-        sample_stream_buf = xStreamBufferCreate(1.5 * 256 * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX,
+        sample_stream_buf = xStreamBufferCreate(1.5 * MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX,
                                                 CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX);
 
-        extern rtos_mic_array_t *mic_array_ctx;
         xTaskCreate((TaskFunction_t) audio_task,
                     "audio_task",
                     portTASK_STACK_DEPTH(audio_task),
-                    mic_array_ctx,
+                    NULL,
                     priority,
                     NULL);
     }
