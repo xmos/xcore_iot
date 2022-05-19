@@ -31,7 +31,7 @@
 #endif
 
 TU_ATTR_WEAK bool tud_xcore_sof_cb(uint8_t rhport);
-TU_ATTR_WEAK void tud_xcore_data_cb(uint32_t cur_time, uint32_t ep_num, uint32_t ep_dir, size_t xfer_len);
+TU_ATTR_WEAK bool tud_xcore_data_cb(uint32_t cur_time, uint32_t ep_num, uint32_t ep_dir, size_t xfer_len);
 
 #include "rtos_usb.h"
 
@@ -119,6 +119,7 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
     switch (packet_type) {
     case rtos_usb_data_packet: {
         xfer_result_t tu_result;
+        bool cb_result;
 
         if (res == XUD_RES_OKAY) {
             rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
@@ -157,7 +158,7 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
         if (tud_xcore_data_cb) {
             uint32_t ep_num = tu_edpt_number(ep_address);
             uint32_t ep_dir = tu_edpt_dir(ep_address);
-            tud_xcore_data_cb(cur_time, ep_num, ep_dir, xfer_len);
+            cb_result = tud_xcore_data_cb(cur_time, ep_num, ep_dir, xfer_len);
         }
 
         dcd_event_xfer_complete(0, ep_address, xfer_len, tu_result, true);
