@@ -1,0 +1,23 @@
+tx starts high: True
+TEST CONFIG:{'baud rate':\d+}
+Performing rx test.
+Start bit recv'd
+Parity bit correct
+tx ends high: True
+
+tx starts high: True
+Start bit recv'd
+Parity bit correct
+tx ends high: True
+
+tx starts high: True
+Start bit recv'd
+Parity bit correct
+tx ends high: True
+
+tx starts high: True
+Start bit recv'd
+Parity bit correct
+tx ends high: True
+
+0x7f, 0x00, 0x2f, 0xff
