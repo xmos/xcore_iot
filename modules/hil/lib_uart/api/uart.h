@@ -3,7 +3,7 @@
 #pragma once
 
 /** \file
- *  \brief API for SPI I/O
+ *  \brief API for UART I/O
  */
 
 #include <stdlib.h> /* for size_t */
@@ -16,15 +16,15 @@
 #include "uart_util.h"
 
 /**
- * \addtogroup hil_spi_master hil_spi_master
+ * \addtogroup hil_uart hil_uart
  *
- * The public API for using the HIL SPI master.
+ * The public API for using the HIL UART.
  * @{
  */
 
 /**
  * Enum type representing the different options
- * for the SPI master sample delay.
+ * parity types.
  */
 typedef enum uart_parity_t {
   UART_PARITY_NONE = 0,
@@ -32,7 +32,24 @@ typedef enum uart_parity_t {
   UART_PARITY_ODD
 } uart_parity_t;
 
+/**
+ * Enum type representing the callback error codes.
+ *
+ */
+typedef enum {
+    UART_RX_COMPLETE = 0x00,
+    UART_TX_EMPTY,
+    UART_START_BIT_ERROR,
+    UART_PARITY_ERROR,
+    UART_FRAMING_ERROR,
+    UART_OVERRUN_ERROR,
+    UART_UNDERRUN_ERROR,
+} uart_callback_t;
 
+/**
+ * Enum type representing the different states
+ * for the UART logic.
+ */
 typedef enum {
     UART_IDLE = 0,
     UART_START,
@@ -42,21 +59,10 @@ typedef enum {
 } uart_state_t;
 
 
-typedef enum {
-    UART_TX_EMPTY = 0x01,
-    UART_START_BIT_ERROR,
-    UART_PARITY_ERROR,
-    UART_FRAMING_ERROR,
-    UART_OVERRUN_ERROR,
-    UART_UNDERRUN_ERROR,
-    UART_RX_COMPLETE
-} uart_callback_t;
-
-
-
 /**
- * This attribute must be specified on all SPI callback functions
- * provided by the application.
+ * This attribute must be specified on the UART callback function
+ * provided by the application. It ensures the correct stack usage
+ * is calculated.
  */
 #define UART_CALLBACK_ATTR __attribute__((fptrgroup("uart_callback")))
 
@@ -64,7 +70,8 @@ typedef enum {
 /**
  * Struct to hold a UART Tx context.
  *
- * The members in this struct should not be accessed directly.
+ * The members in this struct should not be accessed directly. Use the
+ * API provided instead.
  */
 typedef struct {
     uart_state_t state;
@@ -72,7 +79,7 @@ typedef struct {
     uint32_t bit_time_ticks;
     uint32_t next_event_time_ticks;
     uart_parity_t parity;
-    uint8_t num_data_bits; //These are ordered to be better packed
+    uint8_t num_data_bits;
     uint8_t current_data_bit;
     uint8_t uart_data;
     uint8_t stop_bits;
@@ -82,14 +89,19 @@ typedef struct {
     uart_buffer_t buffer;
 } uart_tx_t;
 
-
+/**
+ * Struct to hold a UART Rx context.
+ *
+ * The members in this struct should not be accessed directly. Use the
+ * API provided instead.
+ */
 typedef struct {
     uart_state_t state;
     port_t rx_port;
     uint32_t bit_time_ticks;
     uint32_t next_event_time_ticks;
     uart_parity_t parity;
-    uint8_t num_data_bits; //These are ordered to be better packed
+    uint8_t num_data_bits;
     uint8_t current_data_bit;
     uint8_t uart_data;
     uint8_t stop_bits;
@@ -100,14 +112,23 @@ typedef struct {
 } uart_rx_t;
 
 /**
- * Initializes a SPI master I/O interface.
+ * Initializes a UART Tx I/O interface. Passing a valid buffer will enable
+ * buffered mode with ISR for use in bare-metal applications.
  *
- * \param spi         The spi_master_t context to initialize.
- * \param clock_block The clock block to use for the SPI master interface.
- * \param cs_port     The SPI interface's chip select port. This may be a multi-bit port.
- * \param sclk_port   The SPI interface's SCLK port. Must be a 1-bit port.
- * \param mosi_port   The SPI interface's MOSI port. Must be a 1-bit port.
- * \param miso_port   The SPI interface's MISO port. Must be a 1-bit port.
+ * \param uart          The uart_tx_t context to initialise.
+ * \param tx_port       The port used transmit the UART frames.
+ * \param baud_rate     The baud rate of the UART in bits per second.
+ * \param data_bits     The number of data bits per frame sent.
+ * \param parity        The type of parity used. See uart_parity_t above.
+ * \param stop_bits     The number of stop bits asserted at the of the frame.
+ * \param tmr           The resource id of the timer to be used. Polling mode
+ *                      will be used if set to 0.
+ * \param tx_buff       Pointer to a buffer. Optional. If set to zero the 
+ *                      UART will run in blocking mode. If initialised to a
+ *                      valid buffer, the UART will be interrupt driven.
+ * \param buffer_size   Size of the buffer if enabled in tx_buff.
+ * \param callback_info Callback function pointer for UART buffer empty in 
+ *                      buffered mode.
  */
 void uart_tx_init(
         uart_tx_t *uart,
@@ -124,7 +145,20 @@ void uart_tx_init(
         );
 
 
-
+/**
+ * Initializes a UART Tx I/O interface. The mode is hard wired to
+ * blocking mode where the call to uart_tx will return at the end of
+ * the stop bit.
+ *
+ * \param uart          The uart_tx_t context to initialise.
+ * \param tx_port       The port used transmit the UART frames.
+ * \param baud_rate     The baud rate of the UART in bits per second.
+ * \param data_bits     The number of data bits per frame sent.
+ * \param parity        The type of parity used. See uart_parity_t above.
+ * \param stop_bits     The number of stop bits asserted at the of the frame.
+ * \param tmr           The resource id of the timer to be used. Polling mode
+ *                      will be used if set to 0.
+ */
 void uart_tx_blocking_init(
         uart_tx_t *uart_cfg,
         port_t tx_port,
@@ -136,74 +170,45 @@ void uart_tx_blocking_init(
 
 
 /**
- * Transfers data to/from the specified SPI device. This may be called
- * multiple times during a single transaction.
+ * Transmits a single UART frame with parameters as specified in uart_tx_init()
  *
- * \param dev      The SPI device with which to transfer data.
- * \param data_out Buffer containing the data to send to the device.
- *                 May be NULL if no data needs to be sent.
- * \param data_in  Buffer to save the data received from the device.
- *                 May be NULL if the data received is not needed.
- * \param len      The length in bytes of the data to transfer. Both
- *                 buffers must be at least this large if not NULL.
+ * \param uart          The uart_tx_t context to initialise.
+ * \param data          The word to transmit.
  */
-// void spi_master_transfer(
-//         spi_master_device_t *dev,
-//         uint8_t *data_out,
-//         uint8_t *data_in,
-//         size_t len);
-
-
 void uart_tx(
         uart_tx_t *uart,
         uint8_t data);
 
 /**
- * Enforces a minimum delay between the time this is called and
- * the next transfer. It must be called during a transaction.
- * It returns immediately.
+ * De-initializes the specified UART Tx interface. This disables the
+ * port also. The timer, if used, needs to be freed by the application.
  *
- * \param dev         The active SPI device.
- * \param delay_ticks The number of reference clock ticks to delay.
- */
-// inline void spi_master_delay_before_next_transfer(
-//         spi_master_device_t *dev,
-//         uint32_t delay_ticks)
-// {
-//     spi_master_t *spi = dev->spi_master_ctx;
-
-//     spi->delay_before_transfer = 1;
-
-//     port_clear_trigger_time(spi->cs_port);
-
-//     /* Assert CS now */
-//     port_out(spi->cs_port, dev->cs_assert_val);
-//     port_sync(spi->cs_port);
-
-//     /*
-//      * Assert CS again, scheduled for earliest time the
-//      * next transfer is allowed to start.
-//      */
-//     if (delay_ticks >= SPI_MASTER_MINIMUM_DELAY) {
-//         port_out_at_time(spi->cs_port, port_get_trigger_time(spi->cs_port) + delay_ticks, dev->cs_assert_val);
-//     }
-// }
-
-/**
- * De-initializes the specified SPI master interface. This disables the
- * ports and clock block.
- *
- * \param spi The spi_master_t context to de-initialize.
+ * \param uart          The uart_tx_t context to de-initialise.
  */
 void uart_tx_deinit(
         uart_tx_t *uart);
 
 
 
-
-
-
-
+/**
+ * Initializes a UART Rx I/O interface. Passing a valid buffer will enable
+ * buffered mode with ISR for use in bare-metal applications.
+ *
+ * \param uart          The uart_rx_t context to initialise.
+ * \param rx_port       The port used receive the UART frames.
+ * \param baud_rate     The baud rate of the UART in bits per second.
+ * \param data_bits     The number of data bits per frame sent.
+ * \param parity        The type of parity used. See uart_parity_t above.
+ * \param stop_bits     The number of stop bits asserted at the of the frame.
+ * \param tmr           The resource id of the timer to be used. Polling mode
+ *                      will be used if set to 0.
+ * \param rx_buff       Pointer to a buffer. Optional. If set to zero the 
+ *                      UART will run in blocking mode. If initialised to a
+ *                      valid buffer, the UART will be interrupt driven.
+ * \param buffer_size   Size of the buffer if enabled in tx_buff.
+ * \param callback_info Callback function pointer for UART rx errors and also
+ *                      data received in buffered mode.
+ */
 void uart_rx_init(
         uart_rx_t *uart,
         port_t rx_port,
@@ -213,37 +218,30 @@ void uart_rx_init(
         uint8_t stop_bits,
 
         hwtimer_t tmr,
-        uint8_t *tx_buff,
+        uint8_t *rx_buff,
         size_t buffer_size,
         void(*uart_callback_fptr)(uart_callback_t callback_info)
         );
 
+
+/**
+ * Receives a single UART frame with parameters as specified in uart_rx_init()
+ *
+ * \param uart          The uart_rx_t context to receive from.
+ * 
+ * \return              The word received in the UART frame. In buffered mode
+ *                      it gets the oldest received word.
+ */
 uint8_t uart_rx(uart_rx_t *uart);
 
+/**
+ * De-initializes the specified UART Rx interface. This disables the
+ * port also. The timer, if used, needs to be freed by the application.
+ *
+ * \param uart          The uart_rx_t context to de-initialise.
+ */
 void uart_rx_deinit(uart_rx_t *uart);
 
 
 
-/**
- * Callback group representing callback events that can occur during the
- * operation of the SPI slave task. Must be initialized by the application
- * prior to passing it to one of the SPI slaves.
- */
-#if 0
-typedef struct {
-    /** Pointer to the application's slave_transaction_started_t function to be called by the SPI device */
-    SPI_CALLBACK_ATTR slave_transaction_started_t slave_transaction_started;
-
-    /** Pointer to the application's slave_transaction_ended_t function to be called by the SPI device
-     *  Note: The time spent in this callback must be less than the minimum CS deassertion to reassertion
-     *  time.  If this is violated the first word of the proceeding transaction will be lost.
-     */
-    SPI_CALLBACK_ATTR slave_transaction_ended_t slave_transaction_ended;
-
-    /** Pointer to application specific data which is passed to each callback. */
-    void *app_data;
-} spi_slave_callback_group_t;
-#endif
-
-
-/**@}*/ // END: addtogroup hil_spi_slave
+/**@}*/ // END: addtogroup hil_uart
