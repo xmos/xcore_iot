@@ -98,12 +98,6 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
                                   rtos_usb_packet_type_t packet_type,
                                   XUD_Result_t res)
 {
-    if (res == XUD_RES_RST) {
-        rtos_printf("Reset received on %02x\n", ep_address);
-        reset_ep(ep_address, true);
-        return;
-    }
-
     /* Timestamp packets as they come in */
 
     uint32_t cur_time;
@@ -114,6 +108,25 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
            : /* no clobbers */
            );
 
+    if (res == XUD_RES_RST) {
+        rtos_printf("Reset received on %02x\n", ep_address);
+        reset_ep(ep_address, true);
+        return;
+    }
+
+<<<<<<< HEAD
+    /* Timestamp packets as they come in */
+
+    uint32_t cur_time;
+    asm volatile(
+           "{gettime %0}"
+           : "=r"(cur_time)
+           : /* no resources*/
+           : /* no clobbers */
+           );
+
+=======
+>>>>>>> feature/303b_dcd_callback
     // rtos_printf("packet rx'd, timestamp %d\n", cur_time); 
 
     switch (packet_type) {
