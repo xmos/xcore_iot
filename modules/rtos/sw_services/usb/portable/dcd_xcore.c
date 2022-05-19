@@ -2,6 +2,7 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #define DEBUG_UNIT TUSB_DCD
+#define DEBUG_PRINT_ENABLE_TUSB_DCD 0
 
 #include "device/dcd.h"
 #include "device/usbd.h" /* For tud_descriptor_configuration_cb() */
@@ -30,6 +31,7 @@
 #endif
 
 TU_ATTR_WEAK bool tud_xcore_sof_cb(uint8_t rhport);
+TU_ATTR_WEAK bool tud_xcore_data_cb(uint32_t cur_time, uint32_t ep_num, uint32_t ep_dir, size_t xfer_len);
 
 #include "rtos_usb.h"
 
@@ -96,15 +98,28 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
                                   rtos_usb_packet_type_t packet_type,
                                   XUD_Result_t res)
 {
+    /* Timestamp packets as they come in */
+
+    uint32_t cur_time;
+    asm volatile(
+           "{gettime %0}"
+           : "=r"(cur_time)
+           : /* no resources*/
+           : /* no clobbers */
+           );
+
     if (res == XUD_RES_RST) {
         rtos_printf("Reset received on %02x\n", ep_address);
         reset_ep(ep_address, true);
         return;
     }
 
+    // rtos_printf("packet rx'd, timestamp %d\n", cur_time); 
+
     switch (packet_type) {
     case rtos_usb_data_packet: {
         xfer_result_t tu_result;
+        bool cb_result;
 
         if (res == XUD_RES_OKAY) {
             rtos_printf("xfer of %d bytes complete on %02x\n", xfer_len, ep_address);
@@ -138,6 +153,12 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
             rtos_printf("xfer on %02x failed with status %d\n", ep_address, res);
             tu_result = XFER_RESULT_FAILED;
             xfer_len = 0;
+        }
+
+        if (tud_xcore_data_cb) {
+            uint32_t ep_num = tu_edpt_number(ep_address);
+            uint32_t ep_dir = tu_edpt_dir(ep_address);
+            cb_result = tud_xcore_data_cb(cur_time, ep_num, ep_dir, xfer_len);
         }
 
         dcd_event_xfer_complete(0, ep_address, xfer_len, tu_result, true);
