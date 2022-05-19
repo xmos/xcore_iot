@@ -1,11 +1,13 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
+/**
+ * This file contains the prototypes for the FIFO used by the buffered UART modes (bare metal only)
+ */
+
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
-
-#include <print.h> //TODO Remove me
 
 typedef enum {
     UART_BUFFER_OK = 0,
