@@ -114,19 +114,6 @@ static void dcd_xcore_int_handler(rtos_usb_t *ctx,
         return;
     }
 
-<<<<<<< HEAD
-    /* Timestamp packets as they come in */
-
-    uint32_t cur_time;
-    asm volatile(
-           "{gettime %0}"
-           : "=r"(cur_time)
-           : /* no resources*/
-           : /* no clobbers */
-           );
-
-=======
->>>>>>> feature/303b_dcd_callback
     // rtos_printf("packet rx'd, timestamp %d\n", cur_time); 
 
     switch (packet_type) {
