@@ -205,9 +205,61 @@ void sof_cb(void)
 
 static chanend_t sof_t1_isr_c;
 
-void tud_xcore_data_cb(uint32_t cur_time, uint32_t ep_num, uint32_t ep_dir, size_t xfer_len)
+int32_t get_out_data_rate()
+{
+    return 0;
+}
+
+int32_t get_in_data_rate()
+{
+    return 0;
+}
+
+bool tud_xcore_data_cb(uint32_t cur_time, uint32_t ep_num, uint32_t ep_dir, size_t xfer_len)
 {
     rtos_printf("Data on ep %d at time %d in dir %d with length %d\n", ep_num, cur_time, ep_dir, xfer_len);
+
+    static int32_t numerator = PID_TEST ? 0 : Q(P)((APP_PLL_FRAC_NOM & 0x0000FF00) >> 8);
+
+    int32_t out_data_rate = 0;
+    int32_t in_data_rate = 0;
+    static int32_t integral;
+    static int32_t previous_error;
+
+    int32_t error = out_data_rate - in_data_rate;
+
+    int32_t proportional = error;
+    int32_t integral += error;
+    int32_t derivative = error - previous_error;
+    previous_error = error;
+
+    const int32_t kp = Q(P)(0.1);
+    const int32_t ki = Q(P)(0.0001);
+    const int32_t kd = Q(P)(0);
+
+    output = dsp_math_multiply(kp, proportional, 0) +
+                dsp_math_multiply(ki, integral, 0) +
+                dsp_math_multiply(kd, derivative, 0);
+
+    numerator += output;
+    if (numerator > Q(P)(255)) {
+        numerator = Q(P)(255);
+    } else if (numerator < 0) {
+        numerator = 0;
+    }
+
+    numerator_int = (numerator + Q(P)(0.5)) >> P;
+
+    output += Q(P)(0.5);
+    output >>= P;
+    rtos_printf("%u (%d, %d, %d) -> %d -> %d\n", delta_cycles,
+                proportional, integral, derivative,
+                output, numerator_int);
+
+    app_pll_set_numerator(numerator_int);
+    xscope_int(PLL_FREQ, numerator_int);
+
+    return true;
 }
 
 bool tud_xcore_sof_cb(uint8_t rhport)
