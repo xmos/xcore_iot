@@ -10,8 +10,9 @@ DIST_DIR=${XCORE_SDK_ROOT}/dist
 mkdir -p ${DIST_DIR}
 
 applications=(
-    "explorer_board     example_bare_metal_explorer_board  XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-    "visual_wake_words  example_bare_metal_vww             XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+    "explorer_board     example_bare_metal_explorer_board  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "uart               example_bare_metal_uart            XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "visual_wake_words  example_bare_metal_vww             XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 
 # perform builds
