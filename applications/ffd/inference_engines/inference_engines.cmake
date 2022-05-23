@@ -38,8 +38,8 @@ target_include_directories(xcore_sdk_app_ffd_inference_engine_keyword
 )
 target_link_libraries(xcore_sdk_app_ffd_inference_engine_keyword
     INTERFACE
-    sdk::inferencing::microfrontend
-    sdk::inferencing::rtos
+        core::microfrontend
+        rtos::sw_services::inferencing
 )
 target_compile_definitions(xcore_sdk_app_ffd_inference_engine_keyword
     INTERFACE

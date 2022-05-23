@@ -41,11 +41,8 @@ set(APP_LINK_OPTIONS
 )
 
 set(APP_COMMON_LINK_LIBRARIES
-    sdk::core
-    sdk::rtos_freertos
     sdk::app::inference_engine::keyword
-    sdk::rtos_usb
-    sdk::rtos::audio_drivers
+    rtos::freertos_usb
     sdk::lib_src
     avona::agc
     avona::ic

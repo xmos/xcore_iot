@@ -15,9 +15,11 @@ target_include_directories(xcore_sdk_app_ffd_board_support_xcore_ai_explorer
 )
 target_link_libraries(xcore_sdk_app_ffd_board_support_xcore_ai_explorer
     INTERFACE
-        sdk::core
-        sdk::rtos_freertos
-        sdk::rtos::audio_drivers
+        core::general
+        rtos::freertos
+        rtos::drivers::general
+        rtos::drivers::audio
+        rtos::drivers::usb
         sdk::app::ffd::dac::aic3204
 )
 target_compile_options(xcore_sdk_app_ffd_board_support_xcore_ai_explorer
