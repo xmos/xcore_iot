@@ -42,5 +42,5 @@ MATHJAX_RELPATH = https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/
 ALIASES += math{1}="@f$\1@f$"
 ALIASES += vector{1}="@f$\bar \1@f$"
 ALIASES += operation{1}="@par Operation Performed:^^@f{align*}{ \1 @f}"
-ALIASES = "beginrst=^^\verbatim embed:rst^^"
+ALIASES += "beginrst=^^\verbatim embed:rst^^"
 ALIASES += "endrst=\endverbatim"
