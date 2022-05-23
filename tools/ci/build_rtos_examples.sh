@@ -11,13 +11,13 @@ mkdir -p ${DIST_DIR}
 
 # row format is: "name make_target BOARD toolchain"
 applications=(
-    "cifar10          example_freertos_cifar10          XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-    "device_control   example_freertos_device_control   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-    "dispatcher       example_freertos_dispatcher       XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-    "explorer_board   example_freertos_explorer_board   XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-    "getting_started  example_freertos_getting_started  XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-    "iot              example_freertos_iot              XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
-    "l2_cache         example_freertos_l2_cache         XCORE-AI-EXPLORER  tools/xmos_cmake_toolchain/xs3a.cmake"
+    "cifar10          example_freertos_cifar10          XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "device_control   example_freertos_device_control   XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "dispatcher       example_freertos_dispatcher       XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "explorer_board   example_freertos_explorer_board   XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "getting_started  example_freertos_getting_started  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "iot              example_freertos_iot              XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "l2_cache         example_freertos_l2_cache         XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 
 # perform builds

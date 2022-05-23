@@ -33,6 +33,11 @@ set(APP_LINK_OPTIONS
     ${CMAKE_CURRENT_LIST_DIR}/src/config.xscope
 )
 
+set(APP_LINK_LIBRARIES
+    core::general
+    rtos::freertos
+)
+
 #**********************
 # Tile Targets
 #**********************
@@ -41,7 +46,7 @@ target_sources(example_freertos_dispatcher PUBLIC ${APP_SOURCES})
 target_include_directories(example_freertos_dispatcher PUBLIC ${APP_INCLUDES})
 target_compile_definitions(example_freertos_dispatcher PRIVATE ${APP_COMPILE_DEFINITIONS})
 target_compile_options(example_freertos_dispatcher PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(example_freertos_dispatcher PUBLIC sdk::core sdk::rtos_freertos)
+target_link_libraries(example_freertos_dispatcher PUBLIC ${APP_LINK_LIBRARIES})
 target_link_options(example_freertos_dispatcher PRIVATE ${APP_LINK_OPTIONS})
 
 #**********************
