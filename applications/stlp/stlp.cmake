@@ -46,10 +46,7 @@ set(APP_LINK_OPTIONS
 )
 
 set(APP_COMMON_LINK_LIBRARIES
-    sdk::core
-    sdk::rtos_freertos
-    sdk::rtos::usb_device_control
-    sdk::rtos::audio_drivers
+    rtos::usb_device_control
     sdk::lib_src
 )
 

@@ -15,9 +15,11 @@ target_include_directories(xcore_sdk_app_stlp_board_support_xk_voice_l71
 )
 target_link_libraries(xcore_sdk_app_stlp_board_support_xk_voice_l71
     INTERFACE
-        sdk::core
-        sdk::rtos_freertos
-        sdk::rtos::audio_drivers
+        core::general
+        rtos::freertos
+        rtos::drivers::general
+        rtos::drivers::audio
+        rtos::drivers::usb
         sdk::app::stlp::dac::dac3101
 )
 target_compile_options(xcore_sdk_app_stlp_board_support_xk_voice_l71

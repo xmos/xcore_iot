@@ -14,9 +14,9 @@ target_include_directories(xcore_sdk_app_stlp_audio_pipeline_fixed_delay_aec_2x_
 )
 target_link_libraries(xcore_sdk_app_stlp_audio_pipeline_fixed_delay_aec_2x_2y_no_comms
     INTERFACE
-        sdk::core
-        sdk::rtos_freertos
-        sdk::rtos::sw_services::generic_pipeline
+        core::general
+        rtos::freertos
+        rtos::sw_services::generic_pipeline
         avona::adec
         avona::aec
         avona::agc
@@ -49,9 +49,9 @@ target_include_directories(xcore_sdk_app_stlp_audio_pipeline_adec_aec_2x_2y_no_c
 )
 target_link_libraries(xcore_sdk_app_stlp_audio_pipeline_adec_aec_2x_2y_no_comms
     INTERFACE
-        sdk::core
-        sdk::rtos_freertos
-        sdk::rtos::sw_services::generic_pipeline
+        core::general
+        rtos::freertos
+        rtos::sw_services::generic_pipeline
         avona::adec
         avona::aec
         avona::agc
@@ -85,9 +85,9 @@ target_include_directories(xcore_sdk_app_stlp_audio_pipeline_adec_aec_2x_2y_no_c
 )
 target_link_libraries(xcore_sdk_app_stlp_audio_pipeline_adec_aec_2x_2y_no_comms_altarch
     INTERFACE
-        sdk::core
-        sdk::rtos_freertos
-        sdk::rtos::sw_services::generic_pipeline
+        core::general
+        rtos::freertos
+        rtos::sw_services::generic_pipeline
         avona::adec
         avona::aec
         avona::agc
