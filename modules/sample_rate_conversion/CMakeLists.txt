@@ -20,12 +20,12 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
     list(APPEND LIB_PRIVATE_SOURCES ${${CMAKE_SYSTEM_NAME}_SOURCES})
 
     ## Create library target
-    add_library(xcore_sdk_lib_src STATIC)
-    target_sources(xcore_sdk_lib_src
+    add_library(xcore_sdk_modules_lib_src STATIC)
+    target_sources(xcore_sdk_modules_lib_src
         PRIVATE
             ${LIB_PRIVATE_SOURCES}
     )
-    target_include_directories(xcore_sdk_lib_src
+    target_include_directories(xcore_sdk_modules_lib_src
         PUBLIC
             lib_src/lib_src/api
             lib_src/lib_src/src/fixed_factor_of_3
@@ -38,11 +38,11 @@ if((${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A) OR (${CMAKE_SYSTEM_NAME} STREQUAL 
             lib_src/lib_src/src/multirate_hifi/asrc
             lib_src/lib_src/src/multirate_hifi/ssrc
     )
-    target_link_libraries(xcore_sdk_lib_src
+    target_link_libraries(xcore_sdk_modules_lib_src
         PUBLIC
-            sdk::legacy_compat
+            core::legacy_compat
     )
 
     ## Create an alias
-    add_library(sdk::lib_src ALIAS xcore_sdk_lib_src)
+    add_library(sdk::lib_src ALIAS xcore_sdk_modules_lib_src)
 endif()
