@@ -6,7 +6,7 @@ PROJECT_BRIEF = "XCore Software Development Kit"
 PREDEFINED = __DOXYGEN__=1 
 PREDEFINED += DWORD_ALIGNED=
 PREDEFINED += __attribute__((weak))=
-PREDEFINED + = C_API= MA_C_API= C_API_START= C_API_END= EXTERN_C=
+PREDEFINED += C_API= MA_C_API= C_API_START= C_API_END= EXTERN_C=
 
 # HIL library APIs
 INPUT += ../modules/hil/lib_i2c/api
