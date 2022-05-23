@@ -57,7 +57,7 @@
 	url = git@github.com:ACascarino/test_support.git
 	branch = cmake_additions
 [submodule "xmos_cmake_toolchain"]
-	path = tools/xmos_cmake_toolchain
+	path = xmos_cmake_toolchain
 	url = git@github.com:xmos/xmos_cmake_toolchain.git
 [submodule "lib_tflite_micro"]
 	path = modules/inferencing/lib_tflite_micro
@@ -66,5 +66,5 @@
 	path = modules/inferencing/lib_nn
 	url = git@github.com:xmos/lib_nn.git
 [submodule "avona"]
-	path = modules/avona
+	path = frameworks/avona
 	url = git@github.com:xmos/sw_avona.git
