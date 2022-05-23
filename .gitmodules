@@ -1,57 +1,6 @@
-[submodule "lib_xs3_math"]
-	path = modules/lib_xs3_math/lib_xs3_math
-	url = git@github.com:xmos/lib_xs3_math.git
-	shallow = true
-[submodule "lib_otpinfo"]
-	path = modules/lib_otpinfo/lib_otpinfo
-	url = git@github.com:xmos/lib_otpinfo.git
-[submodule "lib_random"]
-	path = modules/lib_random/lib_random
-	url = git@github.com:xmos/lib_random.git
-[submodule "mbedtls"]
-	path = modules/rtos/sw_services/tls_support/thirdparty/mbedtls
-	url = git@github.com:ARMmbed/mbedtls.git
-	shallow = true
-[submodule "paho.mqtt.embedded-c"]
-	path = modules/rtos/sw_services/mqtt/thirdparty/paho.mqtt.embedded-c
-	url = git@github.com:eclipse/paho.mqtt.embedded-c.git
-	shallow = true
-[submodule "jsmn"]
-	path = modules/rtos/sw_services/json/thirdparty/jsmn
-	url = git@github.com:zserge/jsmn.git
-	shallow = true
-[submodule "lib_mic_array"]
-	path = modules/hil/lib_mic_array/lib_mic_array
-	url = git@github.com:xmos/lib_mic_array.git
-[submodule "wfx-fullMAC-driver"]
-	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-fullMAC-driver
-	url = git@github.com:SiliconLabs/wfx-fullMAC-driver.git
-[submodule "FreeRTOS-SMP-Kernel"]
-	path = modules/rtos/FreeRTOS/FreeRTOS-SMP-Kernel
-	url = git@github.com:FreeRTOS/FreeRTOS-Kernel.git
-	branch = smp
-[submodule "FreeRTOS-Plus-TCP"]
-	path = modules/rtos/FreeRTOS/FreeRTOS-Plus-TCP
-	url = git@github.com:xmos/FreeRTOS-Plus-TCP.git
-	branch = main
-[submodule "wfx-firmware"]
-	path = modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware
-	url = git@github.com:SiliconLabs/wfx-firmware.git
-[submodule "lib_xud"]
-	path = modules/hil/lib_xud/lib_xud
-	url = git@github.com:xmos/lib_xud.git
-[submodule "coreHTTP"]
-	path = modules/rtos/sw_services/http/thirdparty/coreHTTP
-	url = git@github.com:FreeRTOS/coreHTTP.git
-[submodule "tinyusb_src"]
-	path = modules/rtos/sw_services/usb/thirdparty/tinyusb_src
-	url = git@github.com:hathach/tinyusb_src.git
 [submodule "lib_src"]
-	path = modules/lib_src/lib_src
+	path = modules/sample_rate_conversion/lib_src
 	url = git@github.com:xmos/lib_src.git
-[submodule "l2_cache"]
-	path = modules/hil/lib_l2_cache/lib_l2_cache
-	url = git@github.com:xmos/lib_l2_cache.git
 [submodule "test_support"]
 	path = test/modules/test_support
 	url = git@github.com:ACascarino/test_support.git
@@ -59,12 +8,6 @@
 [submodule "xmos_cmake_toolchain"]
 	path = xmos_cmake_toolchain
 	url = git@github.com:xmos/xmos_cmake_toolchain.git
-[submodule "lib_tflite_micro"]
-	path = modules/inferencing/lib_tflite_micro
-	url = git@github.com:xmos/lib_tflite_micro.git
-[submodule "lib_nn"]
-	path = modules/inferencing/lib_nn
-	url = git@github.com:xmos/lib_nn.git
 [submodule "avona"]
 	path = frameworks/avona
 	url = git@github.com:xmos/sw_avona.git
