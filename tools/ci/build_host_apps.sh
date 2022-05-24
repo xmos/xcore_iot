@@ -27,4 +27,4 @@ make_target=example_freertos_device_control_host
 # copy fatfs_mkimage to dist
 name=fatfs/host
 make_target=fatfs_mkimage
-(cd ${path}/build_host; cp frameworks/rtos/modules/sw_services/${name}/${make_target} ${DIST_DIR})
+(cd ${path}/build_host; cp modules/rtos/modules/sw_services/${name}/${make_target} ${DIST_DIR})
