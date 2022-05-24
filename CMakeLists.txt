@@ -18,7 +18,6 @@ option(XCORE_SDK_TESTS     "Enable xcore_sdk tests"  OFF)
 include(tools/cmake_utils/xmos_macros.cmake)
 
 ## Add library subdirectories
-add_subdirectory(frameworks)
 add_subdirectory(modules)
 
 ## Add top level project targets
