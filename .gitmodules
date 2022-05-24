@@ -9,14 +9,14 @@
 	path = xmos_cmake_toolchain
 	url = git@github.com:xmos/xmos_cmake_toolchain.git
 [submodule "avona"]
-	path = frameworks/avona
+	path = modules/avona
 	url = git@github.com:xmos/sw_avona.git
 [submodule "frameworks/core"]
-	path = frameworks/core
+	path = modules/core
 	url = git@github.com:xmos/fwk_core.git
 [submodule "frameworks/io"]
-	path = frameworks/io
+	path = modules/io
 	url = git@github.com:xmos/fwk_io.git
 [submodule "frameworks/rtos"]
-	path = frameworks/rtos
+	path = modules/rtos
 	url = git@github.com:xmos/fwk_rtos.git
