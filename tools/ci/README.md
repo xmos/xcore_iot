@@ -2,9 +2,9 @@
 
 ## Building Docker container for building and testing applications
 
-To build the docker container locally, run the following command:
+To build the docker container locally, run the following command in the root of the repository:
 
-    $ docker build -t ghcr.io/xmos/sdk_app_builder:develop -f Dockerfile.apps .
+    $ docker build -t ghcr.io/xmos/sdk_app_builder:develop -f tools/ci/Dockerfile.apps .
 
 To run the container:
 

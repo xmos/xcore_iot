@@ -23,5 +23,8 @@ WORKDIR /tools/install
 ADD tools/install/contribute.txt /tools/install
 RUN pip3 install -r contribute.txt
 
+# set some git config
+RUN git config --global --add url.https://github.com/.insteadOf git@github.com:
+
 # set login shell
 SHELL ["/bin/bash", "-l", "-c"]
