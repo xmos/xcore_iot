@@ -8,23 +8,21 @@ PREDEFINED += DWORD_ALIGNED=
 PREDEFINED += __attribute__((weak))=
 PREDEFINED + = C_API= MA_C_API= C_API_START= C_API_END= EXTERN_C=
 
-# HIL library APIs
-INPUT += ../modules/hil/lib_i2c/api
-INPUT += ../modules/hil/lib_i2s/api
-INPUT += ../modules/hil/lib_qspi_io/api
-INPUT += ../modules/hil/lib_spi/api
-INPUT += ../modules/hil/lib_mic_array/lib_mic_array/lib_mic_array/api ../modules/hil/lib_mic_array/lib_mic_array/etc/vanilla
-#INPUT += ../modules/hil/lib_l2_cache/api
-#INPUT += ../modules/hil/lib_xud/api ../modules/hil/lib_xud/examples/*/api
+# Core library APIs
+INPUT += ../modules/core/xs3_math 
 
-# Other library APIs
-INPUT += ../modules/lib_xs3_math 
+# IO library APIs
+INPUT += ../modules/io/modules/i2c/api
+INPUT += ../modules/io/modules/i2s/api
+INPUT += ../modules/io/modules/qspi_io/api
+INPUT += ../modules/io/modules/spi/api
+INPUT += ../modules/io/modules/mic_array/lib_mic_array/lib_mic_array/api ../modules/io/modules/mic_array/lib_mic_array/etc/vanilla
 
 # RTOS driver APIs
-INPUT += ../modules/rtos/drivers 
+INPUT += ../modules/rtos/modules/drivers 
 
 # RTOS SW Services
-INPUT += ../modules/rtos/sw_services/device_control/host ../modules/rtos/sw_services/device_control/api 
+INPUT += ../modules/rtos/modules/sw_services/device_control/host ../modules/rtos/modules/sw_services/device_control/api 
 
 # Avona library APIs
 INPUT += ../modules/avona/modules/lib_aec/api ../modules/avona/examples/bare-metal/shared_src/aec/

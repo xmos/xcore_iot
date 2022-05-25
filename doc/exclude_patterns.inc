@@ -4,10 +4,10 @@ documents/README.rst
 tools
 projects
 test
-modules/rtos/FreeRTOS
-modules/legacy_compat
-modules/lib_otpinfo
-modules/lib_src
-modules/lib_random
-modules/inferencing
-modules/hil/lib_xud
+modules/sample_rate_conversion
+modules/rtos/modules/FreeRTOS
+modules/core/modules/legacy_compat
+modules/core/modules/otpinfo
+modules/core/modules/random
+modules/core/modules/inferencing
+modules/io/modules/xud
