@@ -17,6 +17,9 @@ option(XCORE_SDK_TESTS     "Enable xcore_sdk tests"  OFF)
 ## Import some helpful macros
 include(tools/cmake_utils/xmos_macros.cmake)
 
+## Setup a framework root path
+set(XCORE_SDK_ROOT ${PROJECT_SOURCE_DIR} CACHE STRING "Root folder of xcore_sdk in this cmake project tree")
+
 ## Add library subdirectories
 add_subdirectory(modules)
 
