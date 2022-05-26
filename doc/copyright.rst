@@ -8,7 +8,7 @@ All original source code in this repository is Copyright (C) 2019-2021 XMOS Ltd 
 
 Additional third party copyrighted code is included under the following licenses:
 
-`FatFS <http://elm-chan.org/fsw/ff/00index_e.html>`_, Copyright (C) 2017 ChaN, licensed under a `BSD-style license <https://github.com/xmos/xcore_sdk/blob/develop/modules/rtos/sw_services/fatfs/thirdparty/LICENSE.txt>`__.
+`FatFS <http://elm-chan.org/fsw/ff/00index_e.html>`_, Copyright (C) 2017 ChaN, licensed under a `BSD-style license <https://github.com/xmos/fwk_rtos/blob/develop/modules/sw_services/fatfs/thirdparty/LICENSE.txt>`__.
 
 FreeRTOS, Copyright (c) 2017 Amazon.com, Inc., licensed under the `MIT License <https://github.com/xmos/FreeRTOS/blob/release/xcore-smp/LICENSE.md>`__.
 
