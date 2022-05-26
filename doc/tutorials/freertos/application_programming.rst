@@ -69,11 +69,11 @@ To help ease development of XCore applications using an SMP RTOS, XMOS provides 
 
   - Silicon Labs WF200 series WiFi transceiver
 
-These drivers are all found in the SDK under the path `modules/rtos/drivers <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/drivers>`_.
+These drivers are all found in the SDK under the path `modules/rtos/modules/drivers <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/modules/drivers>`_.
 
-Documentation on each of these drivers can be found under the :doc:`Modules/RTOS Drivers<../../reference/rtos_drivers/index>` section in the SDK documentation pages.
+Documentation on each of these drivers can be found under the :ref:`fwk_rtos-rtos_drivers` section in the SDK documentation pages.
 
-It is worth noting that most of these drivers utilize a lightweight RTOS abstraction layer, meaning that they are not dependent on FreeRTOS. Conceivably they should work on any SMP RTOS, provided an abstraction layer for it is provided. This abstraction layer is found under the path `modules/rtos/osal <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/osal>`_. At the moment the only available SMP RTOS for XCore is the XMOS SMP FreeRTOS, but more may become available in the future.
+It is worth noting that most of these drivers utilize a lightweight RTOS abstraction layer, meaning that they are not dependent on FreeRTOS. Conceivably they should work on any SMP RTOS, provided an abstraction layer for it is provided. This abstraction layer is found under the path `modules/rtos/modules/osal <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/modules/osal>`_. At the moment the only available SMP RTOS for XCore is the XMOS SMP FreeRTOS, but more may become available in the future.
 
 *****************
 Software Services
@@ -92,9 +92,9 @@ The SDK also includes some higher level RTOS compatible software services, some 
 - USB stack
 - WiFi connection manager
 
-Documentation on several software services can be found under the :doc:`Tutorials/FreeRTOS/Software Services<../../reference/rtos_services/index>` section in the SDK documentation pages.
+Documentation on several software services can be found under the :ref:`fwk_rtos-rtos_services` section in the SDK documentation pages.
 
-These services are all found in the SDK under the path `modules/rtos/sw_services <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/sw_services>`_.
+These services are all found in the SDK under the path `modules/rtos/modules/sw_services <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/modules/sw_services>`_.
 
 ***************
 Getting Started

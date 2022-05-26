@@ -6,17 +6,18 @@ PROJECT_BRIEF = "XCore Software Development Kit"
 PREDEFINED = __DOXYGEN__=1 
 PREDEFINED += DWORD_ALIGNED=
 PREDEFINED += __attribute__((weak))=
-PREDEFINED + = C_API= MA_C_API= C_API_START= C_API_END= EXTERN_C=
+PREDEFINED += C_API= MA_C_API= C_API_START= C_API_END= EXTERN_C=
 
 # Core library APIs
-INPUT += ../modules/core/xs3_math 
+INPUT += ../modules/core/modules/xs3_math 
 
 # IO library APIs
 INPUT += ../modules/io/modules/i2c/api
 INPUT += ../modules/io/modules/i2s/api
 INPUT += ../modules/io/modules/qspi_io/api
 INPUT += ../modules/io/modules/spi/api
-INPUT += ../modules/io/modules/mic_array/lib_mic_array/lib_mic_array/api ../modules/io/modules/mic_array/lib_mic_array/etc/vanilla
+INPUT += ../modules/io/modules/uart/api
+INPUT += ../modules/io/modules/mic_array/lib_mic_array/api ../modules/io/modules/mic_array/etc/vanilla
 
 # RTOS driver APIs
 INPUT += ../modules/rtos/modules/drivers 
