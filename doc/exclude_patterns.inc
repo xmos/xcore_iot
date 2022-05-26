@@ -5,9 +5,10 @@ tools
 projects
 test
 modules/sample_rate_conversion
-modules/rtos/modules/FreeRTOS
 modules/core/modules/legacy_compat
 modules/core/modules/otpinfo
 modules/core/modules/random
 modules/core/modules/inferencing
 modules/io/modules/xud
+modules/io/doc/substitutions.rst
+modules/avona/doc/substitutions.rst

@@ -114,37 +114,11 @@ Tests for most components in the SDK are located in the ``test`` folder.  This i
     :maxdepth: 1
     :includehidden:
 
-    test/hil
     test/rtos_drivers/hil
     test/rtos_drivers/hil_add
     test/rtos_drivers/usb
     test/rtos_drivers/wifi
     test/examples
-
-**************
-Adding Modules
-**************
-
-If adding a new module to the SDK, the following table may be helpful in determining where to add the module.  If you locate the new module incorrectly, the SDK development team will advise on where and how to relocate it.
-
-.. list-table:: Module Path Descriptions
-    :widths: 50 50
-    :header-rows: 1
-
-    * - Path
-      - Description
-    * - modules/modules.cmake
-      - General purpose modules
-    * - modules/hil/hil.cmake
-      - HIL libraries
-    * - modules/rtos/rtos.cmake
-      - RTOS modules
-    * - modules/rtos/drivers/hil.cmake
-      - RTOS drivers
-    * - modules/rtos/FreeRTOS/kernel.cmake
-      - FreeRTOS kernel
-    * - modules/rtos/sw_services/sw_services.cmake
-      - RTOS software services and middleware
 
 ********************
 Adding CMake Targets

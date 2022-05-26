@@ -1,13 +1,3 @@
-##########
-Frameworks
-##########
-
-.. toctree::
-   :maxdepth: 1
-   :includehidden:
-
-   ../../../modules/avona/index.rst
-
 #######
 Modules
 #######
@@ -15,6 +5,7 @@ Modules
 .. toctree::
    :maxdepth: 2
 
-   libraries/index
-   rtos_drivers/index
-   rtos_services/index
+   ../../modules/core/index.rst
+   ../../modules/io/index.rst
+   ../../modules/avona/index.rst
+   ../../modules/rtos/index.rst
