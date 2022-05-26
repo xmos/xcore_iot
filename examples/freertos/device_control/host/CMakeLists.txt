@@ -8,7 +8,7 @@ set(APP_INCLUDES "")
 
 add_executable(example_freertos_device_control_host)
 
-target_link_libraries(example_freertos_device_control_host PUBLIC sdk::device_control_host_usb)
+target_link_libraries(example_freertos_device_control_host PUBLIC rtos::sw_services::device_control_host_usb)
 target_sources(example_freertos_device_control_host PRIVATE ${APP_SOURCES})
 target_include_directories(example_freertos_device_control_host PRIVATE ${APP_INCLUDES})
 

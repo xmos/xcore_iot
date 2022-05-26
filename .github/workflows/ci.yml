@@ -110,13 +110,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh
-
-      - name: Save RTOS tests firmware artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: xcore_sdk_rtos_tests
-          path: ./dist/*.xe
+          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
 
   build_host_apps:
     name: Build host applications
@@ -140,26 +134,3 @@ jobs:
         with:
           name: xcore_sdk_host_apps
           path: ./dist_host
-
-  build_reference_apps:
-    name: Build reference applications
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout SDK
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Pull SDK builder image
-        run: |
-          docker pull ${SDK_BUILDER_IMAGE}
-
-      - name: Build
-        run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_reference_apps.sh
-
-      - name: Save reference app firmware artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: xcore_sdk_reference_apps
-          path: ./dist/*.xe

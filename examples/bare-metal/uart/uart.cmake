@@ -47,7 +47,7 @@ target_sources(example_bare_metal_uart PUBLIC ${APP_SOURCES})
 target_include_directories(example_bare_metal_uart PUBLIC ${APP_INCLUDES})
 target_compile_definitions(example_bare_metal_uart PRIVATE ${APP_COMPILE_DEFINITIONS})
 target_compile_options(example_bare_metal_uart PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(example_bare_metal_uart PUBLIC sdk::core sdk::utils)
+target_link_libraries(example_bare_metal_uart PUBLIC core::general io::all core::multitile_support)
 target_link_options(example_bare_metal_uart PRIVATE ${APP_LINK_OPTIONS})
 
 #**********************

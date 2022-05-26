@@ -39,11 +39,10 @@ set(APP_LINK_OPTIONS
 )
 
 set(APP_LINK_LIBRARIES
-    sdk::core
-    sdk::rtos::audio_drivers
-    sdk::rtos_freertos
-    sdk::rtos::usb_device_control
-    sdk::rtos_bsp::xcore_ai_explorer
+    core::general
+    rtos::drivers::audio
+    rtos::usb_device_control
+    rtos::bsp_config::xcore_ai_explorer
 )
 
 # **********************

@@ -37,6 +37,12 @@ set(APP_LINK_OPTIONS
     ${CMAKE_CURRENT_LIST_DIR}/src/config.xscope
 )
 
+set(APP_LINK_LIBRARIES
+    core::general
+    rtos::freertos
+    rtos::usb_device_control
+)
+
 #**********************
 # Tile Targets
 #**********************
@@ -46,7 +52,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
@@ -56,7 +62,7 @@ target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos sdk::rtos::usb_device_control)
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
 unset(TARGET_NAME)
 
