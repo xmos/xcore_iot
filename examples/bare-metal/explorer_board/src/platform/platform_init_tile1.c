@@ -13,6 +13,7 @@
 #include "xcore_utils.h"
 #include "i2c.h"
 #include "i2s.h"
+#include "uart.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -24,30 +25,32 @@
 static void tile1_setup_dac(void);
 static void tile1_i2s_init(void);
 static void tile1_mic_init(void);
+static void tile1_uart_init(void);
 
 void platform_init_tile_1(chanend_t c_other_tile)
 {
-    memset(tile1_ctx, 0, sizeof(tile1_ctx_t));
+    // memset(tile1_ctx, 0, sizeof(tile1_ctx_t));
 
-    tile1_ctx->c_from_gpio = soc_channel_establish(c_other_tile, soc_channel_input);
-    tile1_ctx->c_to_gpio = soc_channel_establish(c_other_tile, soc_channel_output);
+    // tile1_ctx->c_from_gpio = soc_channel_establish(c_other_tile, soc_channel_input);
+    // tile1_ctx->c_to_gpio = soc_channel_establish(c_other_tile, soc_channel_output);
 
-    /* Reset CODEC */
-    tile1_setup_dac();
+    // /* Reset CODEC */
+    // tile1_setup_dac();
 
-    /* Signal codec reset complete */
-    chanend_out_byte(c_other_tile, 0x00);
+    // /* Signal codec reset complete */
+    // chanend_out_byte(c_other_tile, 0x00);
 
-    /* Wait for DAC initialization to be complete */
-    char ret_char = chanend_in_byte(c_other_tile);
-    if (ret_char != 0) {
-        debug_printf("DAC init failed on other tile\n");
-    }
+    // /* Wait for DAC initialization to be complete */
+    // char ret_char = chanend_in_byte(c_other_tile);
+    // if (ret_char != 0) {
+    //     debug_printf("DAC init failed on other tile\n");
+    // }
 
-    app_pll_init();
+    // app_pll_init();
 
-    tile1_mic_init();
-    tile1_i2s_init();
+    // tile1_mic_init();
+    // tile1_i2s_init();
+    tile1_uart_init();
 }
 
 static void tile1_setup_dac(void)
@@ -108,3 +111,48 @@ static void tile1_mic_init(void)
 {
     ma_vanilla_init();
 }
+
+HIL_UART_RX_CALLBACK_ATTR
+void uart_rx_error_callback(void * app_data){
+    uart_rx_t *ctx = (uart_rx_t*) app_data;
+    debug_printf("uart_rx_error: 0x%x\n", ctx->cb_code);
+}
+
+static void tile1_uart_init(void)
+{
+    const unsigned baud_rate = 1000000;
+
+    hwtimer_t tmr_tx = hwtimer_alloc();
+    uart_tx_init(
+        &tile1_ctx->uart_tx_ctx,
+        XS1_PORT_1C,  //I2S_LRCLK 3610
+        // XS1_PORT_1M,  //X1D36
+        baud_rate,
+        8,
+        UART_PARITY_NONE,
+        1,
+        tmr_tx,
+        NULL,
+        0,
+        NULL,
+        NULL
+        );
+
+    hwtimer_t tmr_rx = hwtimer_alloc();
+    uart_rx_init(
+        &tile1_ctx->uart_rx_ctx,
+        XS1_PORT_1D, //I2S_BCLK 3610
+        // XS1_PORT_1E, //X1D12
+        baud_rate,
+        8,
+        UART_PARITY_NONE,
+        1,
+        tmr_rx,
+        NULL, // No buffer
+        0,
+        NULL, // No rx complete callback
+        uart_rx_error_callback,
+        &tile1_ctx->uart_rx_ctx
+        );
+}
+
