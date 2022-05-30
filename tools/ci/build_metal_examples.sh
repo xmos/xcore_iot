@@ -11,7 +11,6 @@ mkdir -p ${DIST_DIR}
 
 applications=(
     "explorer_board     example_bare_metal_explorer_board  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "uart               example_bare_metal_uart            XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "visual_wake_words  example_bare_metal_vww             XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 
