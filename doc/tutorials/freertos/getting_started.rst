@@ -10,7 +10,7 @@ This document is intended to help you start your first FreeRTOS application on X
 RTOS Application Design
 ***********************
 
-A fully functional example application that can be found in the SDK under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_. This application is a reference for how to use an RTOS drivers or software service, and serves as an example for how to structure an SMP RTOS application for XCore.  Additional code to initialize the SoC platform for this example is provided by a board support configuration library `modules/rtos/board_support/XCORE-AI-EXPLORER_2V0/platform <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/bsp_config/XCORE-AI-EXPLORER_2V0/platform>`_
+A fully functional example application that can be found in the SDK under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_. This application is a reference for how to use an RTOS drivers or software service, and serves as an example for how to structure an SMP RTOS application for XCore.  Additional code to initialize the SoC platform for this example is provided by a board support configuration library `modules/rtos/modules/board_support/XCORE-AI-EXPLORER_2V0/platform <https://github.com/xmos/fwk_rtos/tree/develop/modules/bsp_config/XCORE-AI-EXPLORER_2V0/platform>`_
 
 This example application runs two instances of SMP FreeRTOS, one on each of the processor's two tiles. Because each tile has its own memory which is not shared between them, this can be viewed as a single asymmetric multiprocessing (AMP) system that comprises two SMP systems. A FreeRTOS thread that is created on one tile will never be scheduled to run on the other tile. Similarly, an RTOS object that is created on a tile, such as a queue, can only be accessed by threads and ISRs that run on that tile and never by code running on the other tile.
 
@@ -22,7 +22,7 @@ For example, a SPI interface might be available on tile 0. Normally, initializat
 
 The example application referenced above, as well as the RTOS driver documentation, should be consulted to see exactly how to initialize and share driver instances.  Additionally, not all IO is capable of being shared between tiles directly through the driver API due to timing constraints.
 
-The SDK provides the ON_TILE(t) preprocessor macro. This macro may be used by applications to ensure certain code is included only on a specific tile at compile time. In the example application, there is a single task that is created on both tiles that starts the drivers and creates the remaining application tasks. While this function is written as a single function, various parts are inside #if ON_TILE() blocks. For example, consider the following code snippet found inside the i2c_init() `function <https://github.com/xmos/xcore_sdk/blob/develop/modules/rtos/bsp_config/XCORE-AI-EXPLORER_2V0/platform/platform_init.c>`_:
+The SDK provides the ON_TILE(t) preprocessor macro. This macro may be used by applications to ensure certain code is included only on a specific tile at compile time. In the example application, there is a single task that is created on both tiles that starts the drivers and creates the remaining application tasks. While this function is written as a single function, various parts are inside #if ON_TILE() blocks. For example, consider the following code snippet found inside the i2c_init() `function <https://github.com/xmos/fwk_rtos/blob/develop/modules/bsp_config/XCORE-AI-EXPLORER_2V0/platform/platform_init.c>`_:
 
 .. code-block:: C
 
@@ -69,7 +69,7 @@ XCore leverages its architecture to provide a flexible chip where many typically
 
 To support any generic bsp_config, applications should call `platform_init()` before starting the scheduler, and then `platform_start()` after the scheduler is running and before any RTOS drivers are used.
 
-The bsp_configs provided with the XCore SDK in `modules/rtos/bsp_config <https://github.com/xmos/xcore_sdk/tree/develop/modules/rtos/bsp_config>`_ are an excellent starting point. They provide the most common peripheral drivers that are supported by the boards that support the XCore SDK. For advanced users, it is recommended that you copy one of these bsp_config into your application project and customize as needed. See `application/ffd/bsp_config <https://github.com/xmos/xcore_sdk/tree/develop/applications/ffd/bsp_config>`_ for example of how the XCORE_AI_EXPLORER bsp_config has been customized for an application.  
+The bsp_configs provided with the XCore SDK in `modules/rtos/modules/bsp_config <https://github.com/xmos/fwk_rtos/tree/develop/modules/bsp_config>`_ are an excellent starting point. They provide the most common peripheral drivers that are supported by the boards that support the XCore SDK. For advanced users, it is recommended that you copy one of these bsp_config into your application project and customize as needed.
 
 *******************************
 Developing and Debugging Memory
