@@ -12,7 +12,7 @@ The XCore SDK is a collection of C/C++ software libraries designed to simplify a
 - Code Examples - Examples showing a variety of XCore features based on bare-metal and FreeRTOS programming.
 - Documentation - Getting started guides, references and API guides.
 
-The SDK is designed to be used in conjunction with the xcore.ai Explorer board and the Voice Reference evaluation kit. The example applications compile targeting these board. Further information about the Explorer board, the Voice Reference evaluation kit, and xcore.ai devices is available to on [www.xmos.ai](https://www.xmos.ai/).
+The SDK is designed to be used in conjunction with the xcore.ai Explorer board and the Voice Reference evaluation kit. The example applications compile targeting these boards. Further information about the Explorer board, the Voice Reference evaluation kit, and xcore.ai devices is available to on [www.xmos.ai](https://www.xmos.ai/).
 
 ## Build Status
 
