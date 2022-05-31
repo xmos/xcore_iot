@@ -1,13 +1,18 @@
 # XCore SDK Repository
 
-The XCore SDK is comprised of the following components:
+[![Version](https://img.shields.io/github/v/release/xmos/xcore_sdk?include_prereleases)](https://github.com/xmos/xcore_sdk/releases/latest)
+[![Issues](https://img.shields.io/github/issues/xmos/xcore_sdk)](https://github.com/xmos/xcore_sdk/issues)
+[![Contributors](https://img.shields.io/github/contributors/xmos/xcore_sdk)](https://github.com/xmos/xcore_sdk/graphs/contributors)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/xmos/xcore_sdk/pulls)
 
-- C Libraries - Libraries to support programming for XCore in the C programming language.
+The XCore SDK is a collection of C/C++ software libraries designed to simplify and accelerate application development on XCore processors. It is composed of the following components:
+
+- Peripherals - Libraries that enable the flexible peripheral capabilities of the XCore architecture.  
+- FreeRTOS - Libraries that enable [multi-core FreeRTOS development](https://www.freertos.org/symmetric-multiprocessing-introduction.html) on XCore including a wide array of RTOS drivers and middleware.
 - Code Examples - Examples showing a variety of XCore features based on bare-metal and FreeRTOS programming.
-- FreeRTOS - Libraries to support FreeRTOS operation on xcore.ai.
 - Documentation - Getting started guides, references and API guides.
 
-The SDK is designed to be used in conjunction with the xcore.ai Explorer board. The example applications compile targeting this board. Further information about the Explorer board, and xcore.ai device are available to on [www.xmos.ai](https://www.xmos.ai/).
+The SDK is designed to be used in conjunction with the xcore.ai Explorer board and the Voice Reference evaluation kit. The example applications compile targeting these boards. Further information about the Explorer board, the Voice Reference evaluation kit, and xcore.ai devices is available to on [www.xmos.ai](https://www.xmos.ai/).
 
 ## Build Status
 
@@ -22,13 +27,20 @@ Some dependent components are included as git submodules. These can be obtained 
 
     $ git clone --recurse-submodules https://github.com/xmos/xcore_sdk.git
 
+## Development Tools
+
+Download and install the XCore [XTC Tools](https://www.xmos.ai/software-tools/) version 15.1.0 or newer. If you already have the XTC Toolchain installed, you can check the version with the following command:
+
+    $ xcc --version
+
 ## Documentation
 
 See the [official documentation](https://www.xmos.ai/xcore-sdk/) for more information including:
 
 - Instructions for installing
+- Getting started guides
 - Programming tutorials
-- How to build and run example applications
+- Supported boards
 - API references
 
 # Getting Help
@@ -37,4 +49,9 @@ A [Github issue](https://github.com/xmos/xcore_sdk/issues/new/choose) should be 
 
 ## License
 
-This Software is subject to the terms of the [XMOS Public Licence: Version 1](https://github.com/xmos/xcore_sdk/blob/develop/LICENSE.rst)
+This Software is subject to the terms of the [XMOS Public Licence: Version 1](https://github.com/xmos/xcore_sdk/blob/develop/LICENSE.rst). Copyrights and licenses for third party components can be found in [Copyrights and Licenses](https://github.com/xmos/xcore_sdk/blob/develop/doc/copyright.rst).
+
+## Contribution
+
+Contributions are greatly welcomed! For guidelines of contribution please check the [Contributing Guide](https://github.com/xmos/xcore_sdk/blob/develop/doc/contributing.rst).
+
