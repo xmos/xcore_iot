@@ -43,7 +43,7 @@ See the [official documentation](https://www.xmos.ai/xcore-sdk/) for more inform
 - Supported boards
 - API references
 
-# Getting Help
+## Getting Help
 
 A [Github issue](https://github.com/xmos/xcore_sdk/issues/new/choose) should be the primary method of getting in touch with the XMOS SDK development team.
 
