@@ -2,6 +2,7 @@
 # Individual tests
 #**********************
 set(SPI_TEST  1)
+set(UART_TEST  1)
 
 #**********************
 # Gather Sources
@@ -36,6 +37,7 @@ set(APP_COMPILE_DEFINITIONS
     XE_BASE_TILE=0
     XUD_CORE_CLOCK=600
     RUN_SPI_TESTS=${SPI_TEST}
+    RUN_UART_TESTS=${UART_TEST}
 )
 
 set(APP_LINK_OPTIONS

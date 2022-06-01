@@ -7,5 +7,6 @@
 #include "rtos_test/rtos_test_utils.h"
 
 #include "individual_tests/spi/spi_test.h"
+#include "individual_tests/uart/uart_test.h"
 
 #endif /* INDIVIDUAL_TESTS_H_ */

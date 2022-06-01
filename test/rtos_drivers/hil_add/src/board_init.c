@@ -58,7 +58,9 @@ void board_tile1_init(
         rtos_intertile_t *intertile_ctx,
         rtos_spi_master_t *spi_master_ctx,
         rtos_spi_master_device_t *test_device_ctx,
-        rtos_spi_slave_t *spi_slave_ctx
+        rtos_spi_slave_t *spi_slave_ctx,
+        rtos_uart_tx_t *rtos_uart_tx_ctx,
+        rtos_uart_rx_t *rtos_uart_rx_ctx 
     )
 {
     rtos_intertile_init(intertile_ctx, tile0);
@@ -82,4 +84,29 @@ void board_tile1_init(
             1,
             &spi_master_rpc_config,
             intertile_ctx);
+
+
+    hwtimer_t tmr_tx = hwtimer_alloc();
+
+    rtos_uart_tx_init(
+            rtos_uart_tx_ctx,
+            XS1_PORT_1E, /* Looped back to 1P on tile 1 */
+            1000000,
+            8,
+            UART_PARITY_ODD,
+            1,
+            tmr_tx);
+
+
+    hwtimer_t tmr_rx = hwtimer_alloc();
+
+    rtos_uart_rx_init(
+            rtos_uart_rx_ctx,
+            UART_RX_CORE_MASK,
+            XS1_PORT_1P, /* Looped back to 1E on tile 1 */
+            1000000,
+            8,
+            UART_PARITY_ODD,
+            1,
+            tmr_rx);
 }
