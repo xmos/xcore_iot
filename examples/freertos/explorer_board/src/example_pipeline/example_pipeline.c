@@ -21,6 +21,7 @@
 #error MIC_ARRAY_CONFIG_MIC_COUNT must be 2
 #endif
 
+#define FRAMES_IN_ALL_CHANS (appconfAUDIO_FRAME_LENGTH * MIC_ARRAY_CONFIG_MIC_COUNT)
 #define EXP -31
 
 #define Q31(f) (int)((signed long long)((f) * ((unsigned long long)1 << (31+20)) + (1<<19)) >> 20)
@@ -71,7 +72,7 @@ void *example_pipeline_input(void *data)
 
     int32_t * audio_frame;
 
-    audio_frame = pvPortMalloc(appconfAUDIO_FRAME_LENGTH * MIC_ARRAY_CONFIG_MIC_COUNT);
+    audio_frame = pvPortMalloc(FRAMES_IN_ALL_CHANS * sizeof(int32_t));
 
     mic_array_ctx->format = RTOS_MIC_ARRAY_CHANNEL_SAMPLE;
 
@@ -80,7 +81,7 @@ void *example_pipeline_input(void *data)
             audio_frame,
             appconfAUDIO_FRAME_LENGTH,
             portMAX_DELAY);
-
+    printf("new\n");
     return audio_frame;
 }
 
@@ -88,7 +89,7 @@ int example_pipeline_output(void *audio_frame, void *data)
 {
     (void) data;
     int32_t * old = audio_frame;
-    int32_t frame [appconfAUDIO_FRAME_LENGTH * MIC_ARRAY_CONFIG_MIC_COUNT];
+    int32_t frame [FRAMES_IN_ALL_CHANS];
 
     for(int i = 0; i < appconfAUDIO_FRAME_LENGTH; i++){
         frame[2 * i] = old[i];
@@ -108,6 +109,7 @@ int example_pipeline_output(void *audio_frame, void *data)
 
 void stage0(int32_t * audio_frame)
 {
+    printf("stage 0\n");
 #if appconfPRINT_AUDIO_FRAME_POWER
     frame_power(audio_frame);
 #endif
@@ -115,6 +117,7 @@ void stage0(int32_t * audio_frame)
 
 void stage1(int32_t * audio_frame)
 {
+    printf("stage 1\n");
     bfp_s32_t ch1, ch2;
     bfp_s32_init(&ch1, &audio_frame[0], EXP, appconfAUDIO_FRAME_LENGTH, 1);
     bfp_s32_init(&ch2, &audio_frame[appconfAUDIO_FRAME_LENGTH], EXP, appconfAUDIO_FRAME_LENGTH, 1);
@@ -128,6 +131,7 @@ void stage1(int32_t * audio_frame)
     // normalise exponent
     bfp_s32_use_exponent(&ch1, EXP);
     bfp_s32_use_exponent(&ch2, EXP);
+    printf("stage 1 end\n");
 }
 
 void example_pipeline_init(UBaseType_t priority)

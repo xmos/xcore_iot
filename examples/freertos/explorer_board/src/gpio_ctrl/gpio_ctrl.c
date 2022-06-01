@@ -13,7 +13,7 @@
 /* Library headers */
 
 /* App headers */
-#include "app_conf.h"
+#include "../app_conf.h"
 #include "example_pipeline/example_pipeline.h"
 #include "platform/driver_instances.h"
 
