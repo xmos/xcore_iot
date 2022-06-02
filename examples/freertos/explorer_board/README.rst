@@ -2,7 +2,7 @@
 Explorer Board
 ##############
 
-This example application demonstrates various capabilities of the Explorer board using FreeRTOS.  The example uses lib_soc and various libraries to build FreeRTOS applications targeting xCORE.  The application uses I2C, I2S, SPI, flash, mic array, and GPIO devices.
+This example application demonstrates various capabilities of the Explorer board using FreeRTOS. The application uses I2C, I2S, SPI, flash, mic array, and GPIO devices.
 
 The FreeRTOS application creates a single stage audio pipeline which applies a variable gain. The output audio is sent to the DAC and can be listened to via the 3.5mm audio jack. The audio gain can be adjusted via GPIO, where button A is volume up and button B is volume down.
 
