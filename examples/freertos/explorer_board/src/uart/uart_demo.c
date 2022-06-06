@@ -22,7 +22,7 @@
 #include "rtos_uart_tx.h"
 #include "rtos_uart_rx.h"
 
-#define MAX_TEST_VECT_SIZE  128
+#define MAX_TEST_VECT_SIZE  32
 
 /* This example requires that you loopback the X1D12 and X1D39 pins */
 
@@ -31,6 +31,7 @@ void uart_tx_demo(void *arg){
     
     rtos_printf("uart_demo tx STARTED\n");
     rtos_uart_tx_start(uart_tx_ctx);
+    
     uint8_t tx_buff[MAX_TEST_VECT_SIZE];
     for(int i = 0; i < MAX_TEST_VECT_SIZE; i++){
         tx_buff[i] = (i * 7) & 0xff;
@@ -39,12 +40,13 @@ void uart_tx_demo(void *arg){
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     for (;;) {
+        rtos_uart_tx_write(uart_tx_ctx, tx_buff, sizeof(tx_buff));
+
         BaseType_t success = xQueueSend(loopback_queue, (void *)tx_buff, (TickType_t)0);
         if(success != pdPASS){
             rtos_printf("Problem sending loopback data reference to rx task\n");
         }
 
-        rtos_uart_tx_write(uart_tx_ctx, tx_buff, sizeof(tx_buff));
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -114,7 +116,7 @@ void uart_rx_demo(void *arg){
 
 
         for(int i = 0; i < MAX_TEST_VECT_SIZE; i++){
-            int timeout_ms = 100;
+            int timeout_ms = 10;
             size_t num_bytes = xStreamBufferReceive(uart_rx_ctx->app_byte_buffer,
                                                     &rx_buf[i],
                                                     1,
@@ -133,6 +135,7 @@ void uart_rx_demo(void *arg){
                 if(tx_buf[i] != rx_buf[i]){
                     rtos_printf("index: %d expected: 0x%x got: 0x%x\n", i, tx_buf[i], rx_buf[i]);
                 }
+                printed_once = 0;
             }
         } else {
             if(!printed_once){
