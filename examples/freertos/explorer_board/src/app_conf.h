@@ -28,7 +28,11 @@
 #define appconfPIPELINE_AUDIO_SAMPLE_RATE       16000
 #define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN    20
 #define appconfAUDIO_FRAME_LENGTH            	MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
+#define appconfMIC_COUNT                        MIC_ARRAY_CONFIG_MIC_COUNT
 #define appconfPRINT_AUDIO_FRAME_POWER          0
+#define appconfFRAMES_IN_ALL_CHANS              (appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT)
+#define appconfPOWER_THRESHOLD                  (float)0.00001
+#define appconfEXP                              -31
 
 
 /* GPIO Configuration */

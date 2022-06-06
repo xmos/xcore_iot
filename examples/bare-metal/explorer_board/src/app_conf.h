@@ -8,7 +8,11 @@
 #define appconfAUDIO_CLOCK_FREQUENCY            24576000
 #define appconfPDM_CLOCK_FREQUENCY              3072000
 #define appconfPIPELINE_AUDIO_SAMPLE_RATE       16000
-#define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN    42
+#define appconfINITIAL_GAIN                     (float)20.0
+#define appconfPOWER_THRESHOLD                  (float)0.00001
 #define appconfAUDIO_FRAME_LENGTH            	256
+#define appconfEXP                              -31
+#define appconfMIC_COUNT                        2
+#define appconfFRAMES_TO_BUFFER                 2
 
 #endif /* APP_CONF_H_ */

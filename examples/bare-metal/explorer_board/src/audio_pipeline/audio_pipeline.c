@@ -21,38 +21,33 @@
 #include "bfp_math.h"
 
 /* App headers */
-#include "app_conf.h"
+#include "../app_conf.h"
 #include "audio_pipeline.h"
-
-#define NORM_EXP -31
-#define FRAMES_TO_BUFFER_PER_STAGE  2
-#define INITIAL_GAIN (float)20.0
-#define LED_FRAME_POWER_THRESHOLD   (float)0.00001
 
 #include <hwtimer.h>
 void ap_stage_a(chanend_t c_input, chanend_t c_output) {
     // initialise the array which will hold the data
-    int32_t output[FRAMES_TO_BUFFER_PER_STAGE][MIC_ARRAY_CONFIG_MIC_COUNT][MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME];
+    int32_t output[appconfFRAMES_TO_BUFFER][appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
     int buf_ndx = 0;
 
     while(1)
     {
-        ma_frame_rx_transpose((int32_t *)output[buf_ndx], c_input, MIC_ARRAY_CONFIG_MIC_COUNT, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME);
+        ma_frame_rx_transpose((int32_t *)output[buf_ndx], c_input, appconfMIC_COUNT, appconfAUDIO_FRAME_LENGTH);
 
-        s_chan_out_buf_word(c_output, (uint32_t*)output[buf_ndx], MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT);
-        buf_ndx = (buf_ndx + 1 >= FRAMES_TO_BUFFER_PER_STAGE) ? buf_ndx + 1 : 0;
+        s_chan_out_buf_word(c_output, (uint32_t*)output[buf_ndx], appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
+        buf_ndx = (buf_ndx + 1 >= appconfFRAMES_TO_BUFFER) ? buf_ndx + 1 : 0;
     }
 }
 
 void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
     // initialise the array which will hold the data
-    int32_t output[MIC_ARRAY_CONFIG_MIC_COUNT][MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME];
+    int32_t output[appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
     // initialise block floating point structures for both channels
-    bfp_s32_t ch1, ch2;
-    bfp_s32_init(&ch1, output[0], NORM_EXP, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, 0);
-    bfp_s32_init(&ch2, output[1], NORM_EXP, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, 0);
+    bfp_s32_t ch0, ch1;
+    bfp_s32_init(&ch0, output[0], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
+    bfp_s32_init(&ch1, output[1], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
 
-    float gain_db = INITIAL_GAIN;
+    float gain_db = appconfINITIAL_GAIN;
 
     triggerable_disable_all();
     // initialise events
@@ -69,22 +64,22 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
             input_frames:
             {
                 // recieve frame over the channel
-                s_chan_in_buf_word(c_input, (uint32_t*)output, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT);
+                s_chan_in_buf_word(c_input, (uint32_t*)output, appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
                 // calculate the headroom of the new frames
+                bfp_s32_headroom(&ch0);
                 bfp_s32_headroom(&ch1);
-                bfp_s32_headroom(&ch2);
                 // update the gain
                 float power = gain_db / 20.0;
                 float gain_fl = powf(10.0, power);
                 float_s32_t gain = float_to_float_s32(gain_fl);
                 // scale both channels 
+                bfp_s32_scale(&ch0, &ch0, gain);
                 bfp_s32_scale(&ch1, &ch1, gain);
-                bfp_s32_scale(&ch2, &ch2, gain);
                 // normalise exponent
-                bfp_s32_use_exponent(&ch1, NORM_EXP);
-                bfp_s32_use_exponent(&ch2, NORM_EXP);
+                bfp_s32_use_exponent(&ch0, appconfEXP);
+                bfp_s32_use_exponent(&ch1, appconfEXP);
                 // send frame over the channel
-                s_chan_out_buf_word(c_output, (uint32_t*)output, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT);
+                s_chan_out_buf_word(c_output, (uint32_t*)output, appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
             }
             continue;
         }
@@ -112,13 +107,11 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
 
 void ap_stage_c(chanend_t c_input, chanend_t c_output, chanend_t c_to_gpio) {
 
-    int32_t output[MIC_ARRAY_CONFIG_MIC_COUNT][MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME];
+    int32_t output[appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
     // initialise block floating point structures for both channels
-    bfp_s32_t ch1, ch2;
-    bfp_s32_init(&ch1, output[0], NORM_EXP, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, 0);
-    bfp_s32_init(&ch2, output[1], NORM_EXP, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME, 0);
-
-    float th = LED_FRAME_POWER_THRESHOLD;
+    bfp_s32_t ch0, ch1;
+    bfp_s32_init(&ch0, output[0], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
+    bfp_s32_init(&ch1, output[1], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
 
     triggerable_disable_all();
     // initialise event
@@ -134,23 +127,23 @@ void ap_stage_c(chanend_t c_input, chanend_t c_output, chanend_t c_to_gpio) {
             {
                 uint8_t led_byte = 0;
                 // recieve frame over the channel
-                s_chan_in_buf_word(c_input, (uint32_t*)output, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT);
+                s_chan_in_buf_word(c_input, (uint32_t*)output, appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
                 // calculate the headroom of the new frames
+                bfp_s32_headroom(&ch0);
                 bfp_s32_headroom(&ch1);
-                bfp_s32_headroom(&ch2);
                 // calculate the frame energy
+                float_s32_t frame_energy_ch0 = float_s64_to_float_s32(bfp_s32_energy(&ch0));
                 float_s32_t frame_energy_ch1 = float_s64_to_float_s32(bfp_s32_energy(&ch1));
-                float_s32_t frame_energy_ch2 = float_s64_to_float_s32(bfp_s32_energy(&ch2));
                 // calculate the frame power
-                float frame_pow1 = float_s32_to_float(frame_energy_ch1) / (float)MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME;
-                float frame_pow2 = float_s32_to_float(frame_energy_ch2) / (float)MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME;
-                if((frame_pow1 > th) || (frame_pow2 > th)){
+                float frame_pow0 = float_s32_to_float(frame_energy_ch0) / (float)appconfAUDIO_FRAME_LENGTH;
+                float frame_pow1 = float_s32_to_float(frame_energy_ch1) / (float)appconfAUDIO_FRAME_LENGTH;
+                if((frame_pow0 > appconfPOWER_THRESHOLD) || (frame_pow1 > appconfPOWER_THRESHOLD)){
                     led_byte = 1;
                 }
                 // send led value to gpio
                 chanend_out_byte(c_to_gpio, led_byte);
                 // send frame over the channel
-                s_chan_out_buf_word(c_output, (uint32_t*)output, MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME * MIC_ARRAY_CONFIG_MIC_COUNT);
+                s_chan_out_buf_word(c_output, (uint32_t*)output, appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
             }
             continue;
         }

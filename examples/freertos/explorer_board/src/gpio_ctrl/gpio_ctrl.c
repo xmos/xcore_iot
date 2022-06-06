@@ -14,7 +14,7 @@
 
 /* App headers */
 #include "../app_conf.h"
-#include "example_pipeline/example_pipeline.h"
+#include "../example_pipeline/example_pipeline.h"
 #include "platform/driver_instances.h"
 
 RTOS_GPIO_ISR_CALLBACK_ATTR
@@ -32,26 +32,24 @@ static void button_callback(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_
 
 static void volume_up( void )
 {
-    BaseType_t gain = 0;
-    gain = audiopipeline_get_stage1_gain();
+    BaseType_t gain = audiopipeline_get_stage1_gain();
     if( gain < 60 )
     {
         gain += 4;
     }
-    audiopipeline_set_stage1_gain( gain );
     rtos_printf("volume up\n");
+    audiopipeline_set_stage1_gain( gain );
 }
 
 static void volume_down( void )
 {
-    BaseType_t gain = 0;
-    gain = audiopipeline_get_stage1_gain();
+    BaseType_t gain = audiopipeline_get_stage1_gain();
     if( gain > 0 )
     {
         gain -= 4;
     }
-    audiopipeline_set_stage1_gain( gain );
     rtos_printf("volume down\n");
+    audiopipeline_set_stage1_gain( gain );
 }
 
 void vVolumeUpCallback( TimerHandle_t pxTimer )
@@ -99,22 +97,20 @@ void gpio_ctrl(void)
                             NULL,
                             vVolumeDownCallback);
 
-    rtos_printf("yo\n");
-
     for (;;) {
         xTaskNotifyWait(
                 0x00000000UL,    /* Don't clear notification bits on entry */
                 0xFFFFFFFFUL,    /* Reset full notification value on exit */
                 &status,         /* Pass out notification value into status */
                 portMAX_DELAY ); /* Wait indefinitely until next notification */
-        rtos_printf("1\n");
+
         buttons_val = rtos_gpio_port_in(gpio_ctx_t0, button_port);
         buttonA = ( buttons_val >> 0 ) & 0x01;
         buttonB = ( buttons_val >> 1 ) & 0x01;
-        rtos_printf("2\n");
+
         /* Turn on LEDS based on buttons */
         rtos_gpio_port_out(gpio_ctx_t0, led_port, buttons_val);
-        rtos_printf("3\n");
+
         /* Adjust volume based on LEDs */
         if( buttonA == 0 )   /* Up */
         {
@@ -126,7 +122,7 @@ void gpio_ctrl(void)
         {
             xTimerStop( volume_up_timer, 0 );
         }
-        rtos_printf("4\n");
+
         if( buttonB == 0 )   /* Down */
         {
             xTimerStart( volume_down_timer, 0 );
@@ -137,7 +133,7 @@ void gpio_ctrl(void)
         {
             xTimerStop( volume_down_timer, 0 );
         }
-        rtos_printf("end\n");
+
     }
 }
 
