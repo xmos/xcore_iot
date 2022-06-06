@@ -7,4 +7,6 @@ FreeRTOS
 
    application_programming
    getting_started
+   faq
+   common_issues
    examples/index
