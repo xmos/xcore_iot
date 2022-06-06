@@ -11,8 +11,8 @@
 #define appconfINITIAL_GAIN                     (float)20.0
 #define appconfPOWER_THRESHOLD                  (float)0.00001
 #define appconfAUDIO_FRAME_LENGTH            	256
-#define appconfEXP                              -31
 #define appconfMIC_COUNT                        2
-#define appconfFRAMES_TO_BUFFER                 2
+#define appconfFRAMES_IN_ALL_CHANS              (appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT)
+#define appconfEXP                              -31
 
 #endif /* APP_CONF_H_ */

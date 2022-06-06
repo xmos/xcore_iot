@@ -7,12 +7,7 @@
 #include <xcore/clock.h>
 #include <xcore/port.h>
 
-#include "app_conf.h"
-
-#define MAX(X, Y) ((X) >= (Y) ? (X) : (Y))
-#define MIN(X, Y) ((X) <= (Y) ? (X) : (Y))
-
-#define MIC_DUAL_NUM_CHANNELS 2
+#include "../app_conf.h"
 
 void mic_array_setup_ddr(
         xclock_t pdmclk,
@@ -22,7 +17,7 @@ void mic_array_setup_ddr(
         port_t p_pdm_mics,
         int divide);
 
-void frame_power(int32_t (*audio_frame)[MIC_DUAL_NUM_CHANNELS]);
+void frame_power(int32_t (*audio_frame)[appconfMIC_COUNT]);
 
 inline int mic_array_decimation_factor(
         const unsigned pdm_clock_frequency,

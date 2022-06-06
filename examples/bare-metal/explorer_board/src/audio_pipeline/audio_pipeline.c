@@ -5,17 +5,9 @@
 #include <platform.h>
 #include <xs1.h>
 #include <string.h>
-#include <xcore/assert.h>
-#include <xcore/chanend.h>
-#include <xcore/channel.h>
-#include <xcore/channel_streaming.h>
-#include <xcore/parallel.h>
-#include <xcore/port.h>
-#include <xcore/hwtimer.h>
 #include <xcore/triggerable.h>
 
 /* SDK headers */
-#include "soc.h"
 #include "xcore_utils.h"
 #include "mic_array.h"
 #include "bfp_math.h"
@@ -24,24 +16,30 @@
 #include "../app_conf.h"
 #include "audio_pipeline.h"
 
-#include <hwtimer.h>
+//#include <hwtimer.h>
 void ap_stage_a(chanend_t c_input, chanend_t c_output) {
     // initialise the array which will hold the data
-    int32_t output[appconfFRAMES_TO_BUFFER][appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
-    int buf_ndx = 0;
+    int32_t DWORD_ALIGNED input [appconfAUDIO_FRAME_LENGTH][appconfMIC_COUNT];
+    int32_t DWORD_ALIGNED output [appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
 
     while(1)
     {
-        ma_frame_rx_transpose((int32_t *)output[buf_ndx], c_input, appconfMIC_COUNT, appconfAUDIO_FRAME_LENGTH);
-
-        s_chan_out_buf_word(c_output, (uint32_t*)output[buf_ndx], appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
-        buf_ndx = (buf_ndx + 1 >= appconfFRAMES_TO_BUFFER) ? buf_ndx + 1 : 0;
+        //printf("trying to recieve a frame\n");
+        ma_frame_rx_transpose((int32_t *) input, c_input, appconfMIC_COUNT, appconfAUDIO_FRAME_LENGTH);
+        //printf("frame recieved\n");
+        for(int ch = 0; ch < appconfMIC_COUNT; ch ++){
+            for(int smp = 0; smp < appconfAUDIO_FRAME_LENGTH; smp ++){
+                output[ch][smp] = input[smp][ch];
+            }
+        }
+        s_chan_out_buf_word(c_output, (uint32_t*) output, appconfFRAMES_IN_ALL_CHANS);
+        //printf("frame sent\n");
     }
 }
 
 void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
     // initialise the array which will hold the data
-    int32_t output[appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
+    int32_t DWORD_ALIGNED output[appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
     // initialise block floating point structures for both channels
     bfp_s32_t ch0, ch1;
     bfp_s32_init(&ch0, output[0], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
@@ -64,7 +62,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
             input_frames:
             {
                 // recieve frame over the channel
-                s_chan_in_buf_word(c_input, (uint32_t*)output, appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
+                s_chan_in_buf_word(c_input, (uint32_t*) output, appconfFRAMES_IN_ALL_CHANS);
                 // calculate the headroom of the new frames
                 bfp_s32_headroom(&ch0);
                 bfp_s32_headroom(&ch1);
@@ -79,7 +77,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                 bfp_s32_use_exponent(&ch0, appconfEXP);
                 bfp_s32_use_exponent(&ch1, appconfEXP);
                 // send frame over the channel
-                s_chan_out_buf_word(c_output, (uint32_t*)output, appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
+                s_chan_out_buf_word(c_output, (uint32_t*) output, appconfFRAMES_IN_ALL_CHANS);
             }
             continue;
         }
@@ -107,11 +105,12 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
 
 void ap_stage_c(chanend_t c_input, chanend_t c_output, chanend_t c_to_gpio) {
 
-    int32_t output[appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
+    int32_t DWORD_ALIGNED input[appconfMIC_COUNT][appconfAUDIO_FRAME_LENGTH];
+    int32_t DWORD_ALIGNED output[appconfAUDIO_FRAME_LENGTH][appconfMIC_COUNT];
     // initialise block floating point structures for both channels
     bfp_s32_t ch0, ch1;
-    bfp_s32_init(&ch0, output[0], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
-    bfp_s32_init(&ch1, output[1], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
+    bfp_s32_init(&ch0, input[0], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
+    bfp_s32_init(&ch1, input[1], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
 
     triggerable_disable_all();
     // initialise event
@@ -127,7 +126,7 @@ void ap_stage_c(chanend_t c_input, chanend_t c_output, chanend_t c_to_gpio) {
             {
                 uint8_t led_byte = 0;
                 // recieve frame over the channel
-                s_chan_in_buf_word(c_input, (uint32_t*)output, appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
+                s_chan_in_buf_word(c_input, (uint32_t*) input, appconfFRAMES_IN_ALL_CHANS);
                 // calculate the headroom of the new frames
                 bfp_s32_headroom(&ch0);
                 bfp_s32_headroom(&ch1);
@@ -142,8 +141,13 @@ void ap_stage_c(chanend_t c_input, chanend_t c_output, chanend_t c_to_gpio) {
                 }
                 // send led value to gpio
                 chanend_out_byte(c_to_gpio, led_byte);
+                for(int ch = 0; ch < appconfMIC_COUNT; ch ++){
+                    for(int smp = 0; smp < appconfAUDIO_FRAME_LENGTH; smp ++){
+                        output[smp][ch] = input[ch][smp];
+                    }
+                }
                 // send frame over the channel
-                s_chan_out_buf_word(c_output, (uint32_t*)output, appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT);
+                s_chan_out_buf_word(c_output, (uint32_t*) output, appconfFRAMES_IN_ALL_CHANS);
             }
             continue;
         }
