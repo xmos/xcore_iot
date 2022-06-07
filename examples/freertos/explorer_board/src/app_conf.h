@@ -26,7 +26,10 @@
 #define appconfAUDIO_CLOCK_FREQUENCY            MIC_ARRAY_CONFIG_MCLK_FREQ
 #define appconfPDM_CLOCK_FREQUENCY              MIC_ARRAY_CONFIG_PDM_FREQ
 #define appconfPIPELINE_AUDIO_SAMPLE_RATE       16000
-#define appconfAUDIO_PIPELINE_STAGE_ONE_GAIN    20
+#define appconfAUDIO_PIPELINE_STAGE_ZERO_GAIN   20
+#define appconfAUDIO_PIPELINE_MAX_GAIN          60
+#define appconfAUDIO_PIPELINE_MIN_GAIN          0
+#define appconfAUDIO_PIPELINE_GAIN_STEP         4
 #define appconfAUDIO_FRAME_LENGTH            	MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
 #define appconfMIC_COUNT                        MIC_ARRAY_CONFIG_MIC_COUNT
 #define appconfPRINT_AUDIO_FRAME_POWER          0

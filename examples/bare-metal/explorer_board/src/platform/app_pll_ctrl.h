@@ -4,7 +4,7 @@
 #ifndef APP_PLL_CTRL_H_
 #define APP_PLL_CTRL_H_
 
-#include "../app_conf.h"
+#include "app_conf.h"
 
 #if (appconfAUDIO_CLOCK_FREQUENCY != 24576000)
 #error PLL values only valid if appconfAUDIO_CLOCK_FREQUENCY == 24576000

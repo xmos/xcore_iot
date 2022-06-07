@@ -8,7 +8,7 @@
 #include "queue.h"
 
 /* App headers */
-#include "../app_conf.h"
+#include "app_conf.h"
 #include "generic_pipeline.h"
 #include "example_pipeline.h"
 #include "platform/driver_instances.h"
@@ -17,18 +17,18 @@
 #error appconfMIC_COUNT must be 2
 #endif
 
-static BaseType_t xStage1_Gain = appconfAUDIO_PIPELINE_STAGE_ONE_GAIN;
+static BaseType_t xStage0_Gain = appconfAUDIO_PIPELINE_STAGE_ZERO_GAIN;
 
 BaseType_t audiopipeline_get_stage1_gain( void )
 {
-    return xStage1_Gain;
+    return xStage0_Gain;
 }
 
 BaseType_t audiopipeline_set_stage1_gain( BaseType_t xNewGain )
 {
-    xStage1_Gain = xNewGain;
-    rtos_printf("Gain currently is: %d new gain is %d\n", xStage1_Gain, xNewGain);
-    return xStage1_Gain;
+    xStage0_Gain = xNewGain;
+    rtos_printf("Gain currently is: %d new gain is %d\n", xStage0_Gain, xNewGain);
+    return xStage0_Gain;
 }
 
 void *example_pipeline_input(void *data)
@@ -99,7 +99,7 @@ void stage0(int32_t * audio_frame)
     bfp_s32_init(&ch0, &audio_frame[0], appconfEXP, appconfAUDIO_FRAME_LENGTH, 1);
     bfp_s32_init(&ch1, &audio_frame[appconfAUDIO_FRAME_LENGTH], appconfEXP, appconfAUDIO_FRAME_LENGTH, 1);
     // convert dB to amplitude
-    float power = (float)xStage1_Gain / 20.0;
+    float power = (float)xStage0_Gain / 20.0;
     float gain_fl = powf(10.0, power);
     float_s32_t gain = float_to_float_s32(gain_fl);
     // scale both channels

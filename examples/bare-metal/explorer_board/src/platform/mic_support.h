@@ -7,7 +7,7 @@
 #include <xcore/clock.h>
 #include <xcore/port.h>
 
-#include "../app_conf.h"
+#include "app_conf.h"
 
 void mic_array_setup_ddr(
         xclock_t pdmclk,

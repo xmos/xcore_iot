@@ -13,8 +13,8 @@
 /* Library headers */
 
 /* App headers */
-#include "../app_conf.h"
-#include "../example_pipeline/example_pipeline.h"
+#include "app_conf.h"
+#include "example_pipeline/example_pipeline.h"
 #include "platform/driver_instances.h"
 
 RTOS_GPIO_ISR_CALLBACK_ATTR
@@ -33,9 +33,9 @@ static void button_callback(rtos_gpio_t *ctx, void *app_data, rtos_gpio_port_id_
 static void volume_up( void )
 {
     BaseType_t gain = audiopipeline_get_stage1_gain();
-    if( gain < 60 )
+    if( gain < appconfAUDIO_PIPELINE_MAX_GAIN )
     {
-        gain += 4;
+        gain += appconfAUDIO_PIPELINE_GAIN_STEP;
     }
     rtos_printf("volume up\n");
     audiopipeline_set_stage1_gain( gain );
@@ -44,9 +44,9 @@ static void volume_up( void )
 static void volume_down( void )
 {
     BaseType_t gain = audiopipeline_get_stage1_gain();
-    if( gain > 0 )
+    if( gain > appconfAUDIO_PIPELINE_MIN_GAIN )
     {
-        gain -= 4;
+        gain -= appconfAUDIO_PIPELINE_GAIN_STEP;
     }
     rtos_printf("volume down\n");
     audiopipeline_set_stage1_gain( gain );

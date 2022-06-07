@@ -13,7 +13,7 @@
 #include "bfp_math.h"
 
 /* App headers */
-#include "../app_conf.h"
+#include "app_conf.h"
 #include "audio_pipeline.h"
 
 //#include <hwtimer.h>
@@ -45,7 +45,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
     bfp_s32_init(&ch0, output[0], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
     bfp_s32_init(&ch1, output[1], appconfEXP, appconfAUDIO_FRAME_LENGTH, 0);
 
-    float gain_db = appconfINITIAL_GAIN;
+    int gain_db = appconfINITIAL_GAIN;
 
     triggerable_disable_all();
     // initialise events
@@ -67,7 +67,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                 bfp_s32_headroom(&ch0);
                 bfp_s32_headroom(&ch1);
                 // update the gain
-                float power = gain_db / 20.0;
+                float power = (float)gain_db / 20.0;
                 float gain_fl = powf(10.0, power);
                 float_s32_t gain = float_to_float_s32(gain_fl);
                 // scale both channels 
@@ -90,10 +90,10 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                 default:
                     break;
                 case 0x01:  /* Btn A */
-                    gain_db = (gain_db == 60.0) ? gain_db : gain_db + 4.0;
+                    gain_db = (gain_db >= appconfAUDIO_PIPELINE_MAX_GAIN) ? gain_db : gain_db + appconfAUDIO_PIPELINE_GAIN_STEP;
                     break;
                 case 0x02:  /* Btn B */
-                    gain_db = (gain_db == 0.0) ? gain_db : gain_db - 4.0;
+                    gain_db = (gain_db <= appconfAUDIO_PIPELINE_MIN_GAIN) ? gain_db : gain_db - appconfAUDIO_PIPELINE_GAIN_STEP;
                     break;
                 }
                 debug_printf("Gain set to %f\n", gain_db);
