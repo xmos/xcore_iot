@@ -1,20 +1,6 @@
-/* This example code is in the Public Domain (or CC0 licensed, at your option.)
+// Copyright 2021 XMOS LIMITED.
+// This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-   NO WARRANTY OR SUPPORT. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT
-   WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-   WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   NONINFRINGEMENT. IN NO EVENT SHALL XMOS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-   OTHER LIABILITY, WHETHER IN CONTRACT, WARRANTY, CIVIL TORT (INCLUDING
-   NEGLIGENCE), PRODUCTS LIABILITY OR OTHERWISE, ARISING FROM, OUT OF OR IN
-   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
-   INCLUDING GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES EVEN IF SUCH
-   PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND NOT
-   WITHSTANDING THE FAILURE OF ESSENTIAL PURPOSE. IN SOME JURISDICTIONS PARTIES
-   ARE UNABLE TO LIMIT LIABILTY IN THIS WAY, IF THIS APPLIES TO YOUR
-   JURISDICTION THIS LIABILITY CLAUSE ABOVE MAY NOT APPLY. NOTWITHSTANDING THE
-   ABOVE, IN NO EVENT SHALL XMOS’s TOTAL LIABILITY TO YOU FOR ALL DAMAGES, LOSS
-   OR OTHERWISE EXCEED $50.
-*/
 #include <platform.h>
 #include <xcore/chanend.h>
 
@@ -23,9 +9,10 @@
 
 #include "rtos_printf.h"
 
-#include "platform_init.h"
+#include "platform/platform_init.h"
+#include "platform/driver_instances.h"
 
-chanend_t other_tile_c;
+#define LED_PORT XS1_PORT_4C
 
 void vApplicationMallocFailedHook(void) {
   rtos_printf("Malloc Failed on tile %d!\n", THIS_XCORE_TILE);
@@ -33,27 +20,49 @@ void vApplicationMallocFailedHook(void) {
     ;
 }
 
-void startup_task(void *arg) {
-  rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE,
+void tile0_task(void *arg) {
+  rtos_printf("Blinky task running from tile %d on core %d\n", THIS_XCORE_TILE,
               portGET_CORE_ID());
 
   for (;;) {
+    rtos_gpio_port_out(gpio_ctx_t0, rtos_gpio_port(LED_PORT), 0x0001);
     rtos_printf("Hello from tile %d\n", THIS_XCORE_TILE);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(500));
+    rtos_gpio_port_out(gpio_ctx_t0, rtos_gpio_port(LED_PORT), 0x0000);
+    vTaskDelay(pdMS_TO_TICKS(500));
   }
+}
 
-  // the forever loop above means we never reach here
-  // if we did, we would want to free the resources
-  chanend_free(other_tile_c);
-  vTaskDelete(NULL);
+void tile1_task(void *arg) {
+  rtos_printf("Blinky task running from tile %d on core %d\n", THIS_XCORE_TILE,
+              portGET_CORE_ID());
+
+  for (;;) {
+    rtos_gpio_port_out(gpio_ctx_t1, rtos_gpio_port(LED_PORT), 0x0002);
+    rtos_printf("Hello from tile %d\n", THIS_XCORE_TILE);
+    vTaskDelay(pdMS_TO_TICKS(500));
+    rtos_gpio_port_out(gpio_ctx_t1, rtos_gpio_port(LED_PORT), 0x0000);
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
 }
 
 static void tile_common_init(chanend_t c) {
   platform_init(c);
 
-  xTaskCreate((TaskFunction_t)startup_task, "startup_task",
-              RTOS_THREAD_STACK_SIZE(startup_task), NULL,
+#if ON_TILE(0)
+  rtos_gpio_port_enable(gpio_ctx_t0, rtos_gpio_port(LED_PORT));
+  xTaskCreate((TaskFunction_t)tile0_task, "tile0_task",
+              RTOS_THREAD_STACK_SIZE(tile0_task), NULL,
               configMAX_PRIORITIES - 1, NULL);
+#endif
+
+#if ON_TILE(1)
+  rtos_gpio_port_enable(gpio_ctx_t1, rtos_gpio_port(LED_PORT));
+  xTaskCreate((TaskFunction_t)tile1_task, "tile1_task",
+              RTOS_THREAD_STACK_SIZE(tile1_task), NULL,
+              configMAX_PRIORITIES - 1, NULL);
+
+#endif
 
   rtos_printf("Start scheduler on tile %d\n", THIS_XCORE_TILE);
   vTaskStartScheduler();
