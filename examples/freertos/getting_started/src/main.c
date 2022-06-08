@@ -2,7 +2,6 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #include <platform.h>
-#include <xcore/chanend.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -12,37 +11,39 @@
 #include "platform/platform_init.h"
 #include "platform/driver_instances.h"
 
-#define LED_PORT XS1_PORT_4C
-
-void vApplicationMallocFailedHook(void) {
-  rtos_printf("Malloc Failed on tile %d!\n", THIS_XCORE_TILE);
-  for (;;)
-    ;
-}
-
-void tile0_task(void *arg) {
+void tile0_blinky_task(void *arg) {
   rtos_printf("Blinky task running from tile %d on core %d\n", THIS_XCORE_TILE,
               portGET_CORE_ID());
 
+  uint32_t gpio_port = rtos_gpio_port(XS1_PORT_4C);
+
+  rtos_gpio_port_enable(gpio_ctx_t0, gpio_port);
+
   for (;;) {
-    rtos_gpio_port_out(gpio_ctx_t0, rtos_gpio_port(LED_PORT), 0x0001);
-    rtos_printf("Hello from tile %d\n", THIS_XCORE_TILE);
+    rtos_gpio_port_out(gpio_ctx_t0, gpio_port, 0x000F);
     vTaskDelay(pdMS_TO_TICKS(500));
-    rtos_gpio_port_out(gpio_ctx_t0, rtos_gpio_port(LED_PORT), 0x0000);
+    rtos_gpio_port_out(gpio_ctx_t0, gpio_port, 0x0000);
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
 
-void tile1_task(void *arg) {
-  rtos_printf("Blinky task running from tile %d on core %d\n", THIS_XCORE_TILE,
+void tile0_hello_task(void *arg) {
+  rtos_printf("Hello task running from tile %d on core %d\n", THIS_XCORE_TILE,
               portGET_CORE_ID());
-
+  
   for (;;) {
-    rtos_gpio_port_out(gpio_ctx_t1, rtos_gpio_port(LED_PORT), 0x0002);
     rtos_printf("Hello from tile %d\n", THIS_XCORE_TILE);
-    vTaskDelay(pdMS_TO_TICKS(500));
-    rtos_gpio_port_out(gpio_ctx_t1, rtos_gpio_port(LED_PORT), 0x0000);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+}
+
+void tile1_hello_task(void *arg) {
+  rtos_printf("Hello task running from tile %d on core %d\n", THIS_XCORE_TILE,
+              portGET_CORE_ID());
+  
+  for (;;) {
+    rtos_printf("Hello from tile %d\n", THIS_XCORE_TILE);
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
 
@@ -50,16 +51,17 @@ static void tile_common_init(chanend_t c) {
   platform_init(c);
 
 #if ON_TILE(0)
-  rtos_gpio_port_enable(gpio_ctx_t0, rtos_gpio_port(LED_PORT));
-  xTaskCreate((TaskFunction_t)tile0_task, "tile0_task",
-              RTOS_THREAD_STACK_SIZE(tile0_task), NULL,
+  xTaskCreate((TaskFunction_t)tile0_hello_task, "tile0_hello_task",
+              RTOS_THREAD_STACK_SIZE(tile0_hello_task), NULL,
+              configMAX_PRIORITIES - 1, NULL);
+  xTaskCreate((TaskFunction_t)tile0_blinky_task, "tile0_blinky_task",
+              RTOS_THREAD_STACK_SIZE(tile0_blinky_task), NULL,
               configMAX_PRIORITIES - 1, NULL);
 #endif
 
 #if ON_TILE(1)
-  rtos_gpio_port_enable(gpio_ctx_t1, rtos_gpio_port(LED_PORT));
-  xTaskCreate((TaskFunction_t)tile1_task, "tile1_task",
-              RTOS_THREAD_STACK_SIZE(tile1_task), NULL,
+  xTaskCreate((TaskFunction_t)tile1_hello_task, "tile1_hello_task",
+              RTOS_THREAD_STACK_SIZE(tile1_hello_task), NULL,
               configMAX_PRIORITIES - 1, NULL);
 
 #endif
