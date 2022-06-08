@@ -48,7 +48,7 @@ The SDK includes utilities that run on the PC host.  Run the following command t
 
     .. code-block:: console
 
-        $ cmake -B build_host
+        $ cmake  -G "NMake Makefiles" -B build_host
         $ cd build_host
         $ make install
 
