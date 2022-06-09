@@ -113,9 +113,8 @@ static void tile1_mic_init(void)
 }
 
 HIL_UART_RX_CALLBACK_ATTR
-void uart_rx_error_callback(void * app_data){
-    uart_rx_t *ctx = (uart_rx_t*) app_data;
-    debug_printf("uart_rx_error: 0x%x\n", ctx->cb_code);
+void uart_rx_error_callback(uart_callback_code_t callback_code, void *app_data){
+    debug_printf("uart_rx_error: 0x%x\n", callback_code);
 }
 
 static void tile1_uart_init(void)
