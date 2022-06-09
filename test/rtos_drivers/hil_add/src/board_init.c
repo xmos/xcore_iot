@@ -91,7 +91,7 @@ void board_tile1_init(
     rtos_uart_tx_init(
             rtos_uart_tx_ctx,
             XS1_PORT_1P, /* X1D39 */
-            1000000,
+            UART_BAUD_RATE,
             8,
             UART_PARITY_ODD,
             1,
@@ -104,7 +104,7 @@ void board_tile1_init(
             rtos_uart_rx_ctx,
             UART_RX_CORE_MASK,
             XS1_PORT_1M , /* X1D36 */
-            1000000,
+            UART_BAUD_RATE,
             8,
             UART_PARITY_ODD,
             1,

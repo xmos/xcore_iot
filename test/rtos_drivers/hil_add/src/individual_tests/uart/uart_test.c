@@ -26,29 +26,29 @@ static volatile int error_cb_occurred = 0;
 
 RTOS_UART_RX_CALLBACK_ATTR
 void rtos_uart_rx_started(rtos_uart_rx_t *ctx){
-    uart_printf("rtos_uart_rx_started_cb\n");
+    uart_printf("rtos_uart_rx_started_cb");
 }
 
 
 RTOS_UART_RX_CALLBACK_ATTR
 void rtos_uart_rx_error(rtos_uart_rx_t *ctx, uint8_t err_flags){
 
-    uart_printf("rtos_uart_rx_error:\n");
+    uart_printf("rtos_uart_rx_error:");
     if(err_flags & UR_START_BIT_ERR_CB_FLAG){
-        uart_printf("UART_START_BIT_ERROR\n");
+        uart_printf("UART_START_BIT_ERROR");
     }
     if(err_flags & UR_PARITY_ERR_CB_FLAG){
-        uart_printf("UART_PARITY_ERROR\n");
+        uart_printf("UART_PARITY_ERROR");
     }
     if(err_flags & UR_FRAMING_ERR_CB_FLAG){
-        uart_printf("UART_FRAMING_ERROR\n");
+        uart_printf("UART_FRAMING_ERROR");
     }
     if(err_flags & UR_OVERRUN_ERR_CB_FLAG){
-        uart_printf("UR_OVERRUN_ERR_CB_CODE\n");
+        uart_printf("UR_OVERRUN_ERR_CB_CODE");
     }
 
     if(err_flags & ~ RX_ERROR_FLAGS){
-        uart_printf("UNKNOWN ERROR FLAG SET: 0x%x (THIS SHOULD NEVER HAPPEN)\n", err_flags);
+        uart_printf("UNKNOWN ERROR FLAG SET: 0x%x (THIS SHOULD NEVER HAPPEN)", err_flags);
     }
 
     error_cb_occurred = 1;
@@ -60,9 +60,10 @@ void rtos_uart_rx_complete(rtos_uart_rx_t *ctx){
     // The backpressure from this causes a test fail - WHY?
 }
 
+const unsigned num_packets = 100;
+
 static int run_uart_tests(uart_test_ctx_t *test_ctx)
 {
-    const unsigned num_packets = 3;
     int retval = 0;
 
     for(unsigned t = 0; t < num_packets; t++)
@@ -91,14 +92,18 @@ static int run_uart_tests(uart_test_ctx_t *test_ctx)
 
         int length_same = (num_read_tot == sizeof(tx_buff));        
         int array_different = memcmp(tx_buff, rx_buff, sizeof(tx_buff));
-        uart_printf("uart loopback result len: %s, contents: %s", length_same ? "PASS" : "FAIL", array_different ? "FAIL" : "PASS");
+        if(!length_same || array_different){
+            uart_printf("uart loopback result len: %s, contents: %s", length_same ? "PASS" : "FAIL", array_different ? "FAIL" : "PASS");
+        }
         if(!length_same){
             uart_printf("len expected: %d, actual: %d", sizeof(tx_buff), num_read_tot);
             retval = -1;
         }
         if(array_different){
             for(int i = 0; i < sizeof(tx_buff); i++){
-                uart_printf("Rx byte %d: 0x%x (0x%x)", i, rx_buff[i], tx_buff[i]);    
+                if(rx_buff[i] != tx_buff[i]){
+                    uart_printf("Rx byte %d got: 0x%x exp: 0x%x", i, rx_buff[i], tx_buff[i]);
+                }    
             }
             retval = -1;
         }
@@ -106,7 +111,6 @@ static int run_uart_tests(uart_test_ctx_t *test_ctx)
             retval = -1;
             error_cb_occurred = 0;
         }
-
     };
 
     test_ctx->rx_success[test_ctx->cur_test] = retval;
@@ -128,7 +132,7 @@ static void start_uart_devices(uart_test_ctx_t *test_ctx)
         rtos_uart_rx_error,
         (1 << UART_RX_ISR_CORE),
         appconfSTARTUP_TASK_PRIORITY,
-        128 // Big enough to hold tx_buff[]
+        1024 // Big enough to hold tx_buff[] many times over
         );
 
     uart_printf("TX start");
@@ -184,6 +188,8 @@ int uart_device_tests(rtos_uart_tx_t *rtos_uart_tx_ctx, rtos_uart_rx_t *rtos_uar
 
     uart_printf("Start tests");
     res = run_uart_tests(&test_ctx);
+
+    uart_printf("UART loopback result (%d packets): %s", num_packets, res ? "FAIL" : "PASS");
 
     return res;
 }
