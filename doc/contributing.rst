@@ -1,6 +1,6 @@
-############
-Contributing
-############
+#######################
+Contributing Guidelines
+#######################
 
 ************
 Requirements
@@ -108,7 +108,7 @@ Some scripts are provided to build all the example applications.  Run this scrip
 Running Tests
 *************
 
-Tests for most components in the SDK are located in the ``test`` folder.  This includes tests for:
+Tests for components in the SDK are located in the ``test`` folder.  This includes tests for:
 
 .. toctree::
     :maxdepth: 1
