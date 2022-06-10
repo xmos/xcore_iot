@@ -89,7 +89,7 @@ pipeline {
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_getting_started.xe")) {
                                 withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                                    sh "test/examples/run_freertos_getting_started.sh $adapterID"
+                                    sh "test/examples/run_freertos_getting_started_tests.sh $adapterID"
                                 }
                             } else {
                                 echo 'SKIPPED: example_freertos_getting_started'

@@ -32,13 +32,13 @@ Run the following command to create a Conda environment:
 
 .. code-block:: console
 
-    $ conda create --prefix xcore_sdk_venv python=3.8
+    conda create --prefix xcore_sdk_venv python=3.8
 
 Run the following command to activate the Conda environment:
 
 .. code-block:: console
 
-    $ conda activate xcore_sdk_venv
+    conda activate xcore_sdk_venv
 
 Install AI Tools
 ================
@@ -47,4 +47,4 @@ The following commands will install all required libraries.
 
 .. code-block:: console
 
-    $ pip install xmos-ai-tools
+    pip install xmos-ai-tools

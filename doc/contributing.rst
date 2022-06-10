@@ -14,8 +14,8 @@ Install development python packages:
 
 .. code-block:: console
 
-    $ python -m pip install --upgrade pip
-    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r doc/requirements.txt
+    python -m pip install --upgrade pip
+    pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r doc/requirements.txt
 
 Python Virtual Environment
 ==========================
@@ -26,25 +26,25 @@ Run the following command to create a Conda environment:
 
 .. code-block:: console
 
-    $ conda create --prefix xcore_sdk_venv python=3.8
+    conda create --prefix xcore_sdk_venv python=3.8
 
 Run the following command to activate the Conda environment:
 
 .. code-block:: console
 
-    $ conda activate <path-to>/xcore_sdk_venv
+    conda activate <path-to>/xcore_sdk_venv
 
 Install development packages:
 
 .. code-block:: console
 
-    $ pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r doc/requirements.txt
+    pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r doc/requirements.txt
 
 Run the following command to deactivate the Conda environment:
 
 .. code-block:: console
 
-    $ conda deactivate
+    conda deactivate
 
 *************************************
 Contribution Guidelines and Standards
@@ -100,9 +100,9 @@ Some scripts are provided to build all the example applications.  Run this scrip
 
 .. code-block:: console
 
-    $ bash tools/ci/build_metal_examples.sh all
-    $ bash tools/ci/build_rtos_examples.sh all
-    $ bash tools/ci/build_rtos_usb_examples.sh all
+    bash tools/ci/build_metal_examples.sh all
+    bash tools/ci/build_rtos_examples.sh all
+    bash tools/ci/build_rtos_usb_examples.sh all
 
 *************
 Running Tests
@@ -144,4 +144,4 @@ At times submodule repositories will need to be updated.  To update all submodul
 
 .. code-block:: console
 
-    $ git submodule update --init --recursive
+    git submodule update --init --recursive
