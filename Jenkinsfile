@@ -12,8 +12,8 @@ def withXTAG(String target, Closure body) {
 
 // Wait here until specified artifacts appear
 def artifactUrls = getGithubArtifactUrls([
-    "xcore_sdk_bare-metal_example_apps"
-    "xcore_sdk_freertos_example_apps",
+    "xcore_sdk_bare-metal_example_apps",
+    "xcore_sdk_freertos_example_apps"
     // "xcore_sdk_freertos_usb_example_apps",
     // "xcore_sdk_host_apps",
     // "xcore_sdk_reference_apps",
