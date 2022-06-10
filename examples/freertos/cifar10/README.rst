@@ -25,17 +25,17 @@ To generate the images run:
 
     .. code-block:: console
 
-        $ cd filesystem_support/test_inputs
-        $ ./make_test_tensors.py
-        $ cd ../..
+        cd filesystem_support/test_inputs
+        ./make_test_tensors.py
+        cd ../..
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cd filesystem_support\test_inputs
-        $ python3 make_test_tensors.py
-        $ cd..\..
+        cd filesystem_support\test_inputs
+        python3 make_test_tensors.py
+        cd..\..
 
 For background information on the CIFAR-10 dataset, please read `Learning Multiple Layers of Features from Tiny Images <https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf>`__, Alex Krizhevsky, 2009.
 
@@ -55,17 +55,17 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ make example_freertos_cifar10
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_cifar10
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ nmake example_freertos_cifar10
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_freertos_cifar10
 
 
 ***********************
@@ -81,13 +81,13 @@ Before running the firmware, the filesystem containing the images must be flashe
 
     .. code-block:: console
 
-        $ make flash_fs_example_freertos_cifar10
+        make flash_fs_example_freertos_cifar10
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake flash_fs_example_freertos_cifar10
+        nmake flash_fs_example_freertos_cifar10
 
 
 ********************
@@ -101,13 +101,13 @@ Running with hardware.
 
     .. code-block:: console
 
-        $ make run_example_freertos_cifar10
+        make run_example_freertos_cifar10
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_example_freertos_cifar10
+        nmake run_example_freertos_cifar10
 
 ********************
 Optimizing the model
@@ -119,7 +119,7 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
 .. code-block:: console
 
-    $ xcore-opt --xcore-flash-image-file=filesystem_support/model.bin -o model/model_xcore.tflite model/model_quant.tflite
+    xcore-opt --xcore-flash-image-file=filesystem_support/model.bin -o model/model_xcore.tflite model/model_quant.tflite
 
 Converting flatbuffer to source file
 ====================================
@@ -128,4 +128,4 @@ The following unix command will generate a C source file that contains the Tenso
 
 .. code-block:: console
 
-    $ python <path-to-sdk>/tools/tflite_micro/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/image_classifier/cifar10_model_data.h --source src/image_classifier/cifar10_model_data.c --variable-name cifar10
+    python <path-to-sdk>/tools/tflite_micro/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/image_classifier/cifar10_model_data.h --source src/image_classifier/cifar10_model_data.c --variable-name cifar10

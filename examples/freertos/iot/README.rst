@@ -23,7 +23,7 @@ Next, configure the example software to connect to the proper MQTT broker.  If y
 
 .. code-block:: console
 
-    $ ifconfig
+    ifconfig
 
 Lastly, in ``appconf.h``, set ``appconfMQTT_HOSTNAME`` to your MQTT broker IP address or URL:
 
@@ -41,9 +41,9 @@ Run the following commands in the xcore_sdk root folder:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ make example_freertos_iot
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_iot
 
 ***********************
 Setting up the hardware
@@ -58,7 +58,7 @@ Before the demo can be run, the filesystem must be configured and flashed.
 
     .. code-block:: console
 
-        $ make flash_fs_example_freertos_iot
+        make flash_fs_example_freertos_iot
 
 The script will create TLS credentials and prompt you for WiFi credentials:
 
@@ -83,7 +83,7 @@ Run the following commands in the xcore_sdk root folder:
 
     .. code-block:: console
 
-        $ make run_example_freertos_iot
+        make run_example_freertos_iot
 
 *********************
 Testing MQTT Messages
@@ -96,8 +96,8 @@ From the root folder of the iot example run:
 
 .. code-block:: console
 
-    $ cd mosquitto
-    $ mosquitto -v -c mosquitto.conf
+    cd mosquitto
+    mosquitto -v -c mosquitto.conf
 
 Note: You may need to modify permissions of the cryptocredentials for mosquitto to use them.
 
@@ -108,6 +108,6 @@ To turn LED 0 on run:
 
 .. code-block:: console
 
-    $ mosquitto_pub --cafile mqtt_broker_certs/ca.crt --cert mqtt_broker_certs/client.crt --key mqtt_broker_certs/client.key -d -t "explorer/ledctrl" -m "{"LED": "0",: "status": "on"}"
+    mosquitto_pub --cafile mqtt_broker_certs/ca.crt --cert mqtt_broker_certs/client.crt --key mqtt_broker_certs/client.key -d -t "explorer/ledctrl" -m "{"LED": "0",: "status": "on"}"
 
 Supported values for "LED" are ["0", "1", "2", "3"], supported values for "status" are ["on", "off"].
