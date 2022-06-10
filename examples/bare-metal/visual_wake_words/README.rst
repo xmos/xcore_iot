@@ -16,17 +16,17 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ make example_bare_metal_vww
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_bare_metal_vww
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ nmake example_bare_metal_vww
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_bare_metal_vww
 
 ********************
 Running the firmware
@@ -38,17 +38,17 @@ Running with hardware
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
-        $ make run_example_bare_metal_vww
+        cmake -B build
+        cd build
+        make run_example_bare_metal_vww
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
-        $ nmake run_example_bare_metal_vww
+        cmake -G "NMake Makefiles" -B build
+        cd build
+        nmake run_example_bare_metal_vww
 
 Running with simulator
 
@@ -58,17 +58,17 @@ Running with simulator
 
     .. code-block:: console
 
-        $ cmake -B build
-        $ cd build
-        $ make xsim_example_bare_metal_vww
+        cmake -B build
+        cd build
+        make xsim_example_bare_metal_vww
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build
-        $ cd build
-        $ nmake xsim_example_bare_metal_vww
+        cmake -G "NMake Makefiles" -B build
+        cd build
+        nmake xsim_example_bare_metal_vww
 
 The firmware will now wait until a data is sent from a host application. Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires Python.  Ensure you have installed Python 3 and the XCore SDK Python requirements.
 
@@ -76,7 +76,7 @@ Sending a test image to the xcore.ai Explorer board using `xscope`. The `test_im
 
 .. code-block:: console
 
-    $ ./test_image.py path/to/image
+    ./test_image.py path/to/image
 
 ********************
 Optimizing the model
@@ -88,7 +88,7 @@ First, be sure you have installed the XMOS AI Toolchain extensions.  If installe
 
 .. code-block:: console
 
-    $ xcore-opt --xcore-thread-count 5 -o model/model_xcore.tflite model/model_quant.tflite 
+    xcore-opt --xcore-thread-count 5 -o model/model_xcore.tflite model/model_quant.tflite 
 
 Converting flatbuffer to source file
 ====================================
@@ -97,4 +97,4 @@ The following unix command will generate a C source file that contains the Tenso
 
 .. code-block:: console
 
-    $ python <path-to-sdk>/tools/tflite_micro/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/vww_model_data.h --source src/vww_model_data.c --variable-name vww
+    python <path-to-sdk>/tools/tflite_micro/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/vww_model_data.h --source src/vww_model_data.c --variable-name vww

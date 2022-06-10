@@ -29,7 +29,7 @@ Usage
 
 .. code-block:: console
 
-    $ convert_tflite_to_c_source.py --input <tflite_input> --source <source_output> --header <header_output>
+    convert_tflite_to_c_source.py --input <tflite_input> --source <source_output> --header <header_output>
 
 *******
 Options
