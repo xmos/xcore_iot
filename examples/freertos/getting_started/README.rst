@@ -1,8 +1,8 @@
-########################
-FreeRTOS Getting Started
-########################
+################################
+FreeRTOS Getting Started Example
+################################
 
-This is a simple multi-tile FreeRTOS project for XCore. It starts the FreeRTOS scheduler running on both tile[0] and tile[1].  tile[0] has two tasks running.  One prints "Hello from tile 0" to the console and the other task blinks the 4 LEDs on the Explorer board.  tile[1] has one task running that prints "Hello from tile 0" to the console.
+This is a simple multi-tile FreeRTOS example application. It starts the FreeRTOS scheduler running on both `tile[0]` and `tile[1]`.  `tile[0]` has two tasks running.  One prints "Hello from tile 0" to the console and the other task blinks the 4 LEDs on the Explorer board.  `tile[1]` has one task running that prints "Hello from tile 0" to the console.
 
 *********************
 Building the firmware
@@ -48,6 +48,10 @@ If successful, you should see the following print messages in the console:
 
 .. code-block:: console
 
+    Hello from tile 0
+    Hello from tile 1
+    Hello from tile 0
+    Hello from tile 1
     Hello from tile 0
     Hello from tile 1
 

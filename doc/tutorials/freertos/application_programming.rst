@@ -51,6 +51,7 @@ To help ease development of XCore applications using an SMP RTOS, XMOS provides 
 - Common I/O interfaces
 
   - GPIO
+  - UART
   - |I2C|
   - |I2S|
   - PDM microphones
@@ -96,8 +97,3 @@ Documentation on several software services can be found under the :ref:`fwk_rtos
 
 These services are all found in the SDK under the path `modules/rtos/modules/sw_services <https://github.com/xmos/fwk_rtos/tree/develop/modules/sw_services>`_.
 
-***************
-Getting Started
-***************
-
-The :doc:`Getting Started with FreeRTOS <getting_started>` tutorial will guide you through writing a FreeRTOS application for XCore.

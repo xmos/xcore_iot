@@ -1,18 +1,10 @@
-.. _sdk-installation-label:
+.. _sdk-installation:
 
 ############
 Installation
 ############
 
-*******************
-System Requirements
-*******************
-
-Make sure your system meets the minumum :ref:`system requirements <sdk-system-requirements-label>` and that you have installed all necessary :ref:`prerequisites <sdk-prerequisites-label>`.
-
-******************
-Installation Steps
-******************
+Follow the following steps to install and setup the SDK:
 
 Step 1. Cloning the SDK
 =======================
@@ -74,8 +66,10 @@ Then use `pip` to install the required modules.
 
     $ pip install -r tools/install/requirements.txt
 
-Start Your First Application
-============================
 
-Follow the :doc:`Tutorials <../tutorials/index>` and begin your first project.
+**********************************
+Build & Run Your First Application
+**********************************
+
+Once your have installed the SDK, the next step is to :ref:`build and run your first XCore application. <sdk-tutorials>`
     

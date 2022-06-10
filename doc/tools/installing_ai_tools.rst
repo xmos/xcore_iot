@@ -16,7 +16,7 @@ Installation
 System Requirements
 ===================
 
-Make sure your system meets the minumum :ref:`system requirements <sdk-system-requirements-label>` and that you have installed all necessary :ref:`prerequisites <sdk-prerequisites-label>`.
+Make sure your system meets the minumum :ref:`system requirements <sdk-system-requirements>` and that you have installed all necessary :ref:`prerequisites <sdk-prerequisites>`.
 
 In addition, `Python 3.8 <https://www.python.org/downloads/>`_ + is required.
 
