@@ -45,10 +45,6 @@ Supported Boards
 
 This example is supported on the XCORE-AI-EXPLORER board.
 
-.. note::
-
-    The external DDR memory options are only available on the XCORE-AI-EXPLORER board.
-
 *********************
 Building the firmware
 *********************
