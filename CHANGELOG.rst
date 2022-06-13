@@ -4,9 +4,17 @@ XCore SDK change log
 In progress
 -----------
 
-  * Addition of clock control HIL library and RTOS driver
-  * Addition of L2 cache HIL library and RTOS driver
-  * Redesign of mic array HIL library to leverage VPU
+
+
+0.10.0
+------
+
+Many enhancements and changes from the prior release.  The list below summarizes many of the changes:
+
+  * Addition of UART library and RTOS driver
+  * Addition of clock control library and RTOS driver
+  * Addition of L2 cache library and RTOS driver
+  * Redesign of mic array library to leverage VPU
   * Removal of the cifar10, hello_world, hotdog_not_hotdog and microspeech bare-metal example applications
   * Addition of explorer_board bare-metal example application
   * Removal of the person_detection FreeRTOS example application
