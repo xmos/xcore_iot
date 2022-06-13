@@ -29,17 +29,17 @@ Per example, to build the midi test demo, run the following commands in the xcor
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ make example_freertos_usb_tusb_demo_midi_test
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_usb_tusb_demo_midi_test
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ nmake example_freertos_usb_tusb_demo_midi_test
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_freertos_usb_tusb_demo_midi_test
 
 
 ********************
@@ -68,10 +68,10 @@ Per example, to run the midi test demo, run:
 
     .. code-block:: console
 
-        $ make run_example_freertos_usb_tusb_demo_midi_test
+        make run_example_freertos_usb_tusb_demo_midi_test
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_example_freertos_usb_tusb_demo_midi_test
+        nmake run_example_freertos_usb_tusb_demo_midi_test

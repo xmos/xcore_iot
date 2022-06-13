@@ -1,6 +1,6 @@
-#######
-Modules
-#######
+##########
+References
+##########
 
 .. toctree::
    :maxdepth: 2

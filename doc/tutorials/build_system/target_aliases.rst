@@ -4,11 +4,11 @@
 Target Aliases
 ##############
 
-The following library target aliases can be used in your application.  An example of how to add aliases to your target link libraries is shown below:
+The following library target aliases can be used in your application `CMakeLists.txt`.  An example of how to add aliases to your target link libraries is shown below:
 
 .. code-block:: cmake
 
-  target_link_libraries(my_app PUBLIC sdk::core sdk::rtos_freertos sdk::rtos_bsp::xcore_ai_explorer)
+  target_link_libraries(my_app PUBLIC core::general rtos::freertos sdk::rtos_bsp::xcore_ai_explorer)
 
 *******
 General
@@ -23,54 +23,65 @@ Several aliases are provided that specify a collection of libraries with similar
 
     * - Target
       - Description
-    * - sdk::core
-      - All core libraries used my most XCore applications
-    * - sdk::multitile_support
-      - Libraries to support development on multiple tiles
-    * - sdk::hil
-      - All Hardware Imitation Layer (HIL) libraries
+    * - core::all
+      - All core libraries
+    * - io::all
+      - All peripheral libraries
+    * - rtos::freertos
+      - All RTOS libraries
 
-If you prefer, you can specify individual Hardware Imitation Layer (HIL) libraries.
 
-.. list-table:: Individual Hardware Imitation Layer (HIL) Libraries
+****
+Core
+****
+
+If you prefer, you can specify individual core libraries.
+
+.. list-table:: Core Libraries
     :widths: 50 50
     :header-rows: 1
     :align: left
 
     * - Target
       - Description
-    * - sdk::hil::lib_i2c
-      - I2C library
-    * - sdk::hil::lib_i2s
-      - I2S library
-    * - sdk::hil::lib_spi
-      - SPI library
-    * - sdk::hil::lib_qspi_io
-      - QSPI library
-    * - sdk::hil::lib_mic_array
-      - Microphone Array library
-    * - sdk::hil::lib_xud
-      - XUD USB library
-    * - sdk::hil::lib_l2_cache
-      - L2 Cache library
-    * - sdk::hil::lib_clock_control
-      - Clock control library
-
-The following libraries are also provided by the SDK.
-
-.. list-table:: Additional Libraries and Modules
-    :widths: 50 50
-    :header-rows: 1
-    :align: left
-
-    * - Target
-      - Description
-    * - sdk::lib_src
-      - Sample rate conversion API
-    * - sdk::lib_xs3_math
-      - Optimize math and DSP API
-    * - sdk::utils
+    * - core::clock_control
+      - Clock control API
+    * - core::utils
       - General utilities used by most applications
+    * - core::xs3_math
+      - Optimize math and DSP API
+    * - core::general
+      - All core libraries except for inferencing
+    * - core::inferencing
+      - Neural networking inferencing API
+
+***********
+Peripherals
+***********
+
+If you prefer, you can specify individual peripheral libraries.
+
+.. list-table:: Peripheral Libraries
+    :widths: 50 50
+    :header-rows: 1
+    :align: left
+
+    * - Target
+      - Description
+    * - io::i2c
+      - I2C library
+    * - io::spi
+      - SPI library
+    * - io::uart
+      - UART library
+    * - io::qspi_io
+      - QSPI library
+    * - io::xud
+      - XUD USB library
+    * - io::i2s
+      - I2S library
+    * - io::mic_array
+      - Microphone Array library
 
 ****
 RTOS
@@ -85,17 +96,17 @@ Several aliases are provided that specify a collection of RTOS libraries with si
 
     * - Target
       - Description
-    * - sdk::rtos_freertos
-      - All core libraries used my most XCore FreeRTOS applications
-    * - sdk::rtos::drivers
+    * - rtos::freertos
+      - All libraries used my most XCore FreeRTOS applications
+    * - rtos::drivers:all
       - All RTOS Driver libraries
-    * - sdk::rtos_usb
+    * - rtos::freertos_usb
       - All libraries to support development with TinyUSB
-    * - sdk::rtos::sw_services
-      - All RTOS software service libraries
-    * - sdk::rtos::iot
+    * - rtos::sw_services::general
+      - Most commonly used RTOS software service libraries
+    * - rtos::iot
       - All IoT libraries
-    * - sdk::rtos::wifi
+    * - rtos::wifi
       - All WiFi libraries
 
 These board support libraries simplify development with a specific board.
@@ -107,10 +118,8 @@ These board support libraries simplify development with a specific board.
 
     * - Target
       - Description
-    * - sdk::rtos_bsp::xcore_ai_explorer
+    * - rtos::bsp_config::xcore_ai_explorer
       - xcore.ai Explorer RTOS board support library
-    * - sdk::rtos_bsp::xs200_micarray
-      - XCore-200 Circular Mic Array RTOS board support library
 
 If you prefer, you can specify individual RTOS driver libraries.
 
@@ -121,33 +130,35 @@ If you prefer, you can specify individual RTOS driver libraries.
 
     * - Target
       - Description
-    * - sdk::rtos::drivers::i2c
+    * - rtos::drivers::uart
+      - UART RTOS driver library
+    * - rtos::drivers::i2c
       - I2C RTOS driver library
-    * - sdk::rtos::drivers::i2s
+    * - rtos::drivers::i2s
       - I2S RTOS driver library
-    * - sdk::rtos::drivers::spi
+    * - rtos::drivers::spi
       - SPI RTOS driver library
-    * - sdk::rtos::drivers::qspi_io
+    * - rtos::drivers::qspi_io
       - QSPI RTOS driver library
-    * - sdk::rtos::drivers::mic_array
+    * - rtos::drivers::mic_array
       - Microphone Array RTOS driver library
-    * - sdk::rtos::drivers::usb
+    * - rtos::drivers::usb
       - USB RTOS driver library
-    * - sdk::rtos::drivers::gpio
+    * - rtos::drivers::gpio
       - GPIO RTOS driver library
-    * - sdk::rtos::drivers::l2_cache
+    * - rtos::drivers::l2_cache
       - L2 Cache RTOS driver library
-    * - sdk::rtos::drivers::clock_control
+    * - rtos::drivers::clock_control
       - Clock control RTOS driver library
-    * - sdk::rtos::drivers::trace
+    * - rtos::drivers::trace
       - Trace RTOS driver library
-    * - sdk::rtos::drivers::swmem
+    * - rtos::drivers::swmem
       - SwMem RTOS driver library
-    * - sdk::rtos::drivers::wifi
+    * - rtos::drivers::wifi
       - WiFi RTOS driver library
-    * - sdk::rtos::drivers::intertile
+    * - rtos::drivers::intertile
       - Intertile RTOS driver library
-    * - sdk::rtos::drivers::rpc
+    * - rtos::drivers::rpc
       - Remote procedure call RTOS driver library
 
 If you prefer, you can specify individual software service libraries.
@@ -159,29 +170,29 @@ If you prefer, you can specify individual software service libraries.
 
     * - Target
       - Description
-    * - sdk::rtos::sw_services::fatfs
+    * - rtos::sw_services::fatfs
       - FatFS library
-    * - sdk::rtos::sw_services::usb
+    * - rtos::sw_services::usb
       - USB library
-    * - sdk::rtos::sw_services::device_control
+    * - rtos::sw_services::device_control
       - Device control library
-    * - sdk::rtos::sw_services::usb_device_control
+    * - rtos::sw_services::usb_device_control
       - USB device control library
-    * - sdk::rtos::sw_services::dispatcher
+    * - rtos::sw_services::dispatcher
       - Dispatcher thread pool library
-    * - sdk::rtos::sw_services::wifi_manager
+    * - rtos::sw_services::wifi_manager
       - WiFi manager library
-    * - sdk::rtos::sw_services::tls_support
+    * - rtos::sw_services::tls_support
       - TLS library
-    * - sdk::rtos::sw_services::dhcp
+    * - rtos::sw_services::dhcp
       - DHCP library
-    * - sdk::rtos::sw_services::json
+    * - rtos::sw_services::json
       - JSON library
-    * - sdk::rtos::sw_services::http
+    * - rtos::sw_services::http
       - HTTP library
-    * - sdk::rtos::sw_services::sntpd
+    * - rtos::sw_services::sntpd
       - SNTP daemon library
-    * - sdk::rtos::sw_services::mqtt
+    * - rtos::sw_services::mqtt
       - MQTT library
 
 The following libraries for building host applications are also provided by the SDK.
@@ -193,5 +204,5 @@ The following libraries for building host applications are also provided by the 
 
     * - Target
       - Description
-    * - sdk::rtos::sw_services::device_control_host_usb
+    * - rtos::sw_services::device_control_host_usb
       - Host USB device control library

@@ -14,17 +14,17 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ make example_freertos_device_control
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_device_control
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ nmake example_freertos_device_control
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_freertos_device_control
 
 ********************
 Running the firmware
@@ -36,13 +36,13 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make run_example_freertos_device_control
+        make run_example_freertos_device_control
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_example_freertos_device_control
+        nmake run_example_freertos_device_control
 
 ********************************
 Debugging the firmware with xgdb
@@ -54,13 +54,13 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make debug_example_freertos_device_control
+        make debug_example_freertos_device_control
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake debug_example_freertos_device_control
+        nmake debug_example_freertos_device_control
 
 *********************
 Building the host app
@@ -73,17 +73,17 @@ run the following commands in the xcore_sdk root folder to build the host app:
 
     .. code-block:: console
 
-        $ cmake -B build_host
-        $ cd build_host
-        $ make example_freertos_device_control_host
+        cmake -B build_host
+        cd build_host
+        make example_freertos_device_control_host
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build_host
-        $ cd build_host
-        $ nmake example_freertos_device_control_host
+        cmake -G "NMake Makefiles" -B build_host
+        cd build_host
+        nmake example_freertos_device_control_host
 
 ********************
 Running the host app
@@ -96,10 +96,10 @@ folder run:
 
     .. code-block:: console
 
-        $ ./example_freertos_device_control_host --help
+        ./example_freertos_device_control_host --help
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ example_freertos_device_control_host.exe --help
+        example_freertos_device_control_host.exe --help

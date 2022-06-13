@@ -12,9 +12,8 @@ The XCore SDK is a collection of C/C++ software libraries designed to simplify a
 - Voice processing libraries including; adaptive echo cancellation, adaptive gain control, noise suppression, interference cancellation (IC), and voice activity detection. These libraries support bare-metal and RTOS application development.
 - Libraries that enable [multi-core FreeRTOS development](https://www.freertos.org/symmetric-multiprocessing-introduction.html) on XCore including a wide array of RTOS drivers and middleware.
 - Code Examples - Examples showing a variety of XCore features based on bare-metal and FreeRTOS programming.
-- Documentation - Getting started guides, references and API guides.
 
-The SDK is designed to be used in conjunction with the xcore.ai Explorer board and the Voice Reference evaluation kit. The example applications compile targeting these boards. Further information about the Explorer board, the Voice Reference evaluation kit, and xcore.ai devices is available to on [www.xmos.ai](https://www.xmos.ai/).
+The SDK is designed to be used in conjunction with the xcore.ai Explorer board evaluation kit. The example applications compile targeting this board. Further information about the Explorer board and xcore.ai devices is available to on [www.xmos.ai](https://www.xmos.ai/).
 
 ## Build Status
 
@@ -27,13 +26,13 @@ Docs             | ![CI](https://github.com/xmos/xcore_sdk/actions/workflows/doc
 
 Some dependent components are included as git submodules. These can be obtained by cloning this repository with the following command:
 
-    $ git clone --recurse-submodules https://github.com/xmos/xcore_sdk.git
+    git clone --recurse-submodules https://github.com/xmos/xcore_sdk.git
 
 ## Development Tools
 
 Download and install the XCore [XTC Tools](https://www.xmos.ai/software-tools/) version 15.1.0 or newer. If you already have the XTC Toolchain installed, you can check the version with the following command:
 
-    $ xcc --version
+    xcc --version
 
 ## Documentation
 
@@ -42,7 +41,6 @@ See the [official documentation](https://www.xmos.ai/xcore-sdk/) for more inform
 - Instructions for installing
 - Getting started guides
 - Programming tutorials
-- Supported boards
 - API references
 
 ## Getting Help

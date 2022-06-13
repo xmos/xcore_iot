@@ -60,7 +60,7 @@ Below is an example ``CMakeLists.txt`` that shows both required and conventional
    target_include_directories(my_app PUBLIC ${APP_INCLUDES})
    target_compile_definitions(my_app PRIVATE ${APP_COMPILE_DEFINITIONS})
    target_compile_options(my_app PRIVATE ${APP_COMPILER_FLAGS})
-   target_link_libraries(my_app PUBLIC sdk::core)
+   target_link_libraries(my_app PUBLIC core:general io:i2c io::uart)
    target_link_options(my_app PRIVATE ${APP_LINK_OPTIONS})
 
    ## Optionally create run and debug targets
@@ -114,7 +114,7 @@ Below is an example ``CMakeLists.txt`` that shows both required and conventional
    target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
    target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
    target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-   target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+   target_link_libraries(${TARGET_NAME} PUBLIC core::general rtos::freertos)
    target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
    unset(TARGET_NAME)
 
@@ -124,7 +124,7 @@ Below is an example ``CMakeLists.txt`` that shows both required and conventional
    target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
    target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
    target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-   target_link_libraries(${TARGET_NAME} PUBLIC sdk::core sdk::rtos_freertos)
+   target_link_libraries(${TARGET_NAME} PUBLIC core::general rtos::freertos)
    target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} )
    unset(TARGET_NAME)
 

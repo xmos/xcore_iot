@@ -18,17 +18,17 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ make example_freertos_dispatcher
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_dispatcher
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ nmake example_freertos_dispatcher
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_freertos_dispatcher
 
 ********************
 Running the firmware
@@ -40,13 +40,13 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make run_example_freertos_dispatcher
+        make run_example_freertos_dispatcher
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_example_freertos_dispatcher
+        nmake run_example_freertos_dispatcher
 
 
 ********************************
@@ -59,10 +59,10 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make debug_example_freertos_dispatcher
+        make debug_example_freertos_dispatcher
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake debug_example_freertos_dispatcher
+        nmake debug_example_freertos_dispatcher
