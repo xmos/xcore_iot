@@ -72,8 +72,6 @@ int example_pipeline_output(void *audio_frame, void *data)
 
 void stage1(int32_t * audio_frame)
 {
-    const rtos_gpio_port_id_t led_port = rtos_gpio_port(PORT_LEDS);
-    uint32_t led_val = 0;
     bfp_s32_t ch0, ch1;
     bfp_s32_init(&ch0, audio_frame, appconfEXP, appconfAUDIO_FRAME_LENGTH, 1);
     bfp_s32_init(&ch1, &audio_frame[appconfAUDIO_FRAME_LENGTH], appconfEXP, appconfAUDIO_FRAME_LENGTH, 1);
@@ -83,10 +81,14 @@ void stage1(int32_t * audio_frame)
     // calculate the frame power
     float frame_pow0 = float_s32_to_float(frame_energy_ch0) / (float)appconfAUDIO_FRAME_LENGTH;
     float frame_pow1 = float_s32_to_float(frame_energy_ch1) / (float)appconfAUDIO_FRAME_LENGTH;
+    // get the led_port and mask out LED 0 and 1
+    const rtos_gpio_port_id_t led_port = rtos_gpio_port(PORT_LEDS);
+    uint32_t led_val = rtos_gpio_port_in(gpio_ctx_t0, led_port);
+    led_val &= 0x3;
+    // if the frame power exeedes the threshold turn on LED 2
     if((frame_pow0 > appconfPOWER_THRESHOLD) || (frame_pow1 > appconfPOWER_THRESHOLD)){
-        led_val = 12;
+        led_val |= 0x4;
     }
-    // light up led 3 & 4 if the frame power exeedes the threshold
     rtos_gpio_port_out(gpio_ctx_t0, led_port, led_val);
 #if appconfPRINT_AUDIO_FRAME_POWER
     rtos_printf("Mic power:\nch0: %f\nch1: %f\n", frame_pow0, frame_pow1);

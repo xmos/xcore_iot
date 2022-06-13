@@ -24,16 +24,16 @@ void ap_stage_a(chanend_t c_input, chanend_t c_output) {
 
     while(1)
     {
-        //printf("trying to recieve a frame\n");
+        // get the frame from the mic array
         ma_frame_rx_transpose((int32_t *) input, c_input, appconfMIC_COUNT, appconfAUDIO_FRAME_LENGTH);
-        //printf("frame recieved\n");
+        // change the frame format to [channel][sample]
         for(int ch = 0; ch < appconfMIC_COUNT; ch ++){
             for(int smp = 0; smp < appconfAUDIO_FRAME_LENGTH; smp ++){
                 output[ch][smp] = input[smp][ch];
             }
         }
+        // send the frame to the next stage
         s_chan_out_buf_word(c_output, (uint32_t*) output, appconfFRAMES_IN_ALL_CHANS);
-        //printf("frame sent\n");
     }
 }
 
@@ -141,6 +141,7 @@ void ap_stage_c(chanend_t c_input, chanend_t c_output, chanend_t c_to_gpio) {
                 }
                 // send led value to gpio
                 chanend_out_byte(c_to_gpio, led_byte);
+                // change the array format to [sample][channel]
                 for(int ch = 0; ch < appconfMIC_COUNT; ch ++){
                     for(int smp = 0; smp < appconfAUDIO_FRAME_LENGTH; smp ++){
                         output[smp][ch] = input[ch][smp];

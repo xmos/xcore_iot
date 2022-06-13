@@ -66,6 +66,7 @@ void gpio_ctrl(void)
 {
     uint32_t status;
     uint32_t buttons_val;
+    uint32_t led_val;
     uint32_t buttonA;
     uint32_t buttonB;
     TimerHandle_t volume_up_timer;
@@ -105,11 +106,17 @@ void gpio_ctrl(void)
                 portMAX_DELAY ); /* Wait indefinitely until next notification */
 
         buttons_val = rtos_gpio_port_in(gpio_ctx_t0, button_port);
-        buttonA = ( buttons_val >> 0 ) & 0x01;
-        buttonB = ( buttons_val >> 1 ) & 0x01;
+        led_val = rtos_gpio_port_in(gpio_ctx_t0, led_port);
+        
+        /* Mask out LED 2*/
+        led_val &= 0x4;
+        led_val |= (~ buttons_val) & 0x3;
 
         /* Turn on LEDS based on buttons */
-        rtos_gpio_port_out(gpio_ctx_t0, led_port, buttons_val);
+        rtos_gpio_port_out(gpio_ctx_t0, led_port, led_val);
+
+        buttonA = ( buttons_val >> 0 ) & 0x01;
+        buttonB = ( buttons_val >> 1 ) & 0x01;
 
         /* Adjust volume based on LEDs */
         if( buttonA == 0 )   /* Up */
