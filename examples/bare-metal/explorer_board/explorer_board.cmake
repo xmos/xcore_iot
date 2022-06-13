@@ -58,7 +58,7 @@ target_link_options(example_bare_metal_explorer_board PRIVATE ${APP_LINK_OPTIONS
 
 # MCLK_FREQ,  PDM_FREQ, MIC_COUNT,  SAMPLES_PER_FRAME
 mic_array_vanilla_add( example_bare_metal_explorer_board
-    24576000  3072000   2           240 )
+    24576000  3072000   2           256 )
 
 #**********************
 # Create run and debug targets

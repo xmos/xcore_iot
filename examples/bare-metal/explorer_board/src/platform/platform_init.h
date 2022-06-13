@@ -4,7 +4,20 @@
 #ifndef PLATFORM_INIT_H_
 #define PLATFORM_INIT_H_
 
+/* System headers */
+#include <platform.h>
 #include <xcore/chanend.h>
+
+/* SDK headers */
+#include "soc.h"
+#include "xcore_utils.h"
+#include "mic_array.h"
+#include "mic_array_vanilla.h"
+
+/* App headers */
+#include "tile_support.h"
+#include "app_pll_ctrl.h"
+#include "aic3204.h"
 
 /** TILE 0 Clock Blocks */
 #define SPI_CLKBLK      XS1_CLKBLK_1

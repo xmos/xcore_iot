@@ -2,20 +2,12 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 /* System headers */
-#include <platform.h>
-#include <xs1.h>
 #include <string.h>
-#include <xcore/chanend.h>
 #include <xcore/port.h>
 #include <xcore/hwtimer.h>
 #include <xcore/triggerable.h>
 
-/* SDK headers */
-#include "soc.h"
-#include "xcore_utils.h"
-
 /* App headers */
-#include "app_conf.h"
 #include "app_demos.h"
 
 #define HEARTBEAT_TICKS 50000000
