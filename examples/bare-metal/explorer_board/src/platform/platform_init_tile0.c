@@ -105,5 +105,30 @@ static void tile0_init_flash(qspi_flash_ctx_t *qspi_flash_ctx)
     qspi_io_ctx->full_speed_sio_pad_delay = 0;
     qspi_io_ctx->spi_read_sio_pad_delay = 0;
 
+    /** The following configuration is only required for the Explorer Board 2v0
+     ** due to an incorrect sfdp parameters being reported for the particular
+     ** flash component sourced. **/
+    qspi_flash_ctx->sfdp_skip = true;
+    qspi_flash_ctx->sfdp_supported = false;
+    qspi_flash_ctx->page_size_bytes = 256;
+    qspi_flash_ctx->page_count = 16384;
+    qspi_flash_ctx->flash_size_kbytes = 4096;
+    qspi_flash_ctx->address_bytes = 3;
+    qspi_flash_ctx->erase_info[0].size_log2 = 12;
+    qspi_flash_ctx->erase_info[0].cmd = 0xEEFEEEEE;
+    qspi_flash_ctx->erase_info[1].size_log2 = 15;
+    qspi_flash_ctx->erase_info[1].cmd = 0xEFEFEEFE;
+    qspi_flash_ctx->erase_info[2].size_log2 = 16;
+    qspi_flash_ctx->erase_info[2].cmd = 0xFFEFFEEE;
+    qspi_flash_ctx->erase_info[3].size_log2 = 0;
+    qspi_flash_ctx->erase_info[3].cmd = 0;
+    qspi_flash_ctx->busy_poll_cmd = 0xEEEEEFEF;
+    qspi_flash_ctx->busy_poll_bit = 0;
+    qspi_flash_ctx->busy_poll_ready_value = 0;
+    qspi_flash_ctx->qe_reg = 2;
+    qspi_flash_ctx->qe_bit = 1;
+    qspi_flash_ctx->sr2_read_cmd = 0xEEFFEFEF;
+    qspi_flash_ctx->sr2_write_cmd = 0xEEEEEEEE;
+
     qspi_flash_init(qspi_flash_ctx);
 }
