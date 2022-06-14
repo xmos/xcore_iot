@@ -24,7 +24,9 @@
 
 #define MAX_TEST_VECT_SIZE  32
 
-/* This example requires that you loopback the X1D12 and X1D39 pins */
+const unsigned packet_period_ms = 500;
+
+/* This example requires that you loopback the X1D36 and X1D39 pins */
 
 void uart_tx_demo(void *arg){
     QueueHandle_t loopback_queue = arg;
