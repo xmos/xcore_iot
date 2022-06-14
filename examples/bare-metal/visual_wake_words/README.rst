@@ -38,37 +38,13 @@ Running with hardware
 
     .. code-block:: console
 
-        cmake -B build
-        cd build
         make run_example_bare_metal_vww
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        cmake -G "NMake Makefiles" -B build
-        cd build
         nmake run_example_bare_metal_vww
-
-Running with simulator
-
-.. code-block:: console
-
-.. tab:: Linux and Mac
-
-    .. code-block:: console
-
-        cmake -B build
-        cd build
-        make xsim_example_bare_metal_vww
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-        cmake -G "NMake Makefiles" -B build
-        cd build
-        nmake xsim_example_bare_metal_vww
 
 The firmware will now wait until a data is sent from a host application. Test images can be sent to the firmware using `xscope`.  Most RGB images should work.  The `test_image.py` script requires Python.  Ensure you have installed Python 3 and the XCore SDK Python requirements.
 
