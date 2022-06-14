@@ -17,25 +17,18 @@ This example application implements a CNN architecture trained on the `CIFAR-10 
 
 The resulting output tensor is returned to FreeRTOS for the application to handle.
 
-A Python script is provided that will generate one example image from each of the classes above.  Ensure you have installed Python 3 and the XCore SDK Python requirements.
+A Python script is provided that will generate one example image from each of the classes above.  Ensure you have installed Python 3 and the XCore SDK Python requirements.  Additionally, you need to install the `tensorflow Python package <https://pypi.org/project/tensorflow/>`__.   
+
+.. code-block:: console
+
+    pip install tensorflow
 
 To generate the images run:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-    .. code-block:: console
-
-        cd filesystem_support/test_inputs
-        ./make_test_tensors.py
-        cd ../..
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-        cd filesystem_support\test_inputs
-        python3 make_test_tensors.py
-        cd..\..
+    cd filesystem_support/test_inputs
+    python make_test_tensors.py
 
 For background information on the CIFAR-10 dataset, please read `Learning Multiple Layers of Features from Tiny Images <https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf>`__, Alex Krizhevsky, 2009.
 
