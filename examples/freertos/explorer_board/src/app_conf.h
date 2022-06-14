@@ -32,6 +32,8 @@
 #define appconfAUDIO_FRAME_LENGTH               MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
 #define appconfPRINT_AUDIO_FRAME_POWER          0
 
+/* UART Configuration */
+#define appconfUART_BAUD_RATE                   1000000
 
 /* GPIO Configuration */
 #define appconfGPIO_VOLUME_RAPID_FIRE_MS        100
