@@ -22,7 +22,7 @@ INPUT_ZERO_POINT = -128
 # NORM_SCALE = 127.5
 # NORM_SHIFT = 1
 
-OUTPUT_SCALE = 1 / 256
+OUTPUT_SCALE = 0.00390625
 OUTPUT_ZERO_POINT = -128
 
 def quantize(arr, scale, zero_point, dtype):
