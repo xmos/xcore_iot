@@ -50,7 +50,7 @@ void uart_tx_demo(void *arg){
         }
 
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(packet_period_ms));
     }
 }
 
@@ -116,18 +116,15 @@ void uart_rx_demo(void *arg){
             rtos_printf("Problem receiving loopback data reference from tx task - timeout\n");
         }
 
+        TickType_t read_timeout = pdMS_TO_TICKS(packet_period_ms * 2);
 
-        for(int i = 0; i < MAX_TEST_VECT_SIZE; i++){
-            int timeout_ms = 10;
-            size_t num_bytes = xStreamBufferReceive(uart_rx_ctx->app_byte_buffer,
-                                                    &rx_buf[i],
-                                                    1,
-                                                    pdMS_TO_TICKS(timeout_ms));
-            if(num_bytes != 1){
-                rtos_printf("Rx byte timed out after %d ms\n", timeout_ms);
-            }
+        size_t num_bytes = rtos_uart_rx_read(uart_rx_ctx, rx_buf, MAX_TEST_VECT_SIZE, read_timeout);
+
+        if(num_bytes != MAX_TEST_VECT_SIZE){
+            rtos_printf("Rx byte timed out after %d ms at byte %d of %d\n", read_timeout, num_bytes, MAX_TEST_VECT_SIZE);
+            rtos_uart_rx_reset_buffer(uart_rx_ctx);
+            break;
         }
-
 
         int data_different = memcmp(rx_buf, tx_buf, sizeof(tx_buf));
 
@@ -142,7 +139,7 @@ void uart_rx_demo(void *arg){
         } else {
             if(!printed_once){
                 rtos_printf("UART Loopback data (%d bytes) received correctly.\n", MAX_TEST_VECT_SIZE);
-                rtos_printf("Further successful received packets will NOT be printed. Errors will be printed.\n");
+                rtos_printf("Further successfully received packets will NOT be printed. Errors will be printed.\n");
                 printed_once = 1; 
             }
         }
