@@ -1,8 +1,8 @@
-########################
-FreeRTOS Getting Started
-########################
+################################
+FreeRTOS Getting Started Example
+################################
 
-This is the simplest buildable multitile FreeRTOS project for XCore. We encourage you to use this as a template for new projects. To start your own project copy the contents of this folder to your computer and begin developing.
+This is a simple multi-tile FreeRTOS example application. It starts the FreeRTOS scheduler running on both `tile[0]` and `tile[1]`.  `tile[0]` has two tasks running.  One prints "Hello from tile 0" to the console and the other task blinks the 4 LEDs on the Explorer board.  `tile[1]` has one task running that prints "Hello from tile 0" to the console.
 
 *********************
 Building the firmware
@@ -14,17 +14,17 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ make example_freertos_getting_started
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_getting_started
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ nmake example_freertos_getting_started
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_freertos_getting_started
 
 *********************
 Running the firmware
@@ -36,28 +36,25 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make run_example_freertos_getting_started
+        make run_example_freertos_getting_started
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_example_freertos_getting_started
+        nmake run_example_freertos_getting_started
 
-********************************
-Debugging the firmware with xgdb
-********************************
+If successful, you should see the following print messages in the console:
 
-From the xcore_sdk build folder run:
+.. code-block:: console
 
-.. tab:: Linux and Mac
+    Hello from tile 0
+    Hello from tile 1
+    Hello from tile 0
+    Hello from tile 1
+    Hello from tile 0
+    Hello from tile 1
 
-    .. code-block:: console
+And all four LEDs should be blinking. 
 
-        $ make debug_example_freertos_getting_started
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-        $ nmake debug_example_freertos_getting_started
+**Congratulations!**  You've just built and run your first application for XCore.  

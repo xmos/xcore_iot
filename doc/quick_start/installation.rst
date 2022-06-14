@@ -1,18 +1,10 @@
-.. _sdk-installation-label:
+.. _sdk-installation:
 
 ############
 Installation
 ############
 
-*******************
-System Requirements
-*******************
-
-Make sure your system meets the minumum :ref:`system requirements <sdk-system-requirements-label>` and that you have installed all necessary :ref:`prerequisites <sdk-prerequisites-label>`.
-
-******************
-Installation Steps
-******************
+Follow the following steps to install and setup the SDK:
 
 Step 1. Cloning the SDK
 =======================
@@ -48,7 +40,7 @@ The SDK includes utilities that run on the PC host.  Run the following command t
 
     .. code-block:: console
 
-        $ cmake -B build_host
+        $ cmake  -G "NMake Makefiles" -B build_host
         $ cd build_host
         $ make install
 
@@ -74,8 +66,9 @@ Then use `pip` to install the required modules.
 
     $ pip install -r tools/install/requirements.txt
 
-Start Your First Application
-============================
+**********************************
+Build & Run Your First Application
+**********************************
 
-Follow the :doc:`Tutorials <../tutorials/index>` and begin your first project.
+Once your have installed the SDK, the next step is to :ref:`build and run your first XCore application. <sdk-tutorials>`
     

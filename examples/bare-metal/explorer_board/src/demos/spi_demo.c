@@ -1,17 +1,7 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-/* System headers */
-#include <platform.h>
-#include <xs1.h>
-
-/* SDK headers */
-#include "soc.h"
-#include "xcore_utils.h"
-#include "spi.h"
-
 /* App headers */
-#include "app_conf.h"
 #include "app_demos.h"
 
 void spi_demo(spi_master_device_t* device_ctx)

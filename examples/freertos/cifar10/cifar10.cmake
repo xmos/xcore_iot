@@ -32,6 +32,7 @@ set(APP_COMPILE_DEFINITIONS
     PLATFORM_SUPPORTS_TILE_3=0
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
+    XUD_CORE_CLOCK=600
     XCORE=1
 )
 
@@ -46,6 +47,7 @@ set(APP_LINK_LIBRARIES
     core::general
     rtos::freertos
     rtos::sw_services::inferencing
+    rtos::bsp_config::xcore_ai_explorer
 )
 
 #**********************

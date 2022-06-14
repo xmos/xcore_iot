@@ -1,34 +1,11 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-/* System headers */
-#include <platform.h>
-#include <xs1.h>
-#include <string.h>
-#include <xcore/assert.h>
-#include <xcore/chanend.h>
-#include <xcore/channel.h>
-#include <xcore/channel_streaming.h>
-#include <xcore/parallel.h>
-#include <xcore/port.h>
-#include <xcore/hwtimer.h>
-#include <xcore/triggerable.h>
-
-/* SDK headers */
-#include "soc.h"
-#include "mic_array.h"
-#include "mic_array_vanilla.h"
-#include "xcore_utils.h"
-#include "i2s.h"
-#include "uart.h"
-
-
 /* App headers */
 #include "app_conf.h"
 #include "app_demos.h"
 #include "burn.h"
 #include "audio_pipeline.h"
-#include "tile_support.h"
 #include "platform_init.h"
 
 void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)

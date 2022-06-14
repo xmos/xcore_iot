@@ -41,6 +41,7 @@ set(APP_LINK_LIBRARIES
     core::general
     rtos::freertos
     rtos::usb_device_control
+    rtos::bsp_config::xcore_ai_explorer
 )
 
 #**********************

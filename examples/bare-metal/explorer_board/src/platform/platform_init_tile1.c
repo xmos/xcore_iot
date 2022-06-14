@@ -1,26 +1,9 @@
 // Copyright (c) 2021-2022 XMOS LIMITED. This Software is subject to the terms of the
 // XMOS Public License: Version 1
 
-/* System headers */
-#include <platform.h>
-#include <xcore/chanend.h>
-#include <xcore/channel_streaming.h>
-
-/* SDK headers */
-#include "soc.h"
-#include "mic_array.h"
-#include "mic_array_vanilla.h"
-#include "xcore_utils.h"
-#include "i2c.h"
-#include "i2s.h"
-#include "uart.h"
-
 /* App headers */
-#include "app_conf.h"
+#include "../app_conf.h"
 #include "platform_init.h"
-#include "tile_support.h"
-#include "app_pll_ctrl.h"
-#include "aic3204.h"
 
 static void tile1_setup_dac(void);
 static void tile1_i2s_init(void);
@@ -29,7 +12,7 @@ static void tile1_uart_init(void);
 
 void platform_init_tile_1(chanend_t c_other_tile)
 {
-    // memset(tile1_ctx, 0, sizeof(tile1_ctx_t));
+    memset(tile1_ctx, 0, sizeof(tile1_ctx_t));
 
     tile1_ctx->c_from_gpio = soc_channel_establish(c_other_tile, soc_channel_input);
     tile1_ctx->c_to_gpio = soc_channel_establish(c_other_tile, soc_channel_output);

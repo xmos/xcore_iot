@@ -4,9 +4,14 @@
 #ifndef APP_DEMOS_H_
 #define APP_DEMOS_H_
 
+/* System headers */
+#include <platform.h>
+#include <xs1.h>
 #include <xcore/parallel.h>
 #include <xcore/chanend.h>
 
+/* SDK headers */
+#include "xcore_utils.h"
 #include "spi.h"
 #include "qspi_flash.h"
 #include "uart.h"

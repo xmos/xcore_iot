@@ -2,10 +2,7 @@
 # Gather Sources
 #**********************
 file(GLOB_RECURSE APP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
-set(APP_INCLUDES
-    ${CMAKE_CURRENT_LIST_DIR}/src
-    ${CMAKE_CURRENT_LIST_DIR}/src/platform
-)
+set(APP_INCLUDES ${CMAKE_CURRENT_LIST_DIR}/src)
 
 #**********************
 # Flags
@@ -22,12 +19,10 @@ set(APP_COMPILER_FLAGS
 )
 set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
-    PLATFORM_SUPPORTS_TILE_0=1
-    PLATFORM_SUPPORTS_TILE_1=1
-    PLATFORM_SUPPORTS_TILE_2=0
-    PLATFORM_SUPPORTS_TILE_3=0
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
+    XE_BASE_TILE=0
+    XUD_CORE_CLOCK=600
 )
 
 set(APP_LINK_OPTIONS
@@ -37,8 +32,7 @@ set(APP_LINK_OPTIONS
 )
 
 set(APP_LINK_LIBRARIES
-    core::general
-    rtos::freertos
+    rtos::bsp_config::xcore_ai_explorer
 )
 
 #**********************

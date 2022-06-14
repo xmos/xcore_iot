@@ -6,7 +6,7 @@ FreeRTOS
    :maxdepth: 2
 
    application_programming
-   getting_started
+   application_design
+   examples/index
    faq
    common_issues
-   examples/index

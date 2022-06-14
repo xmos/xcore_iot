@@ -12,7 +12,7 @@ When button 0 is pressed, LED 0 will be lit.  When button 1 is pressed, LED 1
 will be lit.  When the gain adjusted audio passes a frame power threshold, LED 2
 will be lit.  Lastly, LED 3 will blink periodically.
 
-Additionally, the example demonstrates a simple flash and SPI setup.
+Additionally, the example demonstrates a simple flash, UART (via a loopback) and SPI setup.
 
 *********************
 Building the firmware

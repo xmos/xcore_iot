@@ -4,7 +4,6 @@
 /* System headers */
 #include <platform.h>
 #include <xs1.h>
-#include <xcore/assert.h>
 
 /* SDK headers */
 #include "xcore_utils.h"

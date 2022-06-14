@@ -16,17 +16,17 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
     .. code-block:: console
 
-        $ cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ make example_freertos_explorer_board
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
-        $ cd build
-        $ nmake example_freertos_explorer_board
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_freertos_explorer_board
 
 .. note::
    The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
@@ -37,13 +37,13 @@ From the xcore_sdk build folder, create the filesystem and flash the device with
 
     .. code-block:: console
 
-        $ make flash_fs_example_freertos_explorer_board
+        make flash_fs_example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake flash_fs_example_freertos_explorer_board
+        nmake flash_fs_example_freertos_explorer_board
 
 ********************
 Running the firmware
@@ -55,13 +55,13 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make run_example_freertos_explorer_board
+        make run_example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake run_example_freertos_explorer_board
+        nmake run_example_freertos_explorer_board
 
 
 ********************************
@@ -74,10 +74,10 @@ From the xcore_sdk build folder run:
 
     .. code-block:: console
 
-        $ make debug_example_freertos_explorer_board
+        make debug_example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        $ nmake debug_example_freertos_explorer_board
+        nmake debug_example_freertos_explorer_board
