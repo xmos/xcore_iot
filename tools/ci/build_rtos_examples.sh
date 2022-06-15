@@ -18,19 +18,14 @@ fi
 
 # row format is: "name app_target run_fs_target BOARD toolchain"
 applications=(
+    "cifar10          example_freertos_cifar10          No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "device_control   example_freertos_device_control   No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "dispatcher       example_freertos_dispatcher       No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "explorer_board   example_freertos_explorer_board   Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "getting_started  example_freertos_getting_started  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "iot              example_freertos_iot              No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "l2_cache         example_freertos_l2_cache         No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
-
-# applications=(
-#     "cifar10          example_freertos_cifar10          No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-#     "device_control   example_freertos_device_control   No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-#     "dispatcher       example_freertos_dispatcher       No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-#     "explorer_board   example_freertos_explorer_board   Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-#     "getting_started  example_freertos_getting_started  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-#     "iot              example_freertos_iot              No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-#     "l2_cache         example_freertos_l2_cache         No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-# )
 
 # perform builds
 for ((i = 0; i < ${#applications[@]}; i += 1)); do
