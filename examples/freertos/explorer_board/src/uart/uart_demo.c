@@ -123,7 +123,8 @@ void uart_rx_demo(void *arg){
         if(num_bytes != MAX_TEST_VECT_SIZE){
             rtos_printf("Rx byte timed out after %d ms at byte %d of %d\n", read_timeout, num_bytes, MAX_TEST_VECT_SIZE);
             rtos_uart_rx_reset_buffer(uart_rx_ctx);
-            break;
+            printed_once = 0;
+            continue;
         }
 
         int data_different = memcmp(rx_buf, tx_buf, sizeof(tx_buf));
@@ -136,6 +137,7 @@ void uart_rx_demo(void *arg){
                 }
                 printed_once = 0;
             }
+            rtos_uart_rx_reset_buffer(uart_rx_ctx);
         } else {
             if(!printed_once){
                 rtos_printf("UART Loopback data (%d bytes) received correctly.\n", MAX_TEST_VECT_SIZE);
