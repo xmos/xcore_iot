@@ -3,11 +3,12 @@ set -e
 
 # add dist_host to path.
 #   This is used in CI for fatfs_mkimage
-PATH=$PATH:./dist_host
 
 XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
 source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
+
+PATH="${XCORE_SDK_ROOT}/dist_host":$PATH
 
 # setup distribution folder
 DIST_DIR=${XCORE_SDK_ROOT}/dist
