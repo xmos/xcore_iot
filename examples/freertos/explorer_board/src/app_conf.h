@@ -40,7 +40,7 @@
 #define appconfEXP                              -31
 
 /* UART Configuration */
-#define appconfUART_BAUD_RATE                   1000000
+#define appconfUART_BAUD_RATE                   806400
 
 /* GPIO Configuration */
 #define appconfGPIO_VOLUME_RAPID_FIRE_MS        100
