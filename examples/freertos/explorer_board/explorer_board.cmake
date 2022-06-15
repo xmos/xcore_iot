@@ -101,9 +101,17 @@ else()
     )
 endif()
 
-add_custom_target(flash_fs_example_freertos_explorer_board
-    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_explorer_board.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/example_freertos_explorer_board_fat.fs
+add_custom_target(make_fs_example_freertos_explorer_board
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/example_freertos_explorer_board_fat.fs example_freertos_explorer_board_fat.fs
     DEPENDS example_freertos_explorer_board_fat.fs
+    COMMENT
+        "Make filesystem"
+    VERBATIM
+)
+
+add_custom_target(flash_fs_example_freertos_explorer_board
+    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_explorer_board.xe --boot-partition-size 0x100000 --data example_freertos_explorer_board_fat.fs
+    DEPENDS make_fs_example_freertos_explorer_board
     COMMENT
         "Flash filesystem"
     VERBATIM

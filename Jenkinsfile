@@ -94,6 +94,13 @@ pipeline {
                             } else {
                                 echo 'SKIPPED: example_freertos_getting_started'
                             }
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_explorer_board.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_explorer_board_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_explorer_board'
+                            }
                         } 
                     }
                 }

@@ -13,3 +13,13 @@ function log_errors {
         return 1
     fi    
 }
+
+# Get the corrent timeout command
+function get_timeout {
+    uname=`uname`
+    if [[ "$uname" == 'Linux' ]]; then
+        echo "timeout"
+    elif [[ "$uname" == 'Darwin' ]]; then
+        echo "gtimeout"
+    fi
+}
