@@ -26,8 +26,8 @@ env:
   SDK_BUILDER_IMAGE: 'ghcr.io/xmos/sdk_app_builder:develop'
 
 jobs:
-  build_metal_examples:
-    name: Build bare-metal examples
+  build_host_apps:
+    name: Build host applications
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SDK
@@ -41,13 +41,13 @@ jobs:
 
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_metal_examples.sh
+          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_host_apps.sh
 
-      - name: Save bare-metal example app firmware artifacts
+      - name: Save host application artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: xcore_sdk_bare-metal_example_apps
-          path: ./dist/*.xe
+          name: xcore_sdk_host_apps
+          path: ./dist_host
 
   build_rtos_examples:
     name: Build RTOS examples
@@ -61,6 +61,12 @@ jobs:
       - name: Pull SDK builder image
         run: |
           docker pull ${SDK_BUILDER_IMAGE}
+
+      - name: Download host build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: xcore_sdk_host_apps
+          path: ./dist_host
 
       - name: Build
         run: |
@@ -112,8 +118,8 @@ jobs:
         run: |
           docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
 
-  build_host_apps:
-    name: Build host applications
+  build_metal_examples:
+    name: Build bare-metal examples
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SDK
@@ -127,10 +133,10 @@ jobs:
 
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_host_apps.sh
+          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_metal_examples.sh
 
-      - name: Save host application artifacts
+      - name: Save bare-metal example app firmware artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: xcore_sdk_host_apps
-          path: ./dist_host
+          name: xcore_sdk_bare-metal_example_apps
+          path: ./dist/*.xe
