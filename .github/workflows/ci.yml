@@ -41,7 +41,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_host_apps.sh
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_host_apps.sh
 
       - name: Save host application artifacts
         uses: actions/upload-artifact@v3
@@ -71,7 +71,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_examples.sh
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_examples.sh
 
       - name: Save RTOS example app firmware artifacts
         uses: actions/upload-artifact@v3
@@ -94,7 +94,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh
 
       - name: Save RTOS USB example app firmware artifacts
         uses: actions/upload-artifact@v3
@@ -117,7 +117,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
 
   build_metal_examples:
     name: Build bare-metal examples
@@ -134,7 +134,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --user $(id -u) --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_metal_examples.sh
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_metal_examples.sh
 
       - name: Save bare-metal example app firmware artifacts
         uses: actions/upload-artifact@v3
