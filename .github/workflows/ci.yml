@@ -63,6 +63,7 @@ jobs:
           docker pull ${SDK_BUILDER_IMAGE}
 
       - name: Download host build artifacts
+        needs: build_host_apps
         uses: actions/download-artifact@v3
         with:
           name: xcore_sdk_host_apps
