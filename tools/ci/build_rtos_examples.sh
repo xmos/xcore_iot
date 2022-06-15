@@ -3,7 +3,7 @@ set -e
 
 # add dist_host to path.
 #   This is used in CI for fatfs_mkimage
-PATH=$PATH:dist_host
+PATH=$PATH:./dist_host
 
 XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
@@ -15,6 +15,10 @@ mkdir -p ${DIST_DIR}
 
 # row format is: "name app_target run_fs_target BOARD toolchain"
 ls dist_host/*
+echo "***********"
+ls *
+echo "***********"
+echo $PATH
 applications=(
     "explorer_board   example_freertos_explorer_board   Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "getting_started  example_freertos_getting_started  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
