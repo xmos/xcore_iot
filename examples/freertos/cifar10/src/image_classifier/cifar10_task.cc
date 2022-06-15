@@ -122,7 +122,7 @@ void cifar10_task_inputs(void *args) {
   }
 }
 
-#pragma stackfunction 500
+#pragma stackfunction 600
 void cifar10_task_inference(void *args) {
   inference_engine_args_t *targs = (inference_engine_args_t *)args;
   QueueHandle_t input_queue = targs->input_queue;
@@ -133,15 +133,9 @@ void cifar10_task_inference(void *args) {
   size_t output_size = 0;
   uint8_t *tensor_arena = nullptr;
   uint8_t *input_tensor = nullptr;
-  // dispatcher_t *dispatcher;
   xcore::rtos::InferenceEngine<7, 18> inference_engine;
 
   tensor_arena = (uint8_t *)pvPortMalloc(TENSOR_ARENA_SIZE);
-
-  // dispatcher = dispatcher_create();
-  // dispatcher_thread_init(dispatcher, appconfDISPATCHER_LENGTH,
-  //                        appconfDISPATCHER_THREAD_COUNT,
-  //                        appconfDISPATCHER_THREAD_PRIORITY);
 
   auto resolver = inference_engine.Initialize(tensor_arena, TENSOR_ARENA_SIZE);
 

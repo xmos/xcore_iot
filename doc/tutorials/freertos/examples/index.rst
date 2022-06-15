@@ -11,7 +11,6 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
    :includehidden:
 
    explorer_board.rst
-   usb.rst
    device_control.rst
    dispatcher.rst
    l2_cache.rst
