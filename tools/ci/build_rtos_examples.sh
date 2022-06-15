@@ -12,6 +12,7 @@ mkdir -p ${DIST_DIR}
 # add DIST_HOST_DIR to path.
 #   This is used in CI for fatfs_mkimage
 PATH="${DIST_HOST_DIR}":$PATH
+find ${DIST_HOST_DIR} -type f -exec chmod a+x {} +
 
 # row format is: "name app_target run_fs_target BOARD toolchain"
 applications=(
