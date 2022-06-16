@@ -16,25 +16,24 @@ if [ -d "${DIST_HOST_DIR}" ]; then
     find ${DIST_HOST_DIR} -type f -exec chmod a+x {} +
 fi
 
-# row format is: "name app_target run_fs_target BOARD toolchain"
+# row format is: "name app_target run_fs_target board toolchain"
 applications=(
-    "cifar10          example_freertos_cifar10          No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "device_control   example_freertos_device_control   No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "dispatcher       example_freertos_dispatcher       No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "explorer_board   example_freertos_explorer_board   Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "getting_started  example_freertos_getting_started  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "iot              example_freertos_iot              No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "l2_cache         example_freertos_l2_cache         No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_cifar10          No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_device_control   No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_dispatcher       No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_explorer_board   Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_getting_started  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_iot              No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_l2_cache         No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 
 # perform builds
 for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
-    name="${FIELDS[0]}"
-    app_target="${FIELDS[1]}"
-    run_fs_target="${FIELDS[2]}"
-    board="${FIELDS[3]}"
-    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[4]}"
+    app_target="${FIELDS[0]}"
+    run_fs_target="${FIELDS[1]}"
+    board="${FIELDS[2]}"
+    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[3]}"
     path="${XCORE_SDK_ROOT}"
     echo '******************************************************'
     echo '* Building' ${app_target} 'for' ${board}
