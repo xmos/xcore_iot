@@ -39,6 +39,7 @@ set(APP_LINK_OPTIONS
 set(APP_LINK_LIBRARIES
     core::general
     rtos::freertos
+    rtos::bsp_config::xcore_ai_explorer
 )
 
 #**********************
