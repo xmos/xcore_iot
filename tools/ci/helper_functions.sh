@@ -14,7 +14,7 @@ function log_errors {
     fi    
 }
 
-# Get the corrent timeout command
+# Get the system timeout command
 function get_timeout {
     uname=`uname`
     if [[ "$uname" == 'Linux' ]]; then

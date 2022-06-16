@@ -37,7 +37,7 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[4]}"
     path="${XCORE_SDK_ROOT}"
     echo '******************************************************'
-    echo '* Building' ${make_target} 'for' ${board}
+    echo '* Building' ${app_target} 'for' ${board}
     echo '******************************************************'
 
     (cd ${path}; rm -rf build_${board})
@@ -45,6 +45,9 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     (cd ${path}/build_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board}; log_errors make ${app_target} -j)
     (cd ${path}/build_${board}; cp ${app_target}.xe ${DIST_DIR})
     if [ "$run_fs_target" = "Yes" ]; then
+        echo '======================================================'
+        echo '= Building filesystem for' ${app_target}
+        echo '======================================================'
         (cd ${path}/build_${board}; log_errors make make_fs_${app_target} -j)
         (cd ${path}/build_${board}; cp ${app_target}_fat.fs ${DIST_DIR})
     fi
