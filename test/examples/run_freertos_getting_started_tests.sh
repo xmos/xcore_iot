@@ -18,7 +18,7 @@ DURATION="10s"
 APP_XE=${BUILD_DIR}/${APPLICATION}.xe
 APP_LOG=${APPLICATION}.log
 
-($TIMEOUT_EXE $DURATION xrun --xscope $ADAPTER_ID $APP_XE 2>&1 | tee $APP_LOG)
+($TIMEOUT_EXE $DURATION xrun $ADAPTER_ID --xscope $APP_XE 2>&1 | tee $APP_LOG)
 
 # Search the log file for strings that indicate the app ran OK
 
