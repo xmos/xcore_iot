@@ -14,9 +14,7 @@ def withXTAG(String target, Closure body) {
 def artifactUrls = getGithubArtifactUrls([
     "xcore_sdk_bare-metal_example_apps",
     "xcore_sdk_freertos_example_apps"
-    // "xcore_sdk_freertos_usb_example_apps",
     // "xcore_sdk_host_apps",
-    // "xcore_sdk_reference_apps",
     // "xcore_sdk_rtos_tests"
 ])
 
@@ -29,6 +27,12 @@ pipeline {
     options {
         disableConcurrentBuilds()
         skipDefaultCheckout()
+        timestamps()
+        // on develop discard builds after a certain number else keep forever
+        buildDiscarder(logRotator(
+            numToKeepStr:         env.BRANCH_NAME ==~ /develop/ ? '25' : '',
+            artifactNumToKeepStr: env.BRANCH_NAME ==~ /develop/ ? '25' : ''
+        ))
     }    
     parameters {
         string(

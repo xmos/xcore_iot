@@ -14,9 +14,11 @@ name: CI
 on:
   push:
     branches:
+      - 'main'
       - 'develop'
   pull_request:
     branches:
+      - 'main'
       - 'develop'
 
   # Allow manually triggering of the workflow.
