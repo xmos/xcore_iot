@@ -26,7 +26,6 @@ env:
   SDK_BUILDER_IMAGE: 'ghcr.io/xmos/sdk_app_builder:develop'
 
 jobs:
-  # JOB to run change detection
   changes:
     runs-on: ubuntu-latest
     name: Change detection
