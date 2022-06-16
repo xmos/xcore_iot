@@ -82,6 +82,7 @@ jobs:
           path: |
             ./dist/*.xe
             ./dist/*.fs
+            ./dist/*.swmem
 
   build_rtos_usb_examples:
     name: Build RTOS USB examples

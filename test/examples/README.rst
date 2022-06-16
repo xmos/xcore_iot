@@ -31,6 +31,9 @@ Run the tests with the following commands:
 
     bash test/examples/run_freertos_getting_started_tests.sh <optional adapter-id>
     bash test/examples/run_freertos_explorer_board_tests.sh <optional adapter-id>
+    bash test/examples/run_freertos_cifar10_tests.sh <optional adapter-id>
+    bash test/examples/run_freertos_dispatcher_tests.sh <optional adapter-id>
+    bash test/examples/run_freertos_l2_cache_tests.sh <optional adapter-id>
 
 
 Bare-metal Examples

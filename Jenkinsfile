@@ -108,6 +108,24 @@ pipeline {
                                 echo 'SKIPPED: example_freertos_explorer_board'
                             }
                         } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_dispatcher.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_dispatcher_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_dispatcher'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_l2_cache.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_l2_cache_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_l2_cache'
+                            }
+                        } 
                     }
                 }
             }

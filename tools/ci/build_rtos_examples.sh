@@ -16,15 +16,15 @@ if [ -d "${DIST_HOST_DIR}" ]; then
     find ${DIST_HOST_DIR} -type f -exec chmod a+x {} +
 fi
 
-# row format is: "name app_target run_fs_target board toolchain"
+# row format is: "name app_target run_fs_target run_swmem_target board toolchain"
 applications=(
-    "example_freertos_cifar10          No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_freertos_device_control   No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_freertos_dispatcher       No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_freertos_explorer_board   Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_freertos_getting_started  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_freertos_iot              No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_freertos_l2_cache         No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_cifar10          No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_device_control   No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_dispatcher       No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_explorer_board   Yes No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_getting_started  No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_iot              No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_freertos_l2_cache         No  Yes  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 
 # perform builds
@@ -32,8 +32,9 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
     app_target="${FIELDS[0]}"
     run_fs_target="${FIELDS[1]}"
-    board="${FIELDS[2]}"
-    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[3]}"
+    run_swmem_target="${FIELDS[2]}"
+    board="${FIELDS[3]}"
+    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[4]}"
     path="${XCORE_SDK_ROOT}"
     echo '******************************************************'
     echo '* Building' ${app_target} 'for' ${board}
@@ -45,9 +46,16 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     (cd ${path}/build_${board}; cp ${app_target}.xe ${DIST_DIR})
     if [ "$run_fs_target" = "Yes" ]; then
         echo '======================================================'
-        echo '= Building filesystem for' ${app_target}
+        echo '= Making filesystem for' ${app_target}
         echo '======================================================'
         (cd ${path}/build_${board}; log_errors make make_fs_${app_target} -j)
         (cd ${path}/build_${board}; cp ${app_target}_fat.fs ${DIST_DIR})
+    fi
+    if [ "$run_swmem_target" = "Yes" ]; then
+        echo '======================================================'
+        echo '= Making swmem for' ${app_target}
+        echo '======================================================'
+        (cd ${path}/build_${board}; log_errors make make_swmem_${app_target} -j)
+        (cd ${path}/build_${board}; cp ${app_target}.swmem ${DIST_DIR})
     fi
 done
