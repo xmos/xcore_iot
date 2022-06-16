@@ -14,8 +14,10 @@ name: Documentation
 on:
   push:
     branches:
-      - 'develop'
-  pull_request:
+      - 'releases/**'
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 0 * * *'
     branches:
       - 'develop'
 

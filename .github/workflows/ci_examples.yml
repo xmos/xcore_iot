@@ -84,46 +84,6 @@ jobs:
             ./dist/*.fs
             ./dist/*.swmem
 
-  build_rtos_usb_examples:
-    name: Build RTOS USB examples
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout SDK
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Pull SDK builder image
-        run: |
-          docker pull ${SDK_BUILDER_IMAGE}
-
-      - name: Build
-        run: |
-          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh
-
-      - name: Save RTOS USB example app firmware artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: xcore_sdk_freertos_usb_example_apps
-          path: ./dist/*.xe
-
-  build_rtos_tests:
-    name: Build RTOS tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout SDK
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Pull SDK builder image
-        run: |
-          docker pull ${SDK_BUILDER_IMAGE}
-
-      - name: Build
-        run: |
-          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
-
   build_metal_examples:
     name: Build bare-metal examples
     runs-on: ubuntu-latest

@@ -45,8 +45,8 @@ static int argmax(const int8_t *A, const int N) {
 }
 
 static const char *test_input_files[] = {
-    "airplane.bin", "bird.bin",  "cat.bin",  "deer.bin",
-    "frog.bin",     "horse.bin", "truck.bin"};
+    "plane.bin", "auto.bin", "bird.bin",  "cat.bin",  "deer.bin",
+    "dog.bin", "frog.bin", "horse.bin", "ship.bin", "truck.bin"};
 
 void cifar10_task_inputs(void *args) {
   inference_engine_args_t *targs = (inference_engine_args_t *)args;
@@ -82,10 +82,10 @@ void cifar10_task_inputs(void *args) {
 
       switch (argmax((int8_t *)output_tensor, 10)) {
       case 0:
-        rtos_snprintf(classification, 9, "Airplane");
+        rtos_snprintf(classification, 9, "Plane");
         break;
       case 1:
-        rtos_snprintf(classification, 11, "Automobile");
+        rtos_snprintf(classification, 11, "Auto");
         break;
       case 2:
         rtos_snprintf(classification, 5, "Bird");

@@ -5,7 +5,7 @@ XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 
 BUILD_DIR="build"
-APPLICATION="example_freertos_l2_cache"
+APPLICATION="example_freertos_cifar10"
 
 if [ ! -z "$1" ]
 then
@@ -13,21 +13,21 @@ then
 fi
 
 TIMEOUT_EXE=$(get_timeout)
-DURATION="15s"
+DURATION="20s"
 
 APP_XE=${BUILD_DIR}/${APPLICATION}.xe
-APP_SWMEM=${BUILD_DIR}/${APPLICATION}.swmem
+APP_FS=${BUILD_DIR}/${APPLICATION}_fat.fs
 APP_LOG=${APPLICATION}.log
 
-(xflash $ADAPTER_ID --quad-spi-clock 50MHz --write-all $APP_SWMEM --target XCORE-AI-EXPLORER)
+(xflash $ADAPTER_ID --quad-spi-clock 50MHz --factory $APP_XE --boot-partition-size 0x100000 --data $APP_FS)
 ($TIMEOUT_EXE $DURATION xrun $ADAPTER_ID --xscope $APP_XE 2>&1 | tee $APP_LOG)
 
 # Search the log file for strings that indicate the app ran OK
 
 # Expect one or more matches found
-result=$(grep -c "Run examples" $APP_LOG || true)
+result_hello_world=$(grep -c "Classification of file truck.bin is Truck" $APP_LOG || true)
 
-if [ $result -le 1 ]; then
+if [ $result_hello_world -le 1 ]; then
     echo "FAIL"
     exit 1
 fi
