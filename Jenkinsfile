@@ -13,7 +13,7 @@ def withXTAG(String target, Closure body) {
 // Wait here until specified artifacts appear
 def artifactUrls = getGithubArtifactUrls([
     "bare-metal_example_apps",
-    "freertos_core_example_apps"
+    "freertos_core_example_apps",
     "freertos_aiot_example_apps"
     // "host_apps",
     // "rtos_tests"
