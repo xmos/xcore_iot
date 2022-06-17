@@ -18,12 +18,10 @@ fi
 
 # row format is: "name app_target run_fs_target run_swmem_target board toolchain"
 applications=(
-    "example_freertos_cifar10          No No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_device_control   No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_dispatcher       No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_explorer_board   Yes No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_getting_started  No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_freertos_iot              No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_l2_cache         No  Yes  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 

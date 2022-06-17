@@ -48,11 +48,11 @@ jobs:
       - name: Save host application artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: xcore_sdk_host_apps
+          name: host_apps
           path: ./dist_host
 
-  build_rtos_examples:
-    name: Build RTOS examples
+  build_rtos_core_examples:
+    name: Build RTOS core examples
     runs-on: ubuntu-latest
     needs: build_host_apps
     steps:
@@ -68,17 +68,50 @@ jobs:
       - name: Download host build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: xcore_sdk_host_apps
+          name: host_apps
           path: ./dist_host
 
       - name: Build
         run: |
-          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_examples.sh
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_core_examples.sh
 
       - name: Save RTOS example app firmware artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: xcore_sdk_freertos_example_apps
+          name:freertos_core_example_apps
+          path: |
+            ./dist/*.xe
+            ./dist/*.fs
+            ./dist/*.swmem
+
+  build_rtos_aiot_examples:
+    name: Build RTOS AIoT examples
+    runs-on: ubuntu-latest
+    needs: build_host_apps
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Pull SDK builder image
+        run: |
+          docker pull ${SDK_BUILDER_IMAGE}
+
+      - name: Download host build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: host_apps
+          path: ./dist_host
+
+      - name: Build
+        run: |
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_aiot_examples.sh
+
+      - name: Save RTOS example app firmware artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name:freertos_aiot_example_apps
           path: |
             ./dist/*.xe
             ./dist/*.fs
@@ -104,5 +137,5 @@ jobs:
       - name: Save bare-metal example app firmware artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: xcore_sdk_bare-metal_example_apps
+          name: bare-metal_example_apps
           path: ./dist/*.xe

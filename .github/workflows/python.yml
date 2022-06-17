@@ -15,24 +15,37 @@ name: Build
 on:
   push:
     branches:
+      - 'main'
       - 'develop'
-    paths:
-      - "**.py"
-      - "tools/install/requirements.txt"
 
   pull_request:
     branches:
+      - 'main'
       - 'develop'
-    paths:
-      - "**.py"
-      - "tools/install/requirements.txt"
 
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
 
 jobs:
-  verify_python_packages_install:
+  changes:
+    runs-on: ubuntu-latest
+    name: Change detection
+    # Set job outputs to values from filter step
+    outputs:
+      python_install: ${{ steps.filter.outputs.python_install }}
+    steps:
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          python_install:
+            - 'tools/install/requirements.txt'
+            - '**.py'
+
+  python_install:
+    needs: changes
     name: Install & verify Python packages
+    if: ${{ needs.changes.outputs.python_install == 'true' }}  
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SDK

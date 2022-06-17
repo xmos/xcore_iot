@@ -12,10 +12,11 @@ def withXTAG(String target, Closure body) {
 
 // Wait here until specified artifacts appear
 def artifactUrls = getGithubArtifactUrls([
-    "xcore_sdk_bare-metal_example_apps",
-    "xcore_sdk_freertos_example_apps"
-    // "xcore_sdk_host_apps",
-    // "xcore_sdk_rtos_tests"
+    "bare-metal_example_apps",
+    "freertos_example_core_apps"
+    "freertos_example_aiot_apps"
+    // "host_apps",
+    // "rtos_tests"
 ])
 
 getApproval()
@@ -108,15 +109,15 @@ pipeline {
                                 echo 'SKIPPED: example_freertos_explorer_board'
                             }
                         } 
-                        // script {
-                        //     if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_cifar10.xe")) {
-                        //         withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                        //             sh "test/examples/run_freertos_cifar10_tests.sh $adapterID"
-                        //         }
-                        //     } else {
-                        //         echo 'SKIPPED: example_freertos_cifar10'
-                        //     }
-                        // } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_cifar10.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_cifar10_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_cifar10'
+                            }
+                        } 
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_dispatcher.xe")) {
                                 withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
