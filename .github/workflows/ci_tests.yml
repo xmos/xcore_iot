@@ -53,12 +53,12 @@ jobs:
     if: ${{ needs.changes.outputs.tusb_demos == 'true' }}  
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout SDK
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: recursive
 
-      - name: Pull SDK builder image
+      - name: Pull SDK builder
         run: |
           docker pull ${SDK_BUILDER_IMAGE}
 
@@ -78,12 +78,12 @@ jobs:
     if: ${{ needs.changes.outputs.rtos_tests == 'true' }}  
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout SDK
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: recursive
 
-      - name: Pull SDK builder image
+      - name: Pull SDK builder
         run: |
           docker pull ${SDK_BUILDER_IMAGE}
 
