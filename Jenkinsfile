@@ -13,7 +13,7 @@ def branch, event
 def artifactUrls
 
 (_, _, _, _, branch, _, _, event) = extractFromScm()
-if (event=="pull_request" || branch=="main" || branch="develop") {
+if (event=="pull_request" || branch=="main" || branch=="develop") {
     // Wait here until specified artifacts appear
     artifactUrls = getGithubArtifactUrls([
         "bare-metal_examples",
