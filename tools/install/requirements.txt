@@ -3,4 +3,5 @@ matplotlib
 numpy
 opencv-python
 PyYAML
+tensorflow
 xmos-ai-tools

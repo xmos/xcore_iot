@@ -4,8 +4,8 @@ CIFAR-10
 
 This example application implements a CNN architecture trained on the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`__ dataset.  The example reads a set of test images from a filesystem in flash.  The FreeRTOS kernel manages filesystem IO and sends example images to the AI device that implements the CIFAR-10 model.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
 
-- airplane
-- automobile
+- plane
+- auto
 - bird
 - cat
 - deer
