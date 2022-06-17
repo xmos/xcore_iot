@@ -66,11 +66,11 @@ jobs:
         run: |
           docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh
 
-      - name: Save RTOS USB example app firmware artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: xcore_sdk_freertos_usb_example_apps
-          path: ./dist/*.xe
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: freertos_usb_demos
+      #     path: ./dist/*.xe
 
   build_rtos_tests:
     needs: changes
@@ -90,3 +90,9 @@ jobs:
       - name: Build
         run: |
           docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
+
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: rtos_tests
+      #     path: ./dist/*.xe

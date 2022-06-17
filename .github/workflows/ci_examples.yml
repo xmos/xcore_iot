@@ -45,7 +45,7 @@ jobs:
         run: |
           docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_host_apps.sh
 
-      - name: Save host application artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: host_apps
@@ -75,10 +75,10 @@ jobs:
         run: |
           docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_core_examples.sh
 
-      - name: Save RTOS example app firmware artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: freertos_core_example_apps
+          name: freertos_core_examples
           path: |
             ./dist/*.xe
             ./dist/*.fs
@@ -122,10 +122,10 @@ jobs:
         run: |
           docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_aiot_examples.sh
 
-      - name: Save RTOS example app firmware artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: freertos_aiot_example_apps
+          name: freertos_aiot_examples
           path: |
             ./dist/*.xe
             ./dist/*.fs
@@ -148,8 +148,8 @@ jobs:
         run: |
           docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_metal_examples.sh
 
-      - name: Save bare-metal example app firmware artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: bare-metal_example_apps
+          name: bare-metal_examples
           path: ./dist/*.xe
