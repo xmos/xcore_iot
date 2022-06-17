@@ -9,15 +9,20 @@ def withXTAG(String target, Closure body) {
     sh ("xtagctl release ${adapterID}")
 }
 
+def branch, event
+def artifactUrls
 
-// Wait here until specified artifacts appear
-def artifactUrls = getGithubArtifactUrls([
-    "bare-metal_examples",
-    "freertos_core_examples",
-    "freertos_aiot_examples"
-    // "host_apps",
-    // "rtos_tests"
-])
+(_, _, _, _, branch, _, _, event) = extractFromScm()
+if (event=="pull_request" || branch=="main" || branch="develop") {
+    // Wait here until specified artifacts appear
+    artifactUrls = getGithubArtifactUrls([
+        "bare-metal_examples",
+        "freertos_core_examples",
+        "freertos_aiot_examples"
+        // "host_apps",
+        // "rtos_tests"
+    ])
+}
 
 getApproval()
 
