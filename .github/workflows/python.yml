@@ -34,19 +34,24 @@ jobs:
     outputs:
       python_install: ${{ steps.filter.outputs.python_install }}
     steps:
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          python_install:
-            - 'tools/install/requirements.txt'
-            - '**.py'
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Paths filter
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            python_install:
+              - 'tools/install/requirements.txt'
+              - '**.py'
 
   python_install:
+    runs-on: ubuntu-latest
     needs: changes
     name: Install & verify Python packages
     if: ${{ needs.changes.outputs.python_install == 'true' }}  
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout SDK
         uses: actions/checkout@v2

@@ -34,18 +34,23 @@ jobs:
       tusb_demos: ${{ steps.filter.outputs.tusb_demos }}
       rtos_tests: ${{ steps.filter.outputs.rtos_tests }}
     steps:
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          tusb_demos:
-            - 'modules/io/modules/xud/**'
-            - 'modules/rtos/modules/sw_services/usb/**'
-            - 'modules/rtos/modules/drivers/usb/**'
-          rtos_tests:
-            - 'modules/core/**'
-            - 'modules/io/**'
-            - 'modules/rtos/**'
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Paths filter
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            tusb_demos:
+              - 'modules/io/modules/xud/**'
+              - 'modules/rtos/modules/sw_services/usb/**'
+              - 'modules/rtos/modules/drivers/usb/**'
+            rtos_tests:
+              - 'modules/core/**'
+              - 'modules/io/**'
+              - 'modules/rtos/**'
 
   build_rtos_tusb_demos:
     needs: changes
