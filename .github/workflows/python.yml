@@ -10,7 +10,7 @@
 # This file contains the workflows that are run prior to merging a pull request.
 # This workflow will be triggered when a PR modifies some python relevant files
 
-name: Build
+name: Python
 
 on:
   push:
