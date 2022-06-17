@@ -78,7 +78,7 @@ jobs:
       - name: Save RTOS example app firmware artifacts
         uses: actions/upload-artifact@v3
         with:
-          name:freertos_core_example_apps
+          name: freertos_core_example_apps
           path: |
             ./dist/*.xe
             ./dist/*.fs
@@ -111,7 +111,7 @@ jobs:
       - name: Save RTOS example app firmware artifacts
         uses: actions/upload-artifact@v3
         with:
-          name:freertos_aiot_example_apps
+          name: freertos_aiot_example_apps
           path: |
             ./dist/*.xe
             ./dist/*.fs
