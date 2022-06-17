@@ -18,7 +18,6 @@
 void uart_rx_demo(uart_rx_t* uart_rx_ctx)
 {
     uint8_t expected = 0;
-    hwtimer_t tmr = hwtimer_alloc();
 
     while(1) {
         uint8_t rx = uart_rx(uart_rx_ctx);
@@ -27,7 +26,6 @@ void uart_rx_demo(uart_rx_t* uart_rx_ctx)
             debug_printf("Have you connected pins X1D36 and X1D39?\n");
         }
         expected++;
-        hwtimer_delay(tmr, 22); //Max slippage delay tolerable about 200ns with all 8 threads running
     }
 }
 
@@ -41,8 +39,12 @@ void uart_tx_demo(uart_tx_t* uart_tx_ctx)
     while(get_reference_time() < (time_now + 100000)); // Wait for a millisecond
 
     while(1) {
-        uart_tx(uart_tx_ctx, tx_data);
-        tx_data+=1;
+        for(int i=0; i<256; i++){
+            uart_tx(uart_tx_ctx, tx_data);
+            tx_data+=1;
+        }
+        uint32_t time_now = get_reference_time();
+        while(get_reference_time() < (time_now + 10000000)); // Wait for 100 milliseconds
         // debug_printf("Sent: %u\n", tx_data);
     }   
 }

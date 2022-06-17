@@ -7,7 +7,7 @@
 #include "argtable/argtable3.h"
 #include "commands.h"
 
-struct arg_lit *help, *test_cmd;
+struct arg_lit *help;
 struct arg_str *get, *set, *cmd_args;
 struct arg_end *end;
 
@@ -17,7 +17,6 @@ int main(int argc, char **argv)
 
     void *argtable[] = {
         help    = arg_lit0(NULL, "help", "display this help and exit"),
-        test_cmd = arg_lit0(NULL, "test_cmd", "display test value and exit"),
 
         get     = arg_str0("g", "get", "<cmd>", "Sends the specified get command and prints the return value(s). Must not be used with --set."),
         set     = arg_str0("s", "set", "<cmd>", "Sends the specified set command with the provided argument(s). Must not be used with --get."),
@@ -34,7 +33,7 @@ int main(int argc, char **argv)
     if (help->count > 0) {
         printf("Usage: %s", argv[0]);
         arg_print_syntax(stdout, argtable, "\n");
-        printf("Control tool for xcore_sdk\n\n");
+        printf("Device Control Host Test\n\n");
         arg_print_glossary_gnu(stdout, argtable);
         printf("The following commands are supported:\n");
         command_list_print();
@@ -77,7 +76,7 @@ int main(int argc, char **argv)
             }
 
             if (cmd_values != NULL) {
-                printf("Bytes received are:\n");
+                printf("Values received are:\n");
                 for (int i = 0; i < cmd->num_values; i++) {
                     // print the actual value
                     command_value_print(cmd, cmd_values[i]);

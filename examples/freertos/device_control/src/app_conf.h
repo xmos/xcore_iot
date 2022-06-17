@@ -4,6 +4,7 @@
 #ifndef APP_CONF_H_
 
 #define appconfGPIO_RPC_PORT 0
+#define appconfUSB_MANAGER_SYNC_PORT 3
 
 #define appconfI2C_CTRL_ENABLED 0
 #define appconfUSB_CTRL_ENABLED 1

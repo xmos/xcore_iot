@@ -2,7 +2,7 @@
 set -e
 
 BUILD_DIR="build"
-APPLICATION="example_bare_metal_vww"
+APPLICATION="example_bare_metal_vww_test"
 
 if [ ! -z "$1" ]
 then

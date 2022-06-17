@@ -29,7 +29,7 @@ unsafe {
   }
 }
 
-int main(void) {
+int main() {
   chan xscope_data_in;
 
   par {

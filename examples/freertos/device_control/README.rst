@@ -85,21 +85,26 @@ run the following commands in the xcore_sdk root folder to build the host app:
         cd build_host
         nmake example_freertos_device_control_host
 
-********************
-Running the host app
-********************
+*************************
+Running the host test app
+*************************
 
-From the xcore_sdk/build_host/examples/freertos/device_control/host/
-folder run:
+From the `xcore_sdk/build_host/examples/freertos/device_control/host` folder run:
 
 .. tab:: Linux and Mac
 
     .. code-block:: console
 
-        ./example_freertos_device_control_host --help
+        ./example_freertos_device_control_host -g test_cmd
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        example_freertos_device_control_host.exe --help
+        example_freertos_device_control_host.exe -g test_cmd
+
+You should see the following output in your console:
+
+    Command test_cmd sent with resid 3
+    Bytes received are:
+    50462976

@@ -7,13 +7,7 @@
 #include <inttypes.h>
 #include "commands.h"
 
-/* TODO: Include a header shared with the firmware that has all the resource and command IDs */
-//#include "app_control.h"
-#define APP_CONTROL_RESID_AP 0x3
-#define APP_CONTROL_RESID_AEC 2
-#define APP_CONTROL_RESID_STAGE1 3
-#define APP_CONTROL_RESID_STAGE2 4
-
+#define APP_CONTROL_RESID 0x3
 /*
  * All commands here should have MSB set to 0.
  * If the command is sent as a read command then
@@ -27,7 +21,7 @@
 #endif
 
 static cmd_t commands[] = {
-        {APP_CONTROL_RESID_AP, "test_cmd", TYPE_UINT32, 0, APP_CONTROL_CMD_AP_TEST_CMD, CMD_RO, 1, "Returns a test value"},
+        {APP_CONTROL_RESID, "test_cmd", TYPE_UINT32, 0, APP_CONTROL_CMD_AP_TEST_CMD, CMD_RO, 1, "Returns a test value"},
 };
 
 static char *command_param_type_name(cmd_param_type_t type)

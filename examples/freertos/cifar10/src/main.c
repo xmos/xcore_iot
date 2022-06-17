@@ -10,6 +10,7 @@
 #include "queue.h"
 
 /* Library headers */
+#include "fs_support.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -35,6 +36,7 @@ void startup_task(void *arg) {
   platform_start();
 
 #if ON_TILE(0)
+  rtos_fatfs_init(qspi_flash_ctx);
   cifar10_image_classifier_task_create(appconfCIFAR10_TASK_PRIORITY);
 #endif
 

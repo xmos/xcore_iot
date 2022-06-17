@@ -69,13 +69,24 @@ void startup_task(void *arg)
 
     platform_start();
 
+#if appconfUSB_CTRL_ENABLED && ON_TILE(USB_TILE_NO)
+    usb_manager_start(appconfUSB_DEVICE_CTRL_TASK_PRIORITY);
+    /* Sync with the other tile */
+    int dummy = 0;
+    rtos_intertile_tx(intertile_ctx, appconfUSB_MANAGER_SYNC_PORT, &dummy, sizeof(dummy));
+#else
+    int ret = 0;
+    rtos_intertile_rx_len(intertile_ctx, appconfUSB_MANAGER_SYNC_PORT, RTOS_OSAL_WAIT_FOREVER);
+    rtos_intertile_rx_data(intertile_ctx, &ret, sizeof(ret));
+#endif
+
     static device_control_servicer_t servicer_ctx;
     control_ret_t dc_ret;
 
 	for (;;) {
         #if ON_TILE(0)
         {
-            control_resid_t resources[] = {0x3, 0x6, 0x9};
+            control_resid_t resources[] = {0x3};
 
             rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
 
@@ -90,7 +101,7 @@ void startup_task(void *arg)
         #endif
         #if ON_TILE(1)
         {
-            control_resid_t resources[] = {0x33, 0x66, 0x99};
+            control_resid_t resources[] = {0x33};
 
             rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
 
@@ -118,7 +129,7 @@ static void tile_common_init(chanend_t c)
 
 #if appconfUSB_CTRL_ENABLED && ON_TILE(USB_TILE_NO)
     usb_manager_init();
-    usb_manager_start(appconfUSB_DEVICE_CTRL_TASK_PRIORITY);
+      //usb_manager_start(appconfUSB_DEVICE_CTRL_TASK_PRIORITY);
 #endif
 
     xTaskCreate((TaskFunction_t) startup_task,

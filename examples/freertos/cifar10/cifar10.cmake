@@ -90,7 +90,7 @@ create_debug_target(example_freertos_cifar10)
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
     add_custom_command(
         OUTPUT cifar10_fat.fs
-        COMMAND ${CMAKE_COMMAND} -E make_directory %temp%/fatmktmp/fs
+        COMMAND ${CMAKE_COMMAND} -E make_directory %temp%/fatmktmp
         COMMAND ${CMAKE_COMMAND} -E copy model.bin %temp%/fatmktmp/model.bin
         COMMAND ${CMAKE_COMMAND} -E copy test_inputs/airplane.bin %temp%/fatmktmp/airplane.bin
         COMMAND ${CMAKE_COMMAND} -E copy test_inputs/bird.bin %temp%/fatmktmp/bird.bin
@@ -110,7 +110,7 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
 else()
     add_custom_command(
         OUTPUT cifar10_fat.fs
-        COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/fs && cp model.bin $fat_mnt_dir/model.bin && cp ./test_inputs/airplane.bin $fat_mnt_dir/airplane.bin && cp ./test_inputs/bird.bin $fat_mnt_dir/bird.bin && cp ./test_inputs/cat.bin $fat_mnt_dir/cat.bin && cp ./test_inputs/deer.bin $fat_mnt_dir/deer.bin && cp ./test_inputs/frog.bin $fat_mnt_dir/frog.bin && cp ./test_inputs/horse.bin $fat_mnt_dir/horse.bin && cp ./test_inputs/truck.bin $fat_mnt_dir/truck.bin && fatfs_mkimage --input=$tmp_dir --output=cifar10_fat.fs"
+        COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && cp model.bin $fat_mnt_dir/model.bin && cp ./test_inputs/airplane.bin $fat_mnt_dir/airplane.bin && cp ./test_inputs/bird.bin $fat_mnt_dir/bird.bin && cp ./test_inputs/cat.bin $fat_mnt_dir/cat.bin && cp ./test_inputs/deer.bin $fat_mnt_dir/deer.bin && cp ./test_inputs/frog.bin $fat_mnt_dir/frog.bin && cp ./test_inputs/horse.bin $fat_mnt_dir/horse.bin && cp ./test_inputs/truck.bin $fat_mnt_dir/truck.bin && fatfs_mkimage --input=$fat_mnt_dir --output=cifar10_fat.fs"
         COMMENT
             "Create filesystem"
         WORKING_DIRECTORY
