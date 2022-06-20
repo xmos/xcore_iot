@@ -12,7 +12,16 @@ When button 0 is pressed, LED 0 will be lit.  When button 1 is pressed, LED 1
 will be lit.  When the gain adjusted audio passes a frame power threshold, LED 2
 will be lit.  Lastly, LED 3 will blink periodically.
 
-Additionally, the example demonstrates a simple flash and SPI setup.
+Additionally, the example demonstrates a simple flash, UART loopback and SPI setup.
+
+
+**********************
+Preparing the hardware
+**********************
+
+The UART loopback section of the demo requires that a jumper cable be connected
+between X1D36 and X1D39. This connects the Tx pin to the Rx pin.
+
 
 *********************
 Building the firmware

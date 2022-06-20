@@ -8,6 +8,7 @@
 static void tile1_setup_dac(void);
 static void tile1_i2s_init(void);
 static void tile1_mic_init(void);
+static void tile1_uart_init(void);
 
 void platform_init_tile_1(chanend_t c_other_tile)
 {
@@ -32,6 +33,7 @@ void platform_init_tile_1(chanend_t c_other_tile)
 
     tile1_mic_init();
     tile1_i2s_init();
+    tile1_uart_init();
 }
 
 static void tile1_setup_dac(void)
@@ -92,3 +94,45 @@ static void tile1_mic_init(void)
 {
     ma_vanilla_init();
 }
+
+HIL_UART_RX_CALLBACK_ATTR
+void uart_rx_error_callback(uart_callback_code_t callback_code, void *app_data){
+    debug_printf("uart_rx_error: 0x%x\n", callback_code);
+}
+
+static void tile1_uart_init(void)
+{
+    const unsigned baud_rate = 921600;
+
+    hwtimer_t tmr_tx = hwtimer_alloc();
+    uart_tx_init(
+        &tile1_ctx->uart_tx_ctx,
+        XS1_PORT_1P,  //X1D39
+        baud_rate,
+        8,
+        UART_PARITY_NONE,
+        1,
+        tmr_tx,
+        NULL,
+        0,
+        NULL,
+        NULL
+        );
+
+    hwtimer_t tmr_rx = hwtimer_alloc();
+    uart_rx_init(
+        &tile1_ctx->uart_rx_ctx,
+        XS1_PORT_1M, //X1D36
+        baud_rate,
+        8,
+        UART_PARITY_NONE,
+        1,
+        tmr_rx,
+        NULL, // No buffer
+        0,
+        NULL, // No rx complete callback
+        uart_rx_error_callback,
+        &tile1_ctx->uart_rx_ctx
+        );
+}
+

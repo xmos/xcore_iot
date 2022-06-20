@@ -19,6 +19,11 @@
 
 #define SPI_TEST_BUF_SIZE       4096
 
+#define UART_RX_CORE_MASK       (1 << 2)
+#define UART_RX_ISR_CORE        2
+#define UART_BAUD_RATE          921600
+
+
 /* Task Priorities */
 #define appconfSTARTUP_TASK_PRIORITY            ( configMAX_PRIORITIES - 1 )
 
