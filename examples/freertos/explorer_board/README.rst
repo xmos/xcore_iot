@@ -2,9 +2,16 @@
 Explorer Board
 ##############
 
-This example application demonstrates various capabilities of the Explorer board using FreeRTOS. The application uses I2C, I2S, SPI, flash, mic array, and GPIO devices.
+This example application demonstrates various capabilities of the Explorer board using FreeRTOS. The application uses I2C, I2S, SPI, UART, flash, mic array, and GPIO devices.
 
 The FreeRTOS application creates a single stage audio pipeline which applies a variable gain. The output audio is sent to the DAC and can be listened to via the 3.5mm audio jack. The audio gain can be adjusted via GPIO, where button A is volume up and button B is volume down.
+
+**********************
+Preparing the hardware
+**********************
+
+The UART loopback section of the demo requires that a jumper cable be connected
+between X1D36 and X1D39. This connects the Tx pin to the Rx pin.
 
 *********************
 Building the firmware
