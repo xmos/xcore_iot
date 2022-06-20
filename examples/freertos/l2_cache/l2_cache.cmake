@@ -75,10 +75,18 @@ add_custom_command(
 #**********************
 # SWMEM flashing support targets
 #**********************
-add_custom_target(flash_example_freertos_l2_cache_swmem
-    COMMAND xflash --write-all ${CMAKE_CURRENT_BINARY_DIR}/example_freertos_l2_cache_split/image_n0c0.swmem --target-file ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
+add_custom_target(make_swmem_example_freertos_l2_cache
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/example_freertos_l2_cache_split/image_n0c0.swmem example_freertos_l2_cache.swmem
     DEPENDS example_freertos_l2_cache
     COMMENT
-        "Flash swmem"
+        "Make SwMem"
+    VERBATIM
+)
+
+add_custom_target(flash_example_freertos_l2_cache_swmem
+    COMMAND xflash --write-all example_freertos_l2_cache.swmem --target-file ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
+    DEPENDS make_swmem_example_freertos_l2_cache
+    COMMENT
+        "Flash SwMem"
     VERBATIM
 )

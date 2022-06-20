@@ -1,0 +1,103 @@
+# YAML schema for GitHub Actions:
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+#
+# Helpful YAML parser to clarify YAML syntax:
+# https://yaml-online-parser.appspot.com/
+#
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+#
+# This file contains the workflows that are run prior to merging a pull request.
+
+name: CI - Tests
+
+on:
+  push:
+    branches:
+      - 'develop'
+  pull_request:
+    branches:
+      - 'develop'
+
+  # Allow manually triggering of the workflow.
+  workflow_dispatch: {}
+
+env:
+  SDK_BUILDER_IMAGE: 'ghcr.io/xmos/sdk_app_builder:develop'
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    name: Change detection
+    # Set job outputs to values from filter step
+    outputs:
+      tusb_demos: ${{ steps.filter.outputs.tusb_demos }}
+      rtos_tests: ${{ steps.filter.outputs.rtos_tests }}
+    steps:
+      - name: Checkout SDK
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Paths filter
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            tusb_demos:
+              - 'modules/io/modules/xud/**'
+              - 'modules/rtos/modules/sw_services/usb/**'
+              - 'modules/rtos/modules/drivers/usb/**'
+            rtos_tests:
+              - 'modules/core/**'
+              - 'modules/io/**'
+              - 'modules/rtos/**'
+
+  build_rtos_tusb_demos:
+    needs: changes
+    name: Build RTOS TinyUSB demos
+    if: ${{ needs.changes.outputs.tusb_demos == 'true' }}  
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Pull SDK builder
+        run: |
+          docker pull ${SDK_BUILDER_IMAGE}
+
+      - name: Build
+        run: |
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh
+
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: freertos_usb_demos
+      #     path: ./dist/*.xe
+
+  build_rtos_tests:
+    needs: changes
+    name: Build RTOS tests
+    if: ${{ needs.changes.outputs.rtos_tests == 'true' }}  
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Pull SDK builder
+        run: |
+          docker pull ${SDK_BUILDER_IMAGE}
+
+      - name: Build
+        run: |
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_tests.sh all
+
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: rtos_tests
+      #     path: ./dist/*.xe

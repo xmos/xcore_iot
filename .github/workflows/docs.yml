@@ -9,14 +9,13 @@
 #
 # This file contains the workflows that are run prior to merging a pull request.
 
-name: Documentation
+name: Docs
 
 on:
   push:
     branches:
-      - 'develop'
-  pull_request:
-    branches:
+      - 'main'
+      - 'releases/**'
       - 'develop'
 
   # Allow manually triggering of the workflow.

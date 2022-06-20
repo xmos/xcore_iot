@@ -9,18 +9,19 @@ source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 DIST_DIR=${XCORE_SDK_ROOT}/dist
 mkdir -p ${DIST_DIR}
 
+# row format is: "app_target board toolchain"
 applications=(
-    "explorer_board     example_bare_metal_explorer_board  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "visual_wake_words  example_bare_metal_vww             XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_bare_metal_explorer_board  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_bare_metal_uart            XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
+    "example_bare_metal_vww_test        XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 
 # perform builds
 for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
-    name="${FIELDS[0]}"
-    make_target="${FIELDS[1]}"
-    board="${FIELDS[2]}"
-    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[3]}"
+    make_target="${FIELDS[0]}"
+    board="${FIELDS[1]}"
+    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[2]}"
     path="${XCORE_SDK_ROOT}"
     echo '******************************************************'
     echo '* Building' ${make_target} 'for' ${board}

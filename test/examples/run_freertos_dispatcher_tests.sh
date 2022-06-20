@@ -5,7 +5,7 @@ XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 
 BUILD_DIR="build"
-APPLICATION="example_freertos_getting_started"
+APPLICATION="example_freertos_dispatcher"
 
 if [ ! -z "$1" ]
 then
@@ -13,7 +13,7 @@ then
 fi
 
 TIMEOUT_EXE=$(get_timeout)
-DURATION="10s"
+DURATION="5s"
 
 APP_XE=${BUILD_DIR}/${APPLICATION}.xe
 APP_LOG=${APPLICATION}.log
@@ -23,13 +23,9 @@ APP_LOG=${APPLICATION}.log
 # Search the log file for strings that indicate the app ran OK
 
 # Expect exactly one match found
-result_blinky_tile0=$(grep -c "Blinky task running from tile 0" $APP_LOG || true)
+result=$(grep -c "output matrix verified" $APP_LOG || true)
 
-# Expect one or more matches found
-result_hello_tile0=$(grep -c "Hello from tile 0" $APP_LOG || true)
-result_hello_tile1=$(grep -c "Hello from tile 1" $APP_LOG || true)
-
-if [ $result_hello_tile0 -le 1 ] || [ $result_hello_tile1 -le 1 ] || [ $result_blinky_tile0 -ne 1 ]; then
+if [ $result -ne 1 ]; then
     echo "FAIL"
     exit 1
 fi

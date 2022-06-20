@@ -12,12 +12,11 @@ def withXTAG(String target, Closure body) {
 
 // Wait here until specified artifacts appear
 def artifactUrls = getGithubArtifactUrls([
-    "xcore_sdk_bare-metal_example_apps",
-    "xcore_sdk_freertos_example_apps"
-    // "xcore_sdk_freertos_usb_example_apps",
-    // "xcore_sdk_host_apps",
-    // "xcore_sdk_reference_apps",
-    // "xcore_sdk_rtos_tests"
+    "bare-metal_examples",
+    "freertos_core_examples",
+    "freertos_aiot_examples"
+    // "host_apps",
+    // "rtos_tests"
 ])
 
 getApproval()
@@ -29,6 +28,12 @@ pipeline {
     options {
         disableConcurrentBuilds()
         skipDefaultCheckout()
+        timestamps()
+        // on develop discard builds after a certain number else keep forever
+        buildDiscarder(logRotator(
+            numToKeepStr:         env.BRANCH_NAME ==~ /develop/ ? '25' : '',
+            artifactNumToKeepStr: env.BRANCH_NAME ==~ /develop/ ? '25' : ''
+        ))
     }    
     parameters {
         string(
@@ -93,6 +98,42 @@ pipeline {
                                 }
                             } else {
                                 echo 'SKIPPED: example_freertos_getting_started'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_explorer_board.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_explorer_board_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_explorer_board'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_cifar10.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_cifar10_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_cifar10'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_dispatcher.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_dispatcher_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_dispatcher'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_l2_cache.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_l2_cache_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_l2_cache'
                             }
                         } 
                     }
