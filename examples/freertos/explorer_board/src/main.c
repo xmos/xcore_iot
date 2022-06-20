@@ -43,7 +43,7 @@ void startup_task(void *arg)
     /* Initialize filesystem  */
     rtos_fatfs_init(qspi_flash_ctx);
 
-    /* Create the filesystem demol task */
+    /* Create the filesystem demo task */
     filesystem_demo_create(appconfFILESYSTEM_DEMO_TASK_PRIORITY);
 #endif
 
@@ -54,7 +54,7 @@ void startup_task(void *arg)
     /* Create audio pipeline */
     example_pipeline_init(appconfAUDIO_PIPELINE_TASK_PRIORITY);
 
-    /* Create uart demo tasks and reivers */
+    /* Create uart demo tasks and receivers */
     uart_demo_create(appconfFILESYSTEM_DEMO_TASK_PRIORITY);
 #endif
 
