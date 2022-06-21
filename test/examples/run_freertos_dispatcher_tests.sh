@@ -13,7 +13,7 @@ then
 fi
 
 TIMEOUT_EXE=$(get_timeout)
-DURATION="5s"
+DURATION="10s"
 
 APP_XE=${BUILD_DIR}/${APPLICATION}.xe
 APP_LOG=${APPLICATION}.log
