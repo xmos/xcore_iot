@@ -73,17 +73,19 @@ static int run_uart_tests(uart_test_ctx_t *test_ctx)
                                    0xed, 0x00, 0x77, 0xed, 0x00, 0x77, 0xed, 0x00, 0x55, 0x55, 0xff, 0x55,
                                    0xed, 0x00, 0x77, 0xed, 0x00, 0x77, 0xed, 0x00, 0x55, 0x55, 0xff, 0x55,
                                    0xed, 0x00, 0x77, 0xed, 0x00, 0x77, 0xed, 0x00, 0x55, 0x55, 0xff, 0x55,
-                                   0xed, 0x00, 0x77, 0xed, 0x00, 0x77, 0xed, 0x00, 0x55, 0x55, 0xff, 0x55 };//6 x 12 = 72B
+                                   0xed, 0x00, 0x77, 0xed, 0x00, 0x77, 0xed, 0x00, 0x55, 0x55, 0xff, 0x55 };//5 x 12 = 60B
+
+
+        // Write to the UART Tx on this tile
         rtos_uart_tx_write(test_ctx->rtos_uart_tx_ctx, tx_buff, sizeof(tx_buff));
+        // Write to the remote UART Tx on the other tile using RPC
         rtos_uart_tx_write(test_ctx->rtos_uart_tx2_ctx, tx_buff, sizeof(tx_buff));
 
         //Tx will not return until the last stop bit has finished so we are ready to receive all now
-
         uint8_t rx_buff[sizeof(tx_buff)] = {0};
         memset(rx_buff, 0x11, sizeof(rx_buff));
 
-
-        // Now receive from Rx
+        // Now receive from Rx. This can be connected to either the local or remote Tx and the test should pass
         size_t num_read_tot = rtos_uart_rx_read(test_ctx->rtos_uart_rx_ctx, rx_buff, sizeof(rx_buff), pdMS_TO_TICKS(100));
 
         int length_same = (num_read_tot == sizeof(tx_buff));        
