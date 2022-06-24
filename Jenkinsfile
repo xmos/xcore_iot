@@ -145,7 +145,7 @@ pipeline {
                 withTools(params.TOOLS_VERSION) {
                     withVenv {
                         script {
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_bare_metal_vww.xe")) {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_bare_metal_vww_test.xe")) {
                                 withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
                                     sh "test/examples/run_bare_metal_vww_tests.sh $adapterID"
                                 }
