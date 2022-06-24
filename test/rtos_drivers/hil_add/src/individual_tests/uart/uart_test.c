@@ -60,7 +60,7 @@ void rtos_uart_rx_complete(rtos_uart_rx_t *ctx){
     // The backpressure from this causes a test fail - WHY?
 }
 
-const unsigned num_packets = 10000;
+const unsigned num_packets = 100;
 
 #if ON_TILE(1)
 static int run_uart_tests(uart_test_ctx_t *test_ctx)
