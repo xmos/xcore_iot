@@ -31,12 +31,13 @@ static rtos_spi_master_t *spi_master_ctx = &spi_master_ctx_s;
 static rtos_spi_master_device_t *test_spi_device_ctx = &spi_master_device_ctx_s;
 static rtos_spi_slave_t *spi_slave_ctx = &spi_slave_ctx_s;
 
-#if ON_TILE(1)
 static rtos_uart_tx_t rtos_uart_tx_ctx_s;
+static rtos_uart_tx_t rtos_uart_tx2_ctx_s;
 static rtos_uart_rx_t rtos_uart_rx_ctx_s;
 static rtos_uart_tx_t *rtos_uart_tx_ctx = &rtos_uart_tx_ctx_s;
+static rtos_uart_tx_t *rtos_uart_tx2_ctx = &rtos_uart_tx2_ctx_s;
 static rtos_uart_rx_t *rtos_uart_rx_ctx = &rtos_uart_rx_ctx_s;
-#endif
+
 
 chanend_t other_tile_c;
 
@@ -58,9 +59,8 @@ void vApplicationDaemonTaskStartup(void *arg)
 {
     rtos_intertile_start(intertile_ctx);
 
-#if ON_TILE(1)
     if (RUN_UART_TESTS) {
-        if (uart_device_tests(rtos_uart_tx_ctx, rtos_uart_rx_ctx) != 0)
+        if (uart_device_tests(rtos_uart_tx_ctx, rtos_uart_rx_ctx, rtos_uart_tx2_ctx) != 0)
         {
             test_printf("FAIL UART");
         } else {
@@ -69,7 +69,6 @@ void vApplicationDaemonTaskStartup(void *arg)
     } else {
         test_printf("SKIP UART");
     }
-#endif
 
     if (RUN_SPI_TESTS) {
         if (spi_device_tests(spi_master_ctx, test_spi_device_ctx, spi_slave_ctx, other_tile_c) != 0)
@@ -97,7 +96,8 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     board_tile0_init(c1,
                      intertile_ctx,
                      spi_master_ctx,
-                     test_spi_device_ctx);
+                     test_spi_device_ctx,
+                     rtos_uart_tx2_ctx);
     (void) c2;
     (void) c3;
 
@@ -127,6 +127,7 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
                      test_spi_device_ctx,
                      spi_slave_ctx,
                      rtos_uart_tx_ctx,
+                     rtos_uart_tx2_ctx,
                      rtos_uart_rx_ctx);
     (void) c1;
     (void) c2;

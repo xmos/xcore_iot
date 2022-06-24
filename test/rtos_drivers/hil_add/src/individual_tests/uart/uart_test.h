@@ -19,11 +19,13 @@ struct uart_test_ctx {
 
     rtos_uart_tx_t *rtos_uart_tx_ctx;
     rtos_uart_rx_t *rtos_uart_rx_ctx;
+    rtos_uart_tx_t *rtos_uart_tx2_ctx;
+
     int rx_success[UART_MAX_TESTS];
 
 };
 
-int uart_device_tests(rtos_uart_tx_t *rtos_uart_tx_ctx, rtos_uart_rx_t *rtos_uart_rx_ctx);
+int uart_device_tests(rtos_uart_tx_t *rtos_uart_tx_ctx, rtos_uart_rx_t *rtos_uart_rx_ctx, rtos_uart_tx_t *rtos_uart_tx2_ctx);
 
 // /* Local Tests */
 void register_local_loopback_test(uart_test_ctx_t *test_ctx);

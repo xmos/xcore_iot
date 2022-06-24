@@ -21,7 +21,10 @@
 
 #define UART_RX_CORE_MASK       (1 << 2)
 #define UART_RX_ISR_CORE        2
-#define UART_BAUD_RATE          921600
+#define UART_BAUD_RATE          806400
+#define UART_TX2_RPC_PORT       12
+#define UART_TX2_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES-1)
+
 
 
 /* Task Priorities */

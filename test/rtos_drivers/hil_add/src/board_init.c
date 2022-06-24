@@ -10,12 +10,14 @@
 #include "board_init.h"
 
 static rtos_driver_rpc_t spi_master_rpc_config;
+static rtos_driver_rpc_t uart_tx2_rpc_config;
 
 void board_tile0_init(
         chanend_t tile1,
         rtos_intertile_t *intertile_ctx,
         rtos_spi_master_t *spi_master_ctx,
-        rtos_spi_master_device_t *test_device_ctx
+        rtos_spi_master_device_t *test_device_ctx,
+        rtos_uart_tx_t *rtos_uart_tx2_ctx
     )
 {
     rtos_intertile_init(intertile_ctx, tile1);
@@ -51,6 +53,23 @@ void board_tile0_init(
             &spi_master_rpc_config,
             client_intertile_ctx,
             1);
+
+    hwtimer_t tmr_tx = hwtimer_alloc();
+
+    rtos_uart_tx_init(
+            rtos_uart_tx2_ctx,
+            XS1_PORT_1A, /* X0D00 */
+            UART_BAUD_RATE,
+            8,
+            UART_PARITY_ODD,
+            1,
+            tmr_tx);
+
+    rtos_uart_tx_rpc_host_init(
+            rtos_uart_tx2_ctx,
+            &uart_tx2_rpc_config,
+            client_intertile_ctx,
+            1);
 }
 
 void board_tile1_init(
@@ -60,6 +79,7 @@ void board_tile1_init(
         rtos_spi_master_device_t *test_device_ctx,
         rtos_spi_slave_t *spi_slave_ctx,
         rtos_uart_tx_t *rtos_uart_tx_ctx,
+        rtos_uart_tx_t *rtos_uart_tx2_ctx,
         rtos_uart_rx_t *rtos_uart_rx_ctx 
     )
 {
@@ -109,4 +129,9 @@ void board_tile1_init(
             UART_PARITY_ODD,
             1,
             tmr_rx);
+
+    rtos_uart_tx_rpc_client_init(
+            rtos_uart_tx2_ctx,
+            &uart_tx2_rpc_config,
+            intertile_ctx);
 }

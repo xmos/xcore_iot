@@ -12,13 +12,13 @@
 /* Library headers */
 #include "rtos_uart_tx.h"
 #include "rtos_uart_rx.h"
+#include "rtos_uart_tx_rpc.h"
+
 
 /* App headers */
 #include "app_conf.h"
 #include "individual_tests/uart/uart_test.h"
 
-#define UART_RX_TILE 1
-#if ON_TILE(UART_RX_TILE)
 
 static const char* test_name = "uart_loopback_test";
 
@@ -60,8 +60,9 @@ void rtos_uart_rx_complete(rtos_uart_rx_t *ctx){
     // The backpressure from this causes a test fail - WHY?
 }
 
-const unsigned num_packets = 100;
+const unsigned num_packets = 10000;
 
+#if ON_TILE(1)
 static int run_uart_tests(uart_test_ctx_t *test_ctx)
 {
     int retval = 0;
@@ -74,21 +75,16 @@ static int run_uart_tests(uart_test_ctx_t *test_ctx)
                                    0xed, 0x00, 0x77, 0xed, 0x00, 0x77, 0xed, 0x00, 0x55, 0x55, 0xff, 0x55,
                                    0xed, 0x00, 0x77, 0xed, 0x00, 0x77, 0xed, 0x00, 0x55, 0x55, 0xff, 0x55 };//6 x 12 = 72B
         rtos_uart_tx_write(test_ctx->rtos_uart_tx_ctx, tx_buff, sizeof(tx_buff));
+        rtos_uart_tx_write(test_ctx->rtos_uart_tx2_ctx, tx_buff, sizeof(tx_buff));
+
         //Tx will not return until the last stop bit has finished so we are ready to receive all now
 
         uint8_t rx_buff[sizeof(tx_buff)] = {0};
         memset(rx_buff, 0x11, sizeof(rx_buff));
 
-        size_t num_read_tot = 0;
-        size_t num_timeouts = 0;
-        while(num_read_tot < sizeof(rx_buff) && num_timeouts == 0){
-            size_t num_rx = xStreamBufferReceive(test_ctx->rtos_uart_rx_ctx->app_byte_buffer,
-                                                &rx_buff[num_read_tot],
-                                                sizeof(rx_buff),
-                                                pdMS_TO_TICKS(100));
-            num_read_tot += num_rx;
-            num_timeouts += (num_rx == 0);
-        }
+
+        // Now receive from Rx
+        size_t num_read_tot = rtos_uart_rx_read(test_ctx->rtos_uart_rx_ctx, rx_buff, sizeof(rx_buff), pdMS_TO_TICKS(100));
 
         int length_same = (num_read_tot == sizeof(tx_buff));        
         int array_different = memcmp(tx_buff, rx_buff, sizeof(tx_buff));
@@ -118,9 +114,14 @@ static int run_uart_tests(uart_test_ctx_t *test_ctx)
 
     return retval;
 }
+#endif
 
 static void start_uart_devices(uart_test_ctx_t *test_ctx)
 {
+    uart_printf("Tx rpc configure");
+    rtos_uart_tx_rpc_config(test_ctx->rtos_uart_tx2_ctx, UART_TX2_RPC_PORT, UART_TX2_RPC_HOST_TASK_PRIORITY);
+
+#if ON_TILE(1)
     void *app_data = NULL;
 
     uart_printf("RX start");
@@ -137,6 +138,12 @@ static void start_uart_devices(uart_test_ctx_t *test_ctx)
 
     uart_printf("TX start");
     rtos_uart_tx_start(test_ctx->rtos_uart_tx_ctx);
+#endif
+
+#if ON_TILE(0)
+    uart_printf("TX2 start");
+    rtos_uart_tx_start(test_ctx->rtos_uart_tx2_ctx);
+#endif
 
     uart_printf("Devices setup done");
 }
@@ -158,11 +165,12 @@ static void register_uart_tests(uart_test_ctx_t *test_ctx)
     register_local_loopback_test(test_ctx);
 }
 
-static void uart_init_tests(uart_test_ctx_t *test_ctx, rtos_uart_tx_t *rtos_uart_tx_ctx, rtos_uart_rx_t *rtos_uart_rx_ctx)
+static void uart_init_tests(uart_test_ctx_t *test_ctx, rtos_uart_tx_t *rtos_uart_tx_ctx, rtos_uart_rx_t *rtos_uart_rx_ctx, rtos_uart_tx_t *rtos_uart_tx2_ctx)
 {
     memset(test_ctx, 0, sizeof(uart_test_ctx_t));
     test_ctx->rtos_uart_tx_ctx = rtos_uart_tx_ctx;
     test_ctx->rtos_uart_rx_ctx = rtos_uart_rx_ctx;
+    test_ctx->rtos_uart_tx2_ctx = rtos_uart_tx2_ctx;
 
     test_ctx->cur_test = 0;
     test_ctx->test_cnt = 0;
@@ -173,13 +181,13 @@ static void uart_init_tests(uart_test_ctx_t *test_ctx, rtos_uart_tx_t *rtos_uart
 
 
 
-int uart_device_tests(rtos_uart_tx_t *rtos_uart_tx_ctx, rtos_uart_rx_t *rtos_uart_rx_ctx)
+int uart_device_tests(rtos_uart_tx_t *rtos_uart_tx_ctx, rtos_uart_rx_t *rtos_uart_rx_ctx, rtos_uart_tx_t *rtos_uart_tx2_ctx)
 {
     uart_test_ctx_t test_ctx;
     int res = 0;
 
     uart_printf("Init test context");
-    uart_init_tests(&test_ctx, rtos_uart_tx_ctx, rtos_uart_rx_ctx);
+    uart_init_tests(&test_ctx, rtos_uart_tx_ctx, rtos_uart_rx_ctx, rtos_uart_tx2_ctx);
     uart_printf("Test context init");
 
     uart_printf("Start devices");
@@ -187,12 +195,12 @@ int uart_device_tests(rtos_uart_tx_t *rtos_uart_tx_ctx, rtos_uart_rx_t *rtos_uar
     uart_printf("Devices started");
 
     uart_printf("Start tests");
+#if ON_TILE(1)
     res = run_uart_tests(&test_ctx);
+#endif
 
     uart_printf("UART loopback result (%d packets): %s", num_packets, res ? "FAIL" : "PASS");
 
     return res;
 }
-
-#endif //ON_TILE(UART_RX_TILE)
 
