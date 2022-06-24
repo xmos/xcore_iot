@@ -2,12 +2,10 @@
 CIFAR-10
 ########
 
-This example application implements a CNN architecture trained on the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`__ dataset.  This example demonstrates how to place models in SRAM, Flash or LPDDR.
+This example application implements a CNN architecture trained on the `CIFAR-10 <https://www.cs.toronto.edu/~kriz/cifar.html>`__ dataset.  The example reads a set of test images from a filesystem in flash.  The FreeRTOS kernel manages filesystem IO and sends example images to the AI device that implements the CIFAR-10 model.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
 
-The example reads a set of test images from a filesystem in flash.  The FreeRTOS kernel manages filesystem IO and sends example images to the AI device that implements the CIFAR-10 model.  The application will attempt to classify an entity in the image and assign it to one of the following classes:
-
-- airplane
-- automobile
+- plane
+- auto
 - bird
 - cat
 - deer
@@ -19,12 +17,18 @@ The example reads a set of test images from a filesystem in flash.  The FreeRTOS
 
 The resulting output tensor is returned to FreeRTOS for the application to handle.
 
-A Python 3 script is provided that will generate one example image from each of the classes above. This script requires `Tensorflow <https://www.tensorflow.org/>`__ and `Numpy <https://numpy.org/>`__.  If you have already installed the XMOS AI Toolchain extensions then you have these requirements.  Alternatively, you can install using `pip`.  To generate the images run:
+A Python script is provided that will generate one example image from each of the classes above.  Ensure you have installed Python 3 and the XCore SDK Python requirements.  Additionally, you need to install the `tensorflow Python package <https://pypi.org/project/tensorflow/>`__.   
 
 .. code-block:: console
 
-    $ cd filesystem_support/test_inputs
-    $ ./make_test_tensors.py
+    pip install tensorflow
+
+To generate the images run:
+
+.. code-block:: console
+
+    cd filesystem_support/test_inputs
+    python make_test_tensors.py
 
 For background information on the CIFAR-10 dataset, please read `Learning Multiple Layers of Features from Tiny Images <https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf>`__, Alex Krizhevsky, 2009.
 
@@ -33,107 +37,88 @@ Supported Boards
 ****************
 
 This example is supported on the XCORE-AI-EXPLORER board.
-Set the $TARGET environment variable to the board that you are using. For example:
-
-.. code-block:: console
-
-    $ export TARGET=XCORE-AI-EXPLORER
-
-The build and run commands shown below will then pick up the correct target automatically.
-
-.. note::
-
-    The external DDR memory options are only available on the XCORE-AI-EXPLORER board.
 
 *********************
 Building the firmware
 *********************
 
-Using SRAM memory
-=================
+Run the following commands in the xcore_sdk root folder to build the firmware:
 
-Run make:
+.. tab:: Linux and Mac
 
-.. code-block:: console
+    .. code-block:: console
 
-    $ make BOARD=$TARGET
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_cifar10
 
-To flash the example images, run the following commands:
+.. tab:: Windows
 
-.. code-block:: console
+    .. code-block:: console
 
-    $ cd filesystem_support
-    $ ./flash_image.sh -f
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_freertos_cifar10
 
-Using external flash memory
-===========================
 
-To build with the model stored in flash, replace the call to make above with the following:
+***********************
+Setting up the hardware
+***********************
 
-.. code-block:: console
+.. note::
+   The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
 
-    $ make BOARD=$TARGET USE_SWMEM=1
+Before running the firmware, the filesystem containing the images must be flashed.  After the images have been generated, by following the instructions above:
 
-To flash the model and example images, run the following commands:
+.. tab:: Linux and Mac
 
-.. code-block:: console
+    .. code-block:: console
 
-    $ cd filesystem_support
-    $ ./flash_image.sh -s
+        make flash_fs_example_freertos_cifar10
 
-Using external DDR memory
-=========================
+.. tab:: Windows
 
-If your board supports LPDDR, you may also place your neural network in the external DDR memory.  Currently, only the Explorer Board supports LPDDR.
+    .. code-block:: console
 
-To build with the model stored in LPDDR, replace the call to make above with the following:
+        nmake flash_fs_example_freertos_cifar10
 
-.. code-block:: console
 
-    $ make BOARD=$TARGET USE_EXTMEM=1
-
-To flash the example images, run the following commands:
-
-.. code-block:: console
-
-    $ cd filesystem_support
-    $ ./flash_image.sh -f
-
+********************
 Running the firmware
-====================
+********************
 
 Running with hardware.
 
-.. code-block:: console
 
-    $ xrun --xscope bin/cifar10.xe
+.. tab:: Linux and Mac
+
+    .. code-block:: console
+
+        make run_example_freertos_cifar10
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        nmake run_example_freertos_cifar10
 
 ********************
 Optimizing the model
 ********************
 
-Unoptimized and optimized models are included with the example.
+An unoptimized, quantized model is included with the example.
 
 First, be sure you have installed the XMOS AI Toolchain extensions.  If installed, you can optimize your model with the following command:
 
 .. code-block:: console
 
-    $ xformer.py --analyze -par 1 model/model_quant.tflite model/model_xcore.tflite
-
-Generating the model runner
-===========================
-
-The following command will generate source files for a model runner as well as the TensorFlow Lite model as a character array that can be use by the runner:
-
-.. code-block:: console
-
-    $ generate_model_runner.py --input model/model_xcore.tflite --output src/model_runner --name cifar10
+    xcore-opt --xcore-flash-image-file=filesystem_support/model.bin -o model/model_xcore.tflite model/model_quant.tflite
 
 Converting flatbuffer to source file
 ====================================
 
-If you do not want to regenerate the model runner, the following command will generate ony the C source file that contains the TensorFlow Lite model as a character array:
+The following unix command will generate a C source file that contains the TensorFlow Lite model as a char array.
 
 .. code-block:: console
 
-    $ convert_tflite_to_c_source.py --input model/model_xcore.tflite --header model_runner/cifar10_model_data.h --source model_runner/cifar10_model_data.c --variable-name cifar10
+    python <path-to-sdk>/tools/tflite_micro/convert_tflite_to_c_source.py --input model/model_xcore.tflite --header src/image_classifier/cifar10_model_data.h --source src/image_classifier/cifar10_model_data.c --variable-name cifar10

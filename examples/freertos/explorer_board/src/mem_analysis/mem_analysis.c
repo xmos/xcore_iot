@@ -1,19 +1,17 @@
-// Copyright 2020-2021 XMOS LIMITED.
+// Copyright 2020-2022 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-#include "app_conf.h"
+/* System headers */
+#include <string.h>
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* FreeRTOS Plus headers */
-#include "FreeRTOS_IP.h"
-#include "FreeRTOS_Sockets.h"
-
 /* Library headers */
 
 /* App headers */
+#include "app_conf.h"
 #include "mem_analysis.h"
 
 static void mem_analysis( void *arg )
@@ -50,5 +48,5 @@ static void mem_analysis( void *arg )
 
 void mem_analysis_create( const char* task_name )
 {
-    xTaskCreate( mem_analysis, "mem_an", portTASK_STACK_DEPTH(mem_analysis), ( void * ) task_name, appconfMEM_ANALYSIS_TASK_PRIORITY, NULL );
+    xTaskCreate( mem_analysis, "mem_an", RTOS_THREAD_STACK_SIZE(mem_analysis), ( void * ) task_name, appconfMEM_ANALYSIS_TASK_PRIORITY, NULL );
 }

@@ -1,0 +1,7 @@
+black
+nbval
+pytest
+pytest-forked
+pytest-xdist
+-e git+https://git@github.com/ACascarino/test_support.git@06373a0da65f80fcda3e2b754ceb34a4a8b79af6#egg=test_support
+

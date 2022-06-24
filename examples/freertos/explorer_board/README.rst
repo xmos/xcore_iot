@@ -2,146 +2,89 @@
 Explorer Board
 ##############
 
-This example application demonstrates various capabilities of the Explorer board using FreeRTOS.  The example uses lib_soc and various libraries to build FreeRTOS applications targetting xCORE.  The application uses I2C, I2S, SPI, flash, mic array, and GPIO devices.  These devices are instantiated in the "bitstream_src" folder.  The FreeRTOS application which sets up drivers to communicate with these devices is contained within the "src" folder.
+This example application demonstrates various capabilities of the Explorer board using FreeRTOS. The application uses I2C, I2S, SPI, UART, flash, mic array, and GPIO devices.
 
-The application places FreeRTOS on tile 0.  The peripherals are placed on tile 0 and tile 1 to demonstrate how to connect devices to FreeRTOS regardless of tile placement.
+The FreeRTOS application creates a single stage audio pipeline which applies a variable gain. The output audio is sent to the DAC and can be listened to via the 3.5mm audio jack. The audio gain can be adjusted via GPIO, where button A is volume up and button B is volume down.
 
-The FreeRTOS application creates a single stage audio pipeline which applies a variable gain. The output audio is sent to the DAC and can be listened to via the 3.5mm audio jack. Additionally, the audio can be streamed out over TCP as raw PCM which may be played back on the host device. The audio gain can be adjusted in two ways. Firstly, through a UDP command line interface which is implemented with the FreeRTOS Plus CLI library. Secondly, through GPIO, where button A is volume up and button B is volume down.
+**********************
+Preparing the hardware
+**********************
 
-The application also runs a TCP throughput test server. When a client connects it
-sends 100 MiB of data as fast as it can and then disconnects.
-
-The script ``example_host.sh`` can be used to stream the audio over TCP, connect to the
-command line interface, and to run the throughput test:
-
-- ``example_host.sh -n IP`` connects to the audio stream server and plays the audio
-- ``example_host.sh -t IP`` connects to the throughput test server and shows the current and average throughput.
-- ``example_host.sh -u IP`` connects to the command line interface. Once connected type help for a list of supported commands.
-
-The IP of the board is obtained via DHCP and is printed out over xscope I/O.
-
-****************
-Filesystem setup
-****************
-
-Before the demo can be run, the filesystem must be configured and flashed.
-
-Note, macOS users will need to install `dosfstools`.
-
-.. code-block:: console
-
-    $ brew install dosfstools
-
-To create certificates for the demos run:
-
-.. code-block:: console
-
-    $ cd filesystem_support
-    $ ./gen_demo_certs.sh
-
-If certificates have previously been created run:
-
-.. code-block:: console
-
-    $ ./flash_image.sh
-
-The script will prompt you for WiFi credentials:
-
-.. code-block:: console
-
-    Enter the WiFi network SSID:
-    Enter the WiFi network password:
-    Enter the security (0=open, 1=WEP, 2=WPA):
-    Add another WiFi network? (y/n):
-
-*Note: Once a wifi profile has been created it will automatically be used.  If you need to change the profile delete networks.dat and rerun flash_image.sh*
+The UART loopback section of the demo requires that a jumper cable be connected
+between X1D36 and X1D39. This connects the Tx pin to the Rx pin.
 
 *********************
 Building the firmware
 *********************
 
-Make a directory for the build.
+Run the following commands in the xcore_sdk root folder to build the firmware:
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    $ mkdir build
-    $ cd build
+    .. code-block:: console
 
-Run cmake:
+        cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        make example_freertos_explorer_board
 
-.. code-block:: console
+.. tab:: Windows
 
-    $ cmake ../ -DBOARD=XCORE-AI-EXPLORER
-    $ make
+    .. code-block:: console
 
-If you plan on running the demo where the Explorer Board connects to a host side echo server, modify ``src/app_conf.h`` to your host computer's IP address.
+        cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
+        cd build
+        nmake example_freertos_explorer_board
 
-.. code-block:: c
+.. note::
+   The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
 
-    /* Echo demo defines */
-    #define appconfECHO_IP_ADDR_OCTET_0    	10
-    #define appconfECHO_IP_ADDR_OCTET_1    	0
-    #define appconfECHO_IP_ADDR_OCTET_2    	0
-    #define appconfECHO_IP_ADDR_OCTET_3    	253
+From the xcore_sdk build folder, create the filesystem and flash the device with the following command:
 
-*Note: Your host computer and the developer kit need to be on the same WiFi network.*
+.. tab:: Linux and Mac
 
+    .. code-block:: console
+
+        make flash_fs_example_freertos_explorer_board
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        nmake flash_fs_example_freertos_explorer_board
+
+********************
 Running the firmware
-====================
+********************
 
-To run the demo navigate to the bin folder and use the command:
+From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    $ xrun --xscope XCORE-AI-EXPLORER/explorer_board.xe
+    .. code-block:: console
 
-****************************
-Running the host application
-****************************
+        make run_example_freertos_explorer_board
 
-In a second console you can run the example_host script to demo various actions.
+.. tab:: Windows
 
-Thruput Test
-============
+    .. code-block:: console
 
-The thruput test sends 1 MiB of data to test network transmit speed.
+        nmake run_example_freertos_explorer_board
 
-.. code-block:: console
 
-    $ ./example_host.sh -t [board IP addr]
+********************************
+Debugging the firmware with xgdb
+********************************
 
-Stream audio
-============
+From the xcore_sdk build folder run:
 
-This will stream audio from the audio pipeline to the host computer.  This demo requires aplay on the host machine.
+.. tab:: Linux and Mac
 
-.. code-block:: console
+    .. code-block:: console
 
-    $ ./example_host.sh -n [board IP addr] 16000
+        make debug_example_freertos_explorer_board
 
-UDP CLI
-=======
+.. tab:: Windows
 
-Connects to the FreeRTOS-Plus UPD based CLI demo.  Send "help" for information on available commands.
+    .. code-block:: console
 
-.. code-block:: console
-
-    $ ./example_host.sh -u [board IP addr]
-
-Echo Server
-===========
-
-Connects to the board hosted echo server using TLS.  Type a message and press enter to send.  The board will echo the payload back to the host.
-
-.. code-block:: console
-
-    $ ./example_host.sh -c [board IP addr]
-
-Echo Client
-===========
-
-The board will try to connect to a hosted echo server using TLS.  When this command is run, the host will act as an echo server.  When the board connects, it will send the message HELLO WORLD, and receive the host response.
-
-.. code-block:: console
-
-    $ ./example_host.sh -e
+        nmake debug_example_freertos_explorer_board

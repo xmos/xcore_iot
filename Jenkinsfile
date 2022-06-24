@@ -1,94 +1,158 @@
-@Library('xmos_jenkins_shared_library@v0.14.2') _
+@Library('xmos_jenkins_shared_library@v0.18.0') _
+
+def withXTAG(String target, Closure body) {
+    // Acquire an xtag adapter-id by target name
+    def adapterID = sh (script: "xtagctl acquire ${target}", returnStdout: true).trim()
+    // Run the closure
+    body(adapterID)
+    // Release the xtag by adapter-id
+    sh ("xtagctl release ${adapterID}")
+}
+
+
+// Wait here until specified artifacts appear
+def artifactUrls = getGithubArtifactUrls([
+    "bare-metal_examples",
+    "freertos_core_examples",
+    "freertos_aiot_examples"
+    // "host_apps",
+    // "rtos_tests"
+])
+
 getApproval()
+
 pipeline {
     agent {
-        dockerfile {
-            args ""
-        }
+        label 'sdk'
     }
-    parameters { // Available to modify on the job page within Jenkins if starting a build
-        string( // use to try different tools versions
-            name: 'TOOLS_VERSION',
-            defaultValue: '15.0.6',
-            description: 'The tools version to build with (check /projects/tools/ReleasesTools/)'
-        )
-        booleanParam( // use to check results of rolling all conda deps forward
-            name: 'UPDATE_ALL',
-            defaultValue: false,
-            description: 'Update all conda packages before building'
-        )
-    }
-    options { // plenty of things could go here
-        //buildDiscarder(logRotator(numToKeepStr: '10'))
+    options {
+        disableConcurrentBuilds()
+        skipDefaultCheckout()
         timestamps()
-    }
+        // on develop discard builds after a certain number else keep forever
+        buildDiscarder(logRotator(
+            numToKeepStr:         env.BRANCH_NAME ==~ /develop/ ? '25' : '',
+            artifactNumToKeepStr: env.BRANCH_NAME ==~ /develop/ ? '25' : ''
+        ))
+    }    
+    parameters {
+        string(
+            name: 'TOOLS_VERSION',
+            defaultValue: '15.1.4',
+            description: 'The XTC tools version'
+        )
+    }    
     environment {
-        XMOS_AIOT_SDK_PATH = "${env.WORKSPACE}"
-    }
+        PYTHON_VERSION = "3.8.11"
+        VENV_DIRNAME = ".venv"
+        DOWNLOAD_DIRNAME = "build"
+        SDK_TEST_RIG_TARGET = "xcore_sdk_test_rig"
+    }        
     stages {
-        stage("Setup") {
-            // Clone and install build dependencies
+        stage('Checkout') {
             steps {
-                // clean auto default checkout
-                sh "rm -rf *"
-                // clone
-                checkout([
-                    $class: 'GitSCM',
-                    branches: scm.branches,
-                    doGenerateSubmoduleConfigurations: false,
-                    extensions: [[$class: 'SubmoduleOption',
-                                threads: 8,
-                                timeout: 20,
-                                shallow: false,
-                                parentCredentials: true,
-                                recursiveSubmodules: true],
-                                [$class: 'CleanCheckout']],
-                    userRemoteConfigs: [[credentialsId: 'xmos-bot',
-                                        url: 'git@github.com:xmos/aiot_sdk']]
-                ])
-                // create venv
-                sh "conda env create -q -p sdk_venv -f environment.yml"
-                // Install xmos tools version
-                sh "/XMOS/get_tools.py " + params.TOOLS_VERSION
+                checkout scm
+                sh "git clone git@github.com:xmos/xcore_sdk.git"
+            }
+        }        
+        stage('Download artifacts') {
+            steps {
+                dir("$DOWNLOAD_DIRNAME") {
+                    downloadExtractZips(artifactUrls)
+                    // List extracted files for log
+                    sh "ls -la"
+                }
             }
         }
-        stage("Update environment") {
-            // Roll all conda packages forward beyond their pinned versions
-            when { expression { return params.UPDATE_ALL } }
+        stage('Create virtual environment') {
             steps {
-                sh "conda update --all -y -q -p sdk_venv"
+                // Create venv
+                sh "pyenv install -s $PYTHON_VERSION"
+                sh "~/.pyenv/versions/$PYTHON_VERSION/bin/python -m venv $VENV_DIRNAME"
+                // Install dependencies
+                withVenv() {
+                    // NOTE: only one dependency so not using a requirements.txt file here yet
+                    sh "pip install git+https://github0.xmos.com/xmos-int/xtagctl.git"
+                }
             }
         }
-        stage("Build examples") {
+        stage('Cleanup xtagctl') {
             steps {
-                sh """. /XMOS/tools/${params.TOOLS_VERSION}/XMOS/XTC/${params.TOOLS_VERSION}/SetEnv &&
-                      . activate ./sdk_venv && bash test/build_examples.sh"""
+                // Cleanup any xtagctl cruft from previous failed runs
+                withTools(params.TOOLS_VERSION) {
+                    withVenv {
+                        sh "xtagctl reset_all $SDK_TEST_RIG_TARGET"
+                    }
+                }
+                sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
             }
         }
-        stage("Install") {
+        stage('Run FreeRTOS examples') {
             steps {
-                sh """. activate ./sdk_venv && bash install.sh"""
+                withTools(params.TOOLS_VERSION) {
+                    withVenv {
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_getting_started.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_getting_started_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_getting_started'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_explorer_board.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_explorer_board_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_explorer_board'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_cifar10.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_cifar10_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_cifar10'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_dispatcher.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_dispatcher_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_dispatcher'
+                            }
+                        } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_l2_cache.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_freertos_l2_cache_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_l2_cache'
+                            }
+                        } 
+                    }
+                }
             }
         }
-        stage("Test") {
+        stage('Run bare-metal examples') {
             steps {
-                // run unit tests
-                sh """. activate ./sdk_venv && cd test && pytest -v --junitxml tests_junit.xml"""
-                // run notebook tests
-                sh """. activate ./sdk_venv && cd test && bash test_notebooks.sh"""
-                // Any call to pytest can be given the "--junitxml SOMETHING_junit.xml" option
-                // This step collects these files for display in Jenkins UI
-                junit "**/*_junit.xml"
-            }
-        }
-        stage("Build documentation") {
-            steps {
-                dir('documents') {
-                    sh '. activate ../sdk_venv && make clean linkcheck html SPHINXOPTS="-W --keep-going"'
-                    dir('_build') {
-                        archiveArtifacts artifacts: 'html/**/*', fingerprint: false
-                        sh 'tar -czf docs_sdk.tgz html'
-                        archiveArtifacts artifacts: 'docs_sdk.tgz', fingerprint: true
+                withTools(params.TOOLS_VERSION) {
+                    withVenv {
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_bare_metal_vww_test.xe")) {
+                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
+                                    sh "test/examples/run_bare_metal_vww_tests.sh $adapterID"
+                                }
+                            } else {
+                                echo 'SKIPPED: example_bare_metal_vww'
+                            }
+                        } 
                     }
                 }
             }

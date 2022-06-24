@@ -7,7 +7,6 @@
 **/*.egg-info/*
 **/*.eggs/*
 **/.ipynb_checkpoints/*
-*sdk_venv/*
 
 # Build & debug cruft
 **/.build*/*
@@ -24,27 +23,49 @@
 *.xmt
 **/_build/
 **/build_*/
+!doc/tutorials/build_system/
 **/run_*.log
-**/doxygen/*
+**/_doxygen/*
+**/_templates/*
 **/pdf/*
 **/html/*
 **/.settings/*
 .metadata
 **/test_results.csv
+**/test_results.xml
 **/.venv/**
 .metadata
+*.gtkw
+*.swmem
+*.bin
+*.fs
 
 # Test cruft
 **/.pytest_cache/*
 **/*_junit.xml
+**/testing/*
 
 # waf build cruft
 .lock-waf_*
 .waf-*/
 build/
 
+# filesystem cruft
+**/fat.fs
+**/flash_bin_node0
+**/fw-*
+**/spanning-xn-*
+**/target-xn-*
+
+# wifi cruft
+**/networks.dat
+
 # systemview debug cruft
 *.SVDAT
 
 # macOS cruft
 .DS_Store
+
+# ai_tools
+tools/ai/ai_tools
+*xcore_sdk_venv/*
