@@ -1,10 +1,12 @@
 XCore SDK change log
 ====================
 
-In progress
------------
+0.11.0
+------
 
-
+  * Removed of the FreeRTOS cifar10 example application
+  * Removed visual_wake_word bare-metal example application
+  * Removed inferencing modules
 
 0.10.0
 ------
