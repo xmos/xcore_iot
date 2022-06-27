@@ -94,20 +94,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8' 
-
-      - name: Install Python requirements
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r tools/install/requirements.txt
-
-      - name: Make input data for examples
-        run: |
-          cd ./examples/freertos/cifar10/filesystem_support/test_inputs && python make_test_tensors.py
-
       - name: Pull SDK builder
         run: |
           docker pull ${SDK_BUILDER_IMAGE}
