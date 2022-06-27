@@ -51,9 +51,7 @@ If you prefer, you can specify individual core libraries.
     * - core::xs3_math
       - Optimize math and DSP API
     * - core::general
-      - All core libraries except for inferencing
-    * - core::inferencing
-      - Neural networking inferencing API
+      - All core libraries
 
 ***********
 Peripherals

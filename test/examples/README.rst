@@ -31,7 +31,6 @@ Run the tests with the following commands:
 
     bash test/examples/run_freertos_getting_started_tests.sh <optional adapter-id>
     bash test/examples/run_freertos_explorer_board_tests.sh <optional adapter-id>
-    bash test/examples/run_freertos_cifar10_tests.sh <optional adapter-id>
     bash test/examples/run_freertos_dispatcher_tests.sh <optional adapter-id>
     bash test/examples/run_freertos_l2_cache_tests.sh <optional adapter-id>
 
@@ -45,9 +44,4 @@ First, build all the bare-metal example applications.
 
     bash tools/ci/build_metal_examples.sh
 
-Run the tests with the following commands:
-
-.. code-block:: console
-
-    bash test/examples/run_bare_metal_vww_tests.sh <optional adapter-id>
-
+TODO: The bare-metal tests are a work in progress.

@@ -1,7 +1,2 @@
-Jinja2
 matplotlib
 numpy
-opencv-python
-PyYAML
-tensorflow
-xmos-ai-tools

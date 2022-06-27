@@ -18,7 +18,6 @@ fi
 
 # row format is: "name app_target run_fs_target run_swmem_target board toolchain"
 applications=(
-    "example_freertos_cifar10          Yes No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_iot              No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 
