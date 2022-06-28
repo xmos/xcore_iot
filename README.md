@@ -1,4 +1,4 @@
-# XCORE:tm: SDK Repository
+# XCORE:registered: SDK Repository
 
 [![Version](https://img.shields.io/github/v/release/xmos/xcore_sdk?include_prereleases)](https://github.com/xmos/xcore_sdk/releases/latest)
 [![Issues](https://img.shields.io/github/issues/xmos/xcore_sdk)](https://github.com/xmos/xcore_sdk/issues)
