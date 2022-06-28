@@ -1,4 +1,4 @@
-XCore SDK change log
+XCORE SDK change log
 ====================
 
 0.11.0

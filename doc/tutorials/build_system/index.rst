@@ -6,13 +6,13 @@
 Build System
 ############
 
-This document describes the `CMake <https://cmake.org/>`_-based build system used by the example applications in the XCore SDK.  The build system is designed so a user does not have to be an expert using CMake.  However, some familiarity with CMake is helpful.  You can familiarize yourself by reading the `Cmake Tutorial <https://cmake.org/cmake/help/latest/guide/tutorial/index.html>`_ or `CMake documentation <https://cmake.org/cmake/help/v3.20/>`_.  
+This document describes the `CMake <https://cmake.org/>`_-based build system used by the example applications in the XCORE SDK.  The build system is designed so a user does not have to be an expert using CMake.  However, some familiarity with CMake is helpful.  You can familiarize yourself by reading the `Cmake Tutorial <https://cmake.org/cmake/help/latest/guide/tutorial/index.html>`_ or `CMake documentation <https://cmake.org/cmake/help/v3.20/>`_.  
 
 ********
 Overview
 ********
 
-An XCore SDK project can be seen as an integration of several modules. For example, for a FreeRTOS application that captures audio from PDM microphones and outputs it to a DAC, there could be the following modules:
+An XCORE SDK project can be seen as an integration of several modules. For example, for a FreeRTOS application that captures audio from PDM microphones and outputs it to a DAC, there could be the following modules:
 
 - The SDK core modules (for debug prints, etc...)
 - The FreeRTOS kernel

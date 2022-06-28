@@ -10,8 +10,8 @@ Follow these 3 steps:
 #. :ref:`Install the SDK <sdk-installation>`
 #. Select the Getting Started guide below based on your preferred development path
 
-- :ref:`Build and run your first FreeRTOS application on XCore <sdk-freertos-getting-started>`
-- :ref:`Build and run your first bare-metal application on XCore <sdk-bare-metal-getting-started>`
+- :ref:`Build and run your first FreeRTOS application on xcore <sdk-freertos-getting-started>`
+- :ref:`Build and run your first bare-metal application on xcore <sdk-bare-metal-getting-started>`
 
 Now you are ready to dive into the advanced tutorials.
 

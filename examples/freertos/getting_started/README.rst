@@ -57,4 +57,4 @@ If successful, you should see the following print messages in the console:
 
 And all four LEDs should be blinking. 
 
-**Congratulations!**  You've just built and run your first application for XCore.  
+**Congratulations!**  You've just built and run your first application for xcore.  

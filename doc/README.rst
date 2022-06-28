@@ -2,7 +2,7 @@
 Documentation Source
 ####################
 
-This folder contains source files for the **XCore SDK documentation**.  The sources do not render well in GitHub or an RST viewer.  In addition, some information 
+This folder contains source files for the **XCORE SDK documentation**.  The sources do not render well in GitHub or an RST viewer.  In addition, some information 
 is not visible at all and some links will not be functional.
 
 ********************

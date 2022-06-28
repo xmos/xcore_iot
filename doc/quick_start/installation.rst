@@ -9,7 +9,7 @@ Follow the following steps to install and setup the SDK:
 Step 1. Cloning the SDK
 =======================
 
-Clone the XCore SDK repository with the following command:
+Clone the XCORE SDK repository with the following command:
 
 .. code-block:: console
 
@@ -66,9 +66,8 @@ Then use `pip` to install the required modules.
 
     $ pip install -r tools/install/requirements.txt
 
-**********************************
 Build & Run Your First Application
-**********************************
+==================================
 
-Once your have installed the SDK, the next step is to :ref:`build and run your first XCore application. <sdk-tutorials>`
+Once your have installed the SDK, the next step is to :ref:`build and run your first xcore application. <sdk-tutorials>`
     

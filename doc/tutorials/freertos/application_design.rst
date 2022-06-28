@@ -4,17 +4,17 @@
 RTOS Application Design
 #######################
 
-This document is intended to help you start your first FreeRTOS application on XCore.  We assume you have read :doc:`FreeRTOS Application Programming <application_programming>` and that you are familiar with FreeRTOS.
+This document is intended to help you start your first FreeRTOS application on xcore.  We assume you have read :doc:`FreeRTOS Application Programming <application_programming>` and that you are familiar with FreeRTOS.
 
 ************************
 RTOS Application Example
 ************************
 
-A fully functional example application that can be found in the SDK under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_. This application is a reference for how to use an RTOS drivers or software service, and serves as an example for how to structure an SMP RTOS application for XCore.  Additional code to initialize the SoC platform for this example is provided by a board support configuration library `modules/rtos/modules/board_support/XCORE-AI-EXPLORER_2V0/platform <https://github.com/xmos/fwk_rtos/tree/develop/modules/bsp_config/XCORE-AI-EXPLORER_2V0/platform>`_
+A fully functional example application that can be found in the SDK under the path `examples/freertos/explorer_board <https://github.com/xmos/xcore_sdk/tree/develop/examples/freertos/explorer_board>`_. This application is a reference for how to use an RTOS drivers or software service, and serves as an example for how to structure an SMP RTOS application for xcore.  Additional code to initialize the SoC platform for this example is provided by a board support configuration library `modules/rtos/modules/board_support/XCORE-AI-EXPLORER_2V0/platform <https://github.com/xmos/fwk_rtos/tree/develop/modules/bsp_config/XCORE-AI-EXPLORER_2V0/platform>`_
 
 This example application runs two instances of SMP FreeRTOS, one on each of the processor's two tiles. Because each tile has its own memory which is not shared between them, this can be viewed as a single asymmetric multiprocessing (AMP) system that comprises two SMP systems. A FreeRTOS thread that is created on one tile will never be scheduled to run on the other tile. Similarly, an RTOS object that is created on a tile, such as a queue, can only be accessed by threads and ISRs that run on that tile and never by code running on the other tile.
 
-That said, the example application is programmed and built as a single coherent application, which will be familiar to programmers who have previously programmed for the XCore in the XC programming language. Data that must be shared between threads running on different tiles is sent via a channel using the RTOS intertile driver, which under the hood uses a streaming channel between the tiles.
+That said, the example application is programmed and built as a single coherent application, which will be familiar to programmers who have previously programmed for the xcore in the XC programming language. Data that must be shared between threads running on different tiles is sent via a channel using the RTOS intertile driver, which under the hood uses a streaming channel between the tiles.
 
 Most of the I/O interface drivers in fact provide a mechanism to share driver instances between tiles that utilizes this intertile driver. For those familiar with XC programming, this can be viewed as a C alternative to XC interfaces.
 
@@ -49,7 +49,7 @@ The SDK provides the ON_TILE(t) preprocessor macro. This macro may be used by ap
 
 When this function is compiled for tile I2C_TILE_NO, only the first block is included. When it is compiled for the other tile, only the second block is included. When the application is run, tile I2C_TILE_NO performs the initialization of the the |I2C| master driver host, while the other tile initializes the |I2C| master driver client. Because the |I2C| driver instance is shared between the two tiles, it may in fact be set to either zero or one, providing a demonstration of the way that drivers instances may be shared between tiles.
 
-The SDK provides a single XC file that provides the `main()` function. This provided `main()` function calls `main_tile0()` through `main_tile3()`, depending on the number of tiles that the application requires and the number of tiles provided by the target XCore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
+The SDK provides a single XC file that provides the `main()` function. This provided `main()` function calls `main_tile0()` through `main_tile3()`, depending on the number of tiles that the application requires and the number of tiles provided by the target xcore processor. The application must provide each of these tile entry point functions. Each one is provided with up to three channel ends that are connected to each of the other tiles.
 
 The example application provides both `main_tile0()` and `main_tile1()`. Each one calls a common initialization function that initializes all the drivers for the interfaces specific to its tile. These functions also call the initialization functions to share these driver instances between the tiles. These initialization functions are found in the `platform/platform_init.c` source file.
 
@@ -61,7 +61,7 @@ Consult the RTOS driver documentation for the details on what exactly each of th
 Board Support Configurations
 ****************************
 
-XCore leverages its architecture to provide a flexible chip where many typically silicon based peripherals are found in software. This allows a chip to be reconfigured in a way that provides the specific IO required for a given application, thus resulting in a low cost yet incredibly silicon efficient solution. Board support configurations (bsp_configs) are the description for the hardware IO that exists in a given board. The bsp_configs provide the application programmer with an API to initialize and start the hardware configuration, as well as the supported RTOS driver contexts. The programming model in this FreeRTOS architecture is:
+xcore leverages its architecture to provide a flexible chip where many typically silicon based peripherals are found in software. This allows a chip to be reconfigured in a way that provides the specific IO required for a given application, thus resulting in a low cost yet incredibly silicon efficient solution. Board support configurations (bsp_configs) are the description for the hardware IO that exists in a given board. The bsp_configs provide the application programmer with an API to initialize and start the hardware configuration, as well as the supported RTOS driver contexts. The programming model in this FreeRTOS architecture is:
     * `.xn files <https://www.xmos.ai/documentation/XM-014363-PC-6/html/tools-guide/tools-ref/formats/xn-spec/xn-spec.html?highlight=xn>`__ provide the mapping of ports, pins, and links
     * bsp_configs setup and start hardware IO and provide the application with RTOS driver contexts
     * applications use the bsp_config init/start code as well as RTOS driver contexts, similar to conventional microcontroller programming models.
@@ -69,7 +69,7 @@ XCore leverages its architecture to provide a flexible chip where many typically
 
 To support any generic bsp_config, applications should call `platform_init()` before starting the scheduler, and then `platform_start()` after the scheduler is running and before any RTOS drivers are used.
 
-The bsp_configs provided with the XCore SDK in `modules/rtos/modules/bsp_config <https://github.com/xmos/fwk_rtos/tree/develop/modules/bsp_config>`_ are an excellent starting point. They provide the most common peripheral drivers that are supported by the boards that support the XCore SDK. For advanced users, it is recommended that you copy one of these bsp_config into your application project and customize as needed.
+The bsp_configs provided with the XCORE SDK in `modules/rtos/modules/bsp_config <https://github.com/xmos/fwk_rtos/tree/develop/modules/bsp_config>`_ are an excellent starting point. They provide the most common peripheral drivers that are supported by the boards that support the XCORE SDK. For advanced users, it is recommended that you copy one of these bsp_config into your application project and customize as needed.
 
 *******************************
 Developing and Debugging Memory

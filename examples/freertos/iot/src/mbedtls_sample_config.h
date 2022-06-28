@@ -1,7 +1,7 @@
 // Copyright 2021 XMOS LIMITED.
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
-/* This file provides a default configuration for the mbed TLS library for XCore */
+/* This file provides a default configuration for the mbed TLS library for xcore */
 
 #ifndef MBEDTLS_XCORE_DEFAULT_CONFIG_H
 #define MBEDTLS_XCORE_DEFAULT_CONFIG_H
@@ -121,13 +121,13 @@
 #define MBEDTLS_NO_PLATFORM_ENTROPY
 
 /**
- * mbed TLS platform macros for XCore
+ * mbed TLS platform macros for xcore
  * @{
  */
 
 /**
  * This ensures that the real <time.h> is never included,
- * which causes problems on XCore as another system header
+ * which causes problems on xcore as another system header
  * can redefine clock.
  */
 #define _TIME_H_
