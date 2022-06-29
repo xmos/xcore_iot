@@ -95,7 +95,7 @@ Several aliases are provided that specify a collection of RTOS libraries with si
     * - Target
       - Description
     * - rtos::freertos
-      - All libraries used my most XCore FreeRTOS applications
+      - All libraries used my most xcore FreeRTOS applications
     * - rtos::drivers:all
       - All RTOS Driver libraries
     * - rtos::freertos_usb

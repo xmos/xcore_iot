@@ -1,6 +1,6 @@
 FROM ghcr.io/xmos/xcore_builder:main
 
-# This Dockerfile is for use by the XMOS XCore SDK CI system
+# This Dockerfile is for use by the XMOS XCORE SDK CI system
 # It provides a minimal environment needed to build applications and run tests
 
 ARG CMAKE_VERSION=3.21.6

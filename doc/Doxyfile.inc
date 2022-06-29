@@ -1,7 +1,7 @@
 # This file provides overrides to the Doxyfile configuration
 
-PROJECT_NAME = XCore SDK
-PROJECT_BRIEF = "XCore Software Development Kit"
+PROJECT_NAME = XCORE SDK
+PROJECT_BRIEF = "XCORE Software Development Kit"
 
 PREDEFINED = __DOXYGEN__=1 
 PREDEFINED += DWORD_ALIGNED=
