@@ -11,4 +11,4 @@ modules/core/modules/random
 modules/core/modules/inferencing
 modules/io/modules/xud
 modules/io/doc/substitutions.rst
-modules/avona/doc/substitutions.rst
+modules/voice/doc/substitutions.rst
