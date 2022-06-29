@@ -7,5 +7,5 @@ References
 
    ../../modules/core/index.rst
    ../../modules/io/index.rst
-   ../../modules/avona/index.rst
+   ../../modules/voice/index.rst
    ../../modules/rtos/index.rst
