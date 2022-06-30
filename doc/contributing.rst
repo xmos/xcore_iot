@@ -38,7 +38,7 @@ Install development packages:
 
 .. code-block:: console
 
-    pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r doc/requirements.txt
+    pip install -r tools/install/requirements.txt -r tools/install/contribute.txt
 
 Run the following command to deactivate the Conda environment:
 
