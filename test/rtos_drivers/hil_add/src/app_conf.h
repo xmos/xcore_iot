@@ -19,9 +19,11 @@
 
 #define SPI_TEST_BUF_SIZE       4096
 
-#define UART_RX_CORE_MASK       (1 << 2)
-#define UART_RX_ISR_CORE        2
-#define UART_BAUD_RATE          806400
+#define UART_RX_CORE            2
+#define UART_RX_CORE_MASK       (1 << UART_RX_CORE)
+#define UART_RX_ISR_CORE        3
+#define UART_BAUD_RATE          500000
+#define UART_PARITY_SETTING     UART_PARITY_NONE
 #define UART_TX2_RPC_PORT       12
 #define UART_TX2_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES-1)
 

@@ -113,7 +113,7 @@ void board_tile1_init(
             XS1_PORT_1P, /* X1D39 */
             UART_BAUD_RATE,
             8,
-            UART_PARITY_ODD,
+            UART_PARITY_SETTING,
             1,
             tmr_tx);
 
@@ -126,7 +126,7 @@ void board_tile1_init(
             XS1_PORT_1M , /* X1D36 */
             UART_BAUD_RATE,
             8,
-            UART_PARITY_ODD,
+            UART_PARITY_SETTING,
             1,
             tmr_rx);
 
