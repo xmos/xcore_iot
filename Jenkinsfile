@@ -110,15 +110,6 @@ pipeline {
                             }
                         } 
                         script {
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_cifar10.xe")) {
-                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                                    sh "test/examples/run_freertos_cifar10_tests.sh $adapterID"
-                                }
-                            } else {
-                                echo 'SKIPPED: example_freertos_cifar10'
-                            }
-                        } 
-                        script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_dispatcher.xe")) {
                                 withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
                                     sh "test/examples/run_freertos_dispatcher_tests.sh $adapterID"
@@ -140,23 +131,16 @@ pipeline {
                 }
             }
         }
-        stage('Run bare-metal examples') {
-            steps {
-                withTools(params.TOOLS_VERSION) {
-                    withVenv {
-                        script {
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_bare_metal_vww_test.xe")) {
-                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                                    sh "test/examples/run_bare_metal_vww_tests.sh $adapterID"
-                                }
-                            } else {
-                                echo 'SKIPPED: example_bare_metal_vww'
-                            }
-                        } 
-                    }
-                }
-            }
-        }
+        // stage('Run bare-metal examples') {
+        //     steps {
+        //         withTools(params.TOOLS_VERSION) {
+        //             withVenv {
+        //                 script {
+        //                 } 
+        //             }
+        //         }
+        //     }
+        // }
     }
     post {
         cleanup {

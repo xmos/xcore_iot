@@ -15,7 +15,7 @@ you can find release notes, links to each version of the documentation, and inst
 Versioning
 **********
 
-The XCore SDK uses `Semantic Versioning <http://semver.org/>`_.
+The XCORE SDK uses `Semantic Versioning <http://semver.org/>`_.
 
 Major Releases
 ==============
@@ -56,4 +56,4 @@ The ``settings.json`` file in the root of the repository contains the version st
 Support Period
 **************
 
-Each XCore SDK release version has an associated support period. After this period, the release is ``End of Life`` and no longer supported. Given the number of releases of the XCore SDK is currently small, no official support period policy exists.  Version 1.x will be support for at least two years.
+Each XCORE SDK release version has an associated support period. After this period, the release is ``End of Life`` and no longer supported. Given the number of releases of the XCORE SDK is currently small, no official support period policy exists.  Version 1.x will be support for at least two years.

@@ -9,4 +9,3 @@ Several example bare-metal applications are included to illustrate the fundament
     :includehidden:
     
     explorer_board.rst
-    visual_wake_words.rst
