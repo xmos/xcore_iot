@@ -4,6 +4,7 @@
 /* System headers */
 #include <platform.h>
 #include <xs1.h>
+#include <string.h>
 
 /* FreeRTOS headers */
 #include "FreeRTOS.h"
