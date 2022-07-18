@@ -5,4 +5,3 @@
 
 import numpy
 import matplotlib
-from PIL import Image

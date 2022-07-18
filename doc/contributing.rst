@@ -38,7 +38,7 @@ Install development packages:
 
 .. code-block:: console
 
-    pip install -r tools/install/requirements.txt -r tools/install/contribute.txt -r doc/requirements.txt
+    pip install -r tools/install/requirements.txt -r tools/install/contribute.txt
 
 Run the following command to deactivate the Conda environment:
 
@@ -74,9 +74,9 @@ clang-format
 clang-format can be used to:
 
 - Reformat a block of code to the SDK style.
-- Help you follow the XCore SDK coding style.
+- Help you follow the XCORE SDK coding style.
 
-The SDK's clang-format configuration file is `.clang-format` and is in the root of the xcore_sdk repository. The rules contained in ``.clang-format`` were originally derived from the Linux Kernel coding style. A few modifications have been made by the XCore SDK authors. Not all code in the XCore SDK follows the ``.clang-format`` rules.  Some non-compliant code is intentional while some is not.  Non-intentional instances should be addressed when the non-compliant code needs to be enhanced.
+The SDK's clang-format configuration file is `.clang-format` and is in the root of the xcore_sdk repository. The rules contained in ``.clang-format`` were originally derived from the Linux Kernel coding style. A few modifications have been made by the XCORE SDK authors. Not all code in the XCORE SDK follows the ``.clang-format`` rules.  Some non-compliant code is intentional while some is not.  Non-intentional instances should be addressed when the non-compliant code needs to be enhanced.
 
 For more information about `clang-format` visit:
 

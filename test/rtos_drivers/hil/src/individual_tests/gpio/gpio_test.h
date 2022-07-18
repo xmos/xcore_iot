@@ -29,7 +29,7 @@ typedef int (*gpio_main_test_t)(gpio_test_ctx_t *ctx);
 #define INPUT_PORT              XS1_PORT_1P
 #define INPUT_PORT_PIN_OFFSET   0
 
-#define OUTPUT_PORT             XS1_PORT_1E
+#define OUTPUT_PORT             XS1_PORT_4A
 #define OUTPUT_PORT_PIN_OFFSET  0
 
 int gpio_device_tests(rtos_gpio_t *gpio_ctx, chanend_t c);

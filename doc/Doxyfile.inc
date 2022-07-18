@@ -1,7 +1,7 @@
 # This file provides overrides to the Doxyfile configuration
 
-PROJECT_NAME = XCore SDK
-PROJECT_BRIEF = "XCore Software Development Kit"
+PROJECT_NAME = XCORE SDK
+PROJECT_BRIEF = "XCORE Software Development Kit"
 
 PREDEFINED = __DOXYGEN__=1 
 PREDEFINED += DWORD_ALIGNED=
@@ -25,13 +25,13 @@ INPUT += ../modules/rtos/modules/drivers
 # RTOS SW Services
 INPUT += ../modules/rtos/modules/sw_services/device_control/host ../modules/rtos/modules/sw_services/device_control/api 
 
-# Avona library APIs
-INPUT += ../modules/avona/modules/lib_aec/api ../modules/avona/examples/bare-metal/shared_src/aec/
-INPUT += ../modules/avona/modules/lib_ns/api
-INPUT += ../modules/avona/modules/lib_agc/api
-INPUT += ../modules/avona/modules/lib_adec/api
-INPUT += ../modules/avona/modules/lib_ic/api
-INPUT += ../modules/avona/modules/lib_vad/api
+# Voice DSP library APIs
+INPUT += ../modules/voice/modules/lib_aec/api ../modules/voice/examples/bare-metal/shared_src/aec/
+INPUT += ../modules/voice/modules/lib_ns/api
+INPUT += ../modules/voice/modules/lib_agc/api
+INPUT += ../modules/voice/modules/lib_adec/api
+INPUT += ../modules/voice/modules/lib_ic/api
+INPUT += ../modules/voice/modules/lib_vad/api
 
 USE_MATHJAX = YES
 MATHJAX_FORMAT = HTML-CSS

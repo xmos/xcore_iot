@@ -11,7 +11,7 @@ Thank you for submitting an SDK documentation issue. Please provide as much info
 
 **System information**
  - OS: [e.g. Mac, Linux, Windows]
- - XCore board [e.g. Explorer, Osprey]
+ - xcore board [e.g. Explorer, Osprey]
  - SDK version tag or commit SHA
 
 **Describe the documentation issue**

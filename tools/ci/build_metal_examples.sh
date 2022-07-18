@@ -12,7 +12,6 @@ mkdir -p ${DIST_DIR}
 # row format is: "app_target board toolchain"
 applications=(
     "example_bare_metal_explorer_board  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_bare_metal_vww_test        XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
 )
 
 # perform builds

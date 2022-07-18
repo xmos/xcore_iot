@@ -51,9 +51,7 @@ If you prefer, you can specify individual core libraries.
     * - core::xs3_math
       - Optimize math and DSP API
     * - core::general
-      - All core libraries except for inferencing
-    * - core::inferencing
-      - Neural networking inferencing API
+      - All core libraries
 
 ***********
 Peripherals
@@ -97,7 +95,7 @@ Several aliases are provided that specify a collection of RTOS libraries with si
     * - Target
       - Description
     * - rtos::freertos
-      - All libraries used my most XCore FreeRTOS applications
+      - All libraries used my most xcore FreeRTOS applications
     * - rtos::drivers:all
       - All RTOS Driver libraries
     * - rtos::freertos_usb
