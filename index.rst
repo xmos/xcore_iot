@@ -14,6 +14,7 @@ This is the user guide for the `XCORE Software Development Kit <https://github.c
    doc/quick_start/index
    doc/tutorials/index
    doc/reference/index
+   doc/faq
    doc/contributing
    doc/versions
    doc/copyright
