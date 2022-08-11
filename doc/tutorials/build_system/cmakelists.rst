@@ -11,7 +11,7 @@ This repository supports being added as a CMake subproject. A parent CMake proje
 
 .. note::
 
-    The xcore_sdk subproject should be added before declaring application targets, as some xcore_sdk provided macros may be needed.  Addtionally, when included as a subproject, xcore_sdk examples targets are not added to the CMake build.
+    The xcore_sdk subproject should be added before declaring application targets, as some xcore_sdk provided macros may be needed.  Additionally, when included as a subproject, xcore_sdk examples targets are not added to the CMake build.
 
 **********
 Bare-Metal
