@@ -46,7 +46,7 @@ static int read_write_read(rtos_qspi_flash_t *ctx, unsigned addr, size_t test_le
     {
         if (test_buf[i] != 0xFF)
         {
-            local_printf("Failed. rx_buf[%d]: Expected 0 got 0x%x", i, test_buf[i]);
+            local_printf("Failed. rx_buf[%d]: Expected 0xFF got 0x%x", i, test_buf[i]);
             rtos_osal_free(test_buf);
             return -1;
         }
