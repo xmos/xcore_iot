@@ -1,3 +1,5 @@
+.. _sdk-baremetal-code-examples:
+
 ########################
 Bare-metal Code Examples
 ########################
