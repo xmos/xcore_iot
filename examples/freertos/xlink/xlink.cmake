@@ -106,3 +106,16 @@ merge_binaries(example_freertos_xlink_1 tile0_example_freertos_xlink_1 tile1_exa
 #**********************
 create_run_target(example_freertos_xlink_1)
 create_debug_target(example_freertos_xlink_1)
+
+#**********************
+# Create custom target to build both example applications
+#**********************
+add_custom_target(example_freertos_xlink_both
+    COMMAND
+    DEPENDS
+        example_freertos_xlink_0
+        example_freertos_xlink_1
+    COMMENT
+        "Create both xlink example applications"
+    VERBATIM
+)
