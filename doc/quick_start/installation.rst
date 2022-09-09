@@ -42,7 +42,7 @@ The SDK includes utilities that run on the PC host.  Run the following command t
 
         $ cmake  -G "NMake Makefiles" -B build_host
         $ cd build_host
-        $ make install
+        $ nmake install
 
     This command installs the applications at ``<USERPROFILE>\.xmos\SDK\<sdk version>\bin\`` directory.  You may wish to add this directory to your ``PATH`` variable.
 
