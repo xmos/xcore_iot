@@ -40,8 +40,9 @@ unsigned g_comm_state = 0;
 
 
 
-#include <xs3a_kernel.h>
-
+#define INTER_DELAY 2
+#define INTRA_DELAY 3
+#define LINK_NUM 2
 
 /*
 
@@ -61,9 +62,6 @@ xlink2_tx4								IOR	X1D70
 
 */
 
-
-#define INTER_DELAY 2
-#define INTRA_DELAY 3
 
 void link_disable(unsigned tileid, unsigned link_num);
 void link_enable(unsigned tileid, unsigned link_num);
@@ -121,7 +119,6 @@ unsigned link_got_credit(unsigned tileid, unsigned link_num) {
 
 
 
-#define LINK_NUM 2
 
 
 static int g_data_tokens = 0;
