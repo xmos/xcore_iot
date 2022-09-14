@@ -4,6 +4,22 @@
 #ifndef APP_CONF_H_
 #define APP_CONF_H_
 
+/* XLINK Configuration */
+/* 0 = 2 wire; 1 = 5 wire */
+#define appconfXLINK_WIRE_TYPE  0
+#define appconfLINK_NUM  2
+#define appconfINTER_DELAY 2
+#define appconfINTRA_DELAY 3
+
+#define appconfRX_DIRECTION 0
+#define appconfRX_NODE_ID 0x20
+#define appconfRX_DEBUG_I2C_SLAVE_ADDR 0xc
+#define appconfRX_TIME_OUT_TICKS 500000000
+
+#define appconfTX_DIRECTION 5
+#define appconfRE_ENABLE_TX_PERIOD 6
+#define appconfSEND_CTRL_TOKEN 2500000
+
 /* Intertile Communication Configuration */
 #define appconfI2C_MASTER_RPC_PORT 10
 #define appconfI2C_MASTER_RPC_PRIORITY (configMAX_PRIORITIES/2)
@@ -17,40 +33,13 @@
 #define appconfI2C_INTERRUPT_CORE               0 /* Must be kept off I/O cores. */
 
 /* I/O and interrupt cores for Tile 1 */
-#define appconfPDM_MIC_IO_CORE                  1 /* Must be kept off I/O cores. Must be kept off core 0 with the RTOS tick ISR */
-#define appconfI2S_IO_CORE                      2 /* Must be kept off core 0 with the RTOS tick ISR */
-#define appconfPDM_MIC_INTERRUPT_CORE           3 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
-#define appconfI2S_INTERRUPT_CORE               4 /* Must be kept off I/O cores. Best kept off core 0 with the tick ISR. */
-
-/* Audio Pipeline Configuration */
-#define appconfAUDIO_CLOCK_FREQUENCY            MIC_ARRAY_CONFIG_MCLK_FREQ
-#define appconfPDM_CLOCK_FREQUENCY              MIC_ARRAY_CONFIG_PDM_FREQ
-#define appconfPIPELINE_AUDIO_SAMPLE_RATE       16000
-#define appconfAUDIO_PIPELINE_STAGE_ZERO_GAIN   20
-#define appconfAUDIO_PIPELINE_MAX_GAIN          60
-#define appconfAUDIO_PIPELINE_MIN_GAIN          0
-#define appconfAUDIO_PIPELINE_GAIN_STEP         4
-#define appconfAUDIO_FRAME_LENGTH            	MIC_ARRAY_CONFIG_SAMPLES_PER_FRAME
-#define appconfMIC_COUNT                        MIC_ARRAY_CONFIG_MIC_COUNT
-#define appconfPRINT_AUDIO_FRAME_POWER          0
-#define appconfFRAMES_IN_ALL_CHANS              (appconfAUDIO_FRAME_LENGTH * appconfMIC_COUNT)
-#define appconfPOWER_THRESHOLD                  (float)0.00001
-#define appconfEXP                              -31
-
-/* UART Configuration */
-#define appconfUART_BAUD_RATE                   806400
-
-/* GPIO Configuration */
-#define appconfGPIO_VOLUME_RAPID_FIRE_MS        100
+#ifndef appconfXLINK_RX_IO_CORE     1  /* Must be kept off core 0 with the RTOS tick ISR */
+#ifndef appconfXLINK_TX_IO_CORE     1  /* Must be kept off core 0 with the RTOS tick ISR */
 
 /* Task Priorities */
 #define appconfSTARTUP_TASK_PRIORITY            ( configMAX_PRIORITIES - 1 )
-#define appconfAUDIO_PIPELINE_TASK_PRIORITY     ( configMAX_PRIORITIES - 4 )
 #define appconfGPIO_TASK_PRIORITY               ( configMAX_PRIORITIES - 2 )
-#define appconfFILESYSTEM_DEMO_TASK_PRIORITY    ( configMAX_PRIORITIES - 2 )
-#define appconfMEM_ANALYSIS_TASK_PRIORITY       ( configMAX_PRIORITIES - 1 )
-#define appconfSPI_MASTER_TASK_PRIORITY         ( configMAX_PRIORITIES - 1 )
-#define appconfQSPI_FLASH_TASK_PRIORITY         ( configMAX_PRIORITIES - 1 )
-#define appconfUART_RX_TASK_PRIORITY            ( configMAX_PRIORITIES - 1 )
+#define appconfXLINK_RX_TASK_PRIORITY           ( configMAX_PRIORITIES - 1 )
+#define appconfXLINK_TX_TASK_PRIORITY           ( configMAX_PRIORITIES - 1 )
 
 #endif /* APP_CONF_H_ */

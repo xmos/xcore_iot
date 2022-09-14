@@ -2,16 +2,79 @@
 XLINK
 ##############
 
-This example application demonstrates various capabilities of the Explorer board using FreeRTOS. The application uses I2C, I2S, SPI, UART, flash, mic array, and GPIO devices.
-
-The FreeRTOS application creates a single stage audio pipeline which applies a variable gain. The output audio is sent to the DAC and can be listened to via the 3.5mm audio jack. The audio gain can be adjusted via GPIO, where button A is volume up and button B is volume down.
+This example application demonstrates the `AN01024 <https://www.xmos.ai/file/an01024-xconnect-dynamic-configuration-demo-sw/>`_ application note in FreeRTOS on XCORE AI.
 
 **********************
 Preparing the hardware
 **********************
 
-The UART loopback section of the demo requires that a jumper cable be connected
-between X1D36 and X1D39. This connects the Tx pin to the Rx pin.
+This example requires 2 XCORE-AI-EXPLORER boards, and a user provided device to act as an I2C slave.
+
+To setup the board for testing, the following connections must be made:
+
+.. list-table:: XCORE-AI-EXPLORER to XCORE-AI-EXPLORER Connections 2 Wire
+   :widths: 50 50
+   :header-rows: 1
+   :align: left
+
+   * - BOARD 0
+     - BOARD 1
+   * - GND
+     - GND
+   * - X1D65
+     - X1D66
+   * - X1D66
+     - X1D65
+   * - X1D64
+     - X1D67
+   * - X1D67
+     - X1D64
+   * - X1D63
+     - X1D68
+   * - X1D68
+     - X1D63
+   * - X1D62
+     - X1D69
+   * - X1D69
+     - X1D62
+   * - X1D61
+     - X1D70
+   * - X1D70
+     - X1D61
+
+.. list-table:: XCORE-AI-EXPLORER to XCORE-AI-EXPLORER Connections 5 Wire Additions
+   :widths: 50 50
+   :header-rows: 1
+   :align: left
+
+   * - BOARD 0
+     - BOARD 1
+   * - X1D63
+     - X1D68
+   * - X1D68
+     - X1D63
+   * - X1D62
+     - X1D69
+   * - X1D69
+     - X1D62
+   * - X1D61
+     - X1D70
+   * - X1D70
+     - X1D61
+
+.. list-table:: XCORE-AI-EXPLORER Board 0 to Host Connections
+   :widths: 50 50
+   :header-rows: 1
+   :align: left
+
+   * - BOARD 0
+     - Host
+   * - GND
+     - Host GND
+   * - SCL
+     - Host SCL
+   * - SDA
+     - Host SDA
 
 *********************
 Building the firmware
@@ -25,7 +88,7 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
         cmake -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
         cd build
-        make example_freertos_xlink
+        make example_freertos_xlink_both
 
 .. tab:: Windows
 
@@ -33,58 +96,53 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
         cmake -G "NMake Makefiles" -B build -DCMAKE_TOOLCHAIN_FILE=xmos_cmake_toolchain/xs3a.cmake
         cd build
-        nmake example_freertos_xlink
-
-.. note::
-   The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
-
-From the xcore_sdk build folder, create the filesystem and flash the device with the following command:
-
-.. tab:: Linux and Mac
-
-    .. code-block:: console
-
-        make flash_fs_example_freertos_xlink
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-        nmake flash_fs_example_freertos_xlink
+        nmake example_freertos_xlink_both
 
 ********************
 Running the firmware
 ********************
 
-From the xcore_sdk build folder run:
+This application requires example_freertos_xlink_0.xe to be run on BOARD 0, IE, the board with a host I2C connection.
 
-.. tab:: Linux and Mac
+Use the following command to determine available device:
 
-    .. code-block:: console
+.. code-block:: console
 
-        make run_example_freertos_xlink
-
-.. tab:: Windows
-
-    .. code-block:: console
-
-        nmake run_example_freertos_xlink
-
-
-********************************
-Debugging the firmware with xgdb
-********************************
+    xrun --list-devices
 
 From the xcore_sdk build folder run:
 
-.. tab:: Linux and Mac
+.. code-block:: console
 
-    .. code-block:: console
+    xrun --id 0 example_freertos_xlink_0.xe
+        
+In another console, from the xcore_sdk build folder run:
 
-        make debug_example_freertos_xlink
+.. code-block:: console
 
-.. tab:: Windows
+    xrun --id 1 example_freertos_xlink_1.xe
 
-    .. code-block:: console
+BOARD 0 will send out status messages and communication details to slave address 0xC.
 
-        nmake debug_example_freertos_xlink
+The data will contain an ID, followed by a 4 byte payload.  The payload is an int32, sent least significant byte first.
+
+Payloads match to ID per the table below:
+
+.. list-table:: XCORE-AI-EXPLORER to XCORE-AI-EXPLORER Connections 2 Wire
+   :widths: 50 50
+   :header-rows: 1
+   :align: left
+
+   * - ID
+     - Payload
+   * - 0x01
+     - RX state
+   * - 0x82
+     - received data bytes in the last second
+   * - 0x83
+     - received control tokens in the last second
+   * - 0x84
+     - timeouts in the last second
+
+.. note::
+    Data rates are highly dependant on the electrical characteristics of the physical connection.  Refer to `xCONNECT Architecture <https://www.xmos.ai/file/xconnect-architecture/>`_ for more information.
