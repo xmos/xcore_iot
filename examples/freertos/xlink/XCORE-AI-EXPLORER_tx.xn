@@ -12,7 +12,7 @@
   <Packages>
     <Package id="0" Type="XS3-UnA-1024-FB265">
       <Nodes>
-        <Node Id="0" InPackageId="0" Type="XS3-L16A-1024" Oscillator="24MHz" SystemFrequency="600MHz" ReferenceFrequency="100MHz" RoutingId="0x0020">
+        <Node Id="0" InPackageId="0" Type="XS3-L16A-1024" Oscillator="24MHz" SystemFrequency="600MHz" ReferenceFrequency="100MHz">
           <Boot>
             <Source Location="bootFlash"/>
           </Boot>
@@ -48,13 +48,13 @@
             <Port Location="XS1_PORT_1B" Name="PORT_SQI_CS"/>
             <Port Location="XS1_PORT_1C" Name="PORT_SQI_SCLK"/>
             <Port Location="XS1_PORT_4B" Name="PORT_SQI_SIO"/>
-
+            
             <Port Location="XS1_PORT_1N"  Name="PORT_I2C_SCL"/>
             <Port Location="XS1_PORT_1O"  Name="PORT_I2C_SDA"/>
-
+            
             <Port Location="XS1_PORT_4C" Name="PORT_LEDS"/>
             <Port Location="XS1_PORT_4D" Name="PORT_BUTTONS"/>
-
+            
             <Port Location="XS1_PORT_1I"  Name="WIFI_WIRQ"/>
             <Port Location="XS1_PORT_1J"  Name="WIFI_MOSI"/>
             <Port Location="XS1_PORT_4E"  Name="WIFI_WUP_RST_N"/>
@@ -75,29 +75,6 @@
             <Port Location="XS1_PORT_1N" Name="PORT_I2S_ADC_DATA"/>
             <Port Location="XS1_PORT_4A" Name="PORT_CODEC_RST_N"/>
           </Tile>
-          <RoutingTable>
-            <Bits>
-              <Bit number="0" direction="1"/>
-              <Bit number="1" direction="1"/>
-              <Bit number="2" direction="1"/>
-              <Bit number="3" direction="1"/>
-              <Bit number="4" direction="1"/>
-              <Bit number="5" direction="1"/>
-              <Bit number="6" direction="1"/>
-              <Bit number="7" direction="1"/>
-              <Bit number="8" direction="1"/>
-              <Bit number="9" direction="1"/>
-              <Bit number="10" direction="1"/>
-              <Bit number="11" direction="1"/>
-              <Bit number="12" direction="1"/>
-              <Bit number="13" direction="1"/>
-              <Bit number="14" direction="1"/>
-              <Bit number="15" direction="0"/>
-            </Bits>
-            <Links>
-              <Link name="XL0" direction="0"/>
-            </Links>
-          </RoutingTable>          
         </Node>
       </Nodes>
     </Package>
@@ -129,3 +106,4 @@
   </JTAGChain>
 
 </Network>
+

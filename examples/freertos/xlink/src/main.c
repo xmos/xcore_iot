@@ -127,19 +127,32 @@ static int g_timeout_cnts = 0;
 
 #define RX_NODE_ID 0x20
 
+#define RX_STATE_ID 0x01
+#define RX_REPORT_BYTES_PER_SEC_ID 0x82
+#define RX_REPORT_CTRL_TOKENS_PER_SEC_ID 0x83
+#define RX_REPORT_TIMEOUTS_PER_SEC_ID 0x84
+#define I2C_SLAVE_ADDR 0xc
+
+static void i2c_send_word(uint8_t id, uint32_t word) {
+    uint8_t debug_buf[5] = {0};
+    size_t n = 0;
+    
+    debug_buf[0] = id;
+    memcpy(&debug_buf[1], &word, sizeof(uint32_t));
+    rtos_i2c_master_write(i2c_master_ctx, I2C_SLAVE_ADDR, debug_buf, sizeof(debug_buf), &n, 1);
+}
+
 void xlink_report_task(void) {
     int full_rep_cnt = 0;
+    uint8_t debug_buf[5] = {0};
     size_t n = 0;
 
     while(1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
-
-        rtos_i2c_master_write(i2c_master_ctx, 0xc, &g_data_tokens, sizeof(g_data_tokens), &n, 1);
-
-        rtos_printf("Communication rate: %d bytes per sec \t\t\t ==>\t %d Mbit/sec\n", g_data_tokens, ((g_data_tokens*8)/1000000));
+        i2c_send_word(RX_REPORT_BYTES_PER_SEC_ID, g_data_tokens);
         if (!(full_rep_cnt++ % 10)) {
-            rtos_printf("\nApplication control token count: \t\t%d \n", g_ctrl_tokens);
-            rtos_printf("Receive timeouts: \t\t\t\t%d \n\n", g_timeout_cnts);
+            i2c_send_word(RX_REPORT_CTRL_TOKENS_PER_SEC_ID, g_ctrl_tokens);
+            i2c_send_word(RX_REPORT_TIMEOUTS_PER_SEC_ID, g_timeout_cnts);
         }
         g_data_tokens = 0;
     }
@@ -160,15 +173,12 @@ void xlink_rx(void) {
 
     unsigned x = 0;
 
-    size_t n = 0;
-
-    rtos_printf("RX started...tile id: %x\n", get_local_tile_id());
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << 1));
     rtos_osal_thread_preemption_disable(NULL);
 
     while(1) {
-        // rtos_printf("rx state: %d\n", comm_state);
-        rtos_i2c_master_write(i2c_master_ctx, 0xa, &comm_state, sizeof(comm_state), &n, 1);
+        i2c_send_word(RX_STATE_ID, comm_state);
+
         switch (comm_state) {
             default:
                 break;
@@ -181,7 +191,6 @@ void xlink_rx(void) {
                 break;
             case 1: /* Channel alloc */
                 c_tileid = chanend_alloc();
-                rtos_i2c_master_write(i2c_master_ctx, 0xf, &c_tileid, sizeof(c_tileid), &n, 1);
                 comm_state = 2;
                 break;
             case 2: /* Reconfigure links, setting up a single static link */
@@ -190,6 +199,7 @@ void xlink_rx(void) {
                 }
                 link_enable(RX_NODE_ID, LINK_NUM);
                 delay_milliseconds(100);
+
                 x = 0;
                 x |= XS1_XSTATIC_ENABLE_SET(x, 1);
                 x |= XS1_XSTATIC_DEST_CHAN_END_SET(x, ((c_tileid >> 8) & 0x0000001F));
@@ -197,6 +207,8 @@ void xlink_rx(void) {
 
                 (void) write_sswitch_reg(RX_NODE_ID, XS1_SSWITCH_XSTATIC_0_NUM + LINK_NUM, x);
 
+                delay_milliseconds(100);
+                
                 comm_state = 3;
                 break;
             case 3: /* Wait for transmit credits */
@@ -249,7 +261,6 @@ void xlink_rx(void) {
                         {
                             triggerable_disable_trigger(c_tileid);
                             triggerable_disable_trigger(tmr_rx);
-                            rtos_printf("Timed out\n");
                             rx_loop = 0;
                             comm_state = 3;
                             continue;
@@ -270,7 +281,7 @@ void xlink_tx_reenable(void) {
     while(1) {
         vTaskDelay(pdMS_TO_TICKS(RE_ENABLE_TX_PERIOD * 1000));
         g_comm_state = 1;
-        rtos_printf("Reenable tx link\n");
+        /* Reenable tx link */
         link_disable(get_local_tile_id(), LINK_NUM);
         link_enable(get_local_tile_id(), LINK_NUM);
     }
@@ -285,13 +296,9 @@ void transmit_handler(unsigned comm_state) {
     uint32_t id = 0;
     unsigned x = 0;
 
-    unsigned tileid = get_local_tile_id();
-
-    read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_NODE_ID_NUM, &x);
-    rtos_printf("node is 0x%x\n", x);
+    unsigned switch_id = get_local_tile_id();
 
     while(1) {
-        // rtos_printf("tx state: %d\n", comm_state);
         if (g_comm_state) {
             g_comm_state = 0;
             comm_state = 4;
@@ -304,30 +311,30 @@ void transmit_handler(unsigned comm_state) {
                 reg_val = 0;
                 direction = TX_DIRECTION;
                 reg_val = XS1_LINK_DIRECTION_SET(reg_val, direction);
-                (void) write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_SLINK_0_NUM + LINK_NUM, reg_val);
+                (void) write_sswitch_reg(switch_id, XS1_SSWITCH_SLINK_0_NUM + LINK_NUM, reg_val);
                 comm_state = 1;
                 break;
             case 1: /* Channel setup */
                 c_other_tile = chanend_alloc();
                 chanend_set_dest(c_other_tile, 0x00210902); // hardcode to expected rx
 
-                (void) read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_DIMENSION_DIRECTION1_NUM, &x);
+                (void) read_sswitch_reg(switch_id, XS1_SSWITCH_DIMENSION_DIRECTION1_NUM, &x);
                 x = XS1_DIMF_DIR_SET(x, TX_DIRECTION);
-                (void) write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_DIMENSION_DIRECTION1_NUM, x);
+                (void) write_sswitch_reg(switch_id, XS1_SSWITCH_DIMENSION_DIRECTION1_NUM, x);
 
                 comm_state = 2;
                 break;
             case 2: /* reconfigure links, leaving only one open */
                 for (int i=0; i<8; i++) {
-                    link_disable(tileid, i);
+                    link_disable(switch_id, i);
                 }
-                link_enable(tileid, LINK_NUM);
+                link_enable(switch_id, LINK_NUM);
                 comm_state = 3;
                 break;
             case 3: /* Setup a static routing configuration */
                 x = 0;
                 x |= XS1_XSTATIC_ENABLE_SET(x, 1);
-                x =  write_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_XSTATIC_0_NUM + LINK_NUM, x);
+                x =  write_sswitch_reg(switch_id, XS1_SSWITCH_XSTATIC_0_NUM + LINK_NUM, x);
 
                 delay_milliseconds(150);
 
@@ -335,11 +342,10 @@ void transmit_handler(unsigned comm_state) {
                 break;
             case 4: /* Wait for transmit credits */
                 do {
-                    link_reset(tileid, LINK_NUM);
-                    link_hello(tileid, LINK_NUM);
+                    link_reset(switch_id, LINK_NUM);
+                    link_hello(switch_id, LINK_NUM);
                     delay_milliseconds(100);
-                } while (!link_got_credit(tileid, LINK_NUM));
-                // rtos_printf("TX Got Credit\n");
+                } while (!link_got_credit(switch_id, LINK_NUM));
 
                 /* Setup local control vars */
                 err_ctr = 0;
@@ -355,7 +361,7 @@ void transmit_handler(unsigned comm_state) {
                 break;
             case 6:
                 chanend_free(c_other_tile);
-                link_disable(tileid, LINK_NUM);
+                link_disable(switch_id, LINK_NUM);
                 comm_state = 2;
                 break;
         }
@@ -369,13 +375,10 @@ void xlink_tx(void) {
 
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << 1));
     rtos_osal_thread_preemption_disable(NULL);
-
-    rtos_printf("TX started...tile id: %x\n", get_local_tile_id());
     while(1) {
         TRY {
             transmit_handler(0);
         } CATCH (exception) {
-            rtos_printf("Got exception.\n");
             transmit_handler(4);
         }
     }
@@ -397,69 +400,6 @@ void startup_task(void *arg)
     rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE, portGET_CORE_ID());
 
     platform_start();
-
-#if 0
-#if ON_TILE(1)
-    vTaskDelay(pdMS_TO_TICKS(500));
-#endif
-    rtos_printf("\n\nDebug info:\n");
-    rtos_printf("tile id: %x\n", get_local_tile_id());
-
-    debug_print_sswitch_reg(XS1_SSWITCH_NODE_ID_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_NODE_CONFIG_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_DIMENSION_DIRECTION0_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_DIMENSION_DIRECTION1_NUM);
-    // debug_print_sswitch_reg(XS1_SSWITCH_DEVICE_ID0_NUM);
-    // debug_print_sswitch_reg(XS1_SSWITCH_DEVICE_ID1_NUM);
-    // debug_print_sswitch_reg(XS1_SSWITCH_DEVICE_ID2_NUM);
-    // debug_print_sswitch_reg(XS1_SSWITCH_DEVICE_ID3_NUM);
-
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_0_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_1_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_2_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_3_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_4_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_5_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_6_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_7_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_SLINK_8_NUM);
-
-    debug_print_sswitch_reg(XS1_SSWITCH_PLINK_0_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_PLINK_1_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_PLINK_2_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_PLINK_3_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_PLINK_4_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_PLINK_5_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_PLINK_6_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_PLINK_7_NUM);
-
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_0_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_1_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_2_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_3_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_4_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_5_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_6_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_7_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XLINK_8_NUM);
-
-    debug_print_sswitch_reg(XS1_SSWITCH_XSTATIC_0_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XSTATIC_1_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XSTATIC_2_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XSTATIC_3_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XSTATIC_4_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XSTATIC_5_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XSTATIC_6_NUM);
-    debug_print_sswitch_reg(XS1_SSWITCH_XSTATIC_7_NUM);
-
-    rtos_printf("\nDebug end\n\n");
-
-#if ON_TILE(1)
-    // _Exit(0);
-#endif
-    vTaskDelay(pdMS_TO_TICKS(500));
-#endif
-    rtos_printf("Create tasks\n");
 
 #if ON_TILE(1)
 #if DEMO_TILE == 0
@@ -495,9 +435,9 @@ void startup_task(void *arg)
 
 
 #if ON_TILE(0)
-port_t leds = XS1_PORT_4C;
-int led_status=0;
-port_enable(leds);
+    port_t leds = XS1_PORT_4C;
+    int led_status=0;
+    port_enable(leds);
 #endif
 	for (;;) {
 #if ON_TILE(0)
@@ -531,21 +471,6 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3) {
     (void)c2;
     (void)c3;
 
-unsigned x = 0;
-    read_sswitch_reg(get_local_tile_id(), XS1_SSWITCH_NODE_ID_NUM, &x);
-    rtos_printf("node is 0x%x\n", x);
-#if DEMO_TILE == 0
-    x = XS1_SS_NODE_ID_ID_SET(x, RX_NODE_ID);
-    rtos_printf("set node to 0x%x\n", x);
-    write_sswitch_reg_no_ack(get_local_tile_id(), XS1_SSWITCH_NODE_ID_NUM, x);
-    delay_milliseconds(100);   
-
-    chanend_t c_other = chanend_get_dest(c1);
-    c_other &= 0x0000FFFF;
-    c_other |= 0x00210000;
-    chanend_set_dest(c1, c_other);
-#endif
-
     tile_common_init(c1);
 }
 #endif
@@ -555,14 +480,6 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3) {
     (void)c1;
     (void)c2;
     (void)c3;
-
-#if DEMO_TILE == 0
-    delay_milliseconds(110);   
-    chanend_t c_other = chanend_get_dest(c0);
-    c_other &= 0x0000FFFF;
-    c_other |= 0x00200000;
-    chanend_set_dest(c0, c_other);
-#endif
 
     tile_common_init(c0);
 }

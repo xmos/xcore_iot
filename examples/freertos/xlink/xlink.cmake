@@ -3,6 +3,7 @@
 #**********************
 file(GLOB_RECURSE APP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/*.c)
 set(APP_INCLUDES ${CMAKE_CURRENT_LIST_DIR}/src)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bsp_config)
 
 #**********************
 # Flags
@@ -15,8 +16,6 @@ set(APP_COMPILER_FLAGS
     -lquadspi
     -mcmodel=large
     -Wno-xcore-fptrgroup
-    ${CMAKE_CURRENT_LIST_DIR}/src/config.xscope
-    ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
 )
 set(APP_COMPILE_DEFINITIONS
     DEBUG_PRINT_ENABLE=1
@@ -27,15 +26,29 @@ set(APP_COMPILE_DEFINITIONS
     XUD_CORE_CLOCK=600
 )
 
+set(RX_APP_COMPILER_FLAGS
+    ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
+)
+
+set(TX_APP_COMPILER_FLAGS
+    ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER_tx.xn
+)
+
 set(APP_LINK_OPTIONS
     -lquadspi
     -report
+)
+
+set(RX_APP_LINK_OPTIONS
     ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
-    ${CMAKE_CURRENT_LIST_DIR}/src/config.xscope
+)
+
+set(TX_APP_LINK_OPTIONS
+    ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER_tx.xn
 )
 
 set(APP_LINK_LIBRARIES
-    rtos::bsp_config::xcore_ai_explorer
+    example::freertos::xlink::bsp_config::xcore_ai_explorer_2V0
 )
 
 #**********************
@@ -46,9 +59,9 @@ add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} DEMO_TILE=0 THIS_XCORE_TILE=0)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS} ${RX_APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} ${RX_APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
 set(TARGET_NAME tile1_example_freertos_xlink_0)
@@ -56,9 +69,9 @@ add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} DEMO_TILE=0 THIS_XCORE_TILE=1)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS} ${RX_APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} ${RX_APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
 #**********************
@@ -81,9 +94,9 @@ add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} DEMO_TILE=1 THIS_XCORE_TILE=0)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS} ${TX_APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} ${TX_APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
 set(TARGET_NAME tile1_example_freertos_xlink_1)
@@ -91,9 +104,9 @@ add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} DEMO_TILE=1 THIS_XCORE_TILE=1)
-target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS} ${TX_APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} ${TX_APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
 #**********************

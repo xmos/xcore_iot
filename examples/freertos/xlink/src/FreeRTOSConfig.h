@@ -56,8 +56,8 @@ your application. */
 #define configUSE_CORE_INIT_HOOK                0
 
 /* Run time and task stats gathering related definitions. */
-#define configGENERATE_RUN_TIME_STATS           1
-#define configUSE_TRACE_FACILITY                1
+#define configGENERATE_RUN_TIME_STATS           0
+#define configUSE_TRACE_FACILITY                0
 #define configUSE_STATS_FORMATTING_FUNCTIONS    2 /* Setting to 2 does not include <stdio.h> in tasks.c */
 
 /* Co-routine related definitions. */
@@ -74,7 +74,7 @@ your application. */
 #define configASSERT(x) xassert(x)
 
 /* Define to enable debug_printf() */
-#define configENABLE_DEBUG_PRINTF 1
+#define configENABLE_DEBUG_PRINTF 0
 
 /* Define to map sprintf and snprintf to the
  * lite versions in lib_rtos_support */
