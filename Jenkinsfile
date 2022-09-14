@@ -1,14 +1,4 @@
-@Library('xmos_jenkins_shared_library@v0.18.0') _
-
-def withXTAG(String target, Closure body) {
-    // Acquire an xtag adapter-id by target name
-    def adapterID = sh (script: "xtagctl acquire ${target}", returnStdout: true).trim()
-    // Run the closure
-    body(adapterID)
-    // Release the xtag by adapter-id
-    sh ("xtagctl release ${adapterID}")
-}
-
+@Library('xmos_jenkins_shared_library@v0.20.0') _
 
 // Wait here until specified artifacts appear
 def artifactUrls = getGithubArtifactUrls([
@@ -93,8 +83,8 @@ pipeline {
                     withVenv {
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_getting_started.xe")) {
-                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                                    sh "test/examples/run_freertos_getting_started_tests.sh $adapterID"
+                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                    sh "test/examples/run_freertos_getting_started_tests.sh " + adapterIDs[0]
                                 }
                             } else {
                                 echo 'SKIPPED: example_freertos_getting_started'
@@ -102,8 +92,8 @@ pipeline {
                         } 
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_explorer_board.xe")) {
-                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                                    sh "test/examples/run_freertos_explorer_board_tests.sh $adapterID"
+                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                    sh "test/examples/run_freertos_explorer_board_tests.sh " + adapterIDs[0]
                                 }
                             } else {
                                 echo 'SKIPPED: example_freertos_explorer_board'
@@ -111,8 +101,8 @@ pipeline {
                         } 
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_dispatcher.xe")) {
-                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                                    sh "test/examples/run_freertos_dispatcher_tests.sh $adapterID"
+                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                    sh "test/examples/run_freertos_dispatcher_tests.sh " + adapterIDs[0]
                                 }
                             } else {
                                 echo 'SKIPPED: example_freertos_dispatcher'
@@ -120,8 +110,8 @@ pipeline {
                         } 
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_l2_cache.xe")) {
-                                withXTAG("$SDK_TEST_RIG_TARGET") { adapterID ->
-                                    sh "test/examples/run_freertos_l2_cache_tests.sh $adapterID"
+                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                    sh "test/examples/run_freertos_l2_cache_tests.sh " + adapterIDs[0]
                                 }
                             } else {
                                 echo 'SKIPPED: example_freertos_l2_cache'
