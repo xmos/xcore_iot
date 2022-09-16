@@ -69,12 +69,26 @@ static void i2c_slave_tx_done(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *da
         i2c_printf("SLAVE missing i2c_slave_tx_done callback on test %d", test_ctx->cur_test);
     }
 }
+
+RTOS_I2C_SLAVE_RX_BYTE_CHECK_CALLBACK_ATTR
+void i2c_slave_rx_byte_check(rtos_i2c_slave_t *ctx, void *app_data, uint8_t data, i2c_slave_ack_t *cur_status)
+{
+    i2c_test_ctx_t *test_ctx = (i2c_test_ctx_t*)ctx->app_data;
+    if (test_ctx->slave_rx_check_byte[test_ctx->cur_test] != NULL)
+    {
+        I2C_SLAVE_RX_BYTE_CHECK_ATTR i2c_slave_rx_byte_check_cb_t fn;
+        fn = test_ctx->slave_rx_check_byte[test_ctx->cur_test];
+        fn(ctx, app_data, data, cur_status);
+    } else {
+        i2c_printf("SLAVE missing slave_rx_check_byte callback on test %d", test_ctx->cur_test);
+    }
+}
+
 #endif /* ON_TILE(1) */
 
 static int run_i2c_tests(i2c_test_ctx_t *test_ctx, chanend_t c)
 {
     int retval = 0;
-
     do
     {
         sync(c);
@@ -116,6 +130,7 @@ static void start_i2c_devices(i2c_test_ctx_t *test_ctx)
                          i2c_slave_rx,
                          i2c_slave_tx_start,
                          i2c_slave_tx_done,
+                         i2c_slave_rx_byte_check,
                          I2C_SLAVE_ISR_CORE,
                          configMAX_PRIORITIES-1);
 #endif
