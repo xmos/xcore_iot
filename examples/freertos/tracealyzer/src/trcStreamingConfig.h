@@ -28,7 +28,7 @@ extern "C" {
  * trace display will be affected. In that case, there will be warnings
  * (as User Events) from TzCtrl task, that monitors this.
  */
-#define TRC_CFG_ENTRY_SLOTS 50
+#define TRC_CFG_ENTRY_SLOTS 250
 
 /**
  * @def TRC_CFG_ENTRY_SYMBOL_MAX_LENGTH

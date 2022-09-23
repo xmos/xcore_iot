@@ -23,7 +23,7 @@ extern "C" {
  * required at least for the ARM Cortex-M port, that uses the ARM CMSIS API.
  * Try that in case of build problems. Otherwise, remove the #error line below.
  *****************************************************************************/
-#error "Trace Recorder: Please include your processor's header file here and remove this line."
+//#error "Trace Recorder: Please include your processor's header file here and remove this line."
 
 /**
  * @def TRC_CFG_HARDWARE_PORT
@@ -42,7 +42,7 @@ extern "C" {
  * See trcHardwarePort.h for available ports and information on how to
  * define your own port, if not already present.
  */
-#define TRC_CFG_HARDWARE_PORT TRC_HARDWARE_PORT_NOT_SET
+#define TRC_CFG_HARDWARE_PORT TRC_HARDWARE_PORT_XMOS_XCOREAI
 
 /**
  * @def TRC_CFG_SCHEDULING_ONLY
@@ -157,7 +157,7 @@ extern "C" {
  *
  * Default value is 10.
  */
-#define TRC_CFG_STACK_MONITOR_MAX_TASKS 10
+#define TRC_CFG_STACK_MONITOR_MAX_TASKS 200
 
 /**
  * @def TRC_CFG_STACK_MONITOR_MAX_REPORTS
@@ -206,7 +206,7 @@ extern "C" {
  * increases the CPU load of TzCtrl somewhat, but may improve the performance of
  * of the trace streaming, especially if the trace buffer is small.
  */
-#define TRC_CFG_CTRL_TASK_DELAY 2
+#define TRC_CFG_CTRL_TASK_DELAY 100
 
 /**
  * @def TRC_CFG_CTRL_TASK_STACK_SIZE

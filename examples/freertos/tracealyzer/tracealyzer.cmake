@@ -17,7 +17,10 @@ set(APP_COMPILER_FLAGS
     ${CMAKE_CURRENT_LIST_DIR}/src/config.xscope
     ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
 )
+
+# See xcore_trace.h for valid USE_TRACE_MODE values.
 set(APP_COMPILE_DEFINITIONS
+    USE_TRACE_MODE=TRACE_MODE_TRACEALYZER_STREAMING
     DEBUG_PRINT_ENABLE=1
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
@@ -33,6 +36,7 @@ set(APP_LINK_OPTIONS
 
 set(APP_LINK_LIBRARIES
     rtos::bsp_config::xcore_ai_explorer
+    rtos::drivers::trace
 )
 
 #**********************
@@ -66,5 +70,7 @@ merge_binaries(example_freertos_tracealyzer tile0_example_freertos_tracealyzer t
 #**********************
 # Create run and debug targets
 #**********************
+create_run_xscope_to_file_target(example_freertos_tracealyzer freertos_trace)
 create_run_target(example_freertos_tracealyzer)
 create_debug_target(example_freertos_tracealyzer)
+create_install_target(example_freertos_tracealyzer)
