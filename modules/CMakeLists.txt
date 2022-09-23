@@ -7,3 +7,4 @@ add_subdirectory(voice)
 
 ## Add additional modules
 add_subdirectory(sample_rate_conversion)
+add_subdirectory(xscope_fileio)
