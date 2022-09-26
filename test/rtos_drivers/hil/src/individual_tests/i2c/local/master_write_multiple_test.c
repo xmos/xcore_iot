@@ -163,6 +163,7 @@ void register_master_write_multiple_test(i2c_test_ctx_t *test_ctx)
     #if ON_TILE(I2C_SLAVE_TILE)
     test_ctx->slave_rx[this_test_num] = slave_rx;
     test_ctx->slave_rx_check_byte[this_test_num] = slave_rx_byte_check;
+    test_ctx->slave_write_addr_req[this_test_num] = NULL;
     #endif
 
     #if ON_TILE(I2C_MASTER_TILE)
