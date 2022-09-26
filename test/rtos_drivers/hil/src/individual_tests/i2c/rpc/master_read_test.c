@@ -157,6 +157,7 @@ void register_rpc_master_read_test(i2c_test_ctx_t *test_ctx)
     test_ctx->slave_tx_start[this_test_num] = slave_tx_start;
     test_ctx->slave_tx_done[this_test_num] = slave_tx_done;
     test_ctx->slave_rx_check_byte[this_test_num] = slave_rx_byte_check;
+    test_ctx->slave_write_addr_req[this_test_num] = NULL;
     #endif
 
     #if ON_TILE(0)
