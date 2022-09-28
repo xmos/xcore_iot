@@ -1,6 +1,6 @@
-################################
-FreeRTOS XSCOPE File I/O Example
-################################
+###############
+XSCOPE File I/O
+###############
 
 This FreeRTOS example application reads a file from the host over an XSCOPE server, propagates the data through multiple threads across both tiles, and then writes to a host file, also over an XSCOPE server.
 
@@ -11,7 +11,7 @@ This FreeRTOS example application reads a file from the host over an XSCOPE serv
 Supported Hardware
 ******************
 
-This example is supported on the XCORE-AI-EXPLORER_2V0 board.
+This example is supported on the XCORE-AI-EXPLORER board.
 
 *********************
 Building the Firmware
