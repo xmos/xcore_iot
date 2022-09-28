@@ -4,6 +4,10 @@ XLINK
 
 This example application demonstrates the `AN01024 <https://www.xmos.ai/file/an01024-xconnect-dynamic-configuration-demo-sw/>`_ application note in FreeRTOS on XCORE AI.
 
+.. note::
+
+  This example application required XTC Tools version 15.2.0 or newer.
+
 **********************
 Preparing the hardware
 **********************
