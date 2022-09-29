@@ -43,6 +43,7 @@ set(APP_LINK_OPTIONS
 set(APP_COMMON_LINK_LIBRARIES
     sdk::xscope_fileio
     rtos::bsp_config::xcore_ai_explorer
+    core::xs3_math
 )
 
 #**********************

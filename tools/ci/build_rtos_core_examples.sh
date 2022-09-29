@@ -16,7 +16,7 @@ if [ -d "${DIST_HOST_DIR}" ]; then
     find ${DIST_HOST_DIR} -type f -exec chmod a+x {} +
 fi
 
-# row format is: "name app_target min_tools_version run_fs_target run_swmem_target board toolchain"
+# row format is: "target min_tools_version run_fs_target run_swmem_target board toolchain"
 applications=(
     "example_freertos_device_control   15.1.0  No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_dispatcher       15.1.0  No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
