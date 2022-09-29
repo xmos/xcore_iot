@@ -11,6 +11,7 @@
 #define appconfINTER_DELAY 2
 #define appconfINTRA_DELAY 3
 
+
 #define appconfRX_DIRECTION 0
 #define appconfRX_NODE_ID 0x20
 #define appconfRX_DEBUG_I2C_SLAVE_ADDR 0xc
@@ -33,8 +34,8 @@
 #define appconfI2C_INTERRUPT_CORE               0 /* Must be kept off I/O cores. */
 
 /* I/O and interrupt cores for Tile 1 */
-#ifndef appconfXLINK_RX_IO_CORE     1  /* Must be kept off core 0 with the RTOS tick ISR */
-#ifndef appconfXLINK_TX_IO_CORE     1  /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfXLINK_RX_IO_CORE     1  /* Must be kept off core 0 with the RTOS tick ISR */
+#define appconfXLINK_TX_IO_CORE     1  /* Must be kept off core 0 with the RTOS tick ISR */
 
 /* Task Priorities */
 #define appconfSTARTUP_TASK_PRIORITY            ( configMAX_PRIORITIES - 1 )

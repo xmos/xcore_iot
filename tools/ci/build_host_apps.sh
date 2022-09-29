@@ -28,3 +28,8 @@ make_target=example_freertos_device_control_host
 name=fatfs/host
 make_target=fatfs_mkimage
 (cd ${path}/build_host; cp modules/rtos/modules/sw_services/${name}/${make_target} ${DIST_DIR})
+
+# copy xscope_host_endpoint to dist
+name=xscope_fileio/host
+make_target=xscope_host_endpoint
+(cd ${path}/build_host; cp modules/xscope_fileio/${name}/${make_target} ${DIST_DIR})
