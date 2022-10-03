@@ -1,6 +1,6 @@
-.. _freertos-faq:
-
 .. include:: ../../substitutions.rst
+
+.. _freertos-faq:
 
 #############
 FreeRTOS FAQs
@@ -25,7 +25,7 @@ FreeRTOS FAQs
                     EXAMPLE_TASK_PRIORITY,
                     NULL);
 
-    If function pointers are used within a thread, then the application programmer must annotate the code with the appropriate function pointer group attribute.  For recursive functions, the only option is to specify the stack manually.  See `Appendix A - Guiding Stack Size Calculation <https://www.xmos.ai/documentation/XM-014363-PC-5/html/prog-guide/quick-start/c-programming-guide/index.html>`_ in the XTC Tools documentation for more information.
+    If function pointers are used within a thread, then the application programmer must annotate the code with the appropriate function pointer group attribute.  For recursive functions, the only option is to specify the stack manually.  See `Appendix A - Guiding Stack Size Calculation <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/prog-guide/quick-start/c-programming-guide/index.html>`_ in the XTC Tools documentation for more information.
 
 3. Can I use xcore resources like channels, timers and hw_locks?
 

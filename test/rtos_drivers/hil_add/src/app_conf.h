@@ -14,8 +14,8 @@
 #define SPI_TEST_CPOL   0
 #define SPI_TEST_CPHA   0
 
-#define SPI_SLAVE_CORE_MASK     (1 << 1)
-#define SPI_SLAVE_ISR_CORE      0
+#define SPI_SLAVE_CORE_MASK     (1 << 4)
+#define SPI_SLAVE_ISR_CORE      5
 
 #define SPI_TEST_BUF_SIZE       4096
 

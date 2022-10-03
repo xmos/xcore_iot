@@ -127,6 +127,20 @@ static void slave_tx_done(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, 
     test_slave_iters++;
 }
 
+static int slave_byte_check = 0;
+
+I2C_SLAVE_RX_BYTE_CHECK_ATTR
+static void slave_rx_byte_check(rtos_i2c_slave_t *ctx, void *app_data, uint8_t data, i2c_slave_ack_t *cur_status)
+{
+    i2c_test_ctx_t *test_ctx = (i2c_test_ctx_t*)ctx->app_data;
+    local_printf("SLAVE rx byte check 0x%x status %d", data, *cur_status);
+    int i = slave_byte_check % I2C_MASTER_READ_TEST_SIZE;
+    slave_byte_check++;
+    if (test_vector[test_slave_iters][i] != data) {
+        local_printf("SLAVE rx byte check failed");
+        test_ctx->slave_success[test_ctx->cur_test] = -1;
+    }
+}
 #endif
 
 void register_rpc_master_read_test(i2c_test_ctx_t *test_ctx)
@@ -142,6 +156,8 @@ void register_rpc_master_read_test(i2c_test_ctx_t *test_ctx)
     test_ctx->slave_rx[this_test_num] = slave_rx;
     test_ctx->slave_tx_start[this_test_num] = slave_tx_start;
     test_ctx->slave_tx_done[this_test_num] = slave_tx_done;
+    test_ctx->slave_rx_check_byte[this_test_num] = slave_rx_byte_check;
+    test_ctx->slave_write_addr_req[this_test_num] = NULL;
     #endif
 
     #if ON_TILE(0)

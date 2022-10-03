@@ -1,6 +1,6 @@
-.. _freertos-common_issues:
-
 .. include:: ../../substitutions.rst
+
+.. _freertos-common_issues:
 
 ######################
 FreeRTOS Common Issues
