@@ -27,6 +27,7 @@ else()
     endif()
 
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/freertos/device_control/host)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/freertos/tracealyzer/host)
     add_subdirectory(modules/xscope_fileio/xscope_fileio/host)
     install(TARGETS xscope_host_endpoint DESTINATION ${HOST_INSTALL_DIR})
 endif()
