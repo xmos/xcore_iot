@@ -87,3 +87,4 @@ add_custom_target(run_example_freertos_xscope_fileio
 
 create_debug_target(example_freertos_xscope_fileio)
 create_flash_app_target(example_freertos_xscope_fileio)
+create_install_target(example_freertos_xscope_fileio)

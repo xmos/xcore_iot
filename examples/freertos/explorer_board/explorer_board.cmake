@@ -70,6 +70,7 @@ merge_binaries(example_freertos_explorer_board tile0_example_freertos_explorer_b
 #**********************
 create_run_target(example_freertos_explorer_board)
 create_debug_target(example_freertos_explorer_board)
+create_install_target(example_freertos_explorer_board)
 
 #**********************
 # Filesystem support targets

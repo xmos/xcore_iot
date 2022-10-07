@@ -57,6 +57,7 @@ target_link_options(example_freertos_l2_cache PRIVATE ${APP_LINK_OPTIONS})
 #**********************
 create_run_target(example_freertos_l2_cache)
 create_debug_target(example_freertos_l2_cache)
+create_install_target(example_freertos_l2_cache)
 
 #**********************
 # Extract swmem

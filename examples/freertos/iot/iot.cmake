@@ -85,6 +85,7 @@ merge_binaries(example_freertos_iot tile0_example_freertos_iot tile1_example_fre
 #**********************
 create_run_target(example_freertos_iot)
 create_debug_target(example_freertos_iot)
+create_install_target(example_freertos_iot)
 
 #**********************
 # Filesystem support targets

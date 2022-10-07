@@ -36,8 +36,7 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
 
     (cd ${path}; rm -rf build_${board})
     (cd ${path}; mkdir -p build_${board})
-    (cd ${path}/build_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board}; log_errors make ${app_target} -j)
-    (cd ${path}/build_${board}; cp ${app_target}.xe ${DIST_DIR})
+    (cd ${path}/build_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board}; log_errors make install_${app_target} -j)
     if [ "$run_fs_target" = "Yes" ]; then
         echo '======================================================'
         echo '= Making filesystem for' ${app_target}

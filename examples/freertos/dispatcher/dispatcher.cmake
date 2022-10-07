@@ -54,3 +54,4 @@ target_link_options(example_freertos_dispatcher PRIVATE ${APP_LINK_OPTIONS})
 #**********************
 create_run_target(example_freertos_dispatcher)
 create_debug_target(example_freertos_dispatcher)
+create_install_target(example_freertos_dispatcher)
