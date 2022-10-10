@@ -10,6 +10,6 @@ add_subdirectory(sample_rate_conversion)
 add_subdirectory(xscope_fileio)
 
 ## The following alias is added to support in intermediate version of fwk_voick
-##  THis can be removed once fwk_voice is updated to use the new, core::lib_tflite_micro alias
+##  This can be removed once fwk_voice is updated to use the new, core::lib_tflite_micro alias
 add_library(sdk::inferencing::lib_tflite_micro ALIAS inferencing_tflite_micro)
 
