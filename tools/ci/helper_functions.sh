@@ -31,27 +31,16 @@ function check_tools_version {
     MIN_VERSION_MINOR=${FIELDS[1]}
     MIN_VERSION_PATCH=${FIELDS[2]}
     # Run xcc --version 
-    xcc_version_output_string=`xcc --version`
-    if [[ "$xcc_version_output_string" == *"XTC version:"* ]]; then
-        # Find the semantic version substring
-        prefix=${xcc_version_output_string%%"XTC version:"*}
-        zero_index=${#prefix}
-        start_index=`expr $zero_index + 14`
-        prefix=${xcc_version_output_string%%"Copyright"*}
-        end_index=${#prefix}
-        xcc_semver_substring=`echo $xcc_version_output_string | cut -c$start_index-$end_index`
-        # Split semver substring into fields
-        IFS='.' read -ra FIELDS <<< "$xcc_semver_substring"
-        XTC_VERSION_MAJOR=${FIELDS[0]}
-        XTC_VERSION_MINOR=${FIELDS[1]}
-        XTC_VERSION_PATCH=${FIELDS[2]}
-    else
-        # Unable to determine the version. Return 15.1.0 and hope for the best
-        # Note, 15.1.0 had a bug where the version was missing
-        XTC_VERSION_MAJOR="15"
-        XTC_VERSION_MINOR="1"
-        XTC_VERSION_PATCH="0"
-    fi
+    xcc_version_output_string=`cat "$XMOS_TOOL_PATH"/doc/version.txt`
+    # Find the semantic version substring
+    prefix=${xcc_version_output_string%%" "*}
+    space_position=${#prefix}
+    xcc_semver_substring=`echo $xcc_version_output_string | cut -c1-$space_position`
+    # Split semver substring into fields
+    IFS='.' read -ra FIELDS <<< "$xcc_semver_substring"
+    XTC_VERSION_MAJOR=${FIELDS[0]}
+    XTC_VERSION_MINOR=${FIELDS[1]}
+    XTC_VERSION_PATCH=${FIELDS[2]}
     # Check version
     if [ "$XTC_VERSION_MAJOR" -lt "$MIN_VERSION_MAJOR" ]
     then
