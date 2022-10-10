@@ -132,16 +132,7 @@ The following conventions are used when naming CMake targets:
 - Targets that match ``example_freertos_*`` are FreeRTOS examples
 - Targets that match ``run_example_*`` are a shortcut recipe to call ``xrun`` with ``xscope`` and the associated firmware
 - Targets that match ``debug_example_*`` are a shortcut recipe to call ``xgdb`` with ``xscope`` and the associated firmware
+- Targets that match ``install_example_*`` are a shortcut recipe to copy the associated firmware to the ``dist`` output directory 
 - Targets that match ``xsim_example_*`` are a shortcut recipe to call ``xsim`` with the associated firmware
 - Targets that match ``flash_example_*`` are a shortcut recipe to flash required data
 - Targets that match ``flash_fs_example_*`` are a shortcut recipe to flash required data for applications using a filesystem
-
-****************
-Development Tips
-****************
-
-At times submodule repositories will need to be updated.  To update all submodules, run the following command
-
-.. code-block:: console
-
-    git submodule update --init --recursive
