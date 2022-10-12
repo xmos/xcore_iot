@@ -228,6 +228,16 @@ static void spin_ref_tmr_ticks(uint32_t ticks)
 
 static void process_task(void *arg)
 {
+    /*
+     * This value is used to limit how frequently to produce user event traces.
+     * Creating too many events may lead to data loss due to bandwidth
+     * limitations. This may be observed by closely inspecting the sinusoidal
+     * (or run iteration) waveform being generated in this example. In such
+     * cases, a sample will be held onto for a period of time and then there
+     * will be an "unexpected" phase jump.
+     */
+    const uint8_t trace_subsample_count = 8;
+
     uint32_t current_run_ticks;
     uint32_t last_run_ticks;
     uint32_t delta_ticks;
@@ -276,8 +286,9 @@ static void process_task(void *arg)
                 last_run_ticks = current_run_ticks;
 
 #if ((TRC_USE_TRACEALYZER_RECORDER == 1) && (TRC_CFG_INCLUDE_USER_EVENTS == 1))
-                xTracePrintF(trc_run_iteration, "%d", run_iteration);
-                xTracePrintF(trc_run_delta, "%d", delta_ticks);
+                if ((run_iteration % trace_subsample_count) == 1) {
+                    xTracePrintF(trc_run_iteration, "%d", run_iteration);
+                }
 #endif
 
                 if (delta_ticks >= PROCESS_TIMEOUT_TICKS) {
@@ -287,7 +298,9 @@ static void process_task(void *arg)
 
 #if ((TRC_USE_TRACEALYZER_RECORDER == 1) && (TRC_CFG_INCLUDE_USER_EVENTS == 1))
                 uint32_t output = PROCESS_WAVEFORM(run_iteration);
-                xTracePrintF(trc_output, "%d", output);
+                if ((run_iteration % trace_subsample_count) == 1) {
+                    xTracePrintF(trc_output, "%d", output);
+                }
 #endif
                 /*
                  * In this example, the main process and subprocesses use

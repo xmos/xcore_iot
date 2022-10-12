@@ -135,7 +135,7 @@ extern "C" {
  *
  * Default value is 1.
  */
-#define TRC_CFG_INCLUDE_OSTICK_EVENTS 1
+#define TRC_CFG_INCLUDE_OSTICK_EVENTS 0
 
 /**
  * @def TRC_CFG_ENABLE_STACK_MONITOR
