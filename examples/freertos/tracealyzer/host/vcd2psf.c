@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include "xscope_endpoint.h"
 
 #define VERSION "1.0.0"
 
@@ -37,9 +38,17 @@
  */
 #define PRINT_PSF_EVENTS        0
 
+/*
+ * Enables printing records for probes other than XSCOPE_PROBE_ID when
+ * the `--in-port` option is specified. This is mainly for development
+ * purposes.
+ */
+#define PRINT_OTHER_RECORDS     0
+
 typedef enum error_code {
     ERROR_NONE,
     ERROR_INTERNAL,
+    ERROR_MUTUALLY_EXCLUSIVE_ARGS,
     ERROR_MISSING_ARG,
     ERROR_UNKOWN_ARG,
     ERROR_ARG_VALUE_MISSING,
@@ -110,10 +119,13 @@ static const char *help_arg[] = {"-h", "--help"};
 static const char *version_arg[] = {"--version"};
 static const char *verbose_arg[] = {"-v", "--verbose"};
 static const char *stream_arg[] = {"-s", "--stream"};
+static const char *print_endpoint_arg[] = {"-p", "--print-endpoint"};
 static const char *delay_arg[] = {"-d", "--delay"};
 static const char *input_file_arg[] = {"-i", "--in-file"};
+static const char *input_port_arg[] = {"-I", "--in-port"};
 static const char *output_file_arg[] = {"-o", "--out-file"};
 
+static bool running = true;
 static int event_count = 0;
 static long long line_count = 0;
 static process_psf_state_t psf_state = PROCESS_PSF_HEADER;
@@ -127,18 +139,23 @@ static log_level_t log_level = LOG_WRN;
 static bool show_help = false;
 static bool show_version = false;
 static bool stream_mode = false;
+static bool print_endpoint = false;
 static int sleep_ms = 1000;
-
+static char *input_host = NULL;
+static char *input_port = NULL;
 static char *input_filename = NULL;
 static char *output_filename = NULL;
+static FILE *out_file = NULL;
 
 static void print_help(char *arg0)
 {
     printf("Usage:\n");
-    printf("    %s [-h] [--version] [-v] [-s] [-d <DELAY_MS>] -i <IN_FILE> -o <OUT_FILE>\n\n",
+    printf("    %s [-h] [--version]\n\n", arg0);
+    printf("    %s [-v] [-s] [-d <DELAY_MS>] -i <IN_FILE> -o <OUT_FILE>\n\n",
            arg0);
-    printf("Convert an xscope Value Change Dump (VCD) file containing Tracealyzer data to\n"
-           "Percepio Streaming Format (PSF).\n\n");
+    printf("    %s [-v] [-p] -I <HOST>:<PORT> -o <OUT_FILE>\n\n", arg0);
+    printf("Generate a Percepio Streaming Format (PSF) file based on Tracealyzer data received\n"
+           "via an xscope Value Change Dump (VCD) file or an xscope endpoint socket connection.\n\n");
     printf("Options:\n");
     printf("    -h, --help                  This help menu.\n");
     printf("        --version               Print the version of this tool.\n");
@@ -146,11 +163,16 @@ static void print_help(char *arg0)
     printf("    -s, --stream                Once the end of a file has been reached,\n"
            "                                continue to wait for more data. Terminate\n"
            "                                execution via Ctrl+C or other means.\n");
+    printf("    -p, --print-endpoint        When using -in-port, this option will enable\n"
+           "                                reception of printf data on this xscope endpoint.\n");
     printf("    -d, --delay <DELAY_MS>      The time in milliseconds to sleep when waiting for more\n"
            "                                data on the input file stream. This option only applies\n"
            "                                for --stream. Default = 1000.\n");
     printf("    -i, --in-file <IN_FILE>     The VCD file to process. In stream mode, the\n"
            "                                application will wait for such a file to exist.\n");
+    printf("    -I, --in-port <HOST>:<PORT> The host and port (separated by ':' on the which\n"
+           "                                xgdb's --xscope-port is serving on.\n"
+           "                                Note: --stream is implied when using this mode.\n");
     printf("    -o, --out-file <OUT_FILE>   The PSF file to generate.\n");
 }
 
@@ -178,7 +200,10 @@ static void write_log(log_level_t level, const char *format, ...)
 static void print_stream_status(void)
 {
     write_log(LOG_INF, "[STREAM STATUS]\n");
-    write_log(LOG_INF, "- Read %lld lines\n", line_count);
+
+    if (input_filename)
+        write_log(LOG_INF, "- Read %lld lines\n", line_count);
+
     write_log(LOG_INF, "- Processed %d events\n", event_count + 1);
 }
 
@@ -549,6 +574,60 @@ static error_code_t process_vcd_file(FILE *input_file, FILE *output_file)
     return ERROR_NONE;
 }
 
+static void xscope_exit_cb(void)
+{
+    running = false;
+}
+
+static void xscope_register_cb(unsigned int id, unsigned int type,
+                               unsigned int r, unsigned int g, unsigned int b,
+                               unsigned char *name, unsigned char *unit,
+                               unsigned int data_type, unsigned char *data_name)
+{
+    if (!running)
+        return;
+
+    write_log(LOG_INF, "[REGISTERED] Probe ID: %d, Name: '%s'\n", id, name);
+}
+
+static void xscope_print_cb(unsigned long long timestamp, unsigned int length,
+                            unsigned char *data)
+{
+    if (!running || (length == 0))
+        return;
+
+    printf("[PRINT] ");
+
+    for (unsigned i = 0; i < length; i++)
+        printf("%c", data[i]);
+}
+
+static void xscope_record_cb(unsigned int id, unsigned long long timestamp,
+                             unsigned int length, unsigned long long data_val,
+                             unsigned char *data_bytes)
+{
+    if (!running)
+        return;
+
+    if (id == XSCOPE_PROBE_ID) {
+        error_code_t res = process_psf_data(data_bytes, length);
+        if (res != ERROR_NONE && res != ERROR_DATA_TOO_SHORT) {
+            running = false;
+            return;
+        }
+
+        if (fwrite(data_bytes, sizeof(data_bytes[0]), length, out_file) !=
+            length) {
+            write_log(LOG_ERR, "Data lost while writing to file system.\n");
+        }
+    }
+#if (PRINT_OTHER_RECORDS == 1)
+    else {
+        print_record(id, timestamp, length, data_val, data_bytes);
+    }
+#endif
+}
+
 static bool is_matching_arg(char *arg, const char *arg_options[],
                             int num_options)
 {
@@ -592,6 +671,17 @@ static error_code_t process_args(int argc, char *argv[])
 
             input_filename = argv[i];
             in_file_present = true;
+        } else if (is_matching_arg(argv[i], input_port_arg,
+                                   NUM_ELEMS(input_port_arg))) {
+            if (next_arg_value(argc, argv, &i) != ERROR_NONE)
+                return ERROR_ARG_VALUE_MISSING;
+
+            /* The argument follows similar format to --xscope-port, where
+             * the value specified follows the form <host>:<port>. */
+            const char delims[] = ":";
+            input_host = strtok(argv[i], delims);
+            input_port = strtok(NULL, delims);
+            in_port_present = (input_host && input_port);
         } else if (is_matching_arg(argv[i], output_file_arg,
                                    NUM_ELEMS(output_file_arg))) {
             if (next_arg_value(argc, argv, &i) != ERROR_NONE)
@@ -599,6 +689,9 @@ static error_code_t process_args(int argc, char *argv[])
 
             output_filename = argv[i];
             out_file_present = true;
+        } else if (is_matching_arg(argv[i], print_endpoint_arg,
+                                   NUM_ELEMS(print_endpoint_arg))) {
+            print_endpoint = true;
         } else if (is_matching_arg(argv[i], delay_arg, NUM_ELEMS(delay_arg))) {
             if (next_arg_value(argc, argv, &i) != ERROR_NONE)
                 return ERROR_ARG_VALUE_MISSING;
@@ -620,7 +713,10 @@ static error_code_t process_args(int argc, char *argv[])
         }
     }
 
-    return (in_file_present && out_file_present) ?
+    if (in_port_present && in_file_present)
+        return ERROR_MUTUALLY_EXCLUSIVE_ARGS;
+
+    return ((in_port_present || in_file_present) && out_file_present) ?
                    ERROR_NONE :
                    ERROR_MISSING_ARG;
 }
@@ -629,7 +725,6 @@ int main(int argc, char *argv[])
 {
     int exit_code = process_args(argc, argv);
     FILE *in_file = NULL;
-    FILE *out_file;
 
     if (show_help || exit_code) {
         print_help(argv[0]);
@@ -639,36 +734,78 @@ int main(int argc, char *argv[])
         return exit_code;
     }
 
-    write_log(LOG_INF, "Opening input file ...\n");
+    // Setup the input data source based on the specified user arguments
+    if (input_filename) {
+        write_log(LOG_INF, "Opening input file ...\n");
 
-    while (1) {
-        in_file = fopen(input_filename, "r");
+        while (1) {
+            in_file = fopen(input_filename, "r");
 
-        if (in_file != NULL)
-            break;
+            if (in_file != NULL)
+                break;
 
-        if (stream_mode) {
-            SLEEP_MS(1000);
-        } else {
-            write_log(LOG_INF, "File not found.\n");
-            return ERROR_FILE_SYSTEM;
+            if (stream_mode) {
+                SLEEP_MS(1000);
+            } else {
+                write_log(LOG_INF, "File not found.\n");
+                return ERROR_FILE_SYSTEM;
+            }
         }
+    } else {
+        write_log(LOG_INF, "Configuring xscope callbacks ...\n");
+
+        if (print_endpoint)
+            xscope_ep_set_print_cb(xscope_print_cb);
+
+        xscope_ep_set_register_cb(xscope_register_cb);
+        xscope_ep_set_record_cb(xscope_record_cb);
+        xscope_ep_set_exit_cb(xscope_exit_cb);
     }
 
     write_log(LOG_INF, "Opening output file ...\n");
     out_file = fopen(output_filename, "wb");
 
     if (out_file == NULL) {
-        fclose(in_file);
+        if (in_file != NULL)
+            fclose(in_file);
+
         return ERROR_FILE_SYSTEM;
     }
 
-    write_log(LOG_INF, "Processing file (Probe: %d) ...\n", XSCOPE_PROBE_ID);
-    process_vcd_file(in_file, out_file);
+    // Process the input data source based on the specified user arguments
+    if (input_filename) {
+        write_log(LOG_INF, "Processing file (Probe: %d) ...\n",
+                  XSCOPE_PROBE_ID);
+        process_vcd_file(in_file, out_file);
+    } else {
+        write_log(LOG_INF,
+                  "Connecting to xscope (Probe: %d, Host: %s, Port: %s) ...\n",
+                  XSCOPE_PROBE_ID, input_host, input_port);
+        int error = xscope_ep_connect(input_host, input_port);
+        if (error) {
+            running = false;
+            write_log(LOG_ERR, "Failed to connect to xscope (%d).\n", error);
+        }
+
+        // While 'running' print out basic status info for user feedback.
+        int last_event_count = 0;
+        while (running) {
+            if (last_event_count != event_count) {
+                print_stream_status();
+                last_event_count = event_count;
+            }
+
+            SLEEP_MS(1000);
+        }
+
+        write_log(LOG_INF, "Disconnecting from xscope ...\n");
+        xscope_ep_disconnect();
+    }
 
     write_log(LOG_INF, "Closing files ...\n");
     fclose(out_file);
-    fclose(in_file);
+    if (in_file != NULL)
+        fclose(in_file);
 
     write_log(LOG_INF, "Done.\n");
 

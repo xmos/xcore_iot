@@ -22,9 +22,18 @@ set(APP_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/vcd2psf.c"
 )
 
+set(APP_INCLUDES
+    "$ENV{XMOS_TOOL_PATH}/include/"
+)
+
+find_library(XSCOPE_ENDPOINT_LIB NAMES xscope_endpoint.so xscope_endpoint.lib
+                                 PATHS $ENV{XMOS_TOOL_PATH}/lib)
+
 add_executable(${TARGET_NAME})
 
 target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES})
+target_link_libraries(${TARGET_NAME} PRIVATE ${XSCOPE_ENDPOINT_LIB})
 install(TARGETS ${TARGET_NAME} DESTINATION ${VCD2PSF_INSTALL_DIR})
 
 if ((CMAKE_C_COMPILER_ID STREQUAL "Clang") OR (CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
