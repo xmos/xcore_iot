@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(vcd2psf LANGUAGES C)
-set(TARGET_NAME vcd2psf)
+project(xscope2psf LANGUAGES C)
+set(TARGET_NAME xscope2psf)
 
 set(FATFS_HOST_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
@@ -11,15 +11,15 @@ string(JSON VERSION_VAL GET ${JSON_STRING} ${IDX} version)
 
 # Determine OS, set up output dirs
 if(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-    set(VCD2PSF_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
+    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-    set(VCD2PSF_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
+    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-    set(VCD2PSF_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\SDK\\${VERSION_VAL}\\bin")
+    set(XSCOPE2PSF_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\SDK\\${VERSION_VAL}\\bin")
 endif()
 
 set(APP_SOURCES
-    "${CMAKE_CURRENT_LIST_DIR}/vcd2psf.c"
+    "${CMAKE_CURRENT_LIST_DIR}/xscope2psf.c"
 )
 
 set(APP_INCLUDES
@@ -34,7 +34,7 @@ add_executable(${TARGET_NAME})
 target_sources(${TARGET_NAME} PRIVATE ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PRIVATE ${APP_INCLUDES})
 target_link_libraries(${TARGET_NAME} PRIVATE ${XSCOPE_ENDPOINT_LIB})
-install(TARGETS ${TARGET_NAME} DESTINATION ${VCD2PSF_INSTALL_DIR})
+install(TARGETS ${TARGET_NAME} DESTINATION ${XSCOPE2PSF_INSTALL_DIR})
 
 if ((CMAKE_C_COMPILER_ID STREQUAL "Clang") OR (CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
     message(STATUS "Configuring for Clang")

@@ -14,7 +14,7 @@ applications=(
     "example_freertos_device_control_host   examples/freertos/device_control/host"
     "fatfs_mkimage                          modules/rtos/modules/sw_services/fatfs/host"
     "xscope_host_endpoint                   modules/xscope_fileio/xscope_fileio/host"
-    "vcd2psf                                examples/freertos/tracealyzer/host"
+    "xscope2psf                             examples/freertos/tracealyzer/host"
 )
 
 # perform builds
