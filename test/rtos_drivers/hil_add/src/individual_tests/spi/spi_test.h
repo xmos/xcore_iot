@@ -37,6 +37,7 @@ int spi_device_tests(rtos_spi_master_t *spi_master_ctx, rtos_spi_master_device_t
 /* Local Tests */
 void register_single_transaction_test(spi_test_ctx_t *test_ctx);
 void register_multiple_transaction_test(spi_test_ctx_t *test_ctx);
+void register_slave_default_buffer_test(spi_test_ctx_t *test_ctx);
 
 /* RPC Tests */
 void register_rpc_single_transaction_test(spi_test_ctx_t *test_ctx);
