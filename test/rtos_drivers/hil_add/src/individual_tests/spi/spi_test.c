@@ -94,6 +94,8 @@ static void register_spi_tests(spi_test_ctx_t *test_ctx)
 
     register_rpc_single_transaction_test(test_ctx);
     register_rpc_multiple_transaction_test(test_ctx);
+
+    register_slave_default_buffer_test(test_ctx);
 }
 
 static void spi_init_tests(spi_test_ctx_t *test_ctx, rtos_spi_master_t *spi_master_ctx, rtos_spi_master_device_t *spi_device_ctx, rtos_spi_slave_t *spi_slave_ctx)

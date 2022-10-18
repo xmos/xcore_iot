@@ -8,7 +8,7 @@
 
 #define spi_printf( FMT, ... )       module_printf("SPI", FMT, ##__VA_ARGS__)
 
-#define SPI_MAX_TESTS   4
+#define SPI_MAX_TESTS   5
 
 #define SPI_MAIN_TEST_ATTR          __attribute__((fptrgroup("rtos_test_spi_main_test_fptr_grp")))
 #define SPI_SLAVE_XFER_DONE_ATTR    __attribute__((fptrgroup("rtos_test_spi_slave_xfer_done_fptr_grp")))

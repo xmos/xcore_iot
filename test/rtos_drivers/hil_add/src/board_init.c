@@ -36,12 +36,12 @@ void board_tile0_init(
             0, /* CS pin is on bit 0 of the CS port */
             SPI_MODE_0,
             spi_master_source_clock_ref,
-            0, /* 50 MHz */
+            1, /* 50 MHz */
             spi_master_sample_delay_2,
             0,
-            1,
-            0,
-            0);
+            10000,
+            10000,
+            10000);
 
     rtos_spi_master_device_t *spi_devices_ctx[1] = {test_device_ctx};
 
