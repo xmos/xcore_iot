@@ -17,20 +17,22 @@ echo '******************************************************'
 
 (cd ${path}; rm -rf build_host)
 (cd ${path}; mkdir -p build_host)
-#(cd ${path}/build_host; log_errors cmake ../ ; log_errors make -j)
-(cd ${path}/build_host; cmake ../ ; make)
+(cd ${path}/build_host; log_errors cmake ../)
 
-# copy example_freertos_device_control_host to dist
+# example_freertos_device_control_host
 name=device_control/host
 make_target=example_freertos_device_control_host
+(cd ${path}/build_host; log_errors make ${make_target} -j)
 (cd ${path}/build_host; cp examples/freertos/${name}/${make_target} ${DIST_DIR})
 
-# copy fatfs_mkimage to dist
+# fatfs_mkimage
 name=fatfs/host
 make_target=fatfs_mkimage
+(cd ${path}/build_host; log_errors make ${make_target} -j)
 (cd ${path}/build_host; cp modules/rtos/modules/sw_services/${name}/${make_target} ${DIST_DIR})
 
-# copy xscope_host_endpoint to dist
+# xscope_host_endpoint
 name=xscope_fileio/host
 make_target=xscope_host_endpoint
+(cd ${path}/build_host; log_errors make ${make_target} -j)
 (cd ${path}/build_host; cp modules/xscope_fileio/${name}/${make_target} ${DIST_DIR})
