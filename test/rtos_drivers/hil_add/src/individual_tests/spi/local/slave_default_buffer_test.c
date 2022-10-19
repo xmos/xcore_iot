@@ -67,51 +67,8 @@ static int main_test(spi_test_ctx_t *ctx)
                 SPI_TEST_BUF_SIZE,
                 test_buf,
                 SPI_TEST_BUF_SIZE);
-    }
-    #endif
 
-    #if ON_TILE(SPI_MASTER_TILE)
-    {
-        vTaskDelay(pdMS_TO_TICKS(100));
-
-        uint8_t in_buf[SPI_TEST_BUF_SIZE] = {0};
-        uint8_t in_buf_default[SPI_TEST_BUF_SIZE] = {0};
-        local_printf("MASTER transaction");
-
-        /* Force a default buffer situation by the SPI slave */
-        rtos_spi_master_transaction_start(ctx->spi_device_ctx);
-        rtos_spi_master_transfer(ctx->spi_device_ctx, test_buf, in_buf, SPI_TEST_BUF_SIZE);
-        rtos_spi_master_transaction_end(ctx->spi_device_ctx);
-        rtos_spi_master_transaction_start(ctx->spi_device_ctx);
-        rtos_spi_master_transfer(ctx->spi_device_ctx, test_buf, in_buf_default, SPI_TEST_BUF_SIZE);
-        rtos_spi_master_transaction_end(ctx->spi_device_ctx);
-
-        /* Verify that in_buf == test_buf, and in_buf_default == the default SPI Slave buffer */
-        for (int i=0; i<SPI_TEST_BUF_SIZE; i++)
-        {
-            // local_printf("MASTER got in_buf[%d]:%d", i, in_buf[i]);
-
-            if (in_buf[i] != test_buf[i])
-            {
-                local_printf("MASTER failed on iteration %d got 0x%x expected 0x%x", i, in_buf[i], test_buf[i]);
-                return -1;
-            }
-        }
-        for (int i=0; i<SPI_TEST_BUF_SIZE; i++)
-        {
-            // local_printf("MASTER got in_buf_default[%d]:%d", i, in_buf_default[i]);
-            
-            if (in_buf_default[i] != (uint8_t)i)
-            {
-                local_printf("MASTER failed on default buffer iteration %d got 0x%x expected 0x%x", i, in_buf_default[i], (uint8_t)i);
-                return -1;
-            }
-        }
-    }
-    #endif
-
-    #if ON_TILE(SPI_SLAVE_TILE)
-    {
+        /* Setup handling response */
         uint8_t *rx_buf = NULL;
         size_t rx_len = 0;
         uint8_t *tx_buf = NULL;
@@ -124,6 +81,12 @@ static int main_test(spi_test_ctx_t *ctx)
                 (void**)&tx_buf,
                 &tx_len,
                 pdMS_TO_TICKS(10000));
+
+        /* First time it should be user provided buffer */
+        if (!((rx_buf == in_buf) && tx_buf == test_buf)) {
+            local_printf("SLAVE failed.  Unexpected buffer.  Expected user");
+            return -1;
+        }
 
         if (ret != 0)
         {
@@ -160,7 +123,62 @@ static int main_test(spi_test_ctx_t *ctx)
             return -1;
         }
 
+        ret = spi_slave_xfer_complete(
+                ctx->spi_slave_ctx,
+                (void**)&rx_buf,
+                &rx_len,
+                (void**)&tx_buf,
+                &tx_len,
+                pdMS_TO_TICKS(10000));
+
+        /* Second time it should be default buffer */
+        if (!((rx_buf == default_in_buf) && tx_buf == default_out_buf)) {
+            local_printf("SLAVE failed.  Unexpected buffer.  Expected default");
+            return -1;
+        }
+
         vTaskDelay(pdMS_TO_TICKS(500));
+    }
+    #endif
+
+    #if ON_TILE(SPI_MASTER_TILE)
+    {
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        uint8_t in_buf[SPI_TEST_BUF_SIZE] = {0};
+        uint8_t in_buf_default[SPI_TEST_BUF_SIZE] = {0};
+
+        /* Force a default buffer situation by the SPI slave */
+        local_printf("MASTER transaction");
+        rtos_spi_master_transaction_start(ctx->spi_device_ctx);
+        rtos_spi_master_transfer(ctx->spi_device_ctx, test_buf, in_buf, SPI_TEST_BUF_SIZE);
+        rtos_spi_master_transaction_end(ctx->spi_device_ctx);
+        local_printf("MASTER transaction");
+        rtos_spi_master_transaction_start(ctx->spi_device_ctx);
+        rtos_spi_master_transfer(ctx->spi_device_ctx, test_buf, in_buf_default, SPI_TEST_BUF_SIZE);
+        rtos_spi_master_transaction_end(ctx->spi_device_ctx);
+
+        /* Verify that in_buf == test_buf, and in_buf_default == the default SPI Slave buffer */
+        for (int i=0; i<SPI_TEST_BUF_SIZE; i++)
+        {
+            // local_printf("MASTER got in_buf[%d]:%d", i, in_buf[i]);
+
+            if (in_buf[i] != test_buf[i])
+            {
+                local_printf("MASTER failed on iteration %d got 0x%x expected 0x%x", i, in_buf[i], test_buf[i]);
+                return -1;
+            }
+        }
+        for (int i=0; i<SPI_TEST_BUF_SIZE; i++)
+        {
+            // local_printf("MASTER got in_buf_default[%d]:%d", i, in_buf_default[i]);
+            
+            if (in_buf_default[i] != (uint8_t)i)
+            {
+                local_printf("MASTER failed on default buffer iteration %d got 0x%x expected 0x%x", i, in_buf_default[i], (uint8_t)i);
+                return -1;
+            }
+        }
     }
     #endif
 
