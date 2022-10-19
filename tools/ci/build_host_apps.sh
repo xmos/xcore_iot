@@ -17,7 +17,8 @@ echo '******************************************************'
 
 (cd ${path}; rm -rf build_host)
 (cd ${path}; mkdir -p build_host)
-(cd ${path}/build_host; log_errors cmake ../ ; log_errors make -j)
+#(cd ${path}/build_host; log_errors cmake ../ ; log_errors make -j)
+(cd ${path}/build_host; cmake ../ ; make)
 
 # copy example_freertos_device_control_host to dist
 name=device_control/host
