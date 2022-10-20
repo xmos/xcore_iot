@@ -12,7 +12,7 @@ Build Issues
 Submodule updates
 =================
 
-THe XCORE SDK uses submodules.  If you have cloned the repository and later perform an update, it will sometimes also be necessary to update the submodules.  To update all submodules, run the following command
+The XCORE SDK uses submodules.  If you have cloned the repository and later perform an update, it will sometimes also be necessary to update the submodules.  To update all submodules, run the following command
 
 .. code-block:: console
 
