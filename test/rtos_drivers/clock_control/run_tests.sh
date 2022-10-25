@@ -21,9 +21,9 @@ echo "****************"
 echo "* Run Tests    *"
 echo "****************"
 if [ "$UNAME" == "Linux" ] ; then
-    timeout ${TIMEOUT_S}s xrun --xscope ${XCORE_SDK_PATH}/dist/${FIRMWARE} 2>&1 | tee -a ${REPORT}
+    timeout ${TIMEOUT_S}s xrun --xscope ${XCORE_SDK_ROOT}/dist/${FIRMWARE} 2>&1 | tee -a ${REPORT}
 elif [ "$UNAME" == "Darwin" ] ; then
-    gtimeout ${TIMEOUT_S}s xrun --xscope ${XCORE_SDK_PATH}/dist/${FIRMWARE} 2>&1 | tee -a ${REPORT}
+    gtimeout ${TIMEOUT_S}s xrun --xscope ${XCORE_SDK_ROOT}/dist/${FIRMWARE} 2>&1 | tee -a ${REPORT}
 fi
 
 echo "****************"
