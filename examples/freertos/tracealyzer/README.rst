@@ -66,7 +66,7 @@ Linux or Mac
 
         cmake -B build_host
         cd build_host
-        make xscope_host_endpoint
+        make xscope2psf
         make install
 
 The host application, `xscope2psf`, will be installed at `/opt/xmos/SDK/<sdk version>/bin/`,
@@ -79,7 +79,7 @@ Windows
 
         cmake -G "NMake Makefiles" -B build_host
         cd build_host
-        nmake xscope_host_endpoint
+        nmake xscope2psf
         nmake install
 
 The host application, `xscope2psf.exe`, will be install at `%USERPROFILE%\.xmos\SDK\<sdk version>\bin\\`,
