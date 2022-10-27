@@ -119,11 +119,9 @@ enum
   ITF1_NUM_TOTAL
 };
 
-#define CONFIG_1_TOTAL_LEN    (TUD_CONFIG_DESC_LEN + TUD_DFU_MODE_DESC_LEN )
+#define CONFIG_1_TOTAL_LEN    (TUD_CONFIG_DESC_LEN + TUD_DFU_DESC_LEN(1) )
 
-#define FUNC_ATTRS (DFU_FUNC_ATTR_CAN_UPLOAD_BITMASK | DFU_FUNC_ATTR_CAN_DOWNLOAD_BITMASK)
-// #define FUNC_ATTRS (DFU_FUNC_ATTR_WILL_DETACH_BITMASK | DFU_FUNC_ATTR_CAN_UPLOAD_BITMASK | DFU_FUNC_ATTR_CAN_DOWNLOAD_BITMASK)
-// #define FUNC_ATTRS 0x0d  // original
+#define FUNC_ATTRS (DFU_ATTR_CAN_UPLOAD | DFU_ATTR_CAN_DOWNLOAD | DFU_ATTR_MANIFESTATION_TOLERANT)
 
 uint8_t const desc_configuration_rt[] =
 {
@@ -131,7 +129,7 @@ uint8_t const desc_configuration_rt[] =
   TUD_CONFIG_DESCRIPTOR(1, ITF0_NUM_TOTAL, 0, CONFIG_0_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
 
   // Interface number, string index, attributes, detach timeout, transfer size */
-  TUD_DFU_RT_DESCRIPTOR(ITF0_NUM_DFU_RT, 4, FUNC_ATTRS, 1000, CFG_TUD_DFU_TRANSFER_BUFFER_SIZE),
+  TUD_DFU_RT_DESCRIPTOR(ITF0_NUM_DFU_RT, 4, FUNC_ATTRS, 1000, CFG_TUD_DFU_XFER_BUFSIZE),
 };
 
 uint8_t const desc_configuration_mode[] =
@@ -140,7 +138,7 @@ uint8_t const desc_configuration_mode[] =
   TUD_CONFIG_DESCRIPTOR(1, ITF1_NUM_TOTAL, 0, CONFIG_1_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
 
   // Interface number, string index, attributes, detach timeout, transfer size */
-  TUD_DFU_MODE_DESCRIPTOR(ITF1_NUM_DFU_MODE, 0, FUNC_ATTRS, 1000, CFG_TUD_DFU_TRANSFER_BUFFER_SIZE),
+  TUD_DFU_DESCRIPTOR(ITF1_NUM_DFU_MODE, 1, 5, FUNC_ATTRS, 1000, CFG_TUD_DFU_XFER_BUFSIZE),
 };
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -149,7 +147,9 @@ uint8_t const desc_configuration_mode[] =
 uint8_t const * tud_descriptor_configuration_cb(uint8_t index)
 {
   (void) index; // for multiple configurations
-  return check_dfu_mode() ? desc_configuration_rt : desc_configuration_mode;
+  return desc_configuration_mode;
+  /* TODO tmp always mode for now*/
+  // return check_dfu_mode() ? desc_configuration_rt : desc_configuration_mode;
 }
 
 //--------------------------------------------------------------------+
@@ -164,6 +164,7 @@ char const* string_desc_arr [] =
   "TinyUSB Device",              // 2: Product
   "123456",                      // 3: Serials, should use chip ID
   "TinyUSB DFU runtime",         // 4: DFU runtime
+  "TinyUSB DFU FLASH",           // 5: DFU device
 };
 
 static uint16_t _desc_str[32];

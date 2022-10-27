@@ -211,48 +211,47 @@ create_run_target(example_freertos_usb_tusb_demo_dfu)
 create_debug_target(example_freertos_usb_tusb_demo_dfu)
 
 
-# Incomplete pending xcore tools updates
 #**********************
 # DFU Runtime Tile Targets
 #**********************
-# file(GLOB_RECURSE DEMO_SOURCES ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/dfu_runtime/src/*.c )
-# set(DEMO_INCLUDES              ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/dfu_runtime/src/)
-# set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED
-#                                DFU_DEMO=1
-# )
-# set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_dfu_runtime)
-# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
-# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
-# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
-# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-# target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
-# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-# unset(TARGET_NAME)
-#
-# set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_dfu_runtime)
-# add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-# target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
-# target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
-# target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
-# target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
-# target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
-# target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
-# unset(TARGET_NAME)
-# unset(DEMO_SOURCES)
-# unset(DEMO_INCLUDES)
-# unset(DEMO_COMPILE_DEFINITIONS)
-#
-# #**********************
-# # Merge binaries
-# #**********************
-# merge_binaries(example_freertos_usb_tusb_demo_dfu_runtime tile0_example_freertos_usb_tusb_demo_dfu_runtime tile1_example_freertos_usb_tusb_demo_dfu_runtime 1)
-#
-# #**********************
-# # Create run and debug targets
-# #**********************
-# create_run_target(example_freertos_usb_tusb_demo_dfu_runtime)
-# create_debug_target(example_freertos_usb_tusb_demo_dfu_runtime)
+file(GLOB_RECURSE DEMO_SOURCES ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/dfu_runtime/src/*.c )
+set(DEMO_INCLUDES              ${CMAKE_CURRENT_LIST_DIR}/tinyusb_demos/dfu_runtime/src/)
+set(DEMO_COMPILE_DEFINITIONS   BOARD_DEVICE_RHPORT_SPEED=OPT_MODE_HIGH_SPEED
+                               DFU_DEMO=1
+)
+set(TARGET_NAME tile0_example_freertos_usb_tusb_demo_dfu_runtime)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_example_freertos_usb_tusb_demo_dfu_runtime)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${DEMO_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${DEMO_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${DEMO_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+unset(DEMO_SOURCES)
+unset(DEMO_INCLUDES)
+unset(DEMO_COMPILE_DEFINITIONS)
+
+#**********************
+# Merge binaries
+#**********************
+merge_binaries(example_freertos_usb_tusb_demo_dfu_runtime tile0_example_freertos_usb_tusb_demo_dfu_runtime tile1_example_freertos_usb_tusb_demo_dfu_runtime 1)
+
+#**********************
+# Create run and debug targets
+#**********************
+create_run_target(example_freertos_usb_tusb_demo_dfu_runtime)
+create_debug_target(example_freertos_usb_tusb_demo_dfu_runtime)
 
 
 #**********************
