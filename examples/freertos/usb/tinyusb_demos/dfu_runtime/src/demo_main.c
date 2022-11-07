@@ -225,7 +225,7 @@ uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t* data, uint1
     uint32_t addr = block_num * FLASH_PAGE_SIZE;
     uint32_t endaddr;
 
-#if 1
+#if 0
     // Test code which will just read out all of flash rather than a specific image
     endaddr = 0x800000;
 #else
