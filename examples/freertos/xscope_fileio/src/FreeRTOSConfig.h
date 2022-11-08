@@ -10,7 +10,7 @@ your application. */
 #define configUSE_TICKLESS_IDLE                 0
 #define configCPU_CLOCK_HZ                      100000000
 
-#define configNUM_CORES                         5
+#define configNUM_CORES                         7
 #define configTICK_RATE_HZ                      1000
 #define configMAX_PRIORITIES                    32
 #define configRUN_MULTIPLE_PRIORITIES           1
