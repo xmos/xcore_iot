@@ -11,8 +11,8 @@
 #include "platform/driver_instances.h"
 
 /* App configuration */
-#define appconfINPUT_FILENAME  "in.wav"
-#define appconfOUTPUT_FILENAME "out.wav"
+#define appconfINPUT_FILENAME  "in.wav\0"
+#define appconfOUTPUT_FILENAME "out.wav\0"
 #define appconfMAX_CHANNELS 1
 #define appconfFRAME_ADVANCE 240
 #define appconfFRAME_ELEMENT_SIZE sizeof(int32_t)
@@ -22,7 +22,7 @@
 
 /* Task Priorities */
 #define appconfSTARTUP_TASK_PRIORITY              (configMAX_PRIORITIES - 2)
-#define appconfXSCOPE_IO_TASK_PRIORITY            (configMAX_PRIORITIES - 3)
+#define appconfXSCOPE_IO_TASK_PRIORITY            (configMAX_PRIORITIES - 1)
 #define appconfDATA_PIPELINE_TASK_PRIORITY        (configMAX_PRIORITIES - 1)
 
 #endif /* APP_CONF_H_ */
