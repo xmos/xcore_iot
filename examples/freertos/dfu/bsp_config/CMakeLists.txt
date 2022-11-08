@@ -15,6 +15,7 @@ target_link_libraries(example_freertos_dfu_board_support_config_xcore_ai_explore
         core::general
         rtos::freertos
         rtos::drivers::general
+        rtos::drivers::usb
         rtos::sw_services::usb
 )
 target_compile_definitions(example_freertos_dfu_board_support_config_xcore_ai_explorer_2V0
