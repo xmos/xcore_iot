@@ -17,7 +17,6 @@ set(APP_COMPILER_FLAGS
     -g
     -report
     -fxscope
-    -lquadspi
     -mcmodel=large
     -Wno-xcore-fptrgroup
     ${CMAKE_CURRENT_LIST_DIR}/src/config.xscope
@@ -32,7 +31,7 @@ set(APP_COMPILE_DEFINITIONS
 )
 
 set(APP_LINK_OPTIONS
-    -lquadspi
+    -lquadflash
     -fxscope
     -report
     ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn

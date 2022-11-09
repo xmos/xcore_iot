@@ -2,13 +2,22 @@
 // XMOS Public License: Version 1
 
 #include <platform.h>
+#include <quadflashlib.h>
 
 #include "platform_conf.h"
 #include "platform/driver_instances.h"
-
+#include <xcore/clock.h>
+#include <xcore/port.h>
 static void flash_init(void)
 {
 #if ON_TILE(FLASH_TILE_NO)
+    rtos_dfu_image_init(
+            dfu_image_ctx,
+            FLASH_CLKBLK,
+            PORT_SQI_CS,
+            PORT_SQI_SCLK,
+            PORT_SQI_SIO);
+
     qspi_flash_ctx->ctx.sfdp_skip = true;
     qspi_flash_ctx->ctx.sfdp_supported = false;
     qspi_flash_ctx->ctx.page_size_bytes = 256;
@@ -53,7 +62,7 @@ static void flash_init(void)
             qspi_io_sample_edge_falling,
             0,
 
-            qspi_flash_page_program_1_4_4);
+            qspi_flash_page_program_1_1_4);
 #endif
 }
 

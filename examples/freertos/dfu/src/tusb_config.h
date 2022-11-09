@@ -39,10 +39,9 @@
 
 //------------- CLASS -------------//
 #define CFG_TUD_DFU         1
-#define CFG_TUD_DFU_RUNTIME 1
 
 // DFU buffer size, it has to be set to the buffer size used in TUD_DFU_DESCRIPTOR
-#define CFG_TUD_DFU_XFER_BUFSIZE    ( OPT_MODE_HIGH_SPEED ? 512 : 64 )
+#define CFG_TUD_DFU_XFER_BUFSIZE    4096
 
 #ifdef __cplusplus
  }

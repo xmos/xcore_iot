@@ -29,17 +29,11 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName) {
     configASSERT(0);
 }
 
-#include "demo_main.h"
-
 void startup_task(void *arg)
 {
     rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE, portGET_CORE_ID());
 
     platform_start();
-
-#if ON_TILE(USB_TILE_NO)
-    create_tinyusb_demo(appconfSTARTUP_TASK_PRIORITY);
-#endif
 
 	for (;;) {
 		rtos_printf("Tile[%d]:\n\tMinimum heap free: %d\n\tCurrent heap free: %d\n", THIS_XCORE_TILE, xPortGetMinimumEverFreeHeapSize(), xPortGetFreeHeapSize());
