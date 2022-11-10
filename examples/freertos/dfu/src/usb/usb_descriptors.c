@@ -82,7 +82,7 @@ uint8_t const * tud_descriptor_device_cb(void)
 //--------------------------------------------------------------------+
 
 // Number of Alternate Interface (each for 1 flash partition)
-#define ALT_COUNT   2
+#define ALT_COUNT   3
 
 enum
 {
@@ -124,8 +124,9 @@ char const* string_desc_arr [] =
   "TinyUSB",                     // 1: Manufacturer
   "TinyUSB Device",              // 2: Product
   "123456",                      // 3: Serials, should use chip ID
-  "TinyUSB DFU device FACTORY",  // 4: DFU device
-  "TinyUSB DFU device UPGRADE",  // 5: DFU device
+  "DFU device FACTORY",          // 4: DFU device
+  "DFU device UPGRADE",          // 5: DFU device
+  "DFU device DATAPARTITION",    // 6: DFU device
 };
 
 static uint16_t _desc_str[32];

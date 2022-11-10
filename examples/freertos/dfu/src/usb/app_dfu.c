@@ -36,7 +36,7 @@
 /*
  * After device is enumerated in dfu mode run the following commands
  *
- * To transfer firmware from host to device (best to test with text file)
+ * To transfer firmware from host to device
  *
  * $ dfu-util -d cafe -a 0 -D [filename]
  * $ dfu-util -d cafe -a 1 -D [filename]
@@ -126,8 +126,15 @@ void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const* data, u
                 total_len = 0;
                 dn_base_addr = rtos_dfu_image_get_upgrade_addr(dfu_image_ctx);
                 bytes_avail = data_partition_base_addr - dn_base_addr;    
-                rtos_printf("Using addr 0x%x\nsize %u\n", dn_base_addr, bytes_avail);
             }
+            /* fallthrough */
+        case 2:
+            if (dn_base_addr == 0) {
+                total_len = 0;
+                dn_base_addr = data_partition_base_addr;
+                bytes_avail = rtos_qspi_flash_size_get(qspi_flash_ctx) - dn_base_addr;    
+            }
+            rtos_printf("Using addr 0x%x\nsize %u\n", dn_base_addr, bytes_avail);
             if(length > 0) {
                 unsigned cur_addr = dn_base_addr + (block_num * CFG_TUD_DFU_XFER_BUFSIZE);
                 if((bytes_avail - total_len) >= length) {
@@ -184,6 +191,9 @@ void tud_dfu_manifest_cb(uint8_t alt)
             (uint8_t *)&dummy,
             0,
             sizeof(dummy));
+    
+    /* Reset download */
+    dn_base_addr = 0;
 
     // flashing op for manifest is complete without error
     // Application can perform checksum, should it fail, use appropriate status such as errVERIFY.
@@ -214,6 +224,12 @@ uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t* data, uint1
             if (rtos_dfu_image_get_upgrade_size(dfu_image_ctx) > 0) {
                 addr += rtos_dfu_image_get_upgrade_addr(dfu_image_ctx);
                 endaddr = rtos_dfu_image_get_upgrade_addr(dfu_image_ctx) + rtos_dfu_image_get_upgrade_size(dfu_image_ctx);
+            }
+            break;
+        case 2:
+            if ((rtos_qspi_flash_size_get(qspi_flash_ctx) - rtos_dfu_image_get_data_partition_addr(dfu_image_ctx)) > 0) {
+                addr += rtos_dfu_image_get_data_partition_addr(dfu_image_ctx);
+                endaddr = rtos_qspi_flash_size_get(qspi_flash_ctx);  /* End of flash */
             }
             break;
     }
