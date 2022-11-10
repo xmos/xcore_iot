@@ -31,7 +31,6 @@
 #include "FreeRTOS.h"
 #include "timers.h"
 #include "platform/driver_instances.h"
-#include "demo_main.h"
 #include "tusb.h"
 
 /*

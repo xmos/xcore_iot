@@ -35,6 +35,10 @@ void startup_task(void *arg)
 
     platform_start();
 
+#if ON_TILE(0)
+    rtos_dfu_image_print_debug(dfu_image_ctx);
+#endif
+
 	for (;;) {
 		rtos_printf("Tile[%d]:\n\tMinimum heap free: %d\n\tCurrent heap free: %d\n", THIS_XCORE_TILE, xPortGetMinimumEverFreeHeapSize(), xPortGetFreeHeapSize());
 		vTaskDelay(pdMS_TO_TICKS(5000));
