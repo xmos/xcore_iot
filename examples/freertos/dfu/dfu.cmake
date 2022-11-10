@@ -51,8 +51,7 @@ target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS} 
-"-Wm,--map,memory0.map")
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
 set(TARGET_NAME tile1_example_freertos_dfu)
@@ -62,8 +61,7 @@ target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
-target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS}
-"-Wm,--map,memory1.map")
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
 #**********************
