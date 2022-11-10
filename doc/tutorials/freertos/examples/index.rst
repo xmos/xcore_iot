@@ -11,6 +11,7 @@ Several FreeRTOS code examples are included to illustrate the fundamental tool f
    :includehidden:
 
    explorer_board.rst
+   tracealyzer.rst
    xscope_fileio.rst
    device_control.rst
    dispatcher.rst

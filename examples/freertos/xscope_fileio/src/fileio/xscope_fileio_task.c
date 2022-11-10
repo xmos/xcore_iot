@@ -19,6 +19,8 @@
 #include "wav_utils.h"
 
 static TaskHandle_t fileio_task_handle;
+static QueueHandle_t fileio_queue;
+
 static xscope_file_t infile;
 static xscope_file_t outfile;
 
@@ -45,9 +47,7 @@ void init_xscope_host_data_user_cb(chanend_t c_host) {
 
 size_t xscope_fileio_tx_to_host(uint8_t *buf, size_t len_bytes) {
     size_t ret = 0;
-    // rtos_printf("Write outfile\n");
-
-    xscope_fwrite(&outfile, buf, len_bytes);
+    xQueueSend(fileio_queue, buf, portMAX_DELAY);
 
     return ret;
 }
@@ -88,26 +88,31 @@ void xscope_fileio(void *arg) {
     unsigned input_header_size;
     unsigned frame_count;
     unsigned block_count;        
+    uint8_t in_buf[appconfDATA_FRAME_SIZE_BYTES];
+    uint8_t out_buf[appconfDATA_FRAME_SIZE_BYTES];
+    size_t bytes_read = 0;
 
     /* Wait until xscope_fileio is initialized */
     while(xscope_fileio_is_initialized() == 0) {
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 
+    fileio_queue = xQueueCreate(1, appconfDATA_FRAME_SIZE_BYTES);
+
     rtos_printf("Open test files\n");
-    infile = xscope_open_file(appconfINPUT_FILENAME, "rb");
-    outfile = xscope_open_file(appconfOUTPUT_FILENAME, "wb");
-    uint32_t mask = rtos_interrupt_mask_all(); // Disable preemption around xscope_freads
+    state = rtos_osal_critical_enter();
     {
+        infile = xscope_open_file(appconfINPUT_FILENAME, "rb");
+        outfile = xscope_open_file(appconfOUTPUT_FILENAME, "wb");
         // Validate input wav file
         if(get_wav_header_details(&infile, &input_header_struct, &input_header_size) != 0){
             rtos_printf("Error: error in get_wav_header_details()\n");
             _Exit(1);
         }
+        xscope_fseek(&infile, input_header_size, SEEK_SET);
     }
-    rtos_interrupt_mask_set(mask); // Re-enable preemption
+    rtos_osal_critical_exit(state);
 
-    xscope_fseek(&infile, input_header_size, SEEK_SET);
     // Ensure 32bit wav file
     if(input_header_struct.bit_depth != 32)
     {
@@ -126,33 +131,39 @@ void xscope_fileio(void *arg) {
 
     // Create output wav file
     wav_form_header(&output_header_struct,
-    input_header_struct.audio_format,
-    appconfMAX_CHANNELS,
-    input_header_struct.sample_rate,
-    input_header_struct.bit_depth,
-    block_count*appconfFRAME_ADVANCE);
+        input_header_struct.audio_format,
+        appconfMAX_CHANNELS,
+        input_header_struct.sample_rate,
+        input_header_struct.bit_depth,
+        block_count*appconfFRAME_ADVANCE);
+
     xscope_fwrite(&outfile, (uint8_t*)(&output_header_struct), WAV_HEADER_BYTES);
 
-    uint8_t buf[appconfDATA_FRAME_SIZE_BYTES];
-    size_t bytes_read = 0;
+    // ensure the write above has time to complete before performing any reads
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
     // Iterate over frame blocks and send the data to the first pipeline stage on tile[1]
     for(unsigned b=0; b<block_count; b++) {
-        memset(buf, 0x00, sizeof(buf));
+        memset(in_buf, 0x00, appconfDATA_FRAME_SIZE_BYTES);
         long input_location =  wav_get_frame_start(&input_header_struct, b * appconfFRAME_ADVANCE, input_header_size);
 
-        xscope_fseek(&infile, input_location, SEEK_SET);
-        uint32_t mask = rtos_interrupt_mask_all(); // Disable preemption around xscope_freads
+        state = rtos_osal_critical_enter();
         {
-            bytes_read = xscope_fread(&infile, buf, sizeof(buf));
+            xscope_fseek(&infile, input_location, SEEK_SET);
+            bytes_read = xscope_fread(&infile, in_buf, appconfDATA_FRAME_SIZE_BYTES);
         }
-        rtos_interrupt_mask_set(mask); // Re-enable preemption
+        rtos_osal_critical_exit(state);
 
-        memset(buf + bytes_read, 0x00, sizeof(buf) - bytes_read);
+        memset(in_buf + bytes_read, 0x00, appconfDATA_FRAME_SIZE_BYTES - bytes_read);
+
         rtos_intertile_tx(intertile_ctx,
-                          appconfEXAMPLE_DATA_PORT,
-                          buf,
-                          sizeof(buf));
+                        appconfEXAMPLE_DATA_PORT,
+                        in_buf,
+                        appconfDATA_FRAME_SIZE_BYTES);
+
+        // read from queue here and write to file 
+        xQueueReceive(fileio_queue,  out_buf, portMAX_DELAY);
+        xscope_fwrite(&outfile, out_buf, appconfDATA_FRAME_SIZE_BYTES);
     }
 
 #if (appconfAPP_NOTIFY_FILEIO_DONE == 1)
@@ -182,8 +193,9 @@ void xscope_fileio_tasks_create(unsigned priority, void* app_data) {
                 priority,
                 &fileio_task_handle);
     
-    // Define the core affinity mask such that this task can not run on core 0
-    UBaseType_t uxCoreAffinityMask = 0xFFFFFFFE;
+    // Define the core affinity mask such that this task can only run on a specific core
+    UBaseType_t uxCoreAffinityMask = 0x10;
+
 
     /* Set the core affinity mask for the task. */
     vTaskCoreAffinitySet( fileio_task_handle, uxCoreAffinityMask );                

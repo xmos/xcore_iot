@@ -35,7 +35,7 @@ pipeline {
     environment {
         PYTHON_VERSION = "3.8.11"
         VENV_DIRNAME = ".venv"
-        DOWNLOAD_DIRNAME = "build"
+        DOWNLOAD_DIRNAME = "dist"
         SDK_TEST_RIG_TARGET = "xcore_sdk_test_rig"
     }        
     stages {
@@ -117,6 +117,15 @@ pipeline {
                                 echo 'SKIPPED: example_freertos_l2_cache'
                             }
                         } 
+                        script {
+                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_tracealyzer.xe")) {
+                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                    sh "test/examples/run_freertos_tracealyzer_tests.sh " + adapterIDs[0]
+                                }
+                            } else {
+                                echo 'SKIPPED: example_freertos_tracealyzer'
+                            }
+                        }
                     }
                 }
             }

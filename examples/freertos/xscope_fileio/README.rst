@@ -17,7 +17,7 @@ Stage #3 is implemented in the function `stage_3` which can be found in the file
 
 The example application input file name is hard-coded to `in.wav` and the output file file name is hard-coded to `out.wav`.  Running the application can be wrapped in a simple script if alternative file names are desired.  Simply copy your file to `in.wav`, run the applications, then copy `out.wav` to you preferred output file name.
 
-The input file sample rate must be 16 KHz, 32 bits per sample. 
+The example input file provided is 16 KHz, however, 48 KHz will also work.  The input file sample rate must be 32 bits per sample. 
 
 This example is already configured to link with the `XMOS vectorized math library <https://www.xmos.ai/documentation/XM-014660-LATEST/html/modules/core/modules/xs3_math/lib_xs3_math/doc/index.html>`_.  Users wishing to take advantage of the vector processing unit (VPU) on the XMOS XS3 architecture can use this example application as a starting point.
 

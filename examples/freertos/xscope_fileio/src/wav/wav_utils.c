@@ -125,7 +125,7 @@ int wav_form_header(wav_header *header,
 }
 
 unsigned wav_get_num_bytes_per_frame(const wav_header *s){
-    int bytes_per_sample = s->bit_depth/CHAR_BIT;
+    int bytes_per_sample = s->bit_depth/8;
     return (unsigned)(bytes_per_sample * s->num_channels);
 }
 

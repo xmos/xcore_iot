@@ -4,7 +4,7 @@ set -e
 XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 
-BUILD_DIR="build"
+BUILD_DIR="${XCORE_SDK_ROOT}/dist"
 APPLICATION="example_freertos_explorer_board"
 
 if [ ! -z "$1" ]
