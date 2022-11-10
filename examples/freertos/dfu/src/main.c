@@ -41,7 +41,7 @@ void startup_task(void *arg)
     uint32_t data;
     rtos_qspi_flash_read(
             qspi_flash_ctx,
-            &data,
+            (uint8_t*)&data,
             rtos_dfu_image_get_data_partition_addr(dfu_image_ctx),
             sizeof(int32_t));
     rtos_printf("First word at data partition start is: 0x%x\n", data);
