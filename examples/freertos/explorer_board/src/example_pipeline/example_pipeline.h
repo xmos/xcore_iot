@@ -6,7 +6,7 @@
 
 #include "rtos_mic_array.h"
 #include "rtos_i2s.h"
-#include "bfp_math.h"
+#include "xmath/xmath.h"
 
 enum {
     GET_GAIN_VAL = 1,
