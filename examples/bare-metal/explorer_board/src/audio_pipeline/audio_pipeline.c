@@ -10,7 +10,7 @@
 /* SDK headers */
 #include "xcore_utils.h"
 #include "mic_array.h"
-#include "bfp_math.h"
+#include "xmath/xmath.h"
 
 /* App headers */
 #include "app_conf.h"
