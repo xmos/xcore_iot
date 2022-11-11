@@ -69,7 +69,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                 // update the gain
                 float power = (float)gain_db / 20.0;
                 float gain_fl = powf(10.0, power);
-                float_s32_t gain = float_to_float_s32(gain_fl);
+                float_s32_t gain = f32_to_float_s32(gain_fl);
                 // scale both channels 
                 bfp_s32_scale(&ch0, &ch0, gain);
                 bfp_s32_scale(&ch1, &ch1, gain);
