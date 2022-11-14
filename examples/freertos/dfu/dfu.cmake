@@ -1,10 +1,3 @@
-query_tools_version()
-
-if ((XTC_VERSION_MAJOR LESS 15) OR (XTC_VERSION_MINOR LESS 2))
-    message(WARNING "XTC Tools version 15.2.0 or newer required for FreeRTOS dfu example")
-    return()
-endif()
-
 #**********************
 # Gather Sources
 #**********************
@@ -82,6 +75,7 @@ merge_binaries(example_freertos_dfu tile0_example_freertos_dfu tile1_example_fre
 create_run_target(example_freertos_dfu)
 create_debug_target(example_freertos_dfu)
 create_flash_app_dfu_target(example_freertos_dfu 0x100000)
+query_tools_version()
 create_upgrade_img_target(example_freertos_dfu ${XTC_VERSION_MAJOR} ${XTC_VERSION_MINOR})
 create_erase_all_target(XCORE-AI-EXPLORER)
 create_install_target(example_freertos_dfu)
