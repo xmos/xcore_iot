@@ -103,7 +103,7 @@ void stage0(int32_t * audio_frame)
     // convert dB to amplitude
     float power = (float)xStage0_Gain / 20.0;
     float gain_fl = powf(10.0, power);
-    float_s32_t gain = float_to_float_s32(gain_fl);
+    float_s32_t gain = f32_to_float_s32(gain_fl);
     // scale both channels
     bfp_s32_scale(&ch0, &ch0, gain);
     bfp_s32_scale(&ch1, &ch1, gain);
