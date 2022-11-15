@@ -93,17 +93,27 @@ merge_binaries(example_freertos_dfu_v2 tile0_example_freertos_dfu_v2 tile1_examp
 #**********************
 # Create run and debug targets
 #**********************
-create_erase_all_target(XCORE-AI-EXPLORER)
-
 create_run_target(example_freertos_dfu_v1)
 create_debug_target(example_freertos_dfu_v1)
-create_flash_app_dfu_target(example_freertos_dfu_v1 0x100000)
+create_flash_app_target(
+    #[[ Target ]]                 example_freertos_dfu_v1
+    #[[ Boot Partition Size ]]    0x100000 
+    #[[ Data Parition Contents ]] 
+    #[[ Dependencies ]]           
+)
 query_tools_version()
 create_upgrade_img_target(example_freertos_dfu_v1 ${XTC_VERSION_MAJOR} ${XTC_VERSION_MINOR})
 create_install_target(example_freertos_dfu_v1)
+create_erase_all_target(example_freertos_dfu_v1 ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn)
 
 create_run_target(example_freertos_dfu_v2)
 create_debug_target(example_freertos_dfu_v2)
-create_flash_app_dfu_target(example_freertos_dfu_v2 0x100000)
+create_flash_app_target(
+    #[[ Target ]]                 example_freertos_dfu_v2
+    #[[ Boot Partition Size ]]    0x100000 
+    #[[ Data Parition Contents ]] 
+    #[[ Dependencies ]]           
+)
 create_upgrade_img_target(example_freertos_dfu_v2 ${XTC_VERSION_MAJOR} ${XTC_VERSION_MINOR})
 create_install_target(example_freertos_dfu_v2)
+create_erase_all_target(example_freertos_dfu_v2 ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn)

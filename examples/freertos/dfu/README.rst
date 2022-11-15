@@ -46,32 +46,51 @@ Preparing the hardware
 
 It is recommended to begin from an erased flash.  To erase flash run:
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    xflash --erase-all --target=XCORE-AI-EXPLORER
+    .. code-block:: console
+
+        make erase_all_example_freertos_dfu_v1
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        nmake erase_all_example_freertos_dfu_v1
+
+This target will use `xflash` to erase the flash of the device specified by the provided target XN file.
 
 After building the firmware and erasing the flash, the factory image must be flashed.  From the xcore_sdk build folder run:
 
-.. code-block:: console
+.. tab:: Linux and Mac
 
-    xflash --quad-spi-clock 50MHz --factory example_freertos_dfu_v1.xe --boot-partition-size 0x100000
+    .. code-block:: console
+
+        make flash_app_example_freertos_dfu_v1
+
+.. tab:: Windows
+
+    .. code-block:: console
+
+        nmake flash_app_example_freertos_dfu_v1
+
+This target will use `xflash` to flash the application as a factory image with a boot partition size specified in dfu.cmake.
 
 The board may then be power cycled and will boot up the application.
 
-Next, the user make create an upgrade image.  From the xcore_sdk build folder run:
+.. tab:: Linux and Mac
 
-.. code-block:: console
+    .. code-block:: console
 
-    xflash --factory-version <FACTORY_MAJOR_VER>.<FACTORY_MINOR_VER> --upgrade 0 example_freertos_dfu_v2.xe -o example_freertos_dfu_v2_upgrade.bin
+        make create_upgrade_img_example_freertos_dfu_v2
 
-OR
-.. code-block:: console
+.. tab:: Windows
 
-    make create_upgrade_img_example_freertos_dfu_v1
+    .. code-block:: console
 
-This will create an upgrade image file.
+        nmake create_upgrade_img_example_freertos_dfu_v2
 
-Populating the version of tools you are running.
+This target will use `xflash` to create an upgrade image for the specified target.
 
 ********************
 Running the firmware
