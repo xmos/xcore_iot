@@ -29,6 +29,19 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName) {
     configASSERT(0);
 }
 
+void blinky_task(void *arg) {
+    uint32_t gpio_port = rtos_gpio_port(PORT_LEDS);
+    uint32_t led_val = 0;
+
+    rtos_gpio_port_enable(gpio_ctx_t0, gpio_port);
+
+    for (;;) {
+        rtos_gpio_port_out(gpio_ctx_t0, gpio_port, led_val);
+        led_val ^= 0x0000000f;
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
 void startup_task(void *arg)
 {
     rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE, portGET_CORE_ID());
@@ -70,6 +83,15 @@ void tile_common_init(chanend_t c)
                 NULL,
                 appconfSTARTUP_TASK_PRIORITY,
                 NULL);
+
+#if ON_TILE(0)
+    xTaskCreate((TaskFunction_t) blinky_task,
+                "blinky_task",
+                RTOS_THREAD_STACK_SIZE(blinky_task),
+                NULL,
+                appconfSTARTUP_TASK_PRIORITY / 2,
+                NULL);
+#endif
 
     rtos_printf("start scheduler on tile %d\n", THIS_XCORE_TILE);
     vTaskStartScheduler();

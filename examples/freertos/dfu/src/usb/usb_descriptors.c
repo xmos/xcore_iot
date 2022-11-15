@@ -124,9 +124,9 @@ char const* string_desc_arr [] =
   "TinyUSB",                     // 1: Manufacturer
   "TinyUSB Device",              // 2: Product
   "123456",                      // 3: Serials, should use chip ID
-  "DFU device FACTORY",          // 4: DFU device
-  "DFU device UPGRADE",          // 5: DFU device
-  "DFU device DATAPARTITION",    // 6: DFU device
+  "DFU dev FACTORY v" XCORE_UTILS_STRINGIFY(VERSION),          // 4: DFU device
+  "DFU dev UPGRADE v" XCORE_UTILS_STRINGIFY(VERSION),          // 5: DFU device
+  "DFU dev DATAPARTITION v" XCORE_UTILS_STRINGIFY(VERSION),    // 6: DFU device
 };
 
 static uint16_t _desc_str[32];

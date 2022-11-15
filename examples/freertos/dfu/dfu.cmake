@@ -44,21 +44,41 @@ set(APP_LINK_LIBRARIES
 #**********************
 # Tile Targets
 #**********************
-set(TARGET_NAME tile0_example_freertos_dfu)
+set(TARGET_NAME tile0_example_freertos_dfu_v1)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0 VERSION=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
 unset(TARGET_NAME)
 
-set(TARGET_NAME tile1_example_freertos_dfu)
+set(TARGET_NAME tile1_example_freertos_dfu_v1)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
-target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1 VERSION=1)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile0_example_freertos_dfu_v2)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0 VERSION=2)
+target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
+target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
+target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
+unset(TARGET_NAME)
+
+set(TARGET_NAME tile1_example_freertos_dfu_v2)
+add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
+target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1 VERSION=2)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
 target_link_libraries(${TARGET_NAME} PUBLIC ${APP_LINK_LIBRARIES})
 target_link_options(${TARGET_NAME} PRIVATE ${APP_LINK_OPTIONS})
@@ -67,15 +87,23 @@ unset(TARGET_NAME)
 #**********************
 # Merge binaries
 #**********************
-merge_binaries(example_freertos_dfu tile0_example_freertos_dfu tile1_example_freertos_dfu 1)
+merge_binaries(example_freertos_dfu_v1 tile0_example_freertos_dfu_v1 tile1_example_freertos_dfu_v1 1)
+merge_binaries(example_freertos_dfu_v2 tile0_example_freertos_dfu_v2 tile1_example_freertos_dfu_v2 1)
 
 #**********************
 # Create run and debug targets
 #**********************
-create_run_target(example_freertos_dfu)
-create_debug_target(example_freertos_dfu)
-create_flash_app_dfu_target(example_freertos_dfu 0x100000)
-query_tools_version()
-create_upgrade_img_target(example_freertos_dfu ${XTC_VERSION_MAJOR} ${XTC_VERSION_MINOR})
 create_erase_all_target(XCORE-AI-EXPLORER)
-create_install_target(example_freertos_dfu)
+
+create_run_target(example_freertos_dfu_v1)
+create_debug_target(example_freertos_dfu_v1)
+create_flash_app_dfu_target(example_freertos_dfu_v1 0x100000)
+query_tools_version()
+create_upgrade_img_target(example_freertos_dfu_v1 ${XTC_VERSION_MAJOR} ${XTC_VERSION_MINOR})
+create_install_target(example_freertos_dfu_v1)
+
+create_run_target(example_freertos_dfu_v2)
+create_debug_target(example_freertos_dfu_v2)
+create_flash_app_dfu_target(example_freertos_dfu_v2 0x100000)
+create_upgrade_img_target(example_freertos_dfu_v2 ${XTC_VERSION_MAJOR} ${XTC_VERSION_MINOR})
+create_install_target(example_freertos_dfu_v2)
