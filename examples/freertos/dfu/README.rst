@@ -155,6 +155,8 @@ From the xcore_sdk build folder, the upgrade image can be written by running:
 
     dfu-util -e -d 4000 -a 1 -D example_freertos_dfu_v2_upgrade.bin
 
+After updating the upgrade image it may be necessary to unplug the USB device to initiate a host re-enumeration.
+
 The upgrade image can be read back by running:
 
 .. code-block:: console
