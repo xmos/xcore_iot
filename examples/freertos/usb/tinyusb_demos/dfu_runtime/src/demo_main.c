@@ -130,85 +130,137 @@ void tud_resume_cb(void)
 }
 
 //--------------------------------------------------------------------+
-// Class callbacks
+// DFU callbacks
+// Note: alt is used as the partition number, in order to support multiple partitions like FLASH, EEPROM, etc.
 //--------------------------------------------------------------------+
 
 static size_t total_len = 0;
 static size_t bytes_avail = 0;
 static uint32_t dn_base_addr = 0;
-bool tud_dfu_firmware_valid_check_cb()
+
+// Invoked right before tud_dfu_download_cb() (state=DFU_DNBUSY) or tud_dfu_manifest_cb() (state=DFU_MANIFEST)
+// Application return timeout in milliseconds (bwPollTimeout) for the next download/manifest operation.
+// During this period, USB host won't try to communicate with us.
+uint32_t tud_dfu_get_timeout_cb(uint8_t alt, uint8_t state)
 {
+    if ( state == DFU_DNBUSY )
+    {
+        return 10;  /* 10 ms */
+    }
+    else if (state == DFU_MANIFEST)
+    {
+        // since we don't buffer entire image and do any flashing in manifest stage
+        return 0;
+    }
+
+    return 0;
+}
+
+// Invoked when received DFU_DNLOAD (wLength>0) following by DFU_GETSTATUS (state=DFU_DNBUSY) requests
+// This callback could be returned before flashing op is complete (async).
+// Once finished flashing, application must call tud_dfu_finish_flashing()
+void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const* data, uint16_t length)
+{
+    (void) alt;
+    rtos_printf("Block[%u] Len[%u] Buffer\n", block_num, length);
+    if (dn_base_addr == 0)
+    {
+        uint32_t addr = 0;
+        total_len = 0;
+        int tmp = boot_image_locate_available_spot(bim_ctx_ptr, &addr, &bytes_avail);
+        if(tmp == -1)
+        {
+            boot_image_t* imgptr = NULL;
+            imgptr = boot_image_get_last_image(bim_ctx_ptr);
+            addr = imgptr->startAddress;
+            bytes_avail = bim_ctx_ptr->boot_partition_size - addr;
+        }
+        rtos_printf("Using addr 0x%x\nsize %u\n", addr, bytes_avail);
+        dn_base_addr = addr;
+    }
+
+    if(length > 0)
+    {
+        unsigned cur_addr = dn_base_addr + (block_num * bim_ctx_ptr->page_size);
+        if((bytes_avail - total_len) >= length)
+        {
+            // rtos_printf("write %d at 0x%x\n", length, cur_addr);
+            boot_image_write(bim_ctx_ptr->app_data, cur_addr, data, length);
+            total_len += length;
+        } else {
+            rtos_printf("Insufficient space\n");
+        }
+    }
+}
+
+// Invoked when download process is complete, received DFU_DNLOAD (wLength=0) following by DFU_GETSTATUS (state=Manifest)
+// Application can do checksum, or actual flashing if buffered entire image previously.
+// Once finished flashing, application must call tud_dfu_finish_flashing()
+void tud_dfu_manifest_cb(uint8_t alt)
+{
+    (void) alt;
+    rtos_printf("Download completed, enter manifestation\n");
     uint8_t dummy;
+
     rtos_printf("Pass firmware validity check addr 0x%x size %u\n", dn_base_addr, total_len);
     set_rt_mode();
     boot_image_read(bim_ctx_ptr->app_data, 0, &dummy, 1);   // dummy read to ensure flash writes have completed
     reboot();
-    return true;
+
+    /* TODO actually verify */
+    // tud_dfu_finish_flashing(DFU_STATUS_ERR_VERIFY);
+    // flashing op for manifest is complete without error
+    // Application can perform checksum, should it fail, use appropriate status such as errVERIFY.
+    tud_dfu_finish_flashing(DFU_STATUS_OK);
 }
 
-void tud_dfu_req_dnload_data_cb(uint16_t wBlockNum, uint8_t* data, uint16_t length)
+// Invoked when received DFU_UPLOAD request
+// Application must populate data with up to length bytes and
+// Return the number of written bytes
+uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t* data, uint16_t length)
 {
-  // rtos_printf("Block[%u] Len[%u] Buffer\n", wBlockNum, length);
+    (void) alt;
 
-  if (dn_base_addr == 0)
-  {
-      uint32_t addr = 0;
-      total_len = 0;
-      int tmp = boot_image_locate_available_spot(bim_ctx_ptr, &addr, &bytes_avail);
-      if(tmp == -1)
-      {
-          boot_image_t* imgptr = NULL;
-          imgptr = boot_image_get_last_image(bim_ctx_ptr);
-          addr = imgptr->startAddress;
-          bytes_avail = bim_ctx_ptr->boot_partition_size - addr;
-      }
-      rtos_printf("Using addr 0x%x\nsize %u\n", addr, bytes_avail);
-      dn_base_addr = addr;
-  }
-
-  if(length > 0)
-  {
-    unsigned cur_addr = dn_base_addr + (wBlockNum * bim_ctx_ptr->page_size);
-    if((bytes_avail - total_len) >= length)
-    {
-        // rtos_printf("write %d at 0x%x\n", length, cur_addr);
-        boot_image_write(bim_ctx_ptr->app_data, cur_addr, data, length);
-        total_len += length;
-
-        tud_dfu_dnload_complete();
-    } else {
-        rtos_printf("Insufficient space\n");
-    }
-  }
-}
-
-bool tud_dfu_device_data_done_check_cb()
-{
-  rtos_printf("Dummy device data done check... Returning true\n");
-  return true;
-}
-
-void tud_dfu_abort_cb()
-{
-  rtos_printf("Host Aborted transfer\n");
-}
-
-uint16_t tud_dfu_req_upload_data_cb(uint16_t block_num, uint8_t* data, uint16_t length)
-{
-  memset(data, 0x00, length);
-  uint32_t addr = block_num * FLASH_PAGE_SIZE;
-  uint32_t endaddr;
+    memset(data, 0x00, length);
+    uint32_t addr = block_num * FLASH_PAGE_SIZE;
+    uint32_t endaddr;
 
 #if 0
-  // Test code which will just read out all of flash rather than a specific image
-  endaddr = 0x800000;
+    // Test code which will just read out all of flash rather than a specific image
+    endaddr = 0x800000;
 #else
-  boot_image_t* imgptr = NULL;
-  imgptr = boot_image_get_last_image(bim_ctx_ptr);
-  addr += imgptr->startAddress;
-  endaddr = imgptr->startAddress + imgptr->size;
+    boot_image_t* imgptr = NULL;
+    imgptr = boot_image_get_last_image(bim_ctx_ptr);
+    addr += imgptr->startAddress;
+    endaddr = imgptr->startAddress + imgptr->size;
 #endif
-  return (addr >= endaddr) ? 0 : (uint16_t)boot_image_read(bim_ctx_ptr->app_data, addr, data, length);
+    return (addr >= endaddr) ? 0 : (uint16_t)boot_image_read(bim_ctx_ptr->app_data, addr, data, length);
+}
+
+// Invoked when the Host has terminated a download or upload transfer
+void tud_dfu_abort_cb(uint8_t alt)
+{
+    (void) alt;
+    uint8_t dummy;
+    rtos_printf("Host Aborted transfer.  Reboot to RT\n");
+    set_rt_mode();
+    boot_image_read(bim_ctx_ptr->app_data, 0, &dummy, 1);   // dummy read to ensure flash writes have completed
+    reboot();
+}
+
+// Invoked when a DFU_DETACH request is received
+void tud_dfu_detach_cb(void)
+{
+    rtos_printf("Host detach, reboot\n");
+    set_rt_mode();
+    reboot();
+}
+
+void tud_dfu_runtime_reboot_to_dfu_cb(void)
+{
+    rtos_printf("Host detach, reboot\n");
+    set_dfu_mode();
+    reboot();
 }
 
 static void reboot(void)
@@ -217,12 +269,6 @@ static void reboot(void)
     write_sswitch_reg_no_ack(get_local_tile_id(), XS1_SSWITCH_WATCHDOG_COUNT_NUM, 0x10000);
     write_sswitch_reg_no_ack(get_local_tile_id(), XS1_SSWITCH_WATCHDOG_CFG_NUM, (1 << XS1_WATCHDOG_COUNT_ENABLE_SHIFT) | (1 << XS1_WATCHDOG_TRIGGER_ENABLE_SHIFT) );
     while(1) {;}
-}
-
-void tud_dfu_runtime_reboot_to_dfu_cb(void)
-{
-    set_dfu_mode();
-    reboot();
 }
 
 //--------------------------------------------------------------------+
