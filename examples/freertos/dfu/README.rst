@@ -14,7 +14,9 @@ The application was verified using dfu-util.
 
 Installation instructions for respective operating system can be found `here <https://dfu-util.sourceforge.net/>`__
 
-If on Linux/Mac the user may need to add the USB device to their udev rules.  This example defaults to Vendor ID 0xCAFE with Product ID 0x4000.
+If on Linux the user may need to add the USB device to their udev rules.  This example defaults to Vendor ID 0xCAFE with Product ID 0x4000.
+
+If on Windows the user may need to use a tool such as Zadig to install USB drivers.
 
 *********************
 Building the firmware
