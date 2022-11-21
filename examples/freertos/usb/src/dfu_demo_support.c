@@ -28,7 +28,7 @@ int check_dfu_mode(void)
         (uint8_t*)&mode,
         (unsigned)(MODE_ADDR),
         (size_t)sizeof(int));
-        // rtos_printf("Mode is %u\n", mode);
+    rtos_printf("Mode is %u\n", mode);
     if(mode == 0xffffffff) mode = 0;    // uninitialized should be handled as RT
     return mode;
 }

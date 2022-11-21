@@ -44,13 +44,13 @@ From the xcore_sdk build folder, create the filesystem and flash the device with
 
     .. code-block:: console
 
-        make flash_fs_example_freertos_explorer_board
+        make flash_app_example_freertos_explorer_board
 
 .. tab:: Windows
 
     .. code-block:: console
 
-        nmake flash_fs_example_freertos_explorer_board
+        nmake flash_app_example_freertos_explorer_board
 
 ********************
 Running the firmware
