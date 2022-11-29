@@ -8,7 +8,7 @@
 #include <stdarg.h>
 #include "xscope_endpoint.h"
 
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 
 // Abstraction for sleep portability
 #if defined(__GNUC__) || defined(__MINGW32__)
@@ -56,7 +56,8 @@ typedef enum error_code {
     ERROR_NOT_OPT_OR_FLAG,
     ERROR_INCOMPATIBLE_VCD,
     ERROR_DATA_TOO_SHORT,
-    ERROR_FILE_SYSTEM
+    ERROR_FILE_SYSTEM,
+    ERROR_OUT_OF_RESOURCES
 } error_code_t;
 
 typedef enum log_level {
@@ -131,6 +132,8 @@ static long long line_count = 0;
 static process_psf_state_t psf_state = PROCESS_PSF_HEADER;
 static TraceEntryTableHeader_t psf_evt_table;
 static uint32_t psf_evt_entry = 0;
+static uint16_t *event_cnts = NULL;
+static uint16_t num_cores;
 
 /*
  * Variables set by command line arguments.
@@ -170,7 +173,7 @@ static void print_help(char *arg0)
            "                                for --stream. Default = 1000.\n");
     printf("    -i, --in-file <IN_FILE>     The VCD file to process. In stream mode, the\n"
            "                                application will wait for such a file to exist.\n");
-    printf("    -I, --in-port <HOST>:<PORT> The host and port (separated by ':' on the which\n"
+    printf("    -I, --in-port <HOST>:<PORT> The host and port (separated by ':') on the which\n"
            "                                xgdb's --xscope-port is serving on.\n"
            "                                Note: --stream is implied when using this mode.\n");
     printf("    -o, --out-file <OUT_FILE>   The PSF file to generate.\n");
@@ -329,6 +332,21 @@ static error_code_t process_psf_header(unsigned char trace_bytes[],
     }
 
     print_psf_header(&header);
+
+    if (header.uiNumCores > 0) {
+        uint16_t data_size = header.uiNumCores * sizeof(uint16_t);
+        event_cnts = malloc(data_size);
+
+        if (event_cnts == NULL)
+            return ERROR_OUT_OF_RESOURCES;
+
+        num_cores = header.uiNumCores;
+
+        /* Set each event count to 0xFFFF which is an invalid value
+         * for the 12-bit counter. */
+        memset(event_cnts, 0xFF, data_size);
+    }
+
     return ERROR_NONE;
 }
 
@@ -384,8 +402,42 @@ static error_code_t process_psf_event_table_entry(unsigned char trace_bytes[],
     return ERROR_NONE;
 }
 
-static error_code_t modify_trace_event_count(unsigned char trace_bytes[],
-                                             int num_trace_bytes)
+static void detect_missing_events(unsigned char trace_bytes[],
+                                  int num_trace_bytes)
+{
+    const int core_id_offset = 3;
+    const int evt_cnt_offset_lo = 2;
+    const int evt_cnt_offset_hi = 3;
+    const int hi_evt_cnt_mask = 0x0F;
+    const uint16_t invalid_evt_cnt = 0xFFFF;
+
+    uint16_t core_id = trace_bytes[core_id_offset] >> 4;
+
+    if (event_cnts == NULL || core_id >= num_cores)
+        return;
+
+    uint16_t event_cnt =
+        ((trace_bytes[evt_cnt_offset_hi] & hi_evt_cnt_mask) << 8) |
+        trace_bytes[evt_cnt_offset_lo];
+
+    if (event_cnts[core_id] != invalid_evt_cnt)
+    {
+        uint16_t event_cnt_delta =
+            (event_cnt > event_cnts[core_id]) ?
+            (event_cnt - event_cnts[core_id]) :
+            ((0x1000 - event_cnts[core_id]) + event_cnt);
+
+        if (event_cnt_delta > 1)
+            write_log(LOG_WRN,
+                "Detected %d missing events (Core %d @ Current %d).\n",
+                event_cnt_delta - 1, core_id, event_cnt);
+    }
+
+    event_cnts[core_id] = event_cnt;
+}
+
+static void modify_trace_event_count(unsigned char trace_bytes[],
+                                     int num_trace_bytes)
 {
     const int core_id_offset = 3;
     const int evt_cnt_offset_lo = 2;
@@ -394,6 +446,25 @@ static error_code_t modify_trace_event_count(unsigned char trace_bytes[],
     const int hi_evt_cnt_mask = 0x0F;
     char *evt_cnt = (char *)&event_count;
 
+    /*
+     * Modify the event counter while retaining core id. The trace's event
+     * count is only 12-bit; however, a larger datatype is used by the
+     * application in order to provide a status report for indicating the
+     * total number of events processed.
+     * NOTE: This data is part of TraceBaseEvent_t and is assembled via
+     * TRC_EVENT_SET_EVENT_COUNT in the Tracealyzer unit.
+     */
+
+    trace_bytes[evt_cnt_offset_lo] = evt_cnt[0];
+    trace_bytes[evt_cnt_offset_hi] =
+            (trace_bytes[core_id_offset] & core_id_mask) |
+            (evt_cnt[1] & hi_evt_cnt_mask);
+    event_count++;
+}
+
+static error_code_t process_trace_event(unsigned char trace_bytes[],
+                                        int num_trace_bytes)
+{
     /*
      * Tracealyzer's FreeRTOS unit tracks event data on a per-core basis;
      * however, when viewing all cores simultaneously in Tracealyzer, the event
@@ -418,20 +489,8 @@ static error_code_t modify_trace_event_count(unsigned char trace_bytes[],
     print_psf_event(trace_bytes, num_trace_bytes);
 #endif
 
-    /*
-     * Modify the event counter while retaining core id. The trace's event
-     * count is only 12-bit; however, a larger datatype is used by the
-     * application in order to provide a status report to the indicating the
-     * total number of events processed.
-     * NOTE: This data is part of TraceBaseEvent_t and is assembled via
-     * TRC_EVENT_SET_EVENT_COUNT in the Tracealyzer unit.
-     */
-
-    trace_bytes[evt_cnt_offset_lo] = evt_cnt[0];
-    trace_bytes[evt_cnt_offset_hi] =
-            (trace_bytes[core_id_offset] & core_id_mask) |
-            (evt_cnt[1] & hi_evt_cnt_mask);
-    event_count++;
+    detect_missing_events(trace_bytes, num_trace_bytes);
+    modify_trace_event_count(trace_bytes, num_trace_bytes);
 
     return ERROR_NONE;
 }
@@ -469,7 +528,7 @@ static error_code_t process_psf_data(unsigned char trace_bytes[],
         }
         break;
     case PROCESS_PSF_EVENT:
-        res = modify_trace_event_count(trace_bytes, trace_length);
+        res = process_trace_event(trace_bytes, trace_length);
         break;
     default:
         res = ERROR_INTERNAL;
@@ -776,7 +835,7 @@ int main(int argc, char *argv[])
     if (input_filename) {
         write_log(LOG_INF, "Processing file (Probe: %d) ...\n",
                   XSCOPE_PROBE_ID);
-        process_vcd_file(in_file, out_file);
+        exit_code = process_vcd_file(in_file, out_file);
     } else {
         write_log(LOG_INF,
                   "Connecting to xscope (Probe: %d, Host: %s, Port: %s) ...\n",
@@ -807,7 +866,10 @@ int main(int argc, char *argv[])
     if (in_file != NULL)
         fclose(in_file);
 
+    if (event_cnts != NULL)
+        free(event_cnts);
+
     write_log(LOG_INF, "Done.\n");
 
-    return 0;
+    return exit_code;
 }
