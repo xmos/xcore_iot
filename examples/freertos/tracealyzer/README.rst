@@ -42,11 +42,8 @@ The following are the currently known issues/limitations for this example:
   application may exit prematurely or drop trace data when there are
   exceptionally high number of trace events being recorded. This behavior may be
   attributed to the host PC's USB controller or general performance factors
-  regarding the offloading of trace data from the XTAG.
-- The application while running with the `--xscope-file` will stop after a
-  runtime of 40-70 seconds. This is currently being investigated; to workaround
-  this limitation when taking longer captures use `--xscope-port`. Both
-  use-cases will be documented below.
+  regarding the offloading of trace data from the XTAG. In such cases,
+  xscope2psf will log a "missing events" warning.
 
 *********************
 Building the Host App
