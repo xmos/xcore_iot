@@ -96,7 +96,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                     gain_db = (gain_db <= appconfAUDIO_PIPELINE_MIN_GAIN) ? gain_db : gain_db - appconfAUDIO_PIPELINE_GAIN_STEP;
                     break;
                 }
-                debug_printf("Gain set to %f\n", gain_db);
+                debug_printf("Gain set to %d\n", gain_db);
             }
             continue;
         }
