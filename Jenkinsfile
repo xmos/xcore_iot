@@ -13,7 +13,7 @@ getApproval()
 
 pipeline {
     agent {
-        label 'sdk'
+        label 'us-hw-xcai-exp0'
     }
     options {
         disableConcurrentBuilds()
