@@ -9,7 +9,7 @@
 #include <stdarg.h>
 #include "xscope_endpoint.h"
 
-#define VERSION "1.0.1"
+#define VERSION "1.0.2"
 
 // Abstraction for sleep portability
 #if defined(__GNUC__) || defined(__MINGW32__)
@@ -174,7 +174,7 @@ static void print_help(char *arg0)
            "                                for --stream. Default = 1000.\n");
     printf("    -i, --in-file <IN_FILE>     The VCD file to process. In stream mode, the\n"
            "                                application will wait for such a file to exist.\n");
-    printf("    -I, --in-port <HOST>:<PORT> The host and port (separated by ':') on the which\n"
+    printf("    -I, --in-port <HOST>:<PORT> The host and port (separated by ':') on which\n"
            "                                xgdb's --xscope-port is serving on.\n"
            "                                Note: --stream is implied when using this mode.\n");
     printf("    -o, --out-file <OUT_FILE>   The PSF file to generate.\n");
