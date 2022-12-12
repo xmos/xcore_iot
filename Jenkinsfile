@@ -130,6 +130,7 @@ pipeline {
                 }
             }
         }
+        
         // stage('Run bare-metal examples') {
         //     steps {
         //         withTools(params.TOOLS_VERSION) {
