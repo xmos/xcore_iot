@@ -69,8 +69,11 @@ add_custom_command(
     COMMAND xobjdump --split --split-dir example_freertos_l2_cache_split example_freertos_l2_cache.xb >> example_freertos_l2_cache_split/output.log
     BYPRODUCTS
         example_freertos_l2_cache.xb
-        example_freertos_l2_cache_split
     VERBATIM
+)
+
+set_target_properties(example_freertos_l2_cache PROPERTIES
+    ADDITIONAL_CLEAN_FILES example_freertos_l2_cache_split
 )
 
 #**********************
