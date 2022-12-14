@@ -13,7 +13,7 @@ getApproval()
 
 pipeline {
     agent {
-        label 'sdk'
+        label 'us-hw-xcai-exp0'
     }
     options {
         disableConcurrentBuilds()
@@ -130,6 +130,7 @@ pipeline {
                 }
             }
         }
+        
         // stage('Run bare-metal examples') {
         //     steps {
         //         withTools(params.TOOLS_VERSION) {
