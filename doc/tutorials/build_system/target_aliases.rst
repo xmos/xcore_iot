@@ -176,8 +176,6 @@ If you prefer, you can specify individual software service libraries.
       - Device control library
     * - rtos::sw_services::usb_device_control
       - USB device control library
-    * - rtos::sw_services::dispatcher
-      - Dispatcher thread pool library
     * - rtos::sw_services::wifi_manager
       - WiFi manager library
     * - rtos::sw_services::tls_support
