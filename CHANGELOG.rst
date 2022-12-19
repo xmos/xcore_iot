@@ -1,6 +1,17 @@
 XCORE SDK change log
 ====================
 
+0.12.0
+------
+
+  * Addition of FreeRTOS Tracealyzer example application
+  * Addition of FreeRTOS DFU example application
+  * Addition of FreeRTOS xscope_fileio example application
+  * Addition of FreeRTOS xlink example application
+  * Addition of Voice framework module
+  * Removed FreeRTOS Dispatcher example application
+  * Minor documentation updates
+
 0.11.0
 ------
 
