@@ -76,12 +76,14 @@
 #define CFG_TUD_ENDPOINT0_SIZE    64
 #endif
 
-#define CFG_TUD_DFU_TRANSFER_BUFFER_SIZE    4096
+// #define CFG_TUD_DFU_TRANSFER_BUFFER_SIZE    4096
+#define CFG_TUD_DFU_XFER_BUFSIZE    ( OPT_MODE_HIGH_SPEED ? 512 : 64 )
 
 //------------- CLASS -------------//
 
-#define CFG_TUD_DFU_RUNTIME 1
-#define CFG_TUD_DFU_MODE    1
+// #define CFG_TUD_DFU_RUNTIME 1
+// #define CFG_TUD_DFU_MODE    1
+#define CFG_TUD_DFU    1
 
 #ifdef __cplusplus
  }

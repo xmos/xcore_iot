@@ -27,10 +27,10 @@
 #define MIC_ARRAY_RPC_HOST_TASK_PRIORITY (configMAX_PRIORITIES/2)
 
 #define I2C_SLAVE_ISR_CORE   4
-#define I2C_SLAVE_CORE_MASK  (1 << 1)
+#define I2C_SLAVE_CORE_MASK  (1 << 2)
 #define I2C_SLAVE_ADDR       0x7A
 
-#define MIC_ARRAY_CORE_MASK  (1 << 2)
+#define MIC_ARRAY_CORE_MASK  (1 << 3)
 #define I2S_MASTER_CORE_MASK (1 << 6)
 #define I2S_SLAVE_CORE_MASK  (1 << 6)
 
@@ -44,11 +44,11 @@
 #define I2S_MASTER_SEND_BUF_SIZE    (I2S_FRAME_LEN * 2)
 #define I2S_SLAVE_RECV_BUF_SIZE     (I2S_FRAME_LEN * 2)
 #define I2S_SLAVE_SEND_BUF_SIZE     (I2S_FRAME_LEN * 2)
-#define I2S_MASTER_ISR_CORE         (0)
-#define I2S_SLAVE_ISR_CORE          (0)
+#define I2S_MASTER_ISR_CORE         (1)
+#define I2S_SLAVE_ISR_CORE          (1)
 
 #define MIC_ARRAY_TEST_AUDIO_SAMPLE_RATE      16000
-#define MIC_ARRAY_ISR_CORE          0
+#define MIC_ARRAY_ISR_CORE          1
 #define MIC_ARRAY_CHAN_PAIRS        2
 #define MIC_ARRAY_FRAME_LEN         256
 #define MIC_ARRAY_TEST_ITERS        100

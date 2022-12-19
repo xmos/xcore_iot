@@ -70,6 +70,7 @@ merge_binaries(example_freertos_explorer_board tile0_example_freertos_explorer_b
 #**********************
 create_run_target(example_freertos_explorer_board)
 create_debug_target(example_freertos_explorer_board)
+create_install_target(example_freertos_explorer_board)
 
 #**********************
 # Filesystem support targets
@@ -102,11 +103,9 @@ else()
 endif()
 
 create_filesystem_target(example_freertos_explorer_board)
-
-add_custom_target(flash_fs_example_freertos_explorer_board
-    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_explorer_board.xe --boot-partition-size 0x100000 --data example_freertos_explorer_board_fat.fs
-    DEPENDS make_fs_example_freertos_explorer_board
-    COMMENT
-        "Flash filesystem"
-    VERBATIM
+create_flash_app_target(
+    #[[ Target ]]                 example_freertos_explorer_board
+    #[[ Boot Partition Size ]]    0x100000 
+    #[[ Data Parition Contents ]] example_freertos_explorer_board_fat.fs
+    #[[ Dependencies ]]           make_fs_example_freertos_explorer_board
 )

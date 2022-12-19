@@ -10,23 +10,25 @@ UNAME=$(uname)
 rm -rf testing
 mkdir testing
 REPORT=testing/test.rpt
-FIRMWARE=rtos_drivers.xe
+FIRMWARE=test_rtos_driver_hil_add.xe
 TIMEOUT_S=60
 
 rm -f ${REPORT}
+
+XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
 echo "****************"
 echo "* Run Tests    *"
 echo "****************"
 if [ "$UNAME" == "Linux" ] ; then
-    timeout ${TIMEOUT_S}s xrun --xscope bin/${FIRMWARE} 2>&1 | tee -a ${REPORT}
+    timeout ${TIMEOUT_S}s xrun --xscope ${XCORE_SDK_ROOT}/dist/${FIRMWARE} 2>&1 | tee -a ${REPORT}
 elif [ "$UNAME" == "Darwin" ] ; then
-    gtimeout ${TIMEOUT_S}s xrun --xscope bin/${FIRMWARE} 2>&1 | tee -a ${REPORT}
+    gtimeout ${TIMEOUT_S}s xrun --xscope ${XCORE_SDK_ROOT}/dist/${FIRMWARE} 2>&1 | tee -a ${REPORT}
 fi
 
 echo "****************"
 echo "* Parse Result *"
 echo "****************"
-python ${XCORE_SDK_PATH}/test/rtos_drivers/python/parse_test_output.py testing/test.rpt -outfile="testing/test_results" --print_test_results --verbose
+python ${XCORE_SDK_ROOT}/test/rtos_drivers/python/parse_test_output.py testing/test.rpt -outfile="testing/test_results" --print_test_results --verbose
 
 pytest

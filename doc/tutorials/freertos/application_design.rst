@@ -62,7 +62,7 @@ Board Support Configurations
 ****************************
 
 xcore leverages its architecture to provide a flexible chip where many typically silicon based peripherals are found in software. This allows a chip to be reconfigured in a way that provides the specific IO required for a given application, thus resulting in a low cost yet incredibly silicon efficient solution. Board support configurations (bsp_configs) are the description for the hardware IO that exists in a given board. The bsp_configs provide the application programmer with an API to initialize and start the hardware configuration, as well as the supported RTOS driver contexts. The programming model in this FreeRTOS architecture is:
-    * `.xn files <https://www.xmos.ai/documentation/XM-014363-PC-6/html/tools-guide/tools-ref/formats/xn-spec/xn-spec.html?highlight=xn>`__ provide the mapping of ports, pins, and links
+    * `.xn files <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/tools-ref/formats/xn-spec/xn-spec.html?highlight=xn>`__ provide the mapping of ports, pins, and links
     * bsp_configs setup and start hardware IO and provide the application with RTOS driver contexts
     * applications use the bsp_config init/start code as well as RTOS driver contexts, similar to conventional microcontroller programming models.
 

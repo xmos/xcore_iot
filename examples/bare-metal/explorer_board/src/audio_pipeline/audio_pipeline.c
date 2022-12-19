@@ -10,7 +10,7 @@
 /* SDK headers */
 #include "xcore_utils.h"
 #include "mic_array.h"
-#include "bfp_math.h"
+#include "xmath/xmath.h"
 
 /* App headers */
 #include "app_conf.h"
@@ -69,7 +69,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                 // update the gain
                 float power = (float)gain_db / 20.0;
                 float gain_fl = powf(10.0, power);
-                float_s32_t gain = float_to_float_s32(gain_fl);
+                float_s32_t gain = f32_to_float_s32(gain_fl);
                 // scale both channels 
                 bfp_s32_scale(&ch0, &ch0, gain);
                 bfp_s32_scale(&ch1, &ch1, gain);
@@ -96,7 +96,7 @@ void ap_stage_b(chanend_t c_input, chanend_t c_output, chanend_t c_from_gpio) {
                     gain_db = (gain_db <= appconfAUDIO_PIPELINE_MIN_GAIN) ? gain_db : gain_db - appconfAUDIO_PIPELINE_GAIN_STEP;
                     break;
                 }
-                debug_printf("Gain set to %f\n", gain_db);
+                debug_printf("Gain set to %d\n", gain_db);
             }
             continue;
         }

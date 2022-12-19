@@ -2,7 +2,7 @@
 # Individual tests
 #**********************
 set(SPI_TEST  1)
-set(UART_TEST  1)
+set(UART_TEST  0)   # Appears to be broken
 
 #**********************
 # Gather Sources

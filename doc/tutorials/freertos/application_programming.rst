@@ -83,7 +83,6 @@ Software Services
 The SDK also includes some higher level RTOS compatible software services, some of which call the aforementioned drivers. These include, but are not necessarily limited to:
 
 - DHCP server
-- Dispatcher
 - FAT filesystem
 - HTTP parser
 - JSON parser

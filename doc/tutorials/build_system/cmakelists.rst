@@ -1,10 +1,17 @@
 ######################
-Example CMakeLists.txt 
+Example CMakeLists.txt
 ######################
 
 .. note::
 
    CMake is powerful tool that provides the developer a great deal of flexibility in how their projects are built.  As a result, CMakeLists.txt files in the example applications may vary from the examples below.  This example can be used as a starting point for your bare-metal application.  Or, you may choose to copy a ``CMakeLists.txt`` from one of the applications in the SDK that closely resembles your application.
+
+
+This repository supports being added as a CMake subproject. A parent CMake project can use add_subdirectory() to include the xcore_sdk as a subproject.
+
+.. note::
+
+    The xcore_sdk subproject should be added before declaring application targets, as some xcore_sdk provided macros may be needed.  Additionally, when included as a subproject, xcore_sdk examples targets are not added to the CMake build.
 
 **********
 Bare-Metal

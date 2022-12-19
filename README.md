@@ -37,7 +37,7 @@ Download and install the xcore [XTC Tools](https://www.xmos.ai/software-tools/) 
 
 ## Documentation
 
-See the [official documentation](https://www.xmos.com/documentation/XM-014660-PC-2/html/) for more information including:
+See the [official documentation](https://www.xmos.ai/documentation/XM-014660-PC-2/html/) for more information including:
 
 - Instructions for installing
 - Getting started guides

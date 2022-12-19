@@ -10,18 +10,20 @@ UNAME=$(uname)
 rm -rf testing
 mkdir testing
 REPORT=testing/test.rpt
-FIRMWARE=clock_control_test.xe
+FIRMWARE=test_rtos_driver_clock_control_test.xe
 TIMEOUT_S=60
 
 rm -f ${REPORT}
+
+XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
 
 echo "****************"
 echo "* Run Tests    *"
 echo "****************"
 if [ "$UNAME" == "Linux" ] ; then
-    timeout ${TIMEOUT_S}s xrun --xscope bin/${FIRMWARE} 2>&1 | tee -a ${REPORT}
+    timeout ${TIMEOUT_S}s xrun --xscope ${XCORE_SDK_ROOT}/dist/${FIRMWARE} 2>&1 | tee -a ${REPORT}
 elif [ "$UNAME" == "Darwin" ] ; then
-    gtimeout ${TIMEOUT_S}s xrun --xscope bin/${FIRMWARE} 2>&1 | tee -a ${REPORT}
+    gtimeout ${TIMEOUT_S}s xrun --xscope ${XCORE_SDK_ROOT}/dist/${FIRMWARE} 2>&1 | tee -a ${REPORT}
 fi
 
 echo "****************"

@@ -37,6 +37,7 @@ set(APP_COMPILE_DEFINITIONS
     MIC_ARRAY_CONFIG_PORT_MCLK=PORT_MCLK_IN
     MIC_ARRAY_CONFIG_PORT_PDM_CLK=PORT_PDM_CLK
     MIC_ARRAY_CONFIG_PORT_PDM_DATA=PORT_PDM_DATA
+    XUD_CORE_CLOCK=600
 )
 
 set(APP_LINK_OPTIONS
@@ -66,3 +67,4 @@ mic_array_vanilla_add( example_bare_metal_explorer_board
 create_run_target(example_bare_metal_explorer_board)
 create_debug_target(example_bare_metal_explorer_board)
 create_flash_app_target(example_bare_metal_explorer_board)
+create_install_target(example_bare_metal_explorer_board)

@@ -68,3 +68,4 @@ merge_binaries(example_freertos_getting_started tile0_example_freertos_getting_s
 #**********************
 create_run_target(example_freertos_getting_started)
 create_debug_target(example_freertos_getting_started)
+create_install_target(example_freertos_getting_started)

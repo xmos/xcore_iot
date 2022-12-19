@@ -41,6 +41,7 @@ static reg_test_t test_vector[I2C_MASTER_REG_WRITE_TEST_ITER] =
 
 #if ON_TILE(I2C_SLAVE_TILE)
 static uint32_t test_slave_iters = 0;
+static uint32_t test_slave_requests = 0;
 #endif
 
 I2C_MAIN_TEST_ATTR
@@ -79,6 +80,11 @@ static int main_test(i2c_test_ctx_t *ctx)
             local_printf("SLAVE failed");
             return -1;
         }
+
+        if ((test_slave_requests) != test_slave_iters) {
+            local_printf("SLAVE failed");
+            return -1;
+        }
     }
     #endif
 
@@ -111,6 +117,19 @@ static void slave_rx(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, size_
 
     test_slave_iters++;
 }
+
+I2C_SLAVE_RX_BYTE_CHECK_ATTR
+static void slave_rx_byte_check(rtos_i2c_slave_t *ctx, void *app_data, uint8_t data, i2c_slave_ack_t *cur_status)
+{
+    local_printf("SLAVE rx byte check 0x%x status %d", data, *cur_status);
+}
+
+I2C_SLAVE_WRITE_ADDR_REQ_ATTR
+static void slave_write_addr_req(rtos_i2c_slave_t *ctx, void *app_data, i2c_slave_ack_t *cur_status)
+{
+    test_slave_requests++;
+    local_printf("SLAVE write request %d", test_slave_requests);
+}
 #endif
 
 void register_master_reg_write_test(i2c_test_ctx_t *test_ctx)
@@ -124,6 +143,8 @@ void register_master_reg_write_test(i2c_test_ctx_t *test_ctx)
 
     #if ON_TILE(I2C_SLAVE_TILE)
     test_ctx->slave_rx[this_test_num] = slave_rx;
+    test_ctx->slave_rx_check_byte[this_test_num] = slave_rx_byte_check;
+    test_ctx->slave_write_addr_req[this_test_num] = slave_write_addr_req;
     #endif
 
     #if ON_TILE(I2C_MASTER_TILE)

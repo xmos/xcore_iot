@@ -23,7 +23,7 @@ First, build all the FreeRTOS example applications.
 
 .. code-block:: console
 
-    bash tools/ci/build_freertos_examples.sh
+    bash tools/ci/build_rtos_core_examples.sh
 
 Run the tests with the following commands:
 
@@ -31,8 +31,8 @@ Run the tests with the following commands:
 
     bash test/examples/run_freertos_getting_started_tests.sh <optional adapter-id>
     bash test/examples/run_freertos_explorer_board_tests.sh <optional adapter-id>
-    bash test/examples/run_freertos_dispatcher_tests.sh <optional adapter-id>
     bash test/examples/run_freertos_l2_cache_tests.sh <optional adapter-id>
+    bash test/examples/run_freertos_tracealyzer_tests.sh <optional adapter-id>
 
 
 Bare-metal Examples

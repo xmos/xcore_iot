@@ -107,7 +107,7 @@ void gpio_ctrl(void)
 
         buttons_val = rtos_gpio_port_in(gpio_ctx_t0, button_port);
         led_val = rtos_gpio_port_in(gpio_ctx_t0, led_port);
-        
+
         /* Mask out LED 2*/
         led_val &= 0x4;
         led_val |= (~ buttons_val) & 0x3;
@@ -118,7 +118,7 @@ void gpio_ctrl(void)
         buttonA = ( buttons_val >> 0 ) & 0x01;
         buttonB = ( buttons_val >> 1 ) & 0x01;
 
-        /* Adjust volume based on LEDs */
+        /* Adjust volume based on buttons */
         if( buttonA == 0 )   /* Up */
         {
             xTimerStart( volume_up_timer, 0 );

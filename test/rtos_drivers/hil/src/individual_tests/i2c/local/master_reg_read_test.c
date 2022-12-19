@@ -148,6 +148,11 @@ static void slave_tx_done(rtos_i2c_slave_t *ctx, void *app_data, uint8_t *data, 
     }
 }
 
+I2C_SLAVE_RX_BYTE_CHECK_ATTR
+static void slave_rx_byte_check(rtos_i2c_slave_t *ctx, void *app_data, uint8_t data, i2c_slave_ack_t *cur_status)
+{
+    local_printf("SLAVE rx byte check 0x%x status %d", data, *cur_status);
+}
 #endif
 
 void register_master_reg_read_test(i2c_test_ctx_t *test_ctx)
@@ -163,6 +168,8 @@ void register_master_reg_read_test(i2c_test_ctx_t *test_ctx)
     test_ctx->slave_rx[this_test_num] = slave_rx;
     test_ctx->slave_tx_start[this_test_num] = slave_tx_start;
     test_ctx->slave_tx_done[this_test_num] = slave_tx_done;
+    test_ctx->slave_rx_check_byte[this_test_num] = slave_rx_byte_check;
+    test_ctx->slave_write_addr_req[this_test_num] = NULL;
     #endif
 
     #if ON_TILE(I2C_MASTER_TILE)

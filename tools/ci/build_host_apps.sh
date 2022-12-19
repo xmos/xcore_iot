@@ -9,6 +9,14 @@ source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
 DIST_DIR=${XCORE_SDK_ROOT}/dist_host
 mkdir -p ${DIST_DIR}
 
+# row format is: "target     copy_path"
+applications=(
+    "example_freertos_device_control_host   examples/freertos/device_control/host"
+    "fatfs_mkimage                          modules/rtos/modules/sw_services/fatfs/host"
+    "xscope_host_endpoint                   modules/xscope_fileio/xscope_fileio/host"
+    "xscope2psf                             examples/freertos/tracealyzer/host"
+)
+
 # perform builds
 path="${XCORE_SDK_ROOT}"
 echo '******************************************************'
@@ -17,14 +25,12 @@ echo '******************************************************'
 
 (cd ${path}; rm -rf build_host)
 (cd ${path}; mkdir -p build_host)
-(cd ${path}/build_host; log_errors cmake ../ ; log_errors make -j)
+(cd ${path}/build_host; log_errors cmake ../)
 
-# copy example_freertos_device_control_host to dist
-name=device_control/host
-make_target=example_freertos_device_control_host
-(cd ${path}/build_host; cp examples/freertos/${name}/${make_target} ${DIST_DIR})
-
-# copy fatfs_mkimage to dist
-name=fatfs/host
-make_target=fatfs_mkimage
-(cd ${path}/build_host; cp modules/rtos/modules/sw_services/${name}/${make_target} ${DIST_DIR})
+for ((i = 0; i < ${#applications[@]}; i += 1)); do
+    read -ra FIELDS <<< ${applications[i]}
+    target="${FIELDS[0]}"
+    copy_path="${FIELDS[1]}"
+    (cd ${path}/build_host; log_errors make ${target} -j)
+    (cd ${path}/build_host; cp ${copy_path}/${target} ${DIST_DIR})
+done
