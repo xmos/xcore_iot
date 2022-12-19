@@ -49,7 +49,7 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
-add_executable(example_bare_metal_explorer_board EXCLUDE_FROM_ALL)
+add_executable(example_bare_metal_explorer_board)
 target_sources(example_bare_metal_explorer_board PUBLIC ${APP_SOURCES})
 target_include_directories(example_bare_metal_explorer_board PUBLIC ${APP_INCLUDES})
 target_compile_definitions(example_bare_metal_explorer_board PRIVATE ${APP_COMPILE_DEFINITIONS})
