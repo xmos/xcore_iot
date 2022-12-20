@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 
+# Compile for x86_64 on Mac as we can't support the M1 ARM architecture yet
+set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "")
+
 project(xscope2psf LANGUAGES C)
 set(TARGET_NAME xscope2psf)
 
