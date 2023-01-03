@@ -65,8 +65,8 @@ create_install_target(example_freertos_l2_cache)
 add_custom_command(
     TARGET example_freertos_l2_cache POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory example_freertos_l2_cache_split
-    COMMAND xobjdump --strip example_freertos_l2_cache.xe
-    COMMAND xobjdump --split --split-dir example_freertos_l2_cache_split example_freertos_l2_cache.xb
+    COMMAND xobjdump --strip example_freertos_l2_cache.xe > example_freertos_l2_cache_split/output.log
+    COMMAND xobjdump --split --split-dir example_freertos_l2_cache_split example_freertos_l2_cache.xb >> example_freertos_l2_cache_split/output.log
     BYPRODUCTS
         example_freertos_l2_cache.xb
         example_freertos_l2_cache_split
