@@ -13,7 +13,7 @@ getApproval()
 
 pipeline {
     agent {
-        label 'us-hw-xcai-exp0'
+        label 'xcore.ai-explorer-us'
     }
     options {
         disableConcurrentBuilds()
