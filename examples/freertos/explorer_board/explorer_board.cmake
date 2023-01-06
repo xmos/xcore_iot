@@ -75,37 +75,27 @@ create_install_target(example_freertos_explorer_board)
 #**********************
 # Filesystem support targets
 #**********************
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
-    add_custom_command(
-        OUTPUT example_freertos_explorer_board_fat.fs
-        COMMAND ${CMAKE_COMMAND} -E make_directory %temp%/fatmktmp/fs
-        COMMAND ${CMAKE_COMMAND} -E copy demo.txt %temp%/fatmktmp/fs/demo.txt
-        COMMAND fatfs_mkimage --input=%temp%/fatmktmp --output=example_freertos_explorer_board_fat.fs
-        BYPRODUCTS %temp%/fatmktmp
-        DEPENDS example_freertos_explorer_board
-        COMMENT
-            "Create filesystem"
-        WORKING_DIRECTORY
-            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
-        VERBATIM
-    )
-else()
-    add_custom_command(
-        OUTPUT example_freertos_explorer_board_fat.fs
-        COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/fs && cp ./demo.txt $fat_mnt_dir/fs/demo.txt && fatfs_mkimage --input=$tmp_dir --output=example_freertos_explorer_board_fat.fs"
-        DEPENDS example_freertos_explorer_board
-        COMMENT
-            "Create filesystem"
-        WORKING_DIRECTORY
-            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
-        VERBATIM
-    )
-endif()
+set(FATFS_CONTENTS_DIR ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/fatmktmp)
+set(FATFS_FILE ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/example_freertos_explorer_board_fat.fs)
+add_custom_target(
+    example_freertos_explorer_board_fat.fs ALL
+    COMMAND ${CMAKE_COMMAND} -E copy demo.txt ${FATFS_CONTENTS_DIR}/fs/demo.txt
+    COMMAND fatfs_mkimage --input=${FATFS_CONTENTS_DIR} --output=${FATFS_FILE}
+    COMMENT
+        "Create filesystem"
+    WORKING_DIRECTORY
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+    VERBATIM
+)
+
+set_target_properties(example_freertos_explorer_board_fat.fs PROPERTIES
+    ADDITIONAL_CLEAN_FILES "${FATFS_CONTENTS_DIR};${FATFS_FILE}"
+)
 
 create_filesystem_target(example_freertos_explorer_board)
 create_flash_app_target(
-    #[[ Target ]]                 example_freertos_explorer_board
-    #[[ Boot Partition Size ]]    0x100000 
-    #[[ Data Parition Contents ]] example_freertos_explorer_board_fat.fs
-    #[[ Dependencies ]]           make_fs_example_freertos_explorer_board
+    #[[ Target ]]                  example_freertos_explorer_board
+    #[[ Boot Partition Size ]]     0x100000
+    #[[ Data Partition Contents ]] ${FATFS_FILE}
+    #[[ Dependencies ]]            make_fs_example_freertos_explorer_board
 )
