@@ -23,7 +23,6 @@ applications=(
     "example_freertos_dfu_v2           15.1.3  No  No  Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_dfu_v1           15.2.0  No  No  Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_dfu_v2           15.2.0  No  No  Yes XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
-    "example_freertos_dispatcher       15.1.0  No  No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_explorer_board   15.1.0  Yes No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_getting_started  15.1.0  No  No  No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"
     "example_freertos_l2_cache         15.1.0  No  Yes No  XCORE-AI-EXPLORER  xmos_cmake_toolchain/xs3a.cmake"

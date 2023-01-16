@@ -9,7 +9,7 @@ is not visible at all and some links will not be functional.
 Hosted Documentation
 ********************
 
-TODO: Include URL for hosted documentation
+The latest documentation can be found at https://www.xmos.ai/documentation/XM-014660-PC-LATEST/html
 
 **********************
 Building Documentation

@@ -13,7 +13,7 @@ getApproval()
 
 pipeline {
     agent {
-        label 'sdk'
+        label 'xcore.ai-explorer-us'
     }
     options {
         disableConcurrentBuilds()
@@ -100,15 +100,6 @@ pipeline {
                             }
                         } 
                         script {
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_dispatcher.xe")) {
-                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
-                                    sh "test/examples/run_freertos_dispatcher_tests.sh " + adapterIDs[0]
-                                }
-                            } else {
-                                echo 'SKIPPED: example_freertos_dispatcher'
-                            }
-                        } 
-                        script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_l2_cache.xe")) {
                                 withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_l2_cache_tests.sh " + adapterIDs[0]
@@ -130,6 +121,7 @@ pipeline {
                 }
             }
         }
+        
         // stage('Run bare-metal examples') {
         //     steps {
         //         withTools(params.TOOLS_VERSION) {
