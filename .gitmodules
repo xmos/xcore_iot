@@ -4,9 +4,6 @@
 [submodule "xmos_cmake_toolchain"]
 	path = xmos_cmake_toolchain
 	url = git@github.com:xmos/xmos_cmake_toolchain.git
-[submodule "avona"]
-	path = modules/voice
-	url = git@github.com:xmos/sw_avona.git
 [submodule "frameworks/core"]
 	path = modules/core
 	url = git@github.com:xmos/fwk_core.git
