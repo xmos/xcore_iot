@@ -293,6 +293,7 @@ static void print_psf_event_table_entry(unsigned char trace_bytes[],
 }
 #endif /* (PRINT_PSF_EVENTS == 1) */
 
+#if (PRINT_OTHER_RECORDS == 1)
 static void print_record(unsigned int id, unsigned long long timestamp,
                          unsigned int length, unsigned long long data_val,
                          unsigned char *data_bytes)
@@ -310,6 +311,7 @@ static void print_record(unsigned int id, unsigned long long timestamp,
 
     write_log(LOG_INF, "\n");
 }
+#endif /* (PRINT_OTHER_RECORDS == 1) */
 
 static error_code_t process_psf_header(unsigned char trace_bytes[],
                                        int trace_length)

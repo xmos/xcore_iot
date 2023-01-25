@@ -37,8 +37,6 @@ void transmit_handler(unsigned comm_state) {
     unsigned err_ctr = 0;
     int reg_val = 0;
     int direction = 0x0;
-    int ret = 0;
-    
     unsigned x = 0;
 
     unsigned switch_id = get_local_tile_id();
