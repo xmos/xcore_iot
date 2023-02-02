@@ -23,7 +23,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  SDK_BUILDER_IMAGE: 'ghcr.io/xmos/sdk_app_builder:develop'
+  XCORE_BUILDER: 'ghcr.io/xmos/xcore_builder:latest'
 
 jobs:
   changes:
@@ -34,7 +34,7 @@ jobs:
       tusb_demos: ${{ steps.filter.outputs.tusb_demos }}
       rtos_tests: ${{ steps.filter.outputs.rtos_tests }}
     steps:
-      - name: Checkout SDK
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -59,13 +59,13 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Pull SDK builder
+      - name: Pull Docker builder
         run: |
-          docker pull ${SDK_BUILDER_IMAGE}
+          docker pull ${XCORE_BUILDER}
 
       - name: Build
         run: |
-          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${SDK_BUILDER_IMAGE} bash -l tools/ci/build_rtos_usb_examples.sh
+          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_rtos_usb_examples.sh
 
       # - name: Upload artifacts
       #   uses: actions/upload-artifact@v3
