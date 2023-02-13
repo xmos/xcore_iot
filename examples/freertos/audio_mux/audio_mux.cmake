@@ -76,3 +76,4 @@ merge_binaries(example_freertos_audio_mux tile0_example_freertos_audio_mux tile1
 create_run_target(example_freertos_audio_mux)
 create_debug_target(example_freertos_audio_mux)
 create_flash_app_target(example_freertos_audio_mux)
+create_install_target(example_freertos_audio_mux)
