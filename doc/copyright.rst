@@ -15,7 +15,7 @@ Additional third party code is included under the following copyrights and licen
 
     * - Module
       - Copyright & License
-    * - `Argtable3 <https://github.com/xmos/fwk_rtos/tree/develop/modules/sw_services/fatfs/host/argtable>`__
+    * - `Argtable3 <https://github.com/xmos/fwk_rtos/tree/develop/tools/fatfs_mkimage/argtable>`__
       - Copyright (C) 1998-2001,2003-2011,2013 Stewart Heitmann, licensed under `LICENSE <https://github.com/xmos/fwk_rtos/blob/cbb80e17373ea76ca474921012ca684d092d1059/modules/sw_services/fatfs/host/argtable/LICENSE>`__
     * - `FatFS <http://elm-chan.org/fsw/ff/00index_e.html>`__
       - Copyright (C) 2017 ChaN, licensed under a `BSD-style license <https://github.com/xmos/fwk_rtos/blob/develop/modules/sw_services/fatfs/thirdparty/LICENSE.txt>`__
