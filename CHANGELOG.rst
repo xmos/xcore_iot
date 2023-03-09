@@ -1,6 +1,11 @@
 XCORE SDK change log
 ====================
 
+1.0.0
+------
+  * Addition of FreeRTOS audiomux example application
+  * Documentation updates
+
 0.12.0
 ------
 

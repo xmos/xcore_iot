@@ -22,7 +22,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  DOC_BUILDER_IMAGE: 'ghcr.io/xmos/doc_builder:latest'
+  DOC_BUILDER_IMAGE: 'ghcr.io/xmos/doc_builder:v2.0.0'
 
 jobs:
   build_documentation:
