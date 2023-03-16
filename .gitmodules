@@ -15,7 +15,7 @@
 	url = git@github.com:xmos/fwk_io.git
 [submodule "frameworks/rtos"]
 	path = modules/rtos
-	url = git@github.com:xmos/fwk_rtos.git
+	url = git@github.com:xhuw/fwk_rtos.git
 [submodule "modules/xscope_fileio/xscope_fileio"]
 	path = modules/xscope_fileio/xscope_fileio
 	url = git@github.com:xmos/xscope_fileio.git
