@@ -93,9 +93,9 @@ int wifi_conn_mgr_event_cb(int event, char *ssid, char *password) {
       rtos_printf("Directing WiFi manager to start a soft AP\n");
       rtos_printf("\tSSID is %s\n", appconfSOFT_AP_SSID);
       if (strlen(appconfSOFT_AP_PASSWORD) > 0) {
-        rtos_printf("\tPassword is %s\n");
+        rtos_printf("\tPassword found\n");
       } else {
-        rtos_printf("\tThere is no password\n");
+        rtos_printf("\tPassword not found\n");
       }
       strcpy(ssid, appconfSOFT_AP_SSID);
       strcpy(password, appconfSOFT_AP_PASSWORD);
