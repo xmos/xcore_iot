@@ -175,8 +175,8 @@ static void handle_ep0_command(rtos_usb_t *ctx, uint8_t ep0_cmd)
             prepare_setup(ctx);
             chan_out_byte(ctx->c_ep0_proxy, xud_speed);
 
-            triggerable_enable_trigger(ctx->c_ep[0][0]);
-            triggerable_enable_trigger(ctx->c_ep[0][1]);
+            triggerable_enable_trigger(ctx->c_ep[0][RTOS_USB_OUT_EP]);
+            triggerable_enable_trigger(ctx->c_ep[0][RTOS_USB_IN_EP]);
         }                
         break;
         case e_prepare_setup:
@@ -212,6 +212,20 @@ static void handle_ep0_command(rtos_usb_t *ctx, uint8_t ep0_cmd)
     }
     // Enable interrupts
     triggerable_enable_trigger(ctx->c_ep0_proxy);
+}
+
+static inline void handle_usb_transfer_complete(rtos_usb_t *ctx, ep0_proxy_event_t *event)
+{
+    chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.dir);
+    chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.is_setup);
+    chan_out_word(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.len);
+    chan_out_word(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.result);
+
+    if(event->xfer_complete.is_setup)
+    {
+        // Send setup packet to EP0
+        chan_out_buf_byte(ctx->c_ep0_proxy_xfer_complete, (uint8_t*)sbuffer, event->xfer_complete.len); // Will this cause the interrupt on chan_ep0_proxy to trigger
+    }
 }
 
 
@@ -254,32 +268,24 @@ void ep0_proxy_task(void *app_data)
     printf("In ep0_proxy_task(), 0x%x, 0x%x\n", epTypeTableOut[0], epTypeTableIn[0]);
     
     ep0_proxy_event_t event;
-    uint8_t last_xfer_complete_dir;
     while(1)
     {   
         rtos_osal_queue_receive(&_ep0_proxy_event_queue, &event, RTOS_OSAL_WAIT_FOREVER);
         // Send this to EP0 and wait for commands from EP0
         if(event.event_id == EP0_TRANSFER_COMPLETE)
         {
-            chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event.xfer_complete.dir);
-            chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event.xfer_complete.is_setup);
-            chan_out_word(ctx->c_ep0_proxy_xfer_complete, event.xfer_complete.len);
-            chan_out_word(ctx->c_ep0_proxy_xfer_complete, event.xfer_complete.result);
+            handle_usb_transfer_complete(ctx, &event);
 
-            last_xfer_complete_dir = event.xfer_complete.dir;
-            if(event.xfer_complete.is_setup)
-            {
-                // Send setup packet to EP0
-                chan_out_buf_byte(ctx->c_ep0_proxy_xfer_complete, (uint8_t*)sbuffer, event.xfer_complete.len); // Will this cause the interrupt on chan_ep0_proxy to trigger
-            }
+            // TODO If an out data xfer is  completed the data needs to be sent to EP0. This is currently not handled.
+
             //rtos_printf("Enable c_ep0_proxy ISR on tile 0 on chanend %ld\n", ctx->c_ep0_proxy);
             triggerable_enable_trigger(ctx->c_ep0_proxy); // Enable proxy ISR and wait for offtile EP0 to communicate with us
 
             if(event.xfer_complete.result == XUD_RES_OKAY)
             {
                 // If everything was okay, we might not hear from ep0 at all, so enable the EP interrupts
-                triggerable_enable_trigger(ctx->c_ep[0][0]);
-                triggerable_enable_trigger(ctx->c_ep[0][1]);
+                triggerable_enable_trigger(ctx->c_ep[0][RTOS_USB_OUT_EP]);
+                triggerable_enable_trigger(ctx->c_ep[0][RTOS_USB_IN_EP]);
 
             }
         }
