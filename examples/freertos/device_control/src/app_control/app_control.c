@@ -14,11 +14,20 @@
 
 #define APP_CONTROL_TRANSPORT_COUNT ((appconfI2C_CTRL_ENABLED ? 1 : 0) + (appconfUSB_CTRL_ENABLED ? 1 : 0))
 
-#if ON_TILE(USB_TILE_NO)
-static device_control_t device_control_usb_ctx_s;
+#if RUN_EP0_VIA_PROXY
+    #if ON_TILE(EP0_TILE_NO)
+    static device_control_t device_control_usb_ctx_s;
+    #else
+    static device_control_client_t device_control_usb_ctx_s;
+    #endif
 #else
-static device_control_client_t device_control_usb_ctx_s;
+    #if ON_TILE(USB_TILE_NO)
+    static device_control_t device_control_usb_ctx_s;
+    #else
+    static device_control_client_t device_control_usb_ctx_s;
+    #endif
 #endif
+
 device_control_t *device_control_usb_ctx = (device_control_t *) &device_control_usb_ctx_s;
 
 #if ON_TILE(I2C_CTRL_TILE_NO)
@@ -84,7 +93,11 @@ int app_control_init(void)
 #if appconfUSB_CTRL_ENABLED
     if (ret == CONTROL_SUCCESS) {
         ret = device_control_init(device_control_usb_ctx,
+                                #if RUN_EP0_VIA_PROXY
+                                  THIS_XCORE_TILE == EP0_TILE_NO ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
+                                #else
                                   THIS_XCORE_TILE == USB_TILE_NO ? DEVICE_CONTROL_HOST_MODE : DEVICE_CONTROL_CLIENT_MODE,
+                                #endif
                                   appconf_CONTROL_SERVICER_COUNT,
                                   &intertile_ctx, 1);
     }

@@ -3,6 +3,7 @@ set(APP_SOURCES
     "commands.c"
     "argtable/argtable3.c"
 )
+set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "")
 
 set(APP_INCLUDES "")
 
