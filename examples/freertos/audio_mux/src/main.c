@@ -21,6 +21,9 @@
 #include "usb_support.h"
 #include "usb_audio.h"
 #include "audio_pipeline.h"
+#if RUN_EP0_VIA_PROXY
+#include "rtos_ep0_proxy.h"
+#endif
 
 void audio_pipeline_input(void *input_app_data,
                         int32_t **input_audio_frames,
@@ -139,6 +142,13 @@ static void mem_analysis(void)
 	}
 }
 
+void vApplicationMinimalIdleHook(void)
+{
+    //rtos_printf("idle hook on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
+    asm volatile("waiteu");
+}
+
+#if (!RUN_EP0_VIA_PROXY)
 void startup_task(void *arg)
 {
     rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE, portGET_CORE_ID());
@@ -153,11 +163,7 @@ void startup_task(void *arg)
      */
 }
 
-void vApplicationMinimalIdleHook(void)
-{
-    rtos_printf("idle hook on tile %d core %d\n", THIS_XCORE_TILE, rtos_core_id_get());
-    asm volatile("waiteu");
-}
+
 
 static void tile_common_init(chanend_t c)
 {
@@ -199,4 +205,141 @@ void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
 
     tile_common_init(c0);
 }
+#endif
+
+#endif /* RUN_EP0_VIA_PROXY */
+
+
+#if RUN_EP0_VIA_PROXY
+void startup_task(void *arg)
+{
+    platform_start();
+
+    rtos_printf("Startup task running from tile %d on core %d\n", THIS_XCORE_TILE, portGET_CORE_ID());
+
+#if appconfUSB_ENABLED
+#if ON_TILE(EP0_TILE_NO)
+    printf("Call usb_manager_start() on tile %d\n", THIS_XCORE_TILE);
+    usb_manager_start(configMAX_PRIORITIES-1);
+#else
+    printf("Call ep0_proxy_start on tile %d\n", THIS_XCORE_TILE);
+    
+    ep0_proxy_start(configMAX_PRIORITIES-1);
+#endif
+#endif
+    mem_analysis();
+}
+
+void tile_common_init_tile1(chanend_t c)
+{
+    // Open new cross tile paths tile1 c_ep0_proxy <-> tile 0 c_ep0_proxy using existing channel c0 <-> c1
+    chanend_t c_ep0_proxy;
+    c_ep0_proxy = chanend_alloc();
+    chan_out_word(c, c_ep0_proxy);
+    chanend_set_dest(c_ep0_proxy, chan_in_word(c));
+
+    chanend_t c_ep0_proxy_xfer_complete;
+    c_ep0_proxy_xfer_complete = chanend_alloc();
+    chan_out_word(c, c_ep0_proxy_xfer_complete);
+    chanend_set_dest(c_ep0_proxy_xfer_complete, chan_in_word(c));
+
+    //printf("Calling tile_common_init_tile1() on tile %d, c_ep0_proxy = %ld\n", THIS_XCORE_TILE, c_ep0_proxy);
+    printf("In tile_common_init_tile1()\n");
+    platform_init(c);
+    chanend_free(c);
+#if appconfUSB_ENABLED
+    printf("Calling usb_audio_init()\n");
+    usb_audio_init(intertile_ctx, appconfUSB_AUDIO_TASK_PRIORITY);
+#endif
+#if appconfUSB_ENABLED
+    usb_manager_init(c_ep0_proxy, c_ep0_proxy_xfer_complete);
+#endif
+    xTaskCreate((TaskFunction_t) startup_task,
+                "startup_task",
+                RTOS_THREAD_STACK_SIZE(startup_task),
+                NULL,
+                appconfSTARTUP_TASK_PRIORITY,
+                NULL);
+
+    rtos_printf("start scheduler on tile %d\n", THIS_XCORE_TILE);
+    vTaskStartScheduler();
+}
+
+#if ON_TILE(1)
+void main_tile1(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
+{
+    (void) c1;
+    (void) c2;
+    (void) c3;
+
+    tile_common_init_tile1(c0);
+}
+#endif
+
+
+
+
+volatile uint32_t noEpOut = 0;
+volatile uint32_t noEpIn = 0;
+volatile XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX];
+volatile XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX];
+
+DECLARE_JOB(_XUD_Main, (chanend_t, chanend_t, chanend_t, XUD_BusSpeed_t, XUD_PwrConfig));
+DECLARE_JOB(tile_common_init_tile0, (chanend_t, chanend_t, chanend_t));
+
+void tile_common_init_tile0(chanend_t c, chanend_t c_ep0_out, chanend_t c_ep0_in)
+{
+    chanend_t c_ep0_proxy;
+    c_ep0_proxy = chanend_alloc();
+    chanend_set_dest(c_ep0_proxy, chan_in_word(c));
+    chan_out_word(c, c_ep0_proxy);
+
+    chanend_t c_ep0_proxy_xfer_complete;
+    c_ep0_proxy_xfer_complete = chanend_alloc();
+    chanend_set_dest(c_ep0_proxy_xfer_complete, chan_in_word(c));
+    chan_out_word(c, c_ep0_proxy_xfer_complete);
+
+    platform_init(c);
+    chanend_free(c);
+
+
+#if appconfUSB_ENABLED
+    ep0_proxy_init(c_ep0_out, c_ep0_in, c_ep0_proxy, c_ep0_proxy_xfer_complete);
+#endif
+    
+
+    xTaskCreate((TaskFunction_t) startup_task,
+                "startup_task",
+                RTOS_THREAD_STACK_SIZE(startup_task),
+                NULL,
+                appconfSTARTUP_TASK_PRIORITY,
+                NULL);
+
+    rtos_printf("start scheduler on tile %d\n", THIS_XCORE_TILE);
+    vTaskStartScheduler();
+}
+
+#if ON_TILE(0)
+void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
+{
+    (void) c0;
+    (void) c2;
+    (void) c3;
+
+    // Allocate EP0 endpoint channels
+    channel_t channel_ep0_out;
+    channel_t channel_ep0_in;
+
+    channel_ep0_out = chan_alloc();
+    channel_ep0_in = chan_alloc();
+
+    printf("Calling tile_common_init_tile0() on tile %d\n", THIS_XCORE_TILE);
+
+    PAR_JOBS(        
+        PJOB(_XUD_Main, (channel_ep0_out.end_a, channel_ep0_in.end_a, 0, XUD_SPEED_HS, XUD_PWR_BUS)),
+        PJOB(tile_common_init_tile0, (c1, channel_ep0_out.end_b, channel_ep0_in.end_b))
+
+    );
+}
+#endif
 #endif

@@ -764,6 +764,9 @@ void usb_audio_init(rtos_intertile_t *intertile_ctx,
     sampleFreqRng.subrange[0].bMin = appconfUSB_AUDIO_SAMPLE_RATE;
     sampleFreqRng.subrange[0].bMax = appconfUSB_AUDIO_SAMPLE_RATE;
     sampleFreqRng.subrange[0].bRes = 0;
+#if RUN_EP0_VIA_PROXY
+    return; // When investigating offtile TUSB feasibility, currently the audioo buffer task is out of the picture.
+#endif
 
     /*
      * Note: Given the way that the USB callback notifies usb_audio_out_task,

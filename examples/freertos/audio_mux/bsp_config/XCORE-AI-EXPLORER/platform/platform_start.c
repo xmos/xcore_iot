@@ -110,5 +110,7 @@ void platform_start(void)
     audio_codec_start();
     mics_start();
     i2s_start();
+#if (!RUN_EP0_VIA_PROXY)
     usb_start();
+#endif
 }

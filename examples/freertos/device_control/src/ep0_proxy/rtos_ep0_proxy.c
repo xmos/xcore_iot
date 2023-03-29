@@ -5,11 +5,12 @@
 #include "rtos_usb.h"
 #include "rtos_ep0_proxy.h"
 #include "xud_xfer_data.h"
+#include "tusb_config.h"
 #include <string.h>
 #include <stdbool.h>
 
 static rtos_osal_queue_t _ep0_proxy_event_queue;
-volatile unsigned char sbuffer[120];
+volatile unsigned char sbuffer[CFG_TUD_ENDPOINT0_SIZE];
 static bool waiting_for_setup = false;
 extern rtos_usb_t usb_ctx;
 

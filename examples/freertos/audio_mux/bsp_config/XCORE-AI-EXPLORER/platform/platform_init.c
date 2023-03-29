@@ -194,8 +194,10 @@ static void i2s_init(void)
 
 static void usb_init(void)
 {
+#if (!RUN_EP0_VIA_PROXY)
 #if appconfUSB_ENABLED && ON_TILE(USB_TILE_NO)
     usb_manager_init();
+#endif
 #endif
 }
 
@@ -209,5 +211,7 @@ void platform_init(chanend_t other_tile_c)
     i2c_init();
     mics_init();
     i2s_init();
+#if (!RUN_EP0_VIA_PROXY)
     usb_init();
+#endif
 }

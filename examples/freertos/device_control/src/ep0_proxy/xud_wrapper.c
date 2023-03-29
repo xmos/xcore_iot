@@ -2,6 +2,7 @@
 #include <platform.h>
 #include <xs1.h>
 #include <xcore/channel.h>
+#include <xcore/hwtimer.h>
 #include "xcore/parallel.h"
 
 /* FreeRTOS headers */
@@ -13,12 +14,12 @@
 #include "usb_support.h"
 
 /* App headers */
-#include "app_control/app_control.h"
-#include "device_control.h"
-#include "device_control_i2c.h"
-#include "device_control_usb.h"
-#include "platform/platform_init.h"
-#include "platform/driver_instances.h"
+//#include "app_control/app_control.h"
+//#include "device_control.h"
+//#include "device_control_i2c.h"
+//#include "device_control_usb.h"
+//#include "platform/platform_init.h"
+//#include "platform/driver_instances.h"
 
 #include <xud.h>
 #include <xud_device.h>
@@ -39,11 +40,23 @@ void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_Bus
     // 3. ep0 proxy indicates to XUD_Main over chan_ep0_out that XUD_Main can be started.
     printf("Calling XUD_Main()\n");
     chan_in_byte(c_ep0_Out); // EP0 proxy indicates on this channel that it's safe to start XUD_Main.
-    
+
     chanend_t c_ep_out[RTOS_USB_ENDPOINT_COUNT_MAX];
     chanend_t c_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
     c_ep_out[0] = c_ep0_Out;
     c_ep_in[0] = c_ep0_In;
+
+
+    if(noEpOut > 1) // TODO Hack it to support the audio_mux example with offtile EP0 for now
+    {
+        channel_t channel_ep1_out;
+        channel_t channel_ep1_in;
+        channel_ep1_out = chan_alloc();
+        channel_ep1_in = chan_alloc();
+        c_ep_out[1] = channel_ep1_out.end_a;
+        c_ep_in[1] = channel_ep1_in.end_a;
+    }
+
     
     // TODO If noEpOut and noEpIn are greater than 1, the channels for other endpoints need to be allocated here.
     // The other endpoints will also need to be signalled, to call XUD_InitEp() now.
