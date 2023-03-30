@@ -24,6 +24,44 @@
 #if RUN_EP0_VIA_PROXY
 #include "rtos_ep0_proxy.h"
 #endif
+#include "device_control.h"
+#include "device_control_usb.h"
+#include "app_control/app_control.h"
+
+DEVICE_CONTROL_CALLBACK_ATTR
+control_ret_t read_cmd(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data)
+{
+    rtos_printf("Device control READ\n\t");
+
+    rtos_printf("Servicer on tile %d received command %02x for resid %02x\n\t", THIS_XCORE_TILE, cmd, resid);
+    rtos_printf("The command is requesting %d bytes\n\t", payload_len);
+    for (int i = 0; i < payload_len; i++) {
+        payload[i] = (cmd & 0x7F) + i;
+    }
+    rtos_printf("Raw bytes to be sent are:\n\t", payload_len);
+    for (int i = 0; i < payload_len; i++) {
+        rtos_printf("%02x ", payload[i]);
+    }
+    rtos_printf("\n\n");
+
+    return CONTROL_SUCCESS;
+}
+
+DEVICE_CONTROL_CALLBACK_ATTR
+control_ret_t write_cmd(control_resid_t resid, control_cmd_t cmd, const uint8_t *payload, size_t payload_len, void *app_data)
+{
+    rtos_printf("Device control WRITE\n\t");
+
+    rtos_printf("Servicer on tile %d received command %02x for resid %02x\n\t", THIS_XCORE_TILE, cmd, resid);
+    rtos_printf("The command has %d bytes\n\t", payload_len);
+    rtos_printf("Bytes received are:\n\t", payload_len);
+    for (int i = 0; i < payload_len; i++) {
+        rtos_printf("%02x ", payload[i]);
+    }
+    rtos_printf("\n\n");
+
+    return CONTROL_SUCCESS;
+}
 
 void audio_pipeline_input(void *input_app_data,
                         int32_t **input_audio_frames,
@@ -157,7 +195,41 @@ void startup_task(void *arg)
 
     audio_pipeline_init(NULL, NULL);
 
-    mem_analysis();
+    static device_control_servicer_t servicer_ctx;
+    control_ret_t dc_ret;
+
+    for (;;) {
+        #if ON_TILE(0)
+        {
+            control_resid_t resources[] = {0x3};
+
+            rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
+
+            dc_ret = app_control_servicer_register(&servicer_ctx,
+                                                   resources, sizeof(resources));
+            rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
+
+            for (;;) {
+                device_control_servicer_cmd_recv(&servicer_ctx, read_cmd, write_cmd, NULL, RTOS_OSAL_WAIT_FOREVER);
+            }
+        }
+        #endif
+        #if ON_TILE(1)
+        {
+            control_resid_t resources[] = {0x33};
+
+            rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
+
+            dc_ret = app_control_servicer_register(&servicer_ctx,
+                                                   resources, sizeof(resources));
+            rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
+
+            for (;;) {
+                device_control_servicer_cmd_recv(&servicer_ctx, read_cmd, write_cmd, NULL, RTOS_OSAL_WAIT_FOREVER);
+            }
+        }
+        #endif
+    }
     /*
      * TODO: Watchdog?
      */
@@ -170,6 +242,8 @@ static void tile_common_init(chanend_t c)
     platform_init(c);
     chanend_free(c);
 
+    control_ret_t ctrl_ret = app_control_init();
+    xassert(ctrl_ret == CONTROL_SUCCESS);
 #if appconfUSB_ENABLED && ON_TILE(USB_TILE_NO)
     usb_audio_init(intertile_ctx, appconfUSB_AUDIO_TASK_PRIORITY);
 #endif
@@ -221,13 +295,53 @@ void startup_task(void *arg)
 #if ON_TILE(EP0_TILE_NO)
     printf("Call usb_manager_start() on tile %d\n", THIS_XCORE_TILE);
     usb_manager_start(configMAX_PRIORITIES-1);
+    int dummy = 0;
+    rtos_intertile_tx(intertile_ctx, appconfUSB_MANAGER_SYNC_PORT, &dummy, sizeof(dummy));
 #else
     printf("Call ep0_proxy_start on tile %d\n", THIS_XCORE_TILE);
     
     ep0_proxy_start(configMAX_PRIORITIES-1);
+
+    int ret = 0;
+    rtos_intertile_rx_len(intertile_ctx, appconfUSB_MANAGER_SYNC_PORT, RTOS_OSAL_WAIT_FOREVER);
+    rtos_intertile_rx_data(intertile_ctx, &ret, sizeof(ret));
 #endif
 #endif
-    mem_analysis();
+    static device_control_servicer_t servicer_ctx;
+    control_ret_t dc_ret;
+
+    for (;;) {
+        #if ON_TILE(0)
+        {
+            control_resid_t resources[] = {0x3};
+
+            rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
+
+            dc_ret = app_control_servicer_register(&servicer_ctx,
+                                                   resources, sizeof(resources));
+            rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
+
+            for (;;) {
+                device_control_servicer_cmd_recv(&servicer_ctx, read_cmd, write_cmd, NULL, RTOS_OSAL_WAIT_FOREVER);
+            }
+        }
+        #endif
+        #if ON_TILE(1)
+        {
+            control_resid_t resources[] = {0x33};
+
+            rtos_printf("Will register a servicer now on tile %d\n", THIS_XCORE_TILE);
+
+            dc_ret = app_control_servicer_register(&servicer_ctx,
+                                                   resources, sizeof(resources));
+            rtos_printf("Servicer registered now on tile %d\n", THIS_XCORE_TILE);
+
+            for (;;) {
+                device_control_servicer_cmd_recv(&servicer_ctx, read_cmd, write_cmd, NULL, RTOS_OSAL_WAIT_FOREVER);
+            }
+        }
+        #endif
+    }
 }
 
 void tile_common_init_tile1(chanend_t c)
@@ -247,6 +361,10 @@ void tile_common_init_tile1(chanend_t c)
     printf("In tile_common_init_tile1()\n");
     platform_init(c);
     chanend_free(c);
+
+    control_ret_t ctrl_ret = app_control_init();
+    xassert(ctrl_ret == CONTROL_SUCCESS);
+
 #if appconfUSB_ENABLED
     printf("Calling usb_audio_init()\n");
     usb_audio_init(intertile_ctx, appconfUSB_AUDIO_TASK_PRIORITY);
@@ -302,6 +420,8 @@ void tile_common_init_tile0(chanend_t c, chanend_t c_ep0_out, chanend_t c_ep0_in
     platform_init(c);
     chanend_free(c);
 
+    control_ret_t ctrl_ret = app_control_init();
+    xassert(ctrl_ret == CONTROL_SUCCESS);
 
 #if appconfUSB_ENABLED
     ep0_proxy_init(c_ep0_out, c_ep0_in, c_ep0_proxy, c_ep0_proxy_xfer_complete);

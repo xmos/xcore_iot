@@ -10,6 +10,7 @@
 #define appconfGPIO_T1_RPC_PORT        2
 #define appconfI2S_RPC_PORT            3
 #define appconfAUDIOPIPELINE_PORT      4
+#define appconfDEVICE_CONTROL_USB_PORT 5
 
 /* Application tile specifiers */
 #include "platform/driver_instances.h"
@@ -56,6 +57,12 @@
 #ifndef appconfUSB_AUDIO_ENABLED
 #define appconfUSB_AUDIO_ENABLED    appconfUSB_ENABLED
 #endif
+
+#define appconfUSB_CTRL_ENABLED     1
+#define appconfI2C_CTRL_ENABLED     0
+#define appconf_CONTROL_SERVICER_COUNT 2
+#define appconfDEVICE_CONTROL_USB_CLIENT_PRIORITY   (configMAX_PRIORITIES-1)
+#define appconfUSB_MANAGER_SYNC_PORT 3
 
 #ifndef appconfUSB_AUDIO_SAMPLE_RATE
 #define appconfUSB_AUDIO_SAMPLE_RATE appconfAUDIO_PIPELINE_SAMPLE_RATE

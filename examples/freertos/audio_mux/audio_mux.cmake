@@ -2,10 +2,12 @@
 # Gather Sources
 #**********************
 file(GLOB_RECURSE APP_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/*.c )
+file(GLOB_RECURSE APP_CONTROL_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../device_control/src/app_control/*.c )
 set(APP_INCLUDES
     ${CMAKE_CURRENT_LIST_DIR}/src
     ${CMAKE_CURRENT_LIST_DIR}/src/audio_pipeline
     ${CMAKE_CURRENT_LIST_DIR}/src/usb
+    ${CMAKE_CURRENT_LIST_DIR}/../device_control/src/
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/bsp_config/bsp_config.cmake)
@@ -40,6 +42,7 @@ set(APP_COMMON_LINK_LIBRARIES
     rtos::freertos_usb
     lib_src
     sln_voice::example::audio_mux::xcore_ai_explorer
+    rtos::usb_device_control
 )
 
 #**********************
@@ -47,7 +50,7 @@ set(APP_COMMON_LINK_LIBRARIES
 #**********************
 set(TARGET_NAME tile0_example_freertos_audio_mux)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${APP_CONTROL_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
@@ -57,7 +60,7 @@ unset(TARGET_NAME)
 
 set(TARGET_NAME tile1_example_freertos_audio_mux)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES})
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${APP_CONTROL_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES})
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
@@ -91,7 +94,7 @@ file(GLOB EP0_PROXY_SOURCES ${CMAKE_CURRENT_LIST_DIR}/../device_control/src/ep0_
 #**********************
 set(TARGET_NAME tile0_example_freertos_audio_mux_ep0_proxy)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${EP0_PROXY_SOURCES})
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${EP0_PROXY_SOURCES} ${APP_CONTROL_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${CMAKE_CURRENT_LIST_DIR}/../device_control/src/ep0_proxy)
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${EP0_PROXY_APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=0)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})
@@ -101,7 +104,7 @@ unset(TARGET_NAME)
 
 set(TARGET_NAME tile1_example_freertos_audio_mux_ep0_proxy)
 add_executable(${TARGET_NAME} EXCLUDE_FROM_ALL)
-target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${EP0_PROXY_SOURCES})
+target_sources(${TARGET_NAME} PUBLIC ${APP_SOURCES} ${EP0_PROXY_SOURCES} ${APP_CONTROL_SOURCES})
 target_include_directories(${TARGET_NAME} PUBLIC ${APP_INCLUDES} ${CMAKE_CURRENT_LIST_DIR}/../device_control/src/ep0_proxy)
 target_compile_definitions(${TARGET_NAME} PUBLIC ${APP_COMPILE_DEFINITIONS} ${EP0_PROXY_APP_COMPILE_DEFINITIONS} THIS_XCORE_TILE=1)
 target_compile_options(${TARGET_NAME} PRIVATE ${APP_COMPILER_FLAGS})

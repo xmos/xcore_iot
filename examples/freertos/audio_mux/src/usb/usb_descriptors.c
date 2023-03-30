@@ -28,6 +28,7 @@
 
 #include "usb_descriptors.h"
 #include "tusb.h"
+#include "device_control_usb.h"
 
 #define XMOS_VID    0x20B1
 #define AUDIO_MUX_PID   0x4002
@@ -115,7 +116,7 @@ const uint16_t tud_audio_desc_lengths[CFG_TUD_AUDIO] = {
         uac2_total_descriptors_length
 };
 
-#define CONFIG_TOTAL_LEN        (TUD_CONFIG_DESC_LEN + CFG_TUD_AUDIO * uac2_total_descriptors_length)
+#define CONFIG_TOTAL_LEN        (TUD_CONFIG_DESC_LEN + (CFG_TUD_AUDIO * uac2_total_descriptors_length) + sizeof(tusb_desc_interface_t)/*For the device_control interface descriptor*/)
 #define EPNUM_AUDIO   0x01
 
 
@@ -195,6 +196,9 @@ uint8_t const desc_configuration[] = {
     /* Class-Specific AS Isochronous Audio Data Endpoint Descriptor(4.10.1.2) */
     TUD_AUDIO_DESC_CS_AS_ISO_EP(/*_attr*/ AUDIO_CS_AS_ISO_DATA_EP_ATT_NON_MAX_PACKETS_OK, /*_ctrl*/ AUDIO_CTRL_NONE, /*_lockdelayunit*/ AUDIO_CS_AS_ISO_DATA_EP_LOCK_DELAY_UNIT_MILLISEC, /*_lockdelay*/ 0x0003),
 #endif
+
+    // Interface number, string index
+    TUD_XMOS_DEVICE_CONTROL_DESCRIPTOR(ITF_XMOS_DEV_CTRL, 5),
 };
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -211,11 +215,13 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index)
 //--------------------------------------------------------------------+
 
 // array of pointer to string descriptors
-char const *string_desc_arr[] = {(const char[]) {0x09, 0x04}, // 0: is supported language is English (0x0409)
+char const *string_desc_arr[] = {
+        (const char[]) {0x09, 0x04}, // 0: is supported language is English (0x0409)
         "XMOS",                     // 1: Manufacturer
         AUDIO_MUX_PRODUCT_STR,          // 2: Product
         "123456",                   // 3: Serials, should use chip ID
         AUDIO_MUX_PRODUCT_STR,          // 4: Audio Interface
+        "Device Control Interface"  // 5: Vendor Interface
         };
 
 static uint16_t _desc_str[32];

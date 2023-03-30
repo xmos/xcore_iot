@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     }
 
 #if USE_USB
-    ret = control_init_usb(0x20B1, 0x1010, 0);
+    ret = control_init_usb(0x20B1, 0x4002, 0);
 #elif USE_I2C
     ret = control_init_i2c(0x42);
 #endif
