@@ -27,7 +27,7 @@
 #include "device_control_usb.h"
 
 #define XMOS_VID          0x20B1
-#define DEV_CTRL_TEST_PID 0x1010
+#define DEV_CTRL_TEST_PID 0x4002 //0x1010. Match with the PID used in audio_mux example so that the host app in this example can be used in audio_mux example as well
 
 //--------------------------------------------------------------------+
 // Device Descriptors
