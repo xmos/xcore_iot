@@ -222,9 +222,10 @@ static inline void handle_usb_transfer_complete(rtos_usb_t *ctx, ep0_proxy_event
     chan_out_word(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.len);
     chan_out_word(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.result);
 
-    if(event->xfer_complete.is_setup)
+    // xud_data_get_check() ensures that if res is XUD_RES_RST, xfer_len and is_setup are both set to 0
+    if((event->xfer_complete.dir == RTOS_USB_OUT_EP) && (event->xfer_complete.len > 0))
     {
-        // Send setup packet to EP0
+        // Send H2D data transfer completed on EP0 to the other tile
         chan_out_buf_byte(ctx->c_ep0_proxy_xfer_complete, (uint8_t*)sbuffer, event->xfer_complete.len); // Will this cause the interrupt on chan_ep0_proxy to trigger
     }
 }
