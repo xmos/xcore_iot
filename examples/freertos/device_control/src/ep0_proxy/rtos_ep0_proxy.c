@@ -95,71 +95,19 @@ static void prepare_setup(rtos_usb_t *ctx)
     xassert(res == XUD_RES_OKAY);
 }
 
-DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
+static inline void handle_usb_transfer_complete(rtos_usb_t *ctx, ep0_proxy_event_t *event)
 {
-    rtos_usb_ep_xfer_info_t *ep_xfer_info = arg;
-    rtos_usb_t *ctx = ep_xfer_info->usb_ctx;
-    const int ep_num = ep_xfer_info->ep_num;
-    const int dir = ep_xfer_info->dir;
-    size_t xfer_len;
-    XUD_Result_t res;
-    //printf("In usb_ep0_isr, dir %d\n", dir);
+    chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.dir);
+    chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.is_setup);
+    chan_out_word(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.len);
+    chan_out_word(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.result);
 
-    int is_setup;
-    res = ep_transfer_complete(ctx, ep_num, dir, &xfer_len, &is_setup);
-
-    //printintln(3330 | dir);
-    triggerable_disable_trigger(ctx->c_ep0_proxy);
-    triggerable_disable_trigger(ctx->c_ep[ep_num][dir]);
-    uint8_t other_dir = (dir == 0) ? 1 : 0;
-    triggerable_disable_trigger(ctx->c_ep[ep_num][other_dir]);
-
-    //printf("usb_ep0_isr: dir = %d, res = %d, xfer_len = %d, is_setup = %d\n", dir, res, xfer_len, is_setup);
-    ep_xfer_info->res = (int32_t) res;
-    //printintln(ep_xfer_info->res);
-
-    ep0_proxy_event_t event;
-    event.event_id = EP0_TRANSFER_COMPLETE;
-    event.xfer_complete.ep_num = 0;
-    event.xfer_complete.dir = dir;
-    event.xfer_complete.result = res;
-    event.xfer_complete.is_setup = is_setup;
-    event.xfer_complete.len = xfer_len;
-    //printintln(1234);
-    rtos_osal_status_t status = rtos_osal_queue_send(&_ep0_proxy_event_queue, &event, 0);
-    xassert(status == RTOS_OSAL_SUCCESS);
-
-}
-
-DEFINE_RTOS_INTERRUPT_CALLBACK(ep0_proxy_isr, arg)
-{
-    rtos_usb_t *ctx = arg;
-    triggerable_disable_trigger(ctx->c_ep0_proxy);
-
-    //printf("In ep0_proxy_isr\n");
-    uint8_t cmd = chan_in_byte(ctx->c_ep0_proxy);
-    //uint8_t ep_addr = chan_in_byte(ctx->c_ep0_proxy);
-    
-    ep0_proxy_event_t event;
-    event.event_id = EP0_PROXY_CMD;
-    event.ep0_command.cmd = cmd;
-    rtos_osal_status_t status = rtos_osal_queue_send(&_ep0_proxy_event_queue, &event, 0);
-    //printintln(status);
-    xassert(status == RTOS_OSAL_SUCCESS);
-
-}
-
-static void ep_cfg(rtos_usb_t *ctx,
-                   int ep_num,
-                   int direction)
-{
-    printf("in my_ep_cfg(): ep_num = %d, direction = %d\n",ep_num, direction);
-
-    ctx->ep_xfer_info[ep_num][direction].dir = direction;
-    ctx->ep_xfer_info[ep_num][direction].ep_num = ep_num;
-    ctx->ep_xfer_info[ep_num][direction].ep_address = (direction << 7) | ep_num;
-    ctx->ep_xfer_info[ep_num][direction].usb_ctx = ctx;
-    triggerable_setup_interrupt_callback(ctx->c_ep[ep_num][direction], &ctx->ep_xfer_info[ep_num][direction], RTOS_INTERRUPT_CALLBACK(usb_ep0_isr));
+    // xud_data_get_check() ensures that if res is XUD_RES_RST, xfer_len and is_setup are both set to 0
+    if((event->xfer_complete.dir == RTOS_USB_OUT_EP) && (event->xfer_complete.len > 0))
+    {
+        // Send H2D data transfer completed on EP0 to the other tile
+        chan_out_buf_byte(ctx->c_ep0_proxy_xfer_complete, (uint8_t*)sbuffer, event->xfer_complete.len); // Will this cause the interrupt on chan_ep0_proxy to trigger
+    }
 }
 
 static void handle_ep0_command(rtos_usb_t *ctx, uint8_t ep0_cmd)
@@ -211,25 +159,98 @@ static void handle_ep0_command(rtos_usb_t *ctx, uint8_t ep0_cmd)
         }
         break;
     }
-    // Enable interrupts
-    triggerable_enable_trigger(ctx->c_ep0_proxy);
 }
 
-static inline void handle_usb_transfer_complete(rtos_usb_t *ctx, ep0_proxy_event_t *event)
-{
-    chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.dir);
-    chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.is_setup);
-    chan_out_word(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.len);
-    chan_out_word(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.result);
 
-    // xud_data_get_check() ensures that if res is XUD_RES_RST, xfer_len and is_setup are both set to 0
-    if((event->xfer_complete.dir == RTOS_USB_OUT_EP) && (event->xfer_complete.len > 0))
+DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
+{
+    rtos_usb_ep_xfer_info_t *ep_xfer_info = arg;
+    rtos_usb_t *ctx = ep_xfer_info->usb_ctx;
+    const int ep_num = ep_xfer_info->ep_num;
+    const int dir = ep_xfer_info->dir;
+    size_t xfer_len;
+    XUD_Result_t res;
+    //printf("In usb_ep0_isr, dir %d\n", dir);
+
+    int is_setup;
+    res = ep_transfer_complete(ctx, ep_num, dir, &xfer_len, &is_setup);
+
+    // Everything about USB transfer being serial breaks when we get a XUD_RES_RST.
+    // This happens at startup and till a reset is processed, xud continues to send resets without waiting
+    // for a reset request to be processed. This completely breaks every design assumption.
+    // The only way I can deal with this is by fully disabling all interrupts till a reset request is completed.
+
+    if(res == XUD_RES_RST)
     {
-        // Send H2D data transfer completed on EP0 to the other tile
-        chan_out_buf_byte(ctx->c_ep0_proxy_xfer_complete, (uint8_t*)sbuffer, event->xfer_complete.len); // Will this cause the interrupt on chan_ep0_proxy to trigger
+        triggerable_disable_trigger(ctx->c_ep0_proxy);
+        triggerable_disable_trigger(ctx->c_ep[ep_num][RTOS_USB_OUT_EP]);
+        triggerable_disable_trigger(ctx->c_ep[ep_num][RTOS_USB_IN_EP]);
+    }
+    
+
+    //printf("usb_ep0_isr: dir = %d, res = %d, xfer_len = %d, is_setup = %d\n", dir, res, xfer_len, is_setup);
+    ep_xfer_info->res = (int32_t) res;
+    //printintln(ep_xfer_info->res);
+
+    ep0_proxy_event_t event;
+    event.event_id = EP0_TRANSFER_COMPLETE;
+    event.xfer_complete.ep_num = 0;
+    event.xfer_complete.dir = dir;
+    event.xfer_complete.result = res;
+    event.xfer_complete.is_setup = is_setup;
+    event.xfer_complete.len = xfer_len;
+
+    //rtos_osal_status_t status = rtos_osal_queue_send(&_ep0_proxy_event_queue, &event, 0);
+    //xassert(status == RTOS_OSAL_SUCCESS);
+    
+    // Seems like it might be okay to send completed xfer to tile 1 from here itself instead of posting an event in the queue
+    // and doing it from rtos_ep0_proxy task.
+    handle_usb_transfer_complete(ctx, &event);
+
+    if(res == XUD_RES_RST)
+    {
+        triggerable_enable_trigger(ctx->c_ep0_proxy);
+        // The ctx->c_ep will be enabled once the reset is fully processed in handle_ep0_command()
     }
 }
 
+DEFINE_RTOS_INTERRUPT_CALLBACK(ep0_proxy_isr, arg)
+{
+    rtos_usb_t *ctx = arg;
+    triggerable_disable_trigger(ctx->c_ep0_proxy);
+
+    //printf("In ep0_proxy_isr\n");
+    uint8_t cmd = chan_in_byte(ctx->c_ep0_proxy);
+    //uint8_t ep_addr = chan_in_byte(ctx->c_ep0_proxy);
+    
+    ep0_proxy_event_t event;
+    event.event_id = EP0_PROXY_CMD;
+    event.ep0_command.cmd = cmd;
+    //rtos_osal_status_t status = rtos_osal_queue_send(&_ep0_proxy_event_queue, &event, 0);
+    //xassert(status == RTOS_OSAL_SUCCESS);
+
+    // Seems like it's okay to handle the ep0 command here itself. We can trust tile1 ep0
+    // to not issue blocking commands so this should be okay. Obviously, not tested extensively, and
+    // will probably break when we add HID :(:(
+    handle_ep0_command(ctx, event.ep0_command.cmd);
+    
+    // Enable interrupts
+    triggerable_enable_trigger(ctx->c_ep0_proxy);
+
+}
+
+static void ep_cfg(rtos_usb_t *ctx,
+                   int ep_num,
+                   int direction)
+{
+    printf("in my_ep_cfg(): ep_num = %d, direction = %d\n",ep_num, direction);
+
+    ctx->ep_xfer_info[ep_num][direction].dir = direction;
+    ctx->ep_xfer_info[ep_num][direction].ep_num = ep_num;
+    ctx->ep_xfer_info[ep_num][direction].ep_address = (direction << 7) | ep_num;
+    ctx->ep_xfer_info[ep_num][direction].usb_ctx = ctx;
+    triggerable_setup_interrupt_callback(ctx->c_ep[ep_num][direction], &ctx->ep_xfer_info[ep_num][direction], RTOS_INTERRUPT_CALLBACK(usb_ep0_isr));
+}
 
 void ep0_proxy_task(void *app_data)
 {
@@ -268,7 +289,9 @@ void ep0_proxy_task(void *app_data)
 
     // Enable ISR
     printf("In ep0_proxy_task(), 0x%x, 0x%x\n", epTypeTableOut[0], epTypeTableIn[0]);
-    
+
+    // For now, going with the design on fully handling the request in the ISR itself, so this
+    // will forever remain blocked.
     ep0_proxy_event_t event;
     while(1)
     {   
