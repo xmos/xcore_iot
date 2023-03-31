@@ -1,0 +1,25 @@
+@startuml
+
+box "(Tile 0)" #LightGray
+participant XUD_Main as xud_main
+participant usb_ep0_isr as usb_ep0_isr
+participant ep0_proxy_isr as ep0_proxy_isr
+end box
+box "(Tile 1)" #LightBlue
+participant usb_isr as usb_isr
+participant tud_task as tud_task
+end box
+
+xud_main -> usb_ep0_isr : Trigger interrupt over c_ep0_out or c_ep0_in
+usb_ep0_isr -> xud_main : ep_transfer_complete()
+usb_ep0_isr -> usb_isr : Send completed xfer over\nc_ep0_proxy_xfer_complete
+usb_isr -> usb_isr : Call dcd_xcore_int_handler()
+usb_isr -> tud_task : Send event over _usbd_q
+tud_task -> ep0_proxy_isr : Send cmd
+tud_task -> ep0_proxy_isr : Send data
+ep0_proxy_isr -> xud_main : Call xud functions to\nstart a new xfer,\nreset the EP\nor prepare for next setup pakcet receive
+ep0_proxy_isr --> tud_task : Send function return value
+
+
+
+@enduml
