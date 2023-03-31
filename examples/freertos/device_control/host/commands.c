@@ -21,7 +21,7 @@
 #endif
 
 static cmd_t commands[] = {
-        {APP_CONTROL_RESID, "test_cmd", TYPE_UINT32, 0, APP_CONTROL_CMD_AP_TEST_CMD, CMD_RO, 1, "Returns a test value"},
+        {APP_CONTROL_RESID, "test_cmd", TYPE_UINT32, 0, APP_CONTROL_CMD_AP_TEST_CMD, CMD_RW, 1, "Returns a test value"},
 };
 
 static char *command_param_type_name(cmd_param_type_t type)
