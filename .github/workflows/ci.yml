@@ -76,11 +76,9 @@ jobs:
             else
               version="test"
             fi
-            echo "EXAMPLES_ARTIFACT_NAME=XM-000TBD-SM_xcore_sdk_example_apps_$version" >> $GITHUB_OUTPUT
             echo "SOURCES_ARTIFACT_NAME=XM-000TBD-SM_xcore_sdk_sources_$version" >> $GITHUB_OUTPUT
             echo "DOCS_ARTIFACT_NAME=XM-000TBD-PC_xcore_sdk_docs_$version" >> $GITHUB_OUTPUT
           else
-            echo "EXAMPLES_ARTIFACT_NAME=xcore_sdk_example_apps" >> $GITHUB_OUTPUT
             echo "SOURCES_ARTIFACT_NAME=xcore_sdk_sources" >> $GITHUB_OUTPUT
             echo "DOCS_ARTIFACT_NAME=xcore_sdk_docs" >> $GITHUB_OUTPUT
           fi

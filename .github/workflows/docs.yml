@@ -26,8 +26,7 @@ on:
 
 env:
   DOC_BUILDER_IMAGE: 'ghcr.io/xmos/doc_builder:v3.0.0'
-  HTML_DOCS_ARTIFACT_NAME: "xcore_sdk__html_docs"
-  PDF_DOCS_ARTIFACT_NAME: "xcore_sdk_pdf_docs"  
+  DOCS_ARTIFACT_NAME: "xcore_sdk_docs"
 
 jobs:
   build_documentation:
@@ -50,12 +49,6 @@ jobs:
 
       - name: Determine artifact names
         run: |
-          # if [ ! -z "${{ inputs.html_docs_artifact_name }}" ]; then
-          #   echo "HTML_DOCS_ARTIFACT_NAME=${{ inputs.html_docs_artifact_name }}" >> $GITHUB_ENV
-          # fi
-          # if [ ! -z "${{ inputs.pdf_docs_artifact_name }}" ]; then
-          #   echo "PDF_DOCS_ARTIFACT_NAME=${{ inputs.pdf_docs_artifact_name }}" >> $GITHUB_ENV
-          # fi
           if [ ! -z "${{ inputs.docs_artifact_name }}" ]; then
             echo "DOCS_ARTIFACT_NAME=${{ inputs.docs_artifact_name }}" >> $GITHUB_ENV
           fi
