@@ -9,45 +9,60 @@
 #
 # This file contains the workflows that are run prior to merging a pull request.
 
-name: Docs
+name: Build Documentation
 
 on:
-  push:
-    branches:
-      - 'main'
-      - 'develop'
-  pull_request:
-    branches:
-      - 'main'
-      - 'develop'
-
   # Allow manually triggering of the workflow.
   workflow_dispatch: {}
 
+  # Allow workflow to be called from another.
+  workflow_call:
+    inputs:
+      docs_artifact_name:
+        description: 'The name to be given to the uploaded docs artifact.'
+        default: ""
+        required: true
+        type: string
+
 env:
   DOC_BUILDER_IMAGE: 'ghcr.io/xmos/doc_builder:v3.0.0'
+  HTML_DOCS_ARTIFACT_NAME: "xcore_sdk__html_docs"
+  PDF_DOCS_ARTIFACT_NAME: "xcore_sdk_pdf_docs"  
 
 jobs:
   build_documentation:
-    name: Build and package documentation
+    name: Build documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout SDK
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           submodules: recursive
       
-      - name: Pull documentation builder docker image
+      - name: Pull doc_builder docker image
         run: |
           docker pull ${DOC_BUILDER_IMAGE}
       
-      - name: Build documentation
+      - name: Build
         run: |
           docker run --rm -t -u $(id -u):$(id -g) -v ${{ github.workspace }}:/build -e PDF=1 -e REPO:/build -e EXCLUDE_PATTERNS=/build/doc/exclude_patterns.inc -e DOXYGEN_INCLUDE=/build/doc/Doxyfile.inc -e DOXYGEN_INPUT=ignore ${DOC_BUILDER_IMAGE}
+            rm -rf doc/_build/_doxygen
 
-      - name: Save documentation artifacts
+      - name: Determine artifact names
+        run: |
+          # if [ ! -z "${{ inputs.html_docs_artifact_name }}" ]; then
+          #   echo "HTML_DOCS_ARTIFACT_NAME=${{ inputs.html_docs_artifact_name }}" >> $GITHUB_ENV
+          # fi
+          # if [ ! -z "${{ inputs.pdf_docs_artifact_name }}" ]; then
+          #   echo "PDF_DOCS_ARTIFACT_NAME=${{ inputs.pdf_docs_artifact_name }}" >> $GITHUB_ENV
+          # fi
+          if [ ! -z "${{ inputs.docs_artifact_name }}" ]; then
+            echo "DOCS_ARTIFACT_NAME=${{ inputs.docs_artifact_name }}" >> $GITHUB_ENV
+          fi
+
+      - name: Save doc artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: xcore_sdk_docs
+          name: ${{ env.DOCS_ARTIFACT_NAME }}
           path: doc/_build
           if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn` 

@@ -9,20 +9,25 @@
 #
 # This file contains the workflows that are run prior to merging a pull request.
 
-name: CI - Examples 
+name: Build Applications 
 
 on:
-  push:
-    branches:
-      - 'main'
-      - 'develop'
-  pull_request:
-    branches:
-      - 'main'
-      - 'develop'
-
   # Allow manually triggering of the workflow.
-  workflow_dispatch: {}
+  workflow_dispatch:
+
+  # Allow workflow to be called from another.
+  workflow_call:
+    inputs:
+      is_release:
+        description: "Indicates whether this run is for a release or not."
+        type: string
+        required: true
+        default: "false"
+      examples_artifact_name:
+        description: 'The name to be given to the uploaded "example apps" artifact.'
+        type: string
+        required: true
+        default: ""
 
 env:
   XCORE_BUILDER: 'ghcr.io/xmos/xcore_builder:latest'
@@ -139,3 +144,20 @@ jobs:
         with:
           name: bare-metal_examples
           path: ./dist/*.xe
+
+  build_rtos_tusb_demos:
+    name: Build RTOS TinyUSB demos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Pull Docker builder
+        run: |
+          docker pull ${XCORE_BUILDER}
+
+      - name: Build
+        run: |
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_rtos_usb_examples.sh
