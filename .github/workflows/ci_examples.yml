@@ -43,7 +43,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_host_apps.sh
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_host_apps.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -73,7 +73,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_rtos_core_examples.sh
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_rtos_core_examples.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -106,7 +106,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_rtos_aiot_examples.sh
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_rtos_aiot_examples.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -132,7 +132,7 @@ jobs:
 
       - name: Build
         run: |
-          docker run --rm -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_metal_examples.sh
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_metal_examples.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
