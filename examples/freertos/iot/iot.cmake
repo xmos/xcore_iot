@@ -121,7 +121,7 @@ else()
 
     add_custom_command(
         OUTPUT example_freertos_iot_fat.fs
-        COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/firmware && mkdir $fat_mnt_dir/crypto && mkdir $fat_mnt_dir/wifi && cp mqtt_broker_certs/ca.crt $fat_mnt_dir/crypto/ca.pem && cp mqtt_broker_certs/client.crt $fat_mnt_dir/crypto/cert.pem && cp mqtt_broker_certs/client.key $fat_mnt_dir/crypto/key.pem && cp ${CMAKE_SOURCE_DIR}/modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec $fat_mnt_dir/firmware/wf200.sec && cp networks.dat $fat_mnt_dir/wifi/networks.dat && fatfs_mkimage --input=$tmp_dir --output=example_freertos_iot_fat.fs"
+        COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/firmware && mkdir $fat_mnt_dir/crypto && mkdir $fat_mnt_dir/wifi && cp mqtt_broker_certs/ca.crt $fat_mnt_dir/crypto/ca.pem && cp mqtt_broker_certs/client.crt $fat_mnt_dir/crypto/cert.pem && cp mqtt_broker_certs/client.key $fat_mnt_dir/crypto/key.pem && cp ${CMAKE_SOURCE_DIR}/modules/rtos/modules/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec $fat_mnt_dir/firmware/wf200.sec && cp networks.dat $fat_mnt_dir/wifi/networks.dat && fatfs_mkimage --input=$tmp_dir --output=example_freertos_iot_fat.fs"
         DEPENDS
             example_freertos_iot
             networks.dat
