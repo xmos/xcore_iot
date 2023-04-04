@@ -24,6 +24,7 @@
 **/_build/
 **/build_*/
 !doc/tutorials/build_system/
+**/dist*/
 **/run_*.log
 **/_doxygen/*
 **/_templates/*

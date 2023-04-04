@@ -1,1 +1,0 @@
-.. include::  ../../test/examples/README.rst

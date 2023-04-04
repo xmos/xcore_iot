@@ -1,5 +1,0 @@
-black
-nbval
-pytest
-pytest-forked
-pytest-xdist
