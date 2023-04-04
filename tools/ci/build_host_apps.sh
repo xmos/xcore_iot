@@ -12,7 +12,8 @@ mkdir -p ${DIST_DIR}
 # row format is: "target     copy_path"
 applications=(
     "example_freertos_device_control_host   examples/freertos/device_control/host"
-    "fatfs_mkimage                          modules/rtos/modules/sw_services/fatfs/host"
+    "fatfs_mkimage              modules/rtos/tools/fatfs_mkimage"
+    "datapartition_mkimage      modules/rtos/tools/datapartition_mkimage"
     "xscope_host_endpoint                   modules/xscope_fileio/xscope_fileio/host"
     "xscope2psf                             examples/freertos/tracealyzer/host"
 )

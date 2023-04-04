@@ -1,0 +1,6 @@
+matplotlib
+nbval
+numpy
+pytest
+pytest-forked
+pytest-xdist

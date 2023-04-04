@@ -27,32 +27,17 @@ Docs             | ![CI](https://github.com/xmos/xcore_sdk/actions/workflows/doc
 
 Some dependent components are included as git submodules. These can be obtained by cloning this repository with the following command:
 
-    git clone --recurse-submodules https://github.com/xmos/xcore_sdk.git
-
-## Development Tools
-
-Download and install the xcore [XTC Tools](https://www.xmos.ai/software-tools/) version 15.1.0 or newer. If you already have the XTC Toolchain installed, you can check the version with the following command:
-
-    xcc --version
+    git clone --recurse-submodules git@github.com:xmos/xcore_sdk.git
 
 ## Documentation
 
 See the [official documentation](https://www.xmos.ai/documentation/XM-014660-PC-2/html/) for more information including:
 
-- Instructions for installing
-- Getting started guides
+- Instructions for modifying the software
 - Programming tutorials
 - API references
 
-## Getting Help
-
-A [Github issue](https://github.com/xmos/xcore_sdk/issues/new/choose) should be the primary method of getting in touch with the XMOS XCORE SDK development team.
-
 ## License
 
-This Software is subject to the terms of the [XMOS Public Licence: Version 1](https://github.com/xmos/xcore_sdk/blob/develop/LICENSE.rst). Copyrights and licenses for third party components can be found in [Copyrights and Licenses](https://github.com/xmos/xcore_sdk/blob/develop/doc/copyright.rst).
-
-## Contribution
-
-Contributions are greatly welcomed! For guidelines of contribution please check the [Contributing Guide](https://github.com/xmos/xcore_sdk/blob/develop/doc/contributing.rst).
+This Software is subject to the terms of the [XMOS Public Licence: Version 1](https://github.com/xmos/xcore_sdk/blob/develop/LICENSE.rst). Copyrights and licenses for third party components can be found in [Copyrights and Licenses](https://github.com/xmos/xcore_sdk/blob/develop/doc/shared/legal.rst).
 
