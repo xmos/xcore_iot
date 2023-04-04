@@ -18,7 +18,7 @@ Windows
 
 A standard C/C++ compiler is required to build applications for the host PC.  Windows users may use `Build Tools for Visual Studio <https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170#download-and-install-the-tools>`__ command-line interface.
 
-XCORE-VOICE host build should also work using other Windows GNU development environments like GNU Make, MinGW or Cygwin.
+Host build should also work using other Windows GNU development environments like GNU Make, MinGW or Cygwin.
 
 libusb
 ------
@@ -47,7 +47,7 @@ Clone the XCORE SDK repository with the following command:
 
 .. code-block:: console
 
-    $ git clone --recurse-submodules git@github.com:xmos/xcore_sdk.git
+    git clone --recurse-submodules git@github.com:xmos/xcore_sdk.git
 
 =================================
 Step 2. Install Host Applications
@@ -60,23 +60,23 @@ Linux and MacOS
 
 .. code-block:: console
 
-    $ cmake -B build_host
-    $ cd build_host
-    $ sudo make install
+    cmake -B build_host
+    cd build_host
+    sudo make install
 
-This command installs the applications at `/opt/xmos/SDK/<sdk version>/bin/` directory.  You may wish to append this directory to your `PATH` variable.
+This command installs the applications at ``/opt/xmos/SDK/<sdk version>/bin/`` directory.  You may wish to append this directory to your ``PATH`` variable.
 
 .. code-block:: console
 
-    $ export PATH=$PATH:/opt/xmos/SDK/<sdk_version>/bin/
+    export PATH=$PATH:/opt/xmos/SDK/<sdk_version>/bin/
 
-Some host applications require that the location of `xscope_endpoint.so` be added to your `LD_LIBRARY_PATH` environment variable.  This environment variable will be set if you run the host application in the XTC Tools command-line environment.  For more information see `Configuring the command-line environment <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/install-configure/getting-started.html>`__.   
+Some host applications require that the location of ``xscope_endpoint.so`` be added to your ``LD_LIBRARY_PATH`` environment variable.  This environment variable will be set if you run the host application in the XTC Tools command-line environment.  For more information see `Configuring the command-line environment <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/install-configure/getting-started.html>`__.   
 
 Or, you may prefer to set this environment variable manually.
 
 .. code-block:: console
 
-    $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path-to-XTC-Tools>/lib
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path-to-XTC-Tools>/lib
 
 Windows
 -------
@@ -85,13 +85,13 @@ Windows users must run the x86 native tools command prompt from Visual Studio
 
 .. code-block:: console
 
-    $ cmake  -G "NMake Makefiles" -B build_host
-    $ cd build_host
-    $ nmake install
+    cmake  -G "NMake Makefiles" -B build_host
+    cd build_host
+    nmake install
 
-This command installs the applications at `<USERPROFILE>\.xmos\SDK\<sdk version>\bin\` directory.  You may wish to add this directory to your `PATH` variable.
+This command installs the applications at ``<USERPROFILE>\.xmos\SDK\<sdk version>\bin\`` directory.  You may wish to add this directory to your ``PATH`` variable.
 
-Some host applications require that the location of `xscope_endpoint.dll` be added to your PATH. This environment variable will be set if you run the host application in the XTC Tools command-line environment.  For more information see `Configuring the command-line environment <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/install-configure/getting-started.html>`__.
+Some host applications require that the location of ``xscope_endpoint.dll`` be added to your PATH. This environment variable will be set if you run the host application in the XTC Tools command-line environment.  For more information see `Configuring the command-line environment <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/install-configure/getting-started.html>`__.
 
 =======================================================
 Optional Step 3. Install Python and Python Requirements
@@ -107,13 +107,13 @@ Install ``pip`` if needed:
 
 .. code-block:: console
 
-    $ python -m pip install --upgrade pip
+    python -m pip install --upgrade pip
 
 Then use ``pip`` to install the required modules.
 
 .. code-block:: console
 
-    $ pip install -r tools/install/requirements.txt
+    pip install -r tools/install/requirements.txt
 
 ==================================
 Build & Run Your First Application
