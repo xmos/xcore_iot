@@ -1,14 +1,5 @@
 @Library('xmos_jenkins_shared_library@v0.20.0') _
 
-// Wait here until specified artifacts appear
-def artifactUrls = getGithubArtifactUrls([
-    "bare-metal_examples",
-    "freertos_core_examples",
-    "freertos_aiot_examples"
-    // "host_apps",
-    // "rtos_tests"
-])
-
 getApproval()
 
 pipeline {
@@ -28,32 +19,49 @@ pipeline {
     parameters {
         string(
             name: 'TOOLS_VERSION',
-            defaultValue: '15.1.4',
+            defaultValue: '15.2.1',
             description: 'The XTC tools version'
         )
     }    
     environment {
         PYTHON_VERSION = "3.8.11"
         VENV_DIRNAME = ".venv"
-        DOWNLOAD_DIRNAME = "dist"
+        BUILD_DIRNAME = "dist"
         TEST_RIG_TARGET = "xcore_sdk_test_rig"
     }        
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
-                sh "git clone git@github.com:xmos/xcore_sdk.git"
+                sh "git clone git@github.com:xmos/xcore_iot.git"
             }
         }        
-        stage('Download artifacts') {
+        // stage('Download artifacts') {
+        //     steps {
+        //         dir("$BUILD_DIRNAME") {
+        //             downloadExtractZips(artifactUrls)
+        //             // List extracted files for log
+        //             sh "ls -la"
+        //         }
+        //     }
+        // }
+        stage('Build applications and firmware') {
             steps {
-                dir("$DOWNLOAD_DIRNAME") {
-                    downloadExtractZips(artifactUrls)
-                    // List extracted files for log
-                    sh "ls -la"
+                script {
+                    uid = sh(returnStdout: true, script: 'id -u').trim()
+                    gid = sh(returnStdout: true, script: 'id -g').trim()
                 }
+                // pull docker image
+                sh "docker pull ghcr.io/xmos/xcore_builder:latest"
+                // host apps
+                sh "docker run --rm -u $uid:$gid -w /xcore_iot -v $WORKSPACE:/xcore_iot ghcr.io/xmos/xcore_builder:latest bash -l tools/ci/build_host_apps.sh"
+                // test firmware and filesystems
+                sh "docker run --rm -u $uid:$gid -w /xcore_iot -v $WORKSPACE:/xcore_iot ghcr.io/xmos/xcore_builder:latest bash -l tools/ci/build_rtos_core_examples.sh"
+                // List built files for log
+                sh "ls -la dist_host/"
+                sh "ls -la dist/"
             }
-        }
+        }        
         stage('Create virtual environment') {
             steps {
                 // Create venv
@@ -82,7 +90,7 @@ pipeline {
                 withTools(params.TOOLS_VERSION) {
                     withVenv {
                         script {
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_getting_started.xe")) {
+                            if (fileExists("$BUILD_DIRNAME/example_freertos_getting_started.xe")) {
                                 withXTAG(["$TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_getting_started_tests.sh " + adapterIDs[0]
                                 }
@@ -91,7 +99,7 @@ pipeline {
                             }
                         } 
                         script {
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_explorer_board.xe")) {
+                            if (fileExists("$BUILD_DIRNAME/example_freertos_explorer_board.xe")) {
                                 withXTAG(["$TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_explorer_board_tests.sh " + adapterIDs[0]
                                 }
@@ -100,7 +108,7 @@ pipeline {
                             }
                         } 
                         script {
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_l2_cache.xe")) {
+                            if (fileExists("$BUILD_DIRNAME/example_freertos_l2_cache.xe")) {
                                 withXTAG(["$TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_l2_cache_tests.sh " + adapterIDs[0]
                                 }
@@ -109,7 +117,7 @@ pipeline {
                             }
                         } 
                         script {
-                            if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_tracealyzer.xe")) {
+                            if (fileExists("$BUILD_DIRNAME/example_freertos_tracealyzer.xe")) {
                                 withXTAG(["$TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_tracealyzer_tests.sh " + adapterIDs[0]
                                 }
@@ -121,20 +129,12 @@ pipeline {
                 }
             }
         }
-        
-        // stage('Run bare-metal examples') {
-        //     steps {
-        //         withTools(params.TOOLS_VERSION) {
-        //             withVenv {
-        //                 script {
-        //                 } 
-        //             }
-        //         }
-        //     }
-        // }
     }
     post {
         cleanup {
+            // cleanWs removes all output and artifacts of the Jenkins pipeline
+            //   Comment out this post section to leave the workspace which can be useful for running items on the Jenkins agent. 
+            //   However, beware that this pipeline will not run if the workspace is not manually cleaned.
             cleanWs()
         }
     }
