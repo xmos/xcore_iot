@@ -33,18 +33,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                sh "git clone git@github.com:xmos/xcore_iot.git"
+                sh 'git submodule update --init --recursive --depth 1 --jobs \$(nproc)'
             }
-        }        
-        // stage('Download artifacts') {
-        //     steps {
-        //         dir("$BUILD_DIRNAME") {
-        //             downloadExtractZips(artifactUrls)
-        //             // List extracted files for log
-        //             sh "ls -la"
-        //         }
-        //     }
-        // }
+        }
         stage('Build applications and firmware') {
             steps {
                 script {
