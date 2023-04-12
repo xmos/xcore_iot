@@ -1,12 +1,12 @@
-.. _xcore_sdk_programming_guide:
+.. _xcore_iot_programming_guide:
 
 .. include:: <isonum.txt>
    
 ###############
-XCORE |reg| SDK
+XCORE |reg| IOT
 ###############
 
-This is the user guide for the `XCORE Software Development Kit <https://github.com/xmos/xcore_sdk>`_. 
+This is the user guide for the `XCORE-IOT Software <https://github.com/xmos/xcore_sdk>`_. 
 
 .. toctree::
    :maxdepth: 1

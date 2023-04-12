@@ -7,7 +7,7 @@
 #include <string.h>
 #include <xcore/triggerable.h>
 
-/* SDK headers */
+/* Platform headers */
 #include "xcore_utils.h"
 #include "mic_array.h"
 #include "xmath/xmath.h"

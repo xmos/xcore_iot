@@ -36,7 +36,7 @@ pipeline {
         PYTHON_VERSION = "3.8.11"
         VENV_DIRNAME = ".venv"
         DOWNLOAD_DIRNAME = "dist"
-        SDK_TEST_RIG_TARGET = "xcore_sdk_test_rig"
+        TEST_RIG_TARGET = "xcore_sdk_test_rig"
     }        
     stages {
         stage('Checkout') {
@@ -71,7 +71,7 @@ pipeline {
                 // Cleanup any xtagctl cruft from previous failed runs
                 withTools(params.TOOLS_VERSION) {
                     withVenv {
-                        sh "xtagctl reset_all $SDK_TEST_RIG_TARGET"
+                        sh "xtagctl reset_all $TEST_RIG_TARGET"
                     }
                 }
                 sh "rm -f ~/.xtag/status.lock ~/.xtag/acquired"
@@ -83,7 +83,7 @@ pipeline {
                     withVenv {
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_getting_started.xe")) {
-                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                withXTAG(["$TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_getting_started_tests.sh " + adapterIDs[0]
                                 }
                             } else {
@@ -92,7 +92,7 @@ pipeline {
                         } 
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_explorer_board.xe")) {
-                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                withXTAG(["$TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_explorer_board_tests.sh " + adapterIDs[0]
                                 }
                             } else {
@@ -101,7 +101,7 @@ pipeline {
                         } 
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_l2_cache.xe")) {
-                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                withXTAG(["$TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_l2_cache_tests.sh " + adapterIDs[0]
                                 }
                             } else {
@@ -110,7 +110,7 @@ pipeline {
                         } 
                         script {
                             if (fileExists("$DOWNLOAD_DIRNAME/example_freertos_tracealyzer.xe")) {
-                                withXTAG(["$SDK_TEST_RIG_TARGET"]) { adapterIDs ->
+                                withXTAG(["$TEST_RIG_TARGET"]) { adapterIDs ->
                                     sh "test/examples/run_freertos_tracealyzer_tests.sh " + adapterIDs[0]
                                 }
                             } else {

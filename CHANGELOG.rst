@@ -1,8 +1,9 @@
-XCORE SDK change log
+XCORE-IOT change log
 ====================
 
 1.0.0
 ------
+  * Renamed to XCORE-IOT
   * Addition of FreeRTOS audiomux example application
   * Documentation updates
 
@@ -39,7 +40,7 @@ Many enhancements and changes from the prior release.  The list below summarizes
   * iot_aws FreeRTOS example application redesigned and renamed
   * Addition of device_control, getting_started, ls_cache and dispatcher FreeRTOS example applicatiosn
   * Added USB support for FreeRTOS applications
-  * Simplified SDK installation steps
+  * Simplified installation steps
   * Redesign of CMake build system
   * Documentation updates
 

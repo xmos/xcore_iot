@@ -30,7 +30,7 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
 .. note::
 
-   The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
+   The host applications are required to create the filesystem.  See the XCORE-IOT installation instructions for more information.
 
 From the build folder, create the filesystem and flash the device with the following command:
 
@@ -76,7 +76,7 @@ Run the following commands in the xcore_sdk root folder to build the firmware:
 
 .. note::
 
-   The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
+   The host applications are required to create the filesystem.  See the XCORE-IOT installation instructions for more information.
 
 From the build folder, create the filesystem and flash the device with the following command:
 

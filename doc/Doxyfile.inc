@@ -1,7 +1,7 @@
 # This file provides overrides to the Doxyfile configuration
 
-PROJECT_NAME = XCORE SDK
-PROJECT_BRIEF = "XCORE Software Development Kit"
+PROJECT_NAME = XCORE-IOT
+PROJECT_BRIEF = "XCORE-IOT"
 
 EXTRACT_STATIC = YES
 

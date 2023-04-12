@@ -1,10 +1,10 @@
-.. _sdk-installation:
+.. _xcore-iot-installation:
 
 ############
 Installation
 ############
 
-.. _sdk-system-requirements:
+.. _xcore-iot-system-requirements:
 
 *************
 Prerequisites
@@ -37,23 +37,23 @@ A standard C/C++ compiler is required to build applications for the host PC.  Ma
 Install Steps
 *************
 
-Follow the following steps to install and setup the SDK:
+Follow the following steps to install and setup XCORE-IOT:
 
-=======================
-Step 1. Cloning the SDK
-=======================
+==============================
+Step 1. Cloning the repository
+==============================
 
-Clone the XCORE SDK repository with the following command:
+Clone the XCORE-IOT repository with the following command:
 
 .. code-block:: console
 
-    git clone --recurse-submodules git@github.com:xmos/xcore_sdk.git
+    git clone --recurse-submodules git@github.com:xmos/xcore_iot.git
 
 =================================
 Step 2. Install Host Applications
 =================================
 
-The SDK includes utilities that run on the PC host.  Run the following command to build and install these utilities:
+XCORE-IOT includes utilities that run on the PC host.  Run the following command to build and install these utilities:
 
 Linux and MacOS
 ---------------
@@ -64,11 +64,11 @@ Linux and MacOS
     cd build_host
     sudo make install
 
-This command installs the applications at ``/opt/xmos/SDK/<sdk version>/bin/`` directory.  You may wish to append this directory to your ``PATH`` variable.
+This command installs the applications at ``/opt/xmos/bin/`` directory.  You may wish to append this directory to your ``PATH`` variable.
 
 .. code-block:: console
 
-    export PATH=$PATH:/opt/xmos/SDK/<sdk_version>/bin/
+    export PATH=$PATH:/opt/xmos/bin/
 
 Some host applications require that the location of ``xscope_endpoint.so`` be added to your ``LD_LIBRARY_PATH`` environment variable.  This environment variable will be set if you run the host application in the XTC Tools command-line environment.  For more information see `Configuring the command-line environment <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/install-configure/getting-started.html>`__.   
 
@@ -89,7 +89,7 @@ Windows users must run the x86 native tools command prompt from Visual Studio
     cd build_host
     nmake install
 
-This command installs the applications at ``<USERPROFILE>\.xmos\SDK\<sdk version>\bin\`` directory.  You may wish to add this directory to your ``PATH`` variable.
+This command installs the applications at ``<USERPROFILE>\.xmos\bin\`` directory.  You may wish to add this directory to your ``PATH`` variable.
 
 Some host applications require that the location of ``xscope_endpoint.dll`` be added to your PATH. This environment variable will be set if you run the host application in the XTC Tools command-line environment.  For more information see `Configuring the command-line environment <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/install-configure/getting-started.html>`__.
 
@@ -97,7 +97,7 @@ Some host applications require that the location of ``xscope_endpoint.dll`` be a
 Optional Step 3. Install Python and Python Requirements
 =======================================================
 
-The SDK does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, Python 3 is needed, we recommend and test with Python 3.8.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
+XCORE-IOT does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, Python 3 is needed, we recommend and test with Python 3.8.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
 
 .. note:: 
     
@@ -119,5 +119,5 @@ Then use ``pip`` to install the required modules.
 Build & Run Your First Application
 ==================================
 
-Once your have installed the SDK, the next step is to :ref:`build and run your first xcore application. <sdk-tutorials>`
+Once your have installed XCORE-IOT, the next step is to :ref:`build and run your first xcore application. <xcore-iot-tutorials>`
     

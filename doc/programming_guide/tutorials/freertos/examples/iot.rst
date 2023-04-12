@@ -49,7 +49,7 @@ Setting up the hardware
 
 .. note::
 
-   The host applications are required to create the filesystem.  See the SDK Installation instructions for more information.
+   The host applications are required to create the filesystem.  See the installation instructions for more information.
 
 Before the demo can be run, the filesystem must be configured and flashed.
 

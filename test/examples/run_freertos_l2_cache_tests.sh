@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
-source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
+XCORE_IOT_ROOT=`git rev-parse --show-toplevel`
+source ${XCORE_IOT_ROOT}/tools/ci/helper_functions.sh
 
-BUILD_DIR="${XCORE_SDK_ROOT}/dist"
+BUILD_DIR="${XCORE_IOT_ROOT}/dist"
 APPLICATION="example_freertos_l2_cache"
 
 if [ ! -z "$1" ]

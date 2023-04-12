@@ -5,7 +5,7 @@
 #include <platform.h>
 #include <xs1.h>
 
-/* SDK headers */
+/* Platform headers */
 #include "xcore_utils.h"
 #include "i2c.h"
 
