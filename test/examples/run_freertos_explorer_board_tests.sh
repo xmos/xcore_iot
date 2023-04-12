@@ -19,7 +19,7 @@ APP_XE=${BUILD_DIR}/${APPLICATION}.xe
 APP_FS=${BUILD_DIR}/${APPLICATION}_fat.fs
 APP_LOG=${APPLICATION}.log
 
-(xflash $ADAPTER_ID --quad-spi-clock 50MHz --factory $APP_XE --boot-partition-size 0x100000 --data $APP_FS)
+(xflash $ADAPTER_ID --force --quad-spi-clock 50MHz --factory $APP_XE --boot-partition-size 0x100000 --data $APP_FS)
 ($TIMEOUT_EXE $DURATION xrun $ADAPTER_ID --xscope $APP_XE 2>&1 | tee $APP_LOG)
 
 # Search the log file for strings that indicate the app ran OK
