@@ -26,6 +26,8 @@
 #ifndef _TUSB_CONFIG_H_
 #define _TUSB_CONFIG_H_
 
+#include "rtos_printf.h"
+
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
 //--------------------------------------------------------------------
@@ -39,7 +41,11 @@
 
 #define CFG_TUSB_MEM_ALIGN         __attribute__ ((aligned(4)))
 
-#define CFG_TUSB_DEBUG_PRINTF     rtos_printf
+#ifndef CFG_TUSB_DEBUG_PRINTF
+#ifdef rtos_printf
+#define CFG_TUSB_DEBUG_PRINTF      rtos_printf
+#endif
+#endif
 
 //--------------------------------------------------------------------
 // DEVICE CONFIGURATION
