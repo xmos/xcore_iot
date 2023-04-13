@@ -34,7 +34,7 @@ jobs:
     outputs:
       python_install: ${{ steps.filter.outputs.python_install }}
     steps:
-      - name: Checkout SDK
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -53,7 +53,7 @@ jobs:
     name: Install & verify Python packages
     if: ${{ needs.changes.outputs.python_install == 'true' }}  
     steps:
-      - name: Checkout SDK
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: recursive

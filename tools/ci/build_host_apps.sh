@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
+XCORE_IOT_ROOT=`git rev-parse --show-toplevel`
 
-source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
+source ${XCORE_IOT_ROOT}/tools/ci/helper_functions.sh
 
 # setup distribution folder
-DIST_DIR=${XCORE_SDK_ROOT}/dist_host
+DIST_DIR=${XCORE_IOT_ROOT}/dist_host
 mkdir -p ${DIST_DIR}
 
 # row format is: "target     copy_path"
@@ -19,7 +19,7 @@ applications=(
 )
 
 # perform builds
-path="${XCORE_SDK_ROOT}"
+path="${XCORE_IOT_ROOT}"
 echo '******************************************************'
 echo '* Building host applications'
 echo '******************************************************'

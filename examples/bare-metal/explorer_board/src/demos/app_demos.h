@@ -10,7 +10,7 @@
 #include <xcore/parallel.h>
 #include <xcore/chanend.h>
 
-/* SDK headers */
+/* Platform headers */
 #include "xcore_utils.h"
 #include "spi.h"
 #include "qspi_flash.h"

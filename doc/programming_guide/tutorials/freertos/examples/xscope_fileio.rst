@@ -42,7 +42,7 @@ Run the following commands in the root folder to build the host application usin
     make xscope_host_endpoint
     make install
 
-The host application, ``xscope_host_endpoint``, will be installed at ``/opt/xmos/SDK/<sdk version>/bin/``, and may be moved if desired.  You may wish to add this directory to your ``PATH`` variable.
+The host application, ``xscope_host_endpoint``, will be installed at ``/opt/xmos/bin/``, and may be moved if desired.  You may wish to add this directory to your ``PATH`` variable.
 
 Before running the host application, you may need to add the location of ``xscope_endpoint.so`` to your ``LD_LIBRARY_PATH`` environment variable.  This environment variable will be set if you run the host application in the XTC Tools command-line environment.  For more information see `Configuring the command-line environment <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/install-configure/getting-started.html>`__.
 
@@ -103,7 +103,7 @@ Then build the host application:
     nmake xscope_host_endpoint
     nmake install
 
-The host application, ``xscope_host_endpoint.exe``, will be install at ``<USERPROFILE>\.xmos\SDK\<sdk version>\bin``, and may be moved if desired.  You may wish to add this directory to your ``PATH`` variable.
+The host application, ``xscope_host_endpoint.exe``, will be install at ``<USERPROFILE>\.xmos\bin``, and may be moved if desired.  You may wish to add this directory to your ``PATH`` variable.
 
 Before running the host application, you may need to add the location of ``xscope_endpoint.dll`` to your ``PATH``. This environment variable will be set if you run the host application in the XTC Tools command-line environment.  For more information see `Configuring the command-line environment <https://www.xmos.ai/documentation/XM-014363-PC-LATEST/html/tools-guide/install-configure/getting-started.html>`__.
 

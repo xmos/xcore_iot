@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
+XCORE_IOT_ROOT=`git rev-parse --show-toplevel`
 
-source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
+source ${XCORE_IOT_ROOT}/tools/ci/helper_functions.sh
 
 # setup distribution folder
-DIST_DIR=${XCORE_SDK_ROOT}/dist
+DIST_DIR=${XCORE_IOT_ROOT}/dist
 mkdir -p ${DIST_DIR}
 
 # row format is: "app_target board toolchain"
@@ -19,8 +19,8 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     read -ra FIELDS <<< ${applications[i]}
     make_target="${FIELDS[0]}"
     board="${FIELDS[1]}"
-    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[2]}"
-    path="${XCORE_SDK_ROOT}"
+    toolchain_file="${XCORE_IOT_ROOT}/${FIELDS[2]}"
+    path="${XCORE_IOT_ROOT}"
     echo '******************************************************'
     echo '* Building' ${make_target} 'for' ${board}
     echo '******************************************************'

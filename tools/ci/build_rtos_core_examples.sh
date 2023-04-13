@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-XCORE_SDK_ROOT=`git rev-parse --show-toplevel`
-source ${XCORE_SDK_ROOT}/tools/ci/helper_functions.sh
+XCORE_IOT_ROOT=`git rev-parse --show-toplevel`
+source ${XCORE_IOT_ROOT}/tools/ci/helper_functions.sh
 
 # setup distribution folder
-DIST_DIR=${XCORE_SDK_ROOT}/dist
-DIST_HOST_DIR=${XCORE_SDK_ROOT}/dist_host
+DIST_DIR=${XCORE_IOT_ROOT}/dist
+DIST_HOST_DIR=${XCORE_IOT_ROOT}/dist_host
 mkdir -p ${DIST_DIR}
 
 if [ -d "${DIST_HOST_DIR}" ]; then
@@ -42,8 +42,8 @@ for ((i = 0; i < ${#applications[@]}; i += 1)); do
     run_swmem_target="${FIELDS[3]}"
     run_upgrade_img_target="${FIELDS[4]}"
     board="${FIELDS[5]}"
-    toolchain_file="${XCORE_SDK_ROOT}/${FIELDS[6]}"
-    path="${XCORE_SDK_ROOT}"
+    toolchain_file="${XCORE_IOT_ROOT}/${FIELDS[6]}"
+    path="${XCORE_IOT_ROOT}"
 
     if check_tools_version ${min_tools_version}
     then

@@ -5,7 +5,7 @@
 #include <platform.h>
 #include <xs1.h>
 
-/* SDK headers */
+/* Platform headers */
 #include "soc.h"
 #include "xcore_utils.h"
 #include "uart.h"

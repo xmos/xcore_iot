@@ -8,17 +8,13 @@ set(TARGET_NAME xscope2psf)
 
 set(FATFS_HOST_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
-file(READ ${XCORE_SDK_ROOT}/settings.json JSON_STRING)
-# Get the "version" value from the JSON element
-string(JSON VERSION_VAL GET ${JSON_STRING} ${IDX} version)
-
 # Determine OS, set up output dirs
 if(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
+    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/bin")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
+    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/bin")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-    set(XSCOPE2PSF_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\SDK\\${VERSION_VAL}\\bin")
+    set(XSCOPE2PSF_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\bin")
 endif()
 
 set(APP_SOURCES

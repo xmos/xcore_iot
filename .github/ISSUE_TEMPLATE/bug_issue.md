@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a bug report to help us improve the SDK
+about: Create a bug report to help us improve XCORE-IOT
 title: ''
 labels: type:bug
 assignees: keithm-xmos
@@ -10,7 +10,7 @@ assignees: keithm-xmos
 **System information**
  - OS: [e.g. Mac, Linux, Windows]
  - xcore board [e.g. Explorer, Osprey]
- - SDK version tag or commit SHA
+ - Version tag or commit SHA
 
 **Describe the current behavior**
 

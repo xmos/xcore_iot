@@ -67,7 +67,7 @@ using your native x86 Toolchain:
     make xscope2psf
     make install
 
-The host application, ``xscope2psf``, will be installed at ``/opt/xmos/SDK/<sdk version>/bin/``,
+The host application, ``xscope2psf``, will be installed at ``/opt/xmos/bin/``,
 and may be moved if desired.
 
 =====================
@@ -114,7 +114,7 @@ using your native x86 Toolchain:
     nmake xscope2psf
     nmake install
 
-The host application, ``xscope2psf.exe``, will be install at ``%USERPROFILE%\.xmos\SDK\<sdk version>\bin\\``,
+The host application, ``xscope2psf.exe``, will be install at ``%USERPROFILE%\.xmos\bin\\``,
 and may be moved if desired.
 
 The instructions that follow will assume that the path of this binary has been

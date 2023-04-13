@@ -12,7 +12,7 @@ Build Issues
 Submodule updates
 =================
 
-The XCORE SDK uses submodules.  If you have cloned the repository and later perform an update, it will sometimes also be necessary to update the submodules.  To update all submodules, run the following command
+XCORE-IOT uses submodules.  If you have cloned the repository and later perform an update, it will sometimes also be necessary to update the submodules.  To update all submodules, run the following command
 
 .. code-block:: console
 
@@ -22,7 +22,7 @@ The XCORE SDK uses submodules.  If you have cloned the repository and later perf
 fatfs_mkimage: not found
 ========================
 
-This issue occurs when the XCORE SDK ``fatfs_mkimage`` utility cannot be found.  The most common cause for these issues are an incomplete installation of the XCORE SDK.
+This issue occurs when the ``fatfs_mkimage`` utility cannot be found.  The most common cause for these issues are an incomplete installation of the XCORE-IOT.
 
 Ensure that the host applications setup has been completed.  Verify that the ``fatfs_mkimage`` binary is installed to a location on PATH, or that the default application installation folder is added to PATH.  See the :ref:`sdk-installation` guide for more information on installing the host applications.
 
