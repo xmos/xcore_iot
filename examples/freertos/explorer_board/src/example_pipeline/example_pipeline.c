@@ -41,7 +41,7 @@ void *example_pipeline_input(void *data)
 
     rtos_mic_array_rx(
             mic_array_ctx,
-            audio_frame,
+            (int32_t **)audio_frame,
             appconfAUDIO_FRAME_LENGTH,
             portMAX_DELAY);
 

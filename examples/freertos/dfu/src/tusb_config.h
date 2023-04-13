@@ -9,6 +9,7 @@
 #endif
 
 #include "app_conf.h"
+#include "rtos_printf.h"
 
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
@@ -23,7 +24,11 @@
 
 #define CFG_TUSB_MEM_ALIGN         __attribute__ ((aligned(8)))
 
-#define CFG_TUSB_DEBUG_PRINTF     rtos_printf
+#ifndef CFG_TUSB_DEBUG_PRINTF
+#ifdef rtos_printf
+#define CFG_TUSB_DEBUG_PRINTF      rtos_printf
+#endif
+#endif
 
 //--------------------------------------------------------------------
 // DEVICE CONFIGURATION

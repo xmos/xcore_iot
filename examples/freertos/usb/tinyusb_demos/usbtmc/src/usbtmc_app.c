@@ -79,7 +79,6 @@ static volatile uint8_t status;
 // 0=not query, 1=queried, 2=delay,set(MAV), 3=delay 4=ready?
 // (to simulate delay)
 static volatile uint16_t queryState = 0;
-static volatile uint32_t queryDelayStart;
 static volatile uint32_t bulkInStarted;
 static volatile uint32_t idnQuery;
 
