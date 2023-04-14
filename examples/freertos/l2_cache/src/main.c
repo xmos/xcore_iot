@@ -45,7 +45,7 @@ void rtos_flash_read_wrapper(void *dst_address, const void *src_address,
     // rtos_printf("flash read dst: %p, src: %p, %d bytes\n", dst_address, src_address, bytes);
     int ret = -1;
     do {
-        ret = rtos_qspi_flash_read_ll(qspi_flash_ctx, (uint8_t *)dst_address,
+        ret = rtos_qspi_flash_fast_read_ll(qspi_flash_ctx, (uint8_t *)dst_address,
                                       (unsigned)(src_address - XS1_SWMEM_BASE),
                                       (size_t)bytes);
     } while (ret != 0);
@@ -54,6 +54,14 @@ void rtos_flash_read_wrapper(void *dst_address, const void *src_address,
 void app(void *args)
 {
     rtos_qspi_flash_start(qspi_flash_ctx, configMAX_PRIORITIES - 1);
+    if (rtos_qspi_flash_calibration_valid_get(qspi_flash_ctx) != 1) {
+        rtos_printf("Calibration failed\n");
+        _Exit(-1);
+    }
+    /* When using the rtos_qspi_flash_fast_read_ll API we must setup and apply calibration manually */
+    qspi_flash_fast_read_setup_resources(&qspi_flash_ctx->ctx);
+    qspi_flash_fast_read_apply_calibration(&qspi_flash_ctx->ctx);
+
     rtos_l2_cache_start(l2_cache_ctx);
 
     while (1) {
@@ -76,13 +84,16 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     (void)c2;
     (void)c3;
 
-    rtos_qspi_flash_init(
+    rtos_qspi_flash_fast_read_init(
             qspi_flash_ctx,
             XS1_CLKBLK_1,
             PORT_SQI_CS,
             PORT_SQI_SCLK,
             PORT_SQI_SIO,
-            NULL);
+            NULL,
+            qspi_fast_flash_read_transfer_nibble_swap,
+            4,
+            QSPI_FLASH_CALIBRATION_ADDRESS);
             
     rtos_l2_cache_init(l2_cache_ctx,
 #if DIRECT_MAP
