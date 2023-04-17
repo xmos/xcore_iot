@@ -27,6 +27,7 @@
 #include "device_control.h"
 #include "device_control_usb.h"
 #include "app_control/app_control.h"
+#include "usb_descriptors.h"
 
 DEVICE_CONTROL_CALLBACK_ATTR
 control_ret_t read_cmd(control_resid_t resid, control_cmd_t cmd, uint8_t *payload, size_t payload_len, void *app_data)
@@ -186,6 +187,81 @@ void vApplicationMinimalIdleHook(void)
     asm volatile("waiteu");
 }
 
+// Invoked when received GET_REPORT control request
+// Application must fill buffer report's content and return its length.
+// Return zero will cause the stack to STALL request
+uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer, uint16_t reqlen)
+{
+    // TODO not Implemented
+    (void) itf;
+    (void) report_id;
+    (void) report_type;
+    (void) buffer;
+    (void) reqlen;
+
+    return 0;
+}
+
+// Invoked when received SET_REPORT control request or
+// received data on OUT endpoint ( Report ID = 0, Type = 0 )
+void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
+{
+  (void) instance;
+
+  if (report_type == HID_REPORT_TYPE_OUTPUT)
+  {
+    // Set keyboard LED e.g Capslock, Numlock etc...
+  }
+}
+
+static void send_hid_report(uint8_t report_id)
+{
+  // skip if hid is not ready yet
+  if ( !tud_hid_ready() ) return;
+
+  //printf("In send_hid_report()\n");
+
+  switch(report_id)
+  {
+    case REPORT_ID_MOUSE:
+    {
+      int8_t const delta = 5;
+
+      // no button, right + down, no scroll, no pan
+      tud_hid_mouse_report(REPORT_ID_MOUSE, 0x00, delta, delta, 0, 0);
+    }
+    break;
+
+    default: break;
+  }
+}
+
+void hid_task(void)
+{
+      // Poll every 10ms
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    // Remote wakeup
+    if ( tud_suspended())
+    {
+        // Wake up host if we are in suspend mode
+        // and REMOTE_WAKEUP feature is enabled by host
+        tud_remote_wakeup();
+    }
+    else
+    {
+        //printf("in hid_task()\n");
+        // Send the 1st of report chain, the rest will be sent by tud_hid_report_complete_cb()
+        send_hid_report(REPORT_ID_MOUSE);
+    }
+}
+
+static void hid_task_wrapper(void *arg) {
+    while(1) {
+        hid_task();
+    }
+}
+
 #if (!RUN_EP0_VIA_PROXY)
 void startup_task(void *arg)
 {
@@ -194,6 +270,14 @@ void startup_task(void *arg)
     platform_start();
 
     audio_pipeline_init(NULL, NULL);
+#if ON_TILE(0)
+    xTaskCreate((TaskFunction_t) hid_task_wrapper,
+                    "hid_task",
+                    portTASK_STACK_DEPTH(hid_task_wrapper),
+                    NULL,
+                    appconfSTARTUP_TASK_PRIORITY,
+                    NULL);
+#endif
 
     static device_control_servicer_t servicer_ctx;
     control_ret_t dc_ret;

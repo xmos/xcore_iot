@@ -26,7 +26,14 @@ enum {
     ITF_NUM_AUDIO_STREAMING_MIC,
 #endif
     ITF_XMOS_DEV_CTRL,
+    ITF_NUM_HID,
     ITF_NUM_TOTAL
+};
+
+enum
+{
+  REPORT_ID_MOUSE=1,
+  REPORT_ID_COUNT
 };
 
 // Unit numbers are arbitrary selected

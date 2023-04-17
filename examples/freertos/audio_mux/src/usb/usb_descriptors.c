@@ -116,8 +116,30 @@ const uint16_t tud_audio_desc_lengths[CFG_TUD_AUDIO] = {
         uac2_total_descriptors_length
 };
 
-#define CONFIG_TOTAL_LEN        (TUD_CONFIG_DESC_LEN + (CFG_TUD_AUDIO * uac2_total_descriptors_length) + sizeof(tusb_desc_interface_t)/*For the device_control interface descriptor*/)
+
+//--------------------------------------------------------------------+
+// HID Report Descriptor
+//--------------------------------------------------------------------+
+
+uint8_t const desc_hid_report[] =
+{
+  TUD_HID_REPORT_DESC_MOUSE   ( HID_REPORT_ID(REPORT_ID_MOUSE            ))
+};
+
+// Invoked when received GET HID REPORT DESCRIPTOR
+// Application return pointer to descriptor
+// Descriptor contents must exist long enough for transfer to complete
+uint8_t const * tud_hid_descriptor_report_cb(uint8_t instance)
+{
+  (void) instance;
+  return desc_hid_report;
+}
+
+
+#define CONFIG_TOTAL_LEN        (TUD_CONFIG_DESC_LEN + (CFG_TUD_AUDIO * uac2_total_descriptors_length) + sizeof(tusb_desc_interface_t)/*For the device_control interface descriptor*/ + TUD_HID_DESC_LEN /*HID*/)
+
 #define EPNUM_AUDIO   0x01
+#define EPNUM_HID 0x02
 
 
 #define AUDIO_INTERFACE_STRING_INDEX 4
@@ -199,6 +221,9 @@ uint8_t const desc_configuration[] = {
 
     // Interface number, string index
     TUD_XMOS_DEVICE_CONTROL_DESCRIPTOR(ITF_XMOS_DEV_CTRL, 5),
+
+    // Interface number, string index, protocol, report descriptor len, EP In address, size & polling interval
+    TUD_HID_DESCRIPTOR(ITF_NUM_HID, 0, HID_ITF_PROTOCOL_NONE, sizeof(desc_hid_report), 0x80 | EPNUM_HID, CFG_TUD_HID_EP_BUFSIZE, 5)
 };
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -221,7 +246,8 @@ char const *string_desc_arr[] = {
         AUDIO_MUX_PRODUCT_STR,          // 2: Product
         "123456",                   // 3: Serials, should use chip ID
         AUDIO_MUX_PRODUCT_STR,          // 4: Audio Interface
-        "Device Control Interface"  // 5: Vendor Interface
+        "Device Control Interface",  // 5: Vendor Interface
+        "HID Mouse Interface"
         };
 
 static uint16_t _desc_str[32];
