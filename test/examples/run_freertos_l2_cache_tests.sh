@@ -16,10 +16,10 @@ TIMEOUT_EXE=$(get_timeout)
 DURATION="15s"
 
 APP_XE=${BUILD_DIR}/${APPLICATION}.xe
-APP_SWMEM=${BUILD_DIR}/${APPLICATION}.swmem
+APP_FLASH_CONTENTS=${BUILD_DIR}/${APPLICATION}_flash.bin
 APP_LOG=${APPLICATION}.log
 
-(xflash $ADAPTER_ID --force --quad-spi-clock 50MHz --write-all $APP_SWMEM --target XCORE-AI-EXPLORER)
+(xflash $ADAPTER_ID --force --quad-spi-clock 50MHz --write-all $APP_FLASH_CONTENTS --target XCORE-AI-EXPLORER)
 ($TIMEOUT_EXE $DURATION xrun $ADAPTER_ID --xscope $APP_XE 2>&1 | tee $APP_LOG)
 
 # Search the log file for strings that indicate the app ran OK

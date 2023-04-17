@@ -8,7 +8,7 @@ static void tile0_setup_mclk(void);
 static void tile0_init_i2c(void);
 static void tile0_init_spi(void);
 static void tile0_init_spi_device(spi_master_t *spi_ctx);
-static void tile0_init_flash(qspi_flash_ctx_t *qspi_flash_ctx);
+static void tile0_init_flash(void);
 
 void platform_init_tile_0(chanend_t c_other_tile)
 {
@@ -36,7 +36,7 @@ void platform_init_tile_0(chanend_t c_other_tile)
     tile0_init_spi();
     tile0_init_spi_device(&tile0_ctx->spi_ctx);
 
-    tile0_init_flash(&tile0_ctx->qspi_flash_ctx);
+    tile0_init_flash();
 }
 
 static void tile0_init_spi(void)
@@ -79,56 +79,16 @@ static void tile0_init_i2c(void)
             100); /* kbps */
 }
 
-static void tile0_init_flash(qspi_flash_ctx_t *qspi_flash_ctx)
+static void tile0_init_flash(void)
 {
-    qspi_io_ctx_t *qspi_io_ctx = &qspi_flash_ctx->qspi_io_ctx;
 
-    qspi_flash_ctx->custom_clock_setup = 1;
-    qspi_flash_ctx->quad_page_program_cmd = qspi_flash_page_program_1_4_4;
-    qspi_flash_ctx->source_clock = qspi_io_source_clock_xcore;
+    fl_QSPIPorts qspi_ports;
+    qspi_ports.qspiCS = PORT_SQI_CS;
+    qspi_ports.qspiSCLK = PORT_SQI_SCLK;
+    qspi_ports.qspiSIO = PORT_SQI_SIO;
+    qspi_ports.qspiClkblk = FLASH_CLKBLK;
 
-    qspi_io_ctx->clock_block = FLASH_CLKBLK;
-    qspi_io_ctx->cs_port = PORT_SQI_CS;
-    qspi_io_ctx->sclk_port = PORT_SQI_SCLK;
-    qspi_io_ctx->sio_port = PORT_SQI_SIO;
-
-    /** Full speed clock configuration **/
-    qspi_io_ctx->full_speed_clk_divisor = 5; // 600 MHz / (2*5) -> 60 MHz
-    qspi_io_ctx->full_speed_sclk_sample_delay = 1;
-    qspi_io_ctx->full_speed_sclk_sample_edge = qspi_io_sample_edge_rising;
-
-    /** SPI read clock configuration **/
-    qspi_io_ctx->spi_read_clk_divisor = 12;  // 600 MHz / (2*12) -> 25 MHz
-
-    qspi_io_ctx->spi_read_sclk_sample_delay = 0;
-    qspi_io_ctx->spi_read_sclk_sample_edge = qspi_io_sample_edge_falling;
-    qspi_io_ctx->full_speed_sio_pad_delay = 0;
-    qspi_io_ctx->spi_read_sio_pad_delay = 0;
-
-    /** The following configuration is only required for the Explorer Board 2v0
-     ** due to an incorrect sfdp parameters being reported for the particular
-     ** flash component sourced. **/
-    qspi_flash_ctx->sfdp_skip = true;
-    qspi_flash_ctx->sfdp_supported = false;
-    qspi_flash_ctx->page_size_bytes = 256;
-    qspi_flash_ctx->page_count = 16384;
-    qspi_flash_ctx->flash_size_kbytes = 4096;
-    qspi_flash_ctx->address_bytes = 3;
-    qspi_flash_ctx->erase_info[0].size_log2 = 12;
-    qspi_flash_ctx->erase_info[0].cmd = 0xEEFEEEEE;
-    qspi_flash_ctx->erase_info[1].size_log2 = 15;
-    qspi_flash_ctx->erase_info[1].cmd = 0xEFEFEEFE;
-    qspi_flash_ctx->erase_info[2].size_log2 = 16;
-    qspi_flash_ctx->erase_info[2].cmd = 0xFFEFFEEE;
-    qspi_flash_ctx->erase_info[3].size_log2 = 0;
-    qspi_flash_ctx->erase_info[3].cmd = 0;
-    qspi_flash_ctx->busy_poll_cmd = 0xEEEEEFEF;
-    qspi_flash_ctx->busy_poll_bit = 0;
-    qspi_flash_ctx->busy_poll_ready_value = 0;
-    qspi_flash_ctx->qe_reg = 2;
-    qspi_flash_ctx->qe_bit = 1;
-    qspi_flash_ctx->sr2_read_cmd = 0xEEFFEFEF;
-    qspi_flash_ctx->sr2_write_cmd = 0xEEEEEEEE;
-
-    qspi_flash_init(qspi_flash_ctx);
+    fl_QuadDeviceSpec default_spec = FL_QUADDEVICE_DEFAULT;
+    fl_connectToDevice(&qspi_ports, &default_spec, 1);
+    fl_quadEnable();
 }

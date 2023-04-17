@@ -41,6 +41,7 @@ set(APP_COMPILE_DEFINITIONS
 )
 
 set(APP_LINK_OPTIONS
+    -lquadflash
     -report
     ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
     ${CMAKE_CURRENT_LIST_DIR}/src/config.xscope
