@@ -90,7 +90,7 @@ set_target_properties(example_freertos_l2_cache PROPERTIES
 #**********************
 # SWMEM flashing support targets
 #**********************
-add_custom_target(make_swmem_example_freertos_l2_cache
+add_custom_target(extract_swmem_example_freertos_l2_cache
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/example_freertos_l2_cache_split/image_n0c0.swmem example_freertos_l2_cache.swmem
     DEPENDS example_freertos_l2_cache
     COMMENT
@@ -99,13 +99,13 @@ add_custom_target(make_swmem_example_freertos_l2_cache
 )
 
 add_custom_command(
-    OUTPUT flash_example_freertos_l2_cache_flash_contents
+    OUTPUT make_swmem_example_freertos_l2_cache
     COMMAND ${CMAKE_COMMAND} -E rm -f ${FLASH_CONTENTS_FILE}
     COMMAND datapartition_mkimage -v -b 1
     -i ${FLASH_SWMEM_CONTENTS}:${FLASH_SWMEM_CONTENTS_OFFSET} ${FLASH_CAL_FILE}:${CALIBRATION_PATTERN_OFFSET}
     -o ${FLASH_CONTENTS_FILE}
     DEPENDS
-        make_swmem_example_freertos_l2_cache
+        extract_swmem_example_freertos_l2_cache
         ${FLASH_CAL_FILE}
     COMMENT
         "Create flash contents file"
@@ -114,7 +114,7 @@ add_custom_command(
 
 add_custom_target(flash_example_freertos_l2_cache_swmem
     COMMAND xflash --write-all ${FLASH_CONTENTS_FILE} --target-file ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
-    DEPENDS flash_example_freertos_l2_cache_flash_contents
+    DEPENDS make_swmem_example_freertos_l2_cache
     COMMENT
         "Flash SwMem"
     VERBATIM
