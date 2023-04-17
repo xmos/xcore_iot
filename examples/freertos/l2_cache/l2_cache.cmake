@@ -98,8 +98,7 @@ add_custom_target(extract_swmem_example_freertos_l2_cache
     VERBATIM
 )
 
-add_custom_command(
-    OUTPUT make_swmem_example_freertos_l2_cache
+add_custom_target(make_swmem_example_freertos_l2_cache
     COMMAND ${CMAKE_COMMAND} -E rm -f ${FLASH_CONTENTS_FILE}
     COMMAND datapartition_mkimage -v -b 1
     -i ${FLASH_SWMEM_CONTENTS}:${FLASH_SWMEM_CONTENTS_OFFSET} ${FLASH_CAL_FILE}:${CALIBRATION_PATTERN_OFFSET}
