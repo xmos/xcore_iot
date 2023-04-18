@@ -37,7 +37,9 @@ static void i2c_start(void)
 static void flash_start(void)
 {
 #if ON_TILE(0)
+    uint32_t flash_core_map = ~((1 << appconfUSB_INTERRUPT_CORE) | (1 << appconfUSB_SOF_INTERRUPT_CORE));
     rtos_qspi_flash_start(qspi_flash_ctx, appconfQSPI_FLASH_TASK_PRIORITY);
+    rtos_qspi_flash_op_core_affinity_set(qspi_flash_ctx, flash_core_map);
 #endif
 }
 
