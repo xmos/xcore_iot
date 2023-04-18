@@ -185,6 +185,8 @@ volatile uint32_t noEpOut = 0;
 volatile uint32_t noEpIn = 0;
 volatile XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX];
 volatile XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX];
+volatile channel_t channel_ep_out[RTOS_USB_ENDPOINT_COUNT_MAX];
+volatile channel_t channel_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
 
 DECLARE_JOB(_XUD_Main, (chanend_t, chanend_t, chanend_t, XUD_BusSpeed_t, XUD_PwrConfig));
 DECLARE_JOB(tile_common_init_tile0, (chanend_t, chanend_t, chanend_t));

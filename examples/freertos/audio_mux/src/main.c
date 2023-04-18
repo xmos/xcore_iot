@@ -216,6 +216,7 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
 
 static void send_hid_report(uint8_t report_id)
 {
+#if HID_CONTROL
   // skip if hid is not ready yet
   if ( !tud_hid_ready() ) return;
 
@@ -234,6 +235,7 @@ static void send_hid_report(uint8_t report_id)
 
     default: break;
   }
+#endif
 }
 
 void hid_task(void)
@@ -485,6 +487,8 @@ volatile uint32_t noEpOut = 0;
 volatile uint32_t noEpIn = 0;
 volatile XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX];
 volatile XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX];
+volatile channel_t channel_ep_out[RTOS_USB_ENDPOINT_COUNT_MAX];
+volatile channel_t channel_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
 
 DECLARE_JOB(_XUD_Main, (chanend_t, chanend_t, chanend_t, XUD_BusSpeed_t, XUD_PwrConfig));
 DECLARE_JOB(tile_common_init_tile0, (chanend_t, chanend_t, chanend_t));
@@ -530,18 +534,14 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     (void) c2;
     (void) c3;
 
-    // Allocate EP0 endpoint channels
-    channel_t channel_ep0_out;
-    channel_t channel_ep0_in;
-
-    channel_ep0_out = chan_alloc();
-    channel_ep0_in = chan_alloc();
+    channel_ep_out[0] = chan_alloc(); // Allocate EP0 channels since EP0 proxy uses one of these to signal _XUD_Main when it's safe to start XUD_Main
+    channel_ep_in[0] = chan_alloc();
 
     printf("Calling tile_common_init_tile0() on tile %d\n", THIS_XCORE_TILE);
 
     PAR_JOBS(        
-        PJOB(_XUD_Main, (channel_ep0_out.end_a, channel_ep0_in.end_a, 0, XUD_SPEED_HS, XUD_PWR_BUS)),
-        PJOB(tile_common_init_tile0, (c1, channel_ep0_out.end_b, channel_ep0_in.end_b))
+        PJOB(_XUD_Main, (channel_ep_out[0].end_a, channel_ep_in[0].end_a, 0, XUD_SPEED_HS, XUD_PWR_BUS)),
+        PJOB(tile_common_init_tile0, (c1, channel_ep_out[0].end_b, channel_ep_in[0].end_b))
 
     );
 }

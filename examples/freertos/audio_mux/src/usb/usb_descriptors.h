@@ -26,7 +26,9 @@ enum {
     ITF_NUM_AUDIO_STREAMING_MIC,
 #endif
     ITF_XMOS_DEV_CTRL,
+#if HID_CONTROL
     ITF_NUM_HID,
+#endif
     ITF_NUM_TOTAL
 };
 

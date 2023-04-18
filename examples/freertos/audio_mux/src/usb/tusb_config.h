@@ -33,6 +33,8 @@
 #include "app_conf.h"
 #include "audio_pipeline.h"
 
+#define HID_CONTROL (1)
+
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
 //--------------------------------------------------------------------
@@ -63,7 +65,11 @@
 //------------- CLASS -------------//
 #define CFG_TUD_CDC               0
 #define CFG_TUD_MSC               0
-#define CFG_TUD_HID               1
+#if HID_CONTROL
+    #define CFG_TUD_HID               1
+#else
+    #define CFG_TUD_HID               0
+#endif
 #define CFG_TUD_MIDI              0
 #define CFG_TUD_AUDIO             1
 #define CFG_TUD_VENDOR            0

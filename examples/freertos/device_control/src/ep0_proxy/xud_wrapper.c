@@ -31,6 +31,8 @@ extern volatile uint32_t noEpOut;
 extern volatile uint32_t noEpIn;
 extern volatile XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX];
 extern volatile XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX];
+extern volatile channel_t channel_ep_out[RTOS_USB_ENDPOINT_COUNT_MAX];
+extern volatile channel_t channel_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
 
 void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_BusSpeed_t desiredSpeed, XUD_PwrConfig pwrConfig)
 {
@@ -46,17 +48,22 @@ void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_Bus
     c_ep_out[0] = c_ep0_Out;
     c_ep_in[0] = c_ep0_In;
 
-
-    if(noEpOut > 1) // TODO Hack it to support the audio_mux example with offtile EP0 for now
+    for (int i = 1; i < noEpOut; i++)
     {
-        channel_t channel_ep1_out;
-        channel_t channel_ep1_in;
-        channel_ep1_out = chan_alloc();
-        channel_ep1_in = chan_alloc();
-        c_ep_out[1] = channel_ep1_out.end_a;
-        c_ep_in[1] = channel_ep1_in.end_a;
+        if(epTypeTableOut[i] != XUD_EPTYPE_DIS)
+        {
+            channel_ep_out[i] = chan_alloc();
+            c_ep_out[i] = channel_ep_out[i].end_a;
+        }
     }
-
+    for (int i = 1; i < noEpIn; i++)
+    {
+        if(epTypeTableIn[i] != XUD_EPTYPE_DIS)
+        {
+            channel_ep_in[i] = chan_alloc();
+            c_ep_in[i] = channel_ep_in[i].end_a;
+        }
+    }
     
     // TODO If noEpOut and noEpIn are greater than 1, the channels for other endpoints need to be allocated here.
     // The other endpoints will also need to be signalled, to call XUD_InitEp() now.

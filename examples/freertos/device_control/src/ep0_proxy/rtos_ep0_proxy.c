@@ -39,6 +39,8 @@ extern volatile uint32_t noEpOut;
 extern volatile uint32_t noEpIn;
 extern volatile XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX];
 extern volatile XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX];
+extern volatile channel_t channel_ep_out[RTOS_USB_ENDPOINT_COUNT_MAX];
+extern volatile channel_t channel_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
 
 static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
                                          const int ep_num,
@@ -156,6 +158,14 @@ static void handle_ep0_command(rtos_usb_t *ctx, uint8_t ep0_cmd)
             uint32_t dev_addr = chan_in_word(ctx->c_ep0_proxy);
             XUD_Result_t res = rtos_usb_device_address_set(ctx, dev_addr);
             chan_out_byte(ctx->c_ep0_proxy, res);
+        }
+        break;
+        case e_usb_endpoint_state_reset:
+        {
+            printf("In e_usb_endpoint_state_reset\n");
+            uint32_t endpoint_addr = chan_in_word(ctx->c_ep0_proxy);
+            XUD_ResetEpStateByAddr(endpoint_addr);
+            chan_out_byte(ctx->c_ep0_proxy, XUD_RES_OKAY);
         }
         break;
     }
