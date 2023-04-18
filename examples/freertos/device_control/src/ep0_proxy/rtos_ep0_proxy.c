@@ -18,6 +18,7 @@ void ep0_proxy_init(
     chanend_t chan_ep0_out,
     chanend_t chan_ep0_in,
     chanend_t chan_ep0_proxy,
+    chanend_t chan_ep_hid_proxy,
     chanend_t c_ep0_proxy_xfer_complete)
 {
     rtos_usb_t *ctx = &usb_ctx;
@@ -26,7 +27,8 @@ void ep0_proxy_init(
     // EP0 out and in channels
     ctx->c_ep[0][RTOS_USB_OUT_EP] = chan_ep0_out;
     ctx->c_ep[0][RTOS_USB_IN_EP] = chan_ep0_in;
-    ctx->c_ep0_proxy = chan_ep0_proxy;
+    ctx->c_ep_proxy[0] = chan_ep0_proxy;
+    ctx->c_ep_proxy[2] = chan_ep_hid_proxy; // Descriptors aren't parsed at this point. Hardcoding, assuming ep2 is HID
     ctx->c_ep0_proxy_xfer_complete = c_ep0_proxy_xfer_complete;
     rtos_osal_queue_create(&_ep0_proxy_event_queue, "ep0_proxy_q", 4, sizeof(ep0_proxy_event_t));
 
@@ -113,7 +115,7 @@ static inline void handle_usb_transfer_complete(rtos_usb_t *ctx, ep0_proxy_event
     }
 }
 
-static void handle_ep0_command(rtos_usb_t *ctx, uint8_t ep0_cmd)
+static void handle_ep0_command(rtos_usb_t *ctx, chanend_t c_ep_proxy, uint8_t ep0_cmd)
 {
     switch(ep0_cmd)
     {
@@ -121,11 +123,11 @@ static void handle_ep0_command(rtos_usb_t *ctx, uint8_t ep0_cmd)
         {
             //printf("In e_reset_ep\n");
             ctx->reset_received = 1;
-            uint8_t ep_addr = chan_in_byte(ctx->c_ep0_proxy);
+            uint8_t ep_addr = chan_in_byte(c_ep_proxy);
             XUD_BusSpeed_t xud_speed;
             xud_speed = rtos_usb_endpoint_reset(ctx, ep_addr);
             prepare_setup(ctx);
-            chan_out_byte(ctx->c_ep0_proxy, xud_speed);
+            chan_out_byte(c_ep_proxy, xud_speed);
 
             triggerable_enable_trigger(ctx->c_ep[0][RTOS_USB_OUT_EP]);
             triggerable_enable_trigger(ctx->c_ep[0][RTOS_USB_IN_EP]);
@@ -135,38 +137,38 @@ static void handle_ep0_command(rtos_usb_t *ctx, uint8_t ep0_cmd)
         {
             //printf("In e_prepare_setup\n");
             prepare_setup(ctx);
-            chan_out_byte(ctx->c_ep0_proxy, 0);
+            chan_out_byte(c_ep_proxy, 0);
         }
         break;
         case e_usb_endpoint_transfer_start:
         {
             //printf("In e_usb_endpoint_transfer_start\n");
-            uint8_t ep_addr = chan_in_byte(ctx->c_ep0_proxy);
-            uint8_t len = chan_in_byte(ctx->c_ep0_proxy);
+            uint8_t ep_addr = chan_in_byte(c_ep_proxy);
+            uint8_t len = chan_in_byte(c_ep_proxy);
             if((len > 0) && (endpoint_dir(ep_addr) == RTOS_USB_IN_EP))
             {
-                chan_in_buf_byte(ctx->c_ep0_proxy, (uint8_t*)sbuffer, len);
+                chan_in_buf_byte(c_ep_proxy, (uint8_t*)sbuffer, len);
             }
             //printf("ep_addr %d, len = %d\n", ep_addr, len);
             XUD_Result_t res = rtos_usb_endpoint_transfer_start(ctx, (uint32_t)ep_addr, (uint8_t*)sbuffer, len);
             //printf("res = %d\n",res);
-            chan_out_byte(ctx->c_ep0_proxy, res);
+            chan_out_byte(c_ep_proxy, res);
         }
         break;
         case e_usb_device_address_set:
         {
             //printf("In e_usb_device_address_set\n");
-            uint32_t dev_addr = chan_in_word(ctx->c_ep0_proxy);
+            uint32_t dev_addr = chan_in_word(c_ep_proxy);
             XUD_Result_t res = rtos_usb_device_address_set(ctx, dev_addr);
-            chan_out_byte(ctx->c_ep0_proxy, res);
+            chan_out_byte(c_ep_proxy, res);
         }
         break;
         case e_usb_endpoint_state_reset:
         {
             //printf("In e_usb_endpoint_state_reset\n");
-            uint32_t endpoint_addr = chan_in_word(ctx->c_ep0_proxy);
+            uint32_t endpoint_addr = chan_in_word(c_ep_proxy);
             XUD_ResetEpStateByAddr(endpoint_addr);
-            chan_out_byte(ctx->c_ep0_proxy, XUD_RES_OKAY);
+            chan_out_byte(c_ep_proxy, XUD_RES_OKAY);
         }
         break;
     }
@@ -193,15 +195,11 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
 
     if(res == XUD_RES_RST)
     {
-        triggerable_disable_trigger(ctx->c_ep0_proxy);
+        triggerable_disable_trigger(ctx->c_ep_proxy[0]);
         triggerable_disable_trigger(ctx->c_ep[ep_num][RTOS_USB_OUT_EP]);
         triggerable_disable_trigger(ctx->c_ep[ep_num][RTOS_USB_IN_EP]);
     }
-    
-    if(ep_num != 0)
-    {
-        printf("usb_ep0_isr: ep_num = %d, dir = %d, res = %d, xfer_len = %d, is_setup = %d\n", ep_num, dir, res, xfer_len, is_setup);
-    }
+
     ep_xfer_info->res = (int32_t) res;
     //printintln(ep_xfer_info->res);
 
@@ -212,9 +210,6 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
     event.xfer_complete.result = res;
     event.xfer_complete.is_setup = is_setup;
     event.xfer_complete.len = xfer_len;
-
-    //rtos_osal_status_t status = rtos_osal_queue_send(&_ep0_proxy_event_queue, &event, 0);
-    //xassert(status == RTOS_OSAL_SUCCESS);
     
     // Seems like it might be okay to send completed xfer to tile 1 from here itself instead of posting an event in the queue
     // and doing it from rtos_ep0_proxy task.
@@ -222,7 +217,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
 
     if(res == XUD_RES_RST)
     {
-        triggerable_enable_trigger(ctx->c_ep0_proxy);
+        triggerable_enable_trigger(ctx->c_ep_proxy[0]);
         // The ctx->c_ep will be enabled once the reset is fully processed in handle_ep0_command()
     }
 }
@@ -230,25 +225,44 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
 DEFINE_RTOS_INTERRUPT_CALLBACK(ep0_proxy_isr, arg)
 {
     rtos_usb_t *ctx = arg;
-    triggerable_disable_trigger(ctx->c_ep0_proxy);
+    triggerable_disable_trigger(ctx->c_ep_proxy[0]);
 
     //printf("In ep0_proxy_isr\n");
-    uint8_t cmd = chan_in_byte(ctx->c_ep0_proxy);
-    //uint8_t ep_addr = chan_in_byte(ctx->c_ep0_proxy);
+    uint8_t cmd = chan_in_byte(ctx->c_ep_proxy[0]);
     
     ep0_proxy_event_t event;
     event.event_id = EP0_PROXY_CMD;
     event.ep0_command.cmd = cmd;
-    //rtos_osal_status_t status = rtos_osal_queue_send(&_ep0_proxy_event_queue, &event, 0);
-    //xassert(status == RTOS_OSAL_SUCCESS);
 
     // Seems like it's okay to handle the ep0 command here itself. We can trust tile1 ep0
     // to not issue blocking commands so this should be okay. Obviously, not tested extensively, and
     // will probably break when we add HID :(:(
-    handle_ep0_command(ctx, event.ep0_command.cmd);
+    handle_ep0_command(ctx, ctx->c_ep_proxy[0], event.ep0_command.cmd);
     
     // Enable interrupts
-    triggerable_enable_trigger(ctx->c_ep0_proxy);
+    triggerable_enable_trigger(ctx->c_ep_proxy[0]);
+
+}
+
+DEFINE_RTOS_INTERRUPT_CALLBACK(ep_hid_proxy_isr, arg)
+{
+    rtos_usb_t *ctx = arg;
+    triggerable_disable_trigger(ctx->c_ep_proxy[2]);
+
+    //printf("In ep0_proxy_isr\n");
+    uint8_t cmd = chan_in_byte(ctx->c_ep_proxy[2]);
+    
+    ep0_proxy_event_t event;
+    event.event_id = EP0_PROXY_CMD;
+    event.ep0_command.cmd = cmd;
+
+    // Seems like it's okay to handle the ep0 command here itself. We can trust tile1 ep0
+    // to not issue blocking commands so this should be okay. Obviously, not tested extensively, and
+    // will probably break when we add HID :(:(
+    handle_ep0_command(ctx, ctx->c_ep_proxy[2], event.ep0_command.cmd);
+    
+    // Enable interrupts
+    triggerable_enable_trigger(ctx->c_ep_proxy[2]);
 
 }
 
@@ -270,10 +284,10 @@ void ep0_proxy_task(void *app_data)
     unsigned c_ep0_out_interrupt_core_id = 2;
     rtos_usb_t *ctx = (rtos_usb_t*)&usb_ctx;
 
-    noEpOut = chan_in_word(ctx->c_ep0_proxy);
-    chan_in_buf_byte(ctx->c_ep0_proxy, (uint8_t*)&epTypeTableOut[0], noEpOut*sizeof(XUD_EpType));
-    noEpIn = chan_in_word(ctx->c_ep0_proxy);
-    chan_in_buf_byte(ctx->c_ep0_proxy, (uint8_t*)&epTypeTableIn[0], noEpIn*sizeof(XUD_EpType));
+    noEpOut = chan_in_word(ctx->c_ep_proxy[0]);
+    chan_in_buf_byte(ctx->c_ep_proxy[0], (uint8_t*)&epTypeTableOut[0], noEpOut*sizeof(XUD_EpType));
+    noEpIn = chan_in_word(ctx->c_ep_proxy[0]);
+    chan_in_buf_byte(ctx->c_ep_proxy[0], (uint8_t*)&epTypeTableIn[0], noEpIn*sizeof(XUD_EpType));
 
     // Allocate channels for endpoints EP1 and above
     for (int i = 1; i < noEpOut; i++)
@@ -319,7 +333,8 @@ void ep0_proxy_task(void *app_data)
     }
 
 
-    triggerable_setup_interrupt_callback(ctx->c_ep0_proxy, ctx, RTOS_INTERRUPT_CALLBACK(ep0_proxy_isr));
+    triggerable_setup_interrupt_callback(ctx->c_ep_proxy[0], ctx, RTOS_INTERRUPT_CALLBACK(ep0_proxy_isr));
+    triggerable_setup_interrupt_callback(ctx->c_ep_proxy[2], ctx, RTOS_INTERRUPT_CALLBACK(ep_hid_proxy_isr));
     
     /* Restore the core exclusion map for the calling thread */
     rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
@@ -344,44 +359,14 @@ void ep0_proxy_task(void *app_data)
             triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_IN_EP]);
         }
     }
+    triggerable_enable_trigger(ctx->c_ep_proxy[0]);
+    triggerable_enable_trigger(ctx->c_ep_proxy[2]);
 
-    //printf("EP0 endpoints initialized\n");
-
-
-
-    // Enable ISR
-    //printf("In ep0_proxy_task(), 0x%x, 0x%x\n", epTypeTableOut[0], epTypeTableIn[0]);
-
-    // For now, going with the design on fully handling the request in the ISR itself, so this
-    // will forever remain blocked.
     ep0_proxy_event_t event;
     while(1)
     {   
         rtos_osal_queue_receive(&_ep0_proxy_event_queue, &event, RTOS_OSAL_WAIT_FOREVER);
-        // Send this to EP0 and wait for commands from EP0
-        if(event.event_id == EP0_TRANSFER_COMPLETE)
-        {
-            handle_usb_transfer_complete(ctx, &event);
-
-            // TODO If an out data xfer is  completed the data needs to be sent to EP0. This is currently not handled.
-
-            //rtos_printf("Enable c_ep0_proxy ISR on tile 0 on chanend %ld\n", ctx->c_ep0_proxy);
-            triggerable_enable_trigger(ctx->c_ep0_proxy); // Enable proxy ISR and wait for offtile EP0 to communicate with us
-
-            if(event.xfer_complete.result == XUD_RES_OKAY)
-            {
-                // If everything was okay, we might not hear from ep0 at all, so enable the EP interrupts
-                triggerable_enable_trigger(ctx->c_ep[0][RTOS_USB_OUT_EP]);
-                triggerable_enable_trigger(ctx->c_ep[0][RTOS_USB_IN_EP]);
-
-            }
-        }
-        else if(event.event_id == EP0_PROXY_CMD)
-        {
-            handle_ep0_command(ctx, event.ep0_command.cmd);
-        }
     }
-
 
     return;
 }

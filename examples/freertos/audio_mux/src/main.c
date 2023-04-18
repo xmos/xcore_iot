@@ -223,16 +223,25 @@ static void send_hid_report(uint8_t report_id)
     //printf("tud_hid_ready FALSE!!\n");
     return;
   }
-  return;
-  printf("\n\n In send_hid_report now!!\n\n");
+  //printf("\n\n In send_hid_report now!!\n\n");
 
   //printf("In send_hid_report()\n");
-
+  static int state = 0;
   switch(report_id)
   {
     case REPORT_ID_MOUSE:
     {
-      int8_t const delta = 5;
+      int8_t delta;
+      if(!state)
+      {
+        delta = 5;
+        state = 1;
+      }
+      else
+      {
+        delta = -5;
+        state = 0;
+      }
 
       // no button, right + down, no scroll, no pan
       tud_hid_mouse_report(REPORT_ID_MOUSE, 0x00, delta, delta, 0, 0);
@@ -247,7 +256,7 @@ static void send_hid_report(uint8_t report_id)
 void hid_task(void)
 {
       // Poll every 10ms
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(10));
 
     // Remote wakeup
     if ( tud_suspended())
@@ -452,6 +461,11 @@ void tile_common_init_tile1(chanend_t c)
     chan_out_word(c, c_ep0_proxy);
     chanend_set_dest(c_ep0_proxy, chan_in_word(c));
 
+    chanend_t c_ep_hid_proxy;
+    c_ep_hid_proxy = chanend_alloc();
+    chan_out_word(c, c_ep_hid_proxy);
+    chanend_set_dest(c_ep_hid_proxy, chan_in_word(c));
+
     chanend_t c_ep0_proxy_xfer_complete;
     c_ep0_proxy_xfer_complete = chanend_alloc();
     chan_out_word(c, c_ep0_proxy_xfer_complete);
@@ -470,7 +484,7 @@ void tile_common_init_tile1(chanend_t c)
     usb_audio_init(intertile_ctx, appconfUSB_AUDIO_TASK_PRIORITY);
 #endif
 #if appconfUSB_ENABLED
-    usb_manager_init(c_ep0_proxy, c_ep0_proxy_xfer_complete);
+    usb_manager_init(c_ep0_proxy, c_ep_hid_proxy, c_ep0_proxy_xfer_complete);
 #endif
     xTaskCreate((TaskFunction_t) startup_task,
                 "startup_task",
@@ -514,6 +528,12 @@ void tile_common_init_tile0(chanend_t c, chanend_t c_ep0_out, chanend_t c_ep0_in
     chanend_set_dest(c_ep0_proxy, chan_in_word(c));
     chan_out_word(c, c_ep0_proxy);
 
+    chanend_t c_ep_hid_proxy;
+    c_ep_hid_proxy = chanend_alloc();
+    chanend_set_dest(c_ep_hid_proxy, chan_in_word(c));
+    chan_out_word(c, c_ep_hid_proxy);
+    
+
     chanend_t c_ep0_proxy_xfer_complete;
     c_ep0_proxy_xfer_complete = chanend_alloc();
     chanend_set_dest(c_ep0_proxy_xfer_complete, chan_in_word(c));
@@ -526,7 +546,7 @@ void tile_common_init_tile0(chanend_t c, chanend_t c_ep0_out, chanend_t c_ep0_in
     xassert(ctrl_ret == CONTROL_SUCCESS);
 
 #if appconfUSB_ENABLED
-    ep0_proxy_init(c_ep0_out, c_ep0_in, c_ep0_proxy, c_ep0_proxy_xfer_complete);
+    ep0_proxy_init(c_ep0_out, c_ep0_in, c_ep0_proxy, c_ep_hid_proxy, c_ep0_proxy_xfer_complete);
 #endif
     
 

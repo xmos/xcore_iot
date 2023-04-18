@@ -34,7 +34,7 @@ enum {
 
 enum
 {
-  REPORT_ID_MOUSE=1,
+  REPORT_ID_MOUSE=0,
   REPORT_ID_COUNT
 };
 

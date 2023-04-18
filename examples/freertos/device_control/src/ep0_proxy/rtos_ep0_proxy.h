@@ -42,6 +42,7 @@ void ep0_proxy_init(
     chanend_t chan_ep0_out,
     chanend_t chan_ep0_in,
     chanend_t chan_ep0_out_proxy,
+    chanend_t chan_ep_hid_proxy,
     chanend_t c_ep0_proxy_xfer_complete);
 
 void ep0_proxy_task(void *app_data);
