@@ -73,7 +73,7 @@ static TaskHandle_t usb_audio_out_task_handle;
 // Invoked when device is mounted
 void tud_mount_cb(void)
 {
-    rtos_printf("USB mounted\n");
+    //rtos_printf("USB mounted\n");
 }
 
 // Invoked when device is unmounted

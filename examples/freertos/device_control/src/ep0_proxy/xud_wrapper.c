@@ -66,8 +66,8 @@ void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_Bus
     // TODO If noEpOut and noEpIn are greater than 1, the channels for other endpoints need to be allocated here.
     // The other endpoints will also need to be signalled, to call XUD_InitEp() now.
 
-    printf("In _XUD_Main(): noEpOut = %lu, noEpIn = %lu\n", noEpOut, noEpIn);
-    printf("In _XUD_Main(), 0x%x, 0x%x\n", epTypeTableOut[0], epTypeTableIn[0]);
+    //printf("In _XUD_Main(): noEpOut = %lu, noEpIn = %lu\n", noEpOut, noEpIn);
+    //printf("In _XUD_Main(), 0x%x, 0x%x\n", epTypeTableOut[0], epTypeTableIn[0]);
     hwtimer_realloc_xc_timer();
 
     XUD_Main(c_ep_out, noEpOut, c_ep_in, noEpIn, 0,

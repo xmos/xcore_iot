@@ -218,7 +218,13 @@ static void send_hid_report(uint8_t report_id)
 {
 #if HID_CONTROL
   // skip if hid is not ready yet
-  if ( !tud_hid_ready() ) return;
+  if ( !tud_hid_ready() )
+  {
+    //printf("tud_hid_ready FALSE!!\n");
+    return;
+  }
+  return;
+  printf("\n\n In send_hid_report now!!\n\n");
 
   //printf("In send_hid_report()\n");
 
@@ -381,6 +387,14 @@ void startup_task(void *arg)
 #if ON_TILE(EP0_TILE_NO)
     printf("Call usb_manager_start() on tile %d\n", THIS_XCORE_TILE);
     usb_manager_start(configMAX_PRIORITIES-1);
+
+    xTaskCreate((TaskFunction_t) hid_task_wrapper, // Task for handling the HID endpoint
+                    "hid_task",
+                    portTASK_STACK_DEPTH(hid_task_wrapper),
+                    NULL,
+                    appconfSTARTUP_TASK_PRIORITY,
+                    NULL);
+
     int dummy = 0;
     rtos_intertile_tx(intertile_ctx, appconfUSB_MANAGER_SYNC_PORT, &dummy, sizeof(dummy));
 #else
