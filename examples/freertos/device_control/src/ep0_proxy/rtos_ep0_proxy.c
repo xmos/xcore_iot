@@ -272,6 +272,22 @@ void ep0_proxy_task(void *app_data)
     noEpIn = chan_in_word(ctx->c_ep0_proxy);
     chan_in_buf_byte(ctx->c_ep0_proxy, (uint8_t*)&epTypeTableIn[0], noEpIn*sizeof(XUD_EpType));
 
+    // Allocate channels for endpoints EP1 and above
+    for (int i = 1; i < noEpOut; i++)
+    {
+        if(epTypeTableOut[i] != XUD_EPTYPE_DIS)
+        {
+            channel_ep_out[i] = chan_alloc();            
+        }
+    }
+    for (int i = 1; i < noEpIn; i++)
+    {
+        if(epTypeTableIn[i] != XUD_EPTYPE_DIS)
+        {
+            channel_ep_in[i] = chan_alloc();
+        }
+    }
+
     
     /* Ensure that all USB interrupts are enabled on the requested core */
     uint32_t core_exclude_map;

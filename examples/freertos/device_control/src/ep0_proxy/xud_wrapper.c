@@ -52,15 +52,13 @@ void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_Bus
     {
         if(epTypeTableOut[i] != XUD_EPTYPE_DIS)
         {
-            channel_ep_out[i] = chan_alloc();
             c_ep_out[i] = channel_ep_out[i].end_a;
         }
     }
     for (int i = 1; i < noEpIn; i++)
     {
         if(epTypeTableIn[i] != XUD_EPTYPE_DIS)
-        {
-            channel_ep_in[i] = chan_alloc();
+        {            
             c_ep_in[i] = channel_ep_in[i].end_a;
         }
     }
