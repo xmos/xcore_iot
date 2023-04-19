@@ -19,8 +19,7 @@ XCORE-IOT is designed to be used in conjunction with the xcore.ai Explorer board
 
 Build Type       |    Status     |
 -----------      | --------------|
-CI (Linux)       | ![CI](https://github.com/xmos/xcore_iot/actions/workflows/ci_examples.yml/badge.svg?branch=develop&event=push) |
-CI (Linux)       | ![CI](https://github.com/xmos/xcore_iot/actions/workflows/ci_tests.yml/badge.svg?branch=develop&event=push) |
+CI (Linux)       | ![CI](https://github.com/xmos/xcore_iot/actions/workflows/ci.yml/badge.svg?branch=develop&event=push) |
 Docs             | ![CI](https://github.com/xmos/xcore_iot/actions/workflows/docs.yml/badge.svg?branch=develop&event=push) |
 
 ## Cloning
