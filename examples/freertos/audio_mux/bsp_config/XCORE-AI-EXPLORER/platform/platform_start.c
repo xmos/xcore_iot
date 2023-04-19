@@ -53,7 +53,7 @@ static void audio_codec_start(void)
     int ret = 0;
 #if ON_TILE(I2C_TILE_NO)
     if (aic3204_init() != 0) {
-        rtos_printf("DAC initialization failed\n");
+        ////rtos_printf("DAC initialization failed\n");
     }
     rtos_intertile_tx(intertile_ctx, 0, &ret, sizeof(ret));
 #else

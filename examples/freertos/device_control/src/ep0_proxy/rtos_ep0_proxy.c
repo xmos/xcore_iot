@@ -56,7 +56,7 @@ static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
         res = xud_data_get_check(ctx->c_ep[ep_num][dir], len, is_setup);
 
         if (*len > ctx->ep_xfer_info[ep_num][dir].len) {
-            rtos_printf("Length of %d bytes transferred on ep %d direction %d. Should have been <= %d\n", *len, ep_num, dir, ctx->ep_xfer_info[ep_num][dir].len);
+            //rtos_printf("Length of %d bytes transferred on ep %d direction %d. Should have been <= %d\n", *len, ep_num, dir, ctx->ep_xfer_info[ep_num][dir].len);
         }
 
         xassert(*len <= ctx->ep_xfer_info[ep_num][dir].len);
@@ -66,16 +66,16 @@ static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
             if (*is_setup) {
                 res = xud_setup_data_get_finish(ctx->ep[ep_num][dir]);
                 if (res == XUD_RES_ERR) {
-                    rtos_printf("USB XFER ERROR from xud_setup_data_get_finish()!\n");
+                    //rtos_printf("USB XFER ERROR from xud_setup_data_get_finish()!\n");
                 }
             } else {
                 res = xud_data_get_finish(ctx->ep[ep_num][dir]);
                 if (res == XUD_RES_ERR) {
-                    rtos_printf("USB XFER ERROR from xud_data_get_finish()!\n");
+                    //rtos_printf("USB XFER ERROR from xud_data_get_finish()!\n");
                 }
             }
         } else if (res == XUD_RES_ERR) {
-            rtos_printf("USB XFER ERROR from xud_data_get_check()!\n");
+            //rtos_printf("USB XFER ERROR from xud_data_get_check()!\n");
         }
     }
 
@@ -86,7 +86,7 @@ static void prepare_setup(rtos_usb_t *ctx)
 {
     XUD_Result_t res;
 
-//  rtos_printf("preparing for setup packet\n");
+//  //rtos_printf("preparing for setup packet\n");
     waiting_for_setup = true;
     res = rtos_usb_endpoint_transfer_start(ctx, 0x00, (uint8_t *) &sbuffer[0], 120);
 
@@ -134,18 +134,37 @@ static void handle_ep_command(rtos_usb_t *ctx, chanend_t c_ep_proxy, uint8_t ep0
             chan_out_byte(c_ep_proxy, 0);
         }
         break;
+        case e_reset_ep_by_address:
+        {
+            //printf("In e_reset_ep_by_address\n");
+            uint8_t ep_addr = chan_in_byte(c_ep_proxy);
+            XUD_ResetEpStateByAddr(ep_addr);
+            chan_out_byte(c_ep_proxy, 163);
+        }
+        break;
         case e_usb_endpoint_transfer_start:
         {
             //printf("In e_usb_endpoint_transfer_start\n");
             uint8_t ep_addr = chan_in_byte(c_ep_proxy);
             uint8_t len = chan_in_byte(c_ep_proxy);
+            XUD_Result_t res = XUD_RES_ERR;
             if((len > 0) && (endpoint_dir(ep_addr) == RTOS_USB_IN_EP))
             {
                 chan_in_buf_byte(c_ep_proxy, (uint8_t*)sbuffer, len);
             }
-            //printf("ep_addr %d, len = %d\n", ep_addr, len);
-            XUD_Result_t res = rtos_usb_endpoint_transfer_start(ctx, (uint32_t)ep_addr, (uint8_t*)sbuffer, len);
-            //printf("res = %d\n",res);
+            ////printf("ep_addr %d, len = %d\n", ep_addr, len);
+
+            // We should only be handling EP0 traffic here. 
+            // Fake a return if handling a non-EP0
+            if (endpoint_num(ep_addr) != 1)
+            {
+                res = rtos_usb_endpoint_transfer_start(ctx, (uint32_t)ep_addr, (uint8_t*)sbuffer, len);
+            }
+            else
+            {
+                res = XUD_RES_OKAY;
+            }
+            ////printf("res = %d\n",res);
             chan_out_byte(c_ep_proxy, res);
         }
         break;
@@ -155,14 +174,6 @@ static void handle_ep_command(rtos_usb_t *ctx, chanend_t c_ep_proxy, uint8_t ep0
             uint32_t dev_addr = chan_in_word(c_ep_proxy);
             XUD_Result_t res = rtos_usb_device_address_set(ctx, dev_addr);
             chan_out_byte(c_ep_proxy, res);
-        }
-        break;
-        case e_usb_endpoint_state_reset:
-        {
-            //printf("In e_usb_endpoint_state_reset\n");
-            uint32_t endpoint_addr = chan_in_word(c_ep_proxy);
-            XUD_ResetEpStateByAddr(endpoint_addr);
-            chan_out_byte(c_ep_proxy, XUD_RES_OKAY);
         }
         break;
     }
@@ -177,7 +188,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
     const int dir = ep_xfer_info->dir;
     size_t xfer_len;
     XUD_Result_t res;
-    //printf("In usb_ep0_isr, dir %d\n", dir);
+    ////printf("In usb_ep0_isr, dir %d\n", dir);
 
     int is_setup;
     res = ep_transfer_complete(ctx, ep_num, dir, &xfer_len, &is_setup);
@@ -194,6 +205,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
         triggerable_disable_trigger(ctx->c_ep[ep_num][RTOS_USB_IN_EP]);
     }
 
+    ////printf("usb_ep0_isr: dir = %d, res = %d, xfer_len = %d, is_setup = %d\n", dir, res, xfer_len, is_setup);
     ep_xfer_info->res = (int32_t) res;
     //printintln(ep_xfer_info->res);
 
@@ -241,6 +253,7 @@ static void ep_cfg(rtos_usb_t *ctx,
                    int direction)
 {
     static uint8_t ep_proxy_interrupt_setup[RTOS_USB_ENDPOINT_COUNT_MAX] = {0};
+    //printf("in my_ep_cfg(): ep_num = %d, direction = %d\n",ep_num, direction);
 
     ctx->ep_xfer_info[ep_num][direction].dir = direction;
     ctx->ep_xfer_info[ep_num][direction].ep_num = ep_num;
