@@ -180,14 +180,14 @@ void sof_cb(void)
 
             output += Q(P)(0.5);
             output >>= P;
-            rtos_printf("%u (%d, %d, %d) -> %d -> %d\n", delta_cycles,
-                        proportional, integral, derivative,
-                        output, numerator_int);
+            ////rtos_printf("%u (%d, %d, %d) -> %d -> %d\n", delta_cycles,
+//                        proportional, integral, derivative,
+//                        output, numerator_int);
 
             app_pll_set_numerator(numerator_int);
             xscope_int(PLL_FREQ, numerator_int);
         } else {
-            rtos_printf("no adjustment from PID\n");
+            ////rtos_printf("no adjustment from PID\n");
         }
 
     } else {
@@ -198,7 +198,7 @@ void sof_cb(void)
          */
         previous_error = 0;
         integral = 0;
-        rtos_printf("reset PID\n");
+        ////rtos_printf("reset PID\n");
     }
 }
 

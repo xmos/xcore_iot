@@ -73,13 +73,13 @@ static TaskHandle_t usb_audio_out_task_handle;
 // Invoked when device is mounted
 void tud_mount_cb(void)
 {
-    rtos_printf("USB mounted\n");
+    ////rtos_printf("USB mounted\n");
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void)
 {
-    rtos_printf("USB unmounted\n");
+    ////rtos_printf("USB unmounted\n");
 }
 
 // Invoked when usb bus is suspended
@@ -137,7 +137,7 @@ void usb_audio_send(rtos_intertile_t *intertile_ctx,
 
     if (mic_interface_open) {
         if (xStreamBufferSend(samples_to_host_stream_buf, usb_audio_in_frame, sizeof(usb_audio_in_frame), 0) != sizeof(usb_audio_in_frame)) {
-            rtos_printf("lost VFE output samples\n");
+            ////rtos_printf("lost VFE output samples\n");
         }
     }
 }
@@ -429,7 +429,7 @@ bool tud_audio_get_req_entity_cb(uint8_t rhport,
             ret.iChannelNames = 0;
 
             TU_LOG2("    Get terminal connector\r\n");
-            rtos_printf("Get terminal connector\r\n");
+            ////rtos_printf("Get terminal connector\r\n");
 
             return tud_audio_buffer_and_schedule_control_xfer(rhport, p_request, (void*) &ret, sizeof(ret));
 
@@ -611,12 +611,13 @@ bool tud_audio_rx_done_post_read_cb(uint8_t rhport,
       }
 
   } else {
-      rtos_printf("lost USB output samples\n");
+      ////rtos_printf("lost USB output samples\n");
   }
 
   return true;
 }
 
+#if !RUN_EP0_VIA_PROXY
 bool tud_audio_tx_done_pre_load_cb(uint8_t rhport,
                                    uint8_t itf,
                                    uint8_t ep_in,
@@ -647,7 +648,7 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport,
     if (xStreamBufferIsFull(samples_to_host_stream_buf)) {
         xStreamBufferReset(samples_to_host_stream_buf);
         ready = 0;
-        rtos_printf("oops buffer is full\n");
+        ////rtos_printf("oops buffer is full\n");
         return true;
     }
 
@@ -680,11 +681,12 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport,
             tud_audio_write(stream_buffer_audio_frames, sizeof(stream_buffer_audio_frames));
         }
     } else {
-        rtos_printf("Oops buffer is empty!\n");
+        ////rtos_printf("Oops buffer is empty!\n");
     }
 
     return true;
 }
+#endif // RUN_EP0_VIA_PROXY
 
 bool tud_audio_tx_done_post_load_cb(uint8_t rhport,
                                     uint16_t n_bytes_copied,
@@ -704,6 +706,10 @@ bool tud_audio_tx_done_post_load_cb(uint8_t rhport,
 bool tud_audio_set_itf_cb(uint8_t rhport,
                           tusb_control_request_t const *p_request)
 {
+    #if RUN_EP0_VIA_PROXY
+        return true;
+    #endif
+
     (void) rhport;
     uint8_t const itf = tu_u16_low(tu_le16toh(p_request->wIndex));
     uint8_t const alt = tu_u16_low(tu_le16toh(p_request->wValue));
@@ -725,7 +731,7 @@ bool tud_audio_set_itf_cb(uint8_t rhport,
     }
 #endif
 
-    rtos_printf("Set audio interface %d alt %d\n", itf, alt);
+    ////rtos_printf("Set audio interface %d alt %d\n", itf, alt);
 
     return true;
 }
@@ -748,7 +754,7 @@ bool tud_audio_set_itf_close_EP_cb(uint8_t rhport,
     }
 #endif
 
-    rtos_printf("Close audio interface %d alt %d\n", itf, alt);
+    ////rtos_printf("Close audio interface %d alt %d\n", itf, alt);
 
     return true;
 }

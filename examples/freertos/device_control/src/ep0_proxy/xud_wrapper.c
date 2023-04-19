@@ -21,11 +21,22 @@
 //#include "platform/platform_init.h"
 //#include "platform/driver_instances.h"
 
-#include <xud.h>
-#include <xud_device.h>
+#include "xud.h"
+#include "xud_device.h"
 
 #include <stdio.h>
 #include "rtos_usb.h"
+#include "usb_buffer.h"
+
+void XUD_Main(chanend_t c_epOut[],
+             int noEpOut,
+             chanend_t c_epIn[],
+             int noEpIn,
+             chanend_t c_sof,
+             XUD_EpType epTypeTableOut[],
+             XUD_EpType epTypeTableIn[],
+             XUD_BusSpeed_t desiredSpeed,
+             XUD_PwrConfig pwrConfig);
 
 extern volatile uint32_t noEpOut;
 extern volatile uint32_t noEpIn;
@@ -45,6 +56,7 @@ void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_Bus
     chanend_t c_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
     c_ep_out[0] = c_ep0_Out;
     c_ep_in[0] = c_ep0_In;
+    usb_buffer_args_t usb_args;
 
 
     if(noEpOut > 1) // TODO Hack it to support the audio_mux example with offtile EP0 for now
@@ -55,6 +67,9 @@ void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_Bus
         channel_ep1_in = chan_alloc();
         c_ep_out[1] = channel_ep1_out.end_a;
         c_ep_in[1] = channel_ep1_in.end_a;
+
+        usb_args.chan_ep_audio_out = channel_ep1_out.end_b;
+        usb_args.chan_ep_audio_in = channel_ep1_in.end_b;
     }
 
     
@@ -65,7 +80,17 @@ void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_Bus
     printf("In _XUD_Main(), 0x%x, 0x%x\n", epTypeTableOut[0], epTypeTableIn[0]);
     hwtimer_realloc_xc_timer();
 
-    XUD_Main(c_ep_out, noEpOut, c_ep_in, noEpIn, 0,
-        epTypeTableOut, epTypeTableIn, desiredSpeed, pwrConfig);
+     if(noEpOut > 1)
+     {
+         PAR_JOBS(
+             PJOB(XUD_Main, (c_ep_out, noEpOut, c_ep_in, noEpIn, 0, epTypeTableOut, epTypeTableIn, desiredSpeed, pwrConfig)),
+             PJOB(INTERRUPT_PERMITTED(usb_buffer), (&usb_args))
+         );
+     }
+     else
+     {
+        XUD_Main(c_ep_out, noEpOut, c_ep_in, noEpIn, 0, epTypeTableOut, epTypeTableIn, desiredSpeed, pwrConfig);
+     }
+
     hwtimer_free_xc_timer();
 }

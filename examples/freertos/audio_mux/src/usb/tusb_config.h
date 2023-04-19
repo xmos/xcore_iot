@@ -46,7 +46,7 @@
 
 #define CFG_TUSB_MEM_ALIGN         __attribute__ ((aligned(4)))
 
-#define CFG_TUSB_DEBUG_PRINTF     rtos_printf
+#define CFG_TUSB_DEBUG_PRINTF     //rtos_printf
 
 //--------------------------------------------------------------------
 // DEVICE CONFIGURATION
@@ -95,6 +95,6 @@ extern const uint16_t tud_audio_desc_lengths[CFG_TUD_AUDIO];
 #define CFG_TUD_AUDIO_ENABLE_EP_OUT                 1
 #define CFG_TUD_AUDIO_FUNC_1_EP_OUT_SZ              (AUDIO_FRAMES_PER_USB_FRAME * CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_RX * CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_RX)
 #define CFG_TUD_AUDIO_FUNC_1_EP_OUT_SZ_MAX          (CFG_TUD_AUDIO_FUNC_1_EP_OUT_SZ + 2)   // Maximum EP IN size for all AS alternate settings used. Plus 2 for CRC
-#define CFG_TUD_AUDIO_FUNC_1_EP_OUT_SW_BUF_SZ       CFG_TUD_AUDIO_FUNC_1_EP_OUT_SZ*3
+#define CFG_TUD_AUDIO_FUNC_1_EP_OUT_SW_BUF_SZ       (CFG_TUD_AUDIO_FUNC_1_EP_OUT_SZ*3)
 
 #endif /* _TUSB_CONFIG_H_ */
