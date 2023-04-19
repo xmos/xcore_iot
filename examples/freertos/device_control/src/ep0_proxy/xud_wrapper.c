@@ -28,22 +28,23 @@
 #include "rtos_usb.h"
 #include "usb_buffer.h"
 
-void XUD_Main(chanend_t c_epOut[],
-             int noEpOut,
-             chanend_t c_epIn[],
-             int noEpIn,
-             chanend_t c_sof,
-             XUD_EpType epTypeTableOut[],
-             XUD_EpType epTypeTableIn[],
-             XUD_BusSpeed_t desiredSpeed,
-             XUD_PwrConfig pwrConfig);
-
 extern volatile uint32_t noEpOut;
 extern volatile uint32_t noEpIn;
 extern volatile XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX];
 extern volatile XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX];
 extern volatile channel_t channel_ep_out[RTOS_USB_ENDPOINT_COUNT_MAX];
 extern volatile channel_t channel_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
+
+void void_XUD_Main(
+            chanend c_epOut[], int noEpOut,
+            chanend c_epIn[], int noEpIn,
+            NULLABLE_RESOURCE(chanend, c_sof),
+            XUD_EpType epTypeTableOut[], XUD_EpType epTypeTableIn[],
+            XUD_BusSpeed_t desiredSpeed,
+            XUD_PwrConfig pwrConfig)
+{
+    XUD_Main(c_epOut, noEpOut, c_epIn, noEpIn, c_sof, epTypeTableOut, epTypeTableIn, desiredSpeed, pwrConfig);
+}
 
 void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_BusSpeed_t desiredSpeed, XUD_PwrConfig pwrConfig)
 {
@@ -87,7 +88,7 @@ void _XUD_Main(chanend_t c_ep0_Out, chanend_t c_ep0_In, chanend_t c_sof, XUD_Bus
      if(noEpOut > 1)
      {
          PAR_JOBS(
-             PJOB(XUD_Main, (c_ep_out, noEpOut, c_ep_in, noEpIn, 0, epTypeTableOut, epTypeTableIn, desiredSpeed, pwrConfig)),
+             PJOB(void_XUD_Main, (c_ep_out, noEpOut, c_ep_in, noEpIn, 0, epTypeTableOut, epTypeTableIn, desiredSpeed, pwrConfig)),
              PJOB(INTERRUPT_PERMITTED(usb_buffer), (&usb_args))
          );
      }

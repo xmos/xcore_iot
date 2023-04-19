@@ -9,6 +9,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+XUD_Result_t XUD_SetBuffer_Finish(chanend c, XUD_ep e);
+
 volatile unsigned char sbuffer[CFG_TUD_ENDPOINT0_SIZE];
 static bool waiting_for_setup = false;
 extern rtos_usb_t usb_ctx;
@@ -50,10 +52,13 @@ static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
     xassert(ep_num < RTOS_USB_ENDPOINT_COUNT_MAX);
 
     if (dir == RTOS_USB_IN_EP) {
-        res = xud_data_set_finish(ctx->c_ep[ep_num][dir], ctx->ep[ep_num][dir]);
+        res = XUD_SetBuffer_Finish(ctx->c_ep[ep_num][dir], ctx->ep[ep_num][dir]);
         *is_setup = 0;
         *len = ctx->ep_xfer_info[ep_num][dir].len;
     } else {
+        /* NOTE: XUD_GetBuffer_Finish() is essentially, xud_data_get_check()
+         * combined with xud_data_get_finish(). There is no equivalent that
+         * handles the finalization of the setup packet. */
         res = xud_data_get_check(ctx->c_ep[ep_num][dir], len, is_setup);
 
         if (*len > ctx->ep_xfer_info[ep_num][dir].len) {
@@ -86,10 +91,11 @@ static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
 static void prepare_setup(rtos_usb_t *ctx)
 {
     XUD_Result_t res;
+    bool is_setup = true;
 
 //  //rtos_printf("preparing for setup packet\n");
     waiting_for_setup = true;
-    res = rtos_usb_endpoint_transfer_start(ctx, 0x00, (uint8_t *) &sbuffer[0], 120);
+    res = rtos_usb_endpoint_transfer_start(ctx, 0x00, (uint8_t *) &sbuffer[0], 120, is_setup);
 
     xassert(res == XUD_RES_OKAY);
 }
@@ -149,6 +155,7 @@ static void handle_ep_command(rtos_usb_t *ctx, chanend_t c_ep_proxy, uint8_t ep0
             uint8_t ep_addr = chan_in_byte(c_ep_proxy);
             uint8_t len = chan_in_byte(c_ep_proxy);
             XUD_Result_t res = XUD_RES_ERR;
+            bool is_setup = false;
             if((len > 0) && (endpoint_dir(ep_addr) == RTOS_USB_IN_EP))
             {
                 chan_in_buf_byte(c_ep_proxy, (uint8_t*)sbuffer, len);
@@ -159,7 +166,7 @@ static void handle_ep_command(rtos_usb_t *ctx, chanend_t c_ep_proxy, uint8_t ep0
             // Fake a return if handling a non-EP0
             if (endpoint_num(ep_addr) != 1)
             {
-                res = rtos_usb_endpoint_transfer_start(ctx, (uint32_t)ep_addr, (uint8_t*)sbuffer, len);
+                res = rtos_usb_endpoint_transfer_start(ctx, (uint32_t)ep_addr, (uint8_t*)sbuffer, len, is_setup);
             }
             else
             {

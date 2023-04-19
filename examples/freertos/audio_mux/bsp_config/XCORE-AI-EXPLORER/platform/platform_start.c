@@ -105,7 +105,7 @@ void platform_start(void)
     rtos_intertile_start(intertile_ctx);
 
     gpio_start();
-    flash_start();
+    //flash_start();
     i2c_master_start();
     audio_codec_start();
     mics_start();

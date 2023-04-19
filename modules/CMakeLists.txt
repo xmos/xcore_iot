@@ -10,5 +10,6 @@ add_subdirectory(io)
 add_subdirectory(rtos)
 
 ## Add additional modules
+add_subdirectory(qspi_fast_read)
 add_subdirectory(sample_rate_conversion)
 add_subdirectory(xscope_fileio)
