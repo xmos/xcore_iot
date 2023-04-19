@@ -34,6 +34,7 @@ void ep_proxy_init(
     ctx->c_ep[0][RTOS_USB_OUT_EP] = chan_ep0_out;
     ctx->c_ep[0][RTOS_USB_IN_EP] = chan_ep0_in;
     ctx->c_ep_proxy[0] = chan_ep0_proxy;
+    ctx->c_ep_proxy[1] = chan_ep0_proxy;
     ctx->c_ep_proxy[2] = chan_ep_hid_proxy; // TODO Descriptors aren't parsed at this point. Hardcoding, assuming ep2 is HID
     ctx->c_ep0_proxy_xfer_complete = c_ep0_proxy_xfer_complete;
 }
