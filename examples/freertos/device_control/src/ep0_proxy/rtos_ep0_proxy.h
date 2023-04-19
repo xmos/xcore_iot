@@ -33,7 +33,7 @@ typedef struct
     struct {
       uint8_t cmd;
       uint8_t proxy_dir;
-    }ep0_command;
+    }ep_command;
   };
 } ep0_proxy_event_t;
 

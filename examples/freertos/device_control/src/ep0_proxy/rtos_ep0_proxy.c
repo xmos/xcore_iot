@@ -31,10 +31,6 @@ void ep0_proxy_init(
     ctx->c_ep_proxy[2] = chan_ep_hid_proxy; // Descriptors aren't parsed at this point. Hardcoding, assuming ep2 is HID
     ctx->c_ep0_proxy_xfer_complete = c_ep0_proxy_xfer_complete;
     rtos_osal_queue_create(&_ep0_proxy_event_queue, "ep0_proxy_q", 4, sizeof(ep0_proxy_event_t));
-
-    /*chanend_t chan_notify = chanend_alloc();
-    chanend_set_dest(chan_notify, chan_notify);
-    ep0_proxy_ctx->chan_notify = chan_notify;*/
 }
 
 extern volatile uint32_t noEpOut;
@@ -115,7 +111,7 @@ static inline void handle_usb_transfer_complete(rtos_usb_t *ctx, ep0_proxy_event
     }
 }
 
-static void handle_ep0_command(rtos_usb_t *ctx, chanend_t c_ep_proxy, uint8_t ep0_cmd)
+static void handle_ep_command(rtos_usb_t *ctx, chanend_t c_ep_proxy, uint8_t ep0_cmd)
 {
     switch(ep0_cmd)
     {
@@ -222,47 +218,28 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
     }
 }
 
-DEFINE_RTOS_INTERRUPT_CALLBACK(ep0_proxy_isr, arg)
+DEFINE_RTOS_INTERRUPT_CALLBACK(ep_proxy_isr, arg)
 {
-    rtos_usb_t *ctx = arg;
-    triggerable_disable_trigger(ctx->c_ep_proxy[0]);
+    rtos_usb_ep_xfer_info_t *ep_xfer_info = arg;
+    rtos_usb_t *ctx = ep_xfer_info->usb_ctx;
+    const int ep_num = ep_xfer_info->ep_num; // So we know which c_ep_proxy channel is this request from
 
-    //printf("In ep0_proxy_isr\n");
-    uint8_t cmd = chan_in_byte(ctx->c_ep_proxy[0]);
+    triggerable_disable_trigger(ctx->c_ep_proxy[ep_num]);
+
+    //printf("In ep_proxy_isr\n");
+    uint8_t cmd = chan_in_byte(ctx->c_ep_proxy[ep_num]);
     
     ep0_proxy_event_t event;
     event.event_id = EP0_PROXY_CMD;
-    event.ep0_command.cmd = cmd;
+    event.ep_command.cmd = cmd;
 
     // Seems like it's okay to handle the ep0 command here itself. We can trust tile1 ep0
     // to not issue blocking commands so this should be okay. Obviously, not tested extensively, and
     // will probably break when we add HID :(:(
-    handle_ep0_command(ctx, ctx->c_ep_proxy[0], event.ep0_command.cmd);
+    handle_ep_command(ctx, ctx->c_ep_proxy[ep_num], event.ep_command.cmd);
     
     // Enable interrupts
-    triggerable_enable_trigger(ctx->c_ep_proxy[0]);
-
-}
-
-DEFINE_RTOS_INTERRUPT_CALLBACK(ep_hid_proxy_isr, arg)
-{
-    rtos_usb_t *ctx = arg;
-    triggerable_disable_trigger(ctx->c_ep_proxy[2]);
-
-    //printf("In ep0_proxy_isr\n");
-    uint8_t cmd = chan_in_byte(ctx->c_ep_proxy[2]);
-    
-    ep0_proxy_event_t event;
-    event.event_id = EP0_PROXY_CMD;
-    event.ep0_command.cmd = cmd;
-
-    // Seems like it's okay to handle the ep0 command here itself. We can trust tile1 ep0
-    // to not issue blocking commands so this should be okay. Obviously, not tested extensively, and
-    // will probably break when we add HID :(:(
-    handle_ep0_command(ctx, ctx->c_ep_proxy[2], event.ep0_command.cmd);
-    
-    // Enable interrupts
-    triggerable_enable_trigger(ctx->c_ep_proxy[2]);
+    triggerable_enable_trigger(ctx->c_ep_proxy[ep_num]);
 
 }
 
@@ -270,13 +247,21 @@ static void ep_cfg(rtos_usb_t *ctx,
                    int ep_num,
                    int direction)
 {
-    printf("in my_ep_cfg(): ep_num = %d, direction = %d\n",ep_num, direction);
+    static uint8_t ep_proxy_interrupt_setup[RTOS_USB_ENDPOINT_COUNT_MAX] = {0};
 
     ctx->ep_xfer_info[ep_num][direction].dir = direction;
     ctx->ep_xfer_info[ep_num][direction].ep_num = ep_num;
     ctx->ep_xfer_info[ep_num][direction].ep_address = (direction << 7) | ep_num;
     ctx->ep_xfer_info[ep_num][direction].usb_ctx = ctx;
     triggerable_setup_interrupt_callback(ctx->c_ep[ep_num][direction], &ctx->ep_xfer_info[ep_num][direction], RTOS_INTERRUPT_CALLBACK(usb_ep0_isr));
+
+    // One interrupt per endpoint needs to be setup for the proxy <-> endpoint communication
+    if(!ep_proxy_interrupt_setup[ep_num])
+    {
+        // Any direction would do, since there's one interrupt per endpoint. TODO Would this work if there are both HID output and input endpoints??
+        triggerable_setup_interrupt_callback(ctx->c_ep_proxy[ep_num],  &ctx->ep_xfer_info[ep_num][direction], RTOS_INTERRUPT_CALLBACK(ep_proxy_isr));
+        ep_proxy_interrupt_setup[ep_num] = 1;
+    }
 }
 
 void ep0_proxy_task(void *app_data)
@@ -289,7 +274,7 @@ void ep0_proxy_task(void *app_data)
     noEpIn = chan_in_word(ctx->c_ep_proxy[0]);
     chan_in_buf_byte(ctx->c_ep_proxy[0], (uint8_t*)&epTypeTableIn[0], noEpIn*sizeof(XUD_EpType));
 
-    // Allocate channels for endpoints EP1 and above
+    // Allocate channels for endpoints EP1 and above. EP0 channels are allocated in main since we use c_ep0_out for signalling to _XUD_Main for starting XUD
     for (int i = 1; i < noEpOut; i++)
     {
         if(epTypeTableOut[i] != XUD_EPTYPE_DIS)
@@ -307,34 +292,27 @@ void ep0_proxy_task(void *app_data)
         }
     }
 
-    
     /* Ensure that all USB interrupts are enabled on the requested core */
     uint32_t core_exclude_map;
     rtos_osal_thread_core_exclusion_get(NULL, &core_exclude_map);
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << c_ep0_out_interrupt_core_id));
 
-    ep_cfg(ctx, 0, RTOS_USB_OUT_EP);
-    ep_cfg(ctx, 0, RTOS_USB_IN_EP);
     // Attach ep_cfg ISR to HID endpoints as well
-    for(int i=1; i<noEpOut; i++)
+    for(int i=0; i<noEpOut; i++)
     {
-        if(epTypeTableOut[i] == XUD_EPTYPE_INT)
+        if((i==0) || (epTypeTableOut[i] == XUD_EPTYPE_INT))
         {
             ep_cfg(ctx, i, RTOS_USB_OUT_EP);
         }
     }
 
-    for(int i=1; i<noEpIn; i++)
+    for(int i=0; i<noEpIn; i++)
     {
-        if(epTypeTableIn[i] == XUD_EPTYPE_INT)
+        if((i==0) || (epTypeTableIn[i] == XUD_EPTYPE_INT))
         {
             ep_cfg(ctx, i, RTOS_USB_IN_EP);
         }
     }
-
-
-    triggerable_setup_interrupt_callback(ctx->c_ep_proxy[0], ctx, RTOS_INTERRUPT_CALLBACK(ep0_proxy_isr));
-    triggerable_setup_interrupt_callback(ctx->c_ep_proxy[2], ctx, RTOS_INTERRUPT_CALLBACK(ep_hid_proxy_isr));
     
     /* Restore the core exclusion map for the calling thread */
     rtos_osal_thread_core_exclusion_set(NULL, core_exclude_map);
@@ -346,7 +324,7 @@ void ep0_proxy_task(void *app_data)
     {
         if((i==0) || (epTypeTableOut[i] == XUD_EPTYPE_INT))
         {
-            ctx->ep[i][RTOS_USB_OUT_EP] = XUD_InitEp(ctx->c_ep[i][RTOS_USB_OUT_EP]);
+            ctx->ep[i][RTOS_USB_OUT_EP] = XUD_InitEp(ctx->c_ep[i][RTOS_USB_OUT_EP]); // Blocking! Call after signalling XUD_Main to start
             triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_OUT_EP]);
         }
     }
