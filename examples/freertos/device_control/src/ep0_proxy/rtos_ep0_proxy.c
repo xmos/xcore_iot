@@ -9,12 +9,18 @@
 #include <string.h>
 #include <stdbool.h>
 
-static rtos_osal_queue_t _ep0_proxy_event_queue;
 volatile unsigned char sbuffer[CFG_TUD_ENDPOINT0_SIZE];
 static bool waiting_for_setup = false;
 extern rtos_usb_t usb_ctx;
 
-void ep0_proxy_init(
+extern volatile uint32_t noEpOut;
+extern volatile uint32_t noEpIn;
+extern volatile XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX];
+extern volatile XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX];
+extern volatile channel_t channel_ep_out[RTOS_USB_ENDPOINT_COUNT_MAX];
+extern volatile channel_t channel_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
+
+void ep_proxy_init(
     chanend_t chan_ep0_out,
     chanend_t chan_ep0_in,
     chanend_t chan_ep0_proxy,
@@ -28,17 +34,9 @@ void ep0_proxy_init(
     ctx->c_ep[0][RTOS_USB_OUT_EP] = chan_ep0_out;
     ctx->c_ep[0][RTOS_USB_IN_EP] = chan_ep0_in;
     ctx->c_ep_proxy[0] = chan_ep0_proxy;
-    ctx->c_ep_proxy[2] = chan_ep_hid_proxy; // Descriptors aren't parsed at this point. Hardcoding, assuming ep2 is HID
+    ctx->c_ep_proxy[2] = chan_ep_hid_proxy; // TODO Descriptors aren't parsed at this point. Hardcoding, assuming ep2 is HID
     ctx->c_ep0_proxy_xfer_complete = c_ep0_proxy_xfer_complete;
-    rtos_osal_queue_create(&_ep0_proxy_event_queue, "ep0_proxy_q", 4, sizeof(ep0_proxy_event_t));
 }
-
-extern volatile uint32_t noEpOut;
-extern volatile uint32_t noEpIn;
-extern volatile XUD_EpType epTypeTableOut[RTOS_USB_ENDPOINT_COUNT_MAX];
-extern volatile XUD_EpType epTypeTableIn[RTOS_USB_ENDPOINT_COUNT_MAX];
-extern volatile channel_t channel_ep_out[RTOS_USB_ENDPOINT_COUNT_MAX];
-extern volatile channel_t channel_ep_in[RTOS_USB_ENDPOINT_COUNT_MAX];
 
 static XUD_Result_t ep_transfer_complete(rtos_usb_t *ctx,
                                          const int ep_num,
@@ -95,7 +93,7 @@ static void prepare_setup(rtos_usb_t *ctx)
     xassert(res == XUD_RES_OKAY);
 }
 
-static inline void handle_usb_transfer_complete(rtos_usb_t *ctx, ep0_proxy_event_t *event)
+static inline void handle_usb_transfer_complete(rtos_usb_t *ctx, ep_proxy_event_t *event)
 {
     chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.ep_num);
     chan_out_byte(ctx->c_ep0_proxy_xfer_complete, event->xfer_complete.dir);
@@ -199,8 +197,7 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(usb_ep0_isr, arg)
     ep_xfer_info->res = (int32_t) res;
     //printintln(ep_xfer_info->res);
 
-    ep0_proxy_event_t event;
-    event.event_id = EP0_TRANSFER_COMPLETE;
+    ep_proxy_event_t event;
     event.xfer_complete.ep_num = ep_num;
     event.xfer_complete.dir = dir;
     event.xfer_complete.result = res;
@@ -229,14 +226,10 @@ DEFINE_RTOS_INTERRUPT_CALLBACK(ep_proxy_isr, arg)
     //printf("In ep_proxy_isr\n");
     uint8_t cmd = chan_in_byte(ctx->c_ep_proxy[ep_num]);
     
-    ep0_proxy_event_t event;
-    event.event_id = EP0_PROXY_CMD;
-    event.ep_command.cmd = cmd;
-
     // Seems like it's okay to handle the ep0 command here itself. We can trust tile1 ep0
     // to not issue blocking commands so this should be okay. Obviously, not tested extensively, and
     // will probably break when we add HID :(:(
-    handle_ep_command(ctx, ctx->c_ep_proxy[ep_num], event.ep_command.cmd);
+    handle_ep_command(ctx, ctx->c_ep_proxy[ep_num], cmd);
     
     // Enable interrupts
     triggerable_enable_trigger(ctx->c_ep_proxy[ep_num]);
@@ -264,7 +257,7 @@ static void ep_cfg(rtos_usb_t *ctx,
     }
 }
 
-void ep0_proxy_task(void *app_data)
+void ep_proxy_task(void *app_data)
 {
     unsigned c_ep0_out_interrupt_core_id = 2;
     rtos_usb_t *ctx = (rtos_usb_t*)&usb_ctx;
@@ -335,25 +328,23 @@ void ep0_proxy_task(void *app_data)
         {
             ctx->ep[i][RTOS_USB_IN_EP] = XUD_InitEp(ctx->c_ep[i][RTOS_USB_IN_EP]);
             triggerable_enable_trigger(ctx->c_ep[i][RTOS_USB_IN_EP]);
+            triggerable_enable_trigger(ctx->c_ep_proxy[i]);
         }
     }
-    triggerable_enable_trigger(ctx->c_ep_proxy[0]);
-    triggerable_enable_trigger(ctx->c_ep_proxy[2]);
 
-    ep0_proxy_event_t event;
     while(1)
-    {   
-        rtos_osal_queue_receive(&_ep0_proxy_event_queue, &event, RTOS_OSAL_WAIT_FOREVER);
+    {
+        vTaskDelay(pdMS_TO_TICKS(100));        
     }
 
     return;
 }
 
-void ep0_proxy_start(unsigned priority)
+void ep_proxy_start(unsigned priority)
 {
-    xTaskCreate((TaskFunction_t) ep0_proxy_task,
-        "ep0_proxy_task",
-        RTOS_THREAD_STACK_SIZE(ep0_proxy_task),
+    xTaskCreate((TaskFunction_t) ep_proxy_task,
+        "ep_proxy_task",
+        RTOS_THREAD_STACK_SIZE(ep_proxy_task),
         NULL,
         priority,
         NULL);

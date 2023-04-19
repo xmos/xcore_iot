@@ -212,7 +212,7 @@ void tile_common_init_tile0(chanend_t c, chanend_t c_ep0_out, chanend_t c_ep0_in
     xassert(ctrl_ret == CONTROL_SUCCESS);
 
 #if appconfUSB_CTRL_ENABLED
-    ep0_proxy_init(c_ep0_out, c_ep0_in, c_ep0_proxy, c_ep0_proxy_xfer_complete);
+    ep_proxy_init(c_ep0_out, c_ep0_in, c_ep0_proxy, c_ep0_proxy_xfer_complete);
 #endif
     
 

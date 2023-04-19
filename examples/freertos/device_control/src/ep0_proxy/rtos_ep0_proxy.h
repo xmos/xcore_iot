@@ -7,12 +7,6 @@
 #include "xud_device.h"
 #include "rtos_usb.h"
 
-typedef enum
-{
-    EP0_TRANSFER_COMPLETE = 8,
-    EP0_PROXY_CMD
-}e_ep0_proxy_event_t;
-
 typedef struct
 {
   uint8_t rhport;
@@ -35,18 +29,18 @@ typedef struct
       uint8_t proxy_dir;
     }ep_command;
   };
-} ep0_proxy_event_t;
+} ep_proxy_event_t;
 
 
-void ep0_proxy_init(
+void ep_proxy_init(
     chanend_t chan_ep0_out,
     chanend_t chan_ep0_in,
     chanend_t chan_ep0_out_proxy,
     chanend_t chan_ep_hid_proxy,
     chanend_t c_ep0_proxy_xfer_complete);
 
-void ep0_proxy_task(void *app_data);
+void ep_proxy_task(void *app_data);
 
-void ep0_proxy_start(unsigned priority);
+void ep_proxy_start(unsigned priority);
 
 #endif

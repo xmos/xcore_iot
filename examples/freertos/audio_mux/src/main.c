@@ -407,9 +407,9 @@ void startup_task(void *arg)
     int dummy = 0;
     rtos_intertile_tx(intertile_ctx, appconfUSB_MANAGER_SYNC_PORT, &dummy, sizeof(dummy));
 #else
-    printf("Call ep0_proxy_start on tile %d\n", THIS_XCORE_TILE);
+    printf("Call ep_proxy_start on tile %d\n", THIS_XCORE_TILE);
     
-    ep0_proxy_start(configMAX_PRIORITIES-1);
+    ep_proxy_start(configMAX_PRIORITIES-1);
 
     int ret = 0;
     rtos_intertile_rx_len(intertile_ctx, appconfUSB_MANAGER_SYNC_PORT, RTOS_OSAL_WAIT_FOREVER);
@@ -546,7 +546,7 @@ void tile_common_init_tile0(chanend_t c, chanend_t c_ep0_out, chanend_t c_ep0_in
     xassert(ctrl_ret == CONTROL_SUCCESS);
 
 #if appconfUSB_ENABLED
-    ep0_proxy_init(c_ep0_out, c_ep0_in, c_ep0_proxy, c_ep_hid_proxy, c_ep0_proxy_xfer_complete);
+    ep_proxy_init(c_ep0_out, c_ep0_in, c_ep0_proxy, c_ep_hid_proxy, c_ep0_proxy_xfer_complete);
 #endif
     
 
