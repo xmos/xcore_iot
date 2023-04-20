@@ -146,7 +146,7 @@ jobs:
           path: ./dist/*.xe
 
   build_rtos_tusb_demos:
-    name: Build RTOS TinyUSB demos
+    name: Build TinyUSB tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -160,4 +160,4 @@ jobs:
 
       - name: Build
         run: |
-          docker run --rm -u $(id -u):$(id -g) -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_rtos_usb_examples.sh
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_sdk -v ${{github.workspace}}:/xcore_sdk ${XCORE_BUILDER} bash -l tools/ci/build_rtos_usb_tests.sh
