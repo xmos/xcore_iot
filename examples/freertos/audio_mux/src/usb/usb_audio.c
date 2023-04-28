@@ -534,6 +534,7 @@ bool tud_audio_rx_done_pre_read_cb(uint8_t rhport,
     return true;
 }
 
+#if AUDIO_OUTPUT_ENABLED
 bool tud_audio_rx_done_post_read_cb(uint8_t rhport,
                                     uint16_t n_bytes_received,
                                     uint8_t func_id,
@@ -616,7 +617,9 @@ bool tud_audio_rx_done_post_read_cb(uint8_t rhport,
 
   return true;
 }
+#endif
 
+#if AUDIO_INPUT_ENABLED
 bool tud_audio_tx_done_pre_load_cb(uint8_t rhport,
                                    uint8_t itf,
                                    uint8_t ep_in,
@@ -685,6 +688,7 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport,
 
     return true;
 }
+#endif
 
 bool tud_audio_tx_done_post_load_cb(uint8_t rhport,
                                     uint16_t n_bytes_copied,
