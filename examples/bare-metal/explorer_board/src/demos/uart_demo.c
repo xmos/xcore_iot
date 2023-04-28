@@ -4,6 +4,7 @@
 /* System headers */
 #include <platform.h>
 #include <xs1.h>
+#include <stdbool.h>
 
 /* Platform headers */
 #include "soc.h"
@@ -14,6 +15,7 @@
 #include "app_conf.h"
 #include "app_demos.h"
 
+static bool logged_error = false;
 
 void uart_rx_demo(uart_rx_t* uart_rx_ctx)
 {
@@ -21,9 +23,10 @@ void uart_rx_demo(uart_rx_t* uart_rx_ctx)
 
     while(1) {
         uint8_t rx = uart_rx(uart_rx_ctx);
-        if(rx != expected){
+        if(rx != expected && !logged_error){
             debug_printf("UART data error, expected: %d got: %d\n", expected, rx);
-            debug_printf("Have you connected pins X1D36 and X1D39?\n");
+            debug_printf("Further UART errors will NOT be printed. Have you connected pins X1D36 and X1D39?\n\n");
+            logged_error = true;
         }
         expected++;
     }

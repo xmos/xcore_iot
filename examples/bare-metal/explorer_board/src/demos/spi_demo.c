@@ -16,6 +16,6 @@ void spi_demo(spi_master_device_t* device_ctx)
                         4);
     spi_master_end_transaction(device_ctx);
 
-    debug_printf("spi got 0x%x\n", out_buf);
+    debug_printf("SPI received: 0x%x\n", out_buf);
     while(1) {;}
 }
