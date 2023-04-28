@@ -7,6 +7,6 @@
 void flash_demo(void)
 {
 	uint32_t flash_size = fl_getFlashSize();
-    debug_printf("flash size: 0x%x\n", flash_size);
+    debug_printf("Flash size: 0x%x\n", flash_size);
     while(1) {;}
 }
