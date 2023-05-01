@@ -55,8 +55,12 @@ uint8_t clkValid;
 audio_control_range_2_n_t(1) volumeRng[CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX+1]; 			// Volume range state
 audio_control_range_4_n_t(1) sampleFreqRng; 						// Sample frequency range state
 
+#if AUDIO_INPUT_ENABLED
 static volatile bool mic_interface_open = false;
+#endif
+#if AUDIO_OUTPUT_ENABLED
 static volatile bool spkr_interface_open = false;
+#endif
 
 static StreamBufferHandle_t samples_to_host_stream_buf;
 static StreamBufferHandle_t samples_from_host_stream_buf;
@@ -135,11 +139,13 @@ void usb_audio_send(rtos_intertile_t *intertile_ctx,
         }
     }
 
+#if AUDIO_INPUT_ENABLED
     if (mic_interface_open) {
         if (xStreamBufferSend(samples_to_host_stream_buf, usb_audio_in_frame, sizeof(usb_audio_in_frame), 0) != sizeof(usb_audio_in_frame)) {
             rtos_printf("lost VFE output samples\n");
         }
     }
+#endif
 }
 
 void usb_audio_recv(rtos_intertile_t *intertile_ctx,
@@ -534,6 +540,7 @@ bool tud_audio_rx_done_pre_read_cb(uint8_t rhport,
     return true;
 }
 
+#if AUDIO_OUTPUT_ENABLED
 bool tud_audio_rx_done_post_read_cb(uint8_t rhport,
                                     uint16_t n_bytes_received,
                                     uint8_t func_id,
@@ -616,7 +623,9 @@ bool tud_audio_rx_done_post_read_cb(uint8_t rhport,
 
   return true;
 }
+#endif
 
+#if AUDIO_INPUT_ENABLED
 bool tud_audio_tx_done_pre_load_cb(uint8_t rhport,
                                    uint8_t itf,
                                    uint8_t ep_in,
@@ -685,6 +694,7 @@ bool tud_audio_tx_done_pre_load_cb(uint8_t rhport,
 
     return true;
 }
+#endif
 
 bool tud_audio_tx_done_post_load_cb(uint8_t rhport,
                                     uint16_t n_bytes_copied,

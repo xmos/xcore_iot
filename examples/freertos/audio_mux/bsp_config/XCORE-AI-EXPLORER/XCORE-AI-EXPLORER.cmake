@@ -1,7 +1,7 @@
 
 ## Create custom board targets for application
-add_library(sln_voice_example_audio_mux_board_support_xcore_ai_explorer INTERFACE)
-target_sources(sln_voice_example_audio_mux_board_support_xcore_ai_explorer
+add_library(xcore_iot_example_audio_mux_board_support_xcore_ai_explorer INTERFACE)
+target_sources(xcore_iot_example_audio_mux_board_support_xcore_ai_explorer
     INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/platform/dac_port.c
         ${CMAKE_CURRENT_LIST_DIR}/platform/app_pll_ctrl.c
@@ -9,11 +9,11 @@ target_sources(sln_voice_example_audio_mux_board_support_xcore_ai_explorer
         ${CMAKE_CURRENT_LIST_DIR}/platform/platform_init.c
         ${CMAKE_CURRENT_LIST_DIR}/platform/platform_start.c
 )
-target_include_directories(sln_voice_example_audio_mux_board_support_xcore_ai_explorer
+target_include_directories(xcore_iot_example_audio_mux_board_support_xcore_ai_explorer
     INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}
 )
-target_link_libraries(sln_voice_example_audio_mux_board_support_xcore_ai_explorer
+target_link_libraries(xcore_iot_example_audio_mux_board_support_xcore_ai_explorer
     INTERFACE
         core::general
         rtos::freertos
@@ -21,17 +21,17 @@ target_link_libraries(sln_voice_example_audio_mux_board_support_xcore_ai_explore
         rtos::drivers::audio
         rtos::drivers::usb
         rtos::freertos_usb
-        sln_voice::example::audio_mux::dac::aic3204
+        xcore_iot::example::audio_mux::dac::aic3204
 )
-target_compile_options(sln_voice_example_audio_mux_board_support_xcore_ai_explorer
+target_compile_options(xcore_iot_example_audio_mux_board_support_xcore_ai_explorer
     INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
 )
-target_link_options(sln_voice_example_audio_mux_board_support_xcore_ai_explorer
+target_link_options(xcore_iot_example_audio_mux_board_support_xcore_ai_explorer
     INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
 )
-target_compile_definitions(sln_voice_example_audio_mux_board_support_xcore_ai_explorer
+target_compile_definitions(xcore_iot_example_audio_mux_board_support_xcore_ai_explorer
     INTERFACE
         XCOREAI_EXPLORER=1
         PLATFORM_SUPPORTS_TILE_0=1
@@ -53,4 +53,4 @@ target_compile_definitions(sln_voice_example_audio_mux_board_support_xcore_ai_ex
 )
 
 ## Create an alias
-add_library(sln_voice::example::audio_mux::xcore_ai_explorer ALIAS sln_voice_example_audio_mux_board_support_xcore_ai_explorer)
+add_library(xcore_iot::example::audio_mux::xcore_ai_explorer ALIAS xcore_iot_example_audio_mux_board_support_xcore_ai_explorer)

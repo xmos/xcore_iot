@@ -38,7 +38,7 @@
 
 /* Output configuration */
 #ifndef appconfUSB_OUTPUT
-#define appconfUSB_OUTPUT           0
+#define appconfUSB_OUTPUT           1
 #endif
 
 #ifndef appconfI2S_OUTPUT
