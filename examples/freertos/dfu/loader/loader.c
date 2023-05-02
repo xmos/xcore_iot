@@ -26,8 +26,6 @@ enum interest
 
 void init(void)
 {
-    printf("loader init called\n");
-
     port_t p_btns = XS1_PORT_4D;
     port_enable(p_btns);
     btn_val = port_in(p_btns);
@@ -36,8 +34,6 @@ void init(void)
 
 int checkCandidateImageVersion(int imageVersion)
 {
-    printf("loader checkCandidateImageVersion called\n");
-
     /* Reject all images if btn A is pressed to force load factory image */
     if (BTN_A_IS_PRESSED)
     {
@@ -51,11 +47,9 @@ void recordCandidateImage(int imageVersion, unsigned imageAddress)
 {
     candidateImageVersion = imageVersion;
     candidateImageAddress = imageAddress;
-    printf("loader recordCandidateImage called\n");
 }
 
 unsigned reportSelectedImage(void)
 {
-    printf("loader reportSelectedImage called\n");
     return candidateImageAddress;
 }

@@ -95,9 +95,9 @@ foreach(VERSION ${VERSIONS})
 endforeach()
 
 add_custom_target(example_freertos_dfu_loader_flash
-    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_dfu_v1.xe --upgrade 1 example_freertos_dfu_v2 --loader example_freertos_dfu_v1_loader.o
+    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_dfu_v1.xe --upgrade 1 example_freertos_dfu_v2.xe --loader example_freertos_dfu_v1_loader.o
     DEPENDS
-        example_freertos_dfu_v1_loader
+        create_loader_object_example_freertos_dfu_v1
         example_freertos_dfu_v1
         example_freertos_dfu_v2
 )
