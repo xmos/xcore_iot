@@ -29,8 +29,11 @@ source ${XCORE_VOICE_ROOT}/tools/ci/helper_functions.sh
 DIST_DIR=${XCORE_VOICE_ROOT}/dist_pdfs
 mkdir -p ${DIST_DIR}
 
+# set doc_builder version
+DOC_BUILDER=ghcr.io/xmos/doc_builder:v3.0.0
+
 # setup configurations
-# row format is: "module_path  generate exclude_patterns generated_filename   final_filename"
+# row format is: "module_path  generate original_name exclude_patterns generated_filename   final_filename"
 standard_modules=(
     "modules/io/modules/mic_array   yes programming_guide.pdf   doc_excludes.txt   mic_array_programming_guide.pdf"
     "modules/io   yes programming_guide.pdf   exclude_patterns.inc   peripheral_io_programming_guide.pdf"
@@ -58,14 +61,12 @@ for ((i = 0; i < ${#standard_modules[@]}; i += 1)); do
         echo '******************************************************'
 
         # build docs
-        (cd ${full_path}; docker run --rm -t -u "$(id -u):$(id -g)" -v $(pwd):/build -e PDF=1 -e REPO:/build -e DOXYGEN_INCLUDE=/build/doc/Doxyfile.inc -e EXCLUDE_PATTERNS=/build/doc/${expat_file} -e DOXYGEN_INPUT=ignore ghcr.io/xmos/doc_builder:v2.0.0)
+        (cd ${full_path}; docker run --rm -t -u "$(id -u):$(id -g)" -v $(pwd):/build -e PDF=1 -e REPO:/build -e DOXYGEN_INCLUDE=/build/doc/Doxyfile.inc -e EXCLUDE_PATTERNS=/build/doc/${expat_file} -e DOXYGEN_INPUT=ignore ${DOC_BUILDER})
     fi
 
     # copy to dist folder
     (cd ${full_path}/doc/_build/pdf; cp ${gen_name} ${DIST_DIR}/${fin_name})
 done
-
-# perform builds on non-standard modules
 
 echo '******************************************************'
 echo '* Building PDFs for lib_xcore_math'
@@ -73,9 +74,17 @@ echo '******************************************************'
 # lib_xcore_math is non standard because the doc_builder returns a non-zero return code but does not generate an error.  
 #  To workaround this, the call to docker is redirected so the return code can be ignored.  
 full_path="${XCORE_VOICE_ROOT}/modules/core/modules/xcore_math/lib_xcore_math"
-
 # build docs
-(cd ${full_path}; docker run --rm -t -u "$(id -u):$(id -g)" -v $(pwd):/build -e PDF=1 -e REPO:/build -e DOXYGEN_INCLUDE=/build/doc/Doxyfile.inc -e EXCLUDE_PATTERNS=/build/doc/doc_excludes.txt -e DOXYGEN_INPUT=ignore ghcr.io/xmos/doc_builder:v2.0.0 || echo "Container always falsely reports an error. Ignoring error.")
-
+(cd ${full_path}; docker run --rm -t -u "$(id -u):$(id -g)" -v $(pwd):/build -e PDF=1 -e REPO:/build -e DOXYGEN_INCLUDE=/build/doc/Doxyfile.inc -e EXCLUDE_PATTERNS=/build/doc/doc_excludes.txt -e DOXYGEN_INPUT=ignore ${DOC_BUILDER} || echo "Container always falsely reports an error. Ignoring error.")
 # copy to dist folder
 (cd ${full_path}/doc/_build/pdf; cp programming_guide.pdf ${DIST_DIR}/xcore_math_programming_guide.pdf)
+
+echo '******************************************************'
+echo '* Building PDFs for xmath_walkthrough'
+echo '******************************************************'
+# xmath_walkthrough is non standard because it is a stand-alone project that we redistribute with the xcore_iot project
+full_path="${XCORE_VOICE_ROOT}/examples/bare-metal/xmath_walkthrough"
+# build docs
+(cd ${full_path}; docker run --rm -t -u "$(id -u):$(id -g)" -v $(pwd):/build -e PDF=1 -e SKIP_LINK=1 -e REPO:/build ${DOC_BUILDER})
+# copy to dist folder
+(cd ${full_path}/doc/_build/pdf; cp tutorial.pdf ${DIST_DIR}/xmath_walkthrough_tutorial.pdf)

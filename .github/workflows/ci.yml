@@ -155,14 +155,24 @@ jobs:
       # https://github.com/actions/upload-artifact
       # Also some 3rd party sources contain symlinks thus the --symlinks option
       # specified below.
-      - name: Prepare artifact
+      - name: Prepare xcore_iot artifact
         run: |
           cd $TMP_SOURCES_DIR
           mkdir -p $RELEASE_SOURCES_DIR
           zip -r --symlinks $RELEASE_SOURCES_DIR/${{ needs.event_configuration.outputs.src_artifact_name }}.zip .
 
-      - name: Upload sources
+      - name: Upload xcore_iot sources
         uses: actions/upload-artifact@v3
         with:
           name: ${{ needs.event_configuration.outputs.src_artifact_name }}
+          path: ${{ env.RELEASE_SOURCES_DIR }}
+
+      - name: Prepare xmath_walkthrough artifact
+        run: |
+          run --rm -u $(id -u):$(id -g) -w /xmath_walkthrough -v ${{github.workspace}}:/xmath_walkthrough ${XCORE_BUILDER} bash -l tools/ci/build_xmath_walkthrough_zip.sh
+
+      - name: Upload xmath_walkthrough sources
+        uses: actions/upload-artifact@v3
+        with:
+          name: xmath_walkthrough.zip
           path: ${{ env.RELEASE_SOURCES_DIR }}
