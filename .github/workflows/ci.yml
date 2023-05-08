@@ -76,11 +76,11 @@ jobs:
             else
               version="test"
             fi
-            echo "SOURCES_ARTIFACT_NAME=XM-000TBD-SM_xcore_sdk_sources_$version" >> $GITHUB_OUTPUT
-            echo "DOCS_ARTIFACT_NAME=XM-000TBD-PC_xcore_sdk_docs_$version" >> $GITHUB_OUTPUT
+            echo "SOURCES_ARTIFACT_NAME=XM-000TBD-SM_xcore_iot_sources_$version" >> $GITHUB_OUTPUT
+            echo "DOCS_ARTIFACT_NAME=XM-000TBD-PC_xcore_iot_docs_$version" >> $GITHUB_OUTPUT
           else
-            echo "SOURCES_ARTIFACT_NAME=xcore_sdk_sources" >> $GITHUB_OUTPUT
-            echo "DOCS_ARTIFACT_NAME=xcore_sdk_docs" >> $GITHUB_OUTPUT
+            echo "SOURCES_ARTIFACT_NAME=xcore_iot_sources" >> $GITHUB_OUTPUT
+            echo "DOCS_ARTIFACT_NAME=xcore_iot_docs" >> $GITHUB_OUTPUT
           fi
 
   build_apps:
@@ -121,7 +121,7 @@ jobs:
       - name: Rename PDFs
         run: |
           cd ${{ env.RELEASE_PDF_DOCS_DIR }}
-          mv programming_guide.pdf xcore_sdk_programming_guide.pdf
+          mv programming_guide.pdf xcore_iot_programming_guide.pdf
 
       - name: Build other modules' PDFs
         run: |
