@@ -48,7 +48,8 @@ jobs:
     outputs:
       is_release: ${{ steps.run_type.outputs.IS_RELEASE }}
       examples_artifact_name: ${{ steps.artifact_names.outputs.EXAMPLES_ARTIFACT_NAME }}
-      src_artifact_name: ${{ steps.artifact_names.outputs.SOURCES_ARTIFACT_NAME }}
+      xcore_iot_src_artifact_name: ${{ steps.artifact_names.outputs.XCORE_IOT_SOURCES_ARTIFACT_NAME }}
+      xmath_walkthrough_src_artifact_name: ${{ steps.artifact_names.outputs.XMATH_WALKTHROUGH_SOURCES_ARTIFACT_NAME }}
       docs_artifact_name: ${{ steps.artifact_names.outputs.DOCS_ARTIFACT_NAME }}
     steps:
       - name: Determine workflow run type
@@ -76,11 +77,13 @@ jobs:
             else
               version="test"
             fi
-            echo "SOURCES_ARTIFACT_NAME=XM-000TBD-SM_xcore_sdk_sources_$version" >> $GITHUB_OUTPUT
-            echo "DOCS_ARTIFACT_NAME=XM-000TBD-PC_xcore_sdk_docs_$version" >> $GITHUB_OUTPUT
+            echo "XCORE_IOT_SOURCES_ARTIFACT_NAME=XM-000TBD-SM_xcore_iot_sources_$version" >> $GITHUB_OUTPUT
+            echo "DOCS_ARTIFACT_NAME=XM-000TBD-PC_xcore_iot_docs_$version" >> $GITHUB_OUTPUT
+            echo "XMATH_WALKTHROUGH_SOURCES_ARTIFACT_NAME=XM-000TBD-SM_xmath_walkthrough_sources_$version" >> $GITHUB_OUTPUT
           else
-            echo "SOURCES_ARTIFACT_NAME=xcore_sdk_sources" >> $GITHUB_OUTPUT
-            echo "DOCS_ARTIFACT_NAME=xcore_sdk_docs" >> $GITHUB_OUTPUT
+            echo "XCORE_IOT_SOURCES_ARTIFACT_NAME=xcore_iot_sources" >> $GITHUB_OUTPUT
+            echo "XMATH_WALKTHROUGH_SOURCES_ARTIFACT_NAME=xmath_walkthrough_sources" >> $GITHUB_OUTPUT
+            echo "DOCS_ARTIFACT_NAME=xcore_iot_docs" >> $GITHUB_OUTPUT
           fi
 
   build_apps:
@@ -121,7 +124,7 @@ jobs:
       - name: Rename PDFs
         run: |
           cd ${{ env.RELEASE_PDF_DOCS_DIR }}
-          mv programming_guide.pdf xcore_sdk_programming_guide.pdf
+          mv programming_guide.pdf xcore_iot_programming_guide.pdf
 
       - name: Build other modules' PDFs
         run: |
@@ -159,20 +162,20 @@ jobs:
         run: |
           cd $TMP_SOURCES_DIR
           mkdir -p $RELEASE_SOURCES_DIR
-          zip -r --symlinks $RELEASE_SOURCES_DIR/${{ needs.event_configuration.outputs.src_artifact_name }}.zip .
+          zip -r --symlinks $RELEASE_SOURCES_DIR/${{ needs.event_configuration.outputs.xcore_iot_src_artifact_name }}.zip .
 
       - name: Upload xcore_iot sources
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ needs.event_configuration.outputs.src_artifact_name }}
+          name: ${{ needs.event_configuration.outputs.xcore_iot_src_artifact_name }}
           path: ${{ env.RELEASE_SOURCES_DIR }}
 
       - name: Prepare xmath_walkthrough artifact
         run: |
-          run --rm -u $(id -u):$(id -g) -w /xmath_walkthrough -v ${{github.workspace}}:/xmath_walkthrough ${XCORE_BUILDER} bash -l tools/ci/build_xmath_walkthrough_zip.sh
+          docker run --rm -u $(id -u):$(id -g) -w /xmath_walkthrough -v ${{github.workspace}}:/xmath_walkthrough ${XCORE_BUILDER} bash -l tools/ci/build_xmath_walkthrough_zip.sh
 
       - name: Upload xmath_walkthrough sources
         uses: actions/upload-artifact@v3
         with:
-          name: xmath_walkthrough.zip
+          name: ${{ needs.event_configuration.outputs.xmath_walkthrough_src_artifact_name }}
           path: ${{ env.RELEASE_SOURCES_DIR }}
