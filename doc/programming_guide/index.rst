@@ -14,6 +14,11 @@ XCORE-IOT is a collection of C/C++ software libraries designed to simplify and a
 - Code Examples - Examples showing a variety of xcore features based on bare-metal and FreeRTOS programming.
 - Documentation - Tutorials, references and API guides.
 
+.. figure:: diagrams/xcore-iot_component_diagram.drawio.png
+   :align: center
+   :scale: 80 %
+   :alt: component diagram
+
 XCORE-IOT is designed to be used in conjunction with the xcore.ai Evaluation Kit (XK-EVK-XU316).  Further information about the xcore.ai Evaluation Kit and xcore.ai devices is available to on `www.xmos.ai <https://www.xmos.ai/>`__.
 
 .. toctree::

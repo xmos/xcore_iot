@@ -4,9 +4,9 @@
 Frequently Asked Questions
 #############################
 
-************
-Build Issues
-************
+*******
+General
+*******
 
 =================
 Submodule updates
@@ -17,6 +17,31 @@ XCORE-IOT uses submodules.  If you have cloned the repository and later perform 
 .. code-block:: console
 
     git submodule update --init --recursive
+
+==================
+Explorer Board 1v1
+==================
+
+The Explorer Board 2v0 is supported by default in all example applications.  However, it is possible to target the Explorer Board 1v1.
+In the example application CMakeLists file, change this line:
+
+.. code-block:: cmake
+
+    set(APP_LINK_LIBRARIES
+        rtos::bsp_config::xcore_ai_explorer
+    )
+
+to this:
+
+.. code-block:: cmake
+
+    set(APP_LINK_LIBRARIES
+        rtos::bsp_config::xcore_ai_explorer_1V1
+    )
+
+************
+Build Issues
+************
 
 ========================
 fatfs_mkimage: not found

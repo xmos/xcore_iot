@@ -53,7 +53,7 @@ Clone the XCORE-IOT repository with the following command:
 Step 2. Install Host Applications
 =================================
 
-XCORE-IOT includes utilities that run on the PC host.  Run the following command to build and install these utilities:
+XCORE-IOT includes utilities that run on the PC host.  Run the following command in the XTC Tools Command Prompt to build and install these utilities:
 
 Linux and MacOS
 ---------------
@@ -97,7 +97,7 @@ Some host applications require that the location of ``xscope_endpoint.dll`` be a
 Optional Step 3. Install Python and Python Requirements
 =======================================================
 
-XCORE-IOT does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, Python 3 is needed, we recommend and test with Python 3.8.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
+XCORE-IOT does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, Python 3 is needed, we recommend and test with Python 3.8 but newer versions should also work.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
 
 .. note:: 
     
