@@ -36,6 +36,7 @@ DOC_BUILDER=ghcr.io/xmos/doc_builder:v3.0.0
 # row format is: "module_path  generate original_name exclude_patterns generated_filename   final_filename"
 standard_modules=(
     "modules/io/modules/mic_array   yes programming_guide.pdf   doc_excludes.txt   mic_array_programming_guide.pdf"
+    "modules/qspi_fast_read   yes programming_guide.pdf   exclude_patterns.inc   lib_qspi_fast_read_programming_guide.pdf"
     "modules/io   yes programming_guide.pdf   exclude_patterns.inc   peripheral_io_programming_guide.pdf"
     "modules/rtos   yes programming_guide.pdf   exclude_patterns.inc   rtos_programming_guide.pdf"
     "modules/rtos   no build_system_guide.pdf   exclude_patterns.inc   build_system_guide.pdf"
