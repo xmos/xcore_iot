@@ -1,2 +1,0 @@
--e git+ssh://git@github.com/xmos/infr_scripts_py.git@develop#egg=infr_scripts_py
--e git+ssh://git@github.com/xmos/infr_apps.git@develop#egg=infr_apps
