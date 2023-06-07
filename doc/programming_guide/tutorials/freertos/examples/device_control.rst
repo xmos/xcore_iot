@@ -12,7 +12,7 @@ Deploying the firmware with Linux or macOS
 Building the firmware
 =====================
 
-Run the following commands in the xcore_sdk root folder to build the firmware:
+Run the following commands in the xcore_iot root folder to build the firmware:
 
 .. code-block:: console
 
@@ -45,7 +45,7 @@ Building the host application
 =============================
 
 With the firmware running in its own terminal, in a new window,
-run the following commands in the xcore_sdk root folder to build the host app:
+run the following commands in the xcore_iot root folder to build the host app:
 
 .. code-block:: console
 
@@ -57,7 +57,7 @@ run the following commands in the xcore_sdk root folder to build the host app:
 Running the host application
 ============================
 
-From the `xcore_sdk/build_host/examples/freertos/device_control/host` folder run:
+From the `xcore_iot/build_host/examples/freertos/device_control/host` folder run:
 
 .. code-block:: console
 
@@ -71,7 +71,7 @@ Deploying the firmware with Windows
 Building the firmware
 =====================
 
-Run the following commands in the xcore_sdk root folder to build the firmware:
+Run the following commands in the xcore_iot root folder to build the firmware:
 
 .. code-block:: console
 
@@ -104,7 +104,7 @@ Building the host application
 =============================
 
 With the firmware running in its own terminal, in a new window,
-run the following commands in the xcore_sdk root folder to build the host app:
+run the following commands in the xcore_iot root folder to build the host app:
 
 .. code-block:: console
 
@@ -116,7 +116,7 @@ run the following commands in the xcore_sdk root folder to build the host app:
 Running the host application
 ============================
 
-From the `xcore_sdk/build_host/examples/freertos/device_control/host` folder run:
+From the `xcore_iot/build_host/examples/freertos/device_control/host` folder run:
 
 .. code-block:: console
 

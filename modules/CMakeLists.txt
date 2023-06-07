@@ -4,6 +4,7 @@
 if(${CMAKE_SYSTEM_NAME} STREQUAL XCORE_XS3A)
     ## Need to guard so host targets will not be built
     add_subdirectory(core)
+    add_subdirectory(inferencing)
 endif()
 
 add_subdirectory(io)

@@ -1,4 +1,4 @@
-.. _xcore_sdk_copyright:
+.. _xcore_iot_copyright:
 
 
 .. include:: ../_templates/disclaimer.rst
@@ -9,7 +9,7 @@ Licenses
 XMOS
 ^^^^
 
-All original source code is licensed under the `XMOS License <https://github.com/xmos/xcore_sdk/blob/develop/LICENSE.rst>`_.
+All original source code is licensed under the `XMOS License <https://github.com/xmos/xcore_iot/blob/develop/LICENSE.rst>`_.
 
 Third-Party
 ^^^^^^^^^^^

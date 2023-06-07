@@ -23,7 +23,7 @@ Recipe options are:
     * example_freertos_usb_tusb_demo_usbtmc
     * example_freertos_usb_tusb_demo_webusb_serial
 
-Per example, to build the midi test demo, run the following commands in the xcore_sdk root folder:
+Per example, to build the midi test demo, run the following commands in the xcore_iot root folder:
 
 .. tab:: Linux and Mac
 

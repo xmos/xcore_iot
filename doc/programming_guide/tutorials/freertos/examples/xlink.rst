@@ -84,7 +84,7 @@ To setup the board for testing, the following connections must be made:
 Building the firmware
 =====================
 
-Run the following commands in the xcore_sdk root folder to build the firmware:
+Run the following commands in the xcore_iot root folder to build the firmware:
 
 On Linux and Mac:
 

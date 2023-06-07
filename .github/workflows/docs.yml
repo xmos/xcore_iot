@@ -26,7 +26,7 @@ on:
 
 env:
   DOC_BUILDER_IMAGE: 'ghcr.io/xmos/doc_builder:v3.0.0'
-  DOCS_ARTIFACT_NAME: "xcore_sdk_docs"
+  DOCS_ARTIFACT_NAME: "xcore_iot_docs"
 
 jobs:
   build_documentation:

@@ -19,3 +19,10 @@
 [submodule "lib_qspi_fast_read"]
 	path = modules/qspi_fast_read
 	url = git@github.com:xmos/lib_qspi_fast_read.git
+[submodule "modules/inferencing/lib_nn"]
+	path = modules/inferencing/lib_nn
+	url = git@github.com:xmos/lib_nn.git
+[submodule "modules/inferencing/lib_tflite_micro"]
+	path = modules/inferencing/lib_tflite_micro
+	url = git@github.com:xmos/lib_tflite_micro.git
+	ignore = dirty

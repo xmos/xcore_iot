@@ -6,7 +6,7 @@
 XCORE |reg| IOT
 ###############
 
-This is the user guide for the `XCORE-IOT Software <https://github.com/xmos/xcore_sdk>`_. 
+This is the user guide for the `XCORE-IOT Software <https://github.com/xmos/xcore_iot>`_. 
 
 .. toctree::
    :maxdepth: 1
@@ -23,7 +23,7 @@ This is the user guide for the `XCORE-IOT Software <https://github.com/xmos/xcor
 Licensing
 *********
 
-This Software is subject to the terms of the `XMOS Public Licence: Version 1 <https://github.com/xmos/sln_voice/blob/develop/LICENSE.rst>`_. Copyrights and licenses for third party components can be found in :ref:`xcore_sdk_copyright`.
+This Software is subject to the terms of the `XMOS Public Licence: Version 1 <https://github.com/xmos/sln_voice/blob/develop/LICENSE.rst>`_. Copyrights and licenses for third party components can be found in :ref:`xcore_iot_copyright`.
 
 .. only:: html
 
