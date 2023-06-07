@@ -116,3 +116,5 @@ add_custom_target(run_example_bare_metal_vww
     "Run application"
   VERBATIM
 )
+
+create_install_target(example_bare_metal_vww)
