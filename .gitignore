@@ -70,4 +70,4 @@ build/
 
 # ai_tools
 tools/ai/ai_tools
-*xcore_sdk_venv/*
+*xcore_iot_venv/*

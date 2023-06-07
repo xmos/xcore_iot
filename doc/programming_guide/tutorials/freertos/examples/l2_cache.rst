@@ -12,7 +12,7 @@ Deploying the firmware with Linux or macOS
 Building the firmware
 =====================
 
-Run the following commands in the xcore_sdk root folder to build the firmware:
+Run the following commands in the xcore_iot root folder to build the firmware:
 
 .. code-block:: console
 
@@ -48,7 +48,7 @@ Deploying the firmware with Windows
 Building the firmware
 =====================
 
-Run the following commands in the xcore_sdk root folder to build the firmware:
+Run the following commands in the xcore_iot root folder to build the firmware:
 
 .. code-block:: console
 

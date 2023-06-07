@@ -74,7 +74,7 @@ and may be moved if desired.
 Building the firmware
 =====================
 
-Run the following commands in the xcore_sdk root folder to build the firmware:
+Run the following commands in the xcore_iot root folder to build the firmware:
 
 .. code-block:: console
 
@@ -125,7 +125,7 @@ directory.
 Building the firmware
 =====================
 
-Run the following commands in the xcore_sdk root folder to build the firmware:
+Run the following commands in the xcore_iot root folder to build the firmware:
 
 .. code-block:: console
 

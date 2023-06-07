@@ -5,6 +5,7 @@ XCORE-IOT change log
 ------
   * Renamed to XCORE-IOT
   * Addition of FreeRTOS audiomux example application
+  * Addition of Bare-metal Visual Wake Word example application
   * Documentation updates
 
 0.12.0

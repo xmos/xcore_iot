@@ -57,8 +57,8 @@ target_sources(inferencing_lib_nn
 )
 target_include_directories(inferencing_lib_nn
     PUBLIC
-        lib_nn/lib_nn/api
-        lib_nn/lib_nn/..
+        ${CMAKE_CURRENT_LIST_DIR}/lib_nn/lib_nn/api
+        ${CMAKE_CURRENT_LIST_DIR}/lib_nn/
 )
 
 ## **********************************
@@ -132,7 +132,7 @@ target_sources(inferencing_tflite_micro
 
 target_include_directories(inferencing_tflite_micro
     PUBLIC
-        "${TFLIB_DIR}/../.."
+        "${TFLIB_DIR}/.."
         "${TFLIB_DIR}/api"
         "${TFLIB_DIR}/submodules/tflite-micro"
         "${TFLIB_DIR}/submodules/flatbuffers/include"
@@ -146,7 +146,7 @@ target_include_directories(inferencing_tflite_micro
 )
 
 target_link_libraries(inferencing_tflite_micro
-    PRIVATE
+    PUBLIC
         inferencing_lib_nn
 )
 
