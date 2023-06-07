@@ -174,7 +174,8 @@ jobs:
       - name: Prepare xmath_walkthrough artifact
         run: |
           cd $TMP_SOURCES_DIR
-          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{github.workspace}}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_xmath_walkthrough_zip.sh
+          ls -l
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v $TMP_SOURCES_DIR:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_xmath_walkthrough_zip.sh
 
       - name: Upload xmath_walkthrough sources
         uses: actions/upload-artifact@v3
