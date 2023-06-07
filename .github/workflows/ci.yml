@@ -130,6 +130,7 @@ jobs:
       - name: Build other modules' PDFs
         run: |
           bash tools/ci/build_pdfs.sh
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{ github.workspace }}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_xmath_walkthrough_pdf.sh
           cp dist_pdfs/* ${{ env.RELEASE_PDF_DOCS_DIR }}
 
       - name: Upload documentation
@@ -174,7 +175,6 @@ jobs:
       - name: Prepare xmath_walkthrough artifact
         run: |
           cd $TMP_SOURCES_DIR
-          ls -l
           docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v $TMP_SOURCES_DIR:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_xmath_walkthrough_zip.sh
 
       - name: Upload xmath_walkthrough sources
