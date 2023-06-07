@@ -1,6 +1,6 @@
-===
+###
 IoT
-===
+###
 
 This example demonstrates how to control GPIO using MQTT.
 

@@ -16,6 +16,7 @@ This is the user guide for the `XCORE-IOT Software <https://github.com/xmos/xcor
    modules/rtos/doc/build_system_guide/index
    modules/io/doc/programming_guide/index
    modules/io/modules/mic_array/doc/programming_guide/index.rst
+   modules/qspi_fast_read/doc/programming_guide/index.rst   
    modules/core/modules/xcore_math/lib_xcore_math/doc/programming_guide/index.rst   
 
 *********
