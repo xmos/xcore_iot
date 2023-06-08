@@ -31,12 +31,18 @@ pipeline {
     }        
     stages {
         stage('Checkout') {
+            when {
+                expression { params.NIGHTLY_TEST_ONLY == true }
+            }
             steps {
                 checkout scm
                 sh 'git submodule update --init --recursive --depth 1 --jobs \$(nproc)'
             }
         }
         stage('Build applications and firmware') {
+            when {
+                expression { params.NIGHTLY_TEST_ONLY == true }
+            }
             steps {
                 script {
                     uid = sh(returnStdout: true, script: 'id -u').trim()
@@ -54,6 +60,9 @@ pipeline {
             }
         }        
         stage('Create virtual environment') {
+            when {
+                expression { params.NIGHTLY_TEST_ONLY == true }
+            }
             steps {
                 // Create venv
                 sh "pyenv install -s $PYTHON_VERSION"
@@ -66,6 +75,9 @@ pipeline {
             }
         }
         stage('Cleanup xtagctl') {
+            when {
+                expression { params.NIGHTLY_TEST_ONLY == true }
+            }
             steps {
                 // Cleanup any xtagctl cruft from previous failed runs
                 withTools(params.TOOLS_VERSION) {
@@ -77,6 +89,9 @@ pipeline {
             }
         }
         stage('Run FreeRTOS examples') {
+            when {
+                expression { params.NIGHTLY_TEST_ONLY == true }
+            }
             steps {
                 withTools(params.TOOLS_VERSION) {
                     withVenv {
