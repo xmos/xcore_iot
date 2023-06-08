@@ -79,13 +79,3 @@ full_path="${XCORE_VOICE_ROOT}/modules/core/modules/xcore_math/lib_xcore_math"
 (cd ${full_path}; docker run --rm -t -u "$(id -u):$(id -g)" -v $(pwd):/build -e PDF=1 -e REPO:/build -e DOXYGEN_INCLUDE=/build/doc/Doxyfile.inc -e EXCLUDE_PATTERNS=/build/doc/doc_excludes.txt -e DOXYGEN_INPUT=ignore ${DOC_BUILDER} || echo "Container always falsely reports an error. Ignoring error.")
 # copy to dist folder
 (cd ${full_path}/doc/_build/pdf; cp programming_guide.pdf ${DIST_DIR}/xcore_math_programming_guide.pdf)
-
-echo '******************************************************'
-echo '* Building PDFs for xmath_walkthrough'
-echo '******************************************************'
-# xmath_walkthrough is non standard because it is a stand-alone project that we redistribute with the xcore_iot project
-full_path="${XCORE_VOICE_ROOT}/examples/bare-metal/xmath_walkthrough"
-# build docs
-(cd ${full_path}; docker run --rm -t -u "$(id -u):$(id -g)" -v $(pwd):/build -e PDF=1 -e SKIP_LINK=1 -e REPO:/build ${DOC_BUILDER})
-# copy to dist folder
-(cd ${full_path}/doc/_build/pdf; cp tutorial.pdf ${DIST_DIR}/xmath_walkthrough_tutorial.pdf)

@@ -40,6 +40,7 @@ env:
   RELEASE_SOURCES_DIR: ${{ github.workspace }}/release/src
   RELEASE_DOCS_DIR: ${{ github.workspace }}/release/docs
   RELEASE_PDF_DOCS_DIR: ${{ github.workspace }}/release/docs/pdf
+  XCORE_BUILDER: 'ghcr.io/xmos/xcore_builder:latest'
 
 jobs:
   event_configuration:
@@ -129,6 +130,9 @@ jobs:
       - name: Build other modules' PDFs
         run: |
           bash tools/ci/build_pdfs.sh
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{ github.workspace }}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/fetch_xmath_walkthrough.sh
+          bash tools/ci/build_xmath_walkthrough_pdf.sh
+          bash tools/ci/clean_xmath_walkthrough.sh
           cp dist_pdfs/* ${{ env.RELEASE_PDF_DOCS_DIR }}
 
       - name: Upload documentation
@@ -172,7 +176,10 @@ jobs:
 
       - name: Prepare xmath_walkthrough artifact
         run: |
-          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{github.workspace}}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_xmath_walkthrough_zip.sh
+          cd $TMP_SOURCES_DIR
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v $TMP_SOURCES_DIR:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/fetch_xmath_walkthrough.sh
+          bash tools/ci/build_xmath_walkthrough_zip.sh
+          bash tools/ci/clean_xmath_walkthrough.sh
 
       - name: Upload xmath_walkthrough sources
         uses: actions/upload-artifact@v3
