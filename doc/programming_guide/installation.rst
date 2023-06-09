@@ -97,7 +97,7 @@ Some host applications require that the location of ``xscope_endpoint.dll`` be a
 Optional Step 3. Install Python and Python Requirements
 =======================================================
 
-XCORE-IOT does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, Python 3 is needed, we recommend and test with Python 3.8 but newer versions should also work.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
+XCORE-IOT does not require installing Python, however, several example applications do utilize Python scripts.  To run these scripts, a 32-bit version of Python 3 is needed, we recommend and test with Python 3.8 but newer versions should also work.  Install `Python <https://www.python.org/downloads/>`__ and install the dependencies using the following commands:
 
 .. note:: 
     
