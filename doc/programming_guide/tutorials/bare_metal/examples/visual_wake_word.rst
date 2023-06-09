@@ -98,7 +98,7 @@ From the build folder, create the data partition and flash the device with the f
 
 .. code-block:: console
 
-    nmake example_bare_metal_vww
+    nmake flash_app_example_bare_metal_vww
 
 ====================
 Running the firmware
