@@ -1,10 +1,8 @@
 /*
- * Copyright (c) 2021 XMOS LIMITED. This Software is subject to the terms of the
- * XMOS Public License: Version 1
- *
  * The MIT License (MIT)
  *
  * Copyright (c) 2020 Reinhard Panhuber
+ * Copyright (c) 2023 XMOS LIMITED
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
