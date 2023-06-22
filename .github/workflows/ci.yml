@@ -80,7 +80,7 @@ jobs:
             fi
             echo "XCORE_IOT_SOURCES_ARTIFACT_NAME=XM-014925-SM_xcore_iot_sources_$version" >> $GITHUB_OUTPUT
             echo "DOCS_ARTIFACT_NAME=XM-014926-PC_xcore_iot_docs_$version" >> $GITHUB_OUTPUT
-            echo "XMATH_WALKTHROUGH_SOURCES_ARTIFACT_NAME=XM-000TBD-SM_xmath_walkthrough_sources_$version" >> $GITHUB_OUTPUT
+            echo "XMATH_WALKTHROUGH_SOURCES_ARTIFACT_NAME=XM-014935-SM_xmath_walkthrough_sources_$version" >> $GITHUB_OUTPUT
           else
             echo "XCORE_IOT_SOURCES_ARTIFACT_NAME=xcore_iot_sources" >> $GITHUB_OUTPUT
             echo "XMATH_WALKTHROUGH_SOURCES_ARTIFACT_NAME=xmath_walkthrough_sources" >> $GITHUB_OUTPUT
