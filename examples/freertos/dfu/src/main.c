@@ -37,7 +37,7 @@ void blinky_task(void *arg) {
 
     for (;;) {
         rtos_gpio_port_out(gpio_ctx_t0, gpio_port, led_val);
-        led_val ^= VERSION;
+        led_val ^= 1;
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }

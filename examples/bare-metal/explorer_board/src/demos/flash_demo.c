@@ -4,10 +4,9 @@
 /* App headers */
 #include "app_demos.h"
 
-void flash_demo(qspi_flash_ctx_t *qspi_flash_ctx)
+void flash_demo(void)
 {
-	uint32_t id_reg;
-	qspi_flash_read_id(qspi_flash_ctx, (uint8_t*)&id_reg, 4);
-    debug_printf("flash id: 0x%x\n", id_reg);
+	uint32_t flash_size = fl_getFlashSize();
+    debug_printf("Flash size: 0x%x\n", flash_size);
     while(1) {;}
 }

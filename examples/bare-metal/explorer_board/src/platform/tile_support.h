@@ -9,9 +9,11 @@
 #include "i2c.h"
 #include "i2s.h"
 #include "spi.h"
-#include "qspi_flash.h"
 #include "mic_array.h"
 #include "uart.h"
+
+#include <quadflash.h>
+#include <quadflashlib.h>
 
 typedef struct tile0_struct tile0_ctx_t;
 struct tile0_struct {
@@ -20,8 +22,6 @@ struct tile0_struct {
     spi_master_device_t spi_device_ctx;
     spi_master_t spi_ctx;
     i2c_master_t i2c_ctx;
-    qspi_flash_ctx_t qspi_flash_ctx;
-    qspi_io_ctx_t qspi_io_ctx;
 };
 
 typedef struct tile1_struct tile1_ctx_t;

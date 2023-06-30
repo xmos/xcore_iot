@@ -36,6 +36,7 @@ set(APP_COMPILE_DEFINITIONS
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=1
     XE_BASE_TILE=0
+    XUD_CORE_CLOCK=600
 )
 
 set(APP_LINK_OPTIONS
@@ -91,53 +92,80 @@ create_install_target(example_freertos_iot)
 # Filesystem support targets
 #**********************
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows)
-    message(STATUS "examples/freertos/example_freertos_iot is only available for Linux and Mac")
+    # Default to Windows PowerShell, if PowerShell Core does not exist.
+    find_program(POWERSHELL_EXECUTABLE NAMES pwsh powershell)
+    set(NW_PROFILE_SHELL ${POWERSHELL_EXECUTABLE})
+    set(NW_PROFILE_SCRIPT "wifi_profile.ps1")
+    set(MK_CERTS_SHELL ${POWERSHELL_EXECUTABLE})
+    set(MK_CERTS_SCRIPT "make_certs.ps1")
 else()
-    find_package( Python3 COMPONENTS Interpreter )
-
-    add_custom_command(
-        OUTPUT networks.dat
-        COMMAND ${Python3_EXECUTABLE} wifi_profile.py
-        WORKING_DIRECTORY
-            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
-        BYPRODUCTS
-            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/networks.dat
-        COMMENT "Create wifi profiles file"
-        USES_TERMINAL
-        VERBATIM
-    )
-
-    add_custom_command(
-        OUTPUT mqtt_broker_certs
-        COMMAND bash make_certs.sh
-        WORKING_DIRECTORY
-            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
-        BYPRODUCTS
-            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs
-        COMMENT "Create crypto credential files"
-        USES_TERMINAL
-        VERBATIM
-    )
-
-    add_custom_command(
-        OUTPUT example_freertos_iot_fat.fs
-        COMMAND bash -c "tmp_dir=$(mktemp -d) && fat_mnt_dir=$tmp_dir && mkdir -p $fat_mnt_dir && mkdir $fat_mnt_dir/firmware && mkdir $fat_mnt_dir/crypto && mkdir $fat_mnt_dir/wifi && cp mqtt_broker_certs/ca.crt $fat_mnt_dir/crypto/ca.pem && cp mqtt_broker_certs/client.crt $fat_mnt_dir/crypto/cert.pem && cp mqtt_broker_certs/client.key $fat_mnt_dir/crypto/key.pem && cp ${CMAKE_SOURCE_DIR}/modules/rtos/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec $fat_mnt_dir/firmware/wf200.sec && cp networks.dat $fat_mnt_dir/wifi/networks.dat && fatfs_mkimage --input=$tmp_dir --output=example_freertos_iot_fat.fs"
-        DEPENDS
-            example_freertos_iot
-            networks.dat
-            mqtt_broker_certs
-        COMMENT
-            "Create filesystem"
-        WORKING_DIRECTORY
-            ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
-        VERBATIM
-    )
+    find_package(Python3 COMPONENTS Interpreter)
+    set(NW_PROFILE_SHELL ${Python3_EXECUTABLE})
+    set(NW_PROFILE_SCRIPT "wifi_profile.py")
+    set(MK_CERTS_SHELL bash)
+    set(MK_CERTS_SCRIPT "make_certs.sh")
 endif()
 
-add_custom_target(flash_fs_example_freertos_iot
-    COMMAND xflash --quad-spi-clock 50MHz --factory example_freertos_iot.xe --boot-partition-size 0x100000 --data ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/example_freertos_iot_fat.fs
-    DEPENDS example_freertos_iot_fat.fs
-    COMMENT
-        "Flash filesystem"
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/networks.dat
+    COMMAND ${NW_PROFILE_SHELL} ${NW_PROFILE_SCRIPT}
+    WORKING_DIRECTORY
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+    COMMENT "Create wifi profiles file"
+    USES_TERMINAL
     VERBATIM
+)
+
+add_custom_command(
+    OUTPUT
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/ca.crt
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/ca.key
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/ca.srl
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/client.csr
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/client.crt
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/client.key
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/server.csr
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/server.crt
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/server.key
+    COMMAND ${MK_CERTS_SHELL} ${MK_CERTS_SCRIPT}
+    BYPRODUCTS
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs
+    WORKING_DIRECTORY
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+    COMMENT "Create crypto credential files"
+    USES_TERMINAL
+    VERBATIM
+)
+
+add_custom_target(example_freertos_iot_fat.fs ALL
+    COMMAND ${CMAKE_COMMAND} -E copy mqtt_broker_certs/ca.crt fatmktmp/crypto/ca.pem
+    COMMAND ${CMAKE_COMMAND} -E copy mqtt_broker_certs/client.crt fatmktmp/crypto/cert.pem
+    COMMAND ${CMAKE_COMMAND} -E copy mqtt_broker_certs/client.key fatmktmp/crypto/key.pem
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/modules/rtos/modules/drivers/wifi/sl_wf200/thirdparty/wfx-firmware/wfm_wf200_C0.sec fatmktmp/firmware/wf200.sec
+    COMMAND ${CMAKE_COMMAND} -E copy networks.dat fatmktmp/wifi/networks.dat
+    COMMAND fatfs_mkimage --input=fatmktmp --output=example_freertos_iot_fat.fs
+    BYPRODUCTS
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/example_freertos_iot_fat.fs
+    DEPENDS
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/networks.dat
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/ca.crt
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/client.crt
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/mqtt_broker_certs/client.key
+    COMMENT
+        "Create filesystem"
+    WORKING_DIRECTORY
+        ${CMAKE_CURRENT_LIST_DIR}/filesystem_support
+    VERBATIM
+)
+
+set_target_properties(example_freertos_iot_fat.fs PROPERTIES
+    ADDITIONAL_CLEAN_FILES ${CMAKE_CURRENT_LIST_DIR}/filesystem_support/fatmktmp
+)
+
+create_filesystem_target(example_freertos_iot)
+create_flash_app_target(
+    #[[ Target ]]                  example_freertos_iot
+    #[[ Boot Partition Size ]]     0x100000
+    #[[ Data Partition Contents ]] example_freertos_iot_fat.fs
+    #[[ Dependencies ]]            make_fs_example_freertos_iot
 )

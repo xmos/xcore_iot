@@ -2,6 +2,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)
+ * Copyright (c) 2023 XMOS LIMITED
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +27,8 @@
 #ifndef _TUSB_CONFIG_H_
 #define _TUSB_CONFIG_H_
 
+#include "rtos_printf.h"
+
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
 //--------------------------------------------------------------------
@@ -39,7 +42,11 @@
 
 #define CFG_TUSB_MEM_ALIGN         __attribute__ ((aligned(4)))
 
-#define CFG_TUSB_DEBUG_PRINTF     rtos_printf
+#ifndef CFG_TUSB_DEBUG_PRINTF
+#ifdef rtos_printf
+#define CFG_TUSB_DEBUG_PRINTF      rtos_printf
+#endif
+#endif
 
 //--------------------------------------------------------------------
 // DEVICE CONFIGURATION

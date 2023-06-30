@@ -1,21 +1,20 @@
 cmake_minimum_required(VERSION 3.20)
 
+# Compile for x86_64 on Mac as we can't support the M1 ARM architecture yet
+set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "")
+
 project(xscope2psf LANGUAGES C)
 set(TARGET_NAME xscope2psf)
 
 set(FATFS_HOST_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
-file(READ ${XCORE_SDK_ROOT}/settings.json JSON_STRING)
-# Get the "version" value from the JSON element
-string(JSON VERSION_VAL GET ${JSON_STRING} ${IDX} version)
-
 # Determine OS, set up output dirs
 if(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
+    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/bin")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
-    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/SDK/${VERSION_VAL}/bin")
+    set(XSCOPE2PSF_INSTALL_DIR "/opt/xmos/bin")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-    set(XSCOPE2PSF_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\SDK\\${VERSION_VAL}\\bin")
+    set(XSCOPE2PSF_INSTALL_DIR "$ENV{USERPROFILE}\\.xmos\\bin")
 endif()
 
 set(APP_SOURCES

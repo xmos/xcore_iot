@@ -24,6 +24,7 @@
 **/_build/
 **/build_*/
 !doc/tutorials/build_system/
+**/dist*/
 **/run_*.log
 **/_doxygen/*
 **/_templates/*
@@ -51,6 +52,7 @@
 build/
 
 # filesystem cruft
+**/fatmktmp
 **/fat.fs
 **/flash_bin_node0
 **/fw-*
@@ -68,4 +70,4 @@ build/
 
 # ai_tools
 tools/ai/ai_tools
-*xcore_sdk_venv/*
+*xcore_iot_venv/*

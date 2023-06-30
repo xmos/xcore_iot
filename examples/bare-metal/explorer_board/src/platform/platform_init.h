@@ -8,7 +8,7 @@
 #include <platform.h>
 #include <xcore/chanend.h>
 
-/* SDK headers */
+/* Platform headers */
 #include "soc.h"
 #include "xcore_utils.h"
 #include "mic_array.h"

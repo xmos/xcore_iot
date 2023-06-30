@@ -19,7 +19,7 @@ void main_tile0(chanend_t c0, chanend_t c1, chanend_t c2, chanend_t c3)
     PAR_JOBS (
         PJOB(spi_demo, (&tile0_ctx->spi_device_ctx)),
         PJOB(gpio_server, (tile0_ctx->c_from_gpio, tile0_ctx->c_to_gpio)),
-        PJOB(flash_demo, (&tile0_ctx->qspi_flash_ctx)),
+        PJOB(flash_demo, ()),
         PJOB(burn, ()),
         PJOB(burn, ()),
         PJOB(burn, ()),

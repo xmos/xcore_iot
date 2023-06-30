@@ -41,6 +41,7 @@ set(APP_COMPILE_DEFINITIONS
 )
 
 set(APP_LINK_OPTIONS
+    -lquadflash
     -report
     ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
     ${CMAKE_CURRENT_LIST_DIR}/src/config.xscope
@@ -49,12 +50,12 @@ set(APP_LINK_OPTIONS
 #**********************
 # Tile Targets
 #**********************
-add_executable(example_bare_metal_explorer_board EXCLUDE_FROM_ALL)
+add_executable(example_bare_metal_explorer_board)
 target_sources(example_bare_metal_explorer_board PUBLIC ${APP_SOURCES})
 target_include_directories(example_bare_metal_explorer_board PUBLIC ${APP_INCLUDES})
 target_compile_definitions(example_bare_metal_explorer_board PRIVATE ${APP_COMPILE_DEFINITIONS})
 target_compile_options(example_bare_metal_explorer_board PRIVATE ${APP_COMPILER_FLAGS})
-target_link_libraries(example_bare_metal_explorer_board PUBLIC core::general io::all core::multitile_support)
+target_link_libraries(example_bare_metal_explorer_board PUBLIC core::general io::all framework_core_multitile_support)
 target_link_options(example_bare_metal_explorer_board PRIVATE ${APP_LINK_OPTIONS})
 
 # MCLK_FREQ,  PDM_FREQ, MIC_COUNT,  SAMPLES_PER_FRAME

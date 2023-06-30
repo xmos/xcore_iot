@@ -40,8 +40,6 @@ static void i2c_send_word(uint8_t id, uint32_t word) {
 
 void xlink_report_task(void) {
     int full_rep_cnt = 0;
-    uint8_t debug_buf[5] = {0};
-    size_t n = 0;
 
     while(1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -63,10 +61,8 @@ void xlink_rx(void) {
     uint32_t last_time = 0;
     hwtimer_t tmr_rx = hwtimer_alloc();
     char rx = 'z';
-    uint32_t id = 0;
     int reg_val = 0;
     int direction = 0x0;
-
     unsigned x = 0;
 
     rtos_osal_thread_core_exclusion_set(NULL, ~(1 << appconfXLINK_RX_IO_CORE));

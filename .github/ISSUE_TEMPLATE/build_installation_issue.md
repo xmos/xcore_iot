@@ -1,6 +1,6 @@
 ---
 name: Build or install issue
-about: Create a report to help us improve the SDK
+about: Create a report to help us improve XCORE-IOT
 title: ''
 labels: type:build/install
 assignees: keithm-xmos
@@ -9,7 +9,7 @@ assignees: keithm-xmos
 
 **System information**
  - OS: [e.g. Mac, Linux, Windows]
- - SDK version tag or commit SHA
+ - Version tag or commit SHA
 
 **Describe the problem**
 

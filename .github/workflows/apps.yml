@@ -1,0 +1,163 @@
+# YAML schema for GitHub Actions:
+# https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
+#
+# Helpful YAML parser to clarify YAML syntax:
+# https://yaml-online-parser.appspot.com/
+#
+# This workflow uses actions that are not certified by GitHub. They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+#
+# This file contains the workflows that are run prior to merging a pull request.
+
+name: Build Applications 
+
+on:
+  # Allow manually triggering of the workflow.
+  workflow_dispatch:
+
+  # Allow workflow to be called from another.
+  workflow_call:
+    inputs:
+      is_release:
+        description: "Indicates whether this run is for a release or not."
+        type: string
+        required: true
+        default: "false"
+      examples_artifact_name:
+        description: 'The name to be given to the uploaded "example apps" artifact.'
+        type: string
+        required: true
+        default: ""
+
+env:
+  XCORE_BUILDER: 'ghcr.io/xmos/xcore_builder:latest'
+
+jobs:
+  build_host_apps:
+    name: Build host applications
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Pull Docker builder
+        run: |
+          docker pull ${XCORE_BUILDER}
+
+      - name: Build
+        run: |
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{github.workspace}}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_host_apps.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: host_apps
+          path: ./dist_host
+
+  build_rtos_core_examples:
+    name: Build RTOS core examples
+    runs-on: ubuntu-latest
+    needs: build_host_apps
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Pull Docker builder
+        run: |
+          docker pull ${XCORE_BUILDER}
+
+      - name: Download host build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: host_apps
+          path: ./dist_host
+
+      - name: Build
+        run: |
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{github.workspace}}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_rtos_core_examples.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: freertos_core_examples
+          path: |
+            ./dist/*.xe
+            ./dist/*.fs
+            ./dist/*.swmem
+
+  build_rtos_aiot_examples:
+    name: Build RTOS AIoT examples
+    runs-on: ubuntu-latest
+    needs: build_host_apps
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Pull Docker builder
+        run: |
+          docker pull ${XCORE_BUILDER}
+
+      - name: Download host build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: host_apps
+          path: ./dist_host
+
+      - name: Build
+        run: |
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{github.workspace}}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_rtos_aiot_examples.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: freertos_aiot_examples
+          path: |
+            ./dist/*.xe
+            ./dist/*.fs
+            ./dist/*.swmem
+
+  build_metal_examples:
+    name: Build bare-metal examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Pull Docker builder
+        run: |
+          docker pull ${XCORE_BUILDER}
+
+      - name: Build
+        run: |
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{github.workspace}}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_metal_examples.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: bare-metal_examples
+          path: ./dist/*.xe
+
+  build_rtos_tusb_demos:
+    name: Build TinyUSB tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Pull Docker builder
+        run: |
+          docker pull ${XCORE_BUILDER}
+
+      - name: Build
+        run: |
+          docker run --rm -u $(id -u):$(id -g) -w /xcore_iot -v ${{github.workspace}}:/xcore_iot ${XCORE_BUILDER} bash -l tools/ci/build_rtos_usb_tests.sh

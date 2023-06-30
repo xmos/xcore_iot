@@ -2,13 +2,14 @@
 // This Software is subject to the terms of the XMOS Public Licence: Version 1.
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include "xscope_endpoint.h"
 
-#define VERSION "1.0.1"
+#define VERSION "1.0.2"
 
 // Abstraction for sleep portability
 #if defined(__GNUC__) || defined(__MINGW32__)
@@ -173,7 +174,7 @@ static void print_help(char *arg0)
            "                                for --stream. Default = 1000.\n");
     printf("    -i, --in-file <IN_FILE>     The VCD file to process. In stream mode, the\n"
            "                                application will wait for such a file to exist.\n");
-    printf("    -I, --in-port <HOST>:<PORT> The host and port (separated by ':') on the which\n"
+    printf("    -I, --in-port <HOST>:<PORT> The host and port (separated by ':') on which\n"
            "                                xgdb's --xscope-port is serving on.\n"
            "                                Note: --stream is implied when using this mode.\n");
     printf("    -o, --out-file <OUT_FILE>   The PSF file to generate.\n");
@@ -292,6 +293,7 @@ static void print_psf_event_table_entry(unsigned char trace_bytes[],
 }
 #endif /* (PRINT_PSF_EVENTS == 1) */
 
+#if (PRINT_OTHER_RECORDS == 1)
 static void print_record(unsigned int id, unsigned long long timestamp,
                          unsigned int length, unsigned long long data_val,
                          unsigned char *data_bytes)
@@ -309,6 +311,7 @@ static void print_record(unsigned int id, unsigned long long timestamp,
 
     write_log(LOG_INF, "\n");
 }
+#endif /* (PRINT_OTHER_RECORDS == 1) */
 
 static error_code_t process_psf_header(unsigned char trace_bytes[],
                                        int trace_length)

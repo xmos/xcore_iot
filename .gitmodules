@@ -4,9 +4,6 @@
 [submodule "xmos_cmake_toolchain"]
 	path = xmos_cmake_toolchain
 	url = git@github.com:xmos/xmos_cmake_toolchain.git
-[submodule "avona"]
-	path = modules/voice
-	url = git@github.com:xmos/sw_avona.git
 [submodule "frameworks/core"]
 	path = modules/core
 	url = git@github.com:xmos/fwk_core.git
@@ -19,3 +16,13 @@
 [submodule "modules/xscope_fileio/xscope_fileio"]
 	path = modules/xscope_fileio/xscope_fileio
 	url = git@github.com:xmos/xscope_fileio.git
+[submodule "lib_qspi_fast_read"]
+	path = modules/qspi_fast_read
+	url = git@github.com:xmos/lib_qspi_fast_read.git
+[submodule "modules/inferencing/lib_nn"]
+	path = modules/inferencing/lib_nn
+	url = git@github.com:xmos/lib_nn.git
+[submodule "modules/inferencing/lib_tflite_micro"]
+	path = modules/inferencing/lib_tflite_micro
+	url = git@github.com:xmos/lib_tflite_micro.git
+	ignore = dirty

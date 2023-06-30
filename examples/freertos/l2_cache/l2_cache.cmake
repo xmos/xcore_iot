@@ -7,6 +7,16 @@ set(APP_INCLUDES ${CMAKE_CURRENT_LIST_DIR}/src)
 set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/src/example_code.c PROPERTIES COMPILE_FLAGS -O0)
 
 #**********************
+# QSPI Flash Layout
+#**********************
+set(FLASH_CONTENTS_FILE example_freertos_l2_cache_flash.bin)
+set(FLASH_SWMEM_CONTENTS example_freertos_l2_cache.swmem)
+set(FLASH_CAL_FILE ${LIB_QSPI_FAST_READ_ROOT_PATH}/lib_qspi_fast_read/calibration_pattern_nibble_swap.bin)
+
+set(CALIBRATION_PATTERN_OFFSET 0x100000)
+set(FLASH_SWMEM_CONTENTS_OFFSET 0x0)
+
+#**********************
 # Flags
 #**********************
 set(APP_COMPILER_FLAGS
@@ -28,6 +38,7 @@ set(APP_COMPILE_DEFINITIONS
     PLATFORM_USES_TILE_0=1
     PLATFORM_USES_TILE_1=0
     USE_SWMEM=1
+    QSPI_FLASH_CALIBRATION_ADDRESS=${CALIBRATION_PATTERN_OFFSET}
 )
 
 set(APP_LINK_OPTIONS
@@ -65,12 +76,15 @@ create_install_target(example_freertos_l2_cache)
 add_custom_command(
     TARGET example_freertos_l2_cache POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory example_freertos_l2_cache_split
-    COMMAND xobjdump --strip example_freertos_l2_cache.xe
-    COMMAND xobjdump --split --split-dir example_freertos_l2_cache_split example_freertos_l2_cache.xb
+    COMMAND xobjdump --strip example_freertos_l2_cache.xe > example_freertos_l2_cache_split/output.log
+    COMMAND xobjdump --split --split-dir example_freertos_l2_cache_split example_freertos_l2_cache.xb >> example_freertos_l2_cache_split/output.log
     BYPRODUCTS
         example_freertos_l2_cache.xb
-        example_freertos_l2_cache_split
     VERBATIM
+)
+
+set_target_properties(example_freertos_l2_cache PROPERTIES
+    ADDITIONAL_CLEAN_FILES example_freertos_l2_cache_split
 )
 
 #**********************
@@ -84,9 +98,22 @@ add_custom_target(make_swmem_example_freertos_l2_cache
     VERBATIM
 )
 
+add_custom_target(make_datapartition_example_freertos_l2_cache
+    COMMAND ${CMAKE_COMMAND} -E rm -f ${FLASH_CONTENTS_FILE}
+    COMMAND datapartition_mkimage -v -b 1
+    -i ${FLASH_SWMEM_CONTENTS}:${FLASH_SWMEM_CONTENTS_OFFSET} ${FLASH_CAL_FILE}:${CALIBRATION_PATTERN_OFFSET}
+    -o ${FLASH_CONTENTS_FILE}
+    DEPENDS
+        make_swmem_example_freertos_l2_cache
+        ${FLASH_CAL_FILE}
+    COMMENT
+        "Create flash contents file"
+    VERBATIM
+)
+
 add_custom_target(flash_example_freertos_l2_cache_swmem
-    COMMAND xflash --write-all example_freertos_l2_cache.swmem --target-file ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
-    DEPENDS make_swmem_example_freertos_l2_cache
+    COMMAND xflash --write-all ${FLASH_CONTENTS_FILE} --target-file ${CMAKE_CURRENT_LIST_DIR}/XCORE-AI-EXPLORER.xn
+    DEPENDS make_datapartition_example_freertos_l2_cache
     COMMENT
         "Flash SwMem"
     VERBATIM

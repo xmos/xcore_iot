@@ -1,5 +1,5 @@
 {
-    "title": "XCORE Software Development Kit",
-    "project": "xcore_sdk",
-    "version": "0.12.0"
+    "title": "XCORE-IOT Software",
+    "project": "xcore_iot",
+    "version": "1.0.0"
 }

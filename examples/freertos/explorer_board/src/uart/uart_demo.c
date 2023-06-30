@@ -27,7 +27,6 @@
 const unsigned packet_period_ms = 500;
 
 /* This example requires that you loopback the X1D36 and X1D39 pins */
-
 void uart_tx_demo(void *arg){
     QueueHandle_t loopback_queue = arg;
     
@@ -42,13 +41,14 @@ void uart_tx_demo(void *arg){
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     for (;;) {
-        rtos_uart_tx_write(uart_tx_ctx, tx_buff, sizeof(tx_buff));
+        // rtos_uart_tx_write(uart_tx_ctx, tx_buff, sizeof(tx_buff));
 
-        BaseType_t success = xQueueSend(loopback_queue, (void *)tx_buff, (TickType_t)0);
+        BaseType_t success = xQueueSend(loopback_queue, (void *)tx_buff, portMAX_DELAY);
         if(success != pdPASS){
             rtos_printf("Problem sending loopback data reference to rx task\n");
         }
 
+        rtos_uart_tx_write(uart_tx_ctx, tx_buff, sizeof(tx_buff));
 
         vTaskDelay(pdMS_TO_TICKS(packet_period_ms));
     }
@@ -66,26 +66,26 @@ void uart_rx_complete_cb(rtos_uart_rx_t *uart_rx_ctx){
 
 RTOS_UART_RX_CALLBACK_ATTR
 void uart_rx_error_cb(rtos_uart_rx_t *ctx, uint8_t err_flags){
-    if(err_flags & UR_START_BIT_ERR_CB_FLAG){
-        rtos_printf("UART_START_BIT_ERROR\n");
-    }
-    if(err_flags & UR_PARITY_ERR_CB_FLAG){
-        rtos_printf("UART_PARITY_ERROR\n");
-    }
-    if(err_flags & UR_FRAMING_ERR_CB_FLAG){
-        rtos_printf("UART_FRAMING_ERROR\n");
-    }
-    if(err_flags & UR_OVERRUN_ERR_CB_FLAG){
-        rtos_printf("UR_OVERRUN_ERR_CB_CODE\n");
-    }
+    // Uncomment these lines to print UART Rx errors
+    // if(err_flags & UR_START_BIT_ERR_CB_FLAG){
+    //     rtos_printf("UART_START_BIT_ERROR\n");
+    // }
+    // if(err_flags & UR_PARITY_ERR_CB_FLAG){
+    //     rtos_printf("UART_PARITY_ERROR\n");
+    // }
+    // if(err_flags & UR_FRAMING_ERR_CB_FLAG){
+    //     rtos_printf("UART_FRAMING_ERROR\n");
+    // }
+    // if(err_flags & UR_OVERRUN_ERR_CB_FLAG){
+    //     rtos_printf("UR_OVERRUN_ERR_CB_CODE\n");
+    // }
 
-    if(err_flags & ~RX_ERROR_FLAGS){
-        rtos_printf("UNKNOWN ERROR FLAG SET: 0x%x (THIS SHOULD NEVER HAPPEN)\n", err_flags);
-        rtos_printf("~RX_ERROR_FLAGS: 0x%x\n", ~RX_ERROR_FLAGS);
+    // if(err_flags & ~RX_ERROR_FLAGS){
+    //     rtos_printf("UNKNOWN ERROR FLAG SET: 0x%x (THIS SHOULD NEVER HAPPEN)\n", err_flags);
+    //     rtos_printf("~RX_ERROR_FLAGS: 0x%x\n", ~RX_ERROR_FLAGS);
 
-    }
+    // }
 }
-
 void uart_rx_demo(void *arg){
     QueueHandle_t loopback_queue = arg;
 
@@ -123,28 +123,33 @@ void uart_rx_demo(void *arg){
         if(num_bytes != MAX_TEST_VECT_SIZE){
             rtos_printf("Rx byte timed out after %d ms at byte %d of %d\n", read_timeout, num_bytes, MAX_TEST_VECT_SIZE);
             rtos_uart_rx_reset_buffer(uart_rx_ctx);
-            printed_once = 0;
+            // printed_once = 0;
             continue;
         }
 
         int data_different = memcmp(rx_buf, tx_buf, sizeof(tx_buf));
 
         if(data_different){
-            rtos_printf("UART ERROR - mismatch of received data\n");
-            for(int i = 0; i < MAX_TEST_VECT_SIZE; i++){
-                if(tx_buf[i] != rx_buf[i]){
-                    rtos_printf("index: %d expected: 0x%x got: 0x%x\n", i, tx_buf[i], rx_buf[i]);
+            if(!printed_once){
+                rtos_printf("UART data error - mismatch of received data\n");
+                for(int i = 0; i < MAX_TEST_VECT_SIZE; i++){
+                    if(tx_buf[i] != rx_buf[i]){
+                        rtos_printf("index: %d expected: 0x%x got: 0x%x\n", i, tx_buf[i], rx_buf[i]);
+                    }
+                    // printed_once = 0;
                 }
-                printed_once = 0;
+                rtos_printf("Further UART errors will NOT be printed. Have you connected pins X1D36 and X1D39?\n");
             }
             rtos_uart_rx_reset_buffer(uart_rx_ctx);
         } else {
             if(!printed_once){
                 rtos_printf("UART Loopback data (%d bytes) received correctly.\n", MAX_TEST_VECT_SIZE);
-                rtos_printf("Further successfully received packets will NOT be printed. Errors will be printed.\n");
+                rtos_printf("Further received packets will NOT be printed. Errors will be printed.\n");
                 printed_once = 1; 
             }
         }
+
+        printed_once = 1; 
 
     }
 
