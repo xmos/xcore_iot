@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2020 Ha Thach (tinyusb.org)
  * Copyright (c) 2020 Jerzy Kasenberg
+ * Copyright (c) 2023 XMOS LIMITED
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
