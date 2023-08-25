@@ -27,7 +27,7 @@ pipeline {
         PYTHON_VERSION = "3.8.11"
         VENV_DIRNAME = ".venv"
         BUILD_DIRNAME = "dist"
-        TEST_RIG_TARGET = "xcore_sdk_test_rig"
+        TEST_RIG_TARGET = "XCORE-AI-EXPLORER"
     }        
     stages {
         stage('Checkout') {
